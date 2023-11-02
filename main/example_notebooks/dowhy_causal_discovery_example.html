@@ -481,8 +481,8 @@
   </ul>
  </li>
  <li class="toc-h1 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#Causal-Discovery-with-Causal-Discovery-Tool-(CDT)">
-   Causal Discovery with Causal Discovery Tool (CDT)
+  <a class="reference internal nav-link" href="#Causal-Discovery-with-causal-learn">
+   Causal Discovery with causal-learn
   </a>
   <ul class="visible nav section-nav flex-column">
    <li class="toc-h2 nav-item toc-entry">
@@ -502,31 +502,16 @@
      1. Load the data
     </a>
    </li>
-   <li class="toc-h2 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#Ground-truth-of-the-causal-graph">
-     Ground truth of the causal graph
-    </a>
-   </li>
   </ul>
  </li>
  <li class="toc-h1 nav-item toc-entry">
   <a class="reference internal nav-link" href="#id2">
-   Causal Discovery with Causal Discovery Tool (CDT)
+   Causal Discovery with causal-learn
   </a>
   <ul class="visible nav section-nav flex-column">
    <li class="toc-h2 nav-item toc-entry">
     <a class="reference internal nav-link" href="#Estimate-effects-using-Linear-Regression">
      Estimate effects using Linear Regression
-    </a>
-   </li>
-   <li class="toc-h2 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#Graph-Validation">
-     Graph Validation
-    </a>
-   </li>
-   <li class="toc-h2 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#Graph-Refutation">
-     Graph Refutation
     </a>
    </li>
   </ul>
@@ -809,8 +794,7 @@ div.rendered_html tbody tr:hover {
 </style>
 <section id="Causal-Discovery-example">
 <h1>Causal Discovery example<a class="headerlink" href="#Causal-Discovery-example" title="Permalink to this heading"></a></h1>
-<p>The goal of this notebook is to show how causal discovery methods can work with DoWhy. We use discovery methods from <a class="reference external" href="https://github.com/FenTechSolutions/CausalDiscoveryToolbox">Causal Discovery Tool (CDT)</a> repo. As we will see, causal discovery methods are not fool-proof and there is no guarantee that they will recover the correct causal graph. Even for the simple examples below, there is a large variance in results. These methods, however, may be combined usefully with domain knowledge to
-construct the final causal graph.</p>
+<p>The goal of this notebook is to show how causal discovery methods can work with DoWhy. We use discovery methods from <a class="reference external" href="https://github.com/py-why/causal-learn">causal-learn</a> repo. As we will see, causal discovery methods require appropriate assumptions for the correctness guarantees, adn thus there will be variance across results returned by different methods in practice. These methods, however, may be combined usefully with domain knowledge to construct the final causal graph.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -860,7 +844,7 @@ construct the final causal graph.</p>
 </section>
 <section id="Experiments-on-the-Auto-MPG-dataset">
 <h1>Experiments on the Auto-MPG dataset<a class="headerlink" href="#Experiments-on-the-Auto-MPG-dataset" title="Permalink to this heading"></a></h1>
-<p>In this section, we will use a dataset on the technical specification of cars. The dataset is downloaded from UCI Machine Learning Repository. The dataset contains 9 attributes and 398 instances. We do not know the true causal graph for the dataset and will use CDT to discover it. The causal graph obtained will then be used to estimate the causal effect.</p>
+<p>In this section, we will use a dataset on the technical specification of cars. The dataset is downloaded from UCI Machine Learning Repository. The dataset contains 9 attributes and 398 instances. We do not know the true causal graph for the dataset and will use causal-learn to discover it. The causal graph obtained will then be used to estimate the causal effect.</p>
 <section id="1.-Load-the-data">
 <h2>1. Load the data<a class="headerlink" href="#1.-Load-the-data" title="Permalink to this heading"></a></h2>
 <div class="nbinput docutils container">
@@ -970,125 +954,138 @@ construct the final causal graph.</p>
 </div>
 </section>
 </section>
-<section id="Causal-Discovery-with-Causal-Discovery-Tool-(CDT)">
-<h1>Causal Discovery with Causal Discovery Tool (CDT)<a class="headerlink" href="#Causal-Discovery-with-Causal-Discovery-Tool-(CDT)" title="Permalink to this heading"></a></h1>
-<p>We use the CDT library to perform causal discovery on the Auto-MPG dataset. We use three methods for causal discovery here -LiNGAM, PC and GES. These methods are widely used and do not take much time to run. Hence, these are ideal for an introduction to the topic. Other neural network based methods are also available in CDT and the users are encouraged to try them out by themselves.</p>
-<p>The documentation for the methods used are as follows: - LiNGAM <a class="reference external" href="https://fentechsolutions.github.io/CausalDiscoveryToolbox/html/_modules/cdt/causality/graph/LiNGAM.html">[link]</a> - PC <a class="reference external" href="https://fentechsolutions.github.io/CausalDiscoveryToolbox/html/_modules/cdt/causality/graph/PC.html">[link]</a> - GES <a class="reference external" href="https://fentechsolutions.github.io/CausalDiscoveryToolbox/html/_modules/cdt/causality/graph/GES.html">[link]</a></p>
+<section id="Causal-Discovery-with-causal-learn">
+<h1>Causal Discovery with causal-learn<a class="headerlink" href="#Causal-Discovery-with-causal-learn" title="Permalink to this heading"></a></h1>
+<p>We use the causal-learn library to perform causal discovery on the Auto-MPG dataset. We use three methods for causal discovery here: PC, FCI and GES. These methods are widely used and do not take much time to run. Hence, these are ideal for an introduction to the topic. Causal-learn provides a comprehensive list of well-tested causal-discovery methods, and readers are welcome to explore.</p>
+<p>The documentation for the methods used are as follows: - PC <a class="reference external" href="https://causal-learn.readthedocs.io/en/latest/search_methods_index/Constraint-based%20causal%20discovery%20methods/PC.html">[link]</a> - GES <a class="reference external" href="https://causal-learn.readthedocs.io/en/latest/search_methods_index/Score-based%20causal%20discovery%20methods/GES.html">[link]</a> - LiNGAM
+<a class="reference external" href="https://causal-learn.readthedocs.io/en/latest/search_methods_index/Causal%20discovery%20methods%20based%20on%20constrained%20functional%20causal%20models/lingam.html#ica-based-lingam">[link]</a></p>
+<p>More methods could be found in the causal-learn documentation <a class="reference external" href="https://causal-learn.readthedocs.io/en/latest/">[link]</a>.</p>
+<p>We first try the PC algorithm with default parameters.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">cdt.causality.graph</span> <span class="kn">import</span> <span class="n">LiNGAM</span><span class="p">,</span> <span class="n">PC</span><span class="p">,</span> <span class="n">GES</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">causallearn.search.ConstraintBased.PC</span> <span class="kn">import</span> <span class="n">pc</span>
 
-<span class="n">graphs</span> <span class="o">=</span> <span class="p">{}</span>
 <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data_mpg</span><span class="o">.</span><span class="n">columns</span><span class="p">)]</span>
-<span class="n">functions</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;LiNGAM&#39;</span> <span class="p">:</span> <span class="n">LiNGAM</span><span class="p">,</span>
-    <span class="s1">&#39;PC&#39;</span> <span class="p">:</span> <span class="n">PC</span><span class="p">,</span>
-    <span class="s1">&#39;GES&#39;</span> <span class="p">:</span> <span class="n">GES</span><span class="p">,</span>
-<span class="p">}</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">data_mpg</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
 
-<span class="k">for</span> <span class="n">method</span><span class="p">,</span> <span class="n">lib</span> <span class="ow">in</span> <span class="n">functions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-    <span class="n">obj</span> <span class="o">=</span> <span class="n">lib</span><span class="p">()</span>
-    <span class="n">output</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">data_mpg</span><span class="p">)</span>
-    <span class="n">adj_matrix</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">to_numpy_array</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
-    <span class="n">adj_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">adj_matrix</span><span class="p">)</span>
-    <span class="n">graph_dot</span> <span class="o">=</span> <span class="n">make_graph</span><span class="p">(</span><span class="n">adj_matrix</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
-    <span class="n">graphs</span><span class="p">[</span><span class="n">method</span><span class="p">]</span> <span class="o">=</span> <span class="n">graph_dot</span>
+<span class="n">cg</span> <span class="o">=</span> <span class="n">pc</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
-<span class="c1"># Visualize graphs</span>
-<span class="k">for</span> <span class="n">method</span><span class="p">,</span> <span class="n">graph</span> <span class="ow">in</span> <span class="n">graphs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Method : </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">method</span><span class="p">))</span>
-    <span class="n">display</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+<span class="c1"># Visualization using pydot</span>
+<span class="kn">from</span> <span class="nn">causallearn.utils.GraphUtils</span> <span class="kn">import</span> <span class="n">GraphUtils</span>
+<span class="kn">import</span> <span class="nn">matplotlib.image</span> <span class="k">as</span> <span class="nn">mpimg</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">io</span>
+
+<span class="n">pyd</span> <span class="o">=</span> <span class="n">GraphUtils</span><span class="o">.</span><span class="n">to_pydot</span><span class="p">(</span><span class="n">cg</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
+<span class="n">tmp_png</span> <span class="o">=</span> <span class="n">pyd</span><span class="o">.</span><span class="n">create_png</span><span class="p">(</span><span class="n">f</span><span class="o">=</span><span class="s2">&quot;png&quot;</span><span class="p">)</span>
+<span class="n">fp</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">tmp_png</span><span class="p">)</span>
+<span class="n">img</span> <span class="o">=</span> <span class="n">mpimg</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-No GPU automatically detected. Setting SETTINGS.GPU to 0, and SETTINGS.NJOBS to cpu_count.
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
 <div class="output_area docutils container">
-<div class="highlight"><pre>
-Method : LiNGAM
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/example_notebooks_dowhy_causal_discovery_example_8_2.svg" src="../_images/example_notebooks_dowhy_causal_discovery_example_8_2.svg" /></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Method : PC
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/example_notebooks_dowhy_causal_discovery_example_8_4.svg" src="../_images/example_notebooks_dowhy_causal_discovery_example_8_4.svg" /></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Method : GES
-</pre></div></div>
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "1ed197e9f5ec42c8bf7fc51c5ece4485", "version_major": 2, "version_minor": 0}</script></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_dowhy_causal_discovery_example_8_6.svg" src="../_images/example_notebooks_dowhy_causal_discovery_example_8_6.svg" /></div>
+<img alt="../_images/example_notebooks_dowhy_causal_discovery_example_9_1.png" src="../_images/example_notebooks_dowhy_causal_discovery_example_9_1.png" />
 </div>
-<p>As you can see, no two methods agree on the graphs. PC and GES effectively produce an undirected graph whereas LiNGAM produces a directed graph. We use only the LiNGAM method in the next section.</p>
-<section id="Estimate-causal-effects-using-Linear-Regression">
-<h2>Estimate causal effects using Linear Regression<a class="headerlink" href="#Estimate-causal-effects-using-Linear-Regression" title="Permalink to this heading"></a></h2>
-<p>Now let us see whether these differences in the graphs also lead to significant differences in the causal estimate of effect of <em>mpg</em> on <em>weight</em>.</p>
+</div>
+<p>Then we have a causal graph discovered by PC. Let us also try GES to see its result.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">method</span><span class="p">,</span> <span class="n">graph</span> <span class="ow">in</span> <span class="n">graphs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">method</span> <span class="o">!=</span> <span class="s2">&quot;LiNGAM&quot;</span><span class="p">:</span>
-            <span class="k">continue</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">*****************************************************************************</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Discovery Method : </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">method</span><span class="p">))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">causallearn.search.ScoreBased.GES</span> <span class="kn">import</span> <span class="n">ges</span>
 
-        <span class="c1"># Obtain valid dot format</span>
-        <span class="n">graph_dot</span> <span class="o">=</span> <span class="n">str_to_dot</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">source</span><span class="p">)</span>
+<span class="c1"># default parameters</span>
+<span class="n">Record</span> <span class="o">=</span> <span class="n">ges</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
-        <span class="c1"># Define Causal Model</span>
-        <span class="n">model</span><span class="o">=</span><span class="n">CausalModel</span><span class="p">(</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="n">data_mpg</span><span class="p">,</span>
-                <span class="n">treatment</span><span class="o">=</span><span class="s1">&#39;mpg&#39;</span><span class="p">,</span>
-                <span class="n">outcome</span><span class="o">=</span><span class="s1">&#39;weight&#39;</span><span class="p">,</span>
-                <span class="n">graph</span><span class="o">=</span><span class="n">graph_dot</span><span class="p">)</span>
+<span class="c1"># Visualization using pydot</span>
+<span class="kn">from</span> <span class="nn">causallearn.utils.GraphUtils</span> <span class="kn">import</span> <span class="n">GraphUtils</span>
+<span class="kn">import</span> <span class="nn">matplotlib.image</span> <span class="k">as</span> <span class="nn">mpimg</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">io</span>
 
-        <span class="c1"># Identification</span>
-        <span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
+<span class="n">pyd</span> <span class="o">=</span> <span class="n">GraphUtils</span><span class="o">.</span><span class="n">to_pydot</span><span class="p">(</span><span class="n">Record</span><span class="p">[</span><span class="s1">&#39;G&#39;</span><span class="p">],</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
+<span class="n">tmp_png</span> <span class="o">=</span> <span class="n">pyd</span><span class="o">.</span><span class="n">create_png</span><span class="p">(</span><span class="n">f</span><span class="o">=</span><span class="s2">&quot;png&quot;</span><span class="p">)</span>
+<span class="n">fp</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">tmp_png</span><span class="p">)</span>
+<span class="n">img</span> <span class="o">=</span> <span class="n">mpimg</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_dowhy_causal_discovery_example_11_0.png" src="../_images/example_notebooks_dowhy_causal_discovery_example_11_0.png" />
+</div>
+</div>
+<p>Well, these two results are different, which is not rare when applying causal discovery on real-world dataset, since the required assumptions on the data-generating process are hard to verify.</p>
+<p>In addition, the graphs returned by PC and GES are CPDAGs instead of DAGs, so it is possible to have undirected edges (e.g., the result returned by GES). Thus, causal effect estimataion is difficult for those methods, since there may be absence of backdoor, instrumental or frontdoor variables. In order to get a DAG, we decide to try LiNGAM on our dataset.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">causallearn.search.FCMBased</span> <span class="kn">import</span> <span class="n">lingam</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">lingam</span><span class="o">.</span><span class="n">ICALiNGAM</span><span class="p">()</span>
+<span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
-        <span class="c1"># Estimation</span>
-        <span class="n">estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
-                                        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.linear_regression&quot;</span><span class="p">,</span>
-                                        <span class="n">control_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                                        <span class="n">treatment_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                                        <span class="n">confidence_intervals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                                        <span class="n">test_significance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">estimate</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+<span class="kn">from</span> <span class="nn">causallearn.search.FCMBased.lingam.utils</span> <span class="kn">import</span> <span class="n">make_dot</span>
+<span class="n">make_dot</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">adjacency_matrix_</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_dowhy_causal_discovery_example_13_0.svg" src="../_images/example_notebooks_dowhy_causal_discovery_example_13_0.svg" /></div>
+</div>
+<p>Now we have a DAG and are ready to estimate the causal effects based on that.</p>
+<section id="Estimate-causal-effects-using-Linear-Regression">
+<h2>Estimate causal effects using Linear Regression<a class="headerlink" href="#Estimate-causal-effects-using-Linear-Regression" title="Permalink to this heading"></a></h2>
+<p>Now let us see the estimate of causal effect of <em>mpg</em> on <em>weight</em>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Obtain valid dot format</span>
+<span class="n">graph_dot</span> <span class="o">=</span> <span class="n">make_graph</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">adjacency_matrix_</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
+
+<span class="c1"># Define Causal Model</span>
+<span class="n">model</span><span class="o">=</span><span class="n">CausalModel</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data_mpg</span><span class="p">,</span>
+        <span class="n">treatment</span><span class="o">=</span><span class="s1">&#39;mpg&#39;</span><span class="p">,</span>
+        <span class="n">outcome</span><span class="o">=</span><span class="s1">&#39;weight&#39;</span><span class="p">,</span>
+        <span class="n">graph</span><span class="o">=</span><span class="n">str_to_dot</span><span class="p">(</span><span class="n">graph_dot</span><span class="o">.</span><span class="n">source</span><span class="p">))</span>
+
+<span class="c1"># Identification</span>
+<span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
+
+<span class="c1"># Estimation</span>
+<span class="n">estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+                                <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.linear_regression&quot;</span><span class="p">,</span>
+                                <span class="n">control_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                <span class="n">treatment_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                <span class="n">confidence_intervals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                <span class="n">test_significance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">estimate</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -1097,10 +1094,6 @@ Method : GES
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-
-*****************************************************************************
-
-Causal Discovery Method : LiNGAM
 Estimand type: EstimandType.NONPARAMETRIC_ATE
 
 ### Estimand : 1
@@ -1119,206 +1112,71 @@ No such variable(s) found!
 Estimand name: frontdoor
 No such variable(s) found!
 
-Causal Estimate is -38.94097365620928
+Causal Estimate is -38.940973656209735
 </pre></div></div>
 </div>
-<p>As mentioned earlier, due to the absence of directed edges, no backdoor, instrmental or frontdoor variables can be found out for PC and GES. Thus, causal effect estimation is not possible for these methods. However, LiNGAM does discover a DAG and hence, its possible to output a causal estimate for LiNGAM. The estimate is still pretty far from the original estimate of -70.466 (which can be calculated from the graph).</p>
 </section>
 </section>
 <section id="Experiments-on-the-Sachs-dataset">
 <h1>Experiments on the Sachs dataset<a class="headerlink" href="#Experiments-on-the-Sachs-dataset" title="Permalink to this heading"></a></h1>
 <p>The dataset consists of the simultaneous measurements of 11 phosphorylated proteins and phospholipids derived from thousands of individual primary immune system cells, subjected to both general and specific molecular interventions (Sachs et al., 2005).</p>
 <p>The specifications of the dataset are as follows - - Number of nodes: 11 - Number of arcs: 17 - Number of parameters: 178 - Average Markov blanket size: 3.09 - Average degree: 3.09 - Maximum in-degree: 3 - Number of instances: 7466</p>
-<p>The original causal graph is known for the Sachs dataset and we compare the original graph with the ones discovered using CDT in this section.</p>
 <section id="id1">
 <h2>1. Load the data<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h2>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">cdt.data</span> <span class="kn">import</span> <span class="n">load_dataset</span>
-<span class="n">data_sachs</span><span class="p">,</span> <span class="n">graph_sachs</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;sachs&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">causallearn.utils.Dataset</span> <span class="kn">import</span> <span class="n">load_dataset</span>
 
-<span class="n">data_sachs</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">data_sachs</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-<span class="n">data_sachs</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="n">data_sachs</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;sachs&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
+<div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 (7466, 11)
+[&#39;raf&#39;, &#39;mek&#39;, &#39;plc&#39;, &#39;pip2&#39;, &#39;pip3&#39;, &#39;erk&#39;, &#39;akt&#39;, &#39;pka&#39;, &#39;pkc&#39;, &#39;p38&#39;, &#39;jnk&#39;]
 </pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
-</pre></div>
-</div>
-<div class="output_area rendered_html docutils container">
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>praf</th>
-      <th>pmek</th>
-      <th>plcg</th>
-      <th>PIP2</th>
-      <th>PIP3</th>
-      <th>p44/42</th>
-      <th>pakts473</th>
-      <th>PKA</th>
-      <th>PKC</th>
-      <th>P38</th>
-      <th>pjnk</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>26.4</td>
-      <td>13.2</td>
-      <td>8.82</td>
-      <td>18.30</td>
-      <td>58.80</td>
-      <td>6.61</td>
-      <td>17.0</td>
-      <td>414.0</td>
-      <td>17.00</td>
-      <td>44.9</td>
-      <td>40.0</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>35.9</td>
-      <td>16.5</td>
-      <td>12.30</td>
-      <td>16.80</td>
-      <td>8.13</td>
-      <td>18.60</td>
-      <td>32.5</td>
-      <td>352.0</td>
-      <td>3.37</td>
-      <td>16.5</td>
-      <td>61.5</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>59.4</td>
-      <td>44.1</td>
-      <td>14.60</td>
-      <td>10.20</td>
-      <td>13.00</td>
-      <td>14.90</td>
-      <td>32.5</td>
-      <td>403.0</td>
-      <td>11.40</td>
-      <td>31.9</td>
-      <td>19.5</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>73.0</td>
-      <td>82.8</td>
-      <td>23.10</td>
-      <td>13.50</td>
-      <td>1.29</td>
-      <td>5.83</td>
-      <td>11.8</td>
-      <td>528.0</td>
-      <td>13.70</td>
-      <td>28.6</td>
-      <td>23.1</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>33.7</td>
-      <td>19.8</td>
-      <td>5.19</td>
-      <td>9.73</td>
-      <td>24.80</td>
-      <td>21.10</td>
-      <td>46.1</td>
-      <td>305.0</td>
-      <td>4.66</td>
-      <td>25.7</td>
-      <td>81.3</td>
-    </tr>
-  </tbody>
-</table>
-</div></div>
-</div>
-</section>
-<section id="Ground-truth-of-the-causal-graph">
-<h2>Ground truth of the causal graph<a class="headerlink" href="#Ground-truth-of-the-causal-graph" title="Permalink to this heading"></a></h2>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data_sachs</span><span class="o">.</span><span class="n">columns</span><span class="p">)]</span>
-<span class="n">adj_matrix</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">to_numpy_array</span><span class="p">(</span><span class="n">graph_sachs</span><span class="p">)</span>
-<span class="n">adj_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">adj_matrix</span><span class="p">)</span>
-<span class="n">graph_dot</span> <span class="o">=</span> <span class="n">make_graph</span><span class="p">(</span><span class="n">adj_matrix</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
-<span class="n">display</span><span class="p">(</span><span class="n">graph_dot</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/example_notebooks_dowhy_causal_discovery_example_17_0.svg" src="../_images/example_notebooks_dowhy_causal_discovery_example_17_0.svg" /></div>
 </div>
 </section>
 </section>
 <section id="id2">
-<h1>Causal Discovery with Causal Discovery Tool (CDT)<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h1>
-<p>We use the CDT library to perform causal discovery on the Auto-MPG dataset. We use three methods for causal discovery here -LiNGAM, PC and GES. These methods are widely used and do not take much time to run. Hence, these are ideal for an introduction to the topic. Other neural network based methods are also available in CDT and the users the encourages to try them out by themselves.</p>
-<p>The documentation for the methods used in as follows: - LiNGAM <a class="reference external" href="https://fentechsolutions.github.io/CausalDiscoveryToolbox/html/_modules/cdt/causality/graph/LiNGAM.html">[link]</a> - PC <a class="reference external" href="https://fentechsolutions.github.io/CausalDiscoveryToolbox/html/_modules/cdt/causality/graph/PC.html">[link]</a> - GES <a class="reference external" href="https://fentechsolutions.github.io/CausalDiscoveryToolbox/html/_modules/cdt/causality/graph/GES.html">[link]</a></p>
+<h1>Causal Discovery with causal-learn<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h1>
+<p>We use the three causal discovery methods mentioned above (PC, GES, and LiNGAM) to find the causal graphs.</p>
+<p>First, let us take a look at how PC works.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">cdt.causality.graph</span> <span class="kn">import</span> <span class="n">LiNGAM</span><span class="p">,</span> <span class="n">PC</span><span class="p">,</span> <span class="n">GES</span>
-
-<span class="n">graphs</span> <span class="o">=</span> <span class="p">{}</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">graphs</span> <span class="o">=</span> <span class="p">{}</span>
 <span class="n">graphs_nx</span> <span class="o">=</span> <span class="p">{}</span>
-<span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data_sachs</span><span class="o">.</span><span class="n">columns</span><span class="p">)]</span>
-<span class="n">functions</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;LiNGAM&#39;</span> <span class="p">:</span> <span class="n">LiNGAM</span><span class="p">,</span>
-    <span class="s1">&#39;PC&#39;</span> <span class="p">:</span> <span class="n">PC</span><span class="p">,</span>
-    <span class="s1">&#39;GES&#39;</span> <span class="p">:</span> <span class="n">GES</span><span class="p">,</span>
-<span class="p">}</span>
+<span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">labels</span><span class="p">)]</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">data_sachs</span>
 
-<span class="k">for</span> <span class="n">method</span><span class="p">,</span> <span class="n">lib</span> <span class="ow">in</span> <span class="n">functions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-    <span class="n">obj</span> <span class="o">=</span> <span class="n">lib</span><span class="p">()</span>
-    <span class="n">output</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">data_sachs</span><span class="p">)</span>
-    <span class="n">graphs_nx</span><span class="p">[</span><span class="n">method</span><span class="p">]</span> <span class="o">=</span> <span class="n">output</span>
-    <span class="n">adj_matrix</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">to_numpy_array</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
-    <span class="n">adj_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">adj_matrix</span><span class="p">)</span>
-    <span class="n">graph_dot</span> <span class="o">=</span> <span class="n">make_graph</span><span class="p">(</span><span class="n">adj_matrix</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
-    <span class="n">graphs</span><span class="p">[</span><span class="n">method</span><span class="p">]</span> <span class="o">=</span> <span class="n">graph_dot</span>
+<span class="kn">from</span> <span class="nn">causallearn.search.ConstraintBased.PC</span> <span class="kn">import</span> <span class="n">pc</span>
 
-<span class="c1"># Visualize graphs</span>
-<span class="k">for</span> <span class="n">method</span><span class="p">,</span> <span class="n">graph</span> <span class="ow">in</span> <span class="n">graphs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Method : </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">method</span><span class="p">))</span>
-    <span class="n">display</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+<span class="n">cg</span> <span class="o">=</span> <span class="n">pc</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="c1"># Visualization using pydot</span>
+<span class="kn">from</span> <span class="nn">causallearn.utils.GraphUtils</span> <span class="kn">import</span> <span class="n">GraphUtils</span>
+<span class="kn">import</span> <span class="nn">matplotlib.image</span> <span class="k">as</span> <span class="nn">mpimg</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">io</span>
+
+<span class="n">pyd</span> <span class="o">=</span> <span class="n">GraphUtils</span><span class="o">.</span><span class="n">to_pydot</span><span class="p">(</span><span class="n">cg</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
+<span class="n">tmp_png</span> <span class="o">=</span> <span class="n">pyd</span><span class="o">.</span><span class="n">create_png</span><span class="p">(</span><span class="n">f</span><span class="o">=</span><span class="s2">&quot;png&quot;</span><span class="p">)</span>
+<span class="n">fp</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">tmp_png</span><span class="p">)</span>
+<span class="n">img</span> <span class="o">=</span> <span class="n">mpimg</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -1326,80 +1184,100 @@ Causal Estimate is -38.94097365620928
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<div class="highlight"><pre>
-Method : LiNGAM
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/example_notebooks_dowhy_causal_discovery_example_19_1.svg" src="../_images/example_notebooks_dowhy_causal_discovery_example_19_1.svg" /></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Method : PC
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/example_notebooks_dowhy_causal_discovery_example_19_3.svg" src="../_images/example_notebooks_dowhy_causal_discovery_example_19_3.svg" /></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Method : GES
-</pre></div></div>
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "bc0f31d1492e4934994a6d4ba68f1ad3", "version_major": 2, "version_minor": 0}</script></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_dowhy_causal_discovery_example_19_5.svg" src="../_images/example_notebooks_dowhy_causal_discovery_example_19_5.svg" /></div>
+<img alt="../_images/example_notebooks_dowhy_causal_discovery_example_22_1.png" src="../_images/example_notebooks_dowhy_causal_discovery_example_22_1.png" />
 </div>
-<p>As you can see, no two methods agree on the graphs. Next we study the causal effects of these different graphs</p>
+</div>
+<p>Then, let us try GES.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">causallearn.search.ScoreBased.GES</span> <span class="kn">import</span> <span class="n">ges</span>
+
+<span class="c1"># default parameters</span>
+<span class="n">Record</span> <span class="o">=</span> <span class="n">ges</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="c1"># Visualization using pydot</span>
+<span class="kn">from</span> <span class="nn">causallearn.utils.GraphUtils</span> <span class="kn">import</span> <span class="n">GraphUtils</span>
+<span class="kn">import</span> <span class="nn">matplotlib.image</span> <span class="k">as</span> <span class="nn">mpimg</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">io</span>
+
+<span class="n">pyd</span> <span class="o">=</span> <span class="n">GraphUtils</span><span class="o">.</span><span class="n">to_pydot</span><span class="p">(</span><span class="n">Record</span><span class="p">[</span><span class="s1">&#39;G&#39;</span><span class="p">],</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
+<span class="n">tmp_png</span> <span class="o">=</span> <span class="n">pyd</span><span class="o">.</span><span class="n">create_png</span><span class="p">(</span><span class="n">f</span><span class="o">=</span><span class="s2">&quot;png&quot;</span><span class="p">)</span>
+<span class="n">fp</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">tmp_png</span><span class="p">)</span>
+<span class="n">img</span> <span class="o">=</span> <span class="n">mpimg</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_dowhy_causal_discovery_example_24_0.png" src="../_images/example_notebooks_dowhy_causal_discovery_example_24_0.png" />
+</div>
+</div>
+<p>And also LiNGAM.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">causallearn.search.FCMBased</span> <span class="kn">import</span> <span class="n">lingam</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">lingam</span><span class="o">.</span><span class="n">ICALiNGAM</span><span class="p">()</span>
+<span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">causallearn.search.FCMBased.lingam.utils</span> <span class="kn">import</span> <span class="n">make_dot</span>
+<span class="n">make_dot</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">adjacency_matrix_</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_dowhy_causal_discovery_example_26_0.svg" src="../_images/example_notebooks_dowhy_causal_discovery_example_26_0.svg" /></div>
+</div>
 <section id="Estimate-effects-using-Linear-Regression">
 <h2>Estimate effects using Linear Regression<a class="headerlink" href="#Estimate-effects-using-Linear-Regression" title="Permalink to this heading"></a></h2>
-<p>Now let us see whether these differences in the graphs also lead to significant differences in the causal estimate of effect of <em>PIP2</em> on <em>PKC</em>.</p>
+<p>Similarly, let us use the DAG returned by LiNGAM to estimate the causal effect of <em>PIP2</em> on <em>PKC</em>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">method</span><span class="p">,</span> <span class="n">graph</span> <span class="ow">in</span> <span class="n">graphs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">method</span> <span class="o">!=</span> <span class="s2">&quot;LiNGAM&quot;</span><span class="p">:</span>
-            <span class="k">continue</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">*****************************************************************************</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Discovery Method : </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">method</span><span class="p">))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Obtain valid dot format</span>
+<span class="n">graph_dot</span> <span class="o">=</span> <span class="n">make_graph</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">adjacency_matrix_</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
 
-        <span class="c1"># Obtain valid dot format</span>
-        <span class="n">graph_dot</span> <span class="o">=</span> <span class="n">str_to_dot</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">source</span><span class="p">)</span>
+<span class="n">data_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
 
-        <span class="c1"># Define Causal Model</span>
-        <span class="n">model</span><span class="o">=</span><span class="n">CausalModel</span><span class="p">(</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="n">data_sachs</span><span class="p">,</span>
-                <span class="n">treatment</span><span class="o">=</span><span class="s1">&#39;PIP2&#39;</span><span class="p">,</span>
-                <span class="n">outcome</span><span class="o">=</span><span class="s1">&#39;PKC&#39;</span><span class="p">,</span>
-                <span class="n">graph</span><span class="o">=</span><span class="n">graph_dot</span><span class="p">)</span>
+<span class="c1"># Define Causal Model</span>
+<span class="n">model_est</span><span class="o">=</span><span class="n">CausalModel</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data_df</span><span class="p">,</span>
+        <span class="n">treatment</span><span class="o">=</span><span class="s1">&#39;pip2&#39;</span><span class="p">,</span>
+        <span class="n">outcome</span><span class="o">=</span><span class="s1">&#39;pkc&#39;</span><span class="p">,</span>
+        <span class="n">graph</span><span class="o">=</span><span class="n">str_to_dot</span><span class="p">(</span><span class="n">graph_dot</span><span class="o">.</span><span class="n">source</span><span class="p">))</span>
 
-        <span class="c1"># Identification</span>
-        <span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
+<span class="c1"># Identification</span>
+<span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model_est</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
 
-        <span class="c1"># Estimation</span>
-        <span class="n">estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
-                                        <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.linear_regression&quot;</span><span class="p">,</span>
-                                        <span class="n">control_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                                        <span class="n">treatment_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                                        <span class="n">confidence_intervals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                                        <span class="n">test_significance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">estimate</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+<span class="c1"># Estimation</span>
+<span class="n">estimate</span> <span class="o">=</span> <span class="n">model_est</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
+                                <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.linear_regression&quot;</span><span class="p">,</span>
+                                <span class="n">control_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                <span class="n">treatment_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                <span class="n">confidence_intervals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                <span class="n">test_significance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Estimate is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">estimate</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -1408,126 +1286,26 @@ Method : GES
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
+Estimand type: EstimandType.NONPARAMETRIC_ATE
 
-*****************************************************************************
+### Estimand : 1
+Estimand name: backdoor
+Estimand expression:
+   d
+───────(E[pkc|plc,pip3])
+d[pip₂]
+Estimand assumption 1, Unconfoundedness: If U→{pip2} and U→pkc then P(pkc|pip2,plc,pip3,U) = P(pkc|pip2,plc,pip3)
 
-Causal Discovery Method : LiNGAM
-No directed path from [&#39;PIP2&#39;] to [&#39;PKC&#39;] in the causal graph.
-Causal effect is zero.
-Causal Estimate is 0
+### Estimand : 2
+Estimand name: iv
+No such variable(s) found!
+
+### Estimand : 3
+Estimand name: frontdoor
+No such variable(s) found!
+
+Causal Estimate is 0.03397189228452291
 </pre></div></div>
-</div>
-<p>From the causal estimates obtained, it can be seen that the three estimates differ in different aspects. The graph obtained using LiNGAM contains a backdoor path and instrumental variables. On the other hand, the graph obtained using PC contains a backdoor path and a frontdoor path. However, despite these differences, both obtain the same mean causal estimate.</p>
-<p>The graph obtained using GES contains only a backdoor path with different backdoor variables and obtains a different causal estimate than the first two cases.</p>
-</section>
-<section id="Graph-Validation">
-<h2>Graph Validation<a class="headerlink" href="#Graph-Validation" title="Permalink to this heading"></a></h2>
-<p>We compare the graphs obtained with the true causal graph using the causal discovery methods using 2 graph distance metrics - Structural Hamming Distance (SHD) and Structural Intervention Distance (SID). SHD between two graphs is, in simple terms, the number of edge insertions, deletions or flips in order to transform one graph to another graph. SID, on the other hand, is based on a graphical criterion only and quantifies the closeness between two DAGs in terms of their corresponding causal
-inference statements.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">cdt.metrics</span> <span class="kn">import</span> <span class="n">SHD</span><span class="p">,</span> <span class="n">SHD_CPDAG</span><span class="p">,</span> <span class="n">SID</span><span class="p">,</span> <span class="n">SID_CPDAG</span>
-<span class="kn">from</span> <span class="nn">numpy.random</span> <span class="kn">import</span> <span class="n">randint</span>
-
-<span class="k">for</span> <span class="n">method</span><span class="p">,</span> <span class="n">graph</span> <span class="ow">in</span> <span class="n">graphs_nx</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;***********************************************************&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Method: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">method</span><span class="p">))</span>
-    <span class="n">tar</span><span class="p">,</span> <span class="n">pred</span> <span class="o">=</span> <span class="n">graph_sachs</span><span class="p">,</span> <span class="n">graph</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SHD_CPDAG = </span><span class="si">%f</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">SHD_CPDAG</span><span class="p">(</span><span class="n">tar</span><span class="p">,</span> <span class="n">pred</span><span class="p">)))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SHD = </span><span class="si">%f</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">SHD</span><span class="p">(</span><span class="n">tar</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">double_for_anticausal</span><span class="o">=</span><span class="kc">False</span><span class="p">)))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SID_CPDAG = [</span><span class="si">%f</span><span class="s2">, </span><span class="si">%f</span><span class="s2">]&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">SID_CPDAG</span><span class="p">(</span><span class="n">tar</span><span class="p">,</span> <span class="n">pred</span><span class="p">)))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SID = </span><span class="si">%f</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">SID</span><span class="p">(</span><span class="n">tar</span><span class="p">,</span> <span class="n">pred</span><span class="p">)))</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-***********************************************************
-Method: LiNGAM
-SHD_CPDAG = 17.000000
-SHD = 18.000000
-SID_CPDAG = [80.000000, 80.000000]
-SID = 80.000000
-***********************************************************
-Method: PC
-SHD_CPDAG = 29.000000
-SHD = 27.000000
-SID_CPDAG = [82.000000, 82.000000]
-SID = 82.000000
-***********************************************************
-Method: GES
-SHD_CPDAG = 34.000000
-SHD = 31.000000
-SID_CPDAG = [82.000000, 88.000000]
-SID = 91.000000
-</pre></div></div>
-</div>
-<p>The graph similarity metrics show that the scores are the lowest for the LiNGAM method of graph extraction. Hence, of the three methods used, LiNGAM provides the graph that is most similar to the original graph.</p>
-</section>
-<section id="Graph-Refutation">
-<h2>Graph Refutation<a class="headerlink" href="#Graph-Refutation" title="Permalink to this heading"></a></h2>
-<p>Here, we use the same SHD and SID metric to find out how different the discovered graph are from each other.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">itertools</span>
-<span class="kn">from</span> <span class="nn">numpy.random</span> <span class="kn">import</span> <span class="n">randint</span>
-<span class="kn">from</span> <span class="nn">cdt.metrics</span> <span class="kn">import</span> <span class="n">SHD</span><span class="p">,</span> <span class="n">SHD_CPDAG</span><span class="p">,</span> <span class="n">SID</span><span class="p">,</span> <span class="n">SID_CPDAG</span>
-
-<span class="c1"># Find combinations of pair of methods to compare</span>
-<span class="n">combinations</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="n">graphs_nx</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
-
-<span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">combinations</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;***********************************************************&quot;</span><span class="p">)</span>
-    <span class="n">graph1</span> <span class="o">=</span> <span class="n">graphs_nx</span><span class="p">[</span><span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
-    <span class="n">graph2</span> <span class="o">=</span> <span class="n">graphs_nx</span><span class="p">[</span><span class="n">pair</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Methods: </span><span class="si">%s</span><span class="s2"> and </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pair</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SHD_CPDAG = </span><span class="si">%f</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">SHD_CPDAG</span><span class="p">(</span><span class="n">graph1</span><span class="p">,</span> <span class="n">graph2</span><span class="p">)))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SHD = </span><span class="si">%f</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">SHD</span><span class="p">(</span><span class="n">graph1</span><span class="p">,</span> <span class="n">graph2</span><span class="p">,</span> <span class="n">double_for_anticausal</span><span class="o">=</span><span class="kc">False</span><span class="p">)))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SID_CPDAG = [</span><span class="si">%f</span><span class="s2">, </span><span class="si">%f</span><span class="s2">]&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">SID_CPDAG</span><span class="p">(</span><span class="n">graph1</span><span class="p">,</span> <span class="n">graph2</span><span class="p">)))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SID = </span><span class="si">%f</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">SID</span><span class="p">(</span><span class="n">graph1</span><span class="p">,</span> <span class="n">graph2</span><span class="p">)))</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-***********************************************************
-Methods: LiNGAM and PC
-SHD_CPDAG = 25.000000
-SHD = 24.000000
-SID_CPDAG = [13.000000, 13.000000]
-SID = 13.000000
-***********************************************************
-Methods: LiNGAM and GES
-SHD_CPDAG = 33.000000
-SHD = 33.000000
-SID_CPDAG = [10.000000, 13.000000]
-SID = 13.000000
-***********************************************************
-Methods: PC and GES
-SHD_CPDAG = 22.000000
-SHD = 22.000000
-SID_CPDAG = [70.000000, 78.000000]
-SID = 78.000000
-</pre></div></div>
-</div>
-<p>The values for the metrics show how different the graphs are from each other. A higher distance value implies that the difference between the graphs is more.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
-</pre></div>
-</div>
 </div>
 </section>
 </section>
