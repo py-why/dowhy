@@ -7,6 +7,7 @@ from sklearn.exceptions import NotFittedError
 from sklearn.linear_model import LinearRegression
 
 from dowhy.gcm.ml.regression import SklearnRegressionModel
+from dowhy.gcm.shapley import ShapleyConfig
 from dowhy.gcm.unit_change import (
     SklearnLinearRegressionModel,
     unit_change,
@@ -75,7 +76,12 @@ def test_given_fitted_linear_mechanisms_with_output_change_when_evaluate_unit_ch
         background_mechanism, background_df, foreground_mechanism, foreground_df, ["A", "B"]
     )
     expected_contributions = unit_change_nonlinear(
-        background_mechanism, background_df, foreground_mechanism, foreground_df, ["A", "B"]
+        background_mechanism,
+        background_df,
+        foreground_mechanism,
+        foreground_df,
+        ["A", "B"],
+        shapley_config=ShapleyConfig(n_jobs=1),
     )
 
     np.testing.assert_array_almost_equal(actual_contributions, expected_contributions, decimal=1)
@@ -98,6 +104,7 @@ def test_given_unfitted_mechanisms_when_evaluate_unit_change_methods_then_raises
             SklearnRegressionModel(LinearRegression()),
             pd.DataFrame(data=dict(A=np.random.normal(size=100), B=np.random.normal(size=100))),
             ["A", "B"],
+            shapley_config=ShapleyConfig(n_jobs=1),
         )
 
     with pytest.raises(NotFittedError):
@@ -107,6 +114,7 @@ def test_given_unfitted_mechanisms_when_evaluate_unit_change_methods_then_raises
             SklearnRegressionModel(RFR()),
             pd.DataFrame(data=dict(A=np.random.normal(size=100), B=np.random.normal(size=100))),
             ["A", "B"],
+            shapley_config=ShapleyConfig(n_jobs=1),
         )
 
 
@@ -136,6 +144,7 @@ def test_given_fitted_mechanisms_with_no_input_change_when_evaluate_unit_change_
         background_df,
         foreground_df,
         ["A", "B"],
+        shapley_config=ShapleyConfig(n_jobs=1),
     )
     expected_contributions = pd.DataFrame(data=dict(A=np.zeros(num_rows), B=np.zeros(num_rows)))
     np.testing.assert_array_almost_equal(actual_contributions, expected_contributions, decimal=1)
@@ -180,7 +189,9 @@ def test_given_fitted_linear_mechanism_with_input_change_when_evaluate_unit_chan
     foreground_df = pd.DataFrame(data=dict(A=A2, B=B2, C=C2))
 
     mechanism = SklearnLinearRegressionModel(LinearRegression().fit(np.column_stack((A1, B1)), C1))
-    actual_contributions = unit_change_nonlinear_input_only(mechanism, background_df, foreground_df, ["A", "B"])
+    actual_contributions = unit_change_nonlinear_input_only(
+        mechanism, background_df, foreground_df, ["A", "B"], shapley_config=ShapleyConfig(n_jobs=1)
+    )
     expected_contributions = unit_change_linear_input_only(mechanism, background_df, foreground_df, ["A", "B"])
 
     np.testing.assert_array_almost_equal(actual_contributions, expected_contributions, decimal=1)
@@ -201,6 +212,7 @@ def test_given_unfitted_mechanisms_when_evaluate_unit_change_input_only_methods_
             pd.DataFrame(data=dict(A=np.random.normal(size=100), B=np.random.normal(size=100))),
             pd.DataFrame(data=dict(A=np.random.normal(size=100), B=np.random.normal(size=100))),
             ["A", "B"],
+            shapley_config=ShapleyConfig(n_jobs=1),
         )
 
     with pytest.raises(NotFittedError):
@@ -209,6 +221,7 @@ def test_given_unfitted_mechanisms_when_evaluate_unit_change_input_only_methods_
             pd.DataFrame(data=dict(A=np.random.normal(size=100), B=np.random.normal(size=100))),
             pd.DataFrame(data=dict(A=np.random.normal(size=100), B=np.random.normal(size=100))),
             ["A", "B"],
+            shapley_config=ShapleyConfig(n_jobs=1),
         )
 
 
@@ -246,7 +259,9 @@ def test_given_single_mechanism_with_default_optional_parameters_when_evaluate_u
     mechanism = SklearnRegressionModel(RFR().fit(np.column_stack((A1, B1)), C1))
 
     actual_contributions = unit_change(background_df, foreground_df, ["A", "B"], mechanism)
-    expected_contributions = unit_change_nonlinear_input_only(mechanism, background_df, foreground_df, ["A", "B"])
+    expected_contributions = unit_change_nonlinear_input_only(
+        mechanism, background_df, foreground_df, ["A", "B"], shapley_config=ShapleyConfig(n_jobs=1)
+    )
     np.testing.assert_array_almost_equal(actual_contributions, expected_contributions, decimal=1)
 
 
@@ -287,7 +302,12 @@ def test_given_two_mechanisms_when_evaluate_unit_change_then_returns_correct_att
         background_df, foreground_df, ["A", "B"], background_mechanism, foreground_mechanism
     )
     expected_contributions = unit_change_nonlinear(
-        background_mechanism, background_df, foreground_mechanism, foreground_df, ["A", "B"]
+        background_mechanism,
+        background_df,
+        foreground_mechanism,
+        foreground_df,
+        ["A", "B"],
+        shapley_config=ShapleyConfig(n_jobs=1),
     )
 
     np.testing.assert_array_almost_equal(actual_contributions, expected_contributions, decimal=1)
