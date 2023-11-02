@@ -5,11 +5,10 @@ the future.
 """
 
 from abc import abstractmethod
-from typing import Any, List
+from typing import Any, List, Protocol
 
 import networkx as nx
 from networkx.algorithms.dag import has_cycle
-from typing_extensions import Protocol
 
 
 class HasNodes(Protocol):
