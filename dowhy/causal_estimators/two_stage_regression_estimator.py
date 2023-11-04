@@ -125,7 +125,6 @@ class TwoStageRegressionEstimator(CausalEstimator):
                 )
             )
         else:
-            modified_target_estimand = copy.deepcopy(self._target_estimand)
             self._second_stage_model = self.__class__.DEFAULT_SECOND_STAGE_MODEL(
                 modified_target_estimand,
                 test_significance=self._significance_test,
