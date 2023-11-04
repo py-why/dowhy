@@ -1,11 +1,10 @@
+import numpy as np
+import pandas as pd
 import pytest
 from pytest import mark
 
-from dowhy.causal_estimators.two_stage_regression_estimator import TwoStageRegressionEstimator
 from dowhy import CausalModel
-import numpy as np
-import pandas as pd
-
+from dowhy.causal_estimators.two_stage_regression_estimator import TwoStageRegressionEstimator
 
 from .base import TestEstimator
 
@@ -124,29 +123,23 @@ class TestTwoStageRegressionEstimator(object):
                 target "X"
             ]
         ]
-        """.replace('\n', '')
+        """.replace(
+            "\n", ""
+        )
 
         N_SAMPLES = 10000
         # Generate the data
         U = np.random.randn(N_SAMPLES)
-        X = np.random.randn(N_SAMPLES) + 0.3*U
-        Z = 0.7*X + 0.3*np.random.randn(N_SAMPLES) 
-        Y = 0.65*Z + 0.2*U
+        X = np.random.randn(N_SAMPLES) + 0.3 * U
+        Z = 0.7 * X + 0.3 * np.random.randn(N_SAMPLES)
+        Y = 0.65 * Z + 0.2 * U
 
         # Data to df
-        df = pd.DataFrame(np.vstack([X, Z, Y]).T, columns=['X', 'Z', 'Y'])
+        df = pd.DataFrame(np.vstack([X, Z, Y]).T, columns=["X", "Z", "Y"])
 
         # Create a model
-        model = CausalModel(
-            data=df,
-            treatment='X',
-            outcome='Y',
-            graph=graph
-        )
+        model = CausalModel(data=df, treatment="X", outcome="Y", graph=graph)
         estimand = model.identify_effect(proceed_when_unidentifiable=True)
         # Estimate the effect with front-door
-        estimate = model.estimate_effect(
-            identified_estimand=estimand,
-            method_name='frontdoor.two_stage_regression'
-        )
+        estimate = model.estimate_effect(identified_estimand=estimand, method_name="frontdoor.two_stage_regression")
         assert estimate.value == pytest.approx(0.45, 0.025)
