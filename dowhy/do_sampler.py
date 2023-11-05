@@ -14,9 +14,9 @@ class DoSampler:
     def __init__(
         self,
         graph: nx.DiGraph,
-        observed_nodes: List[str],
         action_nodes: List[str],
         outcome_nodes: List[str],
+        observed_nodes: List[str],
         data,
         params=None,
         variable_types=None,
@@ -63,11 +63,11 @@ class DoSampler:
         """
         self._data = data.copy()
         self._target_estimand = identify_effect_auto(
-            graph, observed_nodes, action_nodes, outcome_nodes, estimand_type=estimand_type
+            graph, action_nodes, outcome_nodes, observed_nodes, estimand_type=estimand_type
         )
         self._target_estimand.set_identifier_method("backdoor")
-        self._treatment_names = action_nodes
-        self._outcome_names = outcome_nodes
+        self._treatment_names = parse_state(action_nodes)
+        self._outcome_names = parse_state(outcome_nodes)
         self._estimate = None
         self._variable_types = variable_types
         self.num_cores = num_cores

@@ -12,9 +12,9 @@ class McmcSampler(DoSampler):
     def __init__(
         self,
         graph: nx.DiGraph,
-        observed_nodes: List[str],
         action_nodes: List[str],
         outcome_nodes: List[str],
+        observed_nodes: List[str],
         data,
         params=None,
         variable_types=None,
@@ -28,9 +28,9 @@ class McmcSampler(DoSampler):
         """
         super().__init__(
             graph=graph,
-            observed_nodes=observed_nodes,
             action_nodes=action_nodes,
             outcome_nodes=outcome_nodes,
+            observed_nodes=observed_nodes,
             data=data,
             params=params,
             variable_types=variable_types,

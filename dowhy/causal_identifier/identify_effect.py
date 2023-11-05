@@ -31,9 +31,9 @@ class CausalIdentifier(Protocol):
 
 def identify_effect(
     graph: nx.DiGraph,
-    observed_nodes: Union[str, List[str]],
     action_nodes: Union[str, List[str]],
     outcome_nodes: Union[str, List[str]],
+    observed_nodes: Union[str, List[str]]
 ) -> IdentifiedEstimand:
     """Identify the causal effect to be estimated based on a causal graph
 
@@ -44,9 +44,9 @@ def identify_effect(
     """
     return identify_effect_auto(
         graph,
-        observed_nodes,
         action_nodes,
         outcome_nodes,
+        observed_nodes,
         EstimandType.NONPARAMETRIC_ATE,
         backdoor_adjustment=BackdoorAdjustment.BACKDOOR_DEFAULT,
         optimize_backdoor=False,

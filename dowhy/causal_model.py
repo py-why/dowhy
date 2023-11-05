@@ -220,9 +220,9 @@ class CausalModel:
 
         identified_estimand = identifier.identify_effect(
             graph=self._graph._graph,
-            observed_nodes=list(self._graph.get_all_nodes(include_unobserved=False)),
             action_nodes=self._treatment,
             outcome_nodes=self._outcome,
+            observed_nodes=list(self._graph.get_all_nodes(include_unobserved=False))
         )
 
         self.identifier = identifier

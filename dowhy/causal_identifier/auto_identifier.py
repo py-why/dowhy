@@ -93,16 +93,16 @@ class AutoIdentifier:
     def identify_effect(
         self,
         graph: nx.DiGraph,
-        observed_nodes: Union[str, List[str]],
         action_nodes: Union[str, List[str]],
         outcome_nodes: Union[str, List[str]],
+        observed_nodes: Union[str, List[str]],
         conditional_node_names: List[str] = None,
     ):
         estimand = identify_effect_auto(
             graph,
-            observed_nodes,
             action_nodes,
             outcome_nodes,
+            observed_nodes,
             self.estimand_type,
             conditional_node_names,
             self.backdoor_adjustment,
@@ -117,18 +117,18 @@ class AutoIdentifier:
     def identify_backdoor(
         self,
         graph: nx.DiGraph,
-        observed_nodes: List[str],
         action_nodes: List[str],
         outcome_nodes: List[str],
+        observed_nodes: List[str],
         include_unobserved: bool = False,
         dseparation_algo: str = "default",
         direct_effect: bool = False,
     ):
         return identify_backdoor(
             graph,
-            observed_nodes,
             action_nodes,
             outcome_nodes,
+            observed_nodes,
             self.backdoor_adjustment,
             include_unobserved,
             dseparation_algo,
@@ -138,9 +138,9 @@ class AutoIdentifier:
 
 def identify_effect_auto(
     graph: nx.DiGraph,
-    observed_nodes: Union[str, List[str]],
     action_nodes: Union[str, List[str]],
     outcome_nodes: Union[str, List[str]],
+    observed_nodes: Union[str, List[str]],
     estimand_type: EstimandType,
     conditional_node_names: List[str] = None,
     backdoor_adjustment: BackdoorAdjustment = BackdoorAdjustment.BACKDOOR_DEFAULT,
@@ -177,9 +177,9 @@ def identify_effect_auto(
     if estimand_type == EstimandType.NONPARAMETRIC_ATE:
         return identify_ate_effect(
             graph,
-            observed_nodes,
             action_nodes,
             outcome_nodes,
+            observed_nodes,
             backdoor_adjustment,
             optimize_backdoor,
             estimand_type,
@@ -188,15 +188,15 @@ def identify_effect_auto(
         )
     elif estimand_type == EstimandType.NONPARAMETRIC_NDE:
         return identify_nde_effect(
-            graph, observed_nodes, action_nodes, outcome_nodes, backdoor_adjustment, estimand_type
+            graph, action_nodes, outcome_nodes, observed_nodes, backdoor_adjustment, estimand_type
         )
     elif estimand_type == EstimandType.NONPARAMETRIC_NIE:
         return identify_nie_effect(
-            graph, observed_nodes, action_nodes, outcome_nodes, backdoor_adjustment, estimand_type
+            graph, action_nodes, outcome_nodes, observed_nodes, backdoor_adjustment, estimand_type
         )
     elif estimand_type == EstimandType.NONPARAMETRIC_CDE:
         return identify_cde_effect(
-            graph, observed_nodes, action_nodes, outcome_nodes, backdoor_adjustment, estimand_type
+            graph, action_nodes, outcome_nodes, observed_nodes, backdoor_adjustment, estimand_type
         )
     else:
         raise ValueError(
@@ -211,9 +211,9 @@ def identify_effect_auto(
 
 def identify_ate_effect(
     graph: nx.DiGraph,
-    observed_nodes: List[str],
     action_nodes: List[str],
     outcome_nodes: List[str],
+    observed_nodes: List[str],
     backdoor_adjustment: BackdoorAdjustment,
     optimize_backdoor: bool,
     estimand_type: EstimandType,
@@ -228,7 +228,7 @@ def identify_ate_effect(
     if backdoor_adjustment not in EFFICIENT_METHODS:
         # First, checking if there are any valid backdoor adjustment sets
         if optimize_backdoor == False:
-            backdoor_sets = identify_backdoor(graph, observed_nodes, action_nodes, outcome_nodes, backdoor_adjustment)
+            backdoor_sets = identify_backdoor(graph, action_nodes, outcome_nodes, observed_nodes, backdoor_adjustment)
         else:
             from dowhy.causal_identifier.backdoor import Backdoor
 
@@ -237,15 +237,15 @@ def identify_ate_effect(
     elif backdoor_adjustment in EFFICIENT_METHODS:
         backdoor_sets = identify_efficient_backdoor(
             graph,
-            observed_nodes,
             action_nodes,
             outcome_nodes,
+            observed_nodes,
             backdoor_adjustment,
             costs,
             conditional_node_names=conditional_node_names,
         )
     estimands_dict, backdoor_variables_dict = build_backdoor_estimands_dict(
-        observed_nodes, action_nodes, outcome_nodes, backdoor_sets, estimands_dict
+        action_nodes, outcome_nodes, observed_nodes, backdoor_sets, estimands_dict
     )
     # Setting default "backdoor" identification adjustment set
     default_backdoor_id = get_default_backdoor_set_id(graph, action_nodes, outcome_nodes, backdoor_variables_dict)
@@ -282,10 +282,10 @@ def identify_ate_effect(
         logger.debug("Identified expression = " + str(frontdoor_estimand_expr))
         estimands_dict["frontdoor"] = frontdoor_estimand_expr
         mediation_first_stage_confounders = identify_mediation_first_stage_confounders(
-            graph, observed_nodes, action_nodes, outcome_nodes, frontdoor_variables_names, backdoor_adjustment
+            graph, action_nodes, outcome_nodes, observed_nodes, frontdoor_variables_names, backdoor_adjustment
         )
         mediation_second_stage_confounders = identify_mediation_second_stage_confounders(
-            graph, observed_nodes, action_nodes, frontdoor_variables_names, outcome_nodes, backdoor_adjustment
+            graph, action_nodes, frontdoor_variables_names, observed_nodes, outcome_nodes, backdoor_adjustment
         )
     else:
         estimands_dict["frontdoor"] = None
@@ -309,9 +309,9 @@ def identify_ate_effect(
 
 def identify_cde_effect(
     graph: nx.DiGraph,
-    observed_nodes: List[str],
     action_nodes: List[str],
     outcome_nodes: List[str],
+    observed_nodes: List[str],
     backdoor_adjustment: BackdoorAdjustment,
     estimand_type: EstimandType,
 ):
@@ -327,10 +327,10 @@ def identify_cde_effect(
     estimands_dict = {}
     # Pick algorithm to compute backdoor sets according to method chosen
     backdoor_sets = identify_backdoor(
-        graph, observed_nodes, action_nodes, outcome_nodes, backdoor_adjustment, direct_effect=True
+        graph, action_nodes, outcome_nodes, observed_nodes, backdoor_adjustment, direct_effect=True
     )
     estimands_dict, backdoor_variables_dict = build_backdoor_estimands_dict(
-        observed_nodes, action_nodes, outcome_nodes, backdoor_sets, estimands_dict
+        action_nodes, outcome_nodes, observed_nodes, backdoor_sets, estimands_dict
     )
     # Setting default "backdoor" identification adjustment set
     default_backdoor_id = get_default_backdoor_set_id(graph, action_nodes, outcome_nodes, backdoor_variables_dict)
@@ -359,18 +359,18 @@ def identify_cde_effect(
 
 def identify_nie_effect(
     graph: nx.DiGraph,
-    observed_nodes: List[str],
     action_nodes: List[str],
     outcome_nodes: List[str],
+    observed_nodes: List[str],
     backdoor_adjustment: BackdoorAdjustment,
     estimand_type: EstimandType,
 ):
     estimands_dict = {}
     ### 1. FIRST DOING BACKDOOR IDENTIFICATION
     # First, checking if there are any valid backdoor adjustment sets
-    backdoor_sets = identify_backdoor(graph, observed_nodes, action_nodes, outcome_nodes, backdoor_adjustment)
+    backdoor_sets = identify_backdoor(graph, action_nodes, outcome_nodes, observed_nodes, backdoor_adjustment)
     estimands_dict, backdoor_variables_dict = build_backdoor_estimands_dict(
-        observed_nodes, action_nodes, outcome_nodes, backdoor_sets, estimands_dict
+        action_nodes, outcome_nodes, observed_nodes, backdoor_sets, estimands_dict
     )
     # Setting default "backdoor" identification adjustment set
     default_backdoor_id = get_default_backdoor_set_id(graph, action_nodes, outcome_nodes, backdoor_variables_dict)
@@ -393,10 +393,10 @@ def identify_nie_effect(
         logger.debug("Identified expression = " + str(mediation_estimand_expr))
         estimands_dict["mediation"] = mediation_estimand_expr
         mediation_first_stage_confounders = identify_mediation_first_stage_confounders(
-            graph, observed_nodes, action_nodes, outcome_nodes, mediators_names, backdoor_adjustment
+            graph, action_nodes, outcome_nodes, observed_nodes, mediators_names, backdoor_adjustment
         )
         mediation_second_stage_confounders = identify_mediation_second_stage_confounders(
-            graph, observed_nodes, action_nodes, mediators_names, outcome_nodes, backdoor_adjustment
+            graph, action_nodes, mediators_names, observed_nodes, outcome_nodes, backdoor_adjustment
         )
     else:
         estimands_dict["mediation"] = None
@@ -420,18 +420,18 @@ def identify_nie_effect(
 
 def identify_nde_effect(
     graph: nx.DiGraph,
-    observed_nodes: List[str],
     action_nodes: List[str],
     outcome_nodes: List[str],
+    observed_nodes: List[str],
     backdoor_adjustment: BackdoorAdjustment,
     estimand_type: EstimandType,
 ):
     estimands_dict = {}
     ### 1. FIRST DOING BACKDOOR IDENTIFICATION
     # First, checking if there are any valid backdoor adjustment sets
-    backdoor_sets = identify_backdoor(graph, observed_nodes, action_nodes, outcome_nodes, backdoor_adjustment)
+    backdoor_sets = identify_backdoor(graph, action_nodes, outcome_nodes, observed_nodes, backdoor_adjustment)
     estimands_dict, backdoor_variables_dict = build_backdoor_estimands_dict(
-        observed_nodes, action_nodes, outcome_nodes, backdoor_sets, estimands_dict
+        action_nodes, outcome_nodes, observed_nodes, backdoor_sets, estimands_dict
     )
     # Setting default "backdoor" identification adjustment set
     default_backdoor_id = get_default_backdoor_set_id(graph, action_nodes, outcome_nodes, backdoor_variables_dict)
@@ -454,10 +454,10 @@ def identify_nde_effect(
         logger.debug("Identified expression = " + str(mediation_estimand_expr))
         estimands_dict["mediation"] = mediation_estimand_expr
         mediation_first_stage_confounders = identify_mediation_first_stage_confounders(
-            graph, observed_nodes, action_nodes, outcome_nodes, mediators_names, backdoor_adjustment
+            graph, action_nodes, outcome_nodes, observed_nodes, mediators_names, backdoor_adjustment
         )
         mediation_second_stage_confounders = identify_mediation_second_stage_confounders(
-            graph, observed_nodes, action_nodes, mediators_names, outcome_nodes, backdoor_adjustment
+            graph, action_nodes, mediators_names, observed_nodes, outcome_nodes, backdoor_adjustment
         )
     else:
         estimands_dict["mediation"] = None
@@ -481,9 +481,9 @@ def identify_nde_effect(
 
 def identify_backdoor(
     graph: nx.DiGraph,
-    observed_nodes: List[str],
     action_nodes: List[str],
     outcome_nodes: List[str],
+    observed_nodes: List[str],
     backdoor_adjustment: BackdoorAdjustment,
     include_unobserved: bool = False,
     dseparation_algo: str = "default",
@@ -551,9 +551,9 @@ def identify_backdoor(
     if backdoor_adjustment in METHOD_NAMES:
         backdoor_sets, found_valid_adjustment_set = find_valid_adjustment_sets(
             graph,
-            observed_nodes,
             action_nodes,
             outcome_nodes,
+            observed_nodes,
             backdoor_paths,
             bdoor_graph,
             dseparation_algo,
@@ -566,9 +566,9 @@ def identify_backdoor(
             # repeat the above search with BACKDOOR_MIN
             backdoor_sets, _ = find_valid_adjustment_sets(
                 graph,
-                observed_nodes,
                 action_nodes,
                 outcome_nodes,
+                observed_nodes,
                 backdoor_paths,
                 bdoor_graph,
                 dseparation_algo,
@@ -586,9 +586,9 @@ def identify_backdoor(
 
 def identify_efficient_backdoor(
     graph: nx.DiGraph,
-    observed_nodes: List[str],
     action_nodes: List[str],
     outcome_nodes: List[str],
+    observed_nodes: List[str],
     backdoor_adjustment: BackdoorAdjustment,
     costs: List,
     conditional_node_names: List[str] = None,
@@ -636,9 +636,9 @@ def identify_efficient_backdoor(
         logger.warning("No costs were passed, so they will be assumed to be constant and equal to 1.")
     efficient_bd = EfficientBackdoor(
         graph=graph,
-        observed_nodes=observed_nodes,
         action_nodes=action_nodes,
         outcome_nodes=outcome_nodes,
+        observed_nodes=observed_nodes,
         conditional_node_names=conditional_node_names,
         costs=costs,
     )
@@ -656,9 +656,9 @@ def identify_efficient_backdoor(
 
 def find_valid_adjustment_sets(
     graph: nx.DiGraph,
-    observed_nodes: List[str],
     action_nodes: List[str],
     outcome_nodes: List[str],
+    observed_nodes: List[str],
     backdoor_paths: List,
     bdoor_graph: nx.DiGraph,
     dseparation_algo: str,

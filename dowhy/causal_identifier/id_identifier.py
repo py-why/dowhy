@@ -97,9 +97,9 @@ class IDIdentifier:
     def identify_effect(
         self,
         graph: nx.DiGraph,
-        observed_nodes: Union[str, List[str]],
         action_nodes: Union[str, List[str]],
         outcome_nodes: Union[str, List[str]],
+        observed_nodes: Union[str, List[str]]
     ):
         return identify_effect_id(graph, action_nodes, outcome_nodes)
 

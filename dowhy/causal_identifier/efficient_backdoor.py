@@ -15,9 +15,9 @@ class EfficientBackdoor:
     def __init__(
         self,
         graph: nx.DiGraph,
-        observed_nodes: List[str],
         action_nodes: List[str],
         outcome_nodes: List[str],
+        observed_nodes: List[str],
         conditional_node_names=None,
         costs=None,
     ):
