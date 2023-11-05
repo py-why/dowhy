@@ -8,6 +8,7 @@ from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegress
 from sklearn.linear_model import LogisticRegression, LogisticRegressionCV
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import PolynomialFeatures
+
 import dowhy
 from dowhy import CausalModel, datasets
 
@@ -58,7 +59,7 @@ class TestEconMLEstimator:
                 "fit_params": {},
             },
         )
-        # Checking that the CATE estimates are not identical 
+        # Checking that the CATE estimates are not identical
         dml_cate_estimates_f = dml_estimate.cate_estimates.flatten()
         assert pytest.approx(dml_cate_estimates_f[0], 0.01) != dml_cate_estimates_f[1]
         # Test ContinuousTreatmentOrthoForest
@@ -68,7 +69,7 @@ class TestEconMLEstimator:
             target_units=lambda df: df["X0"] > 2,
             method_params={"init_params": {"n_trees": 10}, "fit_params": {}},
         )
-        # Checking that the CATE estimates are not identical 
+        # Checking that the CATE estimates are not identical
         orthoforest_cate_estimates_f = orthoforest_estimate.cate_estimates.flatten()
         assert pytest.approx(orthoforest_cate_estimates_f[0], 0.01) != orthoforest_cate_estimates_f[1]
 
@@ -125,14 +126,10 @@ class TestEconMLEstimator:
         # Test LinearDML
         sl_estimate = model.estimate_effect(
             identified_estimand,
-            method_name='backdoor.econml.metalearners.SLearner',
-            target_units='ate',
-            method_params={
-                'init_params': {
-                'overall_model': GradientBoostingRegressor()
-            },
-            'fit_params': {}
-        })
+            method_name="backdoor.econml.metalearners.SLearner",
+            target_units="ate",
+            method_params={"init_params": {"overall_model": GradientBoostingRegressor()}, "fit_params": {}},
+        )
         # checking that CATE estimates are not identical
         sl_cate_estimates_f = sl_estimate.cate_estimates.flatten()
         assert pytest.approx(sl_cate_estimates_f[0], 0.01) != sl_cate_estimates_f[1]
@@ -140,10 +137,10 @@ class TestEconMLEstimator:
         # predict on new data
         sl_estimate_test = model.estimate_effect(
             identified_estimand,
-            method_name='backdoor.econml.metalearners.SLearner',
+            method_name="backdoor.econml.metalearners.SLearner",
             fit_estimator=False,
-            target_units=data["df"].sample(frac=0.1)
-            )
+            target_units=data["df"].sample(frac=0.1),
+        )
         sl_cate_estimates_test_f = sl_estimate_test.cate_estimates.flatten()
         assert pytest.approx(sl_cate_estimates_test_f[0], 0.01) != sl_cate_estimates_test_f[1]
 

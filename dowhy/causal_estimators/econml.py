@@ -328,7 +328,7 @@ class Econml(CausalEstimator):
 
         def effect_fun(filtered_df, T0, T1, *args, **kwargs):
             return self.estimator.effect(filtered_df, T0=T0, T1=T1, *args, **kwargs)
-        
+
         Xdf = df[self._effect_modifier_names] if df is not None else df
         return self.apply_multitreatment(Xdf, effect_fun, *args, **kwargs)
 
