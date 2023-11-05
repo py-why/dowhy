@@ -222,7 +222,7 @@ class CausalModel:
             graph=self._graph._graph,
             action_nodes=self._treatment,
             outcome_nodes=self._outcome,
-            observed_nodes=list(self._graph.get_all_nodes(include_unobserved=False))
+            observed_nodes=list(self._graph.get_all_nodes(include_unobserved=False)),
         )
 
         self.identifier = identifier

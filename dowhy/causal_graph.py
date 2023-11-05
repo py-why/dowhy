@@ -54,6 +54,8 @@ class CausalGraph:
         if graph is None:
             self._graph = nx.DiGraph()
             self._graph = self.build_graph(common_cause_names, instrument_names, effect_modifier_names, mediator_names)
+        elif isinstance(graph, nx.DiGraph):
+            self._graph = graph
         elif re.match(r".*\.dot", graph):
             # load dot file
             try:
@@ -90,7 +92,9 @@ class CausalGraph:
         elif re.match(".*graph\s*\[.*\]\s*", graph):
             self._graph = nx.DiGraph(nx.parse_gml(graph))
         else:
-            self.logger.error("Error: Please provide graph (as string or text file) in dot or gml format.")
+            self.logger.error(
+                "Error: Please provide networkx graph or graph (as string or text file) in dot or gml format."
+            )
             self.logger.error("Error: Incorrect graph format")
             raise ValueError
         if missing_nodes_as_confounders:
