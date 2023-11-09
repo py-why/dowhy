@@ -1,6 +1,7 @@
 import networkx as nx
 import numpy as np
 import pandas as pd
+import pytest
 from _pytest.python_api import approx
 from flaky import flaky
 from pytest import mark
@@ -9,7 +10,7 @@ from sklearn.linear_model import ElasticNetCV, LassoCV, LinearRegression, Logist
 from sklearn.naive_bayes import GaussianNB
 from sklearn.pipeline import Pipeline
 
-from dowhy.gcm import ProbabilisticCausalModel, draw_samples, fit
+from dowhy.gcm import ProbabilisticCausalModel, StructuralCausalModel, draw_samples, fit
 from dowhy.gcm.auto import AssignmentQuality, assign_causal_mechanisms, has_linear_relationship
 
 
@@ -431,3 +432,17 @@ Based on the type of causal mechanism, the model with the lowest metric value re
         "Based on the type of causal mechanism, the model with the lowest metric value represents the best choice."
         in summary_string
     )
+
+
+def test_given_imbalanced_classes_when_auto_assign_mechanism_then_handles_as_expected():
+    X = np.random.normal(0, 1, 1000)
+    Y = np.array(["OneClass"] * 1000)
+
+    with pytest.raises(ValueError):
+        assign_causal_mechanisms(StructuralCausalModel(nx.DiGraph([("X", "Y")])), pd.DataFrame({"X": X, "Y": Y}))
+
+    # Having at least one sample from the second class should not raise an error.
+    X = np.append(X, 0)
+    Y = np.append(Y, "RareClass")
+
+    assign_causal_mechanisms(StructuralCausalModel(nx.DiGraph([("X", "Y")])), pd.DataFrame({"X": X, "Y": Y}))
