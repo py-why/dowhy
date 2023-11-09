@@ -10,7 +10,7 @@ from joblib import Parallel, delayed
 from sklearn import metrics
 from sklearn.exceptions import ConvergenceWarning
 from sklearn.linear_model import LinearRegression, LogisticRegression
-from sklearn.model_selection import KFold, train_test_split
+from sklearn.model_selection import KFold, StratifiedKFold, train_test_split
 from sklearn.preprocessing import MultiLabelBinarizer
 
 from dowhy.gcm import config
@@ -343,7 +343,7 @@ def find_best_model(
     X: np.ndarray,
     Y: np.ndarray,
     metric: Optional[Callable[[np.ndarray, np.ndarray], float]] = None,
-    max_samples_per_split: int = 10000,
+    max_samples_per_split: int = 20000,
     model_selection_splits: int = 5,
     n_jobs: Optional[int] = None,
 ) -> Tuple[Callable[[], PredictionModel], List[Tuple[Callable[[], PredictionModel], float, str]]]:
@@ -370,16 +370,27 @@ def find_best_model(
         labelBinarizer = MultiLabelBinarizer()
         labelBinarizer.fit(Y)
 
-    kfolds = list(KFold(n_splits=model_selection_splits, shuffle=True).split(range(X.shape[0])))
+    if is_classification_problem:
+        if len(np.unique(Y)) == 1:
+            raise ValueError(
+                "The given target samples have only one class! To fit a classification model, there "
+                "should be at least two classes."
+            )
+        kfolds = list(StratifiedKFold(n_splits=model_selection_splits, shuffle=True).split(X, Y))
+    else:
+        kfolds = list(KFold(n_splits=model_selection_splits, shuffle=True).split(range(X.shape[0])))
 
     def estimate_average_score(prediction_model_factory: Callable[[], PredictionModel], random_seed: int) -> float:
         set_random_seed(random_seed)
 
-        average_result = 0
+        average_result = []
 
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=ConvergenceWarning)
             for train_indices, test_indices in kfolds:
+                if is_classification_problem and len(np.unique(Y[train_indices[:max_samples_per_split]])) == 1:
+                    continue
+
                 model_instance = prediction_model_factory()
                 model_instance.fit(X[train_indices[:max_samples_per_split]], Y[train_indices[:max_samples_per_split]])
 
@@ -389,9 +400,12 @@ def find_best_model(
                     y_true = labelBinarizer.transform(y_true)
                     y_pred = labelBinarizer.transform(y_pred)
 
-                average_result += metric(y_true, y_pred)
+                average_result.append(metric(y_true, y_pred))
 
-        return average_result / model_selection_splits
+        if len(average_result) == 0:
+            return float("inf")
+        else:
+            return float(np.mean(average_result))
 
     random_seeds = np.random.randint(np.iinfo(np.int32).max, size=len(prediction_model_factories))
     average_metric_scores = Parallel(n_jobs=n_jobs)(
