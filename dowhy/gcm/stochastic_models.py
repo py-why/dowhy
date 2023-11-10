@@ -1,7 +1,4 @@
-"""This module defines multiple implementations of the abstract class :class:`~dowhy.gcm.graph.StochasticModel`.
-
-Classes in this module should be considered experimental, meaning there might be breaking API changes in the future.
-"""
+"""This module defines multiple implementations of the abstract class :class:`~dowhy.gcm.graph.StochasticModel`."""
 
 import warnings
 from typing import Dict, Optional, Tuple, Union

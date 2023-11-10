@@ -1,7 +1,4 @@
-"""This module provides functionality to falsify a user-given DAG given observed data.
-
-Functions in this module should be considered experimental, meaning there might be breaking API changes in the future.
-"""
+"""This module provides functionality to falsify a user-given DAG given observed data."""
 import warnings
 from dataclasses import dataclass, field
 from enum import Enum, auto

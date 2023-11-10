@@ -1,7 +1,4 @@
-"""Functions to estimate uncertainties such as entropy, KL divergence etc.
-
-Functions in this module should be considered experimental, meaning there might be breaking API changes in the future.
-"""
+"""Functions to estimate uncertainties such as entropy, KL divergence etc."""
 
 import numpy as np
 from numpy.linalg import det

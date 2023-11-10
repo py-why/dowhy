@@ -1,7 +1,4 @@
-"""This module provides functionality to answer what-if questions.
-
-Functions in this module should be considered experimental, meaning there might be breaking API changes in the future.
-"""
+"""This module provides functionality to answer what-if questions."""
 
 from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 

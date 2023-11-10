@@ -1,7 +1,4 @@
-"""This module provides functionality to estimate confidence intervals via bootstrapping.
-
-Functions in this module should be considered experimental, meaning there might be breaking API changes in the future.
-"""
+"""This module provides functionality to estimate confidence intervals via bootstrapping."""
 
 from typing import Any, Callable, Dict, List, Tuple, Union
 
