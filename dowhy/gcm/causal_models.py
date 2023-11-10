@@ -1,7 +1,4 @@
-"""This module defines the fundamental classes for graphical causal models (GCMs).
-
-Classes in this module should be considered experimental, meaning there might be breaking API changes in the future.
-"""
+"""This module defines the fundamental classes for graphical causal models (GCMs)."""
 
 from typing import Any, Callable, Optional, Union
 

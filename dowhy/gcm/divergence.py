@@ -1,6 +1,3 @@
-"""Functions in this module should be considered experimental, meaning there might be breaking API changes in the
-future.
-"""
 from functools import partial
 from typing import Callable, Union
 

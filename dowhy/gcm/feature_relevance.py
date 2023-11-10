@@ -1,10 +1,7 @@
 """This module allows to estimate the feature relevance of inputs with respect to a given model. While these models can
 be blackbox prediction models, it is also possible to explain causal mechanisms with respect to the direct parents.
 In these cases, it would be possible to incorporate the noise to represent the part of the generation process that
-cannot be explained by the parents.
-
-Functions in this module should be considered experimental, meaning there might be breaking API changes in the future.
-"""
+cannot be explained by the parents."""
 from typing import Any, Callable, Dict, Optional, Tuple, Union
 
 import numpy as np

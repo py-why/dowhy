@@ -1,7 +1,4 @@
-"""This module provides functions to estimate causal influences.
-
-Functions in this module should be considered experimental, meaning there might be breaking API changes in the future.
-"""
+"""This module provides functions to estimate causal influences."""
 import logging
 import warnings
 from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Union, cast

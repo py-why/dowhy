@@ -1,7 +1,4 @@
-"""This module implements different causal mechanisms.
-
-Classes in this module should be considered experimental, meaning there might be breaking API changes in the future.
-"""
+"""This module implements different causal mechanisms."""
 
 import copy
 from abc import ABC, abstractmethod

@@ -1,7 +1,4 @@
-"""This module defines functions to attribute distribution changes.
-
-Functions in this module should be considered experimental, meaning there might be breaking API changes in the future.
-"""
+"""This module defines functions to attribute distribution changes."""
 
 import logging
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union

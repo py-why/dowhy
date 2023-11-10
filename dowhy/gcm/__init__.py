@@ -1,7 +1,4 @@
-"""The gcm sub-package provides features built on top of graphical causal model (GCM) based inference. The status of
-this addition and its API is considered experimental, meaning there might be breaking changes to its API in the
-future.
-"""
+"""The gcm sub-package provides features built on top of graphical causal model (GCM) based inference."""
 
 from . import auto, config, divergence, ml, shapley, stats, uncertainty, util
 from .anomaly import anomaly_scores, attribute_anomalies

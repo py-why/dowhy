@@ -54,7 +54,7 @@ News
   redirect your git command for cloning, pulling, etc., we recommend updating git remotes and bookmarks. Please note
   that the **documentation** has now moved to https://py-why.github.io/dowhy with **no** redirect from the old URL.
 
-* **Experimental support for GCM-based inference**
+* **Support for GCM-based inference**
 
   We have started adding support for graphical causal model-based inference (or in short GCM-based). At the moment,
   this includes support for interventions, counterfactuals, and attributing distribution changes. As part of this,
@@ -203,10 +203,10 @@ estimate (if any). Here's a sample output of the linear regression estimator.
 For a full code example, check out the `Getting Started with DoWhy <https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy_simple_example.ipynb>`_ notebook. You can also use Conditional Average Treatment Effect (CATE) estimation methods from other libraries such as EconML and CausalML, as shown in the `Conditional Treatment Effects <https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy-conditional-treatment-effects.ipynb>`_ notebook. For more examples of using DoWhy, check out the Jupyter notebooks in `docs/source/example_notebooks <https://github.com/microsoft/dowhy/tree/main/docs/source/example_notebooks/>`_ or try them online at `Binder <https://mybinder.org/v2/gh/microsoft/dowhy/main?filepath=docs%2Fsource%2F>`_.
 
 
-GCM-based inference (experimental)
+GCM-based inference
 ----------------------------------
 
-Graphical causal model-based inference, or GCM-based inference for short, is an experimental addition to DoWhy. For
+Graphical causal model-based inference, or GCM-based inference for short, is an addition to DoWhy. For
 details, check out the `documentation for the gcm sub-package <https://py-why.github.io/dowhy/main/user_guide/gcm_based_inference/index.html>`_. The basic
 recipe for this API works as follows:
 
@@ -497,7 +497,7 @@ As a practical example, `this notebook <https://github.com/microsoft/dowhy/blob/
 
 Citing this package
 ====================
-If you find DoWhy useful for your work, please cite the following two references:
+If you find DoWhy useful for your work, please cite **both** of the following two references:
 
 - Amit Sharma, Emre Kiciman. DoWhy: An End-to-End Library for Causal Inference. 2020. https://arxiv.org/abs/2011.04216
 - Patrick Blöbaum, Peter Götz, Kailash Budhathoki, Atalanti A. Mastakouri, Dominik Janzing. DoWhy-GCM: An extension of DoWhy for causal inference in graphical causal models. 2022. https://arxiv.org/abs/2206.06821

@@ -1,6 +1,3 @@
-"""Functions and classes in this module should be considered experimental, meaning there might be breaking API changes
-in the future.
-"""
 from abc import abstractmethod
 from typing import Any
 
