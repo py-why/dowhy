@@ -3,8 +3,8 @@ Quantifying Intrinsic Causal Influence
 
 By quantifying intrinsic causal influence, we answer the question:
 
-    **How strong is the causal influence of a source node to a target node
-    that is not inherited from the parents of the source node?**
+    **How strong is the causal influence of an upstream node to a target node
+    that is not inherited from the parents of the upstream node?**
 
 Naturally, descendants will have a zero intrinsic causal influence on the target node. This method is based on the paper:
 
