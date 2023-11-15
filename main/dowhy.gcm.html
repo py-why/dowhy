@@ -1495,10 +1495,19 @@
     </a>
    </li>
    <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#dowhy.gcm.divergence.estimate_kl_divergence_continuous">
+    <a class="reference internal nav-link" href="#dowhy.gcm.divergence.estimate_kl_divergence_continuous_clf">
      <code class="docutils literal notranslate">
       <span class="pre">
-       estimate_kl_divergence_continuous()
+       estimate_kl_divergence_continuous_clf()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#dowhy.gcm.divergence.estimate_kl_divergence_continuous_knn">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       estimate_kl_divergence_continuous_knn()
       </span>
      </code>
     </a>
@@ -4092,9 +4101,40 @@ future.</p>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="dowhy.gcm.divergence.estimate_kl_divergence_continuous">
-<span class="sig-prename descclassname"><span class="pre">dowhy.gcm.divergence.</span></span><span class="sig-name descname"><span class="pre">estimate_kl_divergence_continuous</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_common_elements</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/dowhy/gcm/divergence.html#estimate_kl_divergence_continuous"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.gcm.divergence.estimate_kl_divergence_continuous" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="dowhy.gcm.divergence.estimate_kl_divergence_continuous_clf">
+<span class="sig-prename descclassname"><span class="pre">dowhy.gcm.divergence.</span></span><span class="sig-name descname"><span class="pre">estimate_kl_divergence_continuous_clf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">samples_P:</span> <span class="pre">~numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples_Q:</span> <span class="pre">~numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_splits:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">classifier_model:</span> <span class="pre">~typing.Union[~dowhy.gcm.auto.AssignmentQuality</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">~typing.Callable[[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">~dowhy.gcm.ml.classification.ClassificationModel]]</span> <span class="pre">=</span> <span class="pre">functools.partial(&lt;function</span> <span class="pre">create_logistic_regression_classifier&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter=10000)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">2.220446049250313e-16</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/dowhy/gcm/divergence.html#estimate_kl_divergence_continuous_clf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.gcm.divergence.estimate_kl_divergence_continuous_clf" title="Permalink to this definition"></a></dt>
+<dd><p>Estimates KL-Divergence based on probabilities given by classifier. This is:</p>
+<blockquote>
+<div><p>D_f(P || Q) = int f(p(x)/q(x)) q(x) dx ~= -1/N sum_x log(p(Y = 1 | x) / (1 - p(Y = 1 | x)))</p>
+</div></blockquote>
+<p>Here, the KL divergence can be approximated using the log ratios of probabilities to predict whether a sample
+comes from distribution P or Q.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>samples_P</strong> – Samples drawn from P. Can have a different number of samples than Q.</p></li>
+<li><p><strong>samples_Q</strong> – Samples drawn from Q. Can have a different number of samples than P.</p></li>
+<li><p><strong>n_splits</strong> – Number of splits of the training and test data. The classifier is trained on the training
+data and evaluated on the test data to obtain the probabilities.</p></li>
+<li><p><strong>classifier_model</strong> – Used to estimate the probabilities for the log ratio. This can either be a
+ClassificationModel or an AssignmentQuality. In the latter, a model is automatically
+selected based on the best performance on a training set.</p></li>
+<li><p><strong>epsilon</strong> – If the probability is either 1 or 0, this value will be used for clipping, i.e., 0 becomes epsilon
+and 1 becomes 1- epsilon.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Estimated value of the KL divergence D(P||Q).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dowhy.gcm.divergence.estimate_kl_divergence_continuous_knn">
+<span class="sig-prename descclassname"><span class="pre">dowhy.gcm.divergence.</span></span><span class="sig-name descname"><span class="pre">estimate_kl_divergence_continuous_knn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_common_elements</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/dowhy/gcm/divergence.html#estimate_kl_divergence_continuous_knn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.gcm.divergence.estimate_kl_divergence_continuous_knn" title="Permalink to this definition"></a></dt>
 <dd><p>Estimates KL-Divergence using k-nearest neighbours (Wang et al., 2009).</p>
+<p>While, in theory, this handles multidimensional inputs, consider using estimate_kl_divergence_continuous_clf
+for data with more than one dimension.</p>
 <p>Q. Wang, S. R. Kulkarni, and S. Verdú,
 “Divergence estimation for multidimensional densities via k-nearest-neighbor distances”,
 IEEE Transactions on Information Theory, vol. 55, no. 5, pp. 2392-2405, May 2009.</p>
