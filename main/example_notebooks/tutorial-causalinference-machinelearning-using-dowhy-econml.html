@@ -56,7 +56,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Functional API Preview" href="dowhy_functional_api.html" />
-    <link rel="prev" title="Basic Example for Graphical Causal Model-Based Intervention" href="gcm_basic_example.html" />
+    <link rel="prev" title="Conditional Average Treatment Effects (CATE) with DoWhy and EconML" href="dowhy-conditional-treatment-effects.html" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="docsearch:language" content="en">
   </head>
@@ -215,6 +215,16 @@
   </a>
  </li>
  <li class="toctree-l1">
+  <a class="reference internal" href="gcm_basic_example.html">
+   Basic Example for Graphical Causal Models
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_draw_samples.html">
+   Basic Example for generating samples from a GCM
+  </a>
+ </li>
+ <li class="toctree-l1">
   <a class="reference internal" href="dowhy_confounder_example.html">
    Confounding Example: Finding causal effects from observed data
   </a>
@@ -222,11 +232,6 @@
  <li class="toctree-l1">
   <a class="reference internal" href="dowhy-conditional-treatment-effects.html">
    Conditional Average Treatment Effects (CATE) with DoWhy and EconML
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="gcm_basic_example.html">
-   Basic Example for Graphical Causal Model-Based Intervention
   </a>
  </li>
  <li class="toctree-l1 current active">
@@ -392,11 +397,6 @@
  </span>
 </p>
 <ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="gcm_draw_samples.html">
-   Basic Example for generating samples from a GCM
-  </a>
- </li>
  <li class="toctree-l1">
   <a class="reference internal" href="dowhy_estimation_methods.html">
    DoWhy: Different estimation methods for causal inference
@@ -1062,9 +1062,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W1,W0,W4,W3,W2])
+─────(E[y|W0,W3,W1,W2,W4])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W0,W4,W3,W2,U) = P(y|v0,W1,W0,W4,W3,W2)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W1,W2,W4,U) = P(y|v0,W0,W3,W1,W2,W4)
 
 ### Estimand : 2
 Estimand name: iv
@@ -1111,16 +1111,16 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W1,W0,W4,W3,W2])
+─────(E[y|W0,W3,W1,W2,W4])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W0,W4,W3,W2,U) = P(y|v0,W1,W0,W4,W3,W2)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W1,W2,W4,U) = P(y|v0,W0,W3,W1,W2,W4)
 
 ## Realized estimand
-b: y~v0+W1+W0+W4+W3+W2
+b: y~v0+W0+W3+W1+W2+W4
 Target units: ate
 
 ## Estimate
-Mean value: 9.988397521489144
+Mean value: 9.948769004614737
 
 </pre></div></div>
 </div>
@@ -1175,9 +1175,9 @@ Mean value: 9.988397521489144
   def logit(x):
 /github/home/.cache/pypoetry/virtualenvs/dowhy-oN2hW5jr-py3.8/lib/python3.8/site-packages/shap/links.py:20: NumbaDeprecationWarning: The &#39;nopython&#39; keyword argument was not supplied to the &#39;numba.jit&#39; decorator. The implicit default value for this argument is currently False, but it will be changed to True in Numba 0.59.0. See https://numba.readthedocs.io/en/stable/reference/deprecation.html#deprecation-of-object-mode-fall-back-behaviour-when-using-jit for details.
   def _logit_inverse(x):
-2023-11-15 16:37:40.170306: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+2023-11-15 21:58:22.685680: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
 To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
-2023-11-15 16:37:40.868465: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+2023-11-15 21:58:23.366096: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
 The &#39;nopython&#39; keyword argument was not supplied to the &#39;numba.jit&#39; decorator. The implicit default value for this argument is currently False, but it will be changed to True in Numba 0.59.0. See https://numba.readthedocs.io/en/stable/reference/deprecation.html#deprecation-of-object-mode-fall-back-behaviour-when-using-jit for details.
 The &#39;nopython&#39; keyword argument was not supplied to the &#39;numba.jit&#39; decorator. The implicit default value for this argument is currently False, but it will be changed to True in Numba 0.59.0. See https://numba.readthedocs.io/en/stable/reference/deprecation.html#deprecation-of-object-mode-fall-back-behaviour-when-using-jit for details.
 </pre></div></div>
@@ -1196,17 +1196,17 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W1,W0,W4,W3,W2])
+─────(E[y|W0,W3,W1,W2,W4])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W0,W4,W3,W2,U) = P(y|v0,W1,W0,W4,W3,W2)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W1,W2,W4,U) = P(y|v0,W0,W3,W1,W2,W4)
 
 ## Realized estimand
-b: y~v0+W1+W0+W4+W3+W2 |
+b: y~v0+W0+W3+W1+W2+W4 |
 Target units: ate
 
 ## Estimate
-Mean value: 10.083701981390911
-Effect estimates: [[10.08370198]]
+Mean value: 10.017592605801713
+Effect estimates: [[10.01759261]]
 
 </pre></div></div>
 </div>
@@ -1230,9 +1230,9 @@ estimate value of 0 when the action variable is replaced by a random variable, i
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:9.988397521489144
-New effect:-0.0205258059680673
-p value:0.92
+Estimated effect:9.948769004614737
+New effect:0.007018343658694229
+p value:0.94
 
 </pre></div></div>
 </div>
@@ -1284,11 +1284,11 @@ than learning a new toolkit. The power of EconML is that you can now implement t
 <div class="output_area docutils container">
 <div class="highlight"><pre>
    Treatment    Outcome        w0         s        w1
-0   5.617343  10.560917 -0.435057  8.888106 -1.076563
-1   8.955365  16.672801  2.150681  9.480057 -2.873424
-2  17.068529  34.255792 -3.235590  7.874305  0.562792
-3  20.756686  40.897623  3.926576  3.270968 -1.271200
-4  20.992408  41.753745 -3.964728  7.187807 -1.024740
+0  21.725682  31.289770  3.976004  3.154905 -0.655994
+1  11.246565  20.236692  2.188704  9.487711  1.389010
+2  18.721552  28.176935  3.542840  3.676136  0.149013
+3   8.390353  16.146384  1.577248  1.443481 -0.699837
+4   5.934927  10.611272 -0.254035  5.064550 -1.212662
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1399,9 +1399,9 @@ b: Outcome~Treatment+w0+w1
 Target units: ate
 
 ## Estimate
-Mean value: 1.9990121554004954
+Mean value: 0.9997467902909438
 
-Causal Estimate is 1.9990121554004954
+Causal Estimate is 0.9997467902909438
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1457,8 +1457,8 @@ b: Outcome~Treatment+w0+w1 |
 Target units: ate
 
 ## Estimate
-Mean value: 1.1943292783486397
-Effect estimates: [[1.19432928]]
+Mean value: 0.11821268105127221
+Effect estimates: [[0.11821268]]
 
 </pre></div></div>
 </div>
@@ -1481,9 +1481,9 @@ Effect estimates: [[1.19432928]]
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Add a random common cause
-Estimated effect:1.1943292783486397
-New effect:1.2052384661923279
-p value:0.6200000000000001
+Estimated effect:0.11821268105127221
+New effect:0.12574151064364136
+p value:0.6599999999999999
 
 </pre></div></div>
 </div>
@@ -1504,9 +1504,9 @@ p value:0.6200000000000001
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:1.1943292783486397
-New effect:0.00013143329230768286
-p value:0.41149609107892776
+Estimated effect:0.11821268105127221
+New effect:0.00010022062414542064
+p value:0.39996767316337656
 
 </pre></div></div>
 </div>
@@ -1579,11 +1579,11 @@ refutation methods that can check the robustness of the estimate.</p>
               <footer class="bd-footer-article">
                   <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-  <a class='left-prev' id="prev-link" href="gcm_basic_example.html" title="previous page">
+  <a class='left-prev' id="prev-link" href="dowhy-conditional-treatment-effects.html" title="previous page">
       <i class="fas fa-angle-left"></i>
       <div class="prev-next-info">
           <p class="prev-next-subtitle">previous</p>
-          <p class="prev-next-title">Basic Example for Graphical Causal Model-Based Intervention</p>
+          <p class="prev-next-title">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</p>
       </div>
   </a>
   <a class='right-next' id="next-link" href="dowhy_functional_api.html" title="next page">

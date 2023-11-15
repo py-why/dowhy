@@ -15,7 +15,7 @@
         gtag('config', 'G-B139P18WHM');
     </script>
     
-    <title>Basic Example for Graphical Causal Model-Based Intervention &#8212; DoWhy  documentation</title>
+    <title>Basic Example for Graphical Causal Models &#8212; DoWhy  documentation</title>
 <script>
   document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
   document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
@@ -55,8 +55,8 @@
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Tutorial on Causal Inference and its Connections to Machine Learning (Using DoWhy+EconML)" href="tutorial-causalinference-machinelearning-using-dowhy-econml.html" />
-    <link rel="prev" title="Conditional Average Treatment Effects (CATE) with DoWhy and EconML" href="dowhy-conditional-treatment-effects.html" />
+    <link rel="next" title="Basic Example for generating samples from a GCM" href="gcm_draw_samples.html" />
+    <link rel="prev" title="Basic Example for Calculating the Causal Effect" href="dowhy_simple_example.html" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="docsearch:language" content="en">
   </head>
@@ -214,6 +214,16 @@
    Basic Example for Calculating the Causal Effect
   </a>
  </li>
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   Basic Example for Graphical Causal Models
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_draw_samples.html">
+   Basic Example for generating samples from a GCM
+  </a>
+ </li>
  <li class="toctree-l1">
   <a class="reference internal" href="dowhy_confounder_example.html">
    Confounding Example: Finding causal effects from observed data
@@ -222,11 +232,6 @@
  <li class="toctree-l1">
   <a class="reference internal" href="dowhy-conditional-treatment-effects.html">
    Conditional Average Treatment Effects (CATE) with DoWhy and EconML
-  </a>
- </li>
- <li class="toctree-l1 current active">
-  <a class="current reference internal" href="#">
-   Basic Example for Graphical Causal Model-Based Intervention
   </a>
  </li>
  <li class="toctree-l1">
@@ -392,11 +397,6 @@
  </span>
 </p>
 <ul class="nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="gcm_draw_samples.html">
-   Basic Example for generating samples from a GCM
-  </a>
- </li>
  <li class="toctree-l1">
   <a class="reference internal" href="dowhy_estimation_methods.html">
    DoWhy: Different estimation methods for causal inference
@@ -747,8 +747,8 @@ div.rendered_html tbody tr:hover {
   background: rgba(66, 165, 245, 0.2);
 }
 </style>
-<section id="Basic-Example-for-Graphical-Causal-Model-Based-Intervention">
-<h1>Basic Example for Graphical Causal Model-Based Intervention<a class="headerlink" href="#Basic-Example-for-Graphical-Causal-Model-Based-Intervention" title="Permalink to this heading"></a></h1>
+<section id="Basic-Example-for-Graphical-Causal-Models">
+<h1>Basic Example for Graphical Causal Models<a class="headerlink" href="#Basic-Example-for-Graphical-Causal-Models" title="Permalink to this heading"></a></h1>
 <section id="Step-1:-Modeling-cause-effect-relationships-as-a-structural-causal-model-(SCM)">
 <h2>Step 1: Modeling cause-effect relationships as a structural causal model (SCM)<a class="headerlink" href="#Step-1:-Modeling-cause-effect-relationships-as-a-structural-causal-model-(SCM)" title="Permalink to this heading"></a></h2>
 <p>The first step is to model the cause-effect relationships between variables relevant to our use case. We do that in form of a causal graph. A causal graph is a directed acyclic graph (DAG) where an edge X→Y implies that X causes Y. Statistically, a causal graph encodes the conditional independence relations between variables. Using the <a class="reference external" href="https://networkx.org/">NetworkX</a> library, we can create causal graphs. In the snippet below, we create a chain X→Y→Z:</p>
@@ -817,33 +817,33 @@ div.rendered_html tbody tr:hover {
   <tbody>
     <tr>
       <th>0</th>
-      <td>-2.678758</td>
-      <td>-6.053356</td>
-      <td>-19.241213</td>
+      <td>1.864978</td>
+      <td>2.784668</td>
+      <td>8.382777</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>1.806362</td>
-      <td>3.400840</td>
-      <td>9.484068</td>
+      <td>0.276310</td>
+      <td>1.195109</td>
+      <td>2.997290</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>-0.247792</td>
-      <td>-1.553347</td>
-      <td>-4.800116</td>
+      <td>-0.910811</td>
+      <td>-2.906519</td>
+      <td>-9.965355</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>0.565581</td>
-      <td>0.327888</td>
-      <td>1.636758</td>
+      <td>-0.790902</td>
+      <td>-3.342386</td>
+      <td>-12.565728</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>-0.713399</td>
-      <td>-0.888927</td>
-      <td>-2.497994</td>
+      <td>0.419427</td>
+      <td>0.303794</td>
+      <td>1.043443</td>
     </tr>
   </tbody>
 </table>
@@ -865,7 +865,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;dowhy.gcm.auto.AutoAssignmentSummary at 0x7fdeb432b160&gt;
+&lt;dowhy.gcm.auto.AutoAssignmentSummary at 0x7f02f014e610&gt;
 </pre></div></div>
 </div>
 <p>In case we want to have more control over the assigned mechanisms, we can do this manually as well. For instance, we can can assign an empirical distribution to the root node X and linear additive noise models to nodes Y and Z:</p>
@@ -897,7 +897,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node Z: 100%|██████████| 3/3 [00:00&lt;00:00, 471.71it/s]
+Fitting causal mechanism of node Z: 100%|██████████| 3/3 [00:00&lt;00:00, 453.39it/s]
 </pre></div></div>
 </div>
 <p>Fitting means, we learn the generative models of the variables in the SCM according to the data.</p>
@@ -951,39 +951,40 @@ Fitting causal mechanism of node Z: 100%|██████████| 3/3 [00
   <tbody>
     <tr>
       <th>0</th>
-      <td>0.106371</td>
+      <td>0.052245</td>
       <td>2.34</td>
-      <td>7.828903</td>
+      <td>4.828649</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>-0.151537</td>
+      <td>-1.254112</td>
       <td>2.34</td>
-      <td>6.083200</td>
+      <td>6.534753</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>-0.527340</td>
+      <td>-0.920397</td>
       <td>2.34</td>
-      <td>7.813644</td>
+      <td>9.024568</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>0.335017</td>
+      <td>-0.325503</td>
       <td>2.34</td>
-      <td>5.679022</td>
+      <td>6.960603</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>1.847915</td>
+      <td>0.661071</td>
       <td>2.34</td>
-      <td>5.453066</td>
+      <td>7.712263</td>
     </tr>
   </tbody>
 </table>
 </div></div>
 </div>
 <p>This intervention says: “I’ll ignore any causal effects of X on Y, and set every value of Y to 2.34.” So the distribution of X will remain unchanged, whereas values of Y will be at a fixed value and Z will respond according to its causal model.</p>
+<p>DoWhy offers a wide range of causal questions that can be answered with GCMs. See the user guide or other notebooks for more examples.</p>
 </section>
 </section>
 
@@ -995,17 +996,17 @@ Fitting causal mechanism of node Z: 100%|██████████| 3/3 [00
               <footer class="bd-footer-article">
                   <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-  <a class='left-prev' id="prev-link" href="dowhy-conditional-treatment-effects.html" title="previous page">
+  <a class='left-prev' id="prev-link" href="dowhy_simple_example.html" title="previous page">
       <i class="fas fa-angle-left"></i>
       <div class="prev-next-info">
           <p class="prev-next-subtitle">previous</p>
-          <p class="prev-next-title">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</p>
+          <p class="prev-next-title">Basic Example for Calculating the Causal Effect</p>
       </div>
   </a>
-  <a class='right-next' id="next-link" href="tutorial-causalinference-machinelearning-using-dowhy-econml.html" title="next page">
+  <a class='right-next' id="next-link" href="gcm_draw_samples.html" title="next page">
   <div class="prev-next-info">
       <p class="prev-next-subtitle">next</p>
-      <p class="prev-next-title">Tutorial on Causal Inference and its Connections to Machine Learning (Using DoWhy+EconML)</p>
+      <p class="prev-next-title">Basic Example for generating samples from a GCM</p>
   </div>
   <i class="fas fa-angle-right"></i>
   </a>
