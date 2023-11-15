@@ -109,9 +109,9 @@ def test_given_unfitted_mechanisms_when_evaluate_unit_change_methods_then_raises
 
     with pytest.raises(NotFittedError):
         unit_change_nonlinear(
-            SklearnRegressionModel(RFR()),
+            SklearnRegressionModel(RFR(n_jobs=1)),
             pd.DataFrame(data=dict(A=np.random.normal(size=100), B=np.random.normal(size=100))),
-            SklearnRegressionModel(RFR()),
+            SklearnRegressionModel(RFR(n_jobs=1)),
             pd.DataFrame(data=dict(A=np.random.normal(size=100), B=np.random.normal(size=100))),
             ["A", "B"],
             shapley_config=ShapleyConfig(n_jobs=1),
@@ -121,9 +121,9 @@ def test_given_unfitted_mechanisms_when_evaluate_unit_change_methods_then_raises
 def test_given_fitted_nonlinnear_mechanisms_when_evaluate_unit_change_linear_method_then_raises_exception():
     with pytest.raises(AttributeError):
         unit_change_linear(
-            SklearnRegressionModel(RFR().fit(np.random.normal(size=(100, 2)), np.random.normal(size=100))),
+            SklearnRegressionModel(RFR(n_jobs=1).fit(np.random.normal(size=(100, 2)), np.random.normal(size=100))),
             pd.DataFrame(data=dict(A=np.random.normal(size=100), B=np.random.normal(size=100))),
-            SklearnRegressionModel(RFR().fit(np.random.normal(size=(100, 2)), np.random.normal(size=100))),
+            SklearnRegressionModel(RFR(n_jobs=1).fit(np.random.normal(size=(100, 2)), np.random.normal(size=100))),
             pd.DataFrame(data=dict(A=np.random.normal(size=100), B=np.random.normal(size=100))),
             ["A", "B"],
         )
@@ -140,7 +140,7 @@ def test_given_fitted_mechanisms_with_no_input_change_when_evaluate_unit_change_
     foreground_df = pd.DataFrame(data=dict(A=A, B=B, C=C))
 
     actual_contributions = unit_change_nonlinear_input_only(
-        SklearnRegressionModel(RFR().fit(np.column_stack((A, B)), C)),
+        SklearnRegressionModel(RFR(n_jobs=1).fit(np.column_stack((A, B)), C)),
         background_df,
         foreground_df,
         ["A", "B"],
@@ -217,7 +217,7 @@ def test_given_unfitted_mechanisms_when_evaluate_unit_change_input_only_methods_
 
     with pytest.raises(NotFittedError):
         unit_change_nonlinear_input_only(
-            SklearnRegressionModel(RFR()),
+            SklearnRegressionModel(RFR(n_jobs=1)),
             pd.DataFrame(data=dict(A=np.random.normal(size=100), B=np.random.normal(size=100))),
             pd.DataFrame(data=dict(A=np.random.normal(size=100), B=np.random.normal(size=100))),
             ["A", "B"],
@@ -228,7 +228,7 @@ def test_given_unfitted_mechanisms_when_evaluate_unit_change_input_only_methods_
 def test_given_fitted_nonlinnear_mechanism_when_evaluate_unit_change_linear_input_only_method_then_raises_exception():
     with pytest.raises(AttributeError):
         unit_change_linear_input_only(
-            SklearnRegressionModel(RFR().fit(np.random.normal(size=(100, 2)), np.random.normal(size=100))),
+            SklearnRegressionModel(RFR(n_jobs=1).fit(np.random.normal(size=(100, 2)), np.random.normal(size=100))),
             pd.DataFrame(data=dict(A=np.random.normal(size=100), B=np.random.normal(size=100))),
             pd.DataFrame(data=dict(A=np.random.normal(size=100), B=np.random.normal(size=100))),
             ["A", "B"],
@@ -256,7 +256,7 @@ def test_given_single_mechanism_with_default_optional_parameters_when_evaluate_u
 
     np.testing.assert_array_almost_equal(actual_contributions, expected_contributions, decimal=1)
 
-    mechanism = SklearnRegressionModel(RFR().fit(np.column_stack((A1, B1)), C1))
+    mechanism = SklearnRegressionModel(RFR(n_jobs=1).fit(np.column_stack((A1, B1)), C1))
 
     actual_contributions = unit_change(background_df, foreground_df, ["A", "B"], mechanism)
     expected_contributions = unit_change_nonlinear_input_only(
@@ -295,8 +295,8 @@ def test_given_two_mechanisms_when_evaluate_unit_change_then_returns_correct_att
 
     np.testing.assert_array_almost_equal(actual_contributions, expected_contributions, decimal=1)
 
-    background_mechanism = SklearnRegressionModel(RFR().fit(np.column_stack((A1, B1)), C1))
-    foreground_mechanism = SklearnRegressionModel(RFR().fit(np.column_stack((A2, B2)), C2))
+    background_mechanism = SklearnRegressionModel(RFR(n_jobs=1).fit(np.column_stack((A1, B1)), C1))
+    foreground_mechanism = SklearnRegressionModel(RFR(n_jobs=1).fit(np.column_stack((A2, B2)), C2))
 
     actual_contributions = unit_change(
         background_df, foreground_df, ["A", "B"], background_mechanism, foreground_mechanism
