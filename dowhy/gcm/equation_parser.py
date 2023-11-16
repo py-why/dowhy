@@ -55,7 +55,7 @@ def parse_args(args: str):
     for str_arg in str_args_list:
         if str_arg:
             arg_value_pairs = str_arg.split('=')
-            kwargs[arg_value_pairs[0]] = ast.literal_eval(arg_value_pairs[1])
+            kwargs[arg_value_pairs[0].strip()] = ast.literal_eval(arg_value_pairs[1].strip())
     return kwargs
 
 
