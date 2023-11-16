@@ -5,6 +5,7 @@ import numexpr as ne
 import numpy as np
 import scipy.stats
 from dowhy.gcm.causal_mechanisms import StochasticModel
+from dowhy.gcm.util.general import shape_into_2d
 from dowhy.gcm import EmpiricalDistribution, ScipyDistribution, StructuralCausalModel, AdditiveNoiseModel
 from dowhy.gcm.ml.prediction_model import PredictionModel
 
@@ -77,7 +78,7 @@ class MyCustomModel(PredictionModel):
 
     def predict(self, X):
         local_dict = {self.parent_nodes[i]: X[:, i] for i in range(len(self.parent_nodes))}
-        return ne.evaluate(self.custom_func, local_dict=local_dict,sanitize=True)
+        return shape_into_2d(ne.evaluate(self.custom_func, local_dict=local_dict,sanitize=True))
 
     def clone(self):
         return MyCustomModel(self.custom_func)
