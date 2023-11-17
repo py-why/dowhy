@@ -1019,9 +1019,9 @@ relations. We shall use this information shortly to assign generative causal mod
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node Order DB: 100%|██████████| 11/11 [00:00&lt;00:00, 70.30it/s]
-Evaluating causal mechanisms...: 100%|██████████| 11/11 [00:02&lt;00:00,  4.51it/s]
-Test permutations of given graph: 100%|██████████| 50/50 [01:12&lt;00:00,  1.45s/it]
+Fitting causal mechanism of node Order DB: 100%|██████████| 11/11 [00:00&lt;00:00, 73.16it/s]
+Evaluating causal mechanisms...: 100%|██████████| 11/11 [00:02&lt;00:00,  4.74it/s]
+Test permutations of given graph: 100%|██████████| 50/50 [01:13&lt;00:00,  1.47s/it]
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -1042,37 +1042,37 @@ Evaluated the performance of the causal mechanisms and the invertibility assumpt
 Root nodes are evaluated based on the KL divergence between the generated and the observed distribution.
 Non-root nodes are evaluated based on the (normalized) Continuous Ranked Probability Score (CRPS), which is a generalizes the Mean Absolute Percentage Error to probabilistic predictions. Since the causal mechanisms produce conditional distributions, this should give some insights into their performance and calibration. However, note that many algorithms are still relatively robust against poor model performances.
 
---- Node Customer DB: The KL divergence between generated and observed distribution is 0.01047641921459343.
+--- Node Customer DB: The KL divergence between generated and observed distribution is 0.06308269364411476.
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
---- Node Shipping Cost Service: The KL divergence between generated and observed distribution is 0.0063329526638281645.
+--- Node Shipping Cost Service: The KL divergence between generated and observed distribution is 0.015668562676384633.
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
---- Node Product DB: The KL divergence between generated and observed distribution is 0.03901387556651128.
+--- Node Product DB: The KL divergence between generated and observed distribution is 0.04987900110592691.
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
---- Node Order DB: The KL divergence between generated and observed distribution is 0.02071579380293642.
+--- Node Order DB: The KL divergence between generated and observed distribution is 0.05371147236982958.
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
---- Node Auth Service: The normalized CRPS of this node is 0.3029908776710659.
+--- Node Auth Service: The normalized CRPS of this node is 0.30289225143897136.
 The estimated CRPS indicates a good model performance.
 
---- Node Caching Service: The normalized CRPS of this node is 0.463454241775776.
+--- Node Caching Service: The normalized CRPS of this node is 0.4628828010394176.
 The estimated CRPS indicates a fair model performance. Note, however, that a high CRPS could also result from a small signal to noise ratio.
 
---- Node Order Service: The normalized CRPS of this node is 0.30369675935170537.
+--- Node Order Service: The normalized CRPS of this node is 0.3033587733442815.
 The estimated CRPS indicates a good model performance.
 
---- Node Product Service: The normalized CRPS of this node is 0.36397340754651375.
+--- Node Product Service: The normalized CRPS of this node is 0.36406617138098146.
 The estimated CRPS indicates a fair model performance. Note, however, that a high CRPS could also result from a small signal to noise ratio.
 
---- Node API: The normalized CRPS of this node is 0.11584505271409402.
+--- Node API: The normalized CRPS of this node is 0.11585503465420861.
 The estimated CRPS indicates a very good model performance.
 
---- Node www: The normalized CRPS of this node is 0.07799500865233158.
+--- Node www: The normalized CRPS of this node is 0.07785521939630609.
 The estimated CRPS indicates a very good model performance.
 
---- Node Website: The normalized CRPS of this node is 0.10198285050830809.
+--- Node Website: The normalized CRPS of this node is 0.10208866525674445.
 The estimated CRPS indicates a very good model performance.
 
 ==== Evaluation of Invertible Functional Causal Model Assumption ====
@@ -1101,7 +1101,7 @@ This implies that the model assumption might not be valid. This is, the relation
 Note that these results are based on statistical independence tests, and the fact that the assumption was not rejected does not necessarily imply that it is correct. There is just no evidence against it.
 
 ==== Evaluation of Generated Distribution ====
-The overall average KL divergence between the generated and observed distribution is 0.10385578947052108
+The overall average KL divergence between the generated and observed distribution is 0.11124825073754319
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
 ==== Evaluation of the Causal Graph Structure ====
@@ -1110,7 +1110,7 @@ The estimated KL divergence indicates an overall very good representation of the
 +-------------------------------------------------------------------------------------------------------+
 | The given DAG is informative because 0 / 50 of the permutations lie in the Markov                     |
 | equivalence class of the given DAG (p-value: 0.00).                                                   |
-| The given DAG violates 2/63 LMCs and is better than 100.0% of the permuted DAGs (p-value: 0.00).      |
+| The given DAG violates 0/63 LMCs and is better than 100.0% of the permuted DAGs (p-value: 0.00).      |
 | Based on the provided significance level (0.05) and because the DAG is informative,                   |
 | we do not reject the DAG.                                                                             |
 +-------------------------------------------------------------------------------------------------------+
@@ -1428,7 +1428,7 @@ them in a bar plot.</p>
 <h2>Scenario 3: Simulating the intervention of shifting resources<a class="headerlink" href="#Scenario-3:-Simulating-the-intervention-of-shifting-resources" title="Permalink to this heading"></a></h2>
 <p>Next, let us imagine a scenario where permanent degradation has happened as in scenario 2 and we’ve successfully identified <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> as the root cause. Furthermore, we figured out that a recent deployment of the <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> contained a bug that is causing the overloaded hosts. A proper fix must be deployed, or the previous deployment must be rolled back. But, in the meantime, could we mitigate the situation by shifting over some resources from <code class="docutils literal notranslate"><span class="pre">Shipping</span> <span class="pre">Service</span></code> to
 <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code>? And would that help? Before doing it in reality, let us simulate it first and see whether it improves the situation.</p>
-<p><img alt="b0597da91d844984831b61b7334a600d" class="no-scaled-link" src="../_images/shifting-resources.png" style="width: 600px;" /></p>
+<p><img alt="e26974f8108c48f8bca75113931c6341" class="no-scaled-link" src="../_images/shifting-resources.png" style="width: 600px;" /></p>
 <p>Let’s perform an intervention where we say we can reduce the average time of <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> by 1s. But at the same time we buy this speed-up by an average slow-down of 2s in <code class="docutils literal notranslate"><span class="pre">Shipping</span> <span class="pre">Cost</span> <span class="pre">Service</span></code>.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
