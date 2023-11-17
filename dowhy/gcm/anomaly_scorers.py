@@ -13,7 +13,9 @@ from dowhy.gcm.util.general import shape_into_2d
 
 class MedianCDFQuantileScorer(AnomalyScorer):
     """Given an anomalous observation x and samples from the distribution of X, this score represents:
-        score(x) = 1 - 2 * min[P(X >= x), P(X <= x)]
+        score(x) = 1 - 2 * min[P(X > x) + P(X = x) / 2, P(X < x) + P(X = x) / 2]
+
+    Comparing two NaN values are considered equal here.
 
     It scores the observation based on the quantile of x with respect to the distribution of X. Here, if the
     sample x lies in the tail of the distribution, we want to have a large score. Since we apriori don't know
@@ -27,7 +29,7 @@ class MedianCDFQuantileScorer(AnomalyScorer):
         p(X >= x) = 1 / 7
         P(X <= x) = 6 / 7
     With the end score of:
-       1 - 2 * min[P(X >= x), P(X <= x)] = 1 - 2 / 7 = 0.71
+       1 - 2 * min[P(X > x) + P(X = x) / 2, P(X < x) + P(X = x) / 2] = 1 - 2 / 7 = 0.71
 
     Note: For equal samples, we contribute half of the count to the left and half of the count the right side.
 
@@ -49,7 +51,7 @@ class MedianCDFQuantileScorer(AnomalyScorer):
 
         X = shape_into_2d(X)
 
-        equal_samples = np.sum(X == self._distribution_samples, axis=1)
+        equal_samples = np.sum(np.isclose(X, self._distribution_samples, rtol=0, atol=0, equal_nan=True), axis=1)
         greater_samples = np.sum(X > self._distribution_samples, axis=1) + equal_samples / 2
         smaller_samples = np.sum(X < self._distribution_samples, axis=1) + equal_samples / 2
 
@@ -60,7 +62,9 @@ class MedianCDFQuantileScorer(AnomalyScorer):
 
 class RescaledMedianCDFQuantileScorer(AnomalyScorer):
     """Given an anomalous observation x and samples from the distribution of X, this score represents:
-        score(x) = -log(2 * min[P(X >= x), P(X <= x)])
+        score(x) = -log(2 * min[P(X > x) + P(X = x) / 2, P(X < x) + P(X = x) / 2])
+
+    Comparing two NaN values are considered equal here.
 
     This is a rescaled version of the score s obtained by the :class:`~dowhy.gcm.anomaly_scorers.MedianCDFQuantileScorer`
     by calculating the negative log-probability -log(1 - s). This has the advantage that small differences in the
