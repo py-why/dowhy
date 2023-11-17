@@ -79,7 +79,7 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "## Setting up the causal graph\n",
+    "## Setting up the causal model\n",
     "\n",
     "If we look at the `Website` node, it becomes apparent that the latency we experience there depends on the latencies of\n",
     "all downstream nodes. In particular, if one of the downstream nodes takes a long time, `Website` will also take a\n",
@@ -169,6 +169,39 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
+    "Before we contiue with the first scenario, let's first evaluate our causal model:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "gcm.fit(causal_model, normal_data)\n",
+    "print(gcm.evaluate_causal_model(causal_model, normal_data))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "This confirms the goodness of our causal model. However, we also see that for two nodes ('Product Service' and 'Caching Service'), the additive noise model assumption is violated. This also aligns with the data generation process, where these two nodes follow non-additive noise models. As we see in the following, most of the algorithms are still fairly robust against such violations or poor performance of the causal mechanism."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "<div class=\"alert alert-block alert-info\">\n",
+    "For more detailed insights, set compare_mechanism_baselines to True. However, this will take significantly longer.\n",
+    "</div>"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
     "## Scenario 1: Observing a single outlier\n",
     "\n",
     "Suppose we get an alert from our system where a customer experienced an unusually high latency when\n",
@@ -181,10 +214,7 @@
    "cell_type": "code",
    "execution_count": null,
    "metadata": {
-    "collapsed": false,
-    "jupyter": {
-     "outputs_hidden": false
-    }
+    "collapsed": false
    },
    "outputs": [],
    "source": [
@@ -203,10 +233,7 @@
    "cell_type": "code",
    "execution_count": null,
    "metadata": {
-    "collapsed": false,
-    "jupyter": {
-     "outputs_hidden": false
-    }
+    "collapsed": false
    },
    "outputs": [],
    "source": [
@@ -233,10 +260,7 @@
    "cell_type": "code",
    "execution_count": null,
    "metadata": {
-    "collapsed": false,
-    "jupyter": {
-     "outputs_hidden": false
-    }
+    "collapsed": false
    },
    "outputs": [],
    "source": [
@@ -266,10 +290,7 @@
    "cell_type": "code",
    "execution_count": null,
    "metadata": {
-    "collapsed": false,
-    "jupyter": {
-     "outputs_hidden": false
-    }
+    "collapsed": false
    },
    "outputs": [],
    "source": [
@@ -564,7 +585,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.9.12"
+   "version": "3.9.16"
   }
  },
  "nbformat": 4,

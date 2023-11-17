@@ -1,0 +1,835 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B139P18WHM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-B139P18WHM');
+    </script>
+    
+    <title>Evaluate a GCM &#8212; DoWhy  documentation</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/design-tabs.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Customizing Causal Mechanism Assignment" href="customizing_model_assignment.html" />
+    <link rel="prev" title="Generate samples from a GCM" href="draw_samples.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+    <img src="../../_static/dowhy-logo-small.png" class="logo__image only-light" alt="Logo image">
+    <img src="../../_static/dowhy-logo-small.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../getting_started/index.html">
+  Getting Started
+ </a>
+</li>
+
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="../index.html">
+  User Guide
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../example_notebooks/nb_index.html">
+  Examples
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../dowhy.html">
+  dowhy package
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../contributing.html">
+  Contributing
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../code_repo.html">
+  Release notes
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../cite.html">
+  Citing this package
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+      <div class="navbar-end-item">
+        <div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        main
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.9.1/index.html">v0.9.1</a></dd>
+            <dd><a href="/dowhy/v0.9/index.html">v0.9</a></dd>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.10.1/index.html">v0.10.1</a></dd>
+            <dd><a href="/dowhy/v0.10/index.html">v0.10</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    <ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../foreword.html">
+   Foreword
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../intro.html">
+   Introduction to DoWhy
+  </a>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../modeling_causal_relations/index.html">
+   Modeling Causal Relations
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
+  <label for="toctree-checkbox-1">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../modeling_causal_relations/specifying_causal_graph.html">
+     Specifying a causal graph using domain knowledge
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../modeling_causal_relations/learning_causal_structure.html">
+     Learning causal structure from data
+    </a>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../modeling_causal_relations/refuting_causal_graph/index.html">
+     Refuting a Causal Graph
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/>
+    <label for="toctree-checkbox-2">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../modeling_causal_relations/refuting_causal_graph/independence_tests.html">
+       Performing independence tests
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../modeling_causal_relations/refuting_causal_graph/refute_causal_structure.html">
+       Graph refutations
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 current active has-children">
+  <a class="reference internal" href="index.html">
+   Modeling Graphical Causal Models (GCMs)
+  </a>
+  <input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/>
+  <label for="toctree-checkbox-3">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul class="current">
+   <li class="toctree-l2">
+    <a class="reference internal" href="graphical_causal_model_types.html">
+     Types of graphical causal models
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="draw_samples.html">
+     Generate samples from a GCM
+    </a>
+   </li>
+   <li class="toctree-l2 current active">
+    <a class="current reference internal" href="#">
+     Evaluate a GCM
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="customizing_model_assignment.html">
+     Customizing Causal Mechanism Assignment
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="estimating_confidence_intervals.html">
+     Estimating Confidence Intervals
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../causal_tasks/index.html">
+   Performing Causal Tasks
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/>
+  <label for="toctree-checkbox-4">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../causal_tasks/estimating_causal_effects/index.html">
+     Estimating Causal Effects
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/>
+    <label for="toctree-checkbox-5">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../causal_tasks/estimating_causal_effects/identifying_causal_effect/index.html">
+       Identifying causal effect
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/>
+      <label for="toctree-checkbox-6">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../causal_tasks/estimating_causal_effects/identifying_causal_effect/backdoor.html">
+         Backdoor criterion
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../causal_tasks/estimating_causal_effects/identifying_causal_effect/frontdoor.html">
+         Frontdoor criterion
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../causal_tasks/estimating_causal_effects/identifying_causal_effect/instrumental_variable.html">
+         Natural experiments and instrumental variables
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../causal_tasks/estimating_causal_effects/identifying_causal_effect/id_algorithm.html">
+         ID algorithm for discovering new identification strategies
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../causal_tasks/estimating_causal_effects/effect_estimation_with_backdoor/index.html">
+       Estimating average causal effect using backdoor
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/>
+      <label for="toctree-checkbox-7">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../causal_tasks/estimating_causal_effects/effect_estimation_with_backdoor/regression_based_methods.html">
+         Regression-based methods
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../causal_tasks/estimating_causal_effects/effect_estimation_with_backdoor/distance_matching.html">
+         Distance-based matching
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../causal_tasks/estimating_causal_effects/effect_estimation_with_backdoor/propensity_based_methods.html">
+         Propensity-based methods
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../causal_tasks/estimating_causal_effects/effect_estimation_with_backdoor/do_sampler.html">
+         Do-sampler
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../causal_tasks/estimating_causal_effects/effect_estimation_with_natural_experiments/index.html">
+       Estimating average causal effect with natural experiments
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../causal_tasks/estimating_causal_effects/conditional_effect_estimation/index.html">
+       Estimating conditional average causal effect
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../causal_tasks/estimating_causal_effects/effect_estimation_with_gcm.html">
+       Estimating average causal effect using GCM
+      </a>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../causal_tasks/estimating_causal_effects/direct_indirect_effects/index.html">
+       Estimating direct and indirect effects
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/>
+      <label for="toctree-checkbox-8">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../causal_tasks/estimating_causal_effects/direct_indirect_effects/mediation_analysis.html">
+         Estimating natural direct and indirect effects
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../causal_tasks/estimating_causal_effects/direct_indirect_effects/quantify_arrow_strength.html">
+         Direct Effect: Quantifying Arrow Strength
+        </a>
+       </li>
+      </ul>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../causal_tasks/root_causing_and_explaining/index.html">
+     Explaining Observed Effects and Root-Cause Analysis
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" type="checkbox"/>
+    <label for="toctree-checkbox-9">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../causal_tasks/root_causing_and_explaining/anomaly_attribution.html">
+       Anomaly Attribution
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../causal_tasks/root_causing_and_explaining/distribution_change.html">
+       Attributing Distributional Changes
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../causal_tasks/root_causing_and_explaining/icc.html">
+       Quantifying Intrinsic Causal Influence
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../causal_tasks/root_causing_and_explaining/unit_change.html">
+       Unit Change Attribution
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../causal_tasks/root_causing_and_explaining/feature_relevance.html">
+       Feature Relevance
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../causal_tasks/what_if/index.html">
+     Asking and Answering What-If Questions
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" type="checkbox"/>
+    <label for="toctree-checkbox-10">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../causal_tasks/what_if/interventions.html">
+       Simulating the Impact of Interventions
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../causal_tasks/what_if/counterfactuals.html">
+       Computing Counterfactuals
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../causal_tasks/causal_prediction/index.html">
+     Predicting outcome for out-of-distribution inputs
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../refuting_causal_estimates/index.html">
+   Refuting causal estimates
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" type="checkbox"/>
+  <label for="toctree-checkbox-11">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/index.html">
+     Refuting Effect Estimates
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" type="checkbox"/>
+    <label for="toctree-checkbox-12">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/placebo_treatment.html">
+       Placebo Treatment Refuter
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/dummy_outcome.html">
+       Dummy Outcome Refuter
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/random_common_cause.html">
+       Random Common Cause Refuter
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/data_subsample.html">
+       Data Subsample Refuter
+      </a>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/sensitivity_analysis/index.html">
+       Sensitivity Analysis
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" type="checkbox"/>
+      <label for="toctree-checkbox-13">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/sensitivity_analysis/simulation_based.html">
+         Simulation-based sensitivity analysis
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/sensitivity_analysis/linear_partialr2.html">
+         Partial-R2 based sensitivity analysis for linear estimators
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/sensitivity_analysis/nonlinear_reisz.html">
+         Reisz estimator-based sensitivity analysis for non-linear estimators
+        </a>
+       </li>
+      </ul>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../cite.html">
+   Citing this package
+  </a>
+ </li>
+</ul>
+
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+    
+    <div class="toc-item">
+      
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
+
+<nav id="bd-toc-nav">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#summary-of-auto-assignment">
+   Summary of auto assignment
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#evaluating-a-fitted-gcm">
+   Evaluating a fitted GCM
+  </a>
+ </li>
+</ul>
+
+</nav>
+    </div>
+    
+    <div class="toc-item">
+      
+    </div>
+    
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+  <section id="evaluate-a-gcm">
+<h1>Evaluate a GCM<a class="headerlink" href="#evaluate-a-gcm" title="Permalink to this heading"></a></h1>
+<p>Modeling a graphical causal model (GCM) requires various assumptions and choices of models, all of which can influence
+the performance and accuracy of the model. Some examples of the required assumptions include:</p>
+<p><strong>Graph Structure:</strong> Correctly specifying the causal directions between variables is crucial. For example, it is logical to
+say that rain causes the street to be wet, whereas asserting that a wet street causes rain does not make sense. If
+these relationships are modeled incorrectly, the resultant causal statements will be misleading. However, it is
+important to note that while this example is quite straightforward, models typically exhibit some level of robustness
+to misspecifications. Particularly, the impact of misspecification tends to be less severe in larger graphs.
+Additionally, the severity of misspecifications can vary; for instance, defining an incorrect causal direction is
+generally more problematic than including too many (upstream) nodes as potential parents of a node.</p>
+<p><strong>Causal Mechanism Assumption:</strong> To model the causal data generation process, we represent each node with a causal
+mechanism of the form <span class="math notranslate nohighlight">\(X_i = f_i(PA_i, N_i)\)</span>, where <span class="math notranslate nohighlight">\(N_i\)</span> denotes unobserved noise, and <span class="math notranslate nohighlight">\(PA_i\)</span>
+represents the causal parents of <span class="math notranslate nohighlight">\(X_i\)</span>. In this context, we require an additional assumption regarding the
+form of the function <span class="math notranslate nohighlight">\(f_i\)</span>. For continuous variables, for instance, it is common to model <span class="math notranslate nohighlight">\(f_i\)</span> using an
+additive noise model of the form <span class="math notranslate nohighlight">\(X_i = f_i(PA_i) + N_i\)</span>. However, this representation may not be accurate if the
+true relationship is different (e.g., multiplicative). Thus, the type of causal mechanism is another factor that can
+influence the results. Generally, however, the additive noise model assumption in the continuous case tends to be
+relatively robust to violations in practice.</p>
+<p><strong>Model Selection:</strong> The previous two points focused solely on accurately representing the causal relationships between
+variables. Now, the process of model selection adds an additional layer. Sticking to the additive noise model
+<span class="math notranslate nohighlight">\(X_i = f_i(PA_i) + N_i\)</span> as an example, the challenge in model selection lies in determining the optimal model
+for <span class="math notranslate nohighlight">\(f_i\)</span>. Ideally, this would be the model that minimizes the mean squared error.</p>
+<p>Given the multitude of factors that impact the performance of a GCM, each with their own metrics and challenges,
+<code class="docutils literal notranslate"><span class="pre">dowhy.gcm</span></code> has a module that aims at evaluating a fitted GCM and providing an overview of different evaluation
+metrics. Furthermore, if the auto assignment is used, we can obtain an overview of the evaluated models and
+performances in the selection process.</p>
+<section id="summary-of-auto-assignment">
+<h2>Summary of auto assignment<a class="headerlink" href="#summary-of-auto-assignment" title="Permalink to this heading"></a></h2>
+<p>If we use the auto assignment function, we obtain additional insights into the model selection process. To illustrate
+this, consider the chain structure example X→Y→Z:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span><span class="o">,</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">dowhy.gcm</span> <span class="k">as</span> <span class="nn">gcm</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Y</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">X</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Z</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">Y</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="o">=</span><span class="n">Z</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">StructuralCausalModel</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">([(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">)]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">summary_auto_assignment</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">auto</span><span class="o">.</span><span class="n">assign_causal_mechanisms</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">summary_auto_assignment</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Analyzed</span> <span class="mi">3</span> <span class="n">nodes</span><span class="o">.</span>
+<span class="o">---</span> <span class="n">Node</span><span class="p">:</span> <span class="n">X</span>
+<span class="n">Node</span> <span class="n">X</span> <span class="ow">is</span> <span class="n">a</span> <span class="n">root</span> <span class="n">node</span><span class="o">.</span> <span class="n">Assigning</span> <span class="s1">&#39;Empirical Distribution&#39;</span> <span class="n">to</span> <span class="n">the</span> <span class="n">node</span> <span class="n">representing</span> <span class="n">the</span> <span class="n">marginal</span> <span class="n">distribution</span><span class="o">.</span>
+
+<span class="o">---</span> <span class="n">Node</span><span class="p">:</span> <span class="n">Y</span>
+<span class="n">Node</span> <span class="n">Y</span> <span class="ow">is</span> <span class="n">a</span> <span class="n">non</span><span class="o">-</span><span class="n">root</span> <span class="n">node</span><span class="o">.</span> <span class="n">Assigning</span> <span class="s1">&#39;AdditiveNoiseModel using LinearRegression&#39;</span> <span class="n">to</span> <span class="n">the</span> <span class="n">node</span><span class="o">.</span>
+<span class="n">This</span> <span class="n">represents</span> <span class="n">the</span> <span class="n">causal</span> <span class="n">relationship</span> <span class="k">as</span> <span class="n">Y</span> <span class="o">:=</span> <span class="n">f</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">+</span> <span class="n">N</span><span class="o">.</span>
+<span class="n">For</span> <span class="n">the</span> <span class="n">model</span> <span class="n">selection</span><span class="p">,</span> <span class="n">the</span> <span class="n">following</span> <span class="n">models</span> <span class="n">were</span> <span class="n">evaluated</span> <span class="n">on</span> <span class="n">the</span> <span class="n">mean</span> <span class="n">squared</span> <span class="n">error</span> <span class="p">(</span><span class="n">MSE</span><span class="p">)</span> <span class="n">metric</span><span class="p">:</span>
+<span class="n">LinearRegression</span><span class="p">:</span> <span class="mf">1.0023387259040388</span>
+<span class="n">Pipeline</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;polynomialfeatures&#39;</span><span class="p">,</span> <span class="n">PolynomialFeatures</span><span class="p">(</span><span class="n">include_bias</span><span class="o">=</span><span class="kc">False</span><span class="p">)),</span>
+                <span class="p">(</span><span class="s1">&#39;linearregression&#39;</span><span class="p">,</span> <span class="n">LinearRegression</span><span class="p">)]):</span> <span class="mf">1.0099017476403862</span>
+<span class="n">HistGradientBoostingRegressor</span><span class="p">:</span> <span class="mf">1.1091403766880177</span>
+<span class="n">Based</span> <span class="n">on</span> <span class="n">the</span> <span class="nb">type</span> <span class="n">of</span> <span class="n">causal</span> <span class="n">mechanism</span><span class="p">,</span> <span class="n">the</span> <span class="n">model</span> <span class="k">with</span> <span class="n">the</span> <span class="n">lowest</span> <span class="n">metric</span> <span class="n">value</span> <span class="n">represents</span> <span class="n">the</span> <span class="n">best</span> <span class="n">choice</span><span class="o">.</span>
+
+<span class="o">---</span> <span class="n">Node</span><span class="p">:</span> <span class="n">Z</span>
+<span class="n">Node</span> <span class="n">Z</span> <span class="ow">is</span> <span class="n">a</span> <span class="n">non</span><span class="o">-</span><span class="n">root</span> <span class="n">node</span><span class="o">.</span> <span class="n">Assigning</span> <span class="s1">&#39;AdditiveNoiseModel using LinearRegression&#39;</span> <span class="n">to</span> <span class="n">the</span> <span class="n">node</span><span class="o">.</span>
+<span class="n">This</span> <span class="n">represents</span> <span class="n">the</span> <span class="n">causal</span> <span class="n">relationship</span> <span class="k">as</span> <span class="n">Z</span> <span class="o">:=</span> <span class="n">f</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span> <span class="o">+</span> <span class="n">N</span><span class="o">.</span>
+<span class="n">For</span> <span class="n">the</span> <span class="n">model</span> <span class="n">selection</span><span class="p">,</span> <span class="n">the</span> <span class="n">following</span> <span class="n">models</span> <span class="n">were</span> <span class="n">evaluated</span> <span class="n">on</span> <span class="n">the</span> <span class="n">mean</span> <span class="n">squared</span> <span class="n">error</span> <span class="p">(</span><span class="n">MSE</span><span class="p">)</span> <span class="n">metric</span><span class="p">:</span>
+<span class="n">LinearRegression</span><span class="p">:</span> <span class="mf">0.9451918596711175</span>
+<span class="n">Pipeline</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;polynomialfeatures&#39;</span><span class="p">,</span> <span class="n">PolynomialFeatures</span><span class="p">(</span><span class="n">include_bias</span><span class="o">=</span><span class="kc">False</span><span class="p">)),</span>
+                <span class="p">(</span><span class="s1">&#39;linearregression&#39;</span><span class="p">,</span> <span class="n">LinearRegression</span><span class="p">)]):</span> <span class="mf">0.9488259577453813</span>
+<span class="n">HistGradientBoostingRegressor</span><span class="p">:</span> <span class="mf">1.682146254853607</span>
+<span class="n">Based</span> <span class="n">on</span> <span class="n">the</span> <span class="nb">type</span> <span class="n">of</span> <span class="n">causal</span> <span class="n">mechanism</span><span class="p">,</span> <span class="n">the</span> <span class="n">model</span> <span class="k">with</span> <span class="n">the</span> <span class="n">lowest</span> <span class="n">metric</span> <span class="n">value</span> <span class="n">represents</span> <span class="n">the</span> <span class="n">best</span> <span class="n">choice</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>In this scenario, an empirical distribution is assigned to the root node X, while additive noise models are applied
+to nodes Y and Z. In both of these cases, a linear regression model demonstrated the best performance in terms
+of minimizing the mean squared error. A list of evaluated models and their performance is also available. Since we used
+the default parameter for the auto assignment, only a small model zoo is evaluated. However, we can also adjust the
+assigment quality to extend it to more models.</p>
+<p>After assigning causal mechanisms to each node, the subsequent step involves fitting these mechanisms to the data:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gcm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="evaluating-a-fitted-gcm">
+<h2>Evaluating a fitted GCM<a class="headerlink" href="#evaluating-a-fitted-gcm" title="Permalink to this heading"></a></h2>
+<p>The causal model has been fitted and can be used for different causal questions. However, we might be interested in
+obtaining some insights into the model performance first, i.e., we might wonder:</p>
+<ul class="simple">
+<li><p>How well do my causal mechanisms perform?</p></li>
+<li><p>Is the additive noise model assumption even valid for my data?</p></li>
+<li><p>Does the GCM capture the joint distribution of the observed data?</p></li>
+<li><p>Is my causal graph structure compatible with the data?</p></li>
+</ul>
+<p>For this, we can use the causal model evaluation function, which provides us with some insights into the overall model
+performance and whether our assumptions hold:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">summary_evaluation</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">evaluate_causal_model</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">compare_mechanism_baselines</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">summary_evaluation</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Evaluated</span> <span class="n">the</span> <span class="n">performance</span> <span class="n">of</span> <span class="n">the</span> <span class="n">causal</span> <span class="n">mechanisms</span> <span class="ow">and</span> <span class="n">the</span> <span class="n">invertibility</span> <span class="n">assumption</span> <span class="n">of</span> <span class="n">the</span> <span class="n">causal</span> <span class="n">mechanisms</span> <span class="ow">and</span> <span class="n">the</span> <span class="n">overall</span> <span class="n">average</span> <span class="n">KL</span> <span class="n">divergence</span> <span class="n">between</span> <span class="n">generated</span> <span class="ow">and</span> <span class="n">observed</span> <span class="n">distribution</span> <span class="ow">and</span> <span class="n">graph</span> <span class="n">structure</span><span class="o">.</span> <span class="n">The</span> <span class="n">results</span> <span class="n">are</span> <span class="k">as</span> <span class="n">follows</span><span class="p">:</span>
+
+<span class="o">====</span> <span class="n">Evaluation</span> <span class="n">of</span> <span class="n">Causal</span> <span class="n">Mechanisms</span> <span class="o">====</span>
+<span class="n">Root</span> <span class="n">nodes</span> <span class="n">are</span> <span class="n">evaluated</span> <span class="n">based</span> <span class="n">on</span> <span class="n">the</span> <span class="n">KL</span> <span class="n">divergence</span> <span class="n">between</span> <span class="n">the</span> <span class="n">generated</span> <span class="ow">and</span> <span class="n">the</span> <span class="n">observed</span> <span class="n">distribution</span><span class="o">.</span>
+<span class="n">Non</span><span class="o">-</span><span class="n">root</span> <span class="n">nodes</span> <span class="n">are</span> <span class="n">evaluated</span> <span class="n">based</span> <span class="n">on</span> <span class="n">the</span> <span class="p">(</span><span class="n">normalized</span><span class="p">)</span> <span class="n">Continuous</span> <span class="n">Ranked</span> <span class="n">Probability</span> <span class="n">Score</span> <span class="p">(</span><span class="n">CRPS</span><span class="p">),</span> <span class="n">which</span> <span class="ow">is</span> <span class="n">a</span> <span class="n">generalizes</span> <span class="n">the</span> <span class="n">Mean</span> <span class="n">Absolute</span> <span class="n">Percentage</span> <span class="n">Error</span> <span class="n">to</span> <span class="n">probabilistic</span> <span class="n">predictions</span><span class="o">.</span> <span class="n">Since</span> <span class="n">the</span> <span class="n">causal</span> <span class="n">mechanisms</span> <span class="n">produce</span> <span class="n">conditional</span> <span class="n">distributions</span><span class="p">,</span> <span class="n">this</span> <span class="n">should</span> <span class="n">give</span> <span class="n">some</span> <span class="n">insights</span> <span class="n">into</span> <span class="n">their</span> <span class="n">performance</span> <span class="ow">and</span> <span class="n">calibration</span><span class="o">.</span> <span class="n">However</span><span class="p">,</span> <span class="n">note</span> <span class="n">that</span> <span class="n">many</span> <span class="n">algorithms</span> <span class="n">are</span> <span class="n">still</span> <span class="n">relatively</span> <span class="n">robust</span> <span class="n">against</span> <span class="n">poor</span> <span class="n">model</span> <span class="n">performances</span><span class="o">.</span>
+
+<span class="o">---</span> <span class="n">Node</span> <span class="n">X</span><span class="p">:</span> <span class="n">The</span> <span class="n">KL</span> <span class="n">divergence</span> <span class="n">between</span> <span class="n">generated</span> <span class="ow">and</span> <span class="n">observed</span> <span class="n">distribution</span> <span class="ow">is</span> <span class="mf">0.020548269898818708</span><span class="o">.</span>
+<span class="n">The</span> <span class="n">estimated</span> <span class="n">KL</span> <span class="n">divergence</span> <span class="n">indicates</span> <span class="n">an</span> <span class="n">overall</span> <span class="n">very</span> <span class="n">good</span> <span class="n">representation</span> <span class="n">of</span> <span class="n">the</span> <span class="n">data</span> <span class="n">distribution</span><span class="o">.</span>
+
+<span class="o">---</span> <span class="n">Node</span> <span class="n">Y</span><span class="p">:</span> <span class="n">The</span> <span class="n">normalized</span> <span class="n">CRPS</span> <span class="n">of</span> <span class="n">this</span> <span class="n">node</span> <span class="ow">is</span> <span class="mf">0.26169914525652427</span><span class="o">.</span>
+<span class="n">The</span> <span class="n">estimated</span> <span class="n">CRPS</span> <span class="n">indicates</span> <span class="n">a</span> <span class="n">good</span> <span class="n">model</span> <span class="n">performance</span><span class="o">.</span>
+
+<span class="o">---</span> <span class="n">Node</span> <span class="n">Z</span><span class="p">:</span> <span class="n">The</span> <span class="n">normalized</span> <span class="n">CRPS</span> <span class="n">of</span> <span class="n">this</span> <span class="n">node</span> <span class="ow">is</span> <span class="mf">0.08497732548860475</span><span class="o">.</span>
+<span class="n">The</span> <span class="n">estimated</span> <span class="n">CRPS</span> <span class="n">indicates</span> <span class="n">a</span> <span class="n">very</span> <span class="n">good</span> <span class="n">model</span> <span class="n">performance</span><span class="o">.</span>
+
+<span class="o">====</span> <span class="n">Evaluation</span> <span class="n">of</span> <span class="n">Invertible</span> <span class="n">Functional</span> <span class="n">Causal</span> <span class="n">Model</span> <span class="n">Assumption</span> <span class="o">====</span>
+
+<span class="o">---</span> <span class="n">The</span> <span class="n">model</span> <span class="n">assumption</span> <span class="k">for</span> <span class="n">node</span> <span class="n">Y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">rejected</span> <span class="k">with</span> <span class="n">a</span> <span class="n">p</span><span class="o">-</span><span class="n">value</span> <span class="n">of</span> <span class="mf">0.9261751353508025</span> <span class="p">(</span><span class="n">after</span> <span class="n">potential</span> <span class="n">adjustment</span><span class="p">)</span> <span class="ow">and</span> <span class="n">a</span> <span class="n">significance</span> <span class="n">level</span> <span class="n">of</span> <span class="mf">0.05</span><span class="o">.</span>
+<span class="n">This</span> <span class="n">implies</span> <span class="n">that</span> <span class="n">the</span> <span class="n">model</span> <span class="n">assumption</span> <span class="n">might</span> <span class="n">be</span> <span class="n">valid</span><span class="o">.</span>
+
+<span class="o">---</span> <span class="n">The</span> <span class="n">model</span> <span class="n">assumption</span> <span class="k">for</span> <span class="n">node</span> <span class="n">Z</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">rejected</span> <span class="k">with</span> <span class="n">a</span> <span class="n">p</span><span class="o">-</span><span class="n">value</span> <span class="n">of</span> <span class="mf">1.0</span> <span class="p">(</span><span class="n">after</span> <span class="n">potential</span> <span class="n">adjustment</span><span class="p">)</span> <span class="ow">and</span> <span class="n">a</span> <span class="n">significance</span> <span class="n">level</span> <span class="n">of</span> <span class="mf">0.05</span><span class="o">.</span>
+<span class="n">This</span> <span class="n">implies</span> <span class="n">that</span> <span class="n">the</span> <span class="n">model</span> <span class="n">assumption</span> <span class="n">might</span> <span class="n">be</span> <span class="n">valid</span><span class="o">.</span>
+
+<span class="n">Note</span> <span class="n">that</span> <span class="n">these</span> <span class="n">results</span> <span class="n">are</span> <span class="n">based</span> <span class="n">on</span> <span class="n">statistical</span> <span class="n">independence</span> <span class="n">tests</span><span class="p">,</span> <span class="ow">and</span> <span class="n">the</span> <span class="n">fact</span> <span class="n">that</span> <span class="n">the</span> <span class="n">assumption</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">rejected</span> <span class="n">does</span> <span class="ow">not</span> <span class="n">necessarily</span> <span class="n">imply</span> <span class="n">that</span> <span class="n">it</span> <span class="ow">is</span> <span class="n">correct</span><span class="o">.</span> <span class="n">There</span> <span class="ow">is</span> <span class="n">just</span> <span class="n">no</span> <span class="n">evidence</span> <span class="n">against</span> <span class="n">it</span><span class="o">.</span>
+
+<span class="o">====</span> <span class="n">Evaluation</span> <span class="n">of</span> <span class="n">Generated</span> <span class="n">Distribution</span> <span class="o">====</span>
+<span class="n">The</span> <span class="n">overall</span> <span class="n">average</span> <span class="n">KL</span> <span class="n">divergence</span> <span class="n">between</span> <span class="n">the</span> <span class="n">generated</span> <span class="ow">and</span> <span class="n">observed</span> <span class="n">distribution</span> <span class="ow">is</span> <span class="mf">0.04045436327952057</span>
+<span class="n">The</span> <span class="n">estimated</span> <span class="n">KL</span> <span class="n">divergence</span> <span class="n">indicates</span> <span class="n">an</span> <span class="n">overall</span> <span class="n">very</span> <span class="n">good</span> <span class="n">representation</span> <span class="n">of</span> <span class="n">the</span> <span class="n">data</span> <span class="n">distribution</span><span class="o">.</span>
+
+<span class="o">====</span> <span class="n">Evaluation</span> <span class="n">of</span> <span class="n">the</span> <span class="n">Causal</span> <span class="n">Graph</span> <span class="n">Structure</span> <span class="o">====</span>
+<span class="o">+-------------------------------------------------------------------------------------------------------+</span>
+<span class="o">|</span>                                         <span class="n">Falsificaton</span> <span class="n">Summary</span>                                          <span class="o">|</span>
+<span class="o">+-------------------------------------------------------------------------------------------------------+</span>
+<span class="o">|</span> <span class="n">The</span> <span class="n">given</span> <span class="n">DAG</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">informative</span> <span class="n">because</span> <span class="mi">2</span> <span class="o">/</span> <span class="mi">6</span> <span class="n">of</span> <span class="n">the</span> <span class="n">permutations</span> <span class="n">lie</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">Markov</span>                  <span class="o">|</span>
+<span class="o">|</span> <span class="n">equivalence</span> <span class="k">class</span> <span class="nc">of</span> <span class="n">the</span> <span class="n">given</span> <span class="n">DAG</span> <span class="p">(</span><span class="n">p</span><span class="o">-</span><span class="n">value</span><span class="p">:</span> <span class="mf">0.33</span><span class="p">)</span><span class="o">.</span>                                                   <span class="o">|</span>
+<span class="o">|</span> <span class="n">The</span> <span class="n">given</span> <span class="n">DAG</span> <span class="n">violates</span> <span class="mi">0</span><span class="o">/</span><span class="mi">1</span> <span class="n">LMCs</span> <span class="ow">and</span> <span class="ow">is</span> <span class="n">better</span> <span class="n">than</span> <span class="mf">66.7</span><span class="o">%</span> <span class="n">of</span> <span class="n">the</span> <span class="n">permuted</span> <span class="n">DAGs</span> <span class="p">(</span><span class="n">p</span><span class="o">-</span><span class="n">value</span><span class="p">:</span> <span class="mf">0.33</span><span class="p">)</span><span class="o">.</span>        <span class="o">|</span>
+<span class="o">|</span> <span class="n">Based</span> <span class="n">on</span> <span class="n">the</span> <span class="n">provided</span> <span class="n">significance</span> <span class="n">level</span> <span class="p">(</span><span class="mf">0.05</span><span class="p">)</span> <span class="ow">and</span> <span class="n">because</span> <span class="n">the</span> <span class="n">DAG</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">informative</span><span class="p">,</span>               <span class="o">|</span>
+<span class="o">|</span> <span class="n">we</span> <span class="n">do</span> <span class="ow">not</span> <span class="n">reject</span> <span class="n">the</span> <span class="n">DAG</span><span class="o">.</span>                                                                             <span class="o">|</span>
+<span class="o">+-------------------------------------------------------------------------------------------------------+</span>
+
+<span class="o">====</span> <span class="n">NOTE</span> <span class="o">====</span>
+<span class="n">Always</span> <span class="n">double</span> <span class="n">check</span> <span class="n">the</span> <span class="n">made</span> <span class="n">model</span> <span class="n">assumptions</span> <span class="k">with</span> <span class="n">respect</span> <span class="n">to</span> <span class="n">the</span> <span class="n">graph</span> <span class="n">structure</span> <span class="ow">and</span> <span class="n">choice</span> <span class="n">of</span> <span class="n">causal</span> <span class="n">mechanisms</span><span class="o">.</span>
+<span class="n">All</span> <span class="n">these</span> <span class="n">evaluations</span> <span class="n">give</span> <span class="n">some</span> <span class="n">insight</span> <span class="n">into</span> <span class="n">the</span> <span class="n">goodness</span> <span class="n">of</span> <span class="n">the</span> <span class="n">causal</span> <span class="n">model</span><span class="p">,</span> <span class="n">but</span> <span class="n">should</span> <span class="ow">not</span> <span class="n">be</span> <span class="n">overinterpreted</span><span class="p">,</span> <span class="n">since</span> <span class="n">some</span> <span class="n">causal</span> <span class="n">relationships</span> <span class="n">can</span> <span class="n">be</span> <span class="n">intrinsically</span> <span class="n">hard</span> <span class="n">to</span> <span class="n">model</span><span class="o">.</span> <span class="n">Furthermore</span><span class="p">,</span> <span class="n">many</span> <span class="n">algorithms</span> <span class="n">are</span> <span class="n">fairly</span> <span class="n">robust</span> <span class="n">against</span> <span class="n">misspecifications</span> <span class="ow">or</span> <span class="n">poor</span> <span class="n">performances</span> <span class="n">of</span> <span class="n">causal</span> <span class="n">mechanisms</span><span class="o">.</span>
+</pre></div>
+</div>
+<img alt="Causal Graph Falsification" src="../../_images/graph_evaluation.png" />
+<p>As we see, we get a detailed overview of different evaluations:</p>
+<p><strong>Evaluation of Causal Mechanisms:</strong> Evaluation of the causal mechanisms with respect to their model performance.
+The performance of non-root nodes is measured using the Continuous Ranked Probability Score (CRPS), and the performance
+of root nodes is measured using the KL divergence between the generated and observed data distributions.</p>
+<p>Optionally, we can set the <cite>compare_mechanism_baselines</cite> parameter to <cite>True</cite> in order
+to compare the mechanisms with some baseline models. This gives us better insights into how the mechanisms perform in
+comparison with other models. Note, however, that this can take significant time for larger graphs.</p>
+<p><strong>Evaluation of Invertible Functional Causal Model Assumption:</strong> If the causal mechanism is an invertible functional
+causal model, we can validate if the assumption holds true. Note that an invertible function here means with respect to
+the noise, i.e., an additive noise model <span class="math notranslate nohighlight">\(X_i = f_i(PA_i) + N_i\)</span> and, more generally, post non-linear models
+<span class="math notranslate nohighlight">\(X_i = g_i(f_i(PA_i) + N_i)\)</span> are examples for such types of mechanisms. In this case, the estimated noise based on
+the observation should be independent of the inputs.</p>
+<p><strong>Evaluation of Generated Distribution:</strong> Since the GCM is able to generate new samples from the learned distributions,
+we can evaluate whether the generated (joint) distribution coincides with the observed one. Here, the difference should
+be as small as possible.</p>
+<p><strong>Evaluation of the Causal Graph Structure:</strong> The graph structure should represent the (conditional) independencies
+in the observed data (assuming faithfulness). This can be exploited to obtain some insights on whether the given
+graph violates the (in)dependence structures based on the data. For this, an algorithm is used that checks whether the
+graph can be rejected.</p>
+<p>Note that all these evaluation methods only provide some insights into the provided GCM, but cannot fully confirm
+the correctness of a learned model. More details about the metrics and evaluation methods, please see the corresponding
+docstring of the method.</p>
+</section>
+</section>
+
+
+              </article>
+              
+
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="draw_samples.html" title="previous page">
+      <i class="fas fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">Generate samples from a GCM</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="customizing_model_assignment.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">Customizing Causal Mechanism Assignment</p>
+  </div>
+  <i class="fas fa-angle-right"></i>
+  </a>
+</div>
+              </footer>
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright 2022, PyWhy contributors.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>

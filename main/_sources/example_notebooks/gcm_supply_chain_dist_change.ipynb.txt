@@ -70,6 +70,7 @@
   {
    "cell_type": "markdown",
    "metadata": {
+    "collapsed": false,
     "jupyter": {
      "outputs_hidden": false
     }
@@ -152,6 +153,7 @@
   {
    "cell_type": "markdown",
    "metadata": {
+    "collapsed": false,
     "jupyter": {
      "outputs_hidden": false
     }
@@ -188,9 +190,7 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "#### Attributing change\n",
-    "\n",
-    "We can now attribute the week-over-week change in the average value of *received* quantity using *Causality*. "
+    "Now, we can setup the causal model:"
    ]
   },
   {
@@ -211,8 +211,68 @@
     "causal_model = gcm.StructuralCausalModel(causal_graph)\n",
     "\n",
     "# Automatically assign appropriate causal models to each node in graph\n",
-    "gcm.auto.assign_causal_mechanisms(causal_model, data_week1)\n",
-    "\n",
+    "auto_assignment_summary = gcm.auto.assign_causal_mechanisms(causal_model, data_week1)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Before we attributing the changes to the nodes, let's first take a look at the result of the auto assignment:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(auto_assignment_summary)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "It seems most of the relationship can be well captured using a linear model. Let's further evaluate the assumed graph structure."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "gcm.falsify.falsify_graph(causal_graph, data_week1, n_permutations=20, plot_histogram=True)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Since we do not reject the DAG, we consider our causal graph structure to be confirmed."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### Attributing change"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We can now attribute the week-over-week change in the average value of *received* quantity:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
     "# call the API for attributing change in the average value of `received`\n",
     "contributions = gcm.distribution_change(causal_model,\n",
     "                                        data_week1, \n",
@@ -327,7 +387,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.9.12"
+   "version": "3.9.16"
   }
  },
  "nbformat": 4,

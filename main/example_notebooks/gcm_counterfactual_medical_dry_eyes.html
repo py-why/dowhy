@@ -895,12 +895,85 @@ and data, we can then fit the causal model and start answering counterfactual qu
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node Condition: 100%|██████████| 3/3 [00:00&lt;00:00, 23.23it/s]
+Fitting causal mechanism of node Condition: 100%|██████████| 3/3 [00:00&lt;00:00, 16.58it/s]
 </pre></div></div>
 </div>
-<p>Now returning to our original problem, let’s load Alice’s data, who happens to have a rare allergy (Condition = 1).</p>
+<p>Optionally, we can now also evaluate the fitted causal model:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">evaluate_causal_model</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">medical_data</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Evaluating causal mechanisms...: 100%|██████████| 3/3 [00:00&lt;00:00, 3334.99it/s]
+Test permutations of given graph: 100%|██████████| 6/6 [00:00&lt;00:00, 65.76it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_counterfactual_medical_dry_eyes_9_1.png" src="../_images/example_notebooks_gcm_counterfactual_medical_dry_eyes_9_1.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Evaluated the performance of the causal mechanisms and the invertibility assumption of the causal mechanisms and the overall average KL divergence between generated and observed distribution and graph structure. The results are as follows:
+
+==== Evaluation of Causal Mechanisms ====
+Root nodes are evaluated based on the KL divergence between the generated and the observed distribution.
+Non-root nodes are evaluated based on the (normalized) Continuous Ranked Probability Score (CRPS), which is a generalizes the Mean Absolute Percentage Error to probabilistic predictions. Since the causal mechanisms produce conditional distributions, this should give some insights into their performance and calibration. However, note that many algorithms are still relatively robust against poor model performances.
+
+--- Node Treatment: The KL divergence between generated and observed distribution is 5.6108922465983115e-05.
+The estimated KL divergence indicates an overall very good representation of the data distribution.
+
+--- Node Condition: The KL divergence between generated and observed distribution is 0.0002597065999917329.
+The estimated KL divergence indicates an overall very good representation of the data distribution.
+
+--- Node Vision: The normalized CRPS of this node is 0.10655766832045752.
+The estimated CRPS indicates a very good model performance.
+
+==== Evaluation of Invertible Functional Causal Model Assumption ====
+
+--- The model assumption for node Vision is not rejected with a p-value of 0.21215289566079854 (after potential adjustment) and a significance level of 0.05.
+This implies that the model assumption might be valid.
+
+Note that these results are based on statistical independence tests, and the fact that the assumption was not rejected does not necessarily imply that it is correct. There is just no evidence against it.
+
+==== Evaluation of Generated Distribution ====
+The overall average KL divergence between the generated and observed distribution is 2.4674588065427406e-05
+The estimated KL divergence indicates an overall very good representation of the data distribution.
+
+==== Evaluation of the Causal Graph Structure ====
++-------------------------------------------------------------------------------------------------------+
+|                                         Falsificaton Summary                                          |
++-------------------------------------------------------------------------------------------------------+
+| The given DAG is not informative because 2 / 6 of the permutations lie in the Markov                  |
+| equivalence class of the given DAG (p-value: 0.33).                                                   |
+| The given DAG violates 0/2 LMCs and is better than 33.3% of the permuted DAGs (p-value: 0.67).        |
+| Based on the provided significance level (0.05) and because the DAG is not informative,               |
+| we do not reject the DAG.                                                                             |
++-------------------------------------------------------------------------------------------------------+
+
+==== NOTE ====
+Always double check the made model assumptions with respect to the graph structure and choice of causal mechanisms.
+All these evaluations give some insight into the goodness of the causal model, but should not be overinterpreted, since some causal relationships can be intrinsically hard to model. Furthermore, many algorithms are fairly robust against misspecifications or poor performances of causal mechanisms.
+</pre></div></div>
+</div>
+<p>This confirms the accuracy of our causal model.</p>
+<p>Now returning to our original problem, let’s load Alice’s data, who happens to have a rare allergy (Condition = 1).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">specific_patient_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;newly_come_patients.csv&#39;</span><span class="p">)</span>
@@ -909,7 +982,7 @@ Fitting causal mechanism of node Condition: 100%|██████████|
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -953,7 +1026,7 @@ Fitting causal mechanism of node Condition: 100%|██████████|
 <p>In cases where we want to examine a hypothetical outcome if an event had not happened or if it had happened differently, we employ the so-called Counterfactual logic based on structural causal models. Given: - We know Alice’s treatment was option 2. - Alice has the rare allergy (Condition=1). - Alice vision is 0.78 (Vision=0.78) after treatment option 2. - We are able to recover the noise based on the learned structural causal model.</p>
 <p>We can now examine the counterfactual outcome for her Vision if the Treatment node had been different. In the following, we look at the counterfactual value for Vision of Alice if she had taken no treatment (Treatment=0) and if she had taken the other eye drops (Treatment=1).</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">counterfactual_data1</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">counterfactual_samples</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span>
@@ -980,19 +1053,19 @@ Fitting causal mechanism of node Condition: 100%|██████████|
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.legend.Legend at 0x7f6c85e480a0&gt;
+&lt;matplotlib.legend.Legend at 0x7fc0c1dcedf0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_gcm_counterfactual_medical_dry_eyes_12_1.png" src="../_images/example_notebooks_gcm_counterfactual_medical_dry_eyes_12_1.png" />
+<img alt="../_images/example_notebooks_gcm_counterfactual_medical_dry_eyes_14_1.png" src="../_images/example_notebooks_gcm_counterfactual_medical_dry_eyes_14_1.png" />
 </div>
 </div>
 <p>What we see here is that if Alice had taken option 1 instead, her Vision would have become worse compared to option 2. Therefore, she realised that the rare condition (Condition=1) that she had reported in her medical history could be the one that would have caused an allergic reaction to the popular option 1. Alice was also able to see that if she had not taken any of the recommended options, she would have resulted with worse eyesight (the variable Vision resulted in a smaller relative value)
@@ -1015,7 +1088,7 @@ than with option 2 that she took.</p>
 <p><strong>NOTE</strong> It is important that the assigned functional causal models are invertible with respect to the noise (e.g. an additive noise model) for counterfactual statements. Alternatively, the user could also specify the ground truth models and ground truth noise.</p>
 <p>For such rare events like having the condition (Condition=1, which has a low probability of 1%) it is necessary to have a lot of samples to train the model in order to accurately reflect these rare events. This is why here we used 10000 samples to generate the patients’ database.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">bernoulli</span><span class="p">,</span> <span class="n">norm</span><span class="p">,</span> <span class="n">uniform</span>
@@ -1044,7 +1117,7 @@ than with option 2 that she took.</p>
 </div>
 <p>Generate Alice’s data: A random noise for her initial vision, Condition=1 (as she has the rare allergy) and her initial decision to take Treatment=2 (eye drops option 2).</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><br/><span></span><span class="n">num_samples</span> <span class="o">=</span> <span class="mi">1</span>

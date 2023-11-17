@@ -781,7 +781,7 @@ div.rendered_html tbody tr:hover {
 <h1>Finding Root Causes of Changes in a Supply Chain<a class="headerlink" href="#Finding-Root-Causes-of-Changes-in-a-Supply-Chain" title="Permalink to this heading"></a></h1>
 <p>In a supply chain, the number of units of each product in the inventory that is available for shipment is crucial to fulfill customers’ demand faster. For this reason, retailers continuously buy products anticipating customers’ demand in the future.</p>
 <p>Suppose that each week a retailer submits purchase orders (POs) to vendors taking into account future demands for products and capacity constraints to consider for demands. The vendors will then confirm whether they can fulfill some or all of the retailer’s purchase orders. Once confirmed by the vendors and agreed by the retailer, products are then sent to the retailer. All of the confirmed POs, however, may not arrive at once.</p>
-<p><img alt="e362ed578049477685468090d4ba485c" class="no-scaled-link" src="../_images/supply-chain.png" style="width: 800px;" /></p>
+<p><img alt="6e3a82dbff3b42ad8dec6deda24ec691" class="no-scaled-link" src="../_images/supply-chain.png" style="width: 800px;" /></p>
 <section id="Week-over-week-changes">
 <h2>Week-over-week changes<a class="headerlink" href="#Week-over-week-changes" title="Permalink to this heading"></a></h2>
 <p>For this case study, we consider synthetic data inspired from a real-world use case in supply chain. Let us look at data over two weeks, <em>w1</em> and <em>w2</em> in particular.</p>
@@ -1037,11 +1037,8 @@ causal graph. A causal mechanism of a variable is the conditional distribution o
 <img alt="../_images/example_notebooks_gcm_supply_chain_dist_change_15_0.png" src="../_images/example_notebooks_gcm_supply_chain_dist_change_15_0.png" />
 </div>
 </div>
-</section>
-<section id="Attributing-change">
-<h4>Attributing change<a class="headerlink" href="#Attributing-change" title="Permalink to this heading"></a></h4>
-<p>We can now attribute the week-over-week change in the average value of <em>received</em> quantity using <em>Causality</em>.</p>
-<div class="nbinput docutils container">
+<p>Now, we can setup the causal model:</p>
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
@@ -1057,9 +1054,106 @@ causal graph. A causal mechanism of a variable is the conditional distribution o
 <span class="n">causal_model</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">StructuralCausalModel</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">)</span>
 
 <span class="c1"># Automatically assign appropriate causal models to each node in graph</span>
-<span class="n">gcm</span><span class="o">.</span><span class="n">auto</span><span class="o">.</span><span class="n">assign_causal_mechanisms</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">data_week1</span><span class="p">)</span>
+<span class="n">auto_assignment_summary</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">auto</span><span class="o">.</span><span class="n">assign_causal_mechanisms</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">data_week1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Before we attributing the changes to the nodes, let’s first take a look at the result of the auto assignment:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">auto_assignment_summary</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Analyzed 5 nodes.
 
-<span class="c1"># call the API for attributing change in the average value of `received`</span>
+--- Node: demand
+Node demand is a root node. Assigning &#39;Empirical Distribution&#39; to the node representing the marginal distribution.
+
+--- Node: constraint
+Node constraint is a root node. Assigning &#39;Empirical Distribution&#39; to the node representing the marginal distribution.
+
+--- Node: submitted
+Node submitted is a non-root node. Assigning &#39;AdditiveNoiseModel using Pipeline&#39; to the node.
+This represents the causal relationship as submitted := f(constraint,demand) + N.
+For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
+Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
+                (&#39;linearregression&#39;, LinearRegression)]): 1.1808062726990767
+LinearRegression: 1.2009439526024719
+HistGradientBoostingRegressor: 1.3958159088082907
+Based on the type of causal mechanism, the model with the lowest metric value represents the best choice.
+
+--- Node: confirmed
+Node confirmed is a non-root node. Assigning &#39;AdditiveNoiseModel using Pipeline&#39; to the node.
+This represents the causal relationship as confirmed := f(submitted) + N.
+For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
+Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
+                (&#39;linearregression&#39;, LinearRegression)]): 0.10622356862956134
+LinearRegression: 0.10641327580915147
+HistGradientBoostingRegressor: 0.24786049671261012
+Based on the type of causal mechanism, the model with the lowest metric value represents the best choice.
+
+--- Node: received
+Node received is a non-root node. Assigning &#39;AdditiveNoiseModel using LinearRegression&#39; to the node.
+This represents the causal relationship as received := f(confirmed) + N.
+For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
+LinearRegression: 0.17894188900054708
+Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
+                (&#39;linearregression&#39;, LinearRegression)]): 0.18303496051976145
+HistGradientBoostingRegressor: 0.2966271166973326
+Based on the type of causal mechanism, the model with the lowest metric value represents the best choice.
+</pre></div></div>
+</div>
+<p>It seems most of the relationship can be well captured using a linear model. Let’s further evaluate the assumed graph structure.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gcm</span><span class="o">.</span><span class="n">falsify</span><span class="o">.</span><span class="n">falsify_graph</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">,</span> <span class="n">data_week1</span><span class="p">,</span> <span class="n">n_permutations</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">plot_histogram</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_supply_chain_dist_change_21_0.png" src="../_images/example_notebooks_gcm_supply_chain_dist_change_21_0.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
++-------------------------------------------------------------------------------------------------------+
+|                                         Falsificaton Summary                                          |
++-------------------------------------------------------------------------------------------------------+
+| The given DAG is informative because 1 / 20 of the permutations lie in the Markov                     |
+| equivalence class of the given DAG (p-value: 0.05).                                                   |
+| The given DAG violates 0/7 LMCs and is better than 95.0% of the permuted DAGs (p-value: 0.05).        |
+| Based on the provided significance level (0.05) and because the DAG is informative,                   |
+| we do not reject the DAG.                                                                             |
++-------------------------------------------------------------------------------------------------------+
+</pre></div></div>
+</div>
+<p>Since we do not reject the DAG, we consider our causal graph structure to be confirmed.</p>
+</section>
+<section id="Attributing-change">
+<h4>Attributing change<a class="headerlink" href="#Attributing-change" title="Permalink to this heading"></a></h4>
+<p>We can now attribute the week-over-week change in the average value of <em>received</em> quantity:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># call the API for attributing change in the average value of `received`</span>
 <span class="n">contributions</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">distribution_change</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span>
                                         <span class="n">data_week1</span><span class="p">,</span>
                                         <span class="n">data_week2</span><span class="p">,</span>
@@ -1077,12 +1171,12 @@ causal graph. A causal mechanism of a variable is the conditional distribution o
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_gcm_supply_chain_dist_change_17_0.png" src="../_images/example_notebooks_gcm_supply_chain_dist_change_17_0.png" />
+<img alt="../_images/example_notebooks_gcm_supply_chain_dist_change_25_0.png" src="../_images/example_notebooks_gcm_supply_chain_dist_change_25_0.png" />
 </div>
 </div>
 <p>These point estimates suggest that changes in the causal mechanisms of <em>demand</em> and <em>confirmed</em> are the main drivers of the change in the average value of <em>received</em> between two weeks. It would be risky, however, to draw conclusions from these point estimates. Therefore, we compute the bootstrap confidence interval for each attribution.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">median_contribs</span><span class="p">,</span> <span class="n">uncertainty_contribs</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">confidence_intervals</span><span class="p">(</span>
@@ -1108,7 +1202,7 @@ causal graph. A causal mechanism of a variable is the conditional distribution o
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_gcm_supply_chain_dist_change_19_0.png" src="../_images/example_notebooks_gcm_supply_chain_dist_change_19_0.png" />
+<img alt="../_images/example_notebooks_gcm_supply_chain_dist_change_27_0.png" src="../_images/example_notebooks_gcm_supply_chain_dist_change_27_0.png" />
 </div>
 </div>
 <p>Whereas the <span class="math notranslate nohighlight">\(95\%\)</span> confidence intervals for the contributions of <em>demand</em> and <em>confirmed</em> are above <span class="math notranslate nohighlight">\(0\)</span>, those of other nodes are close to <span class="math notranslate nohighlight">\(0\)</span>. Overall, these results suggest that changes in the causal mechanisms of <em>demand</em> and <em>confirmed</em> are the drivers for the observed change in the <em>received</em> quantity week-over-week. Causal mechanisms can change in a real-world system, for instance, after deploying a new subsystem with a different algorithm. In fact, these results are
@@ -1122,7 +1216,7 @@ consistent with the <strong>ground truth</strong> (see Appendix).</p>
 book</a>. Using linear ANMs, we generate data (or draw i.i.d. samples) from the distribution of each variable. We use the Gamma distribution for noise terms mainly to mimic real-world setting, where the distribution of variables often show heavy-tail behaviour. Between two weeks, we only change the data-generating process (causal mechanism) of <em>demand</em> and <em>confirmed</em> respectively by changing the
 value of demand mean from <span class="math notranslate nohighlight">\(2\)</span> to <span class="math notranslate nohighlight">\(4\)</span>, and linear coefficient <span class="math notranslate nohighlight">\(\alpha\)</span> from <span class="math notranslate nohighlight">\(1\)</span> to <span class="math notranslate nohighlight">\(2\)</span>.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>

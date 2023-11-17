@@ -457,8 +457,8 @@
 <nav id="bd-toc-nav">
     <ul class="visible nav section-nav flex-column">
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#Setting-up-the-causal-graph">
-   Setting up the causal graph
+  <a class="reference internal nav-link" href="#Setting-up-the-causal-model">
+   Setting up the causal model
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
@@ -940,8 +940,8 @@ div.rendered_html tbody tr:hover {
 </div>
 <p>In the matrix above, the plots on the diagonal line are histograms of variables, whereas those outside of the diagonal are scatter plots of pair of variables. The histograms of services without a dependency, namely <code class="docutils literal notranslate"><span class="pre">Customer</span> <span class="pre">DB</span></code>, <code class="docutils literal notranslate"><span class="pre">Product</span> <span class="pre">DB</span></code>, <code class="docutils literal notranslate"><span class="pre">Order</span> <span class="pre">DB</span></code> and <code class="docutils literal notranslate"><span class="pre">Shipping</span> <span class="pre">Cost</span> <span class="pre">Service</span></code>, have shapes similar to one half of a Gaussian distribution. The scatter plots of various pairs of variables (e.g., <code class="docutils literal notranslate"><span class="pre">API</span></code> and <code class="docutils literal notranslate"><span class="pre">www</span></code>, <code class="docutils literal notranslate"><span class="pre">www</span></code> and <code class="docutils literal notranslate"><span class="pre">Website</span></code>, <code class="docutils literal notranslate"><span class="pre">Order</span> <span class="pre">Service</span></code> and <code class="docutils literal notranslate"><span class="pre">Order</span> <span class="pre">DB</span></code>) show linear
 relations. We shall use this information shortly to assign generative causal models to nodes in the causal graph.</p>
-<section id="Setting-up-the-causal-graph">
-<h2>Setting up the causal graph<a class="headerlink" href="#Setting-up-the-causal-graph" title="Permalink to this heading"></a></h2>
+<section id="Setting-up-the-causal-model">
+<h2>Setting up the causal model<a class="headerlink" href="#Setting-up-the-causal-model" title="Permalink to this heading"></a></h2>
 <p>If we look at the <code class="docutils literal notranslate"><span class="pre">Website</span></code> node, it becomes apparent that the latency we experience there depends on the latencies of all downstream nodes. In particular, if one of the downstream nodes takes a long time, <code class="docutils literal notranslate"><span class="pre">Website</span></code> will also take a long time to show an update. Seeing this, the causal graph of the latencies can be built by inverting the arrows of the service graph.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
@@ -1004,13 +1004,131 @@ relations. We shall use this information shortly to assign generative causal mod
 <blockquote>
 <div><p>gcm.auto.assign_causal_mechanisms(causal_model, normal_data)</p>
 </div></blockquote>
+</div><p>Before we contiue with the first scenario, let’s first evaluate our causal model:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gcm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">normal_data</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">evaluate_causal_model</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">normal_data</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Fitting causal mechanism of node Order DB: 100%|██████████| 11/11 [00:00&lt;00:00, 70.30it/s]
+Evaluating causal mechanisms...: 100%|██████████| 11/11 [00:02&lt;00:00,  4.51it/s]
+Test permutations of given graph: 100%|██████████| 50/50 [01:12&lt;00:00,  1.45s/it]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_rca_microservice_architecture_15_1.png" src="../_images/example_notebooks_gcm_rca_microservice_architecture_15_1.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Evaluated the performance of the causal mechanisms and the invertibility assumption of the causal mechanisms and the overall average KL divergence between generated and observed distribution and graph structure. The results are as follows:
+
+==== Evaluation of Causal Mechanisms ====
+Root nodes are evaluated based on the KL divergence between the generated and the observed distribution.
+Non-root nodes are evaluated based on the (normalized) Continuous Ranked Probability Score (CRPS), which is a generalizes the Mean Absolute Percentage Error to probabilistic predictions. Since the causal mechanisms produce conditional distributions, this should give some insights into their performance and calibration. However, note that many algorithms are still relatively robust against poor model performances.
+
+--- Node Customer DB: The KL divergence between generated and observed distribution is 0.01047641921459343.
+The estimated KL divergence indicates an overall very good representation of the data distribution.
+
+--- Node Shipping Cost Service: The KL divergence between generated and observed distribution is 0.0063329526638281645.
+The estimated KL divergence indicates an overall very good representation of the data distribution.
+
+--- Node Product DB: The KL divergence between generated and observed distribution is 0.03901387556651128.
+The estimated KL divergence indicates an overall very good representation of the data distribution.
+
+--- Node Order DB: The KL divergence between generated and observed distribution is 0.02071579380293642.
+The estimated KL divergence indicates an overall very good representation of the data distribution.
+
+--- Node Auth Service: The normalized CRPS of this node is 0.3029908776710659.
+The estimated CRPS indicates a good model performance.
+
+--- Node Caching Service: The normalized CRPS of this node is 0.463454241775776.
+The estimated CRPS indicates a fair model performance. Note, however, that a high CRPS could also result from a small signal to noise ratio.
+
+--- Node Order Service: The normalized CRPS of this node is 0.30369675935170537.
+The estimated CRPS indicates a good model performance.
+
+--- Node Product Service: The normalized CRPS of this node is 0.36397340754651375.
+The estimated CRPS indicates a fair model performance. Note, however, that a high CRPS could also result from a small signal to noise ratio.
+
+--- Node API: The normalized CRPS of this node is 0.11584505271409402.
+The estimated CRPS indicates a very good model performance.
+
+--- Node www: The normalized CRPS of this node is 0.07799500865233158.
+The estimated CRPS indicates a very good model performance.
+
+--- Node Website: The normalized CRPS of this node is 0.10198285050830809.
+The estimated CRPS indicates a very good model performance.
+
+==== Evaluation of Invertible Functional Causal Model Assumption ====
+
+--- The model assumption for node www is not rejected with a p-value of 1.0 (after potential adjustment) and a significance level of 0.05.
+This implies that the model assumption might be valid.
+
+--- The model assumption for node Website is not rejected with a p-value of 1.0 (after potential adjustment) and a significance level of 0.05.
+This implies that the model assumption might be valid.
+
+--- The model assumption for node Auth Service is not rejected with a p-value of 1.0 (after potential adjustment) and a significance level of 0.05.
+This implies that the model assumption might be valid.
+
+--- The model assumption for node API is not rejected with a p-value of 1.0 (after potential adjustment) and a significance level of 0.05.
+This implies that the model assumption might be valid.
+
+--- The model assumption for node Product Service is rejected with a p-value of 0.0 (after potential adjustment) and a significance level of 0.05.
+This implies that the model assumption might not be valid. This is, the relationship cannot be represent with this type of mechanism or there is a hidden confounder between the node and its parents.
+
+--- The model assumption for node Order Service is not rejected with a p-value of 1.0 (after potential adjustment) and a significance level of 0.05.
+This implies that the model assumption might be valid.
+
+--- The model assumption for node Caching Service is rejected with a p-value of 0.0 (after potential adjustment) and a significance level of 0.05.
+This implies that the model assumption might not be valid. This is, the relationship cannot be represent with this type of mechanism or there is a hidden confounder between the node and its parents.
+
+Note that these results are based on statistical independence tests, and the fact that the assumption was not rejected does not necessarily imply that it is correct. There is just no evidence against it.
+
+==== Evaluation of Generated Distribution ====
+The overall average KL divergence between the generated and observed distribution is 0.10385578947052108
+The estimated KL divergence indicates an overall very good representation of the data distribution.
+
+==== Evaluation of the Causal Graph Structure ====
++-------------------------------------------------------------------------------------------------------+
+|                                         Falsificaton Summary                                          |
++-------------------------------------------------------------------------------------------------------+
+| The given DAG is informative because 0 / 50 of the permutations lie in the Markov                     |
+| equivalence class of the given DAG (p-value: 0.00).                                                   |
+| The given DAG violates 2/63 LMCs and is better than 100.0% of the permuted DAGs (p-value: 0.00).      |
+| Based on the provided significance level (0.05) and because the DAG is informative,                   |
+| we do not reject the DAG.                                                                             |
++-------------------------------------------------------------------------------------------------------+
+
+==== NOTE ====
+Always double check the made model assumptions with respect to the graph structure and choice of causal mechanisms.
+All these evaluations give some insight into the goodness of the causal model, but should not be overinterpreted, since some causal relationships can be intrinsically hard to model. Furthermore, many algorithms are fairly robust against misspecifications or poor performances of causal mechanisms.
+</pre></div></div>
+</div>
+<p>This confirms the goodness of our causal model. However, we also see that for two nodes (‘Product Service’ and ‘Caching Service’), the additive noise model assumption is violated. This also aligns with the data generation process, where these two nodes follow non-additive noise models. As we see in the following, most of the algorithms are still fairly robust against such violations or poor performance of the causal mechanism.</p>
+<div class="alert alert-block alert-info"><p>For more detailed insights, set compare_mechanism_baselines to True. However, this will take significantly longer.</p>
 </div></section>
 <section id="Scenario-1:-Observing-a-single-outlier">
 <h2>Scenario 1: Observing a single outlier<a class="headerlink" href="#Scenario-1:-Observing-a-single-outlier" title="Permalink to this heading"></a></h2>
 <p>Suppose we get an alert from our system where a customer experienced an unusually high latency when an order is placed. Our task is now to investigate this issue and to find the root cause of this behaviour.</p>
 <p>We first load the latency to the corresponding alert.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">outlier_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;rca_microservice_architecture_anomaly.csv&quot;</span><span class="p">)</span>
@@ -1019,7 +1137,7 @@ relations. We shall use this information shortly to assign generative causal mod
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1075,7 +1193,7 @@ relations. We shall use this information shortly to assign generative causal mod
 </div>
 <p>We are interested in the increased latency of <code class="docutils literal notranslate"><span class="pre">Website</span></code> which the customer directly experienced.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">outlier_data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;Website&#39;</span><span class="p">]</span><span class="o">-</span><span class="n">normal_data</span><span class="p">[</span><span class="s1">&#39;Website&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
@@ -1083,7 +1201,7 @@ relations. We shall use this information shortly to assign generative causal mod
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1096,7 +1214,7 @@ $\displaystyle 2.00895545064217$</div></div>
 <p>To answer why <code class="docutils literal notranslate"><span class="pre">Website</span></code> was slower for this customer, we attribute the outlier latency at <code class="docutils literal notranslate"><span class="pre">Website</span></code> to upstream services in the causal graph. We refer the reader to <a class="reference external" href="https://arxiv.org/abs/1912.02724">Janzing et al., 2019</a> for scientific details behind this API. We will calculate a 95% bootstrapped confidence interval of our attributions. In particular, we learn the causal models from a random subset of normal data and attribute the target outlier score using those models, repeating the
 process 10 times. This way, the confidence intervals we report account for (a) the uncertainty of our causal models as well as (b) the uncertainty in the attributions due to the variance in the samples drawn from those causal models.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gcm</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">disable_progress_bars</span><span class="p">()</span> <span class="c1"># to disable print statements when computing Shapley values</span>
@@ -1114,7 +1232,7 @@ process 10 times. This way, the confidence intervals we report account for (a) t
 <div class="alert alert-block alert-info"><p>By default, a quantile-based anomaly score is used that estimates the negative log-probability of a sample being normal. This is, the higher the probabilty of an outlier, the larger the score. The library offers different kinds of outlier scoring functions, such as the z-score, where the mean is the expected value based on the causal model.</p>
 </div><p>Let us visualize the attributions along with their uncertainty in a bar plot.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bar_plot</span><span class="p">(</span><span class="n">median_attribs</span><span class="p">,</span> <span class="n">uncertainty_attribs</span><span class="p">,</span> <span class="s1">&#39;Attribution Score&#39;</span><span class="p">)</span>
@@ -1125,7 +1243,7 @@ process 10 times. This way, the confidence intervals we report account for (a) t
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_gcm_rca_microservice_architecture_22_0.png" src="../_images/example_notebooks_gcm_rca_microservice_architecture_22_0.png" />
+<img alt="../_images/example_notebooks_gcm_rca_microservice_architecture_26_0.png" src="../_images/example_notebooks_gcm_rca_microservice_architecture_26_0.png" />
 </div>
 </div>
 <p>The attributions indicate that <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> is the main driver of high latency in <code class="docutils literal notranslate"><span class="pre">Website</span></code> which is expected as we perturb the causal mechanism of <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> to generate an outlier latency in <code class="docutils literal notranslate"><span class="pre">Website</span></code> (see Appendix below). Attributions to <code class="docutils literal notranslate"><span class="pre">Customer</span> <span class="pre">DB</span></code> and <code class="docutils literal notranslate"><span class="pre">Product</span> <span class="pre">Service</span></code> can be explained by misspecification of causal models. First, some of the parent-child relationships in the causal graph are non-linear (by looking at the scatter matrix). Second, the parent
@@ -1137,7 +1255,7 @@ child-relationship between <code class="docutils literal notranslate"><span clas
 <p>In the previous scenario, we attributed a <em>single</em> outlier latency in <code class="docutils literal notranslate"><span class="pre">Website</span></code> to services that are nodes in the causal graph, which is useful for anecdotal deep dives. Next, we consider a scenario where we observe a permanent degradation of latencies and we want to understand its drivers. In particular, we attribute the change in the average latency of <code class="docutils literal notranslate"><span class="pre">Website</span></code> to upstream nodes.</p>
 <p>Suppose we get additional 1000 requests with higher latencies as follows.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">outlier_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;rca_microservice_architecture_anomaly_1000.csv&quot;</span><span class="p">)</span>
@@ -1146,7 +1264,7 @@ child-relationship between <code class="docutils literal notranslate"><span clas
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1258,7 +1376,7 @@ child-relationship between <code class="docutils literal notranslate"><span clas
 </div>
 <p>We are interested in the increased latency of <code class="docutils literal notranslate"><span class="pre">Website</span></code> on average for 1000 requests which the customers directly experienced.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">outlier_data</span><span class="p">[</span><span class="s1">&#39;Website&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">-</span> <span class="n">normal_data</span><span class="p">[</span><span class="s1">&#39;Website&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
@@ -1266,7 +1384,7 @@ child-relationship between <code class="docutils literal notranslate"><span clas
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1279,7 +1397,7 @@ $\displaystyle 1.93236488530225$</div></div>
 <p>To answer why <code class="docutils literal notranslate"><span class="pre">Website</span></code> is slower for those 1000 requests compared to before, we attribute the change in the average latency of <code class="docutils literal notranslate"><span class="pre">Website</span></code> to services upstream in the causal graph. We refer the reader to <a class="reference external" href="https://assets.amazon.science/b6/c0/604565d24d049a1b83355921cc6c/why-did-the-distribution-change.pdf">Budhathoki et al., 2021</a> for scientific details behind this API. As in the previous scenario, we will calculate a 95% bootstrapped confidence interval of our attributions and visualize
 them in a bar plot.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -1300,7 +1418,7 @@ them in a bar plot.</p>
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_gcm_rca_microservice_architecture_30_0.png" src="../_images/example_notebooks_gcm_rca_microservice_architecture_30_0.png" />
+<img alt="../_images/example_notebooks_gcm_rca_microservice_architecture_34_0.png" src="../_images/example_notebooks_gcm_rca_microservice_architecture_34_0.png" />
 </div>
 </div>
 <p>We observe that <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> is the root cause that slowed down <code class="docutils literal notranslate"><span class="pre">Website</span></code>. In particular, the method we used tells us that the change in the causal mechanism (i.e., the input-output behaviour) of <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> (e.g., Caching algorithm) slowed down <code class="docutils literal notranslate"><span class="pre">Website</span></code>. This is also expected as the outlier latencies were generated by changing the causal mechanism of <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> (see Appendix below).</p>
@@ -1310,10 +1428,10 @@ them in a bar plot.</p>
 <h2>Scenario 3: Simulating the intervention of shifting resources<a class="headerlink" href="#Scenario-3:-Simulating-the-intervention-of-shifting-resources" title="Permalink to this heading"></a></h2>
 <p>Next, let us imagine a scenario where permanent degradation has happened as in scenario 2 and we’ve successfully identified <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> as the root cause. Furthermore, we figured out that a recent deployment of the <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> contained a bug that is causing the overloaded hosts. A proper fix must be deployed, or the previous deployment must be rolled back. But, in the meantime, could we mitigate the situation by shifting over some resources from <code class="docutils literal notranslate"><span class="pre">Shipping</span> <span class="pre">Service</span></code> to
 <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code>? And would that help? Before doing it in reality, let us simulate it first and see whether it improves the situation.</p>
-<p><img alt="b187dc43c32943ebbbd4d0acb49e534f" class="no-scaled-link" src="../_images/shifting-resources.png" style="width: 600px;" /></p>
+<p><img alt="b0597da91d844984831b61b7334a600d" class="no-scaled-link" src="../_images/shifting-resources.png" style="width: 600px;" /></p>
 <p>Let’s perform an intervention where we say we can reduce the average time of <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> by 1s. But at the same time we buy this speed-up by an average slow-down of 2s in <code class="docutils literal notranslate"><span class="pre">Shipping</span> <span class="pre">Cost</span> <span class="pre">Service</span></code>.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">median_mean_latencies</span><span class="p">,</span> <span class="n">uncertainty_mean_latencies</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">confidence_intervals</span><span class="p">(</span>
@@ -1331,7 +1449,7 @@ them in a bar plot.</p>
 </div>
 <p>Has the situation improved? Let’s visualize the results.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">avg_website_latency_before</span> <span class="o">=</span> <span class="n">outlier_data</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()[</span><span class="s1">&#39;Website&#39;</span><span class="p">]</span>
@@ -1349,7 +1467,7 @@ them in a bar plot.</p>
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_gcm_rca_microservice_architecture_35_0.png" src="../_images/example_notebooks_gcm_rca_microservice_architecture_35_0.png" />
+<img alt="../_images/example_notebooks_gcm_rca_microservice_architecture_39_0.png" src="../_images/example_notebooks_gcm_rca_microservice_architecture_39_0.png" />
 </div>
 </div>
 <p>Indeed, we do get an improvement by about 1s. We’re not back at normal operation, but we’ve mitigated part of the problem. From here, maybe we can wait until a proper fix is deployed.</p>
@@ -1358,7 +1476,7 @@ them in a bar plot.</p>
 <h2>Appendix: Data generation process<a class="headerlink" href="#Appendix:-Data-generation-process" title="Permalink to this heading"></a></h2>
 <p>The scenarios above work on synthetic data. The normal data was generated using the following functions:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">truncexpon</span><span class="p">,</span> <span class="n">halfnorm</span>
@@ -1421,7 +1539,7 @@ all three service have returned.</p>
 <div class="alert alert-block alert-info"><p>We use truncated exponential and half-normal distributions, since their shapes are similar to distributions observed in real services.</p>
 </div><p>The anomalous data is generated in the following way:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">unobserved_intrinsic_latencies_anomalous</span><span class="p">(</span><span class="n">num_samples</span><span class="p">):</span>

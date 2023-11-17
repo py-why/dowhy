@@ -96,6 +96,10 @@ Fitting means, we learn the generative models of the variables in the SCM accord
 
 The causal model is now ready to be used for :doc:`../causal_tasks/index`.
 
+Evaluating a fitted SCM
+-----------------------
+
+For evaluating the fitted model, see :doc:`modeling_gcm/model_evaluation`.
 
 Other related GCM topics
 ------------------------
@@ -109,5 +113,6 @@ Other related GCM topics
 
     graphical_causal_model_types
     draw_samples
+    model_evaluation
     customizing_model_assignment
     estimating_confidence_intervals
