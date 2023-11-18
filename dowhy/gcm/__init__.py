@@ -2,7 +2,6 @@
 this addition and its API is considered experimental, meaning there might be breaking changes to its API in the
 future.
 """
-
 from . import auto, config, divergence, ml, shapley, stats, uncertainty, util
 from .anomaly import anomaly_scores, attribute_anomalies
 from .anomaly_scorers import (
@@ -19,6 +18,7 @@ from .confidence_intervals import confidence_intervals
 from .confidence_intervals_cms import bootstrap_sampling, fit_and_compute
 from .density_estimators import GaussianMixtureDensityEstimator, KernelDensityEstimator1D
 from .distribution_change import distribution_change, distribution_change_of_graphs
+from .equation_parser import create_causal_model_from_equations
 from .feature_relevance import feature_relevance_distribution, feature_relevance_sample, parent_relevance
 from .fitting_sampling import draw_samples, fit
 from .independence_test import (
