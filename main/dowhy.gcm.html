@@ -2917,9 +2917,10 @@ such as mean, variance, median etc. that are used for computing a score.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.gcm.anomaly_scorers.</span></span><span class="sig-name descname"><span class="pre">MedianCDFQuantileScorer</span></span><a class="reference internal" href="_modules/dowhy/gcm/anomaly_scorers.html#MedianCDFQuantileScorer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.gcm.anomaly_scorers.MedianCDFQuantileScorer" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#dowhy.gcm.anomaly_scorer.AnomalyScorer" title="dowhy.gcm.anomaly_scorer.AnomalyScorer"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnomalyScorer</span></code></a></p>
 <dl class="simple">
-<dt>Given an anomalous observation x and samples from the distribution of X, this score represents:</dt><dd><p>score(x) = 1 - 2 * min[P(X &gt;= x), P(X &lt;= x)]</p>
+<dt>Given an anomalous observation x and samples from the distribution of X, this score represents:</dt><dd><p>score(x) = 1 - 2 * min[P(X &gt; x) + P(X = x) / 2, P(X &lt; x) + P(X = x) / 2]</p>
 </dd>
 </dl>
+<p>Comparing two NaN values are considered equal here.</p>
 <p>It scores the observation based on the quantile of x with respect to the distribution of X. Here, if the
 sample x lies in the tail of the distribution, we want to have a large score. Since we apriori don’t know
 whether the sample falls on the left or right side of the median of X, we estimate the quantile on both
@@ -2934,7 +2935,7 @@ x = 2.5</p>
 <dt>Then, x falls in the right sided-quantile and only one sample in X is larger than x. Therefore, we get</dt><dd><p>p(X &gt;= x) = 1 / 7
 P(X &lt;= x) = 6 / 7</p>
 </dd>
-<dt>With the end score of:</dt><dd><p>1 - 2 * min[P(X &gt;= x), P(X &lt;= x)] = 1 - 2 / 7 = 0.71</p>
+<dt>With the end score of:</dt><dd><p>1 - 2 * min[P(X &gt; x) + P(X = x) / 2, P(X &lt; x) + P(X = x) / 2] = 1 - 2 / 7 = 0.71</p>
 </dd>
 </dl>
 <p>Note: For equal samples, we contribute half of the count to the left and half of the count the right side.</p>
@@ -2995,9 +2996,10 @@ such as mean, variance, median etc. that are used for computing a score.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.gcm.anomaly_scorers.</span></span><span class="sig-name descname"><span class="pre">RescaledMedianCDFQuantileScorer</span></span><a class="reference internal" href="_modules/dowhy/gcm/anomaly_scorers.html#RescaledMedianCDFQuantileScorer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.gcm.anomaly_scorers.RescaledMedianCDFQuantileScorer" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#dowhy.gcm.anomaly_scorer.AnomalyScorer" title="dowhy.gcm.anomaly_scorer.AnomalyScorer"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnomalyScorer</span></code></a></p>
 <dl class="simple">
-<dt>Given an anomalous observation x and samples from the distribution of X, this score represents:</dt><dd><p>score(x) = -log(2 * min[P(X &gt;= x), P(X &lt;= x)])</p>
+<dt>Given an anomalous observation x and samples from the distribution of X, this score represents:</dt><dd><p>score(x) = -log(2 * min[P(X &gt; x) + P(X = x) / 2, P(X &lt; x) + P(X = x) / 2])</p>
 </dd>
 </dl>
+<p>Comparing two NaN values are considered equal here.</p>
 <p>This is a rescaled version of the score s obtained by the <a class="reference internal" href="#dowhy.gcm.anomaly_scorers.MedianCDFQuantileScorer" title="dowhy.gcm.anomaly_scorers.MedianCDFQuantileScorer"><code class="xref py py-class docutils literal notranslate"><span class="pre">MedianCDFQuantileScorer</span></code></a>
 by calculating the negative log-probability -log(1 - s). This has the advantage that small differences in the
 probabilities are amplified, especially when they are close to 0. For instance, the difference between
