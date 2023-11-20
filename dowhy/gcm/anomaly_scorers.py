@@ -43,13 +43,13 @@ class MedianCDFQuantileScorer(AnomalyScorer):
         if (X.ndim == 2 and X.shape[1] > 1) or X.ndim > 2:
             raise ValueError("The MedianCDFQuantileScorer currently only supports one-dimensional data!")
 
-        self._distribution_samples = X.reshape(-1)
+        self._distribution_samples = X.reshape(-1).astype(float)
 
     def score(self, X: np.ndarray) -> np.ndarray:
         if self._distribution_samples is None:
             raise ValueError("Scorer has not been fitted!")
 
-        X = shape_into_2d(X)
+        X = shape_into_2d(X.astype(float))
 
         equal_samples = np.sum(np.isclose(X, self._distribution_samples, rtol=0, atol=0, equal_nan=True), axis=1)
         greater_samples = np.sum(X > self._distribution_samples, axis=1) + equal_samples / 2

@@ -29,3 +29,14 @@ def test_given_data_with_nans_when_using_median_quantile_scorer_with_nan_support
     assert scorer.score(np.array([1, 4, 8, np.nan])) == approx(
         [-np.log(2 * 0.5 / 10), -np.log(2 * 3.5 / 10), -np.log(2 * 0.5 / 10), -np.log(2 * 1 / 10)]
     )
+
+
+def test_given_numpy_arrays_with_object_type_when_using_median_quantile_scorer_then_does_not_raise_error():
+    training_data = np.array([1, 2, 3, 4, 5, 6, 7, 8, np.nan, np.nan], dtype=object)
+
+    scorer = RescaledMedianCDFQuantileScorer()
+    scorer.fit(training_data)
+
+    assert scorer.score(np.array([1, 4, 8, np.nan], dtype=object)) == approx(
+        [-np.log(2 * 0.5 / 10), -np.log(2 * 3.5 / 10), -np.log(2 * 0.5 / 10), -np.log(2 * 1 / 10)]
+    )
