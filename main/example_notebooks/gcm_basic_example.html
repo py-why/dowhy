@@ -302,6 +302,11 @@
   </a>
  </li>
  <li class="toctree-l1">
+  <a class="reference internal" href="gcm_icc.html">
+   Estimating intrinsic causal influences in real-world examples
+  </a>
+ </li>
+ <li class="toctree-l1">
   <a class="reference internal" href="gcm_counterfactual_medical_dry_eyes.html">
    Counterfactual Analysis in a Medical Case
   </a>
@@ -822,33 +827,33 @@ div.rendered_html tbody tr:hover {
   <tbody>
     <tr>
       <th>0</th>
-      <td>-0.048568</td>
-      <td>1.752937</td>
-      <td>6.456715</td>
+      <td>0.828540</td>
+      <td>0.368320</td>
+      <td>0.178130</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>-0.649381</td>
-      <td>-2.039610</td>
-      <td>-8.029293</td>
+      <td>-0.573015</td>
+      <td>-0.674695</td>
+      <td>-1.515167</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>-0.862508</td>
-      <td>-0.381532</td>
-      <td>-1.362773</td>
+      <td>1.578314</td>
+      <td>2.274793</td>
+      <td>7.334955</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>0.341258</td>
-      <td>1.711897</td>
-      <td>4.567796</td>
+      <td>-0.302126</td>
+      <td>-1.514518</td>
+      <td>-4.689454</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>-1.826782</td>
-      <td>-3.764052</td>
-      <td>-10.353731</td>
+      <td>0.594344</td>
+      <td>1.231524</td>
+      <td>3.278236</td>
     </tr>
   </tbody>
 </table>
@@ -887,20 +892,20 @@ Node X is a root node. Assigning &#39;Empirical Distribution&#39; to the node re
 Node Y is a non-root node. Assigning &#39;AdditiveNoiseModel using LinearRegression&#39; to the node.
 This represents the causal relationship as Y := f(X) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
-LinearRegression: 0.9894422442291113
+LinearRegression: 1.001494557677026
 Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 0.9915453464080399
-HistGradientBoostingRegressor: 1.1159191791415402
+                (&#39;linearregression&#39;, LinearRegression)]): 1.0029910960009065
+HistGradientBoostingRegressor: 1.1935987603503613
 Based on the type of causal mechanism, the model with the lowest metric value represents the best choice.
 
 --- Node: Z
 Node Z is a non-root node. Assigning &#39;AdditiveNoiseModel using LinearRegression&#39; to the node.
 This represents the causal relationship as Z := f(Y) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
-LinearRegression: 1.0547081464876367
+LinearRegression: 0.9499388162352504
 Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 1.0549564955168667
-HistGradientBoostingRegressor: 1.736335656311163
+                (&#39;linearregression&#39;, LinearRegression)]): 0.9552863787669679
+HistGradientBoostingRegressor: 1.6924956127217472
 Based on the type of causal mechanism, the model with the lowest metric value represents the best choice.
 </pre></div></div>
 </div>
@@ -934,7 +939,7 @@ Based on the type of causal mechanism, the model with the lowest metric value re
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node Z: 100%|██████████| 3/3 [00:00&lt;00:00, 437.29it/s]
+Fitting causal mechanism of node Z: 100%|██████████| 3/3 [00:00&lt;00:00, 428.51it/s]
 </pre></div></div>
 </div>
 <p>Fitting means, we learn the generative models of the variables in the SCM according to the data.</p>
@@ -952,8 +957,8 @@ Fitting causal mechanism of node Z: 100%|██████████| 3/3 [00
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Evaluating causal mechanisms...: 100%|██████████| 3/3 [00:00&lt;00:00, 3532.54it/s]
-Test permutations of given graph: 100%|██████████| 6/6 [00:00&lt;00:00, 18.71it/s]
+Evaluating causal mechanisms...: 100%|██████████| 3/3 [00:00&lt;00:00, 3196.88it/s]
+Test permutations of given graph: 100%|██████████| 6/6 [00:00&lt;00:00, 18.63it/s]
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -974,13 +979,13 @@ Evaluated the performance of the causal mechanisms and the invertibility assumpt
 Root nodes are evaluated based on the KL divergence between the generated and the observed distribution.
 Non-root nodes are evaluated based on the (normalized) Continuous Ranked Probability Score (CRPS), which is a generalizes the Mean Absolute Percentage Error to probabilistic predictions. Since the causal mechanisms produce conditional distributions, this should give some insights into their performance and calibration. However, note that many algorithms are still relatively robust against poor model performances.
 
---- Node X: The KL divergence between generated and observed distribution is 0.11466565511892757.
+--- Node X: The KL divergence between generated and observed distribution is 0.10305731074650686.
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
---- Node Y: The normalized CRPS of this node is 0.2575689091352067.
+--- Node Y: The normalized CRPS of this node is 0.2585436983393517.
 The estimated CRPS indicates a good model performance.
 
---- Node Z: The normalized CRPS of this node is 0.08831160626420534.
+--- Node Z: The normalized CRPS of this node is 0.08173366645220267.
 The estimated CRPS indicates a very good model performance.
 
 ==== Evaluation of Invertible Functional Causal Model Assumption ====
@@ -1065,33 +1070,33 @@ All these evaluations give some insight into the goodness of the causal model, b
   <tbody>
     <tr>
       <th>0</th>
-      <td>-0.453326</td>
+      <td>0.623163</td>
       <td>2.34</td>
-      <td>6.928253</td>
+      <td>6.724680</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>0.739382</td>
+      <td>-0.781923</td>
       <td>2.34</td>
-      <td>6.323582</td>
+      <td>7.340677</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>-0.095827</td>
+      <td>-1.118729</td>
       <td>2.34</td>
-      <td>6.410906</td>
+      <td>8.802063</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>-0.291357</td>
+      <td>0.946871</td>
       <td>2.34</td>
-      <td>9.201059</td>
+      <td>6.608137</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>-1.824795</td>
+      <td>1.628036</td>
       <td>2.34</td>
-      <td>7.092001</td>
+      <td>4.745804</td>
     </tr>
   </tbody>
 </table>

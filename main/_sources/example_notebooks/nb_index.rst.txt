@@ -141,6 +141,15 @@ Real world-inspired examples
 
 .. grid:: 2
 
+    .. grid-item-card:: :doc:`gcm_icc`
+
+        .. image:: ../_static/icc-example.jpg
+            :width: 200px
+            :align: center
+        +++
+        | **Level:** Advanced
+        | **Task:** Intrinsic causal influence via GCM
+
     .. grid-item-card:: :doc:`gcm_counterfactual_medical_dry_eyes`
 
         .. image:: ../_static/gcm-counterfactual-example.png
@@ -149,6 +158,8 @@ Real world-inspired examples
         +++
         | **Level:** Advanced
         | **Task:** Counterfactuals via GCM
+
+.. grid:: 2
 
     .. grid-item-card:: :doc:`gcm_falsify_dag`
 
@@ -341,6 +352,7 @@ Miscellaneous
    gcm_rca_microservice_architecture
    gcm_401k_analysis
    gcm_supply_chain_dist_change
+   gcm_icc
    gcm_counterfactual_medical_dry_eyes
    gcm_falsify_dag
 
