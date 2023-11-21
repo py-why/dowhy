@@ -109,20 +109,31 @@ performance and whether our assumptions hold:
 
     ==== Evaluation of Causal Mechanisms ====
     Root nodes are evaluated based on the KL divergence between the generated and the observed distribution.
-    Non-root nodes are evaluated based on the (normalized) Continuous Ranked Probability Score (CRPS), which is a generalizes the Mean Absolute Percentage Error to probabilistic predictions. Since the causal mechanisms produce conditional distributions, this should give some insights into their performance and calibration. However, note that many algorithms are still relatively robust against poor model performances.
+    Non-root nodes are mainly evaluated based on the (normalized) Continuous Ranked Probability Score (CRPS), which is a generalizes the Mean Absolute Percentage Error to probabilistic predictions. Since the causal mechanisms produce conditional distributions, this should give some insights into their performance and calibration. In addition, the mean squared error (MSE), the normalized MSE (NMSE), the R2 coefficient and the F1 score (for categorical nodes) is reported.
 
-    --- Node X: The KL divergence between generated and observed distribution is 0.020548269898818708.
+    --- Node X
+    - The KL divergence between generated and observed distribution is 0.009626590006593095.
     The estimated KL divergence indicates an overall very good representation of the data distribution.
 
-    --- Node Y: The normalized CRPS of this node is 0.26169914525652427.
+    --- Node Y
+    - The MSE is 0.9757997114620423.
+    - The NMSE is 0.43990166981441525.
+    - The R2 coefficient is 0.8061235344428738.
+    - The normalized CRPS is 0.25017606839653783.
     The estimated CRPS indicates a good model performance.
+    The mechanism is better or equally good than all 7 baseline mechanisms.
 
-    --- Node Z: The normalized CRPS of this node is 0.08497732548860475.
+    --- Node Z
+    - The MSE is 1.0203244742317465.
+    - The NMSE is 0.14823906495213202.
+    - The R2 coefficient is 0.9779316094447573.
+    - The normalized CRPS is 0.08426403180533645.
     The estimated CRPS indicates a very good model performance.
+    The mechanism is better or equally good than all 7 baseline mechanisms.
 
     ==== Evaluation of Invertible Functional Causal Model Assumption ====
 
-    --- The model assumption for node Y is not rejected with a p-value of 0.9261751353508025 (after potential adjustment) and a significance level of 0.05.
+    --- The model assumption for node Y is not rejected with a p-value of 1.0 (after potential adjustment) and a significance level of 0.05.
     This implies that the model assumption might be valid.
 
     --- The model assumption for node Z is not rejected with a p-value of 1.0 (after potential adjustment) and a significance level of 0.05.
@@ -131,7 +142,7 @@ performance and whether our assumptions hold:
     Note that these results are based on statistical independence tests, and the fact that the assumption was not rejected does not necessarily imply that it is correct. There is just no evidence against it.
 
     ==== Evaluation of Generated Distribution ====
-    The overall average KL divergence between the generated and observed distribution is 0.04045436327952057
+    The overall average KL divergence between the generated and observed distribution is 0.0017936403551594468
     The estimated KL divergence indicates an overall very good representation of the data distribution.
 
     ==== Evaluation of the Causal Graph Structure ====
@@ -156,8 +167,11 @@ performance and whether our assumptions hold:
 As we see, we get a detailed overview of different evaluations:
 
 **Evaluation of Causal Mechanisms:** Evaluation of the causal mechanisms with respect to their model performance.
-The performance of non-root nodes is measured using the Continuous Ranked Probability Score (CRPS), and the performance
-of root nodes is measured using the KL divergence between the generated and observed data distributions.
+For non-root nodes, the most important measure is the Continuous Ranked Probability Score (CRPS), which provides
+insights into the mechanism's accuracy and its calibration as a probabilistic model. It further lists other metrics
+such as the mean squared error (MSE), the MSE normalized by the variance (denoted as NMSE), the R2 coefficient and, in
+the case of categorical variables, the F1 score.
+If the node is a root node, the KL divergence between the generated and observed data distributions is measured.
 
 Optionally, we can set the `compare_mechanism_baselines` parameter to `True` in order
 to compare the mechanisms with some baseline models. This gives us better insights into how the mechanisms perform in
