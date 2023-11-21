@@ -8,7 +8,7 @@ import pandas as pd
 from joblib import Parallel, delayed
 from numpy.matlib import repmat
 from scipy.stats import mode
-from sklearn.metrics import f1_score, mean_squared_error
+from sklearn.metrics import f1_score, mean_squared_error, r2_score
 from sklearn.model_selection import KFold
 from statsmodels.stats.multitest import multipletests
 from tqdm import tqdm
@@ -136,10 +136,39 @@ class EvaluateCausalModelConfig:
 
 
 @dataclass
+class MechanismPerformanceResult:
+    def __init__(
+        self,
+        node_name: Any,
+        is_root: bool,
+        crps: Optional[float],
+        kl_divergence: Optional[float],
+        mse: Optional[float],
+        nmse: Optional[float],
+        r2: Optional[float],
+        f1: Optional[float],
+        count_better_performance: Optional[int],
+        best_baseline_model: Optional[str],
+        total_number_baselines: int,
+        best_baseline_performance: Optional[float],
+    ):
+        self.node_name = node_name
+        self.is_root = is_root
+        self.crps = crps
+        self.kl_divergence = kl_divergence
+        self.mse = mse
+        self.nmse = nmse
+        self.r2 = r2
+        self.f1 = f1
+        self.count_better_performance = count_better_performance
+        self.best_baseline_model = best_baseline_model
+        self.total_number_baselines = total_number_baselines
+        self.best_baseline_performance = best_baseline_performance
+
+
+@dataclass
 class CausalModelEvaluationResult:
-    model_performances: Optional[
-        Dict[Any, Tuple[bool, float, Optional[int], Optional[str], int, Optional[float]]]
-    ] = None
+    mechanism_performances: Optional[Dict[str, MechanismPerformanceResult]] = None
     pnl_assumptions: Optional[Dict[Any, Tuple[float, str, Optional[float]]]] = None
     graph_falsification: Optional[EvaluationResult] = None
     overall_kl_divergence: Optional[float] = None
@@ -147,7 +176,7 @@ class CausalModelEvaluationResult:
 
     def __str__(self):
         summary_string = "Evaluated"
-        if self.model_performances is not None:
+        if self.mechanism_performances is not None:
             summary_string += " the performance of the causal mechanisms"
         if self.pnl_assumptions is not None:
             summary_string += " and the invertibility assumption of the causal mechanisms"
@@ -159,43 +188,57 @@ class CausalModelEvaluationResult:
         summary_string += ". The results are as follows:"
         summary_strings = [summary_string]
 
-        if self.model_performances is not None:
+        if self.mechanism_performances is not None:
             summary_strings.append("\n==== Evaluation of Causal Mechanisms ====")
             summary_strings.append(
                 "Root nodes are evaluated based on the KL divergence between the generated "
                 "and the observed distribution."
             )
             summary_strings.append(
-                "Non-root nodes are evaluated based on the (normalized) Continuous Ranked Probability Score "
+                "Non-root nodes are mainly evaluated based on the (normalized) Continuous Ranked Probability Score "
                 "(CRPS), which is a generalizes the Mean Absolute Percentage Error to probabilistic "
                 "predictions. Since the causal mechanisms produce conditional distributions, this "
-                "should give some insights into their performance and calibration. However, note that many algorithms "
-                "are still relatively robust against poor model performances."
+                "should give some insights into their performance and calibration. In addition, the mean squared error "
+                "(MSE), the normalized MSE (NMSE), the R2 coefficient and the F1 score (for categorical nodes) is "
+                "reported."
             )
 
-            for node in self.model_performances:
-                if self.model_performances[node][0]:
+            for mechanism_performance in self.mechanism_performances.values():
+                summary_strings.append("\n--- Node %s" % mechanism_performance.node_name)
+                if mechanism_performance.kl_divergence is not None:
                     summary_strings.append(
-                        "\n--- Node %s: The KL divergence between generated and observed distribution is %s."
-                        % (node, self.model_performances[node][1])
+                        "- The KL divergence between generated and observed distribution is %s."
+                        % mechanism_performance.kl_divergence
                     )
-                    summary_strings.append(_get_kl_divergence_interpretation_string(self.model_performances[node][1]))
-                else:
                     summary_strings.append(
-                        "\n--- Node %s: The normalized CRPS of this node is %s."
-                        % (node, self.model_performances[node][1])
+                        _get_kl_divergence_interpretation_string(mechanism_performance.kl_divergence)
                     )
-                    summary_strings.append(_get_crps_interpretation_string(self.model_performances[node][1]))
 
-                    if self.model_performances[node][2] is not None:
-                        summary_strings.append(
-                            _get_baseline_model_interpretation_string(
-                                self.model_performances[node][2],
-                                self.model_performances[node][4],
-                                self.model_performances[node][3],
-                                self.model_performances[node][5],
-                            )
+                if mechanism_performance.mse is not None:
+                    summary_strings.append("- The MSE is %s." % mechanism_performance.mse)
+
+                if mechanism_performance.nmse is not None:
+                    summary_strings.append("- The NMSE is %s." % mechanism_performance.nmse)
+
+                if mechanism_performance.r2 is not None:
+                    summary_strings.append("- The R2 coefficient is %s." % mechanism_performance.r2)
+
+                if mechanism_performance.f1 is not None:
+                    summary_strings.append("- The F1 score is %s." % mechanism_performance.f1)
+
+                if mechanism_performance.crps is not None:
+                    summary_strings.append("- The normalized CRPS is %s." % mechanism_performance.crps)
+                    summary_strings.append(_get_crps_interpretation_string(mechanism_performance.crps))
+
+                if mechanism_performance.total_number_baselines > 0:
+                    summary_strings.append(
+                        _get_baseline_model_interpretation_string(
+                            mechanism_performance.count_better_performance,
+                            mechanism_performance.total_number_baselines,
+                            mechanism_performance.best_baseline_model,
+                            mechanism_performance.best_baseline_performance,
                         )
+                    )
 
         if self.pnl_assumptions is not None:
             summary_strings.append("\n==== Evaluation of Invertible Functional Causal Model Assumption ====")
@@ -268,9 +311,11 @@ def evaluate_causal_model(
     Evaluation of Causal Mechanisms:
     The quality of the causal mechanisms is assessed using k-fold cross validation. This means that the models are trained
     from scratch multiple times, which might take a significant amount of time for larger models. Within each fold, the models
-    are assessed using the (normalized) continuous ranked probability score (CRPS). The normalization is with respect to
-    the standard deviation of the target values. Optionally, the mechanisms are compared with baseline models to see if
-    they are performing significantly better or equally good.
+    are assessed by different metrics. For all models, the continuous ranked probability score (CRPS) normalized by the
+    standard deviation is estimated, an important metric that provides insights to the model performance as well as its
+    calibration. Further, if the node is numerical, the mean squared error (MSE), the normalized MSE (normalized by
+    the variance) and the R2 coefficient is computed. In case of categorical nodes, the F1 score is computed instead.
+    Optionally, the mechanisms' CRPS are compared with baseline models to see if there are baseline models performing significantly better.
 
     Evaluation of Invertible Functional Causal Model Assumption:
     Invertible causal mechanisms rely on the assumption that the inputs are independent of the reconstructed noise.
@@ -317,7 +362,7 @@ def evaluate_causal_model(
         data = data[np.random.choice(data.shape[0], data.shape[0], replace=False)]
 
     if evaluate_causal_mechanisms:
-        evaluation_result.model_performances = _evaluate_model_performances(
+        evaluation_result.mechanism_performances = _evaluate_model_performances(
             causal_model,
             data,
             compare_mechanism_baselines,
@@ -377,7 +422,7 @@ def _evaluate_model_performances(
         set_random_seed(random_seed)
 
         node_data = data[node_name].to_numpy()
-        metric_evaluations = []
+        metric_evaluations = {"CRPS": [], "KL": [], "MSE": [], "NMSE": [], "R2": [], "F1": []}
         baseline_crps = {}
         categorical = is_categorical(node_data)
 
@@ -386,7 +431,7 @@ def _evaluate_model_performances(
                 tmp_causal_mechanism = causal_model.causal_mechanism(node_name).clone()
                 tmp_causal_mechanism.fit(node_data[training_indices])
 
-                metric_evaluations.append(
+                metric_evaluations["KL"].append(
                     auto_estimate_kl_divergence(
                         tmp_causal_mechanism.draw_samples(len(test_indices)), node_data[test_indices]
                     )
@@ -398,9 +443,23 @@ def _evaluate_model_performances(
                 tmp_causal_mechanism = causal_model.causal_mechanism(node_name).clone()
                 tmp_causal_mechanism.fit(parent_data[training_indices], node_data[training_indices])
 
-                metric_evaluations.append(
+                metric_evaluations["CRPS"].append(
                     crps(parent_data[test_indices], node_data[test_indices], tmp_causal_mechanism.draw_samples)
                 )
+
+                conditional_expectations = _estimate_conditional_expectations(
+                    tmp_causal_mechanism, parent_data[test_indices], is_categorical, 50
+                )
+                if categorical:
+                    metric_evaluations["F1"].append(
+                        f1_score(node_data[test_indices], conditional_expectations, average="macro", zero_division=0)
+                    )
+                else:
+                    metric_evaluations["MSE"].append(
+                        mean_squared_error(node_data[test_indices], conditional_expectations)
+                    )
+                    metric_evaluations["NMSE"].append(nmse(node_data[test_indices], conditional_expectations))
+                    metric_evaluations["R2"].append(r2_score(node_data[test_indices], conditional_expectations))
 
                 if not compare_mechanism_baselines:
                     continue
@@ -442,22 +501,24 @@ def _evaluate_model_performances(
                             crps(parent_data[test_indices], node_data[test_indices], baseline_mechanism.draw_samples)
                         )
 
-        if len(metric_evaluations) == 0:
-            mean_metric = None
-        else:
-            mean_metric = float(np.mean(metric_evaluations))
+        for metric in metric_evaluations:
+            metric_evaluations[metric] = (
+                float(np.mean(metric_evaluations[metric])) if len(metric_evaluations[metric]) > 0 else None
+            )
 
         count_better_performance = None
         best_baseline_performance = None
         best_baseline_model = None
+        total_number_baselines = 0
 
         if compare_mechanism_baselines:
             count_better_performance = 0
 
             for k in baseline_crps:
+                total_number_baselines += 1
                 baseline_crps[k] = float(np.mean(baseline_crps[k]))
 
-                if mean_metric - baseline_crps[k] > 0.05:
+                if metric_evaluations["CRPS"] - baseline_crps[k] > 0.05:
                     count_better_performance += 1
 
                 if best_baseline_performance is None:
@@ -468,14 +529,19 @@ def _evaluate_model_performances(
                     best_baseline_model = k
                     best_baseline_performance = baseline_crps[k]
 
-        return (
-            node_name,
-            is_root_node(causal_model.graph, node_name),
-            mean_metric,
-            count_better_performance,
-            best_baseline_model,
-            len(baseline_crps),
-            best_baseline_performance,
+        return MechanismPerformanceResult(
+            node_name=node_name,
+            is_root=is_root_node(causal_model.graph, node_name),
+            kl_divergence=metric_evaluations["KL"],
+            crps=metric_evaluations["CRPS"],
+            mse=metric_evaluations["MSE"],
+            nmse=metric_evaluations["NMSE"],
+            r2=metric_evaluations["R2"],
+            f1=metric_evaluations["F1"],
+            count_better_performance=count_better_performance,
+            best_baseline_model=best_baseline_model,
+            total_number_baselines=total_number_baselines,
+            best_baseline_performance=best_baseline_performance,
         )
 
     random_seeds = np.random.randint(np.iinfo(np.int32).max, size=len(causal_model.graph.nodes))
@@ -492,25 +558,7 @@ def _evaluate_model_performances(
         )
     )
 
-    for (
-        node_name,
-        root_node,
-        mean_metric,
-        count_better_performance,
-        best_baseline_model,
-        num_baselines,
-        best_baseline_performance,
-    ) in all_results:
-        model_performances[node_name] = (
-            root_node,
-            mean_metric,
-            count_better_performance,
-            best_baseline_model,
-            num_baselines,
-            best_baseline_performance,
-        )
-
-    return model_performances
+    return {performance_result.node_name: performance_result for performance_result in all_results}
 
 
 def _evaluate_invertibility_assumptions(
@@ -610,18 +658,23 @@ def _estimate_conditional_expectations(
             return np.array(modes[0].tolist())
 
 
-def nrmse(y_true: np.ndarray, y_pred: np.ndarray) -> float:
-    """Estimates the Normalized Root Mean Squared Error (NRMSE) based on the given samples. This is, the root mean
+def nmse(y_true: np.ndarray, y_pred: np.ndarray, squared: bool = False) -> float:
+    """Estimates the Normalized Mean Squared Error (NMSE) based on the given samples. This is, the root mean
     squared error normalized by the variance of the observed values.
 
     :param y_true: Observed values.
     :param y_pred: Predicted values.
-    :return: The normalized RMSE.
+    :param squared: If True, returns the normalized MSE if False, it returns the normalized RMSE.
+    :return: The normalized MSE.
     """
     y_true = y_true.reshape(-1)
     y_pred = y_pred.reshape(-1)
 
-    return mean_squared_error(y_true, y_pred, squared=False) / np.std(y_true)
+    y_std = np.std(y_true)
+    if y_std == 0:
+        return mean_squared_error(y_true, y_pred, squared=squared)
+
+    return mean_squared_error(y_true, y_pred, squared=squared) / (np.var(y_true) if squared else y_std)
 
 
 def crps(

@@ -27,7 +27,7 @@ from dowhy.gcm.model_evaluation import (
     _evaluate_invertibility_assumptions,
     crps,
     evaluate_causal_model,
-    nrmse,
+    nmse,
 )
 
 
@@ -40,7 +40,8 @@ def test_given_good_fit_when_estimate_nrmse_then_returns_zero():
         noise_model=ScipyDistribution(stats.norm, loc=0, scale=0),
     )
 
-    assert nrmse(_estimate_conditional_expectations(mdl, X, False, 1), Y) == approx(0, abs=0.01)
+    assert nmse(Y, _estimate_conditional_expectations(mdl, X, False, 1), squared=True) == approx(0, abs=0.01)
+    assert nmse(Y, _estimate_conditional_expectations(mdl, X, False, 1), squared=False) == approx(0, abs=0.01)
 
 
 def test_given_bad_fit_when_estimate_nrmse_then_returns_high_value():
@@ -52,7 +53,8 @@ def test_given_bad_fit_when_estimate_nrmse_then_returns_high_value():
         noise_model=ScipyDistribution(stats.norm, loc=0, scale=0),
     )
 
-    assert nrmse(Y, _estimate_conditional_expectations(mdl, X, False, 1)) > 1
+    assert nmse(Y, _estimate_conditional_expectations(mdl, X, False, 1), squared=True) > 1
+    assert nmse(Y, _estimate_conditional_expectations(mdl, X, False, 1), squared=False) > 1
 
 
 def test_given_good_fit_but_noisy_data_when_estimate_nrmse_then_returns_expected_result():
@@ -64,8 +66,13 @@ def test_given_good_fit_but_noisy_data_when_estimate_nrmse_then_returns_expected
         noise_model=ScipyDistribution(stats.norm, loc=0, scale=1),
     )
 
-    # The RMSE should be 1 due to the variance of the noise. The NRMSE is accordingly 1 / std(Y).
-    assert nrmse(Y, _estimate_conditional_expectations(mdl, X, False, 1)) == approx(1 / np.std(Y), abs=0.05)
+    # The MSE should be 1 due to the variance of the noise. The RMSE is accordingly 1 / var(Y).
+    assert nmse(Y, _estimate_conditional_expectations(mdl, X, False, 1), squared=True) == approx(
+        1 / np.var(Y), abs=0.05
+    )
+    assert nmse(Y, _estimate_conditional_expectations(mdl, X, False, 1), squared=False) == approx(
+        1 / np.std(Y), abs=0.05
+    )
 
 
 def test_given_good_fit_with_deterministic_data_when_estimate_crps_then_returns_zero():
@@ -195,14 +202,35 @@ def test_given_continuous_data_only_when_evaluate_model_returns_expected_informa
     )
 
     assert summary.overall_kl_divergence == approx(0, abs=0.05)
-    assert summary.model_performances["X0"][1] == approx(0, abs=0.15)
-    assert summary.model_performances["X1"][1] == approx(0, abs=0.15)
-    assert summary.model_performances["Y"][1] == approx(0.05, abs=0.02)  # CRPS
+
+    assert summary.mechanism_performances["X0"].kl_divergence == approx(0, abs=0.2)
+    assert summary.mechanism_performances["X0"].crps == None
+    assert summary.mechanism_performances["X0"].nmse == None
+    assert summary.mechanism_performances["X0"].r2 == None
+    assert summary.mechanism_performances["X0"].f1 == None
+    assert summary.mechanism_performances["X0"].total_number_baselines == 0
+
+    assert summary.mechanism_performances["X1"].kl_divergence == approx(0, abs=0.2)
+    assert summary.mechanism_performances["X1"].crps == None
+    assert summary.mechanism_performances["X1"].nmse == None
+    assert summary.mechanism_performances["X1"].r2 == None
+    assert summary.mechanism_performances["X1"].f1 == None
+    assert summary.mechanism_performances["X0"].total_number_baselines == 0
+
+    assert summary.mechanism_performances["Y"].kl_divergence == None
+    assert summary.mechanism_performances["Y"].crps == approx(0.05, abs=0.02)
+    assert summary.mechanism_performances["Y"].nmse == approx(0.07, abs=0.03)
+    assert summary.mechanism_performances["Y"].r2 == approx(1, abs=0.05)
+    assert summary.mechanism_performances["Y"].f1 == None
+    assert 0 < summary.mechanism_performances["Y"].total_number_baselines <= 2
+    assert summary.mechanism_performances["Y"].count_better_performance == 0
+
+    assert "X0" not in summary.pnl_assumptions
+    assert "X1" not in summary.pnl_assumptions
     assert not summary.pnl_assumptions["Y"][1]
     assert summary.pnl_assumptions["Y"][2] == 0.05
 
     summary.plot_falsification_histogram = False
-
     summary_string = str(summary)
 
     assert (
@@ -210,12 +238,15 @@ def test_given_continuous_data_only_when_evaluate_model_returns_expected_informa
 
 ==== Evaluation of Causal Mechanisms ====
 Root nodes are evaluated based on the KL divergence between the generated and the observed distribution.
-Non-root nodes are evaluated based on the (normalized) Continuous Ranked Probability Score (CRPS), which is a generalizes the Mean Absolute Percentage Error to probabilistic predictions. Since the causal mechanisms produce conditional distributions, this should give some insights into their performance and calibration. However, note that many algorithms are still relatively robust against poor model performances.
-
---- Node X0: The KL divergence between generated and observed distribution is """
+Non-root nodes are mainly evaluated based on the (normalized) Continuous Ranked Probability Score (CRPS), which is a generalizes the Mean Absolute Percentage Error to probabilistic predictions. Since the causal mechanisms produce conditional distributions, this should give some insights into their performance and calibration. In addition, the mean squared error (MSE), the normalized MSE (NMSE), the R2 coefficient and the F1 score (for categorical nodes) is reported."""
         in summary_string
     )
-    assert "--- Node Y: The normalized CRPS of this node is " in summary_string
+    assert "--- Node X0\n" "- The KL divergence between generated and observed distribution is " in summary_string
+    assert "--- Node X1\n" "- The KL divergence between generated and observed distribution is " in summary_string
+    assert "--- Node Y\n" "- The MSE is " in summary_string
+    assert "- The NMSE is " in summary_string
+    assert "- The R2 coefficient is " in summary_string
+    assert "- The normalized CRPS is " in summary_string
     assert "The estimated CRPS indicates a very good model performance." in summary_string
 
     assert "The mechanism is better or equally good than all " in summary_string
@@ -264,14 +295,36 @@ def test_given_categorical_data_only_when_evaluate_model_returns_expected_inform
             ],
         ),
     )
+
     assert summary.overall_kl_divergence == approx(0, abs=0.05)
-    assert summary.model_performances["X0"][1] == approx(0, abs=0.15)
-    assert summary.model_performances["X1"][1] == approx(0, abs=0.15)
-    assert summary.model_performances["Y"][1] == approx(0.02, abs=0.05)  # CRPS
-    assert len(summary.pnl_assumptions) == 0
+
+    assert summary.mechanism_performances["X0"].kl_divergence == approx(0, abs=0.2)
+    assert summary.mechanism_performances["X0"].crps == None
+    assert summary.mechanism_performances["X0"].nmse == None
+    assert summary.mechanism_performances["X0"].r2 == None
+    assert summary.mechanism_performances["X0"].f1 == None
+    assert summary.mechanism_performances["X0"].total_number_baselines == 0
+
+    assert summary.mechanism_performances["X1"].kl_divergence == approx(0, abs=0.2)
+    assert summary.mechanism_performances["X1"].crps == None
+    assert summary.mechanism_performances["X1"].nmse == None
+    assert summary.mechanism_performances["X1"].r2 == None
+    assert summary.mechanism_performances["X1"].f1 == None
+    assert summary.mechanism_performances["X0"].total_number_baselines == 0
+
+    assert summary.mechanism_performances["Y"].kl_divergence == None
+    assert summary.mechanism_performances["Y"].crps == approx(0.02, abs=0.02)
+    assert summary.mechanism_performances["Y"].nmse == None
+    assert summary.mechanism_performances["Y"].r2 == None
+    assert summary.mechanism_performances["Y"].f1 == approx(0.97, abs=0.05)
+    assert 0 < summary.mechanism_performances["Y"].total_number_baselines <= 2
+    assert summary.mechanism_performances["Y"].count_better_performance == 0
+
+    assert "X0" not in summary.pnl_assumptions
+    assert "X1" not in summary.pnl_assumptions
+    assert "Y" not in summary.pnl_assumptions
 
     summary.plot_falsification_histogram = False
-
     summary_string = str(summary)
 
     assert (
@@ -279,23 +332,19 @@ def test_given_categorical_data_only_when_evaluate_model_returns_expected_inform
 
 ==== Evaluation of Causal Mechanisms ====
 Root nodes are evaluated based on the KL divergence between the generated and the observed distribution.
-Non-root nodes are evaluated based on the (normalized) Continuous Ranked Probability Score (CRPS), which is a generalizes the Mean Absolute Percentage Error to probabilistic predictions. Since the causal mechanisms produce conditional distributions, this should give some insights into their performance and calibration. However, note that many algorithms are still relatively robust against poor model performances.
-
---- Node X0: The KL divergence between generated and observed distribution is """
+Non-root nodes are mainly evaluated based on the (normalized) Continuous Ranked Probability Score (CRPS), which is a generalizes the Mean Absolute Percentage Error to probabilistic predictions. Since the causal mechanisms produce conditional distributions, this should give some insights into their performance and calibration. In addition, the mean squared error (MSE), the normalized MSE (NMSE), the R2 coefficient and the F1 score (for categorical nodes) is reported."""
         in summary_string
     )
-    assert "--- Node Y: The normalized CRPS of this node is " in summary_string
+    assert "--- Node X0\n" "- The KL divergence between generated and observed distribution is " in summary_string
+    assert "--- Node X1\n" "- The KL divergence between generated and observed distribution is " in summary_string
+    assert "--- Node Y\n" "- The F1 score is " in summary_string
+    assert "- The normalized CRPS is " in summary_string
     assert "The estimated CRPS indicates a very good model performance." in summary_string
+
     assert "The mechanism is better or equally good than all " in summary_string
     assert "==== Evaluation of Invertible Functional Causal Model Assumption ====" in summary_string
     assert "The causal model has no invertible causal models." in summary_string
-    assert (
-        (
-            """==== Evaluation of Generated Distribution ====
-The overall average KL divergence between the generated and observed distribution is"""
-        )
-        in summary_string
-    )
+    assert "==== Evaluation of Generated Distribution ====" in summary_string
     assert (
         "The estimated KL divergence indicates an overall very good representation of the data distribution"
         in summary_string
