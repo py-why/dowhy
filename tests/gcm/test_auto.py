@@ -343,40 +343,46 @@ def test_given_continuous_data_when_print_auto_summary_then_returns_expected_for
     assert len(summary_result._nodes["X4"]["model_performances"]) == 0
     assert len(summary_result._nodes["Y"]["model_performances"]) > 0
 
-    expected_summary = """Analyzed 6 nodes.
+    assert (
+        """When using this auto assignment function, the following types of causal mechanisms are considered:
+If root node:
+- Empirical distribution for root nodes, i.e., the distribution is represented by randomly sampling from the provided data. This provides a flexible and non-parametric way to model the marginal distribution.
+If non-root node and the data is numeric:
+- Additive Noise Models (ANM) of the form X_i = f(PA_i) + N_i, where PA_i are the parents of X_i and the unobserved noise N_i is assumed to be independent of PA_i.
+To select the best model for f, different regression models are evaluated and the model with the smallest mean squared error is selected.
+Note that minimizing the mean squared error here is equivalent to selecting the best choice of an ANM.
+If non-root node and the data is categorical:
+- A functional causal model based on a classifier, i.e., X_i = f(PA_i, N_i).
+Here, N_i follows a uniform distribution on [0, 1] and is used to randomly sample a class (category) using the conditional probability distribution produced by a classification model.
+Here, different model classes are evaluated using the (negative) F1 score and the best performing model class is selected.
+
+In total, 6 nodes were analyzed:
 
 --- Node: X0
-Node X0 is a root node. Assigning 'Empirical Distribution' to the node representing the marginal distribution.
+Node X0 is a root node. Therefore, assigning 'Empirical Distribution' to the node representing the marginal distribution.
 
 --- Node: X1
-Node X1 is a root node. Assigning 'Empirical Distribution' to the node representing the marginal distribution.
+Node X1 is a root node. Therefore, assigning 'Empirical Distribution' to the node representing the marginal distribution.
 
 --- Node: X2
-Node X2 is a root node. Assigning 'Empirical Distribution' to the node representing the marginal distribution.
+Node X2 is a root node. Therefore, assigning 'Empirical Distribution' to the node representing the marginal distribution.
 
 --- Node: X3
-Node X3 is a root node. Assigning 'Empirical Distribution' to the node representing the marginal distribution.
+Node X3 is a root node. Therefore, assigning 'Empirical Distribution' to the node representing the marginal distribution.
 
 --- Node: X4
-Node X4 is a root node. Assigning 'Empirical Distribution' to the node representing the marginal distribution.
+Node X4 is a root node. Therefore, assigning 'Empirical Distribution' to the node representing the marginal distribution.
 
 --- Node: Y
-Node Y is a non-root node. Assigning 'AdditiveNoiseModel using HistGradientBoostingRegressor' to the node.
+Node Y is a non-root node with numerical data. Assigning 'AdditiveNoiseModel using HistGradientBoostingRegressor' to the node.
 This represents the causal relationship as Y := f(X0,X1,X2,X3,X4) + N.
-For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
-*
-Based on the type of causal mechanism, the model with the lowest metric value represents the best choice."""
-
-    assert (
-        summary_string.split(
-            "For the model selection, the following models were evaluated on the mean squared error (MSE) metric:"
-        )[0]
-        == expected_summary.split(
-            "For the model selection, the following models were evaluated on the mean squared error (MSE) metric:"
-        )[0]
+For the model selection, the following models were evaluated on the mean squared error (MSE) metric:"""
+        in summary_string
     )
     assert (
-        "Based on the type of causal mechanism, the model with the lowest metric value represents the best choice."
+        """===Note===
+Note, based on the selected auto assignment quality, the set of evaluated models changes.
+For more insights toward the quality of the fitted graphical causal model, consider using the evaluate_causal_model function after fitting the causal mechanisms."""
         in summary_string
     )
 
@@ -408,40 +414,46 @@ def test_given_categorical_data_when_print_auto_summary_then_returns_expected_fo
     assert len(summary_result._nodes["X4"]["model_performances"]) == 0
     assert len(summary_result._nodes["Y"]["model_performances"]) > 0
 
-    expected_summary = """Analyzed 6 nodes.
+    assert (
+        """When using this auto assignment function, the following types of causal mechanisms are considered:
+If root node:
+- Empirical distribution for root nodes, i.e., the distribution is represented by randomly sampling from the provided data. This provides a flexible and non-parametric way to model the marginal distribution.
+If non-root node and the data is numeric:
+- Additive Noise Models (ANM) of the form X_i = f(PA_i) + N_i, where PA_i are the parents of X_i and the unobserved noise N_i is assumed to be independent of PA_i.
+To select the best model for f, different regression models are evaluated and the model with the smallest mean squared error is selected.
+Note that minimizing the mean squared error here is equivalent to selecting the best choice of an ANM.
+If non-root node and the data is categorical:
+- A functional causal model based on a classifier, i.e., X_i = f(PA_i, N_i).
+Here, N_i follows a uniform distribution on [0, 1] and is used to randomly sample a class (category) using the conditional probability distribution produced by a classification model.
+Here, different model classes are evaluated using the (negative) F1 score and the best performing model class is selected.
+
+In total, 6 nodes were analyzed:
 
 --- Node: X0
-Node X0 is a root node. Assigning 'Empirical Distribution' to the node representing the marginal distribution.
+Node X0 is a root node. Therefore, assigning 'Empirical Distribution' to the node representing the marginal distribution.
 
 --- Node: X1
-Node X1 is a root node. Assigning 'Empirical Distribution' to the node representing the marginal distribution.
+Node X1 is a root node. Therefore, assigning 'Empirical Distribution' to the node representing the marginal distribution.
 
 --- Node: X2
-Node X2 is a root node. Assigning 'Empirical Distribution' to the node representing the marginal distribution.
+Node X2 is a root node. Therefore, assigning 'Empirical Distribution' to the node representing the marginal distribution.
 
 --- Node: X3
-Node X3 is a root node. Assigning 'Empirical Distribution' to the node representing the marginal distribution.
+Node X3 is a root node. Therefore, assigning 'Empirical Distribution' to the node representing the marginal distribution.
 
 --- Node: X4
-Node X4 is a root node. Assigning 'Empirical Distribution' to the node representing the marginal distribution.
+Node X4 is a root node. Therefore, assigning 'Empirical Distribution' to the node representing the marginal distribution.
 
 --- Node: Y
-Node Y is a non-root node. Assigning 'Classifier FCM based on LogisticRegression(max_iter=10000)' to the node.
+Node Y is a non-root node with categorical data. Assigning 'Classifier FCM based on LogisticRegression(max_iter=10000)' to the node.
 This represents the causal relationship as Y := f(X0,X1,X2,X3,X4,N).
-For the model selection, the following models were evaluated on the (negative) F1 metric:
-*
-Based on the type of causal mechanism, the model with the lowest metric value represents the best choice."""
-
-    assert (
-        summary_string.split(
-            "For the model selection, the following models were evaluated on the (negative) F1 metric:"
-        )[0]
-        == expected_summary.split(
-            "For the model selection, the following models were evaluated on the (negative) F1 metric:"
-        )[0]
+For the model selection, the following models were evaluated on the (negative) F1 metric:"""
+        in summary_string
     )
     assert (
-        "Based on the type of causal mechanism, the model with the lowest metric value represents the best choice."
+        """===Note===
+Note, based on the selected auto assignment quality, the set of evaluated models changes.
+For more insights toward the quality of the fitted graphical causal model, consider using the evaluate_causal_model function after fitting the causal mechanisms."""
         in summary_string
     )
 

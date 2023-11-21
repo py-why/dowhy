@@ -52,29 +52,44 @@ this, consider the chain structure example X→Y→Z:
 
 .. code-block::
 
-    Analyzed 3 nodes.
+    When using this auto assignment function, the following types of causal mechanisms are considered:
+    If root node:
+    - Empirical distribution for root nodes, i.e., the distribution is represented by randomly sampling from the provided data. This provides a flexible and non-parametric way to model the marginal distribution.
+    If non-root node and the data is numeric:
+    - Additive Noise Models (ANM) of the form X_i = f(PA_i) + N_i, where PA_i are the parents of X_i and the unobserved noise N_i is assumed to be independent of PA_i.
+    To select the best model for f, different regression models are evaluated and the model with the smallest mean squared error is selected.
+    Note that minimizing the mean squared error here is equivalent to selecting the best choice of an ANM.
+    If non-root node and the data is categorical:
+    - A functional causal model based on a classifier, i.e., X_i = f(PA_i, N_i).
+    Here, N_i follows a uniform distribution on [0, 1] and is used to randomly sample a class (category) using the conditional probability distribution produced by a classification model.
+    Here, different model classes are evaluated using the (negative) F1 score and the best performing model class is selected.
+
+    In total, 3 nodes were analyzed:
+
     --- Node: X
-    Node X is a root node. Assigning 'Empirical Distribution' to the node representing the marginal distribution.
+    Node X is a root node. Therefore, assigning 'Empirical Distribution' to the node representing the marginal distribution.
 
     --- Node: Y
-    Node Y is a non-root node. Assigning 'AdditiveNoiseModel using LinearRegression' to the node.
+    Node Y is a non-root node with numerical data. Assigning 'AdditiveNoiseModel using LinearRegression' to the node.
     This represents the causal relationship as Y := f(X) + N.
     For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
-    LinearRegression: 1.0023387259040388
+    LinearRegression: 1.0424907752599213
     Pipeline(steps=[('polynomialfeatures', PolynomialFeatures(include_bias=False)),
-                    ('linearregression', LinearRegression)]): 1.0099017476403862
-    HistGradientBoostingRegressor: 1.1091403766880177
-    Based on the type of causal mechanism, the model with the lowest metric value represents the best choice.
+                    ('linearregression', LinearRegression)]): 1.0513669500176608
+    HistGradientBoostingRegressor: 1.2265463861930144
 
     --- Node: Z
-    Node Z is a non-root node. Assigning 'AdditiveNoiseModel using LinearRegression' to the node.
+    Node Z is a non-root node with numerical data. Assigning 'AdditiveNoiseModel using LinearRegression' to the node.
     This represents the causal relationship as Z := f(Y) + N.
     For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
-    LinearRegression: 0.9451918596711175
+    LinearRegression: 1.0771799222760987
     Pipeline(steps=[('polynomialfeatures', PolynomialFeatures(include_bias=False)),
-                    ('linearregression', LinearRegression)]): 0.9488259577453813
-    HistGradientBoostingRegressor: 1.682146254853607
-    Based on the type of causal mechanism, the model with the lowest metric value represents the best choice.
+                    ('linearregression', LinearRegression)]): 1.0794628391969723
+    HistGradientBoostingRegressor: 1.8782633696358095
+
+    ===Note===
+    Note, based on the selected auto assignment quality, the set of evaluated models changes.
+    For more insights toward the quality of the fitted graphical causal model, consider using the evaluate_causal_model function after fitting the causal mechanisms.
 
 In this scenario, an empirical distribution is assigned to the root node X, while additive noise models are applied
 to nodes Y and Z. In both of these cases, a linear regression model demonstrated the best performance in terms

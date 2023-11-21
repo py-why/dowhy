@@ -108,7 +108,34 @@ class AutoAssignmentSummary:
     def __str__(self):
         summary_strings = []
 
-        summary_strings.append("Analyzed %d nodes." % len(list(self._nodes)))
+        summary_strings.append(
+            "When using this auto assignment function, the following types of causal mechanisms are " "considered:"
+        )
+        summary_strings.append("If root node:")
+        summary_strings.append(
+            "- Empirical distribution for root nodes, i.e., the distribution is represented by "
+            "randomly sampling from the provided data. This provides a flexible and non-parametric "
+            "way to model the marginal distribution."
+        )
+        summary_strings.append("If non-root node and the data is numeric:")
+        summary_strings.append(
+            "- Additive Noise Models (ANM) of the form X_i = f(PA_i) + N_i, where PA_i are the "
+            "parents of X_i and the unobserved noise N_i is assumed to be independent of PA_i.\n"
+            "To select the best model for f, different regression models are evaluated and the model "
+            "with the smallest mean squared error is selected.\n"
+            "Note that minimizing the mean squared error here is equivalent to selecting the best "
+            "choice of an ANM."
+        )
+        summary_strings.append("If non-root node and the data is categorical:")
+        summary_strings.append(
+            "- A functional causal model based on a classifier, i.e., X_i = f(PA_i, N_i).\n"
+            "Here, N_i follows a uniform distribution on [0, 1] and is used to randomly sample a "
+            "class (category) using the conditional probability distribution produced by a "
+            "classification model.\n"
+            "Here, different model classes are evaluated using the (negative) F1 score and the best"
+            " performing model class is selected."
+        )
+        summary_strings.append("\nIn total, %d nodes were analyzed:" % len(list(self._nodes)))
 
         for node in self._nodes:
             summary_strings.append("\n--- Node: %s" % node)
@@ -123,11 +150,13 @@ class AutoAssignmentSummary:
                 for (model, performance, metric_name) in self._nodes[node]["model_performances"]:
                     summary_strings.append("%s: %s" % (str(model()).replace("()", ""), str(performance)))
 
-                summary_strings.append(
-                    "Based on the type of causal mechanism, the model with the lowest metric value "
-                    "represents the best choice."
-                )
-
+        summary_strings.append(
+            "\n===Note===\nNote, based on the selected auto assignment quality, the set of " "evaluated models changes."
+        )
+        summary_strings.append(
+            "For more insights toward the quality of the fitted graphical causal model, consider "
+            "using the evaluate_causal_model function after fitting the causal mechanisms."
+        )
         return "\n".join(summary_strings)
 
 
@@ -189,13 +218,18 @@ def assign_causal_mechanisms(
         if is_root_node(causal_model.graph, node):
             auto_assignment_summary.add_node_log_message(
                 node,
-                "Node %s is a root node. Assigning '%s' to the node representing the marginal distribution."
+                "Node %s is a root node. Therefore, assigning '%s' to the node representing the marginal distribution."
                 % (node, causal_model.causal_mechanism(node)),
             )
         else:
             auto_assignment_summary.add_node_log_message(
                 node,
-                "Node %s is a non-root node. Assigning '%s' to the node." % (node, causal_model.causal_mechanism(node)),
+                "Node %s is a non-root node with %s data. Assigning '%s' to the node."
+                % (
+                    node,
+                    "categorical" if is_categorical(based_on[node].to_numpy()) else "numerical",
+                    causal_model.causal_mechanism(node),
+                ),
             )
 
         if isinstance(causal_model.causal_mechanism(node), AdditiveNoiseModel):
