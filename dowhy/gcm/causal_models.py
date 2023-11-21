@@ -39,8 +39,17 @@ class ProbabilisticCausalModel:
         :param graph_copier: Optional function that can copy a causal graph. Defaults to a networkx.DiGraph
                              constructor.
         """
+        # Todo: Remove after https://github.com/py-why/dowhy/pull/943.
+        from dowhy.causal_graph import CausalGraph
+        from dowhy.causal_model import CausalModel
+
         if graph is None:
             graph = nx.DiGraph()
+        elif isinstance(graph, CausalModel):
+            graph = graph_copier(graph._graph._graph)
+        elif isinstance(graph, CausalGraph):
+            graph = graph_copier(graph._graph)
+
         self.graph = graph
         self.graph_copier = graph_copier
 

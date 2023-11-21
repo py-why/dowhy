@@ -4,6 +4,7 @@ import re
 
 import networkx as nx
 
+from dowhy.gcm.causal_models import ProbabilisticCausalModel
 from dowhy.utils.api import parse_state
 from dowhy.utils.graph_operations import daggity_to_dot
 from dowhy.utils.plotting import plot
@@ -55,7 +56,9 @@ class CausalGraph:
             self._graph = nx.DiGraph()
             self._graph = self.build_graph(common_cause_names, instrument_names, effect_modifier_names, mediator_names)
         elif isinstance(graph, nx.DiGraph):
-            self._graph = graph
+            self._graph = nx.DiGraph(graph)
+        elif isinstance(graph, ProbabilisticCausalModel):
+            self._graph = nx.DiGraph(graph.graph)
         elif re.match(r".*\.dot", graph):
             # load dot file
             try:
@@ -93,10 +96,17 @@ class CausalGraph:
             self._graph = nx.DiGraph(nx.parse_gml(graph))
         else:
             self.logger.error(
-                "Error: Please provide networkx graph or graph (as string or text file) in dot or gml format."
+                "Error: Please provide graph (as string or text file) in dot, gml format, networkx graph "
+                "or GCM model."
             )
             self.logger.error("Error: Incorrect graph format")
             raise ValueError
+
+        if observed_node_names is None and (
+            isinstance(graph, nx.DiGraph) or isinstance(graph, ProbabilisticCausalModel)
+        ):
+            observed_node_names = list(self._graph.nodes)
+
         if missing_nodes_as_confounders:
             self._graph = self.add_missing_nodes_as_common_causes(observed_node_names)
         # Adding node attributes

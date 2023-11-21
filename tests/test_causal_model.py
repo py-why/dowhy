@@ -8,6 +8,8 @@ from sklearn import linear_model
 import dowhy
 import dowhy.datasets
 from dowhy import CausalModel
+from dowhy.causal_graph import CausalGraph
+from dowhy.gcm import ProbabilisticCausalModel, StructuralCausalModel
 from dowhy.utils.graph_operations import daggity_to_dot
 
 
@@ -552,6 +554,30 @@ class TestCausalModel(object):
             f"and with level `logging.WARNING` and this content '{expected_logging_message}'. "
             f"Only the following log records were emitted instead: '{caplog.records}'."
         )
+
+    def test_compability_with_gcm(self):
+        data = pd.DataFrame({"X": [0], "Y": [0], "Z": [0]})
+        model = CausalModel(
+            data=data,
+            treatment="Y",
+            outcome="Z",
+            graph=StructuralCausalModel(nx.DiGraph([("X", "Y"), ("Y", "Z")])),
+        )
+
+        assert set(model._graph._graph.nodes) == {"X", "Y", "Z"}
+        assert set(model._graph._graph.edges) == {("X", "Y"), ("Y", "Z")}
+
+        causal_graph = CausalGraph("Y", "Z", graph=StructuralCausalModel(nx.DiGraph([("X", "Y"), ("Y", "Z")])))
+        assert set(causal_graph._graph.nodes) == {"X", "Y", "Z"}
+        assert set(causal_graph._graph.edges) == {("X", "Y"), ("Y", "Z")}
+
+        pcm = ProbabilisticCausalModel(model)
+        assert set(pcm.graph.nodes) == {"X", "Y", "Z"}
+        assert set(pcm.graph.edges) == {("X", "Y"), ("Y", "Z")}
+
+        pcm = ProbabilisticCausalModel(model._graph)
+        assert set(pcm.graph.nodes) == {"X", "Y", "Z"}
+        assert set(pcm.graph.edges) == {("X", "Y"), ("Y", "Z")}
 
 
 if __name__ == "__main__":

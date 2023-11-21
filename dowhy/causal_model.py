@@ -22,7 +22,6 @@ init_printing()  # To display symbolic math symbols
 
 
 class CausalModel:
-
     """Main class for storing the causal model state."""
 
     def __init__(
