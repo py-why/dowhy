@@ -101,6 +101,15 @@ Real world-inspired examples
 
 .. grid:: 2
 
+    .. grid-item-card:: :doc:`gcm_online_shop`
+
+        .. image:: ../_static/online-shop.png
+            :height: 120px
+            :align: center
+        +++
+        | **Level:** Beginner
+        | **Task:** Quantify causal effects and root cause analysis via GCM
+
     .. grid-item-card:: :doc:`gcm_rca_microservice_architecture`
 
         .. image:: ../_static/microservice-architecture.png
@@ -109,6 +118,8 @@ Real world-inspired examples
         +++
         | **Level:** Beginner
         | **Task:** Root cause analysis, intervention, counterfactual via GCM
+
+.. grid:: 2
 
     .. grid-item-card:: :doc:`gcm_401k_analysis`
 
@@ -119,8 +130,6 @@ Real world-inspired examples
         | **Level:** Advanced
         | **Task:** Intervention via GCM
 
-.. grid:: 2
-
     .. grid-item-card:: :doc:`gcm_supply_chain_dist_change`
 
         .. image:: ../_static/supply-chain.png
@@ -130,6 +139,8 @@ Real world-inspired examples
         | **Level:** Advanced
         | **Task:** Root cause analysis via GCM
 
+.. grid:: 2
+
     .. grid-item-card:: :doc:`gcm_counterfactual_medical_dry_eyes`
 
         .. image:: ../_static/gcm-counterfactual-example.png
@@ -138,8 +149,6 @@ Real world-inspired examples
         +++
         | **Level:** Advanced
         | **Task:** Counterfactuals via GCM
-
-.. grid:: 2
 
     .. grid-item-card:: :doc:`gcm_falsify_dag`
 
@@ -328,6 +337,7 @@ Miscellaneous
 
    DoWhy-The Causal Story Behind Hotel Booking Cancellations
    dowhy_example_effect_of_memberrewards_program
+   gcm_online_shop
    gcm_rca_microservice_architecture
    gcm_401k_analysis
    gcm_supply_chain_dist_change
