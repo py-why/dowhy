@@ -16,6 +16,7 @@ from dowhy.gcm.util.general import (
     fit_one_hot_encoders,
     has_categorical,
     is_categorical,
+    is_discrete,
     set_random_seed,
     setdiff2d,
     shape_into_2d,
@@ -207,3 +208,14 @@ def test_given_categorical_data_when_using_auto_fit_and_apply_encoder_then_retur
             ]
         ).T
     )
+
+
+def test_given_discrete_data_when_calling_is_discrete_then_returns_true():
+    assert is_discrete(np.array([0, -4, 5, 10]))
+    assert is_discrete(np.array([0, -4, 5, 10]).reshape(-1, 1))
+
+
+def test_given_non_discrete_data_when_calling_is_discrete_then_returns_false():
+    assert not is_discrete(np.array([0, -4, 5, 10, 1.0000000001, 0.000000001, 10**-15, 99.9, 40.5]))
+    assert not is_discrete(np.array([10**-15]))
+    assert not is_discrete(np.array([0, -4, 5, 10, 1.0000000001, 0.000000001, 10**-15, 99.9, 40.5]).reshape(-1, 1))
