@@ -10,7 +10,7 @@ from .anomaly_scorers import (
     MedianDeviationScorer,
     RescaledMedianCDFQuantileScorer,
 )
-from .causal_mechanisms import AdditiveNoiseModel, ClassifierFCM, PostNonlinearModel
+from .causal_mechanisms import AdditiveNoiseModel, ClassifierFCM, DiscreteAdditiveNoiseModel, PostNonlinearModel
 from .causal_models import InvertibleStructuralCausalModel, ProbabilisticCausalModel, StructuralCausalModel
 from .confidence_intervals import confidence_intervals
 from .confidence_intervals_cms import bootstrap_sampling, fit_and_compute

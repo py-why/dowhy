@@ -8,7 +8,7 @@ import numpy as np
 
 from dowhy.gcm.ml import ClassificationModel, PredictionModel
 from dowhy.gcm.ml.regression import InvertibleFunction, SklearnRegressionModel
-from dowhy.gcm.util.general import is_categorical, shape_into_2d
+from dowhy.gcm.util.general import is_categorical, is_discrete, shape_into_2d
 
 
 class StochasticModel(ABC):
@@ -216,6 +216,52 @@ class AdditiveNoiseModel(PostNonlinearModel):
             prediction_model_string = self._prediction_model.__class__.__name__
 
         return "AdditiveNoiseModel using %s" % prediction_model_string
+
+
+class DiscreteAdditiveNoiseModel(AdditiveNoiseModel):
+    """Implements a discrete ANM. This is, it follows a normal ANM of the form Y = f(X) + N, where N is assumed to be
+    independent of X and f is forced to output discrete values. To allow for flexible models, f can be any regression
+    model and the output will be rounded to a discrete value accordingly. Note that this remains a valid additive noise
+    model, but assumes that Y can take any integer value."""
+
+    def fit(self, X: np.ndarray, Y: np.ndarray) -> None:
+        if not is_discrete(Y):
+            raise ValueError("Cannot fit a discrete ANM to non-discrete target values!")
+
+        X, Y = shape_into_2d(X, Y)
+        Y = Y.astype(np.int32)
+
+        self._prediction_model.fit(X=X, Y=Y)
+        self._noise_model.fit(self._rounded_prediction(X) - Y)
+
+    def evaluate(self, parent_samples: np.ndarray, noise_samples: np.ndarray) -> np.ndarray:
+        if not is_discrete(noise_samples):
+            raise ValueError("Noise values have to be discrete!")
+
+        parent_samples, noise_samples = shape_into_2d(parent_samples, noise_samples)
+        predictions = shape_into_2d(self._rounded_prediction(parent_samples))
+
+        return predictions + noise_samples
+
+    def estimate_noise(self, target_samples: np.ndarray, parent_samples: np.ndarray) -> np.ndarray:
+        if not is_discrete(target_samples):
+            raise ValueError("Target samples have to be discrete!")
+
+        target_samples, parent_samples = shape_into_2d(target_samples, parent_samples)
+
+        return target_samples - self._rounded_prediction(parent_samples)
+
+    def _rounded_prediction(self, X: np.ndarray) -> np.ndarray:
+        return np.round(self._prediction_model.predict(X).astype(float)).astype(np.int32)
+
+    def clone(self):
+        return DiscreteAdditiveNoiseModel(
+            prediction_model=self.prediction_model.clone(),
+            noise_model=self.noise_model.clone(),
+        )
+
+    def __str__(self) -> str:
+        return "Discrete " + super().__str__()
 
 
 class ProbabilityEstimatorModel(ABC):

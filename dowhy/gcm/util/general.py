@@ -196,6 +196,15 @@ def has_categorical(X: np.ndarray) -> bool:
     return False
 
 
+def is_discrete(X: np.ndarray) -> bool:
+    """Checks if all values in the given array are discrete.
+
+    :param X: Input array to check.
+    :return: True if all values in the input are discrete, False otherwise.
+    """
+    return np.all(X == np.floor(X))
+
+
 def setdiff2d(ar1: np.ndarray, ar2: np.ndarray, assume_unique: bool = False) -> np.ndarray:
     """This method generalizes numpy's setdiff1d to 2d, i.e., it compares vectors for arbitrary length. See
     https://numpy.org/doc/stable/reference/generated/numpy.setdiff1d.html for more details."""

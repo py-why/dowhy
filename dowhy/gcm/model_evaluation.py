@@ -183,7 +183,7 @@ class CausalModelEvaluationResult:
         if self.overall_kl_divergence is not None:
             summary_string += " and the overall average KL divergence between generated and observed distribution"
         if self.graph_falsification is not None:
-            summary_string += " and graph structure"
+            summary_string += " and the graph structure"
 
         summary_string += ". The results are as follows:"
         summary_strings = [summary_string]
@@ -191,16 +191,15 @@ class CausalModelEvaluationResult:
         if self.mechanism_performances is not None:
             summary_strings.append("\n==== Evaluation of Causal Mechanisms ====")
             summary_strings.append(
-                "Root nodes are evaluated based on the KL divergence between the generated "
-                "and the observed distribution."
-            )
-            summary_strings.append(
-                "Non-root nodes are mainly evaluated based on the (normalized) Continuous Ranked Probability Score "
-                "(CRPS), which is a generalizes the Mean Absolute Percentage Error to probabilistic "
-                "predictions. Since the causal mechanisms produce conditional distributions, this "
-                "should give some insights into their performance and calibration. In addition, the mean squared error "
-                "(MSE), the normalized MSE (NMSE), the R2 coefficient and the F1 score (for categorical nodes) is "
-                "reported."
+                "The used evaluation metrics are:\n"
+                "- KL divergence (only for root-nodes): Evaluates the divergence between the generated and the observed distribution.\n"
+                "- Mean Squared Error (MSE): Evaluates the average squared differences between the observed values and the conditional expectation of the causal mechanisms.\n"
+                "- Normalized MSE (NMSE): The MSE normalized by the standard deviation for better comparison.\n"
+                "- R2 coefficient: Indicates how much variance is explained by the conditional expectations of the mechanisms. Note, however, that this can be misleading for nonlinear relationships.\n"
+                "- F1 score (only for categorical non-root nodes): The harmonic mean of the precision and recall indicating the goodness of the underlying classifier model.\n"
+                "- (normalized) Continuous Ranked Probability Score (CRPS): The CRPS generalizes the Mean Absolute Percentage Error to probabilistic predictions. This gives insights into the accuracy and calibration of the causal mechanisms.\n"
+                "NOTE: Every metric focuses on different aspects and they might not consistently indicate a good or bad performance.\n"
+                "We will mostly utilize the CRPS for comparing and interpreting the performance of the mechanisms, since this captures the most important properties for the causal model."
             )
 
             for mechanism_performance in self.mechanism_performances.values():

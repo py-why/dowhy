@@ -14,7 +14,7 @@ from sklearn.model_selection import KFold, StratifiedKFold, train_test_split
 from sklearn.preprocessing import MultiLabelBinarizer
 
 from dowhy.gcm import config
-from dowhy.gcm.causal_mechanisms import AdditiveNoiseModel, ClassifierFCM
+from dowhy.gcm.causal_mechanisms import AdditiveNoiseModel, ClassifierFCM, DiscreteAdditiveNoiseModel
 from dowhy.gcm.causal_models import CAUSAL_MECHANISM, ProbabilisticCausalModel, validate_causal_model_assignment
 from dowhy.gcm.ml import (
     ClassificationModel,
@@ -48,6 +48,7 @@ from dowhy.gcm.util.general import (
     auto_apply_encoders,
     auto_fit_encoders,
     is_categorical,
+    is_discrete,
     set_random_seed,
     shape_into_2d,
 )
@@ -108,7 +109,43 @@ class AutoAssignmentSummary:
     def __str__(self):
         summary_strings = []
 
-        summary_strings.append("Analyzed %d nodes." % len(list(self._nodes)))
+        summary_strings.append(
+            "When using this auto assignment function, the given data is used to automatically assign a causal "
+            "mechanism to each node. Note that causal mechanisms can also be customized and assigned manually.\n"
+            "The following types of causal mechanisms are considered for the automatic selection:"
+        )
+        summary_strings.append("\nIf root node:")
+        summary_strings.append(
+            "An empirical distribution, i.e., the distribution is represented by randomly sampling from the provided "
+            "data. This provides a flexible and non-parametric way to model the marginal distribution and is valid for "
+            "all types of data modalities."
+        )
+        summary_strings.append("\nIf non-root node and the data is continuous:")
+        summary_strings.append(
+            "Additive Noise Models (ANM) of the form X_i = f(PA_i) + N_i, where PA_i are the "
+            "parents of X_i and the unobserved noise N_i is assumed to be independent of PA_i."
+            "To select the best model for f, different regression models are evaluated and the model "
+            "with the smallest mean squared error is selected."
+            "Note that minimizing the mean squared error here is equivalent to selecting the best "
+            "choice of an ANM."
+        )
+        summary_strings.append("\nIf non-root node and the data is discrete:")
+        summary_strings.append(
+            "Discrete Additive Noise Models have almost the same definition as non-discrete ANMs, but come with an "
+            "additional constraint for f to only return discrete values.\n"
+            "Note that 'discrete' here refers to numerical values with an order. If the data is categorical, consider "
+            "representing them as strings to ensure proper model selection."
+        )
+        summary_strings.append("\nIf non-root node and the data is categorical:")
+        summary_strings.append(
+            "A functional causal model based on a classifier, i.e., X_i = f(PA_i, N_i).\n"
+            "Here, N_i follows a uniform distribution on [0, 1] and is used to randomly sample a "
+            "class (category) using the conditional probability distribution produced by a "
+            "classification model."
+            "Here, different model classes are evaluated using the (negative) F1 score and the best"
+            " performing model class is selected."
+        )
+        summary_strings.append("\nIn total, %d nodes were analyzed:" % len(list(self._nodes)))
 
         for node in self._nodes:
             summary_strings.append("\n--- Node: %s" % node)
@@ -123,11 +160,13 @@ class AutoAssignmentSummary:
                 for (model, performance, metric_name) in self._nodes[node]["model_performances"]:
                     summary_strings.append("%s: %s" % (str(model()).replace("()", ""), str(performance)))
 
-                summary_strings.append(
-                    "Based on the type of causal mechanism, the model with the lowest metric value "
-                    "represents the best choice."
-                )
-
+        summary_strings.append(
+            "\n===Note===\nNote, based on the selected auto assignment quality, the set of " "evaluated models changes."
+        )
+        summary_strings.append(
+            "For more insights toward the quality of the fitted graphical causal model, consider "
+            "using the evaluate_causal_model function after fitting the causal mechanisms."
+        )
         return "\n".join(summary_strings)
 
 
@@ -137,26 +176,93 @@ def assign_causal_mechanisms(
     quality: AssignmentQuality = AssignmentQuality.GOOD,
     override_models: bool = False,
 ) -> AutoAssignmentSummary:
-    """Automatically assigns appropriate causal models. If causal models are already assigned to nodes and
-    override_models is set to False, this function only validates the assignments with respect to the graph structure.
-    Here, the validation checks whether root nodes have StochasticModels and non-root ConditionalStochasticModels
-    assigned.
+    """Automatically assigns appropriate causal mechanisms to nodes. If causal mechanisms are already assigned to nodes
+    and override_models is set to False, this function only validates the assignments with respect to the graph
+    structure. This is, the validation checks whether root nodes have StochasticModels and non-root
+    ConditionalStochasticModels assigned.
+
+    The following types of causal mechanisms are considered for the automatic selection:
+
+    If root node:
+    An empirical distribution, i.e., the distribution is represented by randomly sampling from the provided data.
+    This provides a flexible and non-parametric way to model the marginal distribution and is valid for all types of
+    data modalities.
+
+    If non-root node and the data is continuous:
+    Additive Noise Models (ANM) of the form X_i = f(PA_i) + N_i, where PA_i are the parents of X_i and the unobserved
+    noise N_i is assumed to be independent of PA_i. To select the best model for f, different regression models are
+    evaluated and the model with the smallest mean squared error is selected. Note that minimizing the mean squared
+    error here is equivalent to selecting the best choice of an ANM. See the following paper for more details:
+        Hoyer, P., Janzing, D., Mooij, J. M., Peters, J., & Schölkopf, B. (2008).
+        Nonlinear causal discovery with additive noise models.
+        Advances in neural information processing systems, 21
+
+    If non-root node and the data is discrete:
+    Discrete Additive Noise Models have almost the same definition as non-discrete ANMs, but come with an additional
+    constraint to return discrete values. Note that 'discrete' here refers to numerical values with an order. If the
+    data is categorical, consider representing them as strings to ensure proper model selection. See the following
+    paper for more details:
+        Peters, J., Janzing, D., & Scholkopf, B. (2011).
+        Causal inference on discrete data using additive noise models.
+        IEEE Transactions on Pattern Analysis and Machine Intelligence, 33(12), 2436-2450.
+
+    If non-root node and the data is categorical:
+    A functional causal model based on a classifier, i.e., X_i = f(PA_i, N_i).
+    Here, N_i follows a uniform distribution on [0, 1] and is used to randomly sample a class (category) using the
+    conditional probability distribution produced by a classification model. Here, different model classes are evaluated
+    using the (negative) F1 score and the best performing model class is selected.
+
+    The current model zoo is:
+
+    With "GOOD" quality:
+        Numerical:
+        - Linear Regressor
+        - Linear Regressor with polynomial features
+        - Histogram Gradient Boost Regressor
+
+        Categorical:
+        - Logistic Regressor
+        - Logistic Regressor with polynomial features
+        - Histogram Gradient Boost Classifier
+
+    With "BETTER" quality:
+        Numerical:
+        - Linear Regressor
+        - Linear Regressor with polynomial features
+        - Gradient Boost Regressor
+        - Ridge Regressor
+        - Lasso Regressor
+        - Random Forest Regressor
+        - Support Vector Regressor
+        - Extra Trees Regressor
+        - KNN Regressor
+        - Ada Boost Regressor
+
+        Categorical:
+        - Logistic Regressor
+        - Logistic Regressor with polynomial features
+        - Histogram Gradient Boost Classifier
+        - Random Forest Classifier
+        - Extra Trees Classifier
+        - Support Vector Classifier
+        - KNN Classifier
+        - Gaussian Naive Bayes Classifier
+        - Ada Boost Classifier
+
+    With "BEST" quality:
+    An auto ML model based on AutoGluon (optional dependency, needs to be installed).
 
     :param causal_model: The causal model to whose nodes to assign causal models.
     :param based_on: Jointly sampled data corresponding to the nodes of the given graph.
     :param quality: AssignmentQuality for the automatic model selection and model accuracy. This changes the type of
-    prediction model and time spent on the selection. Options are:
-        - AssignmentQuality.GOOD: Compares a linear, polynomial and gradient boost model on small test-training split
-            of the data. The best performing model is then selected.
+                    prediction model and time spent on the selection. See the docstring for a list of potential models.
+                    The options for the quality are:
+        - AssignmentQuality.GOOD: Only a small set of models are evaluated.
             Model selection speed: Fast
             Model training speed: Fast
             Model inference speed: Fast
             Model accuracy: Medium
-        - AssignmentQuality.BETTER: Compares multiple model types and uses the one with the best performance
-            averaged over multiple splits of the training data. By default, the model with the smallest root mean
-            squared error is selected for regression problems and the model with the highest F1 score is selected for
-            classification problems. For a list of possible models, see _LIST_OF_POTENTIAL_REGRESSORS_BETTER and
-            _LIST_OF_POTENTIAL_CLASSIFIERS_BETTER, respectively.
+        - AssignmentQuality.BETTER: A larger set of models are evaluated.
             Model selection speed: Medium
             Model training speed: Fast
             Model inference speed: Fast
@@ -168,8 +274,8 @@ def assign_causal_mechanisms(
             Model training speed: Slow
             Model inference speed: Slow-Medium
             Model accuracy: Best
-    :param override_models: If set to True, existing model assignments are replaced with automatically selected
-                            ones. If set to False, the assigned models are only validated with respect to the graph
+    :param override_models: If set to True, existing mechanism assignments are replaced with automatically selected
+                            ones. If set to False, the assigned mechanisms are only validated with respect to the graph
                             structure.
     :return: A summary object containing details about the model selection process.
     """
@@ -179,7 +285,8 @@ def assign_causal_mechanisms(
         if not override_models and CAUSAL_MECHANISM in causal_model.graph.nodes[node]:
             auto_assignment_summary.add_node_log_message(
                 node,
-                "Node %s already has a model assigned and the override parameter is False. Skipping this node." % node,
+                "Node %s already has a causal mechanism assigned and the override parameter is False. Skipping this "
+                "node." % node,
             )
             validate_causal_model_assignment(causal_model.graph, node)
             continue
@@ -189,16 +296,36 @@ def assign_causal_mechanisms(
         if is_root_node(causal_model.graph, node):
             auto_assignment_summary.add_node_log_message(
                 node,
-                "Node %s is a root node. Assigning '%s' to the node representing the marginal distribution."
+                "Node %s is a root node. Therefore, assigning '%s' to the node representing the marginal distribution."
                 % (node, causal_model.causal_mechanism(node)),
             )
         else:
+            data_type = "continuous"
+            if isinstance(causal_model.causal_mechanism(node), ClassifierFCM):
+                data_type = "categorical"
+            elif isinstance(causal_model.causal_mechanism(node), DiscreteAdditiveNoiseModel):
+                data_type = "discrete"
+
             auto_assignment_summary.add_node_log_message(
                 node,
-                "Node %s is a non-root node. Assigning '%s' to the node." % (node, causal_model.causal_mechanism(node)),
+                "Node %s is a non-root node with %s data. Assigning '%s' to the node."
+                % (
+                    node,
+                    data_type,
+                    causal_model.causal_mechanism(node),
+                ),
             )
 
-        if isinstance(causal_model.causal_mechanism(node), AdditiveNoiseModel):
+        if isinstance(causal_model.causal_mechanism(node), DiscreteAdditiveNoiseModel):
+            auto_assignment_summary.add_node_log_message(
+                node,
+                "This represents the discrete causal relationship as "
+                + str(node)
+                + " := f("
+                + ",".join([str(parent) for parent in get_ordered_predecessors(causal_model.graph, node)])
+                + ") + N.",
+            )
+        elif isinstance(causal_model.causal_mechanism(node), AdditiveNoiseModel):
             auto_assignment_summary.add_node_log_message(
                 node,
                 "This represents the causal relationship as "
@@ -230,16 +357,21 @@ def assign_causal_mechanism_node(
         causal_model.set_causal_mechanism(node, EmpiricalDistribution())
         model_performances = []
     else:
+        node_data = based_on[node].to_numpy()
+
         best_model, model_performances = select_model(
             based_on[get_ordered_predecessors(causal_model.graph, node)].to_numpy(),
-            based_on[node].to_numpy(),
+            node_data,
             quality,
         )
 
         if isinstance(best_model, ClassificationModel):
             causal_model.set_causal_mechanism(node, ClassifierFCM(best_model))
         else:
-            causal_model.set_causal_mechanism(node, AdditiveNoiseModel(best_model))
+            if is_discrete(node_data):
+                causal_model.set_causal_mechanism(node, DiscreteAdditiveNoiseModel(best_model))
+            else:
+                causal_model.set_causal_mechanism(node, AdditiveNoiseModel(best_model))
 
     return model_performances
 
@@ -263,7 +395,7 @@ def select_model(
     elif model_selection_quality == AssignmentQuality.GOOD:
         list_of_regressor = list(_LIST_OF_POTENTIAL_REGRESSORS_GOOD)
         list_of_classifier = list(_LIST_OF_POTENTIAL_CLASSIFIERS_GOOD)
-        model_selection_splits = 2
+        model_selection_splits = 5
     elif model_selection_quality == AssignmentQuality.BETTER:
         list_of_regressor = list(_LIST_OF_POTENTIAL_REGRESSORS_BETTER)
         list_of_classifier = list(_LIST_OF_POTENTIAL_CLASSIFIERS_BETTER)
