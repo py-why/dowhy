@@ -18,7 +18,6 @@ from .confidence_intervals import confidence_intervals
 from .confidence_intervals_cms import bootstrap_sampling, fit_and_compute
 from .density_estimators import GaussianMixtureDensityEstimator, KernelDensityEstimator1D
 from .distribution_change import distribution_change, distribution_change_of_graphs
-from .equation_parser import create_causal_model_from_equations
 from .feature_relevance import feature_relevance_distribution, feature_relevance_sample, parent_relevance
 from .fitting_sampling import draw_samples, fit
 from .independence_test import (
@@ -31,6 +30,7 @@ from .independence_test import (
 from .influence import arrow_strength, intrinsic_causal_influence
 from .ml import ClassificationModel, PredictionModel
 from .stochastic_models import BayesianGaussianMixtureDistribution, EmpiricalDistribution, ScipyDistribution
+from .equation_parser import create_causal_model_from_equations
 from .unit_change import unit_change
 from .validation import RejectionResult, refute_causal_structure, refute_invertible_model
 from .whatif import average_causal_effect, counterfactual_samples, interventional_samples
