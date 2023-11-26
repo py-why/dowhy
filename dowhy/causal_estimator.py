@@ -710,7 +710,7 @@ def estimate_effect(
     elif identified_estimand.estimands[identifier_name] is None:
         logger.error("No valid identified estimand available.")
         return CausalEstimate(
-            None, None, None, None, None, control_value=control_value, treatment_value=treatment_value
+            None, None, None, None, None, None, control_value=control_value, treatment_value=treatment_value
         )
 
     if fit_estimator:

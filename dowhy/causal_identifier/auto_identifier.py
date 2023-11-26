@@ -282,10 +282,10 @@ def identify_ate_effect(
         logger.debug("Identified expression = " + str(frontdoor_estimand_expr))
         estimands_dict["frontdoor"] = frontdoor_estimand_expr
         mediation_first_stage_confounders = identify_mediation_first_stage_confounders(
-            graph, action_nodes, outcome_nodes, observed_nodes, frontdoor_variables_names, backdoor_adjustment
+            graph, action_nodes, outcome_nodes, frontdoor_variables_names, observed_nodes, backdoor_adjustment
         )
         mediation_second_stage_confounders = identify_mediation_second_stage_confounders(
-            graph, action_nodes, frontdoor_variables_names, observed_nodes, outcome_nodes, backdoor_adjustment
+            graph, action_nodes, frontdoor_variables_names, outcome_nodes, observed_nodes, backdoor_adjustment
         )
     else:
         estimands_dict["frontdoor"] = None
@@ -393,10 +393,10 @@ def identify_nie_effect(
         logger.debug("Identified expression = " + str(mediation_estimand_expr))
         estimands_dict["mediation"] = mediation_estimand_expr
         mediation_first_stage_confounders = identify_mediation_first_stage_confounders(
-            graph, action_nodes, outcome_nodes, observed_nodes, mediators_names, backdoor_adjustment
+            graph, action_nodes, outcome_nodes, mediators_names, observed_nodes, backdoor_adjustment
         )
         mediation_second_stage_confounders = identify_mediation_second_stage_confounders(
-            graph, action_nodes, mediators_names, observed_nodes, outcome_nodes, backdoor_adjustment
+            graph, action_nodes, mediators_names, outcome_nodes, observed_nodes, backdoor_adjustment
         )
     else:
         estimands_dict["mediation"] = None
@@ -454,10 +454,10 @@ def identify_nde_effect(
         logger.debug("Identified expression = " + str(mediation_estimand_expr))
         estimands_dict["mediation"] = mediation_estimand_expr
         mediation_first_stage_confounders = identify_mediation_first_stage_confounders(
-            graph, action_nodes, outcome_nodes, observed_nodes, mediators_names, backdoor_adjustment
+            graph, action_nodes, outcome_nodes, mediators_names, observed_nodes, backdoor_adjustment
         )
         mediation_second_stage_confounders = identify_mediation_second_stage_confounders(
-            graph, action_nodes, mediators_names, observed_nodes, outcome_nodes, backdoor_adjustment
+            graph, action_nodes, mediators_names, outcome_nodes, observed_nodes, backdoor_adjustment
         )
     else:
         estimands_dict["mediation"] = None
@@ -748,9 +748,9 @@ def get_default_backdoor_set_id(
 
 
 def build_backdoor_estimands_dict(
-    observed_nodes: List[str],
     treatment_names: List[str],
     outcome_names: List[str],
+    observed_nodes: List[str],
     backdoor_sets: List[str],
     estimands_dict: Dict,
 ):
@@ -868,19 +868,19 @@ def identify_mediation(graph: nx.DiGraph, action_nodes: List[str], outcome_nodes
 
 def identify_mediation_first_stage_confounders(
     graph: nx.DiGraph,
-    observed_nodes: List[str],
     action_nodes: List[str],
     outcome_nodes: List[str],
     mediator_nodes: List[str],
+    observed_nodes: List[str],
     backdoor_adjustment: BackdoorAdjustment,
 ):
     # Create estimands dict as per the API for backdoor, but do not return it
     estimands_dict = {}
-    backdoor_sets = identify_backdoor(graph, observed_nodes, action_nodes, mediator_nodes, backdoor_adjustment)
+    backdoor_sets = identify_backdoor(graph, action_nodes, mediator_nodes, observed_nodes, backdoor_adjustment)
     estimands_dict, backdoor_variables_dict = build_backdoor_estimands_dict(
-        observed_nodes,
         action_nodes,
         mediator_nodes,
+        observed_nodes,
         backdoor_sets,
         estimands_dict,
     )
@@ -893,19 +893,19 @@ def identify_mediation_first_stage_confounders(
 
 def identify_mediation_second_stage_confounders(
     graph: nx.DiGraph,
-    observed_nodes: List[str],
     action_nodes: List[str],
     mediator_nodes: List[str],
     outcome_nodes: List[str],
+    observed_nodes: List[str],
     backdoor_adjustment: BackdoorAdjustment,
 ):
     # Create estimands dict as per the API for backdoor, but do not return it
     estimands_dict = {}
-    backdoor_sets = identify_backdoor(graph, observed_nodes, mediator_nodes, outcome_nodes, backdoor_adjustment)
+    backdoor_sets = identify_backdoor(graph, mediator_nodes, outcome_nodes, observed_nodes, backdoor_adjustment)
     estimands_dict, backdoor_variables_dict = build_backdoor_estimands_dict(
-        observed_nodes,
         mediator_nodes,
         outcome_nodes,
+        observed_nodes,
         backdoor_sets,
         estimands_dict,
     )
