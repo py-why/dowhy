@@ -1,8 +1,4 @@
-"""This module defines the fundamental interfaces and functions related to causal graphs..
-
-Classes and functions in this module should be considered experimental, meaning there might be breaking API changes in
-the future.
-"""
+"""This module defines the fundamental interfaces and functions related to causal graphs."""
 import itertools
 import logging
 import re
