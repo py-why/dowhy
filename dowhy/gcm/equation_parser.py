@@ -2,7 +2,6 @@ import ast
 import re
 
 import networkx as nx
-import numexpr as ne
 import numpy as np
 import scipy.stats
 
@@ -19,22 +18,33 @@ STOCHASTIC_MODEL_TYPES = {
     "parametric": ScipyDistribution,
 }
 NOISE_MODEL_PATTERN = r"^\s*([\w]+)\(([^)]*)\)\s*$"
+banned_characters = [":", ";", "[", "__"]
+allowed_callables = {}
+np_functions = {func: getattr(np, func) for func in dir(np) if callable(getattr(np, func))}
+scipy_functions = {
+    func: getattr(scipy.stats, func) for func in dir(scipy.stats) if callable(getattr(scipy.stats, func))
+}
+builtin_functions = {"len": len, "__builtins__": {}}
+allowed_callables.update(np_functions)
+allowed_callables.update(scipy_functions)
+allowed_callables.update(builtin_functions)
 
 
 def create_causal_model_from_equations(node_equations: str):
-    graph_node_pairs = []
     causal_nodes_info = {}
+    causal_graph = nx.DiGraph()
     for equation in node_equations.split("\n"):
         equation = equation.strip()
+        sanitize_input_expression(equation)
         if equation:
             node_name, expression = extract_equation_components(equation)
             if not (node_name in causal_nodes_info):
                 causal_nodes_info[node_name] = {}
             print("Variable Name:", node_name)
             root_node_match = re.match(NOISE_MODEL_PATTERN, expression)
+            causal_graph.add_node(node_name)
             if root_node_match:
                 causal_mechanism_name = root_node_match.group(1)
-                print(causal_mechanism_name)
                 args = root_node_match.group(2)
                 parsed_args = parse_args(args) if args else {}
                 causal_nodes_info[node_name]["causal_mechanism"] = identify_noise_model(
@@ -42,16 +52,16 @@ def create_causal_model_from_equations(node_equations: str):
                 )
             else:
                 custom_func, noise_eq = expression.rsplit("+", 1)
-                parent_nodes = extract_parent_nodes(custom_func)
-                graph_node_pairs += [(parent_node, node_name) for parent_node in parent_nodes]
+                compiled_eq = compile(custom_func, "<string>", "eval")
+                parent_nodes = extract_parent_nodes(compiled_eq)
+                for parent_node in parent_nodes:
+                    causal_graph.add_edge(parent_node, node_name)
                 noise_model_name, parsed_args = extract_noise_model_components(noise_eq)
                 noise_model = identify_noise_model(noise_model_name, parsed_args)
                 causal_nodes_info[node_name]["causal_mechanism"] = AdditiveNoiseModel(
-                    MyCustomModel(custom_func, parent_nodes), noise_model
+                    CustomModel(compiled_eq, parent_nodes), noise_model
                 )
             causal_nodes_info[node_name]["fully_defined"] = True if parsed_args else False
-
-    causal_graph = nx.DiGraph(graph_node_pairs)
     causal_model = StructuralCausalModel(causal_graph)
     for node in causal_graph.nodes:
         causal_model.set_causal_mechanism(node, causal_nodes_info[node]["causal_mechanism"])
@@ -82,9 +92,9 @@ def identify_noise_model(causal_mechanism_name: str, parsed_args: dict) -> Stoch
     raise ValueError(f"Unable to recognise the noise model: {causal_mechanism_name}")
 
 
-class MyCustomModel(PredictionModel):
-    def __init__(self, custom_func: str, parent_nodes: list):
-        self.custom_func = custom_func
+class CustomModel(PredictionModel):
+    def __init__(self, compiled_eq, parent_nodes: list):
+        self.compiled_eq = compiled_eq
         self.parent_nodes = parent_nodes
 
     def fit(self, X, Y):
@@ -93,10 +103,11 @@ class MyCustomModel(PredictionModel):
 
     def predict(self, X):
         local_dict = {self.parent_nodes[i]: X[:, i] for i in range(len(self.parent_nodes))}
-        return shape_into_2d(ne.evaluate(self.custom_func, local_dict=local_dict, sanitize=True))
+        return shape_into_2d(eval(self.compiled_eq, allowed_callables, local_dict))
+        # return shape_into_2d(ne.evaluate(self.custom_func, local_dict=local_dict, sanitize=True))
 
     def clone(self):
-        return MyCustomModel(self.custom_func)
+        return CustomModel(self.custom_func)
 
 
 def extract_noise_model_components(noise_eq):
@@ -117,13 +128,22 @@ def extract_equation_components(equation):
     return node_name, expression
 
 
-def extract_parent_nodes(func_equation):
+def extract_parent_nodes(compiled_eq):
     parent_nodes = []
-    available_funcs = set(dir(__builtins__) + dir(np) + dir(scipy.stats))
+    # available_funcs = set(dir(__builtins__) + dir(np) + dir(scipy.stats))
     # Find all node names in the expression string
-    matched_node_names = re.findall(r"\b[A-Za-z_][A-Za-z_0-9 ]*\b", func_equation)
-    for matched_node in matched_node_names:
-        if matched_node not in available_funcs:
+    # matched_node_names = re.findall(r"\b[A-Za-z_][A-Za-z_0-9 ]*\b", func_equation)
+
+    for matched_node in compiled_eq.co_names:
+        if matched_node not in allowed_callables:
             parent_nodes.append(matched_node)
     parent_nodes.sort()
     return parent_nodes
+
+
+def sanitize_input_expression(expression: str):
+    for char in banned_characters:
+        if char in expression:
+            raise ValueError(
+                f"Following list of characters {banned_characters} are not allowed because of security reasons"
+            )

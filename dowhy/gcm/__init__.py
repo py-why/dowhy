@@ -29,6 +29,7 @@ from .influence import arrow_strength, intrinsic_causal_influence
 from .ml import ClassificationModel, PredictionModel
 from .model_evaluation import evaluate_causal_model
 from .stochastic_models import BayesianGaussianMixtureDistribution, EmpiricalDistribution, ScipyDistribution
+from .equation_parser import create_causal_model_from_equations
 from .unit_change import unit_change
 from .validation import RejectionResult, refute_causal_structure, refute_invertible_model
 from .whatif import average_causal_effect, counterfactual_samples, interventional_samples

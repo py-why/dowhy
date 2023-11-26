@@ -37,7 +37,7 @@ def test_equation_parser_fit_func_is_giving_correct_results():
 
 
 def _generate_data():
-    X0 = np.random.uniform(-1, 1, 100)
+    X0 = np.random.normal(0, 0.1, 100)
     X1 = 2 * X0 + np.random.normal(0, 0.1, 100)
     X2 = 0.5 * X0 + np.random.normal(0, 0.1, 100)
     X3 = 0.5 * X2 + np.random.normal(0, 0.1, 100)
@@ -48,7 +48,7 @@ def _generate_data():
 def _get_causal_model_from_eq():
     causal_model = create_causal_model_from_equations(
         """
-    X0 = empirical()
+    X0 = norm(loc=0,scale=0.1)
     X1 = 2*X0 + norm(loc=0, scale=0.1)
     X2 = 0.5*X0 + norm(loc=0, scale=0.1)
     X3 = 0.5*X2 + norm(loc=0, scale=0.1)
