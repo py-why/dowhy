@@ -296,7 +296,7 @@ def get_adjacency_matrix(graph: nx.DiGraph, *args, **kwargs):
     Get adjacency matrix from the networkx graph
 
     """
-    return nx.convert_matrix.to_numpy_matrix(graph, *args, **kwargs)
+    return nx.convert_matrix.to_numpy_array(graph, *args, **kwargs)
 
 
 def build_graph(
