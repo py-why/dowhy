@@ -403,7 +403,7 @@ def build_graph_from_str(graph_str: str) -> nx.DiGraph:
             try:
                 import pydot
 
-                return nx.DiGraph(nx.drawing.nx_pydot.read_dot(graph))
+                return nx.DiGraph(nx.drawing.nx_pydot.read_dot(graph_str))
             except Exception as e:
                 _logger.error("Error: Pydot cannot be loaded. " + str(e))
                 raise e
@@ -420,7 +420,7 @@ def build_graph_from_str(graph_str: str) -> nx.DiGraph:
             try:
                 import pydot
 
-                P_list = pydot.graph_from_dot_data(graph)
+                P_list = pydot.graph_from_dot_data(graph_str)
                 return nx.drawing.nx_pydot.from_pydot(P_list[0])
             except Exception as e:
                 _logger.error("Error: Pydot cannot be loaded. " + str(e))

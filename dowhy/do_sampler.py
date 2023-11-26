@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 from dowhy import EstimandType, identify_effect_auto
-
+from dowhy.utils.api import parse_state
 
 class DoSampler:
     """Base class for a sampler from the interventional distribution."""
