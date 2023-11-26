@@ -302,10 +302,10 @@ def get_adjacency_matrix(graph: nx.DiGraph, *args, **kwargs):
 def build_graph(
     action_nodes: List[str],
     outcome_nodes: List[str],
-    common_cause_nodes: List[str],
-    instrument_nodes,
-    effect_modifier_nodes,
-    mediator_nodes,
+    common_cause_nodes: List[str] = None,
+    instrument_nodes = None,
+    effect_modifier_nodes = None,
+    mediator_nodes = None,
 ):
     """Creates nodes and edges based on variable names and their semantics.
 
@@ -369,52 +369,65 @@ def build_graph(
 
 
 def build_graph_from_str(graph_str: str) -> nx.DiGraph:
+    """
+    User-friendly function that returns a networkx graph based on the graph string. 
+    
+    Formats supported: dot, gml, daggity
+
+    The `graph_str` parameter can refer to the path of a text file containing the encoded graph or contain the actual encoded graph as a string. 
+   
+    :param graph_str: a string containing the filepath or the encoded graph
+    :type graph_str: str
+
+    :returns: a networkx directed graph object
+    """ 
+    # some preprocessing steps
     if re.match(r".*\.txt", graph_str):
         text_file = open(graph_str, "r")
-        graph = text_file.read()
+        graph_str = text_file.read()
         text_file.close()
-        return graph
-    elif re.match(r"^dag", graph_str):  # Convert daggity output to dot format
-        return daggity_to_dot(graph_str)
-    elif isinstance(graph_str, str):
-        graph_str.replace("\n", " ")
+    if re.match(r"^dag", graph_str):  # Convert daggity output to dot format
+        graph_str = daggity_to_dot(graph_str)
+    if isinstance(graph_str, str):
+        graph_str = graph_str.replace("\n", " ")
 
-        if re.match(r".*\.dot", graph_str):
-            # load dot file
+    # parsing the correct graph based on input graph format
+    if re.match(r".*\.dot", graph_str):
+        # load dot file
+        try:
+            import pygraphviz as pgv
+
+            return nx.DiGraph(nx.drawing.nx_agraph.read_dot(graph_str))
+        except Exception as e:
+            _logger.error("Pygraphviz cannot be loaded. " + str(e) + "\nTrying pydot...")
             try:
-                import pygraphviz as pgv
+                import pydot
 
-                return nx.DiGraph(nx.drawing.nx_agraph.read_dot(graph_str))
+                return nx.DiGraph(nx.drawing.nx_pydot.read_dot(graph))
             except Exception as e:
-                _logger.error("Pygraphviz cannot be loaded. " + str(e) + "\nTrying pydot...")
-                try:
-                    import pydot
+                _logger.error("Error: Pydot cannot be loaded. " + str(e))
+                raise e
+    elif re.match(r".*\.gml", graph_str):
+        return nx.DiGraph(nx.read_gml(graph_str))
+    elif re.match(r".*graph\s*\{.*\}\s*", graph_str):
+        try:
+            import pygraphviz as pgv
 
-                    return nx.DiGraph(nx.drawing.nx_pydot.read_dot(graph))
-                except Exception as e:
-                    _logger.error("Error: Pydot cannot be loaded. " + str(e))
-                    raise e
-        elif re.match(r".*\.gml", graph_str):
-            return nx.DiGraph(nx.read_gml(graph_str))
-        elif re.match(r".*graph\s*\{.*\}\s*", graph_str):
+            graph = pgv.AGraph(graph_str, strict=True, directed=True)
+            return nx.drawing.nx_agraph.from_agraph(graph)
+        except Exception as e:
+            _logger.error("Error: Pygraphviz cannot be loaded. " + str(e) + "\nTrying pydot ...")
             try:
-                import pygraphviz as pgv
+                import pydot
 
-                graph = pgv.AGraph(graph_str, strict=True, directed=True)
-                return nx.drawing.nx_agraph.from_agraph(graph)
+                P_list = pydot.graph_from_dot_data(graph)
+                return nx.drawing.nx_pydot.from_pydot(P_list[0])
             except Exception as e:
-                _logger.error("Error: Pygraphviz cannot be loaded. " + str(e) + "\nTrying pydot ...")
-                try:
-                    import pydot
-
-                    P_list = pydot.graph_from_dot_data(graph)
-                    return nx.drawing.nx_pydot.from_pydot(P_list[0])
-                except Exception as e:
-                    _logger.error("Error: Pydot cannot be loaded. " + str(e))
-                    raise e
-        elif re.match(".*graph\s*\[.*\]\s*", graph_str):
-            return nx.DiGraph(nx.parse_gml(graph_str))
-        else:
-            _logger.error("Error: Please provide graph (as string or text file) in dot or gml format.")
-            _logger.error("Error: Incorrect graph format")
-            raise ValueError
+                _logger.error("Error: Pydot cannot be loaded. " + str(e))
+                raise e
+    elif re.match(".*graph\s*\[.*\]\s*", graph_str):
+        return nx.DiGraph(nx.parse_gml(graph_str))
+    else:
+        _logger.error("Error: Please provide graph (as string or text file) in dot or gml format.")
+        _logger.error("Error: Incorrect graph format")
+        raise ValueError
