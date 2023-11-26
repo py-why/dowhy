@@ -26,12 +26,10 @@ To see how to use the method, let us generate some data.
 >>> Y = 3*X + 4*Z + np.random.normal(loc=0, scale=1, size=1000)
 >>> data = pd.DataFrame(dict(X=X, Y=Y, Z=Z))
 
-Next, we will model cause-effect relationships as a probabilistic causal model and fit it to the data.
+Next, we will model cause-effect relationships as a probabilistic causal model using DoWhy's GCM framework and fit it to the data.
 
 >>> causal_model = gcm.ProbabilisticCausalModel(nx.DiGraph([('Z', 'Y'), ('Z', 'X'), ('X', 'Y')]))
->>> causal_model.set_causal_mechanism('Z', gcm.EmpiricalDistribution())
->>> causal_model.set_causal_mechanism('X', gcm.AdditiveNoiseModel(gcm.ml.create_linear_regressor()))
->>> causal_model.set_causal_mechanism('Y', gcm.AdditiveNoiseModel(gcm.ml.create_linear_regressor()))
+>>> gcm.auto.assign_causal_mechanisms(causal_model, data)
 >>> gcm.fit(causal_model, data)
 
 Finally, we can estimate the strength of incoming arrows to a node of interest (e.g., :math:`Y`).
@@ -49,8 +47,16 @@ than the direct influence from :math:`Z` to :math:`Y` (~14.73). Roughly speaking
 from :math:`X` to :math:`Y` increases the variance of :math:`Y` by ~41.32 units,
 whereas removing :math:`Z \to Y` increases the variance of :math:`Y` by ~14.73 units.
 
-In the next section, we explain what "removing" an edge implies.
+In the Section :ref:`Understanding the method <understand-method-arrow-strength>`, we explain what "removing" an edge implies.
 In particular, we briefly explain the science behind our method for quantifying the strength of an arrow.
+
+Related example notebooks
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- :doc:`../../../example_notebooks/gcm_online_shop`
+- :doc:`../../../example_notebooks/gcm_icc`
+
+.. _understand-method-arrow-strength:
 
 Understanding the method
 ^^^^^^^^^^^^^^^^^^^^^^^^

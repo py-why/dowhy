@@ -244,8 +244,7 @@ def intrinsic_causal_influence(
                              that generated samples follow the fitted models. In contrast, the 'approx' method involves
                              selecting and training a suitable model based on data sampled from the graph. This might
                              lead to deviations from the outcomes of the fitted models, but is faster and can be more
-                             robust in certain settings. A more detailed treatment on why we need this parameter is
-                             also provided in :ref:`icc`.
+                             robust in certain settings.
     :param attribution_func: Optional attribution function to measure the statistical property of the target node. This
                              function expects two inputs; predictions after the randomization of certain features (i.e.
                              samples from noise nodes) and a baseline where no features were randomized. The baseline
@@ -353,8 +352,7 @@ def intrinsic_causal_influence_sample(
                              that generated samples follow the fitted models. In contrast, the 'approx' method involves
                              selecting and training a suitable model based on data sampled from the graph. This might
                              lead to deviations from the outcomes of the fitted models, but is faster and can be more
-                             robust in certain settings. A more detailed treatment on why we need this parameter is
-                             also provided in :ref:`icc`.
+                             robust in certain settings.
     :param subset_scoring_func: Set function for estimating the quantity of interest based. This function
                                 expects two inputs; the outcome of the model for some samples if certain features are permuted and the
                                 outcome of the model for the same samples when no features were permuted. By default,

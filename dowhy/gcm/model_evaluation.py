@@ -69,6 +69,7 @@ class EvaluateCausalModelConfig:
         conditional_independence_test_falsify: Callable[[np.ndarray, np.ndarray, np.ndarray], float] = partial(
             kernel_based, use_bootstrap=False, max_num_samples_run=500
         ),
+        falsify_graph_significance_level: float = 0.2,
         n_jobs: Optional[int] = None,
     ):
         """Parameters for the causal model evaluation method. See the parameter description for more details.
@@ -94,6 +95,10 @@ class EvaluateCausalModelConfig:
         :param conditional_independence_test_falsify: A method for testing the independence between two variables given a
                                                       third one used for falsifying the given graph structure. Note that
                                                       the variables can be multivariate.
+        :param falsify_graph_significance_level: Significance level for rejecting the given graph based on the
+                                                 permutation tests. The default of 0.2 here is higher than the usual
+                                                 0.05. Consider reducing it to be more strict about falsifying the
+                                                 graph.
         :param n_jobs: Number of parallel jobs. Whenever the evaluation method supports parallelization, this parameter
                        is used.
         """
@@ -132,6 +137,7 @@ class EvaluateCausalModelConfig:
         self.max_num_permutations_falsify = max_num_permutations_falsify
         self.independence_test_falsify = independence_test_falsify
         self.conditional_independence_test_falsify = conditional_independence_test_falsify
+        self.falsify_graph_significance_level = falsify_graph_significance_level
         self.n_jobs = n_jobs
 
 
@@ -400,6 +406,7 @@ def evaluate_causal_model(
             n_permutations=config.max_num_permutations_falsify,
             independence_test=config.independence_test_falsify,
             conditional_independence_test=config.conditional_independence_test_falsify,
+            significance_level=config.falsify_graph_significance_level,
             n_jobs=config.n_jobs,
         )
 
@@ -775,7 +782,7 @@ def _get_crps_interpretation_string(crps: float) -> str:
         return "The estimated CRPS indicates a good model performance."
     elif 0.35 <= crps < 0.65:
         return (
-            "The estimated CRPS indicates a fair model performance. "
+            "The estimated CRPS indicates only a fair model performance. "
             "Note, however, that a high CRPS could also result from a small signal to noise ratio."
         )
     elif 0.65 <= crps < 0.9:
