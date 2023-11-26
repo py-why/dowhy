@@ -303,9 +303,9 @@ def build_graph(
     action_nodes: List[str],
     outcome_nodes: List[str],
     common_cause_nodes: List[str] = None,
-    instrument_nodes = None,
-    effect_modifier_nodes = None,
-    mediator_nodes = None,
+    instrument_nodes=None,
+    effect_modifier_nodes=None,
+    mediator_nodes=None,
 ):
     """Creates nodes and edges based on variable names and their semantics.
 
@@ -370,17 +370,17 @@ def build_graph(
 
 def build_graph_from_str(graph_str: str) -> nx.DiGraph:
     """
-    User-friendly function that returns a networkx graph based on the graph string. 
-    
+    User-friendly function that returns a networkx graph based on the graph string.
+
     Formats supported: dot, gml, daggity
 
-    The `graph_str` parameter can refer to the path of a text file containing the encoded graph or contain the actual encoded graph as a string. 
-   
+    The `graph_str` parameter can refer to the path of a text file containing the encoded graph or contain the actual encoded graph as a string.
+
     :param graph_str: a string containing the filepath or the encoded graph
     :type graph_str: str
 
     :returns: a networkx directed graph object
-    """ 
+    """
     # some preprocessing steps
     if re.match(r".*\.txt", graph_str):
         text_file = open(graph_str, "r")
