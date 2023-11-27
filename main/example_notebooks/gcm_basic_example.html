@@ -827,33 +827,33 @@ div.rendered_html tbody tr:hover {
   <tbody>
     <tr>
       <th>0</th>
-      <td>-1.717832</td>
-      <td>-4.072220</td>
-      <td>-11.251695</td>
+      <td>-0.157440</td>
+      <td>0.063774</td>
+      <td>0.445127</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>0.642411</td>
-      <td>1.284616</td>
-      <td>4.767430</td>
+      <td>0.284121</td>
+      <td>0.947892</td>
+      <td>2.552651</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>0.210087</td>
-      <td>0.195623</td>
-      <td>0.449202</td>
+      <td>-1.260674</td>
+      <td>-0.944892</td>
+      <td>-2.398332</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>-2.066432</td>
-      <td>-4.333746</td>
-      <td>-13.077411</td>
+      <td>-0.729869</td>
+      <td>-0.005861</td>
+      <td>-0.668718</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>-0.325817</td>
-      <td>-0.841352</td>
-      <td>-3.588740</td>
+      <td>1.079521</td>
+      <td>1.236396</td>
+      <td>4.212099</td>
     </tr>
   </tbody>
 </table>
@@ -889,23 +889,23 @@ Analyzed 3 nodes.
 Node X is a root node. Assigning &#39;Empirical Distribution&#39; to the node representing the marginal distribution.
 
 --- Node: Y
-Node Y is a non-root node. Assigning &#39;AdditiveNoiseModel using Pipeline&#39; to the node.
+Node Y is a non-root node. Assigning &#39;AdditiveNoiseModel using LinearRegression&#39; to the node.
 This represents the causal relationship as Y := f(X) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
+LinearRegression: 1.0084320860341547
 Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 1.0265157829858094
-LinearRegression: 1.0270823903753037
-HistGradientBoostingRegressor: 1.1387712742825475
+                (&#39;linearregression&#39;, LinearRegression)]): 1.0109992475256595
+HistGradientBoostingRegressor: 1.1268987616264656
 Based on the type of causal mechanism, the model with the lowest metric value represents the best choice.
 
 --- Node: Z
 Node Z is a non-root node. Assigning &#39;AdditiveNoiseModel using LinearRegression&#39; to the node.
 This represents the causal relationship as Z := f(Y) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
-LinearRegression: 0.9727991152411267
+LinearRegression: 0.9383030286853717
 Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 0.9806784948306302
-HistGradientBoostingRegressor: 1.511462334009503
+                (&#39;linearregression&#39;, LinearRegression)]): 0.9415586181619349
+HistGradientBoostingRegressor: 1.4493496264243189
 Based on the type of causal mechanism, the model with the lowest metric value represents the best choice.
 </pre></div></div>
 </div>
@@ -939,7 +939,7 @@ Based on the type of causal mechanism, the model with the lowest metric value re
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node Z: 100%|██████████| 3/3 [00:00&lt;00:00, 543.00it/s]
+Fitting causal mechanism of node Z: 100%|██████████| 3/3 [00:00&lt;00:00, 476.34it/s]
 </pre></div></div>
 </div>
 <p>Fitting means, we learn the generative models of the variables in the SCM according to the data.</p>
@@ -957,8 +957,8 @@ Fitting causal mechanism of node Z: 100%|██████████| 3/3 [00
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Evaluating causal mechanisms...: 100%|██████████| 3/3 [00:00&lt;00:00, 3211.57it/s]
-Test permutations of given graph: 100%|██████████| 6/6 [00:00&lt;00:00, 18.68it/s]
+Evaluating causal mechanisms...: 100%|██████████| 3/3 [00:00&lt;00:00, 3767.34it/s]
+Test permutations of given graph: 100%|██████████| 6/6 [00:00&lt;00:00, 18.71it/s]
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -980,26 +980,26 @@ Root nodes are evaluated based on the KL divergence between the generated and th
 Non-root nodes are mainly evaluated based on the (normalized) Continuous Ranked Probability Score (CRPS), which is a generalizes the Mean Absolute Percentage Error to probabilistic predictions. Since the causal mechanisms produce conditional distributions, this should give some insights into their performance and calibration. In addition, the mean squared error (MSE), the normalized MSE (NMSE), the R2 coefficient and the F1 score (for categorical nodes) is reported.
 
 --- Node X
-- The KL divergence between generated and observed distribution is 0.01883862989875419.
+- The KL divergence between generated and observed distribution is 0.06856623348473723.
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
 --- Node Y
-- The MSE is 1.0333305257438703.
-- The NMSE is 0.4586241866208637.
-- The R2 coefficient is 0.7891232060621751.
-- The normalized CRPS is 0.2617368571216516.
+- The MSE is 1.0086755290804637.
+- The NMSE is 0.4535063984443696.
+- The R2 coefficient is 0.7935850701306044.
+- The normalized CRPS is 0.25903843366461554.
 The estimated CRPS indicates a good model performance.
 
 --- Node Z
-- The MSE is 0.9734619089584161.
-- The NMSE is 0.14581872898890366.
-- The R2 coefficient is 0.9786343217931565.
-- The normalized CRPS is 0.08381502510079275.
+- The MSE is 0.943925803641364.
+- The NMSE is 0.1456541506324752.
+- The R2 coefficient is 0.9786862631167519.
+- The normalized CRPS is 0.08299583823164343.
 The estimated CRPS indicates a very good model performance.
 
 ==== Evaluation of Invertible Functional Causal Model Assumption ====
 
---- The model assumption for node Y is not rejected with a p-value of 1.0 (after potential adjustment) and a significance level of 0.05.
+--- The model assumption for node Y is not rejected with a p-value of 0.9504239407108825 (after potential adjustment) and a significance level of 0.05.
 This implies that the model assumption might be valid.
 
 --- The model assumption for node Z is not rejected with a p-value of 1.0 (after potential adjustment) and a significance level of 0.05.
@@ -1008,7 +1008,7 @@ This implies that the model assumption might be valid.
 Note that these results are based on statistical independence tests, and the fact that the assumption was not rejected does not necessarily imply that it is correct. There is just no evidence against it.
 
 ==== Evaluation of Generated Distribution ====
-The overall average KL divergence between the generated and observed distribution is 0.0
+The overall average KL divergence between the generated and observed distribution is 0.036305574490817054
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
 ==== Evaluation of the Causal Graph Structure ====
@@ -1079,33 +1079,33 @@ All these evaluations give some insight into the goodness of the causal model, b
   <tbody>
     <tr>
       <th>0</th>
-      <td>0.466756</td>
+      <td>-0.540773</td>
       <td>2.34</td>
-      <td>6.083479</td>
+      <td>7.161061</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>-1.203898</td>
+      <td>0.438743</td>
       <td>2.34</td>
-      <td>6.501343</td>
+      <td>6.846530</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>-1.423213</td>
+      <td>1.570076</td>
       <td>2.34</td>
-      <td>6.226632</td>
+      <td>7.684705</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>1.157982</td>
+      <td>1.790598</td>
       <td>2.34</td>
-      <td>7.603549</td>
+      <td>5.595907</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>0.683654</td>
+      <td>1.068801</td>
       <td>2.34</td>
-      <td>6.413084</td>
+      <td>5.971411</td>
     </tr>
   </tbody>
 </table>

@@ -756,6 +756,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">dowhy.datasets</span>
 <span class="kn">import</span> <span class="nn">dowhy.api</span>
+<span class="kn">from</span> <span class="nn">dowhy.graph</span> <span class="kn">import</span> <span class="n">build_graph_from_str</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -775,7 +776,7 @@ div.rendered_html tbody tr:hover {
         <span class="n">treatment_is_binary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">df</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;df&#39;</span><span class="p">]</span>
 <span class="n">df</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))</span> <span class="c1"># Adding noise to data. Without noise, the variance in Y|X, Z is zero, and mcmc fails.</span>
-<span class="c1">#data[&#39;dot_graph&#39;] = &#39;digraph { v -&gt;y;X0-&gt; v;X0-&gt; y;}&#39;</span>
+<span class="n">nx_graph</span> <span class="o">=</span> <span class="n">build_graph_from_str</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;dot_graph&quot;</span><span class="p">])</span>
 
 <span class="n">treatment</span><span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">outcome</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
@@ -815,33 +816,33 @@ div.rendered_html tbody tr:hover {
   <tbody>
     <tr>
       <th>0</th>
-      <td>1.165846</td>
+      <td>1.873369</td>
       <td>True</td>
-      <td>4.898475</td>
+      <td>7.631441</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>-2.973417</td>
+      <td>-0.454660</td>
       <td>False</td>
-      <td>-2.880521</td>
+      <td>-0.983654</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>-2.733533</td>
+      <td>-0.311393</td>
       <td>False</td>
-      <td>-1.800068</td>
+      <td>0.568165</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>-0.700831</td>
-      <td>False</td>
-      <td>-0.837711</td>
+      <td>0.019126</td>
+      <td>True</td>
+      <td>5.215282</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>-1.528190</td>
-      <td>False</td>
-      <td>-1.198808</td>
+      <td>1.232669</td>
+      <td>True</td>
+      <td>6.535844</td>
     </tr>
     <tr>
       <th>...</th>
@@ -851,33 +852,33 @@ div.rendered_html tbody tr:hover {
     </tr>
     <tr>
       <th>995</th>
-      <td>-1.447895</td>
-      <td>False</td>
-      <td>-1.754864</td>
+      <td>0.726076</td>
+      <td>True</td>
+      <td>5.290686</td>
     </tr>
     <tr>
       <th>996</th>
-      <td>-3.261694</td>
-      <td>False</td>
-      <td>-3.581316</td>
+      <td>2.311299</td>
+      <td>True</td>
+      <td>7.573668</td>
     </tr>
     <tr>
       <th>997</th>
-      <td>-1.081209</td>
+      <td>-0.193134</td>
       <td>False</td>
-      <td>1.548817</td>
+      <td>-0.138724</td>
     </tr>
     <tr>
       <th>998</th>
-      <td>-0.928905</td>
-      <td>False</td>
-      <td>-1.106769</td>
+      <td>0.898267</td>
+      <td>True</td>
+      <td>6.647209</td>
     </tr>
     <tr>
       <th>999</th>
-      <td>-0.136961</td>
-      <td>False</td>
-      <td>-0.358277</td>
+      <td>1.717833</td>
+      <td>True</td>
+      <td>7.125196</td>
     </tr>
   </tbody>
 </table>
@@ -890,10 +891,10 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># data[&#39;df&#39;] is just a regular pandas.DataFrame</span>
 <span class="n">df</span><span class="o">.</span><span class="n">causal</span><span class="o">.</span><span class="n">do</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">treatment</span><span class="p">,</span>
-                     <span class="n">variable_types</span><span class="o">=</span><span class="p">{</span><span class="n">treatment</span><span class="p">:</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">outcome</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">common_cause</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">},</span>
-                     <span class="n">outcome</span><span class="o">=</span><span class="n">outcome</span><span class="p">,</span>
-                     <span class="n">common_causes</span><span class="o">=</span><span class="p">[</span><span class="n">common_cause</span><span class="p">],</span>
-                     <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">treatment</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">outcome</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;bar&#39;</span><span class="p">)</span>
+             <span class="n">variable_types</span><span class="o">=</span><span class="p">{</span><span class="n">treatment</span><span class="p">:</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">outcome</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">common_cause</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">},</span>
+             <span class="n">outcome</span><span class="o">=</span><span class="n">outcome</span><span class="p">,</span>
+             <span class="n">common_causes</span><span class="o">=</span><span class="p">[</span><span class="n">common_cause</span><span class="p">],</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">treatment</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">outcome</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;bar&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -921,8 +922,8 @@ div.rendered_html tbody tr:hover {
               <span class="n">variable_types</span><span class="o">=</span><span class="p">{</span><span class="n">treatment</span><span class="p">:</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">outcome</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">common_cause</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">},</span>
               <span class="n">outcome</span><span class="o">=</span><span class="n">outcome</span><span class="p">,</span>
               <span class="n">method</span><span class="o">=</span><span class="s1">&#39;weighting&#39;</span><span class="p">,</span>
-              <span class="n">common_causes</span><span class="o">=</span><span class="p">[</span><span class="n">common_cause</span><span class="p">],</span>
-              <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">treatment</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">outcome</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;bar&#39;</span><span class="p">)</span>
+              <span class="n">common_causes</span><span class="o">=</span><span class="p">[</span><span class="n">common_cause</span><span class="p">]</span>
+              <span class="p">)</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">treatment</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">outcome</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;bar&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -949,14 +950,14 @@ div.rendered_html tbody tr:hover {
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cdf_1</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">causal</span><span class="o">.</span><span class="n">do</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">{</span><span class="n">treatment</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
               <span class="n">variable_types</span><span class="o">=</span><span class="p">{</span><span class="n">treatment</span><span class="p">:</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">outcome</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">common_cause</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">},</span>
               <span class="n">outcome</span><span class="o">=</span><span class="n">outcome</span><span class="p">,</span>
-              <span class="n">dot_graph</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;dot_graph&#39;</span><span class="p">],</span>
-              <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+              <span class="n">graph</span><span class="o">=</span><span class="n">nx_graph</span>
+              <span class="p">)</span>
 
 <span class="n">cdf_0</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">causal</span><span class="o">.</span><span class="n">do</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">{</span><span class="n">treatment</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span>
               <span class="n">variable_types</span><span class="o">=</span><span class="p">{</span><span class="n">treatment</span><span class="p">:</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">outcome</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">common_cause</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">},</span>
               <span class="n">outcome</span><span class="o">=</span><span class="n">outcome</span><span class="p">,</span>
-              <span class="n">dot_graph</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;dot_graph&#39;</span><span class="p">],</span>
-              <span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+              <span class="n">graph</span><span class="o">=</span><span class="n">nx_graph</span>
+              <span class="p">)</span>
 <br/></pre></div>
 </div>
 </div>
@@ -1001,43 +1002,43 @@ div.rendered_html tbody tr:hover {
   <tbody>
     <tr>
       <th>0</th>
-      <td>-1.243252</td>
+      <td>0.516043</td>
       <td>False</td>
-      <td>-1.804566</td>
-      <td>0.864096</td>
-      <td>1.157279</td>
+      <td>-0.545623</td>
+      <td>0.238641</td>
+      <td>4.190402</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>-1.947563</td>
+      <td>1.869794</td>
       <td>False</td>
-      <td>-3.383860</td>
-      <td>0.945963</td>
-      <td>1.057124</td>
+      <td>2.799745</td>
+      <td>0.016290</td>
+      <td>61.388164</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>0.264575</td>
+      <td>0.639884</td>
       <td>False</td>
-      <td>2.564084</td>
-      <td>0.421037</td>
-      <td>2.375088</td>
+      <td>-0.523910</td>
+      <td>0.193230</td>
+      <td>5.175179</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>-2.273290</td>
+      <td>-1.049229</td>
       <td>False</td>
-      <td>-1.336138</td>
-      <td>0.965475</td>
-      <td>1.035760</td>
+      <td>-0.541982</td>
+      <td>0.903782</td>
+      <td>1.106462</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>-0.312780</td>
+      <td>1.869794</td>
       <td>False</td>
-      <td>0.573384</td>
-      <td>0.625209</td>
-      <td>1.599465</td>
+      <td>2.799745</td>
+      <td>0.016290</td>
+      <td>61.388164</td>
     </tr>
     <tr>
       <th>...</th>
@@ -1049,43 +1050,43 @@ div.rendered_html tbody tr:hover {
     </tr>
     <tr>
       <th>995</th>
-      <td>-0.556259</td>
+      <td>0.712475</td>
       <td>False</td>
-      <td>0.170536</td>
-      <td>0.703045</td>
-      <td>1.422384</td>
+      <td>2.032263</td>
+      <td>0.169829</td>
+      <td>5.888278</td>
     </tr>
     <tr>
       <th>996</th>
-      <td>-1.020518</td>
+      <td>1.220727</td>
       <td>False</td>
-      <td>-2.087888</td>
-      <td>0.821925</td>
-      <td>1.216656</td>
+      <td>0.249688</td>
+      <td>0.063514</td>
+      <td>15.744581</td>
     </tr>
     <tr>
       <th>997</th>
-      <td>-0.166632</td>
+      <td>1.071904</td>
       <td>False</td>
-      <td>1.032011</td>
-      <td>0.574823</td>
-      <td>1.739665</td>
+      <td>0.501629</td>
+      <td>0.085677</td>
+      <td>11.671757</td>
     </tr>
     <tr>
       <th>998</th>
-      <td>0.925807</td>
+      <td>1.197020</td>
       <td>False</td>
-      <td>1.583095</td>
-      <td>0.219365</td>
-      <td>4.558609</td>
+      <td>-0.285915</td>
+      <td>0.066647</td>
+      <td>15.004524</td>
     </tr>
     <tr>
       <th>999</th>
-      <td>0.269818</td>
+      <td>0.544399</td>
       <td>False</td>
-      <td>-2.204826</td>
-      <td>0.419200</td>
-      <td>2.385496</td>
+      <td>1.184132</td>
+      <td>0.227630</td>
+      <td>4.393094</td>
     </tr>
   </tbody>
 </table>
@@ -1133,43 +1134,43 @@ div.rendered_html tbody tr:hover {
   <tbody>
     <tr>
       <th>0</th>
-      <td>-0.055647</td>
+      <td>0.612009</td>
       <td>True</td>
-      <td>5.052966</td>
-      <td>0.464569</td>
-      <td>2.152532</td>
+      <td>5.907924</td>
+      <td>0.797155</td>
+      <td>1.254462</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>-1.247729</td>
+      <td>1.468826</td>
       <td>True</td>
-      <td>3.360896</td>
-      <td>0.135150</td>
-      <td>7.399208</td>
+      <td>6.432508</td>
+      <td>0.961941</td>
+      <td>1.039565</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>-1.707798</td>
+      <td>0.839326</td>
       <td>True</td>
-      <td>2.187090</td>
-      <td>0.074623</td>
-      <td>13.400712</td>
+      <td>6.288672</td>
+      <td>0.865575</td>
+      <td>1.155301</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>0.748888</td>
+      <td>0.724306</td>
       <td>True</td>
-      <td>6.964967</td>
-      <td>0.733990</td>
-      <td>1.362417</td>
+      <td>3.476508</td>
+      <td>0.833764</td>
+      <td>1.199380</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>0.277232</td>
+      <td>2.489883</td>
       <td>True</td>
-      <td>4.834429</td>
-      <td>0.583393</td>
-      <td>1.714109</td>
+      <td>7.622922</td>
+      <td>0.995713</td>
+      <td>1.004306</td>
     </tr>
     <tr>
       <th>...</th>
@@ -1181,43 +1182,43 @@ div.rendered_html tbody tr:hover {
     </tr>
     <tr>
       <th>995</th>
-      <td>-1.657681</td>
+      <td>1.144508</td>
       <td>True</td>
-      <td>4.285212</td>
-      <td>0.079755</td>
-      <td>12.538462</td>
+      <td>7.042830</td>
+      <td>0.925897</td>
+      <td>1.080033</td>
     </tr>
     <tr>
       <th>996</th>
-      <td>-0.418750</td>
+      <td>0.680236</td>
       <td>True</td>
-      <td>4.802385</td>
-      <td>0.339818</td>
-      <td>2.942747</td>
+      <td>5.668570</td>
+      <td>0.820068</td>
+      <td>1.219410</td>
     </tr>
     <tr>
       <th>997</th>
-      <td>0.655487</td>
+      <td>2.639511</td>
       <td>True</td>
-      <td>5.031105</td>
-      <td>0.706957</td>
-      <td>1.414513</td>
+      <td>7.206697</td>
+      <td>0.996899</td>
+      <td>1.003111</td>
     </tr>
     <tr>
       <th>998</th>
-      <td>-1.301508</td>
+      <td>2.316264</td>
       <td>True</td>
-      <td>4.894662</td>
-      <td>0.126363</td>
-      <td>7.913725</td>
+      <td>6.895061</td>
+      <td>0.993761</td>
+      <td>1.006278</td>
     </tr>
     <tr>
       <th>999</th>
-      <td>-1.264343</td>
+      <td>1.541031</td>
       <td>True</td>
-      <td>4.028819</td>
-      <td>0.132381</td>
-      <td>7.553935</td>
+      <td>4.011880</td>
+      <td>0.967285</td>
+      <td>1.033822</td>
     </tr>
   </tbody>
 </table>
@@ -1241,7 +1242,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle 5.2260340435441$</div></div>
+$\displaystyle 5.01938816515125$</div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
@@ -1257,7 +1258,7 @@ $\displaystyle 5.2260340435441$</div></div>
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle 0.103712273835376$</div></div>
+$\displaystyle 0.115046860463795$</div></div>
 </div>
 <p>Comparing to the estimate from OLS.</p>
 <div class="nbinput docutils container">
@@ -1278,25 +1279,25 @@ $\displaystyle 0.103712273835376$</div></div>
 <table class="simpletable">
 <caption>OLS Regression Results</caption>
 <tr>
-  <th>Dep. Variable:</th>            <td>y</td>        <th>  R-squared (uncentered):</th>      <td>   0.884</td>
+  <th>Dep. Variable:</th>            <td>y</td>        <th>  R-squared (uncentered):</th>      <td>   0.964</td>
 </tr>
 <tr>
-  <th>Model:</th>                   <td>OLS</td>       <th>  Adj. R-squared (uncentered):</th> <td>   0.884</td>
+  <th>Model:</th>                   <td>OLS</td>       <th>  Adj. R-squared (uncentered):</th> <td>   0.964</td>
 </tr>
 <tr>
-  <th>Method:</th>             <td>Least Squares</td>  <th>  F-statistic:       </th>          <td>   3820.</td>
+  <th>Method:</th>             <td>Least Squares</td>  <th>  F-statistic:       </th>          <td>1.339e+04</td>
 </tr>
 <tr>
   <th>Date:</th>             <td>Mon, 27 Nov 2023</td> <th>  Prob (F-statistic):</th>           <td>  0.00</td>
 </tr>
 <tr>
-  <th>Time:</th>                 <td>09:18:28</td>     <th>  Log-Likelihood:    </th>          <td> -1404.2</td>
+  <th>Time:</th>                 <td>17:56:39</td>     <th>  Log-Likelihood:    </th>          <td> -1447.7</td>
 </tr>
 <tr>
-  <th>No. Observations:</th>      <td>  1000</td>      <th>  AIC:               </th>          <td>   2812.</td>
+  <th>No. Observations:</th>      <td>  1000</td>      <th>  AIC:               </th>          <td>   2899.</td>
 </tr>
 <tr>
-  <th>Df Residuals:</th>          <td>   998</td>      <th>  BIC:               </th>          <td>   2822.</td>
+  <th>Df Residuals:</th>          <td>   998</td>      <th>  BIC:               </th>          <td>   2909.</td>
 </tr>
 <tr>
   <th>Df Model:</th>              <td>     2</td>      <th>                     </th>              <td> </td>
@@ -1310,24 +1311,24 @@ $\displaystyle 0.103712273835376$</div></div>
    <td></td>     <th>coef</th>     <th>std err</th>      <th>t</th>      <th>P>|t|</th>  <th>[0.025</th>    <th>0.975]</th>
 </tr>
 <tr>
-  <th>x1</th> <td>    0.8420</td> <td>    0.023</td> <td>   37.134</td> <td> 0.000</td> <td>    0.797</td> <td>    0.886</td>
+  <th>x1</th> <td>    0.9364</td> <td>    0.040</td> <td>   23.444</td> <td> 0.000</td> <td>    0.858</td> <td>    1.015</td>
 </tr>
 <tr>
-  <th>x2</th> <td>    5.0140</td> <td>    0.062</td> <td>   81.325</td> <td> 0.000</td> <td>    4.893</td> <td>    5.135</td>
+  <th>x2</th> <td>    4.9866</td> <td>    0.060</td> <td>   83.025</td> <td> 0.000</td> <td>    4.869</td> <td>    5.104</td>
 </tr>
 </table>
 <table class="simpletable">
 <tr>
-  <th>Omnibus:</th>       <td> 2.726</td> <th>  Durbin-Watson:     </th> <td>   2.070</td>
+  <th>Omnibus:</th>       <td> 1.327</td> <th>  Durbin-Watson:     </th> <td>   2.018</td>
 </tr>
 <tr>
-  <th>Prob(Omnibus):</th> <td> 0.256</td> <th>  Jarque-Bera (JB):  </th> <td>   2.630</td>
+  <th>Prob(Omnibus):</th> <td> 0.515</td> <th>  Jarque-Bera (JB):  </th> <td>   1.210</td>
 </tr>
 <tr>
-  <th>Skew:</th>          <td> 0.089</td> <th>  Prob(JB):          </th> <td>   0.269</td>
+  <th>Skew:</th>          <td>-0.039</td> <th>  Prob(JB):          </th> <td>   0.546</td>
 </tr>
 <tr>
-  <th>Kurtosis:</th>      <td> 3.177</td> <th>  Cond. No.          </th> <td>    2.73</td>
+  <th>Kurtosis:</th>      <td> 3.152</td> <th>  Cond. No.          </th> <td>    3.15</td>
 </tr>
 </table><br/><br/>Notes:<br/>[1] R² is computed without centering (uncentered) since the model does not contain a constant.<br/>[2] Standard Errors assume that the covariance matrix of the errors is correctly specified.</div>
 </div>

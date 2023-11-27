@@ -787,6 +787,8 @@ minimum cardinality.</p>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dowhy.causal_graph</span> <span class="kn">import</span> <span class="n">CausalGraph</span>
 <span class="kn">from</span> <span class="nn">dowhy.causal_identifier</span> <span class="kn">import</span> <span class="n">AutoIdentifier</span><span class="p">,</span> <span class="n">BackdoorAdjustment</span><span class="p">,</span> <span class="n">EstimandType</span>
+<span class="kn">from</span> <span class="nn">dowhy.graph</span> <span class="kn">import</span> <span class="n">build_graph_from_str</span>
+<span class="kn">from</span> <span class="nn">dowhy.utils.plotting</span> <span class="kn">import</span> <span class="n">plot</span>
 </pre></div>
 </div>
 </div>
@@ -847,9 +849,7 @@ to sense the movement, action, and location of their own bodies.</p>
 <span class="p">]</span>
 <span class="n">treatment_name</span> <span class="o">=</span> <span class="s2">&quot;warm-up&quot;</span>
 <span class="n">outcome_name</span> <span class="o">=</span> <span class="s2">&quot;injury&quot;</span>
-<span class="n">G</span> <span class="o">=</span> <span class="n">CausalGraph</span><span class="p">(</span>
-    <span class="n">graph</span><span class="o">=</span><span class="n">graph_str</span><span class="p">,</span> <span class="n">treatment_name</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span> <span class="n">outcome_name</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span> <span class="n">observed_node_names</span><span class="o">=</span><span class="n">observed_node_names</span>
-<span class="p">)</span>
+<span class="n">G</span> <span class="o">=</span> <span class="n">build_graph_from_str</span><span class="p">(</span><span class="n">graph_str</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -858,7 +858,7 @@ to sense the movement, action, and location of their own bodies.</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">G</span><span class="o">.</span><span class="n">view_graph</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -889,7 +889,11 @@ to sense the movement, action, and location of their own bodies.</p>
 <span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span>
     <span class="n">ident_eff</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span>
-        <span class="n">graph</span><span class="o">=</span><span class="n">G</span><span class="p">,</span> <span class="n">treatment_name</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span> <span class="n">outcome_name</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span> <span class="n">conditional_node_names</span><span class="o">=</span><span class="n">conditional_node_names</span>
+        <span class="n">graph</span><span class="o">=</span><span class="n">G</span><span class="p">,</span>
+        <span class="n">action_nodes</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span>
+        <span class="n">outcome_nodes</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span>
+        <span class="n">observed_nodes</span><span class="o">=</span><span class="n">observed_node_names</span><span class="p">,</span>
+        <span class="n">conditional_node_names</span><span class="o">=</span><span class="n">conditional_node_names</span>
     <span class="p">)</span>
 <span class="p">)</span>
 </pre></div>
@@ -906,13 +910,13 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
     d
-──────────(E[injury|previous injury,neuromusc fatigue,team motivation,tissue d
+──────────(E[injury|neuromusc fatigue,contact sport,previous injury,team motiv
 d[warm-up]
 
 
-isorder,contact sport])
+ation,tissue disorder])
 
-Estimand assumption 1, Unconfoundedness: If U→{warm-up} and U→injury then P(injury|warm-up,previous injury,neuromusc fatigue,team motivation,tissue disorder,contact sport,U) = P(injury|warm-up,previous injury,neuromusc fatigue,team motivation,tissue disorder,contact sport)
+Estimand assumption 1, Unconfoundedness: If U→{warm-up} and U→injury then P(injury|warm-up,neuromusc fatigue,contact sport,previous injury,team motivation,tissue disorder,U) = P(injury|warm-up,neuromusc fatigue,contact sport,previous injury,team motivation,tissue disorder)
 
 ### Estimand : 2
 Estimand name: iv
@@ -936,7 +940,11 @@ No such variable(s) found!
 <span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span>
     <span class="n">ident_minimal_eff</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span>
-        <span class="n">graph</span><span class="o">=</span><span class="n">G</span><span class="p">,</span> <span class="n">treatment_name</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span> <span class="n">outcome_name</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span> <span class="n">conditional_node_names</span><span class="o">=</span><span class="n">conditional_node_names</span>
+        <span class="n">graph</span><span class="o">=</span><span class="n">G</span><span class="p">,</span>
+        <span class="n">action_nodes</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span>
+        <span class="n">outcome_nodes</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span>
+        <span class="n">observed_nodes</span><span class="o">=</span><span class="n">observed_node_names</span><span class="p">,</span>
+        <span class="n">conditional_node_names</span><span class="o">=</span><span class="n">conditional_node_names</span>
     <span class="p">)</span>
 <span class="p">)</span>
 </pre></div>
@@ -953,13 +961,13 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
     d
-──────────(E[injury|neuromusc fatigue,tissue disorder,team motivation,previous
+──────────(E[injury|tissue disorder,neuromusc fatigue,previous injury,team mot
 d[warm-up]
 
 
- injury])
+ivation])
 
-Estimand assumption 1, Unconfoundedness: If U→{warm-up} and U→injury then P(injury|warm-up,neuromusc fatigue,tissue disorder,team motivation,previous injury,U) = P(injury|warm-up,neuromusc fatigue,tissue disorder,team motivation,previous injury)
+Estimand assumption 1, Unconfoundedness: If U→{warm-up} and U→injury then P(injury|warm-up,tissue disorder,neuromusc fatigue,previous injury,team motivation,U) = P(injury|warm-up,tissue disorder,neuromusc fatigue,previous injury,team motivation)
 
 ### Estimand : 2
 Estimand name: iv
@@ -982,7 +990,11 @@ No such variable(s) found!
 <span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span>
     <span class="n">ident_mincost_eff</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span>
-        <span class="n">graph</span><span class="o">=</span><span class="n">G</span><span class="p">,</span> <span class="n">treatment_name</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span> <span class="n">outcome_name</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span> <span class="n">conditional_node_names</span><span class="o">=</span><span class="n">conditional_node_names</span>
+        <span class="n">graph</span><span class="o">=</span><span class="n">G</span><span class="p">,</span>
+        <span class="n">action_nodes</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span>
+        <span class="n">outcome_nodes</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span>
+        <span class="n">observed_nodes</span><span class="o">=</span><span class="n">observed_node_names</span><span class="p">,</span>
+        <span class="n">conditional_node_names</span><span class="o">=</span><span class="n">conditional_node_names</span>
     <span class="p">)</span>
 <span class="p">)</span>
 </pre></div>
@@ -999,9 +1011,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
     d
-──────────(E[injury|fitness,team motivation,previous injury])
+──────────(E[injury|fitness,previous injury,team motivation])
 d[warm-up]
-Estimand assumption 1, Unconfoundedness: If U→{warm-up} and U→injury then P(injury|warm-up,fitness,team motivation,previous injury,U) = P(injury|warm-up,fitness,team motivation,previous injury)
+Estimand assumption 1, Unconfoundedness: If U→{warm-up} and U→injury then P(injury|warm-up,fitness,previous injury,team motivation,U) = P(injury|warm-up,fitness,previous injury,team motivation)
 
 ### Estimand : 2
 Estimand name: iv
@@ -1043,9 +1055,7 @@ be detected based solely on graphical criteria.</p>
 <span class="n">observed_node_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;X&quot;</span><span class="p">,</span> <span class="s2">&quot;Y&quot;</span><span class="p">,</span> <span class="s2">&quot;Z1&quot;</span><span class="p">,</span> <span class="s2">&quot;Z2&quot;</span><span class="p">]</span>
 <span class="n">treatment_name</span> <span class="o">=</span> <span class="s2">&quot;X&quot;</span>
 <span class="n">outcome_name</span> <span class="o">=</span> <span class="s2">&quot;Y&quot;</span>
-<span class="n">G</span> <span class="o">=</span> <span class="n">CausalGraph</span><span class="p">(</span>
-    <span class="n">graph</span><span class="o">=</span><span class="n">graph_str</span><span class="p">,</span> <span class="n">treatment_name</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span> <span class="n">outcome_name</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span> <span class="n">observed_node_names</span><span class="o">=</span><span class="n">observed_node_names</span>
-<span class="p">)</span>
+<span class="n">G</span> <span class="o">=</span> <span class="n">build_graph_from_str</span><span class="p">(</span><span class="n">graph_str</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1059,7 +1069,10 @@ be detected based solely on graphical criteria.</p>
     <span class="n">backdoor_adjustment</span><span class="o">=</span><span class="n">BackdoorAdjustment</span><span class="o">.</span><span class="n">BACKDOOR_EFFICIENT</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="k">try</span><span class="p">:</span>
-    <span class="n">results_eff</span> <span class="o">=</span> <span class="n">ident_eff</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">graph</span><span class="o">=</span><span class="n">G</span><span class="p">,</span> <span class="n">treatment_name</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span> <span class="n">outcome_name</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">)</span>
+    <span class="n">results_eff</span> <span class="o">=</span> <span class="n">ident_eff</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">graph</span><span class="o">=</span><span class="n">G</span><span class="p">,</span>
+                                            <span class="n">action_nodes</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span>
+                                            <span class="n">outcome_nodes</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span>
+                                            <span class="n">observed_nodes</span><span class="o">=</span><span class="n">observed_node_names</span><span class="p">)</span>
 <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
 </pre></div>
@@ -1084,8 +1097,9 @@ Conditions to guarantee the existence of an optimal adjustment set are not satis
 <span class="nb">print</span><span class="p">(</span>
     <span class="n">ident_minimal_eff</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span>
         <span class="n">graph</span><span class="o">=</span><span class="n">G</span><span class="p">,</span>
-        <span class="n">treatment_name</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span>
-        <span class="n">outcome_name</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span>
+        <span class="n">action_nodes</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span>
+        <span class="n">outcome_nodes</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span>
+        <span class="n">observed_nodes</span><span class="o">=</span><span class="n">observed_node_names</span>
     <span class="p">)</span>
 <span class="p">)</span>
 </pre></div>
@@ -1133,8 +1147,9 @@ No such variable(s) found!
 <span class="nb">print</span><span class="p">(</span>
     <span class="n">ident_mincost_eff</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span>
         <span class="n">graph</span><span class="o">=</span><span class="n">G</span><span class="p">,</span>
-        <span class="n">treatment_name</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span>
-        <span class="n">outcome_name</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span>
+        <span class="n">action_nodes</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span>
+        <span class="n">outcome_nodes</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span>
+        <span class="n">observed_nodes</span><span class="o">=</span><span class="n">observed_node_names</span>
     <span class="p">)</span>
 <span class="p">)</span>
 </pre></div>
@@ -1190,9 +1205,7 @@ No such variable(s) found!
 <span class="n">observed_node_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;X&quot;</span><span class="p">,</span> <span class="s2">&quot;Y&quot;</span><span class="p">]</span>
 <span class="n">treatment_name</span> <span class="o">=</span> <span class="s2">&quot;X&quot;</span>
 <span class="n">outcome_name</span> <span class="o">=</span> <span class="s2">&quot;Y&quot;</span>
-<span class="n">G</span> <span class="o">=</span> <span class="n">CausalGraph</span><span class="p">(</span>
-    <span class="n">graph</span><span class="o">=</span><span class="n">graph_str</span><span class="p">,</span> <span class="n">treatment_name</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span> <span class="n">outcome_name</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span> <span class="n">observed_node_names</span><span class="o">=</span><span class="n">observed_node_names</span>
-<span class="p">)</span>
+<span class="n">G</span> <span class="o">=</span> <span class="n">build_graph_from_str</span><span class="p">(</span><span class="n">graph_str</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1207,8 +1220,9 @@ No such variable(s) found!
 <span class="k">try</span><span class="p">:</span>
     <span class="n">results_eff</span> <span class="o">=</span> <span class="n">ident_eff</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span>
         <span class="n">graph</span><span class="o">=</span><span class="n">G</span><span class="p">,</span>
-        <span class="n">treatment_name</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span>
-        <span class="n">outcome_name</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span>
+        <span class="n">action_nodes</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span>
+        <span class="n">outcome_nodes</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span>
+        <span class="n">observed_nodes</span><span class="o">=</span><span class="n">observed_node_names</span>
     <span class="p">)</span>
 <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
@@ -1266,9 +1280,7 @@ An adjustment set formed by observable variables does not exist
     <span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;cost&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}),</span>
     <span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;cost&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}),</span>
 <span class="p">]</span>
-<span class="n">G</span> <span class="o">=</span> <span class="n">CausalGraph</span><span class="p">(</span>
-    <span class="n">graph</span><span class="o">=</span><span class="n">graph_str</span><span class="p">,</span> <span class="n">treatment_name</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span> <span class="n">outcome_name</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span> <span class="n">observed_node_names</span><span class="o">=</span><span class="n">observed_node_names</span>
-<span class="p">)</span>
+<span class="n">G</span> <span class="o">=</span> <span class="n">build_graph_from_str</span><span class="p">(</span><span class="n">graph_str</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1284,7 +1296,11 @@ An adjustment set formed by observable variables does not exist
 <span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span>
     <span class="n">ident_mincost_eff</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span>
-        <span class="n">graph</span><span class="o">=</span><span class="n">G</span><span class="p">,</span> <span class="n">treatment_name</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span> <span class="n">outcome_name</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span> <span class="n">conditional_node_names</span><span class="o">=</span><span class="n">conditional_node_names</span>
+        <span class="n">graph</span><span class="o">=</span><span class="n">G</span><span class="p">,</span>
+        <span class="n">action_nodes</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span>
+        <span class="n">outcome_nodes</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span>
+        <span class="n">observed_nodes</span><span class="o">=</span><span class="n">observed_node_names</span><span class="p">,</span>
+        <span class="n">conditional_node_names</span><span class="o">=</span><span class="n">conditional_node_names</span>
     <span class="p">)</span>
 <span class="p">)</span>
 </pre></div>
@@ -1338,7 +1354,11 @@ Estimand assumption 3, Second-stage-unconfoundedness: If U→{M} and U→Y then 
 <span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span>
     <span class="n">ident_minimal_eff</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span>
-        <span class="n">graph</span><span class="o">=</span><span class="n">G</span><span class="p">,</span> <span class="n">treatment_name</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span> <span class="n">outcome_name</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span> <span class="n">conditional_node_names</span><span class="o">=</span><span class="n">conditional_node_names</span>
+        <span class="n">graph</span><span class="o">=</span><span class="n">G</span><span class="p">,</span>
+        <span class="n">action_nodes</span><span class="o">=</span><span class="n">treatment_name</span><span class="p">,</span>
+        <span class="n">outcome_nodes</span><span class="o">=</span><span class="n">outcome_name</span><span class="p">,</span>
+        <span class="n">observed_nodes</span><span class="o">=</span><span class="n">observed_node_names</span><span class="p">,</span>
+        <span class="n">conditional_node_names</span><span class="o">=</span><span class="n">conditional_node_names</span>
     <span class="p">)</span>
 <span class="p">)</span>
 </pre></div>
@@ -1355,9 +1375,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
  d
-────(E[Y|R,T,L])
+────(E[Y|T,R,L])
 d[X]
-Estimand assumption 1, Unconfoundedness: If U→{X} and U→Y then P(Y|X,R,T,L,U) = P(Y|X,R,T,L)
+Estimand assumption 1, Unconfoundedness: If U→{X} and U→Y then P(Y|X,T,R,L,U) = P(Y|X,T,R,L)
 
 ### Estimand : 2
 Estimand name: iv
@@ -1380,14 +1400,6 @@ Estimand assumption 2, First-stage-unconfoundedness: If U→{X} and U→{M} then
 Estimand assumption 3, Second-stage-unconfoundedness: If U→{M} and U→Y then P(Y|M, X, U) = P(Y|M, X)
 
 </pre></div></div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
-</pre></div>
-</div>
 </div>
 </section>
 </section>
