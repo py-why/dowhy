@@ -18,7 +18,7 @@ STOCHASTIC_MODEL_TYPES = {
     "parametric": ScipyDistribution,
 }
 NOISE_MODEL_PATTERN = r"^\s*([\w]+)\(([^)]*)\)\s*$"
-banned_characters = [":", ";", "[", "__"]
+banned_characters = [":", ";", "[", "__", "import", "lambda"]
 allowed_callables = {}
 np_functions = {func: getattr(np, func) for func in dir(np) if callable(getattr(np, func))}
 scipy_functions = {
@@ -40,7 +40,6 @@ def create_causal_model_from_equations(node_equations: str):
             node_name, expression = extract_equation_components(equation)
             if not (node_name in causal_nodes_info):
                 causal_nodes_info[node_name] = {}
-            print("Variable Name:", node_name)
             root_node_match = re.match(NOISE_MODEL_PATTERN, expression)
             causal_graph.add_node(node_name)
             if root_node_match:
@@ -52,14 +51,13 @@ def create_causal_model_from_equations(node_equations: str):
                 )
             else:
                 custom_func, noise_eq = expression.rsplit("+", 1)
-                compiled_eq = compile(custom_func, "<string>", "eval")
-                parent_nodes = extract_parent_nodes(compiled_eq)
+                parent_nodes = extract_parent_nodes(custom_func)
                 for parent_node in parent_nodes:
                     causal_graph.add_edge(parent_node, node_name)
                 noise_model_name, parsed_args = extract_noise_model_components(noise_eq)
                 noise_model = identify_noise_model(noise_model_name, parsed_args)
                 causal_nodes_info[node_name]["causal_mechanism"] = AdditiveNoiseModel(
-                    CustomModel(compiled_eq, parent_nodes), noise_model
+                    CustomModel(custom_func, parent_nodes), noise_model
                 )
             causal_nodes_info[node_name]["fully_defined"] = True if parsed_args else False
     causal_model = StructuralCausalModel(causal_graph)
@@ -71,7 +69,6 @@ def create_causal_model_from_equations(node_equations: str):
 
 
 def parse_args(args: str):
-    print("args: ", args)
     str_args_list = args.split(",")
     kwargs = {}
     for str_arg in str_args_list:
@@ -93,8 +90,8 @@ def identify_noise_model(causal_mechanism_name: str, parsed_args: dict) -> Stoch
 
 
 class CustomModel(PredictionModel):
-    def __init__(self, compiled_eq, parent_nodes: list):
-        self.compiled_eq = compiled_eq
+    def __init__(self, custom_func: str, parent_nodes: list):
+        self.custom_func = custom_func
         self.parent_nodes = parent_nodes
 
     def fit(self, X, Y):
@@ -103,7 +100,7 @@ class CustomModel(PredictionModel):
 
     def predict(self, X):
         local_dict = {self.parent_nodes[i]: X[:, i] for i in range(len(self.parent_nodes))}
-        return shape_into_2d(eval(self.compiled_eq, allowed_callables, local_dict))
+        return shape_into_2d(eval(self.custom_func, allowed_callables, local_dict))
         # return shape_into_2d(ne.evaluate(self.custom_func, local_dict=local_dict, sanitize=True))
 
     def clone(self):
@@ -128,13 +125,12 @@ def extract_equation_components(equation):
     return node_name, expression
 
 
-def extract_parent_nodes(compiled_eq):
+def extract_parent_nodes(func_equation):
     parent_nodes = []
-    # available_funcs = set(dir(__builtins__) + dir(np) + dir(scipy.stats))
     # Find all node names in the expression string
-    # matched_node_names = re.findall(r"\b[A-Za-z_][A-Za-z_0-9 ]*\b", func_equation)
+    matched_node_names = re.findall(r"\b[A-Za-z_][A-Za-z_0-9 ]*\b", func_equation)
 
-    for matched_node in compiled_eq.co_names:
+    for matched_node in matched_node_names:
         if matched_node not in allowed_callables:
             parent_nodes.append(matched_node)
     parent_nodes.sort()
@@ -144,6 +140,6 @@ def extract_parent_nodes(compiled_eq):
 def sanitize_input_expression(expression: str):
     for char in banned_characters:
         if char in expression:
-            raise ValueError(
-                f"Following list of characters {banned_characters} are not allowed because of security reasons"
-            )
+            raise ValueError(f"'{char}' in the expression '{expression}' is not allowed because of security reasons")
+    if re.search(r"[^0-9\+\-\*\/]+\.[^0-9\+\-\*\/]+", expression):
+        raise ValueError(f"'.' can only be used incase of specifying decimals because of security reasons")
