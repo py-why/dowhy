@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import pytest
 from pytest import mark
 from sklearn.linear_model import LinearRegression
 
@@ -39,7 +38,6 @@ class TestPandasDoAPI(object):
             outcome=outcome,
             method=method,
             common_causes=common_causes,
-            proceed_when_unidentifiable=True,
         )
 
         ate = (causal_df[causal_df.v == 1].mean() - causal_df[causal_df.v == 0].mean())["y"]
@@ -81,7 +79,6 @@ class TestPandasDoAPI(object):
             outcome=outcome,
             method=method,
             common_causes=common_causes,
-            proceed_when_unidentifiable=True,
         )
 
         ate = (causal_df[causal_df.v == 1].mean() - causal_df[causal_df.v == 0].mean())["y"]
@@ -124,7 +121,6 @@ class TestPandasDoAPI(object):
             outcome=outcome,
             method=method,
             common_causes=common_causes,
-            proceed_when_unidentifiable=True,
         )
 
         ate = LinearRegression().fit(causal_df[["v"]], causal_df["y"]).coef_[0]
@@ -167,7 +163,6 @@ class TestPandasDoAPI(object):
             outcome=outcome,
             method=method,
             common_causes=common_causes,
-            proceed_when_unidentifiable=True,
         )
 
         ate = LinearRegression().fit(causal_df[["v"]], causal_df["y"]).coef_[0]
@@ -198,9 +193,9 @@ class TestPandasDoAPI(object):
             beta=5, num_common_causes=1, num_instruments=0, num_samples=1000, treatment_is_binary=True
         )
 
-        data["df"].causal.do(
-            x="v0", variable_types=variable_types, outcome="y", proceed_when_unidentifiable=True, common_causes=["W0"]
-        ).groupby("v0").mean()
+        data["df"].causal.do(x="v0", variable_types=variable_types, outcome="y", common_causes=["W0"]).groupby(
+            "v0"
+        ).mean()
         assert True
 
     @mark.parametrize(
@@ -214,9 +209,9 @@ class TestPandasDoAPI(object):
             beta=5, num_common_causes=1, num_instruments=0, num_samples=1000, treatment_is_binary=True
         )
 
-        data["df"].causal.do(
-            x="v0", variable_types=variable_types, outcome="y", proceed_when_unidentifiable=True, common_causes=["W0"]
-        ).groupby("v0").mean()
+        data["df"].causal.do(x="v0", variable_types=variable_types, outcome="y", common_causes=["W0"]).groupby(
+            "v0"
+        ).mean()
         assert True
 
     @mark.parametrize(
@@ -230,9 +225,9 @@ class TestPandasDoAPI(object):
             beta=5, num_common_causes=1, num_instruments=0, num_samples=1000, treatment_is_binary=True
         )
 
-        data["df"].causal.do(
-            x="v0", variable_types=variable_types, outcome="y", proceed_when_unidentifiable=True, common_causes=["W0"]
-        ).groupby("v0").mean()
+        data["df"].causal.do(x="v0", variable_types=variable_types, outcome="y", common_causes=["W0"]).groupby(
+            "v0"
+        ).mean()
         assert True
 
     @mark.parametrize(
@@ -247,7 +242,6 @@ class TestPandasDoAPI(object):
             x=["x"],
             outcome="y",
             common_causes=["a", "b"],
-            proceed_when_unidentifiable=True,
             variable_types=dict(x="c", y="c", a="c", b="c"),
         )
         print(dd)

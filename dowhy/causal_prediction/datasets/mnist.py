@@ -3,9 +3,9 @@
 import torch
 import torchvision
 from PIL import Image
-from torch.utils.data import Subset, TensorDataset
+from torch.utils.data import TensorDataset
 from torchvision import transforms
-from torchvision.datasets import MNIST, ImageFolder
+from torchvision.datasets import MNIST
 from torchvision.transforms.functional import rotate
 
 from dowhy.causal_prediction.datasets.base_dataset import MultipleDomainDataset

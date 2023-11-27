@@ -1,5 +1,4 @@
 import re
-from collections import deque
 from queue import LifoQueue
 
 import networkx as nx

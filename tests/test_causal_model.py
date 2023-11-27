@@ -1,3 +1,4 @@
+import networkx as nx
 import pandas as pd
 import pytest
 from flaky import flaky
@@ -7,6 +8,7 @@ from sklearn import linear_model
 import dowhy
 import dowhy.datasets
 from dowhy import CausalModel
+from dowhy.utils.graph_operations import daggity_to_dot
 
 
 class TestCausalModel(object):
@@ -298,6 +300,59 @@ class TestCausalModel(object):
             treatment=data["treatment_name"],
             outcome=data["outcome_name"],
             graph=gml_str,
+            proceed_when_unidentifiable=True,
+            test_significance=None,
+            missing_nodes_as_confounders=True,
+        )
+        common_causes = model.get_common_causes()
+        assert all(node_name in common_causes for node_name in ["X1", "X2"])
+        all_nodes = model._graph.get_all_nodes(include_unobserved=True)
+        assert all(
+            node_name in all_nodes for node_name in ["Unobserved Confounders", "X0", "X1", "X2", "Z0", "v0", "y"]
+        )
+        all_nodes = model._graph.get_all_nodes(include_unobserved=False)
+        assert "Unobserved Confounders" not in all_nodes
+
+    @mark.parametrize(
+        ["beta", "num_instruments", "num_samples", "num_treatments"],
+        [
+            (10, 1, 100, 1),
+        ],
+    )
+    def test_graph_input_nx(self, beta, num_instruments, num_samples, num_treatments):
+        num_common_causes = 5
+        data = dowhy.datasets.linear_dataset(
+            beta=beta,
+            num_common_causes=num_common_causes,
+            num_instruments=num_instruments,
+            num_samples=num_samples,
+            num_treatments=num_treatments,
+            treatment_is_binary=True,
+        )
+        nx_graph = nx.DiGraph(nx.parse_gml(data["gml_graph"]))
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=nx_graph,
+            proceed_when_unidentifiable=True,
+            test_significance=None,
+        )
+        # removing two common causes
+        daggity_file = "tests/sample_dag.txt"
+        with open(daggity_file, "r") as text_file:
+            graph_str = text_file.read()
+        graph_str = daggity_to_dot(graph_str)
+        graph_str = graph_str.replace("\n", " ")
+        import pygraphviz as pgv
+
+        nx_graph2 = pgv.AGraph(graph_str, strict=True, directed=True)
+        nx_graph2 = nx.drawing.nx_agraph.from_agraph(nx_graph2)
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=nx_graph2,
             proceed_when_unidentifiable=True,
             test_significance=None,
             missing_nodes_as_confounders=True,

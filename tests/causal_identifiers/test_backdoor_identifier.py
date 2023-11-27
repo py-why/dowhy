@@ -1,6 +1,5 @@
 import pytest
 
-from dowhy.causal_graph import CausalGraph
 from dowhy.causal_identifier import AutoIdentifier, BackdoorAdjustment
 from dowhy.causal_identifier.identify_effect import EstimandType
 
@@ -16,7 +15,13 @@ class TestBackdoorIdentification(object):
             backdoor_adjustment=BackdoorAdjustment.BACKDOOR_EXHAUSTIVE,
         )
 
-        backdoor_results = identifier.identify_backdoor(graph, "X", "Y", include_unobserved=False)
+        backdoor_results = identifier.identify_backdoor(
+            graph,
+            observed_nodes=example_graph_solution.observed_nodes,
+            action_nodes=["X"],
+            outcome_nodes=["Y"],
+            include_unobserved=False,
+        )
         backdoor_sets = [
             set(backdoor_result_dict["backdoor_set"])
             for backdoor_result_dict in backdoor_results
@@ -31,13 +36,19 @@ class TestBackdoorIdentification(object):
         self, example_graph_solution: IdentificationTestGraphSolution
     ):
         graph = example_graph_solution.graph
-        observed_variables = example_graph_solution.observed_variables
+        observed_variables = example_graph_solution.observed_nodes
         identifier = AutoIdentifier(
             estimand_type=EstimandType.NONPARAMETRIC_ATE,
             backdoor_adjustment=BackdoorAdjustment.BACKDOOR_EXHAUSTIVE,
         )
 
-        backdoor_results = identifier.identify_backdoor(graph, "X", "Y", include_unobserved=False)
+        backdoor_results = identifier.identify_backdoor(
+            graph,
+            observed_nodes=example_graph_solution.observed_nodes,
+            action_nodes=["X"],
+            outcome_nodes=["Y"],
+            include_unobserved=False,
+        )
         backdoor_sets = [
             set(backdoor_result_dict["backdoor_set"])
             for backdoor_result_dict in backdoor_results
@@ -52,12 +63,16 @@ class TestBackdoorIdentification(object):
         graph = example_graph_solution.graph
         expected_sets = example_graph_solution.minimal_adjustment_sets
         identifier = AutoIdentifier(
-            estimand_type=EstimandType.NONPARAMETRIC_ATE,
-            backdoor_adjustment=BackdoorAdjustment.BACKDOOR_MIN,
-            proceed_when_unidentifiable=False,
+            estimand_type=EstimandType.NONPARAMETRIC_ATE, backdoor_adjustment=BackdoorAdjustment.BACKDOOR_MIN
         )
 
-        backdoor_results = identifier.identify_backdoor(graph, "X", "Y", include_unobserved=False)
+        backdoor_results = identifier.identify_backdoor(
+            graph,
+            observed_nodes=example_graph_solution.observed_nodes,
+            action_nodes=["X"],
+            outcome_nodes=["Y"],
+            include_unobserved=False,
+        )
         backdoor_sets = [set(backdoor_result_dict["backdoor_set"]) for backdoor_result_dict in backdoor_results]
 
         assert (
@@ -72,13 +87,17 @@ class TestBackdoorIdentification(object):
         identifier = AutoIdentifier(
             estimand_type=EstimandType.NONPARAMETRIC_ATE,
             backdoor_adjustment=BackdoorAdjustment.BACKDOOR_MAX,
-            proceed_when_unidentifiable=False,
         )
 
-        backdoor_results = identifier.identify_backdoor(graph, "X", "Y", include_unobserved=False)
+        backdoor_results = identifier.identify_backdoor(
+            graph,
+            observed_nodes=example_graph_solution.observed_nodes,
+            action_nodes=["X"],
+            outcome_nodes=["Y"],
+            include_unobserved=False,
+        )
 
         backdoor_sets = [set(backdoor_result_dict["backdoor_set"]) for backdoor_result_dict in backdoor_results]
-        print(backdoor_sets, expected_sets, example_graph_solution.graph_str)
         assert (
             (len(backdoor_sets) == 0) and (len(expected_sets) == 0)
         ) or all(  # No adjustments exist and that's expected.
@@ -91,13 +110,17 @@ class TestBackdoorIdentification(object):
         identifier = AutoIdentifier(
             estimand_type=EstimandType.NONPARAMETRIC_CDE,
             backdoor_adjustment=BackdoorAdjustment.BACKDOOR_MAX,
-            proceed_when_unidentifiable=False,
         )
 
-        backdoor_results = identifier.identify_backdoor(graph, "X", "Y", direct_effect=True)
+        backdoor_results = identifier.identify_backdoor(
+            graph,
+            observed_nodes=example_graph_solution.observed_nodes,
+            action_nodes=["X"],
+            outcome_nodes=["Y"],
+            direct_effect=True,
+        )
 
         backdoor_sets = [set(backdoor_result_dict["backdoor_set"]) for backdoor_result_dict in backdoor_results]
-        print(backdoor_sets, expected_sets, example_graph_solution.graph_str)
         assert (
             (len(backdoor_sets) == 0) and (len(expected_sets) == 0)
         ) or all(  # No adjustments exist and that's expected.

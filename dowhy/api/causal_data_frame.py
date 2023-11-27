@@ -1,7 +1,9 @@
+import networkx as nx
 import pandas as pd
 
 import dowhy.do_samplers as do_samplers
-from dowhy.causal_model import CausalModel
+from dowhy import EstimandType
+from dowhy.graph import build_graph
 from dowhy.utils.api import parse_state
 
 
@@ -14,7 +16,7 @@ class CausalAccessor(object):
         :param pandas_obj:
         """
         self._obj = pandas_obj
-        self._causal_model = None
+        self._graph = None
         self._sampler = None
         self._identified_estimand = None
         self._method = None
@@ -25,7 +27,7 @@ class CausalAccessor(object):
 
         :return:
         """
-        self._causal_model = None
+        self._graph = None
         self._identified_estimand = None
         self._sampler = None
         self._method = None
@@ -38,10 +40,9 @@ class CausalAccessor(object):
         variable_types={},
         outcome=None,
         params=None,
-        dot_graph=None,
+        graph: nx.DiGraph = None,
         common_causes=None,
-        estimand_type="nonparametric-ate",
-        proceed_when_unidentifiable=False,
+        estimand_type=EstimandType.NONPARAMETRIC_ATE,
         stateful=False,
     ):
         """
@@ -92,18 +93,16 @@ class CausalAccessor(object):
         outcome = parse_state(outcome)
         if not stateful or method != self._method:
             self.reset()
-        if not self._causal_model:
-            self._causal_model = CausalModel(
-                self._obj,
-                [xi for xi in x.keys()],
-                outcome,
-                graph=dot_graph,
-                common_causes=common_causes,
-                instruments=None,
-                estimand_type=estimand_type,
-                proceed_when_unidentifiable=proceed_when_unidentifiable,
+
+        if graph is None:
+            graph = build_graph(
+                action_nodes=[xi for xi in x.keys()],
+                outcome_nodes=outcome,
+                common_cause_nodes=common_causes,
+                effect_modifier_nodes=None,
+                instrument_nodes=None,
+                mediator_nodes=None,
             )
-        # self._identified_estimand = self._causal_model.identify_effect()
 
         if not bool(variable_types):  # check if the variables dictionary is empty
             variable_types = dict(self._obj.dtypes)  # Convert the series containing data types to a dictionary
@@ -125,15 +124,16 @@ class CausalAccessor(object):
             self._method = method
             do_sampler_class = do_samplers.get_class_object(method + "_sampler")
             self._sampler = do_sampler_class(
-                self._obj,
-                # self._identified_estimand,
-                # self._causal_model._treatment,
-                # self._causal_model._outcome,
+                graph,
+                observed_nodes=list(graph.nodes()),
+                action_nodes=[xi for xi in x.keys()],
+                outcome_nodes=outcome,
+                data=self._obj,
                 params=params,
                 variable_types=variable_types,
                 num_cores=num_cores,
-                causal_model=self._causal_model,
                 keep_original_treatment=keep_original_treatment,
+                estimand_type=estimand_type,
             )
         result = self._sampler.do_sample(x)
         if not stateful:
