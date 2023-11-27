@@ -245,7 +245,6 @@ class Econml(CausalEstimator):
         # Changing shape to a list for a singleton value
         # Note that self._control_value is assumed to be a singleton value
         self._treatment_value = parse_state(self._treatment_value)
-
         est = self.effect(X_test)
         ate = np.mean(est, axis=0)  # one value per treatment value
 
@@ -305,7 +304,6 @@ class Econml(CausalEstimator):
             filtered_df = None
         else:
             filtered_df = df.values
-
         for tv in self._treatment_value:
             ests.append(
                 fun(
@@ -331,7 +329,8 @@ class Econml(CausalEstimator):
         def effect_fun(filtered_df, T0, T1, *args, **kwargs):
             return self.estimator.effect(filtered_df, T0=T0, T1=T1, *args, **kwargs)
 
-        return self.apply_multitreatment(df, effect_fun, *args, **kwargs)
+        Xdf = df[self._effect_modifier_names] if df is not None else df
+        return self.apply_multitreatment(Xdf, effect_fun, *args, **kwargs)
 
     def effect_interval(self, df: pd.DataFrame, *args, **kwargs) -> np.ndarray:
         """
@@ -346,7 +345,8 @@ class Econml(CausalEstimator):
                 filtered_df, T0=T0, T1=T1, alpha=1 - self.confidence_level, *args, **kwargs
             )
 
-        return self.apply_multitreatment(df, effect_interval_fun, *args, **kwargs)
+        Xdf = df[self._effect_modifier_names] if df is not None else df
+        return self.apply_multitreatment(Xdf, effect_interval_fun, *args, **kwargs)
 
     def effect_inference(self, df: pd.DataFrame, *args, **kwargs):
         """
@@ -359,7 +359,8 @@ class Econml(CausalEstimator):
         def effect_inference_fun(filtered_df, T0, T1, *args, **kwargs):
             return self.estimator.effect_inference(filtered_df, T0=T0, T1=T1, *args, **kwargs)
 
-        return self.apply_multitreatment(df, effect_inference_fun, *args, **kwargs)
+        Xdf = df[self._effect_modifier_names] if df is not None else df
+        return self.apply_multitreatment(Xdf, effect_inference_fun, *args, **kwargs)
 
     def effect_tt(self, df: pd.DataFrame, treatment_value, *args, **kwargs):
         """
