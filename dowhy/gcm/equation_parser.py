@@ -1,4 +1,5 @@
 import ast
+import logging
 import re
 
 import networkx as nx
@@ -29,6 +30,8 @@ allowed_callables.update(np_functions)
 allowed_callables.update(scipy_functions)
 allowed_callables.update(builtin_functions)
 
+logger = logging.getLogger(__name__)
+
 
 def create_causal_model_from_equations(node_equations: str):
     causal_nodes_info = {}
@@ -38,6 +41,7 @@ def create_causal_model_from_equations(node_equations: str):
         sanitize_input_expression(equation)
         if equation:
             node_name, expression = extract_equation_components(equation)
+            check_node_redundancy(causal_nodes_info, node_name)
             if not (node_name in causal_nodes_info):
                 causal_nodes_info[node_name] = {}
             root_node_match = re.match(NOISE_MODEL_PATTERN, expression)
@@ -60,6 +64,7 @@ def create_causal_model_from_equations(node_equations: str):
                     CustomModel(custom_func, parent_nodes), noise_model
                 )
             causal_nodes_info[node_name]["fully_defined"] = True if parsed_args else False
+    add_undefined_nodes_info(causal_nodes_info, causal_graph.nodes)
     causal_model = StructuralCausalModel(causal_graph)
     for node in causal_graph.nodes:
         causal_model.set_causal_mechanism(node, causal_nodes_info[node]["causal_mechanism"])
@@ -115,7 +120,7 @@ def extract_noise_model_components(noise_eq):
         parsed_args = parse_args(args)
         return noise_model_name, parsed_args
     else:
-        raise ValueError("Unable to recognise the format or function specified")
+        raise Exception("Unable to recognise the format or function specified")
 
 
 def extract_equation_components(equation):
@@ -135,6 +140,20 @@ def extract_parent_nodes(func_equation):
             parent_nodes.append(matched_node)
     parent_nodes.sort()
     return parent_nodes
+
+
+def add_undefined_nodes_info(causal_nodes_info, present_nodes):
+    for present_node in present_nodes:
+        if present_node not in causal_nodes_info:
+            logger.warning(f"{present_node} is undefined and will be considered as root node by default.")
+            causal_nodes_info[present_node] = {}
+            causal_nodes_info[present_node]["causal_mechanism"] = EmpiricalDistribution()
+            causal_nodes_info[present_node]["fully_defined"] = False
+
+
+def check_node_redundancy(causal_nodes_info, node_name):
+    if node_name in causal_nodes_info:
+        raise Exception(f"The node {node_name} is specified twice which is not allowed.")
 
 
 def sanitize_input_expression(expression: str):
