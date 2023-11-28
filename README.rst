@@ -41,6 +41,7 @@ For more example notebooks, see `here! <https://www.pywhy.org/dowhy/main/example
 
 Introduction
 ------------
+Decision-making involves understanding how different variables affect each other and predicting the outcome when some of them are changed to new values. For instance, given an outcome variable, one may be interested in determining how a potential action(s) may affect it, understanding what led to its current value, or simulate what would happen if some variables are changed. Answering such questions requires causal reasoning. DoWhy is a Python library that guides you through the various steps of causal reasoning and provides a unified interface for answering causal questions.
 
 DoWhy provides a wide variety of algorithms for effect estimation, prediction, quantification
 of causal influences, diagnosis of causal structures, root cause analysis, interventions and
@@ -167,7 +168,26 @@ estimate (if any). Here's a sample output of the linear regression estimator:
 
 .. image:: https://raw.githubusercontent.com/py-why/dowhy/main/docs/images/regression_output.png
 
-For a full code example, check out the `Getting Started with DoWhy <https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/dowhy_simple_example.ipynb>`_ notebook. You can also use Conditional Average Treatment Effect (CATE) estimation methods from other libraries such as EconML and CausalML, as shown in the `Conditional Treatment Effects <https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/dowhy-conditional-treatment-effects.ipynb>`_ notebook.
+For a full code example, check out the `Getting Started with DoWhy <https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/dowhy_simple_example.ipynb>`_ notebook. You can also use Conditional Average Treatment Effect (CATE) estimation methods from `EconML <https://github.com/py-why/econml>`_, as shown in the `Conditional Treatment Effects <https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/dowhy-conditional-treatment-effects.ipynb>`_ notebook. Here's a code snippet. 
+
+.. code:: python
+
+	from sklearn.preprocessing import PolynomialFeatures
+	from sklearn.linear_model import LassoCV
+	from sklearn.ensemble import GradientBoostingRegressor
+	dml_estimate = model.estimate_effect(identified_estimand, method_name="backdoor.econml.dml.DML",
+                        control_value = 0,
+                        treatment_value = 1,
+                        target_units = lambda df: df["X0"]>1,
+                        confidence_intervals=False,
+                        method_params={
+                            "init_params":{'model_y':GradientBoostingRegressor(),
+                                           'model_t': GradientBoostingRegressor(),
+                                           'model_final':LassoCV(),
+                                           'featurizer':PolynomialFeatures(degree=1, include_bias=True)},
+                            "fit_params":{}}
+						)
+
 
 Example usage - Graphical causal model (GCM) based inference
 ------------------------------------------------------------
