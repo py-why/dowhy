@@ -20,14 +20,16 @@
 \
 ===============================
 
-  `Microsoft Research Blog <https://www.microsoft.com/en-us/research/blog/dowhy-a-library-for-causal-inference/>`_ | `Video Tutorial for Effect Estimation <https://www.youtube.com/watch?v=LALfQStONEc&t=114s>`_ | `Video Tutorial for Root Cause Analysis <https://www.youtube.com/watch?v=icpHrbDlGaw>`_ | `Arxiv Paper <https://arxiv.org/abs/2011.04216>`_ | `Arxiv Paper (Graphical Causal Model extension) <https://arxiv.org/abs/2206.06821>`_ | `Slides <https://www2.slideshare.net/AmitSharma315/dowhy-an-endtoend-library-for-causal-inference>`_
+.. admonition:: `Checkout the documentation <https://py-why.github.io/dowhy/>`_
 
-**The documentation is available at** `https://py-why.github.io/dowhy <https://py-why.github.io/dowhy/>`_ | Try it online! |Binder|_
+    The documentation, user guide, sample notebooks and other information are available at:
+
+        `https://py-why.github.io/dowhy <https://py-why.github.io/dowhy/>`_
+
+**For any questions, comments, or discussions about specific use cases, join our community on Discord:** |discord|_
 
 .. |Binder| image:: https://mybinder.org/badge_logo.svg
 .. _Binder: https://mybinder.org/v2/gh/microsoft/dowhy/main?filepath=docs%2Fsource%2F
-
-**Join our community on discord:** |discord|_
 
 .. |discord| image:: https://img.shields.io/discord/818456847551168542
 .. _discord: https://discord.gg/cSBGb3vsZb
@@ -39,8 +41,8 @@
 
 For more example notebooks, see `here! <https://www.pywhy.org/dowhy/main/example_notebooks/nb_index.html>`_
 
-Introduction
-------------
+Introduction & Key Features
+===========================
 Decision-making involves understanding how different variables affect each other and predicting the outcome when some of them are changed to new values. For instance, given an outcome variable, one may be interested in determining how a potential action(s) may affect it, understanding what led to its current value, or simulate what would happen if some variables are changed. Answering such questions requires causal reasoning. DoWhy is a Python library that guides you through the various steps of causal reasoning and provides a unified interface for answering causal questions.
 
 DoWhy provides a wide variety of algorithms for effect estimation, prediction, quantification
@@ -64,7 +66,7 @@ We also gave a more comprehensive tutorial at the ACM Knowledge Discovery and Da
 For an introduction to the four steps of causal inference and its implications for machine learning, you can access this video tutorial from Microsoft Research `DoWhy Webinar <https://www.microsoft.com/en-us/research/video/foundations-of-causal-inference-and-its-impacts-on-machine-learning/>`_ and for an introduction to the graphical causal model API, see the `PyCon presentation on Root Cause Analysis with DoWhy <https://www.youtube.com/watch?v=icpHrbDlGaw>`_.
 
 Key Features
-------------
+~~~~~~~~~~~~
 
 .. image:: https://raw.githubusercontent.com/py-why/dowhy/main/docs/images/dowhy-features.png
 
@@ -77,9 +79,8 @@ DoWhy supports the following causal tasks:
 
 For more details and how to use these methods in practice, checkout the documentation at `https://py-why.github.io/dowhy <https://py-why.github.io/dowhy/>`_
 
-Installation
-------------
-
+Quick Start
+===========
 DoWhy support Python 3.8+. To install, you can use pip, poetry, or conda.
 
 **Latest Release**
@@ -133,8 +134,12 @@ first install graphviz and then pygraphviz (on Ubuntu and Ubuntu WSL).
     --install-option="--library-path=/usr/lib/graphviz/"
 
 
-Example usage - Effect identification and estimation
-----------------------------------------------------
+Example usage
+~~~~~~~~~~~~~
+Two examples demonstrating the effect estimation and graphical causal models API.
+
+Effect identification and estimation
+++++++++++++++++++++++++++++++++++++
 Most causal tasks in DoWhy only require a few lines of code to write. Here, we exemplarily estimate the causal effect of
 a treatment on an outcome variable:
 
@@ -180,8 +185,11 @@ you can inspect the untested assumptions, identified estimands (if any), and the
 estimate (if any). Here's a sample output of the linear regression estimator:
 
 .. image:: https://raw.githubusercontent.com/py-why/dowhy/main/docs/images/regression_output.png
+    :width: 50%
 
-For a full code example, check out the `Getting Started with DoWhy <https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/dowhy_simple_example.ipynb>`_ notebook. You can also use Conditional Average Treatment Effect (CATE) estimation methods from `EconML <https://github.com/py-why/econml>`_, as shown in the `Conditional Treatment Effects <https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/dowhy-conditional-treatment-effects.ipynb>`_ notebook. Here's a code snippet. 
+For a full code example, check out the `Getting Started with DoWhy <https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/dowhy_simple_example.ipynb>`_ notebook.
+
+You can also use Conditional Average Treatment Effect (CATE) estimation methods from `EconML <https://github.com/py-why/econml>`_, as shown in the `Conditional Treatment Effects <https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/dowhy-conditional-treatment-effects.ipynb>`_ notebook. Here's a code snippet.
 
 .. code:: python
 
@@ -198,13 +206,11 @@ For a full code example, check out the `Getting Started with DoWhy <https://gith
                                            'model_t': GradientBoostingRegressor(),
                                            'model_final':LassoCV(),
                                            'featurizer':PolynomialFeatures(degree=1, include_bias=True)},
-                            "fit_params":{}}
-						)
+                            "fit_params":{}})
 
 
-Example usage - Graphical causal model (GCM) based inference
-------------------------------------------------------------
-
+Graphical causal model (GCM) based inference
+++++++++++++++++++++++++++++++++++++++++++++
 DoWhy's graphical causal model framework offers powerful tools to address causal questions beyond effect estimation.
 It is based on Pearl's graphical causal model framework and models the causal data generation process of each variable
 explicitly via *causal mechanisms* to support a wide range of causal algorithms. For more details, see the book
@@ -251,8 +257,13 @@ The GCM framework offers many more features beyond these examples. For a full co
 For more functionalities, example applications of DoWhy and details about the outputs, see the `User Guide <https://www.pywhy.org/dowhy/main/user_guide/intro.html>`_ or
 checkout `Jupyter notebooks <https://www.pywhy.org/dowhy/main/example_notebooks/nb_index.html>`_.
 
+More Information & Resources
+============================
+`Microsoft Research Blog <https://www.microsoft.com/en-us/research/blog/dowhy-a-library-for-causal-inference/>`_ | `Video Tutorial for Effect Estimation <https://www.youtube.com/watch?v=LALfQStONEc&t=114s>`_ | `Video Tutorial for Root Cause Analysis <https://www.youtube.com/watch?v=icpHrbDlGaw>`_ | `Arxiv Paper <https://arxiv.org/abs/2011.04216>`_ | `Arxiv Paper (Graphical Causal Model extension) <https://arxiv.org/abs/2206.06821>`_ | `Slides <https://www2.slideshare.net/AmitSharma315/dowhy-an-endtoend-library-for-causal-inference>`_
+
+
 Citing this package
-====================
+~~~~~~~~~~~~~~~~~~~
 If you find DoWhy useful for your work, please cite **both** of the following two references:
 
 - Amit Sharma, Emre Kiciman. DoWhy: An End-to-End Library for Causal Inference. 2020. https://arxiv.org/abs/2011.04216
@@ -276,10 +287,10 @@ Bibtex::
 
 
 Issues
-======
+~~~~~~
 If you encounter an issue or have a specific request for DoWhy, please `raise an issue <https://github.com/py-why/dowhy/issues>`_.
 
 Contributing
-============
+~~~~~~~~~~~~
 
 This project welcomes contributions and suggestions. For a guide to contributing and a list of all contributors, check out `CONTRIBUTING.md <https://github.com/py-why/dowhy/blob/main/CONTRIBUTING.md>`_ and our `docs for contributing code <https://github.com/py-why/dowhy/blob/main/docs/source/contributing/contributing-code.rst>`_. Our `contributor code of conduct is available here <https://github.com/py-why/governance/blob/main/CODE-OF-CONDUCT.md>`_.
