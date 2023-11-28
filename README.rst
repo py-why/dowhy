@@ -78,7 +78,7 @@ DoWhy supports the following causal tasks:
 For more details and how to use these methods in practice, checkout the documentation at `https://py-why.github.io/dowhy <https://py-why.github.io/dowhy/>`_
 
 Installation
--------------
+------------
 
 DoWhy support Python 3.8+. To install, you can use pip, poetry, or conda.
 
@@ -95,6 +95,19 @@ Install the latest `release <https://pypi.org/project/dowhy/>`__ using poetry.
 .. code:: shell
 
    poetry add dowhy
+
+Install the latest `release <https://anaconda.org/conda-forge/dowhy>`__ using conda.
+
+.. code:: shell
+   conda install -c conda-forge dowhy
+If you face "Solving environment" problems with conda, then try :code:`conda update --all` and then install dowhy. If that does not work, then use :code:`conda config --set channel_priority false` and try to install again. If the problem persists, please `add your issue here <https://github.com/microsoft/dowhy/issues/197>`_.
+
+**Development Version**
+
+If you prefer to use the latest dev version, your dependency management tool will need to point at our GitHub repository.
+
+.. code:: shell
+    pip install git+https://github.com/py-why/dowhy@main
 
 **Requirements**
 
@@ -120,7 +133,7 @@ first install graphviz and then pygraphviz (on Ubuntu and Ubuntu WSL).
     --install-option="--library-path=/usr/lib/graphviz/"
 
 
-Example usage - Effect estimation and identification
+Example usage - Effect identification and estimation
 ----------------------------------------------------
 Most causal tasks in DoWhy only require a few lines of code to write. Here, we exemplarily estimate the causal effect of
 a treatment on an outcome variable:
@@ -193,8 +206,8 @@ Example usage - Graphical causal model (GCM) based inference
 ------------------------------------------------------------
 
 DoWhy's graphical causal model framework offers powerful tools to address causal questions beyond effect estimation.
-It is based on Pearl's graphical causal model framework and follows modern concepts by explicitly modeling the causal
-data generation process of each variable explicitly via *causal mechanisms*. For more details, see the book
+It is based on Pearl's graphical causal model framework and models the causal data generation process of each variable
+explicitly via *causal mechanisms* to support a wide range of causal algorithms. For more details, see the book
 `Elements of Causal Inference <https://mitpress.mit.edu/9780262037310/elements-of-causal-inference/>`_.
 
 Complex causal queries, such as attributing observed anomalies to nodes in the system, can be performed with just a few
@@ -236,7 +249,7 @@ lines of code:
 The GCM framework offers many more features beyond these examples. For a full code example, check out the `Online Shop example notebook <https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/gcm_online_shop.ipynb>`_.
 
 For more functionalities, example applications of DoWhy and details about the outputs, see the `User Guide <https://www.pywhy.org/dowhy/main/user_guide/intro.html>`_ or
-checkout the other `Jupyter notebooks <https://www.pywhy.org/dowhy/main/example_notebooks/nb_index.html>`_.
+checkout `Jupyter notebooks <https://www.pywhy.org/dowhy/main/example_notebooks/nb_index.html>`_.
 
 Citing this package
 ====================
