@@ -1,4 +1,4 @@
-|BuildStatus|_ |PyPiVersion|_ |PythonSupport|_ |Downloads|_
+|BuildStatus|_ |PyPiVersion|_ |PythonSupport|_ |Downloads|_ |discord|_
 
 .. |PyPiVersion| image:: https://img.shields.io/pypi/v/dowhy.svg
 .. _PyPiVersion: https://pypi.org/project/dowhy/
@@ -12,32 +12,23 @@
 .. |Downloads| image:: https://pepy.tech/badge/dowhy
 .. _Downloads: https://pepy.tech/project/dowhy
 
+.. |discord| image:: https://img.shields.io/discord/818456847551168542
+.. _discord: https://discord.gg/cSBGb3vsZb
 
 .. image:: dowhy-logo-large.png
   :width: 50%
   :align: center
 
-\
-===============================
 
-.. admonition:: `Checkout the documentation <https://py-why.github.io/dowhy/>`_
+`Checkout the documentation <https://py-why.github.io/dowhy/>`_
+===============================================================
 
-    The documentation, user guide, sample notebooks and other information are available at:
-
-        `https://py-why.github.io/dowhy <https://py-why.github.io/dowhy/>`_
-
-**For any questions, comments, or discussions about specific use cases, join our community on Discord:** |discord|_
-
-.. |Binder| image:: https://mybinder.org/badge_logo.svg
-.. _Binder: https://mybinder.org/v2/gh/microsoft/dowhy/main?filepath=docs%2Fsource%2F
-
-.. |discord| image:: https://img.shields.io/discord/818456847551168542
-.. _discord: https://discord.gg/cSBGb3vsZb
-
-**Jump right into some case studies**:
-
-- Effect estimation: `Hotel booking cancellations <https://towardsdatascience.com/beyond-predictive-models-the-causal-story-behind-hotel-booking-cancellations-d29e8558cbaf>`_ | `Effect of customer loyalty programs <https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy_example_effect_of_memberrewards_program.ipynb>`_ | `Optimizing article headlines <https://medium.com/@akelleh/introducing-the-do-sampler-for-causal-inference-a3296ea9e78d>`_ | `Effect of home visits on infant health (IHDP) <https://towardsdatascience.com/implementing-causal-inference-a-key-step-towards-agi-de2cde8ea599>`_ | `Causes of customer churn/attrition <https://medium.com/geekculture/a-quickstart-for-causal-analysis-decision-making-with-dowhy-2ce2d4d1efa9>`_
-- Root cause analysis and explanations: `Root Cause Analysis with DoWhy, an Open Source Python Library for Causal Machine Learning <https://aws.amazon.com/blogs/opensource/root-cause-analysis-with-dowhy-an-open-source-python-library-for-causal-machine-learning/>`_ | `Finding the Root Cause of Elevated Latencies in a Microservice Architecture <https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/gcm_rca_microservice_architecture.ipynb>`_ | `Finding Root Causes of Changes in a Supply Chain <https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/gcm_supply_chain_dist_change.ipynb>`_
+- The documentation, user guide, sample notebooks and other information are available at
+    `https://py-why.github.io/dowhy <https://py-why.github.io/dowhy/>`_
+- For any questions, comments, or discussions about specific use cases, join our community on `Discord <https://discord.gg/cSBGb3vsZb>`_ (|discord|_)
+- Jump right into some case studies:
+    - Effect estimation: `Hotel booking cancellations <https://towardsdatascience.com/beyond-predictive-models-the-causal-story-behind-hotel-booking-cancellations-d29e8558cbaf>`_ | `Effect of customer loyalty programs <https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy_example_effect_of_memberrewards_program.ipynb>`_ | `Optimizing article headlines <https://medium.com/@akelleh/introducing-the-do-sampler-for-causal-inference-a3296ea9e78d>`_ | `Effect of home visits on infant health (IHDP) <https://towardsdatascience.com/implementing-causal-inference-a-key-step-towards-agi-de2cde8ea599>`_ | `Causes of customer churn/attrition <https://medium.com/geekculture/a-quickstart-for-causal-analysis-decision-making-with-dowhy-2ce2d4d1efa9>`_
+    - Root cause analysis and explanations: `Root Cause Analysis with DoWhy, an Open Source Python Library for Causal Machine Learning <https://aws.amazon.com/blogs/opensource/root-cause-analysis-with-dowhy-an-open-source-python-library-for-causal-machine-learning/>`_ | `Finding the Root Cause of Elevated Latencies in a Microservice Architecture <https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/gcm_rca_microservice_architecture.ipynb>`_ | `Finding Root Causes of Changes in a Supply Chain <https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/gcm_supply_chain_dist_change.ipynb>`_
 
 For more example notebooks, see `here! <https://www.pywhy.org/dowhy/main/example_notebooks/nb_index.html>`_
 
