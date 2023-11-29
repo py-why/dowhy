@@ -827,33 +827,33 @@ div.rendered_html tbody tr:hover {
   <tbody>
     <tr>
       <th>0</th>
-      <td>-0.157440</td>
-      <td>0.063774</td>
-      <td>0.445127</td>
+      <td>-1.673545</td>
+      <td>-3.966800</td>
+      <td>-10.380653</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>0.284121</td>
-      <td>0.947892</td>
-      <td>2.552651</td>
+      <td>-1.145180</td>
+      <td>-3.066926</td>
+      <td>-8.198261</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>-1.260674</td>
-      <td>-0.944892</td>
-      <td>-2.398332</td>
+      <td>-0.462962</td>
+      <td>-1.358237</td>
+      <td>-4.324773</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>-0.729869</td>
-      <td>-0.005861</td>
-      <td>-0.668718</td>
+      <td>1.028941</td>
+      <td>2.734436</td>
+      <td>6.630281</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>1.079521</td>
-      <td>1.236396</td>
-      <td>4.212099</td>
+      <td>2.163564</td>
+      <td>5.328036</td>
+      <td>14.573658</td>
     </tr>
   </tbody>
 </table>
@@ -883,30 +883,49 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Analyzed 3 nodes.
+When using this auto assignment function, the given data is used to automatically assign a causal mechanism to each node. Note that causal mechanisms can also be customized and assigned manually.
+The following types of causal mechanisms are considered for the automatic selection:
+
+If root node:
+An empirical distribution, i.e., the distribution is represented by randomly sampling from the provided data. This provides a flexible and non-parametric way to model the marginal distribution and is valid for all types of data modalities.
+
+If non-root node and the data is continuous:
+Additive Noise Models (ANM) of the form X_i = f(PA_i) + N_i, where PA_i are the parents of X_i and the unobserved noise N_i is assumed to be independent of PA_i.To select the best model for f, different regression models are evaluated and the model with the smallest mean squared error is selected.Note that minimizing the mean squared error here is equivalent to selecting the best choice of an ANM.
+
+If non-root node and the data is discrete:
+Discrete Additive Noise Models have almost the same definition as non-discrete ANMs, but come with an additional constraint for f to only return discrete values.
+Note that &#39;discrete&#39; here refers to numerical values with an order. If the data is categorical, consider representing them as strings to ensure proper model selection.
+
+If non-root node and the data is categorical:
+A functional causal model based on a classifier, i.e., X_i = f(PA_i, N_i).
+Here, N_i follows a uniform distribution on [0, 1] and is used to randomly sample a class (category) using the conditional probability distribution produced by a classification model.Here, different model classes are evaluated using the (negative) F1 score and the best performing model class is selected.
+
+In total, 3 nodes were analyzed:
 
 --- Node: X
-Node X is a root node. Assigning &#39;Empirical Distribution&#39; to the node representing the marginal distribution.
+Node X is a root node. Therefore, assigning &#39;Empirical Distribution&#39; to the node representing the marginal distribution.
 
 --- Node: Y
-Node Y is a non-root node. Assigning &#39;AdditiveNoiseModel using LinearRegression&#39; to the node.
+Node Y is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using LinearRegression&#39; to the node.
 This represents the causal relationship as Y := f(X) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
-LinearRegression: 1.0084320860341547
+LinearRegression: 0.9313615852554851
 Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 1.0109992475256595
-HistGradientBoostingRegressor: 1.1268987616264656
-Based on the type of causal mechanism, the model with the lowest metric value represents the best choice.
+                (&#39;linearregression&#39;, LinearRegression)]): 0.9325986607577438
+HistGradientBoostingRegressor: 1.0476806848467826
 
 --- Node: Z
-Node Z is a non-root node. Assigning &#39;AdditiveNoiseModel using LinearRegression&#39; to the node.
+Node Z is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using LinearRegression&#39; to the node.
 This represents the causal relationship as Z := f(Y) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
-LinearRegression: 0.9383030286853717
+LinearRegression: 1.0063027460974827
 Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 0.9415586181619349
-HistGradientBoostingRegressor: 1.4493496264243189
-Based on the type of causal mechanism, the model with the lowest metric value represents the best choice.
+                (&#39;linearregression&#39;, LinearRegression)]): 1.0070432235761393
+HistGradientBoostingRegressor: 1.4245983629139416
+
+===Note===
+Note, based on the selected auto assignment quality, the set of evaluated models changes.
+For more insights toward the quality of the fitted graphical causal model, consider using the evaluate_causal_model function after fitting the causal mechanisms.
 </pre></div></div>
 </div>
 <p>In case we want to have more control over the assigned mechanisms, we can do this manually as well. For instance, we can can assign an empirical distribution to the root node X and linear additive noise models to nodes Y and Z:</p>
@@ -939,7 +958,7 @@ Based on the type of causal mechanism, the model with the lowest metric value re
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node Z: 100%|██████████| 3/3 [00:00&lt;00:00, 476.34it/s]
+Fitting causal mechanism of node Z: 100%|██████████| 3/3 [00:00&lt;00:00, 512.13it/s]
 </pre></div></div>
 </div>
 <p>Fitting means, we learn the generative models of the variables in the SCM according to the data.</p>
@@ -957,7 +976,7 @@ Fitting causal mechanism of node Z: 100%|██████████| 3/3 [00
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Evaluating causal mechanisms...: 100%|██████████| 3/3 [00:00&lt;00:00, 3767.34it/s]
+Evaluating causal mechanisms...: 100%|██████████| 3/3 [00:00&lt;00:00, 3119.99it/s]
 Test permutations of given graph: 100%|██████████| 6/6 [00:00&lt;00:00, 18.71it/s]
 </pre></div></div>
 </div>
@@ -973,33 +992,40 @@ Test permutations of given graph: 100%|██████████| 6/6 [00:0
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Evaluated the performance of the causal mechanisms and the invertibility assumption of the causal mechanisms and the overall average KL divergence between generated and observed distribution and graph structure. The results are as follows:
+Evaluated the performance of the causal mechanisms and the invertibility assumption of the causal mechanisms and the overall average KL divergence between generated and observed distribution and the graph structure. The results are as follows:
 
 ==== Evaluation of Causal Mechanisms ====
-Root nodes are evaluated based on the KL divergence between the generated and the observed distribution.
-Non-root nodes are mainly evaluated based on the (normalized) Continuous Ranked Probability Score (CRPS), which is a generalizes the Mean Absolute Percentage Error to probabilistic predictions. Since the causal mechanisms produce conditional distributions, this should give some insights into their performance and calibration. In addition, the mean squared error (MSE), the normalized MSE (NMSE), the R2 coefficient and the F1 score (for categorical nodes) is reported.
+The used evaluation metrics are:
+- KL divergence (only for root-nodes): Evaluates the divergence between the generated and the observed distribution.
+- Mean Squared Error (MSE): Evaluates the average squared differences between the observed values and the conditional expectation of the causal mechanisms.
+- Normalized MSE (NMSE): The MSE normalized by the standard deviation for better comparison.
+- R2 coefficient: Indicates how much variance is explained by the conditional expectations of the mechanisms. Note, however, that this can be misleading for nonlinear relationships.
+- F1 score (only for categorical non-root nodes): The harmonic mean of the precision and recall indicating the goodness of the underlying classifier model.
+- (normalized) Continuous Ranked Probability Score (CRPS): The CRPS generalizes the Mean Absolute Percentage Error to probabilistic predictions. This gives insights into the accuracy and calibration of the causal mechanisms.
+NOTE: Every metric focuses on different aspects and they might not consistently indicate a good or bad performance.
+We will mostly utilize the CRPS for comparing and interpreting the performance of the mechanisms, since this captures the most important properties for the causal model.
 
 --- Node X
-- The KL divergence between generated and observed distribution is 0.06856623348473723.
+- The KL divergence between generated and observed distribution is 0.0971863945356327.
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
 --- Node Y
-- The MSE is 1.0086755290804637.
-- The NMSE is 0.4535063984443696.
-- The R2 coefficient is 0.7935850701306044.
-- The normalized CRPS is 0.25903843366461554.
+- The MSE is 0.9272391911717511.
+- The NMSE is 0.43325048539932054.
+- The R2 coefficient is 0.8120339833764868.
+- The normalized CRPS is 0.24890222385349842.
 The estimated CRPS indicates a good model performance.
 
 --- Node Z
-- The MSE is 0.943925803641364.
-- The NMSE is 0.1456541506324752.
-- The R2 coefficient is 0.9786862631167519.
-- The normalized CRPS is 0.08299583823164343.
+- The MSE is 1.0066664121114985.
+- The NMSE is 0.14888191734078704.
+- The R2 coefficient is 0.9777942420072419.
+- The normalized CRPS is 0.08494236970787179.
 The estimated CRPS indicates a very good model performance.
 
 ==== Evaluation of Invertible Functional Causal Model Assumption ====
 
---- The model assumption for node Y is not rejected with a p-value of 0.9504239407108825 (after potential adjustment) and a significance level of 0.05.
+--- The model assumption for node Y is not rejected with a p-value of 1.0 (after potential adjustment) and a significance level of 0.05.
 This implies that the model assumption might be valid.
 
 --- The model assumption for node Z is not rejected with a p-value of 1.0 (after potential adjustment) and a significance level of 0.05.
@@ -1008,7 +1034,7 @@ This implies that the model assumption might be valid.
 Note that these results are based on statistical independence tests, and the fact that the assumption was not rejected does not necessarily imply that it is correct. There is just no evidence against it.
 
 ==== Evaluation of Generated Distribution ====
-The overall average KL divergence between the generated and observed distribution is 0.036305574490817054
+The overall average KL divergence between the generated and observed distribution is 0.003840797731386769
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
 ==== Evaluation of the Causal Graph Structure ====
@@ -1079,33 +1105,33 @@ All these evaluations give some insight into the goodness of the causal model, b
   <tbody>
     <tr>
       <th>0</th>
-      <td>-0.540773</td>
+      <td>-1.736720</td>
       <td>2.34</td>
-      <td>7.161061</td>
+      <td>7.363387</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>0.438743</td>
+      <td>-0.102206</td>
       <td>2.34</td>
-      <td>6.846530</td>
+      <td>7.665876</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>1.570076</td>
+      <td>0.280920</td>
       <td>2.34</td>
-      <td>7.684705</td>
+      <td>5.013126</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>1.790598</td>
+      <td>-0.296841</td>
       <td>2.34</td>
-      <td>5.595907</td>
+      <td>6.890202</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>1.068801</td>
+      <td>0.434970</td>
       <td>2.34</td>
-      <td>5.971411</td>
+      <td>7.062539</td>
     </tr>
   </tbody>
 </table>

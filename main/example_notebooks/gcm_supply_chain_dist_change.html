@@ -791,7 +791,7 @@ div.rendered_html tbody tr:hover {
 <h1>Finding Root Causes of Changes in a Supply Chain<a class="headerlink" href="#Finding-Root-Causes-of-Changes-in-a-Supply-Chain" title="Permalink to this heading"></a></h1>
 <p>In a supply chain, the number of units of each product in the inventory that is available for shipment is crucial to fulfill customers’ demand faster. For this reason, retailers continuously buy products anticipating customers’ demand in the future.</p>
 <p>Suppose that each week a retailer submits purchase orders (POs) to vendors taking into account future demands for products and capacity constraints to consider for demands. The vendors will then confirm whether they can fulfill some or all of the retailer’s purchase orders. Once confirmed by the vendors and agreed by the retailer, products are then sent to the retailer. All of the confirmed POs, however, may not arrive at once.</p>
-<p><img alt="97032336043c48cbbf7d55fda065584a" class="no-scaled-link" src="../_images/supply-chain.png" style="width: 800px;" /></p>
+<p><img alt="5994bc20a8b6410696d3ff457a07a850" class="no-scaled-link" src="../_images/supply-chain.png" style="width: 800px;" /></p>
 <section id="Week-over-week-changes">
 <h2>Week-over-week changes<a class="headerlink" href="#Week-over-week-changes" title="Permalink to this heading"></a></h2>
 <p>For this case study, we consider synthetic data inspired from a real-world use case in supply chain. Let us look at data over two weeks, <em>w1</em> and <em>w2</em> in particular.</p>
@@ -1082,43 +1082,61 @@ causal graph. A causal mechanism of a variable is the conditional distribution o
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Analyzed 5 nodes.
+When using this auto assignment function, the given data is used to automatically assign a causal mechanism to each node. Note that causal mechanisms can also be customized and assigned manually.
+The following types of causal mechanisms are considered for the automatic selection:
+
+If root node:
+An empirical distribution, i.e., the distribution is represented by randomly sampling from the provided data. This provides a flexible and non-parametric way to model the marginal distribution and is valid for all types of data modalities.
+
+If non-root node and the data is continuous:
+Additive Noise Models (ANM) of the form X_i = f(PA_i) + N_i, where PA_i are the parents of X_i and the unobserved noise N_i is assumed to be independent of PA_i.To select the best model for f, different regression models are evaluated and the model with the smallest mean squared error is selected.Note that minimizing the mean squared error here is equivalent to selecting the best choice of an ANM.
+
+If non-root node and the data is discrete:
+Discrete Additive Noise Models have almost the same definition as non-discrete ANMs, but come with an additional constraint for f to only return discrete values.
+Note that &#39;discrete&#39; here refers to numerical values with an order. If the data is categorical, consider representing them as strings to ensure proper model selection.
+
+If non-root node and the data is categorical:
+A functional causal model based on a classifier, i.e., X_i = f(PA_i, N_i).
+Here, N_i follows a uniform distribution on [0, 1] and is used to randomly sample a class (category) using the conditional probability distribution produced by a classification model.Here, different model classes are evaluated using the (negative) F1 score and the best performing model class is selected.
+
+In total, 5 nodes were analyzed:
 
 --- Node: demand
-Node demand is a root node. Assigning &#39;Empirical Distribution&#39; to the node representing the marginal distribution.
+Node demand is a root node. Therefore, assigning &#39;Empirical Distribution&#39; to the node representing the marginal distribution.
 
 --- Node: constraint
-Node constraint is a root node. Assigning &#39;Empirical Distribution&#39; to the node representing the marginal distribution.
+Node constraint is a root node. Therefore, assigning &#39;Empirical Distribution&#39; to the node representing the marginal distribution.
 
 --- Node: submitted
-Node submitted is a non-root node. Assigning &#39;AdditiveNoiseModel using Pipeline&#39; to the node.
-This represents the causal relationship as submitted := f(constraint,demand) + N.
+Node submitted is a non-root node with discrete data. Assigning &#39;Discrete AdditiveNoiseModel using Pipeline&#39; to the node.
+This represents the discrete causal relationship as submitted := f(constraint,demand) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
 Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 1.1808062726990767
-LinearRegression: 1.2009439526024719
-HistGradientBoostingRegressor: 1.3958159088082907
-Based on the type of causal mechanism, the model with the lowest metric value represents the best choice.
+                (&#39;linearregression&#39;, LinearRegression)]): 1.1828666304115492
+LinearRegression: 1.202146528455657
+HistGradientBoostingRegressor: 1.3214374799939141
 
 --- Node: confirmed
-Node confirmed is a non-root node. Assigning &#39;AdditiveNoiseModel using Pipeline&#39; to the node.
-This represents the causal relationship as confirmed := f(submitted) + N.
+Node confirmed is a non-root node with discrete data. Assigning &#39;Discrete AdditiveNoiseModel using LinearRegression&#39; to the node.
+This represents the discrete causal relationship as confirmed := f(submitted) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
+LinearRegression: 0.10631247993087496
 Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 0.10622356862956134
-LinearRegression: 0.10641327580915147
-HistGradientBoostingRegressor: 0.24786049671261012
-Based on the type of causal mechanism, the model with the lowest metric value represents the best choice.
+                (&#39;linearregression&#39;, LinearRegression)]): 0.10632506989501964
+HistGradientBoostingRegressor: 0.22146133208979166
 
 --- Node: received
-Node received is a non-root node. Assigning &#39;AdditiveNoiseModel using LinearRegression&#39; to the node.
-This represents the causal relationship as received := f(confirmed) + N.
+Node received is a non-root node with discrete data. Assigning &#39;Discrete AdditiveNoiseModel using LinearRegression&#39; to the node.
+This represents the discrete causal relationship as received := f(confirmed) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
-LinearRegression: 0.17894188900054708
+LinearRegression: 0.1785978818963511
 Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 0.18303496051976145
-HistGradientBoostingRegressor: 0.2966271166973326
-Based on the type of causal mechanism, the model with the lowest metric value represents the best choice.
+                (&#39;linearregression&#39;, LinearRegression)]): 0.17920013806550833
+HistGradientBoostingRegressor: 0.2892923434164462
+
+===Note===
+Note, based on the selected auto assignment quality, the set of evaluated models changes.
+For more insights toward the quality of the fitted graphical causal model, consider using the evaluate_causal_model function after fitting the causal mechanisms.
 </pre></div></div>
 </div>
 <p>It seems most of the relationship can be well captured using a linear model. Let’s further evaluate the assumed graph structure.</p>

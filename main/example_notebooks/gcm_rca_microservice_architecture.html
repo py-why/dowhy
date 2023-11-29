@@ -1029,9 +1029,9 @@ relations. We shall use this information shortly to assign generative causal mod
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node Order DB: 100%|██████████| 11/11 [00:00&lt;00:00, 70.71it/s]
-Evaluating causal mechanisms...: 100%|██████████| 11/11 [00:02&lt;00:00,  4.51it/s]
-Test permutations of given graph: 100%|██████████| 50/50 [01:13&lt;00:00,  1.48s/it]
+Fitting causal mechanism of node Order DB: 100%|██████████| 11/11 [00:00&lt;00:00, 72.17it/s]
+Evaluating causal mechanisms...: 100%|██████████| 11/11 [00:02&lt;00:00,  4.73it/s]
+Test permutations of given graph: 100%|██████████| 50/50 [01:14&lt;00:00,  1.49s/it]
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -1046,75 +1046,82 @@ Test permutations of given graph: 100%|██████████| 50/50 [01
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Evaluated the performance of the causal mechanisms and the invertibility assumption of the causal mechanisms and the overall average KL divergence between generated and observed distribution and graph structure. The results are as follows:
+Evaluated the performance of the causal mechanisms and the invertibility assumption of the causal mechanisms and the overall average KL divergence between generated and observed distribution and the graph structure. The results are as follows:
 
 ==== Evaluation of Causal Mechanisms ====
-Root nodes are evaluated based on the KL divergence between the generated and the observed distribution.
-Non-root nodes are mainly evaluated based on the (normalized) Continuous Ranked Probability Score (CRPS), which is a generalizes the Mean Absolute Percentage Error to probabilistic predictions. Since the causal mechanisms produce conditional distributions, this should give some insights into their performance and calibration. In addition, the mean squared error (MSE), the normalized MSE (NMSE), the R2 coefficient and the F1 score (for categorical nodes) is reported.
+The used evaluation metrics are:
+- KL divergence (only for root-nodes): Evaluates the divergence between the generated and the observed distribution.
+- Mean Squared Error (MSE): Evaluates the average squared differences between the observed values and the conditional expectation of the causal mechanisms.
+- Normalized MSE (NMSE): The MSE normalized by the standard deviation for better comparison.
+- R2 coefficient: Indicates how much variance is explained by the conditional expectations of the mechanisms. Note, however, that this can be misleading for nonlinear relationships.
+- F1 score (only for categorical non-root nodes): The harmonic mean of the precision and recall indicating the goodness of the underlying classifier model.
+- (normalized) Continuous Ranked Probability Score (CRPS): The CRPS generalizes the Mean Absolute Percentage Error to probabilistic predictions. This gives insights into the accuracy and calibration of the causal mechanisms.
+NOTE: Every metric focuses on different aspects and they might not consistently indicate a good or bad performance.
+We will mostly utilize the CRPS for comparing and interpreting the performance of the mechanisms, since this captures the most important properties for the causal model.
 
 --- Node Customer DB
-- The KL divergence between generated and observed distribution is 0.07399276833392865.
+- The KL divergence between generated and observed distribution is 0.045573949171863345.
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
 --- Node Shipping Cost Service
-- The KL divergence between generated and observed distribution is 0.017100871849792233.
+- The KL divergence between generated and observed distribution is 0.028214230381668676.
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
 --- Node Product DB
-- The KL divergence between generated and observed distribution is 0.055245764750264714.
+- The KL divergence between generated and observed distribution is 0.0728339242156369.
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
 --- Node Order DB
-- The KL divergence between generated and observed distribution is 0.06894526982240654.
+- The KL divergence between generated and observed distribution is 0.07220705354998802.
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
 --- Node Auth Service
-- The MSE is 0.0144093993658562.
-- The NMSE is 0.5467262029231879.
-- The R2 coefficient is 0.7009318990687973.
-- The normalized CRPS is 0.3034488956349754.
+- The MSE is 0.014413269036563713.
+- The NMSE is 0.5464281917280154.
+- The R2 coefficient is 0.7013825755326133.
+- The normalized CRPS is 0.3028475030106042.
 The estimated CRPS indicates a good model performance.
 
 --- Node Caching Service
-- The MSE is 0.02322173903816932.
-- The NMSE is 0.847140717179071.
-- The R2 coefficient is 0.28130936853038735.
-- The normalized CRPS is 0.46396925677534184.
+- The MSE is 0.023156224771742128.
+- The NMSE is 0.843050903544284.
+- The R2 coefficient is 0.2891107438250896.
+- The normalized CRPS is 0.4624024544160449.
 The estimated CRPS indicates a fair model performance. Note, however, that a high CRPS could also result from a small signal to noise ratio.
 
 --- Node Order Service
-- The MSE is 0.014398420388576708.
-- The NMSE is 0.548741422198101.
-- The R2 coefficient is 0.6987839940858108.
-- The normalized CRPS is 0.304303918700528.
+- The MSE is 0.014403630368650522.
+- The NMSE is 0.5490931979119187.
+- The R2 coefficient is 0.698378775973082.
+- The normalized CRPS is 0.3042794639294811.
 The estimated CRPS indicates a good model performance.
 
 --- Node Product Service
-- The MSE is 0.020441861997811624.
-- The NMSE is 0.6500386862569251.
-- The R2 coefficient is 0.5771801420581921.
-- The normalized CRPS is 0.3644960349179902.
+- The MSE is 0.020448603444977103.
+- The NMSE is 0.6496641342455303.
+- The R2 coefficient is 0.5776938227618824.
+- The normalized CRPS is 0.36458587681078625.
 The estimated CRPS indicates a fair model performance. Note, however, that a high CRPS could also result from a small signal to noise ratio.
 
 --- Node API
-- The MSE is 0.01449292328504669.
-- The NMSE is 0.20985398702139765.
-- The R2 coefficient is 0.9559449969251123.
-- The normalized CRPS is 0.11575761046894972.
+- The MSE is 0.01448569406170597.
+- The NMSE is 0.20984033213568623.
+- The R2 coefficient is 0.9559509418655889.
+- The normalized CRPS is 0.11579000209745152.
 The estimated CRPS indicates a very good model performance.
 
 --- Node www
-- The MSE is 0.011040147813516083.
-- The NMSE is 0.1376407141287314.
-- The R2 coefficient is 0.9810479479871169.
-- The normalized CRPS is 0.07798041741750858.
+- The MSE is 0.011055306198925894.
+- The NMSE is 0.1378252297301992.
+- The R2 coefficient is 0.980978490332094.
+- The normalized CRPS is 0.07807664243250796.
 The estimated CRPS indicates a very good model performance.
 
 --- Node Website
-- The MSE is 0.02077939178868219.
-- The NMSE is 0.1851387551326615.
-- The R2 coefficient is 0.9656988556849999.
-- The normalized CRPS is 0.10218086518155416.
+- The MSE is 0.020789827493389125.
+- The NMSE is 0.18522273088501956.
+- The R2 coefficient is 0.9656616260356868.
+- The normalized CRPS is 0.10216771693263041.
 The estimated CRPS indicates a very good model performance.
 
 ==== Evaluation of Invertible Functional Causal Model Assumption ====
@@ -1143,7 +1150,7 @@ This implies that the model assumption might not be valid. This is, the relation
 Note that these results are based on statistical independence tests, and the fact that the assumption was not rejected does not necessarily imply that it is correct. There is just no evidence against it.
 
 ==== Evaluation of Generated Distribution ====
-The overall average KL divergence between the generated and observed distribution is 0.10510897555128967
+The overall average KL divergence between the generated and observed distribution is 0.10537744553952094
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
 ==== Evaluation of the Causal Graph Structure ====
@@ -1152,7 +1159,7 @@ The estimated KL divergence indicates an overall very good representation of the
 +-------------------------------------------------------------------------------------------------------+
 | The given DAG is informative because 0 / 50 of the permutations lie in the Markov                     |
 | equivalence class of the given DAG (p-value: 0.00).                                                   |
-| The given DAG violates 5/63 LMCs and is better than 100.0% of the permuted DAGs (p-value: 0.00).      |
+| The given DAG violates 7/63 LMCs and is better than 100.0% of the permuted DAGs (p-value: 0.00).      |
 | Based on the provided significance level (0.05) and because the DAG is informative,                   |
 | we do not reject the DAG.                                                                             |
 +-------------------------------------------------------------------------------------------------------+
@@ -1470,7 +1477,7 @@ them in a bar plot.</p>
 <h2>Scenario 3: Simulating the intervention of shifting resources<a class="headerlink" href="#Scenario-3:-Simulating-the-intervention-of-shifting-resources" title="Permalink to this heading"></a></h2>
 <p>Next, let us imagine a scenario where permanent degradation has happened as in scenario 2 and we’ve successfully identified <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> as the root cause. Furthermore, we figured out that a recent deployment of the <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> contained a bug that is causing the overloaded hosts. A proper fix must be deployed, or the previous deployment must be rolled back. But, in the meantime, could we mitigate the situation by shifting over some resources from <code class="docutils literal notranslate"><span class="pre">Shipping</span> <span class="pre">Service</span></code> to
 <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code>? And would that help? Before doing it in reality, let us simulate it first and see whether it improves the situation.</p>
-<p><img alt="b6c3cd46907d4fa1ab1fdd0902c9013f" class="no-scaled-link" src="../_images/shifting-resources.png" style="width: 600px;" /></p>
+<p><img alt="1e19445548e449b39db94d87673f453c" class="no-scaled-link" src="../_images/shifting-resources.png" style="width: 600px;" /></p>
 <p>Let’s perform an intervention where we say we can reduce the average time of <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> by 1s. But at the same time we buy this speed-up by an average slow-down of 2s in <code class="docutils literal notranslate"><span class="pre">Shipping</span> <span class="pre">Cost</span> <span class="pre">Service</span></code>.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
