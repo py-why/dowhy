@@ -25,6 +25,7 @@
 
 - The documentation, user guide, sample notebooks and other information are available at
     `https://py-why.github.io/dowhy <https://py-why.github.io/dowhy/>`_
+- DoWhy is part of the `PyWhy Ecosystem <https://www.pywhy.org/>`_. For more tools and libraries related to causality, checkout the `PyWhy GitHub organization <https://github.com/py-why/>`_!
 - For any questions, comments, or discussions about specific use cases, join our community on `Discord <https://discord.gg/cSBGb3vsZb>`_ (|discord|_)
 - Jump right into some case studies:
     - Effect estimation: `Hotel booking cancellations <https://towardsdatascience.com/beyond-predictive-models-the-causal-story-behind-hotel-booking-cancellations-d29e8558cbaf>`_ | `Effect of customer loyalty programs <https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy_example_effect_of_memberrewards_program.ipynb>`_ | `Optimizing article headlines <https://medium.com/@akelleh/introducing-the-do-sampler-for-causal-inference-a3296ea9e78d>`_ | `Effect of home visits on infant health (IHDP) <https://towardsdatascience.com/implementing-causal-inference-a-key-step-towards-agi-de2cde8ea599>`_ | `Causes of customer churn/attrition <https://medium.com/geekculture/a-quickstart-for-causal-analysis-decision-making-with-dowhy-2ce2d4d1efa9>`_
@@ -52,7 +53,7 @@ For causal questions beyond effect estimation, it uses the power of graphical ca
 generation process via explicit causal mechanisms at each node, which, for instance, unlocks capabilities to attribute
 observed effects to particular variables or estimate point-wise counterfactuals.
 
-For a quick introduction to causal inference, check out `amit-sharma/causal-inference-tutorial <https://github.com/amit-sharma/causal-inference-tutorial/>`_.
+For a quick introduction to causal inference, check out `amit-sharma/causal-inference-tutorial <https://github.com/amit-sharma/causal-inference-tutorial/>`_
 We also gave a more comprehensive tutorial at the ACM Knowledge Discovery and Data Mining (`KDD 2018 <http://www.kdd.org/kdd2018/>`_) conference: `causalinference.gitlab.io/kdd-tutorial <http://causalinference.gitlab.io/kdd-tutorial/>`_.
 For an introduction to the four steps of causal inference and its implications for machine learning, you can access this video tutorial from Microsoft Research `DoWhy Webinar <https://www.microsoft.com/en-us/research/video/foundations-of-causal-inference-and-its-impacts-on-machine-learning/>`_ and for an introduction to the graphical causal model API, see the `PyCon presentation on Root Cause Analysis with DoWhy <https://www.youtube.com/watch?v=icpHrbDlGaw>`_.
 
@@ -176,7 +177,7 @@ you can inspect the untested assumptions, identified estimands (if any), and the
 estimate (if any). Here's a sample output of the linear regression estimator:
 
 .. image:: https://raw.githubusercontent.com/py-why/dowhy/main/docs/images/regression_output.png
-    :width: 50%
+    :width: 80%
 
 For a full code example, check out the `Getting Started with DoWhy <https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/dowhy_simple_example.ipynb>`_ notebook.
 
