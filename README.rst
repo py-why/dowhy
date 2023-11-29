@@ -125,13 +125,8 @@ first install graphviz and then pygraphviz (on Ubuntu and Ubuntu WSL).
     pip install pygraphviz --install-option="--include-path=/usr/include/graphviz" \
     --install-option="--library-path=/usr/lib/graphviz/"
 
-
-Example usage
-~~~~~~~~~~~~~
-Two examples demonstrating the effect estimation and graphical causal models API.
-
-Effect identification and estimation
-++++++++++++++++++++++++++++++++++++
+Example: Effect identification and estimation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Most causal tasks in DoWhy only require a few lines of code to write. Here, we exemplarily estimate the causal effect of
 a treatment on an outcome variable:
 
@@ -201,8 +196,8 @@ You can also use Conditional Average Treatment Effect (CATE) estimation methods 
                             "fit_params":{}})
 
 
-Graphical causal model (GCM) based inference
-++++++++++++++++++++++++++++++++++++++++++++
+Example: Graphical causal model (GCM) based inference
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 DoWhy's graphical causal model framework offers powerful tools to address causal questions beyond effect estimation.
 It is based on Pearl's graphical causal model framework and models the causal data generation process of each variable
 explicitly via *causal mechanisms* to support a wide range of causal algorithms. For more details, see the book
