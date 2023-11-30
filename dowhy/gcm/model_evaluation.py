@@ -401,6 +401,7 @@ def evaluate_causal_model(
             independence_test=config.independence_test_falsify,
             conditional_independence_test=config.conditional_independence_test_falsify,
             n_jobs=config.n_jobs,
+            allow_data_subset=False,
         )
 
     return evaluation_result
