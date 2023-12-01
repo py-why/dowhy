@@ -24,9 +24,9 @@ To see how we can use this method, let's generate some data:
 >>> import networkx as nx, numpy as np, pandas as pd
 >>> from dowhy import gcm
 
->>> X = np.random.uniform(low=0, high=10, size=2000)
->>> Y = -2*X + np.random.normal(loc=0, scale=5, size=2000)
->>> Z = 3*Y + 80 + np.random.normal(loc=0, scale=5, size=2000)
+>>> X = np.random.uniform(low=0, high=10, size=1000)
+>>> Y = -2*X + np.random.normal(loc=0, scale=5, size=1000)
+>>> Z = 3*Y + 80 + np.random.normal(loc=0, scale=5, size=1000)
 >>> training_data = pd.DataFrame(data=dict(X=X, Y=Y, Z=Z))
 
 If we think of the cholesterol example, one could think of :math:`Y` here as some kind of body measurement that affects
@@ -36,7 +36,9 @@ Next, we'll model cause-effect relationships and fit the models to the data. Est
 invertible SCM that can be represented by additive noise models:
 
 >>> causal_model = gcm.InvertibleStructuralCausalModel(nx.DiGraph([('X', 'Y'), ('Y', 'Z')])) # X -> Y -> Z
->>> gcm.auto.assign_causal_mechanisms(causal_model, training_data)
+>>> causal_model.set_causal_mechanism('X', gcm.EmpiricalDistribution())
+>>> causal_model.set_causal_mechanism('Y', gcm.AdditiveNoiseModel(gcm.ml.create_linear_regressor()))
+>>> causal_model.set_causal_mechanism('Z', gcm.AdditiveNoiseModel(gcm.ml.create_linear_regressor()))
 
 >>> gcm.fit(causal_model, training_data)
 
@@ -75,11 +77,6 @@ since the model parameters were not learned
 perfectly. Specifically, the learned coefficients for :math:`Y` and :math:`Z` are not precisely -2 and 3, respectively,
 as suggested by the data generation process. As usual in machine learning, more data or fine-tuning models can help to
 improve accuracy.
-
-Related example notebooks
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-- :doc:`../../../example_notebooks/gcm_counterfactual_medical_dry_eyes`
 
 .. _understand-method-counter:
 

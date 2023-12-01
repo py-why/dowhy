@@ -394,38 +394,33 @@
        Estimating average causal effect using GCM
       </a>
      </li>
-    </ul>
-   </li>
-   <li class="toctree-l2 has-children">
-    <a class="reference internal" href="../quantify_causal_influence/index.html">
-     Quantify Causal Influence
-    </a>
-    <input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/>
-    <label for="toctree-checkbox-8">
-     <i class="fas fa-chevron-down">
-     </i>
-    </label>
-    <ul>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../quantify_causal_influence/mediation_analysis.html">
-       Mediation Analysis: Estimating natural direct and indirect effects
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../estimating_causal_effects/direct_indirect_effects/index.html">
+       Estimating direct and indirect effects
       </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../quantify_causal_influence/quantify_arrow_strength.html">
-       Direct Effect: Quantifying Arrow Strength
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../quantify_causal_influence/icc.html">
-       Quantifying Intrinsic Causal Influence
-      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/>
+      <label for="toctree-checkbox-8">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../estimating_causal_effects/direct_indirect_effects/mediation_analysis.html">
+         Estimating natural direct and indirect effects
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../estimating_causal_effects/direct_indirect_effects/quantify_arrow_strength.html">
+         Direct Effect: Quantifying Arrow Strength
+        </a>
+       </li>
+      </ul>
      </li>
     </ul>
    </li>
    <li class="toctree-l2 has-children">
     <a class="reference internal" href="../root_causing_and_explaining/index.html">
-     Root-Cause Analysis and Explanation
+     Explaining Observed Effects and Root-Cause Analysis
     </a>
     <input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" type="checkbox"/>
     <label for="toctree-checkbox-9">
@@ -441,6 +436,16 @@
      <li class="toctree-l3">
       <a class="reference internal" href="../root_causing_and_explaining/distribution_change.html">
        Attributing Distributional Changes
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../root_causing_and_explaining/icc.html">
+       Quantifying Intrinsic Causal Influence
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../root_causing_and_explaining/unit_change.html">
+       Unit Change Attribution
       </a>
      </li>
      <li class="toctree-l3">
@@ -584,11 +589,6 @@
    How to use it
   </a>
  </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#related-example-notebooks">
-   Related example notebooks
-  </a>
- </li>
 </ul>
 
 </nav>
@@ -632,7 +632,9 @@
 </pre></div>
 </div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">ProbabilisticCausalModel</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">([(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">)]))</span> <span class="c1"># X -&gt; Y -&gt; Z</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">gcm</span><span class="o">.</span><span class="n">auto</span><span class="o">.</span><span class="n">assign_causal_mechanisms</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">training_data</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">EmpiricalDistribution</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">AdditiveNoiseModel</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">ml</span><span class="o">.</span><span class="n">create_linear_regressor</span><span class="p">()))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">AdditiveNoiseModel</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">ml</span><span class="o">.</span><span class="n">create_linear_regressor</span><span class="p">()))</span>
 </pre></div>
 </div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gcm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">training_data</span><span class="p">)</span>
@@ -665,14 +667,6 @@ shift interventions where we shift the random variable X by some value:</p>
 <span class="go">    4  3.791410  8.361918  25.477725</span>
 </pre></div>
 </div>
-</section>
-<section id="related-example-notebooks">
-<h2>Related example notebooks<a class="headerlink" href="#related-example-notebooks" title="Permalink to this heading"></a></h2>
-<ul class="simple">
-<li><p><a class="reference internal" href="../../../example_notebooks/gcm_basic_example.html"><span class="doc">Basic Example for Graphical Causal Models</span></a></p></li>
-<li><p><a class="reference internal" href="../../../example_notebooks/gcm_401k_analysis.html"><span class="doc">Impact of 401(k) eligibility on net financial assets</span></a></p></li>
-<li><p><a class="reference internal" href="../../../example_notebooks/gcm_rca_microservice_architecture.html"><span class="doc">Finding the Root Cause of Elevated Latencies in a Microservice Architecture</span></a></p></li>
-</ul>
 </section>
 </section>
 

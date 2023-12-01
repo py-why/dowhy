@@ -5,7 +5,7 @@
    "id": "1c74ae7a-e77a-4b38-be41-7fb82e6930a5",
    "metadata": {},
    "source": [
-    "# Causal Attributions and Root-Cause Analysis in an Online Shop"
+    "# Causal attribution and root-cause analysis of an online shop"
    ]
   },
   {
@@ -274,7 +274,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "print(gcm.evaluate_causal_model(scm, data_2021, compare_mechanism_baselines=True, evaluate_invertibility_assumptions=False))"
+    "print(gcm.evaluate_causal_model(scm, data_2021, compare_mechanism_baselines=True, evaluate_invertibility_assumptions=False, evaluate_causal_structure=False))"
    ]
   },
   {
@@ -282,7 +282,7 @@
    "id": "b65c73b6-28af-4b57-b05f-c6c6245a714a",
    "metadata": {},
    "source": [
-    "The fitted causal mechanisms are fairly good representations of the data generation process, with some minor inaccuracies. However, this is to be expected given the small sample size and relatively small signal-to-noise ratio for many nodes. Most importantly, all the baseline mechanisms did not perform better, which is a good indicator that our model selection is appropriate. Based on the evaluation, we also do not reject the given causal graph."
+    "The fitted causal mechanisms are fairly good representations of the data generation process, with some minor inaccuracies. However, this is to be expected given the small sample size and relatively small signal-to-noise ratio for many nodes. Most importantly, all the baseline mechanisms did not perform better, which is a good indicator that our model selection is appropriate. Note that even if the models have some inaccuracies, most of the GCM-based algorithms are generally robust against this."
    ]
   },
   {
@@ -290,7 +290,9 @@
    "id": "a2e5acb0-f40e-4478-bee8-db3ff58bea21",
    "metadata": {},
    "source": [
-    "> The selection of baseline models or the p-value for graph falsification can be configured as well. For more details, take a look at the corresponding evaluate_causal_model documentation."
+    "<div class=\"alert alert-block alert-info\">\n",
+    "The selection of baseline models change be configured as well. For more details, take a look at the corresponding evaluate_causal_model documentation.\n",
+    "</div>"
    ]
   },
   {
@@ -299,34 +301,6 @@
    "metadata": {},
    "source": [
     "## Step 3: Answer causal questions\n",
-    "### Generate new samples\n",
-    "\n",
-    "Since we learned about the data generation process, we can also generate new samples:"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "74ed17eb-45ec-444d-9364-2aa850911a05",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "gcm.draw_samples(scm, num_samples=10)"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "id": "8dfc67f4-f89c-480d-8f6a-b0a74651ef3f",
-   "metadata": {},
-   "source": [
-    "We have drawn 10 samples from the joint distribution following the learned causal relationships."
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "id": "9a10e5ff-c5aa-4386-b462-bd696a1a54ed",
-   "metadata": {},
-   "source": [
     "### What are the key factors influencing the variance in profit?"
    ]
   },
@@ -579,7 +553,9 @@
    "id": "c2c82783-9a69-43c3-820c-048a6f5860bf",
    "metadata": {},
    "source": [
-    "> Note that the results differ depending on the selected data, since they are sample specific. On other days, other factors could be relevant. Furthermore, note that the analysis (including the confidence intervals) always relies on the modeling assumptions made. In other words, if the models change or have a poor fit, one would also expect different results."
+    "<div class=\"alert alert-block alert-info\">\n",
+    "Note that the results differ depending on the selected data, since they are sample specific. On other days, other factors could be relevant. Furthermore, note that the analysis (including the confidence intervals) always relies on the modeling assumptions made. In other words, if the models change or have a poor fit, one would also expect different results.\n",
+    "</div>"
    ]
   },
   {

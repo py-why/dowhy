@@ -6,7 +6,7 @@
    "source": [
     "# Impact of 401(k) eligibility on net financial assets\n",
     "\n",
-    "In this case study, we will use real-world data from 401(k) analysis to explain how graphical causal models can be used to estimate average treatment effect (ATE) and conditional ATE (CATE)."
+    "In this case study, we will use real-world data from 401(k) analysis to explain how Causality library can be used to estimate average treatment effect (ATE) and conditional ATE (CATE)."
    ]
   },
   {
@@ -106,9 +106,6 @@
     "edges.extend([(covariate, treatment_var) for covariate in covariates])\n",
     "edges.extend([(covariate, outcome_var) for covariate in covariates])\n",
     "\n",
-    "# To ensure that the treatment is considered as a categorical variable, we convert the values explicitly to strings.\n",
-    "df = df.astype({treatment_var: str})\n",
-    "\n",
     "causal_graph = nx.DiGraph(edges)"
    ]
   },
@@ -156,9 +153,9 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "We observe that real-valued variables do not follow well-known parametric distributions like Gaussian. Therefore, we fit empirical distributions whenever those variables do not have parents, which is also suitable for categorical variables. \n",
+    "We observe that real-valued variables do not follow well-known parameteric distributions like Gaussian. Therefore, we fit empirical distributions whenever those variables do not have parents, which is also suitable for categorical variables. \n",
     "\n",
-    "Let’s assign the causal mechanisms to each node explicitly. For the treatment variable, we assign a classifier functional causal model (FCM) with a random forest classifier. For the outcome variable, we assign an additive noise model with random forest regression as a function and an empirical distribution for the noise. We assign empirical distributions to other variables as they do not have parents in the causal graph."
+    "Let's assign causal models to variables. For the treatment variable, we assign a classifier functional causal model (FCM) with a random forest classifier. For the outcome variable, we assign an additive noise model with a random forest regression as a function and empirical distribution for the noise. We assign empirical distributions to other variables as they do not have parents in the causal graph."
    ]
   },
   {
@@ -178,10 +175,27 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "> **If** we don't have prior knowledge or are not familiar with the statistical implications, we can also assign causal mechanisms automatically using a heuristic:\n",
-    "```\n",
-    "gcm.auto.assign_causal_mechanisms(causal_model, df)\n",
-    "```"
+    "To fit a classifier FCM, we cast the treatment column to string type."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df = df.astype({treatment_var: str})"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "<div class=\"alert alert-block alert-info\">\n",
+    "Instead of assigning the models manually, we can also automate this **if** we don't have prior knowledge or are not familiar with the statistical implications:\n",
+    "    \n",
+    "> gcm.auto.assign_causal_mechanisms(causal_model, df)\n",
+    "</div>"
    ]
   },
   {
@@ -267,7 +281,7 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "The average treatment effect of 401(k) eligibility on net financial assets is positive as indicated by the corresponding confidence interval. Now, let's plot CATEs of various income groups to get a clear picture."
+    "The average treatment effect of 401(k) eligibility on net financial assets is positive as indicated by the confidence interval $[4902.24, 8486.89]$. Now, let's plot CATEs of various income groups to get a clear picture."
    ]
   },
   {
@@ -313,7 +327,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.9.16"
+   "version": "3.9.12"
   }
  },
  "nbformat": 4,

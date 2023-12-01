@@ -23,8 +23,8 @@ Non-root nodes such as :math:`Y` are modelled using a *conditional* stochastic m
 defines corresponding interfaces for both, namely :class:`~dowhy.gcm.causal_mechanisms.StochasticModel` and
 :class:`~dowhy.gcm.causal_mechanisms.ConditionalStochasticModel`.
 
-The gcm package also provides ready-to-use implementations, such as :class:`~dowhy.gcm.stochastic_models.ScipyDistribution`
-or :class:`~dowhy.gcm.stochastic_models.BayesianGaussianMixtureDistribution` for
+The gcm package also provides ready-to-use implementations, such as :class:`~dowhy.gcm.stochastic_models
+.ScipyDistribution` or :class:`~dowhy.gcm.stochastic_models.BayesianGaussianMixtureDistribution` for
 :class:`~dowhy.gcm.causal_mechanisms.StochasticModel`, and :class:`~dowhy.gcm.causal_mechanisms.AdditiveNoiseModel` for
 :class:`~dowhy.gcm.causal_mechanisms.ConditionalStochasticModel`.
 
@@ -44,9 +44,9 @@ For the non-root node Y, let's use an additive noise model (ANM), represented by
 structural assignment of the form: :math:`Y := f(X) + N`. Here, f is a deterministic prediction
 function, whereas N is a noise term. Let's put all of this together:
 
->>> causal_model.set_causal_mechanism('Y',
->>>                                   gcm.AdditiveNoiseModel(prediction_model=gcm.ml.create_linear_regressor(),
->>>                                                          noise_model=gcm.ScipyDistribution(norm)))
+>>> causal_model.set_causal_mechanism('Y', gcm.AdditiveNoiseModel(
+>>>     prediction_model=gcm.ml.create_linear_regressor(),
+>>>     noise_model=gcm.ScipyDistribution(norm)))
 
 The rather interesting part here is the ``prediction_model``, which corresponds to our function
 :math:`f` above. This prediction model must satisfy the contract defined by
@@ -73,15 +73,6 @@ Finally, we can learn the parameters of those causal models from the training da
 
 ``causal_model`` is now ready to be used for various types of causal queries as explained in
 :doc:`../causal_tasks/index`.
-
-.. note::
-
-    As mentioned above, DoWhy has a wrapper class that supports scikit learn models out of the box. For instance
-
-    >>> from sklearn.ensemble import RandomForestRegressor
-    >>> causal_model.set_causal_mechanism('Y', gcm.AdditiveNoiseModel(gcm.ml.SklearnRegressionModel(RandomForestRegressor)))
-
-    would use a RandomForestRegressor instead of a LinearRegressor from the sklearn package.
 
 
 Using ground truth models
@@ -111,6 +102,7 @@ implements the :class:`~dowhy.gcm.ml.PredictionModel` interface:
 Now we can use this in our ANMs instead:
 
 >>> causal_model.set_causal_mechanism('Y', gcm.AdditiveNoiseModel(MyCustomModel(2)))
+>>>
 >>> gcm.fit(causal_model, data)
 
 .. note::

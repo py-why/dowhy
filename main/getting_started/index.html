@@ -340,9 +340,9 @@ using the same API, refer to <a class="reference internal" href="../example_note
 </section>
 <section id="graphical-causal-model-based-inference">
 <h3>Graphical causal model-based inference<a class="headerlink" href="#graphical-causal-model-based-inference" title="Permalink to this heading"></a></h3>
-<p>For features like root cause analysis, point-wise counterfactual inference, structural analysis and similar, DoWhy uses
-graphical causal models. The language of graphical causal models again offers a variety of causal questions that can
-be answered. DoWhy’s API to answer these causal questions follows a simple 3-step recipe as follows:</p>
+<p>For features like root cause analysis, structural analysis and similar, DoWhy uses graphical causal models. The
+language of graphical causal models again offers a variety of causal questions that can be answered. DoWhy’s API to
+answer these causal questions follows a simple 3-step recipe as follows:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span><span class="o">,</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span><span class="o">,</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">gcm</span>
 
@@ -359,20 +359,21 @@ be answered. DoWhy’s API to answer these causal questions follows a simple 3-s
 <span class="c1"># Step 2: Train our causal model with the data from above:</span>
 <span class="n">gcm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
 
-<span class="c1"># Step 3: Perform a causal analysis. For instance, root cause analysis, where we observe</span>
-<span class="n">anomalous_sample</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">],</span> <span class="n">Y</span><span class="o">=</span><span class="p">[</span><span class="mf">6.2</span><span class="p">],</span> <span class="n">Z</span><span class="o">=</span><span class="p">[</span><span class="mi">19</span><span class="p">]))</span>  <span class="c1"># Here, Y is the root cause.</span>
+<span class="c1"># Step 3: Perform a causal analysis. E.g. we have an:</span>
+<span class="n">anomalous_record</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="p">[</span><span class="mf">.7</span><span class="p">],</span> <span class="n">Y</span><span class="o">=</span><span class="p">[</span><span class="mf">100.0</span><span class="p">],</span> <span class="n">Z</span><span class="o">=</span><span class="p">[</span><span class="mf">303.0</span><span class="p">]))</span>
 <span class="c1"># ... and would like to answer the question:</span>
 <span class="c1"># &quot;Which node is the root cause of the anomaly in Z?&quot;:</span>
-<span class="n">anomaly_attribution</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">attribute_anomalies</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="s2">&quot;Z&quot;</span><span class="p">,</span> <span class="n">anomalous_sample</span><span class="p">)</span>
+<span class="n">anomaly_attribution</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">attribute_anomalies</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="s2">&quot;Z&quot;</span><span class="p">,</span> <span class="n">anomalous_record</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>If you want to learn more about this and other GCM features, we recommend starting with <a class="reference internal" href="../user_guide/modeling_gcm/index.html"><span class="doc">Modeling Graphical Causal Models (GCMs)</span></a> in
+<p>If you want to learn more about this, we recommend starting with
+<a class="reference internal" href="../user_guide/modeling_gcm/index.html"><span class="doc">Modeling Graphical Causal Models (GCMs)</span></a> in
 the user guide or check out <a class="reference internal" href="../example_notebooks/gcm_basic_example.html"><span class="doc">Basic Example for Graphical Causal Models</span></a>.</p>
 </section>
 </section>
 <section id="further-resources">
 <h2>Further resources<a class="headerlink" href="#further-resources" title="Permalink to this heading"></a></h2>
-<p>There are further resources available:</p>
+<p>There’s further resources available:</p>
 <ul class="simple">
 <li><p>An introductory <a class="reference external" href="https://github.com/amit-sharma/causal-inference-tutorial/">tutorial on causal inference</a></p></li>
 <li><p>A comprehensive
@@ -383,7 +384,6 @@ Microsoft Research:
 <a class="reference external" href="https://note.microsoft.com/MSR-Webinar-DoWhy-Library-Registration-On-Demand.html">Foundations of causal inference and its impacts on machine learning</a></p></li>
 <li><p>The PDF book <a class="reference external" href="https://mitp-content-server.mit.edu/books/content/sectbyfn?collid=books_pres_0&amp;id=11283&amp;fn=11283.pdf">Elements of Causal Inference</a></p></li>
 <li><p>Draft chapters of an upcoming book: <a class="reference external" href="https://causalinference.gitlab.io/book/">Causal reasoning: Fundamentals and machine learning applications</a></p></li>
-<li><p>A blog post describing one of DoWhy’s root cause analysis algorithms via graphical causal models: <a class="reference external" href="https://www.amazon.science/blog/new-method-identifies-the-root-causes-of-statistical-outliers">New method identifies the root causes of statistical outliers</a></p></li>
 </ul>
 </section>
 </section>
