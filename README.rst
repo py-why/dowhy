@@ -28,8 +28,8 @@
 - DoWhy is part of the `PyWhy Ecosystem <https://www.pywhy.org/>`_. For more tools and libraries related to causality, checkout the `PyWhy GitHub organization <https://github.com/py-why/>`_!
 - For any questions, comments, or discussions about specific use cases, join our community on `Discord <https://discord.gg/cSBGb3vsZb>`_ (|discord|_)
 - Jump right into some case studies:
-    - Effect estimation: `Hotel booking cancellations <https://towardsdatascience.com/beyond-predictive-models-the-causal-story-behind-hotel-booking-cancellations-d29e8558cbaf>`_ | `Effect of customer loyalty programs <https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy_example_effect_of_memberrewards_program.ipynb>`_ | `Optimizing article headlines <https://medium.com/@akelleh/introducing-the-do-sampler-for-causal-inference-a3296ea9e78d>`_ | `Effect of home visits on infant health (IHDP) <https://towardsdatascience.com/implementing-causal-inference-a-key-step-towards-agi-de2cde8ea599>`_ | `Causes of customer churn/attrition <https://medium.com/geekculture/a-quickstart-for-causal-analysis-decision-making-with-dowhy-2ce2d4d1efa9>`_
-    - Root cause analysis and explanations: `Root Cause Analysis with DoWhy, an Open Source Python Library for Causal Machine Learning <https://aws.amazon.com/blogs/opensource/root-cause-analysis-with-dowhy-an-open-source-python-library-for-causal-machine-learning/>`_ | `Finding the Root Cause of Elevated Latencies in a Microservice Architecture <https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/gcm_rca_microservice_architecture.ipynb>`_ | `Finding Root Causes of Changes in a Supply Chain <https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/gcm_supply_chain_dist_change.ipynb>`_
+    - Effect estimation: `Hotel booking cancellations <https://towardsdatascience.com/beyond-predictive-models-the-causal-story-behind-hotel-booking-cancellations-d29e8558cbaf>`_ | `Effect of customer loyalty programs <https://www.pywhy.org/dowhy/main/example_notebooks/dowhy_example_effect_of_memberrewards_program.html>`_ | `Optimizing article headlines <https://medium.com/@akelleh/introducing-the-do-sampler-for-causal-inference-a3296ea9e78d>`_ | `Effect of home visits on infant health (IHDP) <https://towardsdatascience.com/implementing-causal-inference-a-key-step-towards-agi-de2cde8ea599>`_ | `Causes of customer churn/attrition <https://medium.com/geekculture/a-quickstart-for-causal-analysis-decision-making-with-dowhy-2ce2d4d1efa9>`_
+    - Root cause analysis and explanations: `Causal attribution and root-cause analysis of an online shop <https://www.pywhy.org/dowhy/main/example_notebooks/gcm_online_shop.html>`_ | `Finding the Root Cause of Elevated Latencies in a Microservice Architecture <https://www.pywhy.org/dowhy/main/example_notebooks/gcm_rca_microservice_architecture.html>`_ | `Finding Root Causes of Changes in a Supply Chain <https://www.pywhy.org/dowhy/main/example_notebooks/gcm_supply_chain_dist_change.html>`_
 
 For more example notebooks, see `here! <https://www.pywhy.org/dowhy/main/example_notebooks/nb_index.html>`_
 
@@ -174,9 +174,9 @@ estimate (if any). Here's a sample output of the linear regression estimator:
 .. image:: https://raw.githubusercontent.com/py-why/dowhy/main/docs/images/regression_output.png
     :width: 80%
 
-For a full code example, check out the `Getting Started with DoWhy <https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/dowhy_simple_example.ipynb>`_ notebook.
+For a full code example, check out the `Getting Started with DoWhy <https://www.pywhy.org/dowhy/main/example_notebooks/dowhy_simple_example.html>`_ notebook.
 
-You can also use Conditional Average Treatment Effect (CATE) estimation methods from `EconML <https://github.com/py-why/econml>`_, as shown in the `Conditional Treatment Effects <https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/dowhy-conditional-treatment-effects.ipynb>`_ notebook. Here's a code snippet.
+You can also use Conditional Average Treatment Effect (CATE) estimation methods from `EconML <https://github.com/py-why/econml>`_, as shown in the `Conditional Treatment Effects <https://www.pywhy.org/dowhy/main/example_notebooks/dowhy-conditional-treatment-effects.html>`_ notebook. Here's a code snippet.
 
 .. code:: python
 
@@ -239,7 +239,7 @@ lines of code:
     # Or sampling from an interventional distribution. Here, under the intervention do(Y := 2).
     samples = gcm.interventional_samples(causal_model, interventions={'Y': lambda y: 2}, num_samples_to_draw=100)
 
-The GCM framework offers many more features beyond these examples. For a full code example, check out the `Online Shop example notebook <https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/gcm_online_shop.ipynb>`_.
+The GCM framework offers many more features beyond these examples. For a full code example, check out the `Online Shop example notebook <https://www.pywhy.org/dowhy/main/example_notebooks/gcm_online_shop.html>`_.
 
 For more functionalities, example applications of DoWhy and details about the outputs, see the `User Guide <https://www.pywhy.org/dowhy/main/user_guide/intro.html>`_ or
 checkout `Jupyter notebooks <https://www.pywhy.org/dowhy/main/example_notebooks/nb_index.html>`_.
