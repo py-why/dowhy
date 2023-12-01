@@ -133,7 +133,7 @@ def extract_equation_components(equation):
 def extract_parent_nodes(func_equation):
     parent_nodes = []
     # Find all node names in the expression string
-    matched_node_names = re.findall(r"\b[A-Za-z_][A-Za-z_0-9 ]*\b", func_equation)
+    matched_node_names = re.findall(r"[A-Za-z_][a-zA-Z0-9_]*", func_equation)
 
     for matched_node in matched_node_names:
         if matched_node not in allowed_callables:
