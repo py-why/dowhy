@@ -196,10 +196,7 @@ class TestEconMLEstimator:
             target_units=lambda df: df["X0"] > -1,
             confidence_intervals=False,
             method_params={
-                "init_params": {
-                    'discrete_treatment':False,
-                    'discrete_instrument':False
-                },
+                "init_params": {"discrete_treatment": False, "discrete_instrument": False},
                 "fit_params": {},
             },
         )
