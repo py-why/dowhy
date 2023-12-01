@@ -15,7 +15,7 @@
         gtag('config', 'G-B139P18WHM');
     </script>
     
-    <title>Causal attribution and root-cause analysis of an online shop &#8212; DoWhy  documentation</title>
+    <title>Causal Attributions and Root-Cause Analysis in an Online Shop &#8212; DoWhy  documentation</title>
 <script>
   document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
   document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
@@ -283,7 +283,7 @@
  </li>
  <li class="toctree-l1 current active">
   <a class="current reference internal" href="#">
-   Causal attribution and root-cause analysis of an online shop
+   Causal Attributions and Root-Cause Analysis in an Online Shop
   </a>
  </li>
  <li class="toctree-l1">
@@ -468,7 +468,7 @@
     <ul class="visible nav section-nav flex-column">
  <li class="toc-h1 nav-item toc-entry">
   <a class="reference internal nav-link" href="#">
-   Causal attribution and root-cause analysis of an online shop
+   Causal Attributions and Root-Cause Analysis in an Online Shop
   </a>
   <ul class="visible nav section-nav flex-column">
    <li class="toc-h2 nav-item toc-entry">
@@ -491,6 +491,11 @@
      Step 3: Answer causal questions
     </a>
     <ul class="nav section-nav flex-column">
+     <li class="toc-h3 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#Generate-new-samples">
+       Generate new samples
+      </a>
+     </li>
      <li class="toc-h3 nav-item toc-entry">
       <a class="reference internal nav-link" href="#What-are-the-key-factors-influencing-the-variance-in-profit?">
        What are the key factors influencing the variance in profit?
@@ -791,8 +796,8 @@ div.rendered_html tbody tr:hover {
   background: rgba(66, 165, 245, 0.2);
 }
 </style>
-<section id="Causal-attribution-and-root-cause-analysis-of-an-online-shop">
-<h1>Causal attribution and root-cause analysis of an online shop<a class="headerlink" href="#Causal-attribution-and-root-cause-analysis-of-an-online-shop" title="Permalink to this heading"></a></h1>
+<section id="Causal-Attributions-and-Root-Cause-Analysis-in-an-Online-Shop">
+<h1>Causal Attributions and Root-Cause Analysis in an Online Shop<a class="headerlink" href="#Causal-Attributions-and-Root-Cause-Analysis-in-an-Online-Shop" title="Permalink to this heading"></a></h1>
 <p>This notebook is an extended and updated version of the corresponding blog post: <a class="reference external" href="https://aws.amazon.com/blogs/opensource/root-cause-analysis-with-dowhy-an-open-source-python-library-for-causal-machine-learning/">Root Cause Analysis with DoWhy, an Open Source Python Library for Causal Machine Learning</a></p>
 <p>In this example, we look at an online store and analyze how different factors influence our profit. In particular, we want to analyze an unexpected drop in profit and identify the potential root cause of it. For this, we can make use of Graphical Causal Models (GCM).</p>
 <section id="The-scenario">
@@ -1084,64 +1089,64 @@ Node Shopping Event? is a root node. Therefore, assigning &#39;Empirical Distrib
 Node Unit Price is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using LinearRegression&#39; to the node.
 This represents the causal relationship as Unit Price := f(Shopping Event?) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
-LinearRegression: 167.54056865890442
+LinearRegression: 207.23824247789875
 Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 167.5968613309181
-HistGradientBoostingRegressor: 425.68837228461797
+                (&#39;linearregression&#39;, LinearRegression)]): 207.25935268647163
+HistGradientBoostingRegressor: 427.1913791842975
 
 --- Node: Ad Spend
 Node Ad Spend is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using Pipeline&#39; to the node.
 This represents the causal relationship as Ad Spend := f(Shopping Event?) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
 Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 16462.05158574192
-LinearRegression: 16612.342093004325
-HistGradientBoostingRegressor: 80326.52901529413
+                (&#39;linearregression&#39;, LinearRegression)]): 15842.081841420493
+LinearRegression: 15906.576656901592
+HistGradientBoostingRegressor: 80578.90007758597
 
 --- Node: Page Views
-Node Page Views is a non-root node with discrete data. Assigning &#39;Discrete AdditiveNoiseModel using LinearRegression&#39; to the node.
+Node Page Views is a non-root node with discrete data. Assigning &#39;Discrete AdditiveNoiseModel using Pipeline&#39; to the node.
 This represents the discrete causal relationship as Page Views := f(Ad Spend,Shopping Event?) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
-LinearRegression: 82562.62988048584
 Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 85587.14534786825
-HistGradientBoostingRegressor: 1529429.3846769112
+                (&#39;linearregression&#39;, LinearRegression)]): 82985.33540954716
+LinearRegression: 84006.20476293971
+HistGradientBoostingRegressor: 1486017.902440816
 
 --- Node: Sold Units
 Node Sold Units is a non-root node with discrete data. Assigning &#39;Discrete AdditiveNoiseModel using LinearRegression&#39; to the node.
 This represents the discrete causal relationship as Sold Units := f(Page Views,Shopping Event?,Unit Price) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
-LinearRegression: 8701.08236413983
+LinearRegression: 8396.375770091905
 Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 13769.4865913195
-HistGradientBoostingRegressor: 250712.47221718595
+                (&#39;linearregression&#39;, LinearRegression)]): 20885.83594449654
+HistGradientBoostingRegressor: 261421.33539808873
 
 --- Node: Revenue
 Node Revenue is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using Pipeline&#39; to the node.
 This represents the causal relationship as Revenue := f(Sold Units,Unit Price) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
 Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 3.373959929935206e-16
-LinearRegression: 63165707.77309924
-HistGradientBoostingRegressor: 158497387685.75665
+                (&#39;linearregression&#39;, LinearRegression)]): 1.0024503582631863e-16
+LinearRegression: 58511651.58703927
+HistGradientBoostingRegressor: 165389942406.6512
 
 --- Node: Operational Cost
-Node Operational Cost is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using LinearRegression&#39; to the node.
+Node Operational Cost is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using Pipeline&#39; to the node.
 This represents the causal relationship as Operational Cost := f(Ad Spend,Sold Units) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
-LinearRegression: 38.307036465352034
 Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 38.827654322914285
-HistGradientBoostingRegressor: 16883814480.47222
+                (&#39;linearregression&#39;, LinearRegression)]): 38.70495144251972
+LinearRegression: 38.73969589346827
+HistGradientBoostingRegressor: 16552006874.416967
 
 --- Node: Profit
 Node Profit is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using LinearRegression&#39; to the node.
 This represents the causal relationship as Profit := f(Operational Cost,Revenue) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
-LinearRegression: 1.1262707019863975e-18
+LinearRegression: 1.49044381526509e-18
 Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 1.010045420015239e-06
-HistGradientBoostingRegressor: 23914005283.63319
+                (&#39;linearregression&#39;, LinearRegression)]): 1.2564189237933176e-06
+HistGradientBoostingRegressor: 27012789915.621975
 
 ===Note===
 Note, based on the selected auto assignment quality, the set of evaluated models changes.
@@ -1166,7 +1171,7 @@ For more insights toward the quality of the fitted graphical causal model, consi
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node Operational Cost: 100%|██████████| 8/8 [00:00&lt;00:00, 325.11it/s]
+Fitting causal mechanism of node Operational Cost: 100%|██████████| 8/8 [00:00&lt;00:00, 323.88it/s]
 </pre></div></div>
 </div>
 <p>The fit method learns the parameters of the generative models in each node. Before we continue, let’s have a quick look into the performance of the causal mechanisms and how well they capture the distribution:</p>
@@ -1174,7 +1179,7 @@ Fitting causal mechanism of node Operational Cost: 100%|████████
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">evaluate_causal_model</span><span class="p">(</span><span class="n">scm</span><span class="p">,</span> <span class="n">data_2021</span><span class="p">,</span> <span class="n">compare_mechanism_baselines</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">evaluate_invertibility_assumptions</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">evaluate_causal_structure</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">evaluate_causal_model</span><span class="p">(</span><span class="n">scm</span><span class="p">,</span> <span class="n">data_2021</span><span class="p">,</span> <span class="n">compare_mechanism_baselines</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">evaluate_invertibility_assumptions</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -1183,15 +1188,23 @@ Fitting causal mechanism of node Operational Cost: 100%|████████
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Evaluating causal mechanisms...: 100%|██████████| 8/8 [00:00&lt;00:00, 868.36it/s]
+Evaluating causal mechanisms...: 100%|██████████| 8/8 [00:00&lt;00:00, 886.00it/s]
+Test permutations of given graph: 100%|██████████| 50/50 [00:15&lt;00:00,  3.14it/s]
 </pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_online_shop_22_1.png" src="../_images/example_notebooks_gcm_online_shop_22_1.png" />
+</div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Evaluated the performance of the causal mechanisms and the overall average KL divergence between generated and observed distribution. The results are as follows:
+Evaluated the performance of the causal mechanisms and the overall average KL divergence between generated and observed distribution and the graph structure. The results are as follows:
 
 ==== Evaluation of Causal Mechanisms ====
 The used evaluation metrics are:
@@ -1205,84 +1218,258 @@ NOTE: Every metric focuses on different aspects and they might not consistently 
 We will mostly utilize the CRPS for comparing and interpreting the performance of the mechanisms, since this captures the most important properties for the causal model.
 
 --- Node Shopping Event?
-- The KL divergence between generated and observed distribution is 0.008821657308751733.
+- The KL divergence between generated and observed distribution is 0.30390386006312775.
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
 --- Node Unit Price
-- The MSE is 165.47545174160337.
-- The NMSE is 0.784186832515512.
-- The R2 coefficient is -0.04231913006110646.
-- The normalized CRPS is 0.15194090149009398.
+- The MSE is 181.58480389440533.
+- The NMSE is 0.7717690206731028.
+- The R2 coefficient is 0.14366143307047802.
+- The normalized CRPS is 0.1481340958591188.
 The estimated CRPS indicates a very good model performance.
 The mechanism is better or equally good than all 7 baseline mechanisms.
 
 --- Node Ad Spend
-- The MSE is 16205.137102606392.
-- The NMSE is 0.5606649642104248.
-- The R2 coefficient is 0.6317799456345534.
-- The normalized CRPS is 0.3232828565839597.
+- The MSE is 17054.02086798274.
+- The NMSE is 0.47101065235523415.
+- The R2 coefficient is 0.7751127591525331.
+- The normalized CRPS is 0.2698006079530256.
 The estimated CRPS indicates a good model performance.
 The mechanism is better or equally good than all 7 baseline mechanisms.
 
 --- Node Page Views
-- The MSE is 97209.6794520548.
-- The NMSE is 0.18028901014594131.
-- The R2 coefficient is 0.9650740748953339.
-- The normalized CRPS is 0.07194784422519415.
+- The MSE is 86584.30958904109.
+- The NMSE is 0.1705818331579451.
+- The R2 coefficient is 0.969152161761723.
+- The normalized CRPS is 0.06847028332630793.
 The estimated CRPS indicates a very good model performance.
 The mechanism is better or equally good than all 7 baseline mechanisms.
 
 --- Node Sold Units
-- The MSE is 9072.457534246574.
-- The NMSE is 0.2615984191100358.
-- The R2 coefficient is 0.8273627685847067.
-- The normalized CRPS is 0.1161879670873622.
+- The MSE is 9014.887671232877.
+- The NMSE is 0.2799250539270863.
+- The R2 coefficient is 0.815895180173668.
+- The normalized CRPS is 0.12108511929535755.
 The estimated CRPS indicates a very good model performance.
 The mechanism is better or equally good than all 7 baseline mechanisms.
 
 --- Node Revenue
-- The MSE is 5.091294585315493e-19.
-- The NMSE is 1.1823092955579878e-15.
+- The MSE is 3.4516244504880986e-19.
+- The NMSE is 9.602698581194244e-16.
 - The R2 coefficient is 1.0.
-- The normalized CRPS is 3.0849295720687124e-16.
+- The normalized CRPS is 2.326202548698497e-16.
 The estimated CRPS indicates a very good model performance.
 The mechanism is better or equally good than all 7 baseline mechanisms.
 
 --- Node Operational Cost
-- The MSE is 38.90812510553659.
-- The NMSE is 1.7915007620855577e-05.
-- The R2 coefficient is 0.9999999996597687.
-- The normalized CRPS is 9.933312059864375e-06.
+- The MSE is 38.3869525591811.
+- The NMSE is 2.2069128498619638e-05.
+- The R2 coefficient is 0.9999999993416129.
+- The normalized CRPS is 1.2143748065334409e-05.
 The estimated CRPS indicates a very good model performance.
 The mechanism is better or equally good than all 7 baseline mechanisms.
 
 --- Node Profit
-- The MSE is 1.3185680667570287e-18.
-- The NMSE is 4.039222012433233e-15.
+- The MSE is 1.6761691326203126e-18.
+- The NMSE is 5.032608374215865e-15.
 - The R2 coefficient is 1.0.
-- The normalized CRPS is 2.827261712417106e-16.
+- The normalized CRPS is 2.9190287934136297e-16.
 The estimated CRPS indicates a very good model performance.
 The mechanism is better or equally good than all 7 baseline mechanisms.
 
 ==== Evaluation of Generated Distribution ====
-The overall average KL divergence between the generated and observed distribution is 0.9900630009879949
-The estimated KL divergence indicates a good representation of the data distribution, but might indicate some smaller mismatches between the distributions.
+The overall average KL divergence between the generated and observed distribution is 1.1097785630826111
+The estimated KL divergence indicates some mismatches between the distributions.
+
+==== Evaluation of the Causal Graph Structure ====
++-------------------------------------------------------------------------------------------------------+
+|                                         Falsificaton Summary                                          |
++-------------------------------------------------------------------------------------------------------+
+| The given DAG is informative because 0 / 50 of the permutations lie in the Markov                     |
+| equivalence class of the given DAG (p-value: 0.00).                                                   |
+| The given DAG violates 6/18 LMCs and is better than 76.0% of the permuted DAGs (p-value: 0.24).       |
+| Based on the provided significance level (0.2) and because the DAG is informative,                    |
+| we reject the DAG.                                                                                    |
++-------------------------------------------------------------------------------------------------------+
 
 ==== NOTE ====
 Always double check the made model assumptions with respect to the graph structure and choice of causal mechanisms.
 All these evaluations give some insight into the goodness of the causal model, but should not be overinterpreted, since some causal relationships can be intrinsically hard to model. Furthermore, many algorithms are fairly robust against misspecifications or poor performances of causal mechanisms.
 </pre></div></div>
 </div>
-<p>The fitted causal mechanisms are fairly good representations of the data generation process, with some minor inaccuracies. However, this is to be expected given the small sample size and relatively small signal-to-noise ratio for many nodes. Most importantly, all the baseline mechanisms did not perform better, which is a good indicator that our model selection is appropriate. Note that even if the models have some inaccuracies, most of the GCM-based algorithms are generally robust against this.</p>
-<div class="alert alert-block alert-info"><p>The selection of baseline models change be configured as well. For more details, take a look at the corresponding evaluate_causal_model documentation.</p>
-</div></section>
+<p>The fitted causal mechanisms are fairly good representations of the data generation process, with some minor inaccuracies. However, this is to be expected given the small sample size and relatively small signal-to-noise ratio for many nodes. Most importantly, all the baseline mechanisms did not perform better, which is a good indicator that our model selection is appropriate. Based on the evaluation, we also do not reject the given causal graph.</p>
+<blockquote>
+<div><p>The selection of baseline models or the p-value for graph falsification can be configured as well. For more details, take a look at the corresponding evaluate_causal_model documentation.</p>
+</div></blockquote>
+</section>
 <section id="Step-3:-Answer-causal-questions">
 <h2>Step 3: Answer causal questions<a class="headerlink" href="#Step-3:-Answer-causal-questions" title="Permalink to this heading"></a></h2>
+<section id="Generate-new-samples">
+<h3>Generate new samples<a class="headerlink" href="#Generate-new-samples" title="Permalink to this heading"></a></h3>
+<p>Since we learned about the data generation process, we can also generate new samples:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gcm</span><span class="o">.</span><span class="n">draw_samples</span><span class="p">(</span><span class="n">scm</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Shopping Event?</th>
+      <th>Unit Price</th>
+      <th>Ad Spend</th>
+      <th>Page Views</th>
+      <th>Sold Units</th>
+      <th>Revenue</th>
+      <th>Operational Cost</th>
+      <th>Profit</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>False</td>
+      <td>$999.00</td>
+      <td>$1,472.33</td>
+      <td>10970</td>
+      <td>2179</td>
+      <td>$2,176,821.00</td>
+      <td>$1,590,976.97</td>
+      <td>$585,844.03</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>False</td>
+      <td>$999.00</td>
+      <td>$1,437.15</td>
+      <td>11659</td>
+      <td>2372</td>
+      <td>$2,369,628.00</td>
+      <td>$1,687,443.61</td>
+      <td>$682,184.39</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>False</td>
+      <td>$999.00</td>
+      <td>$1,240.77</td>
+      <td>11690</td>
+      <td>2379</td>
+      <td>$2,376,621.00</td>
+      <td>$1,690,746.24</td>
+      <td>$685,874.76</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>False</td>
+      <td>$999.00</td>
+      <td>$1,123.41</td>
+      <td>11572</td>
+      <td>2216</td>
+      <td>$2,213,784.00</td>
+      <td>$1,609,125.17</td>
+      <td>$604,658.83</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>False</td>
+      <td>$999.00</td>
+      <td>$1,250.70</td>
+      <td>11874</td>
+      <td>2394</td>
+      <td>$2,391,606.00</td>
+      <td>$1,698,262.09</td>
+      <td>$693,343.91</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>False</td>
+      <td>$999.00</td>
+      <td>$1,169.18</td>
+      <td>11546</td>
+      <td>2441</td>
+      <td>$2,438,559.00</td>
+      <td>$1,721,670.69</td>
+      <td>$716,888.31</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>False</td>
+      <td>$999.00</td>
+      <td>$1,199.07</td>
+      <td>11580</td>
+      <td>2289</td>
+      <td>$2,286,711.00</td>
+      <td>$1,645,700.35</td>
+      <td>$641,010.65</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>False</td>
+      <td>$999.00</td>
+      <td>$1,125.42</td>
+      <td>11500</td>
+      <td>2297</td>
+      <td>$2,294,703.00</td>
+      <td>$1,649,628.21</td>
+      <td>$645,074.79</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>False</td>
+      <td>$999.00</td>
+      <td>$1,234.39</td>
+      <td>11656</td>
+      <td>2263</td>
+      <td>$2,260,737.00</td>
+      <td>$1,632,735.27</td>
+      <td>$628,001.73</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>False</td>
+      <td>$999.00</td>
+      <td>$1,465.95</td>
+      <td>11769</td>
+      <td>2286</td>
+      <td>$2,283,714.00</td>
+      <td>$1,644,471.12</td>
+      <td>$639,242.88</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>We have drawn 10 samples from the joint distribution following the learned causal relationships.</p>
+</section>
 <section id="What-are-the-key-factors-influencing-the-variance-in-profit?">
 <h3>What are the key factors influencing the variance in profit?<a class="headerlink" href="#What-are-the-key-factors-influencing-the-variance-in-profit?" title="Permalink to this heading"></a></h3>
 <p>At this point, we want to understand which factors drive changes in the Profit. Let us first have a closer look at the Profit over time. For this, we plot the Profit over time for 2021, where the produced plot shows the Profit in dollars on the Y-axis and the time on the X-axis.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_2021</span><span class="p">[</span><span class="s1">&#39;Profit&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ylabel</span><span class="o">=</span><span class="s1">&#39;Profit in $&#39;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="n">rot</span><span class="o">=</span><span class="mi">45</span><span class="p">)</span>
@@ -1290,7 +1477,7 @@ All these evaluations give some insight into the goodness of the causal model, b
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1302,12 +1489,12 @@ All these evaluations give some insight into the goodness of the causal model, b
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_gcm_online_shop_27_1.png" src="../_images/example_notebooks_gcm_online_shop_27_1.png" />
+<img alt="../_images/example_notebooks_gcm_online_shop_30_1.png" src="../_images/example_notebooks_gcm_online_shop_30_1.png" />
 </div>
 </div>
 <p>We see some significant spikes in the Profit across the year. We can further quantify this by looking at the standard deviation:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_2021</span><span class="p">[</span><span class="s1">&#39;Profit&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
@@ -1315,7 +1502,7 @@ All these evaluations give some insight into the goodness of the causal model, b
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1324,7 +1511,7 @@ $\displaystyle 259247.66010978$</div></div>
 </div>
 <p>The estimated standard deviation of ~259247 dollars is quite significant. Looking at the causal graph, we see that Revenue and Operational Cost have a direct impact on the Profit, but which of them contribute the most to the variance? To find this out, we can make use of the direct arrow strength algorithm that quantifies the causal influence of a specific arrow in the graph:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -1347,7 +1534,7 @@ $\displaystyle 259247.66010978$</div></div>
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_gcm_online_shop_31_0.png" src="../_images/example_notebooks_gcm_online_shop_31_0.png" />
+<img alt="../_images/example_notebooks_gcm_online_shop_34_0.png" src="../_images/example_notebooks_gcm_online_shop_34_0.png" />
 </div>
 </div>
 <p>In this causal graph, we see how much each node contributes to the variance in Profit. For simplicity, the contributions are converted to percentages. Since Profit itself is only the difference between Revenue and Operational Cost, we do not expect further factors influencing the variance. As we see, Revenue has more impact than Operational Cost. This makes sense seeing that Revenue typically varies more than Operational Cost due to the stronger dependency on the number of sold units. Note that
@@ -1358,7 +1545,7 @@ on the variance.</p>
 paper</a> for more details.</p>
 <p>Let’s apply the method to the data:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">iccs</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">intrinsic_causal_influence</span><span class="p">(</span><span class="n">scm</span><span class="p">,</span> <span class="n">target_node</span><span class="o">=</span><span class="s1">&#39;Profit&#39;</span><span class="p">,</span> <span class="n">num_samples_randomization</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
@@ -1370,11 +1557,11 @@ paper</a> for more details.</p>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Estimating Shapley Values. Average change of Shapley values in run 13 (65 evaluated permutations): 0.6678289567197169%: 100%|██████████| 1/1 [09:48&lt;00:00, 588.17s/it]
+Estimating Shapley Values. Average change of Shapley values in run 30 (150 evaluated permutations): 0.5726431433811561%: 100%|██████████| 1/1 [13:06&lt;00:00, 786.51s/it]
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dowhy.utils</span> <span class="kn">import</span> <span class="n">bar_plot</span>
@@ -1387,13 +1574,13 @@ Estimating Shapley Values. Average change of Shapley values in run 13 (65 evalua
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_gcm_online_shop_34_0.png" src="../_images/example_notebooks_gcm_online_shop_34_0.png" />
+<img alt="../_images/example_notebooks_gcm_online_shop_37_0.png" src="../_images/example_notebooks_gcm_online_shop_37_0.png" />
 </div>
 </div>
 <p>The scores shown in this bar chart are percentages indicating how much variance each node is contributing to Profit — without inheriting the variance from its parents in the causal graph. As we see quite clearly, the Shopping Event has by far the biggest influence on the variance in our Profit. This makes sense, seeing that the sales are heavily impacted during promotion periods like Black Friday or Prime Day and, thus, impact the overall profit. Surprisingly, we also see that factors such as
 the number of sold units or number of page views have a rather small influence, i.e., the large variance in profit can be almost completely explained by the shopping events. Let’s check this visually by marking the days where we had a shopping event. To do so, we use the pandas plot function again, but additionally mark all points in the plot with a vertical red bar where a shopping event occured:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -1404,19 +1591,19 @@ the number of sold units or number of page views have a rather small influence, 
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.LineCollection at 0x7fe0efde9d60&gt;
+&lt;matplotlib.collections.LineCollection at 0x7f7d7fcb7af0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_gcm_online_shop_36_1.png" src="../_images/example_notebooks_gcm_online_shop_36_1.png" />
+<img alt="../_images/example_notebooks_gcm_online_shop_39_1.png" src="../_images/example_notebooks_gcm_online_shop_39_1.png" />
 </div>
 </div>
 <p>We clearly see that the shopping events coincide with the high peaks in profit. While we could have investigated this manually by looking at all kinds of different relationships or using domain knowledge, the tasks gets much more difficult as the complexity of the system increases. With a few lines of code, we obtained these insights from DoWhy.</p>
@@ -1426,7 +1613,7 @@ the number of sold units or number of page views have a rather small influence, 
 <p>After a successful year in terms of profit, newer technologies come to the market and, thus, we want to keep the profit up and get rid of excess inventory by selling more devices. In order to increase the demand, we therefore lower the retail price by 10% at the beginning of 2022. Based on a prior analysis, we know that a decrease of 10% in the price would roughly increase the demand by 13.75%, a slight surplus. Following the price elasticity of demand model, we expect an increase of around
 37.5% in number of Sold Units. Let us take a look if this is true by loading the data for the first day in 2022 and taking the fraction between the numbers of Sold Units from both years for that day:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">first_day_2022</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;2022 First Day.csv&#39;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="s1">&#39;Date&#39;</span><span class="p">)</span>
@@ -1435,7 +1622,7 @@ the number of sold units or number of page views have a rather small influence, 
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1444,7 +1631,7 @@ $\displaystyle 18.9469141130773$</div></div>
 </div>
 <p>Surprisingly, we only increased the number of sold units by ~19%. This will certainly impact the profit given that the revenue is much smaller than expected. Let us compare it with the previous year at the same time:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">first_day_2022</span><span class="p">[</span><span class="s1">&#39;Profit&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">data_2021</span><span class="p">[</span><span class="s1">&#39;Profit&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="mi">100</span>
@@ -1452,7 +1639,7 @@ $\displaystyle 18.9469141130773$</div></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1462,7 +1649,7 @@ $\displaystyle 8.57891513840979$</div></div>
 <p>Indeed, the profit dropped by ~8.5%. Why is this the case seeing that we would expect a much higher demand due to the decreased price? Let us investigate what is going on here.</p>
 <p>In order to figure out what contributed to the Profit drop, we can make use of DoWhy’s anomaly attribution feature. Here, we only need to specify the target node we are interested in (the Profit) and the anomaly sample we want to analyze (the first day of 2022). These results are then plotted in a bar chart indicating the attribution scores of each node for the given anomaly sample:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">attributions</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">attribute_anomalies</span><span class="p">(</span><span class="n">scm</span><span class="p">,</span> <span class="n">target_node</span><span class="o">=</span><span class="s1">&#39;Profit&#39;</span><span class="p">,</span> <span class="n">anomaly_samples</span><span class="o">=</span><span class="n">first_day_2022</span><span class="p">)</span>
@@ -1476,21 +1663,21 @@ $\displaystyle 8.57891513840979$</div></div>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Estimating Shapley Values. Average change of Shapley values in run 22 (110 evaluated permutations): 2.2724469946442047%: 100%|██████████| 1/1 [00:02&lt;00:00,  2.84s/it]
+Estimating Shapley Values. Average change of Shapley values in run 29 (145 evaluated permutations): 1.3847630009495377%: 100%|██████████| 1/1 [00:03&lt;00:00,  3.12s/it]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_gcm_online_shop_44_1.png" src="../_images/example_notebooks_gcm_online_shop_44_1.png" />
+<img alt="../_images/example_notebooks_gcm_online_shop_47_1.png" src="../_images/example_notebooks_gcm_online_shop_47_1.png" />
 </div>
 </div>
 <p>A positive attribution score means that the corresponding node contributed to the observed anomaly, which is in our case the drop in Profit. A negative score of a node indicates that the observed value for the node is actually reducing the likelihood of the anomaly (e.g., a higher demand due to the decreased price should increase the profit). More details about the interpretation of the score can be found in the corresponding <a class="reference external" href="https://proceedings.mlr.press/v162/budhathoki22a.html">reserach
 paper</a>. Interestingly, the Page Views stand out as a factor explaining the Profit drop that day as indicated in the bar chart shown here.</p>
 <p>While this method gives us a point estimate of the attributions for the particular models and parameters we learned, we can also use DoWhy’s confidence interval feature, which incorporates uncertainties about the fitted model parameters and algorithmic approximations:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gcm</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">disable_progress_bars</span><span class="p">()</span>  <span class="c1"># We turn off the progress bars here to reduce the number of outputs.</span>
@@ -1506,7 +1693,7 @@ paper</a>. Interestingly, the Page Views stand out as a factor explaining the Pr
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bar_plot</span><span class="p">(</span><span class="n">median_attributions</span><span class="p">,</span> <span class="n">confidence_intervals</span><span class="p">,</span> <span class="s1">&#39;Anomaly attribution score&#39;</span><span class="p">)</span>
@@ -1517,17 +1704,19 @@ paper</a>. Interestingly, the Page Views stand out as a factor explaining the Pr
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_gcm_online_shop_47_0.png" src="../_images/example_notebooks_gcm_online_shop_47_0.png" />
+<img alt="../_images/example_notebooks_gcm_online_shop_50_0.png" src="../_images/example_notebooks_gcm_online_shop_50_0.png" />
 </div>
 </div>
 <p>Note, in this bar chart we see the median attributions over multiple runs on smaller data sets, where each run re-fits the models and re-evaluates the attributions. We get a similar picture as before, but the confidence interval of the attribution to Sold Units also contains zero, meaning its contribution is insignificant. But some important questions still remain: Was this only a coincidence and, if not, which part in our system has changed? To find this out, we need to collect some more data.</p>
-<div class="alert alert-block alert-info"><p>Note that the results differ depending on the selected data, since they are sample specific. On other days, other factors could be relevant. Furthermore, note that the analysis (including the confidence intervals) always relies on the modeling assumptions made. In other words, if the models change or have a poor fit, one would also expect different results.</p>
-</div></section>
+<blockquote>
+<div><p>Note that the results differ depending on the selected data, since they are sample specific. On other days, other factors could be relevant. Furthermore, note that the analysis (including the confidence intervals) always relies on the modeling assumptions made. In other words, if the models change or have a poor fit, one would also expect different results.</p>
+</div></blockquote>
+</section>
 <section id="What-caused-the-profit-drop-in-Q1-2022?">
 <h3>What caused the profit drop in Q1 2022?<a class="headerlink" href="#What-caused-the-profit-drop-in-Q1-2022?" title="Permalink to this heading"></a></h3>
 <p>While the previous analysis is based on a single observation, let us see if this was just coincidence or if this is a persistent issue. When preparing the quarterly business report, we have some more data available from the first three months. We first check if the profit dropped on average in the first quarter of 2022 as compared to 2021. Similar as before, we can do this by taking the fraction between the average Profit of 2022 and 2021 for the first quarter:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_first_quarter_2021</span> <span class="o">=</span> <span class="n">data_2021</span><span class="p">[</span><span class="n">data_2021</span><span class="o">.</span><span class="n">index</span> <span class="o">&lt;=</span> <span class="s1">&#39;2021-03-31&#39;</span><span class="p">]</span>
@@ -1538,7 +1727,7 @@ paper</a>. Interestingly, the Page Views stand out as a factor explaining the Pr
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1547,7 +1736,7 @@ $\displaystyle 13.0494881794224$</div></div>
 </div>
 <p>Indeed, the profit drop is persistent in the first quarter of 2022. Now, what is the root cause of this? Let us apply the <a class="reference external" href="https://proceedings.mlr.press/v130/budhathoki21a.html">distribution change method</a> to identify the part in the system that has changed:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">median_attributions</span><span class="p">,</span> <span class="n">confidence_intervals</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">confidence_intervals</span><span class="p">(</span>
@@ -1562,7 +1751,7 @@ $\displaystyle 13.0494881794224$</div></div>
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bar_plot</span><span class="p">(</span><span class="n">median_attributions</span><span class="p">,</span> <span class="n">confidence_intervals</span><span class="p">,</span> <span class="s1">&#39;Profit change attribution in $&#39;</span><span class="p">)</span>
@@ -1573,13 +1762,13 @@ $\displaystyle 13.0494881794224$</div></div>
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_gcm_online_shop_55_0.png" src="../_images/example_notebooks_gcm_online_shop_55_0.png" />
+<img alt="../_images/example_notebooks_gcm_online_shop_58_0.png" src="../_images/example_notebooks_gcm_online_shop_58_0.png" />
 </div>
 </div>
 <p>In our case, the distribution change method explains the change in the mean of Profit, i.e., a negative value indicates that a node contributes to a decrease and a positive value to an increase of the mean. Using the bar chart, we get now a very clear picture that the change in Unit Price has actually a slightly positive contribution to the expected Profit due to the increase of Sold Units, but it seems that the issue is coming from the Page Views which has a negative value. While we already
 understood this as a main driver of the drop at the beginning of 2022, we have now isolated and confirmed that something changed for the Page Views as well. Let’s compare the average Page Views with the previous year.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">data_first_quarter_2022</span><span class="p">[</span><span class="s1">&#39;Page Views&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">/</span> <span class="n">data_first_quarter_2021</span><span class="p">[</span><span class="s1">&#39;Page Views&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">*</span> <span class="mi">100</span>
@@ -1587,7 +1776,7 @@ understood this as a main driver of the drop at the beginning of 2022, we have n
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1602,7 +1791,7 @@ $\displaystyle 14.347627108364$</div></div>
 <h1>Data generation process<a class="headerlink" href="#Data-generation-process" title="Permalink to this heading"></a></h1>
 <p>While the exact same data cannot be reproduced, the following dataset generator should provide quite similar types of data and has various parameters to adjust:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dowhy.datasets</span> <span class="kn">import</span> <span class="n">sales_dataset</span>

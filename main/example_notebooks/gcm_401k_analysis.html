@@ -283,7 +283,7 @@
  </li>
  <li class="toctree-l1">
   <a class="reference internal" href="gcm_online_shop.html">
-   Causal attribution and root-cause analysis of an online shop
+   Causal Attributions and Root-Cause Analysis in an Online Shop
   </a>
  </li>
  <li class="toctree-l1">
@@ -759,7 +759,7 @@ div.rendered_html tbody tr:hover {
 </style>
 <section id="Impact-of-401(k)-eligibility-on-net-financial-assets">
 <h1>Impact of 401(k) eligibility on net financial assets<a class="headerlink" href="#Impact-of-401(k)-eligibility-on-net-financial-assets" title="Permalink to this heading"></a></h1>
-<p>In this case study, we will use real-world data from 401(k) analysis to explain how Causality library can be used to estimate average treatment effect (ATE) and conditional ATE (CATE).</p>
+<p>In this case study, we will use real-world data from 401(k) analysis to explain how graphical causal models can be used to estimate average treatment effect (ATE) and conditional ATE (CATE).</p>
 <section id="Background">
 <h2>Background<a class="headerlink" href="#Background" title="Permalink to this heading"></a></h2>
 <p>In the early 1980s, the United States government introduced several tax deferred savings options for employees in an effort to increase individual saving for retirement. One popular option is the 401(k) plan, which allows employees to contribute a portion of their wages to individual accounts. The goal here is to understand the effect of 401(k) eligibility on net financial assets (which is a sum of 401(k) balances and non-401(k) assets) considering heterogeneity due to individual’s
@@ -1068,6 +1068,9 @@ age, income, family size, education, marital status, etc. We consider 16 covaria
 <span class="n">edges</span><span class="o">.</span><span class="n">extend</span><span class="p">([(</span><span class="n">covariate</span><span class="p">,</span> <span class="n">treatment_var</span><span class="p">)</span> <span class="k">for</span> <span class="n">covariate</span> <span class="ow">in</span> <span class="n">covariates</span><span class="p">])</span>
 <span class="n">edges</span><span class="o">.</span><span class="n">extend</span><span class="p">([(</span><span class="n">covariate</span><span class="p">,</span> <span class="n">outcome_var</span><span class="p">)</span> <span class="k">for</span> <span class="n">covariate</span> <span class="ow">in</span> <span class="n">covariates</span><span class="p">])</span>
 
+<span class="c1"># To ensure that the treatment is considered as a categorical variable, we convert the values explicitly to strings.</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">astype</span><span class="p">({</span><span class="n">treatment_var</span><span class="p">:</span> <span class="nb">str</span><span class="p">})</span>
+
 <span class="n">causal_graph</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -1117,8 +1120,8 @@ age, income, family size, education, marital status, etc. We consider 16 covaria
 <img alt="../_images/example_notebooks_gcm_401k_analysis_9_0.png" src="../_images/example_notebooks_gcm_401k_analysis_9_0.png" />
 </div>
 </div>
-<p>We observe that real-valued variables do not follow well-known parameteric distributions like Gaussian. Therefore, we fit empirical distributions whenever those variables do not have parents, which is also suitable for categorical variables.</p>
-<p>Let’s assign causal models to variables. For the treatment variable, we assign a classifier functional causal model (FCM) with a random forest classifier. For the outcome variable, we assign an additive noise model with a random forest regression as a function and empirical distribution for the noise. We assign empirical distributions to other variables as they do not have parents in the causal graph.</p>
+<p>We observe that real-valued variables do not follow well-known parametric distributions like Gaussian. Therefore, we fit empirical distributions whenever those variables do not have parents, which is also suitable for categorical variables.</p>
+<p>Let’s assign the causal mechanisms to each node explicitly. For the treatment variable, we assign a classifier functional causal model (FCM) with a random forest classifier. For the outcome variable, we assign an additive noise model with random forest regression as a function and an empirical distribution for the noise. We assign empirical distributions to other variables as they do not have parents in the causal graph.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
@@ -1131,22 +1134,15 @@ age, income, family size, education, marital status, etc. We consider 16 covaria
 </pre></div>
 </div>
 </div>
-<p>To fit a classifier FCM, we cast the treatment column to string type.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">astype</span><span class="p">({</span><span class="n">treatment_var</span><span class="p">:</span> <span class="nb">str</span><span class="p">})</span>
-</pre></div>
-</div>
-</div>
-<div class="alert alert-block alert-info"><p>Instead of assigning the models manually, we can also automate this <strong>if</strong> we don’t have prior knowledge or are not familiar with the statistical implications:</p>
 <blockquote>
-<div><p>gcm.auto.assign_causal_mechanisms(causal_model, df)</p>
+<div><p><strong>If</strong> we don’t have prior knowledge or are not familiar with the statistical implications, we can also assign causal mechanisms automatically using a heuristic:</p>
 </div></blockquote>
-</div><p>With that, we can now fit the learn the causal models from data.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>gcm.auto.assign_causal_mechanisms(causal_model, df)
+</pre></div>
+</div>
+<p>With that, we can now fit the learn the causal models from data.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gcm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span>
@@ -1158,12 +1154,12 @@ age, income, family size, education, marital status, etc. We consider 16 covaria
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node smcol: 100%|██████████| 18/18 [00:05&lt;00:00,  3.07it/s]
+Fitting causal mechanism of node smcol: 100%|██████████| 18/18 [00:05&lt;00:00,  3.13it/s]
 </pre></div></div>
 </div>
 <p>Before computing CATE, we first divide households into equi-width bins of income percentiles. This allows us to study the impact on various income groups.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -1180,7 +1176,7 @@ Fitting causal mechanism of node smcol: 100%|██████████| 18/
 </div>
 <p>Now we can compute CATE. To this end, we perform a randomised intervention on the treatment variable in the fitted causal graph, draw samples from the interventional distribution, group observations by the income group, and then compute the treatment effect in each group.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">47</span><span class="p">)</span>
@@ -1215,7 +1211,7 @@ Fitting causal mechanism of node smcol: 100%|██████████| 18/
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Estimating bootstrap interval...: 100%|██████████| 100/100 [00:42&lt;00:00,  2.36it/s]
+Estimating bootstrap interval...: 100%|██████████| 100/100 [00:42&lt;00:00,  2.35it/s]
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -1223,8 +1219,8 @@ Estimating bootstrap interval...: 100%|██████████| 100/100 [
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;ate&#39;: 6572.04227200694, &#39;0%-20%&#39;: 4209.039577013771, &#39;20%-40%&#39;: 3641.7422520552564, &#39;40%-60%&#39;: 5851.087273401551, &#39;60%-80%&#39;: 7377.945499940909, &#39;80%-100%&#39;: 11563.215504065738}
-{&#39;ate&#39;: array([4834.03951959, 8488.63261959]), &#39;0%-20%&#39;: array([2668.83542751, 5665.07830378]), &#39;20%-40%&#39;: array([1744.09812387, 5870.05976638]), &#39;40%-60%&#39;: array([3724.25584303, 8487.1488445 ]), &#39;60%-80%&#39;: array([ 4357.68288985, 10919.47636211]), &#39;80%-100%&#39;: array([ 4589.0317695 , 18425.50183412])}
+{&#39;ate&#39;: 6550.940912254107, &#39;0%-20%&#39;: 4199.302414154028, &#39;20%-40%&#39;: 3396.986105933165, &#39;40%-60%&#39;: 5685.564047441268, &#39;60%-80%&#39;: 7488.924075108319, &#39;80%-100%&#39;: 11826.362118736644}
+{&#39;ate&#39;: array([4888.43752718, 8391.07311113]), &#39;0%-20%&#39;: array([2762.48960336, 5981.35288192]), &#39;20%-40%&#39;: array([1365.84993122, 5466.13486476]), &#39;40%-60%&#39;: array([3374.49044063, 8311.43405287]), &#39;60%-80%&#39;: array([ 4443.19936103, 10441.96664146]), &#39;80%-100%&#39;: array([ 4544.58938616, 18633.48241417])}
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1235,9 +1231,9 @@ Estimating bootstrap interval...: 100%|██████████| 100/100 [
 
 </pre></div></div>
 </div>
-<p>The average treatment effect of 401(k) eligibility on net financial assets is positive as indicated by the confidence interval <span class="math notranslate nohighlight">\([4902.24, 8486.89]\)</span>. Now, let’s plot CATEs of various income groups to get a clear picture.</p>
+<p>The average treatment effect of 401(k) eligibility on net financial assets is positive as indicated by the corresponding confidence interval. Now, let’s plot CATEs of various income groups to get a clear picture.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
@@ -1267,7 +1263,7 @@ Estimating bootstrap interval...: 100%|██████████| 100/100 [
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_gcm_401k_analysis_22_1.png" src="../_images/example_notebooks_gcm_401k_analysis_22_1.png" />
+<img alt="../_images/example_notebooks_gcm_401k_analysis_20_1.png" src="../_images/example_notebooks_gcm_401k_analysis_20_1.png" />
 </div>
 </div>
 <p>The impact increases as one moves from lower to higher income groups. This result seems to be consistent with the resource constraints of the different income groups.</p>

@@ -283,7 +283,7 @@
  </li>
  <li class="toctree-l1">
   <a class="reference internal" href="gcm_online_shop.html">
-   Causal attribution and root-cause analysis of an online shop
+   Causal Attributions and Root-Cause Analysis in an Online Shop
   </a>
  </li>
  <li class="toctree-l1">
@@ -764,8 +764,8 @@ explicitly model our causal relationships using functional causal models, as we 
 <p>In the following, we will look at two real-world examples where we apply ICC.</p>
 <section id="Intrinsic-influence-on-car-MPG-consumption">
 <h2>Intrinsic influence on car MPG consumption<a class="headerlink" href="#Intrinsic-influence-on-car-MPG-consumption" title="Permalink to this heading"></a></h2>
-<p>In the first example, we use the famous <a class="reference external" href="https://archive.ics.uci.edu/dataset/9/auto+mpg">MPG data set</a>, which contains different features that are used for the prediction of miles per gallon (mpg) of a car engine. The relationship between these features can be modeled as a graphical causal model. For this, we follow the causal graph defined in the <a class="reference external" href="https://ieeexplore.ieee.org/document/8585647">work by Wang et al.</a> and remove all nodes that have no influence on MPG. This leaves us with the
-following graph:</p>
+<p>In the first example, we use the famous <a class="reference external" href="https://archive.ics.uci.edu/dataset/9/auto+mpg">MPG data set</a>, which contains different features that are used for the prediction of miles per gallon (mpg) of a car engine. Let’s say our task is to improve the design process where we need a good understanding of the influences of our variables on the mpg consumption. The relationship between these features can be modeled as a graphical causal model. For this, we follow the causal graph defined in the
+<a class="reference external" href="https://ieeexplore.ieee.org/document/8585647">work by Wang et al.</a> and remove all nodes that have no influence on MPG. This leaves us with the following graph:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -828,7 +828,7 @@ following graph:</p>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node mpg: 100%|██████████| 5/5 [00:00&lt;00:00, 23.49it/s]
+Fitting causal mechanism of node mpg: 100%|██████████| 5/5 [00:00&lt;00:00, 20.54it/s]
 </pre></div></div>
 </div>
 <p>Optionally, we can get some insights into the performance of the causal mechanisms by using the evaluation method:</p>
@@ -845,7 +845,7 @@ Fitting causal mechanism of node mpg: 100%|██████████| 5/5 [
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Evaluating causal mechanisms...: 100%|██████████| 5/5 [00:00&lt;00:00, 395.38it/s]
+Evaluating causal mechanisms...: 100%|██████████| 5/5 [00:00&lt;00:00, 2587.48it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -871,35 +871,35 @@ We will mostly utilize the CRPS for comparing and interpreting the performance o
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
 --- Node displacement
-- The MSE is 1042.9524010641892.
-- The NMSE is 0.31183123232552507.
-- The R2 coefficient is 0.9024285966378793.
-- The normalized CRPS is 0.17444064460637057.
+- The MSE is 1042.835846001507.
+- The NMSE is 0.3112753343291146.
+- The R2 coefficient is 0.902464466911329.
+- The normalized CRPS is 0.17461500138238537.
 The estimated CRPS indicates a very good model performance.
 
 --- Node weight
-- The MSE is 80462.99321648815.
-- The NMSE is 0.336239777790291.
-- The R2 coefficient is 0.8852190855065732.
-- The normalized CRPS is 0.18444831544355353.
+- The MSE is 79113.9895163908.
+- The NMSE is 0.33550917851966516.
+- The R2 coefficient is 0.8862005631352309.
+- The normalized CRPS is 0.18311543167639988.
 The estimated CRPS indicates a very good model performance.
 
 --- Node horsepower
-- The MSE is 204.47925998052582.
-- The NMSE is 0.3673354942520849.
-- The R2 coefficient is 0.8637380555628402.
-- The normalized CRPS is 0.1996881481590842.
+- The MSE is 199.31496267445635.
+- The NMSE is 0.36575845352580705.
+- The R2 coefficient is 0.8641695124878186.
+- The normalized CRPS is 0.1999201476050486.
 The estimated CRPS indicates a very good model performance.
 
 --- Node mpg
-- The MSE is 15.83749473992286.
-- The NMSE is 0.5102869577220007.
-- The R2 coefficient is 0.7369577499502742.
-- The normalized CRPS is 0.28173459610274976.
+- The MSE is 15.653968547157026.
+- The NMSE is 0.5096284989021983.
+- The R2 coefficient is 0.7378037896209205.
+- The normalized CRPS is 0.2822200477642434.
 The estimated CRPS indicates a good model performance.
 
 ==== Evaluation of Generated Distribution ====
-The overall average KL divergence between the generated and observed distribution is 0.9866995139970591
+The overall average KL divergence between the generated and observed distribution is 0.9934979969753922
 The estimated KL divergence indicates a good representation of the data distribution, but might indicate some smaller mismatches between the distributions.
 
 ==== NOTE ====
@@ -907,9 +907,27 @@ Always double check the made model assumptions with respect to the graph structu
 All these evaluations give some insight into the goodness of the causal model, but should not be overinterpreted, since some causal relationships can be intrinsically hard to model. Furthermore, many algorithms are fairly robust against misspecifications or poor performances of causal mechanisms.
 </pre></div></div>
 </div>
-<p>After defining our structural causal model, we can now apply the ICC method to obtain more insights into what factors influence fuel consumption. This could help us improve the design process. Note that by default, we attribute the variance of the target node to the upstream nodes.</p>
+<p>After defining our structural causal model, we can now obtain more insights into what factors influence fuel consumption. As a first insight, we can estimate the direct arrow strength of the connections weight -&gt; mpg and horsepower -&gt; mpg. Note that by default, the arrow strength method measures the influence with respect to the variance.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">arrow_strengths_mpg</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">arrow_strength</span><span class="p">(</span><span class="n">scm_mpg</span><span class="p">,</span> <span class="n">target_node</span><span class="o">=</span><span class="s1">&#39;mpg&#39;</span><span class="p">)</span>
+<span class="n">gcm</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">scm_mpg</span><span class="o">.</span><span class="n">graph</span><span class="p">,</span> <span class="n">causal_strengths</span><span class="o">=</span><span class="n">arrow_strengths_mpg</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_icc_10_0.png" src="../_images/example_notebooks_gcm_icc_10_0.png" />
+</div>
+</div>
+<p>As we see here, the weight has a much higher influence on the variance in mpg than horsepower does.</p>
+<p>While knowing how much the direct parents influence our node of interest provides some valuable insights, the weight and horsepower might only just inherit information from their common parent. To distinguish between the information inherited from the parent and their own contribution, we apply the ICC method:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">iccs_mpg</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">intrinsic_causal_influence</span><span class="p">(</span><span class="n">scm_mpg</span><span class="p">,</span> <span class="n">target_node</span><span class="o">=</span><span class="s1">&#39;mpg&#39;</span><span class="p">)</span>
@@ -921,12 +939,12 @@ All these evaluations give some insight into the goodness of the causal model, b
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Evaluate set function: 32it [01:59,  3.74s/it]
+Evaluate set function: 32it [01:58,  3.69s/it]
 </pre></div></div>
 </div>
 <p>For a better interpretation of the results, we convert the variance attribution to percentages by normalizing it over the total sum.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">convert_to_percentage</span><span class="p">(</span><span class="n">value_dictionary</span><span class="p">):</span>
@@ -936,7 +954,7 @@ Evaluate set function: 32it [01:59,  3.74s/it]
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bar_plot</span><span class="p">(</span><span class="n">convert_to_percentage</span><span class="p">(</span><span class="n">iccs_mpg</span><span class="p">),</span> <span class="n">ylabel</span><span class="o">=</span><span class="s1">&#39;Variance contribution in %&#39;</span><span class="p">)</span>
@@ -947,34 +965,21 @@ Evaluate set function: 32it [01:59,  3.74s/it]
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_gcm_icc_13_0.png" src="../_images/example_notebooks_gcm_icc_13_0.png" />
+<img alt="../_images/example_notebooks_gcm_icc_16_0.png" src="../_images/example_notebooks_gcm_icc_16_0.png" />
 </div>
 </div>
-<p>It turns out that the number of cylinders already explains a large fraction of the fuel consumption and the intermediate nodes like displacement, horsepower, and weight mostly inherit uncertainty from their parents. This is because, although weight and horsepower are the more direct predictors of mpg, they are mostly determined by displacement and cylinders. As we also see with the contribution of mpg itself, roughly 1/4 of the variance of mpg remains unexplained by all of the above factors,
-which may be partially due to model inaccuracies.</p>
+<p>It turns out that the number of cylinders already explains a large fraction of the fuel consumption and the intermediate nodes like displacement, horsepower, and weight mostly inherit uncertainty from their parents. This is because, although weight and horsepower are the more direct predictors of mpg, they are mostly determined by displacement and cylinders. This gives some useful insights for potential optimizations. As we also see with the contribution of mpg itself, roughly 1/4 of the
+variance of mpg remains unexplained by all of the above factors, which may be partially due to model inaccuracies.</p>
 <p>While the model evaluation showed that there are some inaccuracies with respect to the KL divergence between the generated and observed distributions, we see that ICC still provides non-trivial results in the sense that the contributions differ significantly across nodes and that not everything is simply attributed to the target node itself.</p>
-<div class="alert alert-block alert-info"><p>Note that estimating the contribution to the variance of the target in ICC can be seen as a nonlinear version of ANOVA that incorporates the causal structure.</p>
-</div></section>
+<blockquote>
+<div><p>Note that estimating the contribution to the variance of the target in ICC can be seen as a nonlinear version of ANOVA that incorporates the causal structure.</p>
+</div></blockquote>
+</section>
 <section id="Intrinsic-influence-on-river-flow">
 <h2>Intrinsic influence on river flow<a class="headerlink" href="#Intrinsic-influence-on-river-flow" title="Permalink to this heading"></a></h2>
-<p>In the next example, we look at different recordings taken of the river flows (<span class="math notranslate nohighlight">\(m^3/s\)</span>) at a 15 minute frequency across 5 different measuring stations in England at Henthorn, New Jumbles Rock, Hodder Place, Whalley Weir and Samlesbury. The data is taken from the <a class="reference external" href="https://environment.data.gov.uk/hydrology/explore">UK Department for Environment Food &amp; Rural Affairs website</a>. Here is a map of the rivers:</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span>
-<span class="n">Image</span><span class="p">(</span><span class="s1">&#39;river-map.jpg&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/example_notebooks_gcm_icc_18_0.jpg" src="../_images/example_notebooks_gcm_icc_18_0.jpg" />
-</div>
-</div>
+<p>In the next example, we look at different recordings taken of the river flows (<span class="math notranslate nohighlight">\(m^3/s\)</span>) at a 15 minute frequency across 5 different measuring stations in England at Henthorn, New Jumbles Rock, Hodder Place, Whalley Weir and Samlesbury. Here, obtaining a better understanding of how the river flows behave can help to plan potential mitigation steps to avoid overflows. The data is taken from the <a class="reference external" href="https://environment.data.gov.uk/hydrology/explore">UK Department for Environment Food &amp; Rural Affairs
+website</a>. Here is a map of the rivers:</p>
+<p><img alt="4ff886bab4fc406b8826ceffc3b53219" class="no-scaled-link" src="../_images/river-map.jpg" style="width: 600px;" /></p>
 <p>New Jumbles Rock lies at a confluence point of the 3 rivers passing Henthorn, Hodder Place, and Whalley Weir and New Jumbles Rock flows into Samlesbury. The water passing a certain measuring station is certainly a mixture of some fraction of the amount observed at the next stations further upstream plus some amount contributed by streams and little rivers entering the river in between. This defines our causal graph as:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
@@ -993,29 +998,14 @@ which may be partially due to model inaccuracies.</p>
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_gcm_icc_20_0.png" src="../_images/example_notebooks_gcm_icc_20_0.png" />
+<img alt="../_images/example_notebooks_gcm_icc_23_0.png" src="../_images/example_notebooks_gcm_icc_23_0.png" />
 </div>
 </div>
-<p>Here, we are interested in the causal influence of the upstream rivers on the Samlesbury river. For instance, to obtain a better understanding of how the river flows behave and to potentially plan mitigation steps to avoid overflows. Similar to the example before, we would expect these nodes to be heavily confounded by, e.g., the weather. That is, the true graph is more likely to be along the lines of:</p>
+<p>In this setting, we are interested in the causal influence of the upstream rivers on the Samlesbury river. Similar to the example before, we would expect these nodes to be heavily confounded by, e.g., the weather. That is, the true graph is more likely to be along the lines of:</p>
+<p><img alt="c6eca0f5d88141d3b1d5d3eac127ccbb" class="no-scaled-link" src="../_images/river-confounded.png" style="width: 400px;" /></p>
+<p>Nevertheless, we still expect the ICC algorithm to provide some insights into the contribution to the river flow of Samlesbury, even with the hidden confounder in place:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Image</span><span class="p">(</span><span class="s1">&#39;river-confounded.png&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/example_notebooks_gcm_icc_22_0.png" src="../_images/example_notebooks_gcm_icc_22_0.png" />
-</div>
-</div>
-<p>Nevertheless, we still expect the ICC algorithm to provide some insights into the contribution to the river flow of Samlesbury, even with the hidden confounder in place.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">river_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;river.csv&quot;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -1034,15 +1024,15 @@ which may be partially due to model inaccuracies.</p>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node Samlesbury: 100%|██████████| 5/5 [00:00&lt;00:00, 187.64it/s]
-Evaluate set function: 32it [00:00, 57.18it/s]
+Fitting causal mechanism of node Samlesbury: 100%|██████████| 5/5 [00:00&lt;00:00, 242.50it/s]
+Evaluate set function: 32it [00:00, 61.27it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_gcm_icc_24_1.png" src="../_images/example_notebooks_gcm_icc_24_1.png" />
+<img alt="../_images/example_notebooks_gcm_icc_27_1.png" src="../_images/example_notebooks_gcm_icc_27_1.png" />
 </div>
 </div>
 <p>Interestingly, the intrinsic contribution of New Jumbles Rock on Samlesbury is small, although the interventional effect on New Jumbles Rock would certaintly have a large effect. This illustrates that ICC does not measure influence in the sense of the strength of a treatment effect and points out here that New Jumbles Rock simply passes the flow onto Samlesbury. The contribution by Samlesbury itself represents the (hidden) factors that are not captured. Even though we can expect the nodes to be

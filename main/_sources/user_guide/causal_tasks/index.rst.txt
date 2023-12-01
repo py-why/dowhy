@@ -13,6 +13,7 @@ This chapter describes how to perform each of these tasks.
    :maxdepth: 2
 
    estimating_causal_effects/index
+   quantify_causal_influence/index
    root_causing_and_explaining/index
    what_if/index
    causal_prediction/index

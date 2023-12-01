@@ -394,33 +394,38 @@
        Estimating average causal effect using GCM
       </a>
      </li>
-     <li class="toctree-l3 has-children">
-      <a class="reference internal" href="../causal_tasks/estimating_causal_effects/direct_indirect_effects/index.html">
-       Estimating direct and indirect effects
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../causal_tasks/quantify_causal_influence/index.html">
+     Quantify Causal Influence
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/>
+    <label for="toctree-checkbox-8">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../causal_tasks/quantify_causal_influence/mediation_analysis.html">
+       Mediation Analysis: Estimating natural direct and indirect effects
       </a>
-      <input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/>
-      <label for="toctree-checkbox-8">
-       <i class="fas fa-chevron-down">
-       </i>
-      </label>
-      <ul>
-       <li class="toctree-l4">
-        <a class="reference internal" href="../causal_tasks/estimating_causal_effects/direct_indirect_effects/mediation_analysis.html">
-         Estimating natural direct and indirect effects
-        </a>
-       </li>
-       <li class="toctree-l4">
-        <a class="reference internal" href="../causal_tasks/estimating_causal_effects/direct_indirect_effects/quantify_arrow_strength.html">
-         Direct Effect: Quantifying Arrow Strength
-        </a>
-       </li>
-      </ul>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../causal_tasks/quantify_causal_influence/quantify_arrow_strength.html">
+       Direct Effect: Quantifying Arrow Strength
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../causal_tasks/quantify_causal_influence/icc.html">
+       Quantifying Intrinsic Causal Influence
+      </a>
      </li>
     </ul>
    </li>
    <li class="toctree-l2 has-children">
     <a class="reference internal" href="../causal_tasks/root_causing_and_explaining/index.html">
-     Explaining Observed Effects and Root-Cause Analysis
+     Root-Cause Analysis and Explanation
     </a>
     <input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" type="checkbox"/>
     <label for="toctree-checkbox-9">
@@ -436,16 +441,6 @@
      <li class="toctree-l3">
       <a class="reference internal" href="../causal_tasks/root_causing_and_explaining/distribution_change.html">
        Attributing Distributional Changes
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../causal_tasks/root_causing_and_explaining/icc.html">
-       Quantifying Intrinsic Causal Influence
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../causal_tasks/root_causing_and_explaining/unit_change.html">
-       Unit Change Attribution
       </a>
      </li>
      <li class="toctree-l3">
@@ -578,9 +573,19 @@
     
     <div class="toc-item">
       
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
 
 <nav id="bd-toc-nav">
-    
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#available-causal-mechanisms">
+   Available Causal Mechanisms
+  </a>
+ </li>
+</ul>
+
 </nav>
     </div>
     
@@ -631,8 +636,27 @@ constraint reduces model flexibility but is required for modeling rung 3. With i
 additive noise model (ANM) of the form <span class="math notranslate nohighlight">\(X_i = f_i(PA_i, N_i) = f'_i(PA_i) + N_i\)</span>, which can be learned using
 standard regression models. The noise then becomes simply the residual.</p>
 <p>For causal questions like treatment effect estimation, modeling rung 2 is sufficient. On the other hand, to determine
-root causes by asking “Would the target have been an outlier if node X behaved differently?”, rung 3 is required. Note
-that DoWhy generally uses invertible FCMs, such as ANMs, when models are assigned automatically.</p>
+root causes by asking “Would the target have been an outlier if node X behaved differently?”, rung 3 is required. The
+following provides an overview of available types of causal mechanisms that are supported out-of-the box:</p>
+<section id="available-causal-mechanisms">
+<h2>Available Causal Mechanisms<a class="headerlink" href="#available-causal-mechanisms" title="Permalink to this heading"></a></h2>
+<p>To support causal mechanisms that can be used for any of the types of causal models above, we have simple interfaces
+that a causal mechanism needs to implement. For instance, to use a causal mechanism in a PCM, one only needs to
+implement a method that expects samples from the parent nodes and returns samples from the conditional distribution.
+Having these lightweight interfaces allows easily using your own and customized types of causal mechanisms for different
+use cases. However, DoWhy also has different types of mechanisms, specifically functional causal models, implemented
+natively supporting different types of data:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://papers.nips.cc/paper_files/paper/2008/file/f7664060cc52bc6f3d620bcedc94a4b6-Paper.pdf">Additive Noise Models</a> (continuous data) of the form <span class="math notranslate nohighlight">\(X_i = f_i(PA_i) + N_i\)</span>, where <span class="math notranslate nohighlight">\(f_i\)</span> can be any kind of regression function (e.g., from scikit-learn) and the noise <span class="math notranslate nohighlight">\(N_i\)</span> is unobserved noise. When fitting an ANM, this then boils down to fitting the <span class="math notranslate nohighlight">\(f_i\)</span> model (e.g., via least squares) and fitting <span class="math notranslate nohighlight">\(N_i\)</span> based on the residuals <span class="math notranslate nohighlight">\(N_i = X_i - f_i(PA_i)\)</span>. As mentioned throughout the user guide, ANMs are the most commonly used types of causal models due to their simplicity and ability to answer counterfactual questions.</p></li>
+<li><p><a class="reference external" href="https://arxiv.org/ftp/arxiv/papers/1205/1205.2599.pdf">Post-nonlinear models</a> (continuous data) of the form <span class="math notranslate nohighlight">\(X_i = g_i(f_i(PA_i) + N_i)\)</span>, where <span class="math notranslate nohighlight">\(g_i\)</span> is assumed to be invertible. These are a generalization of ANMs, allowing more complex relationships between <span class="math notranslate nohighlight">\(f_i\)</span> and <span class="math notranslate nohighlight">\(PA_i\)</span>.</p></li>
+<li><p><a class="reference external" href="https://pubmed.ncbi.nlm.nih.gov/21464504/">Discrete Additive Noise Models</a> (discrete data), which have a similar definition as ANMs but are restricted to discrete values.</p></li>
+<li><p><a class="reference external" href="https://mitpress.mit.edu/9780262037310/elements-of-causal-inference/">Classifier-based Functional Causal Models</a> (categorical data) of the form <span class="math notranslate nohighlight">\(X_i = f_i(PA_i, N_i)\)</span>, which cannot be used for rung 3 queries, since <span class="math notranslate nohighlight">\(f_i\)</span> is typically not invertible here with respect to <span class="math notranslate nohighlight">\(N_i\)</span>, but can be used for algorithms relying only on interventional queries (rung 2). Here, <span class="math notranslate nohighlight">\(f_i\)</span> can be based on any classification model (e.g., from scikit-learn) and <span class="math notranslate nohighlight">\(N_i\)</span> is by definition a uniform distribution on [0, 1] used to sample from the conditional class probabilities.</p></li>
+</ul>
+<p>In all mechanisms, causal sufficiency is assumed, i.e., <span class="math notranslate nohighlight">\(N_i\)</span> is assumed to be independent of <span class="math notranslate nohighlight">\(PA_i\)</span>. More
+details and justification of these types of causal mechanisms can be found in the correspondingly linked papers. Note
+that when using the auto assignment function, DoWhy tries to use invertible FCMs, such as ANMs, due to their flexibility
+in addressing rung 3 queries. For categorical data, make sure to represent them as strings.</p>
+</section>
 </section>
 
 
