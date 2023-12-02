@@ -783,7 +783,9 @@ def identify_frontdoor(
     observed_nodes: List[str],
     dseparation_algo: str = "default",
 ):
-    """Find a valid frontdoor variable if it exists."""
+    """Find a valid frontdoor variable set if it exists.
+
+    """
     frontdoor_var = None
     frontdoor_paths = None
     fdoor_graph = None
