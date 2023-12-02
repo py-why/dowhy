@@ -367,6 +367,38 @@ class TestCausalModel(object):
         assert "Unobserved Confounders" not in all_nodes
 
     @mark.parametrize(
+        ["beta", "num_effect_modifiers", "num_samples"],
+        [
+            (10, 0, 100),
+            (10, 1, 100),
+        ],
+    )
+    def test_cate_estimates_regression(self, beta, num_effect_modifiers, num_samples):
+        data = dowhy.datasets.linear_dataset(
+            beta=beta,
+            num_common_causes=2,
+            num_samples=num_samples,
+            num_treatments=1,
+            treatment_is_binary=True,
+            num_effect_modifiers=num_effect_modifiers,
+        )
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+            test_significance=None,
+        )
+        identified_estimand = model.identify_effect()
+        linear_estimate = model.estimate_effect(
+            identified_estimand, method_name="backdoor.linear_regression", control_value=0, treatment_value=1
+        )
+        if num_effect_modifiers == 0:
+            assert linear_estimate.conditional_estimates is None
+        else:
+            assert linear_estimate.conditional_estimates is not None
+
+    @mark.parametrize(
         ["num_variables", "num_samples"],
         [
             (5, 5000),
