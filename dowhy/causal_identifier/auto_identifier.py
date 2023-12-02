@@ -271,7 +271,7 @@ def identify_ate_effect(
 
     ### 3. FRONTDOOR IDENTIFICATION
     # Now checking if there is a valid frontdoor variable
-    frontdoor_variables_names = identify_frontdoor(graph, action_nodes, outcome_nodes)
+    frontdoor_variables_names = identify_frontdoor(graph, action_nodes, outcome_nodes, observed_nodes)
     logger.info("Frontdoor variables for treatment and outcome:" + str(frontdoor_variables_names))
     if len(frontdoor_variables_names) > 0:
         frontdoor_estimand_expr = construct_frontdoor_estimand(
@@ -777,18 +777,18 @@ def build_backdoor_estimands_dict(
 
 
 def identify_frontdoor(
-    graph: nx.DiGraph, action_nodes: List[str], outcome_nodes: List[str], dseparation_algo: str = "default"
+    graph: nx.DiGraph,
+    action_nodes: List[str],
+    outcome_nodes: List[str],
+    observed_nodes: List[str],
+    dseparation_algo: str = "default",
 ):
-    """Find a valid frontdoor variable if it exists.
-
-    Currently only supports a single variable frontdoor set.
-    """
+    """Find a valid frontdoor variable if it exists."""
     frontdoor_var = None
     frontdoor_paths = None
     fdoor_graph = None
     if dseparation_algo == "default":
         cond1_graph = do_surgery(graph, action_nodes, remove_incoming_edges=True)
-        bdoor_graph1 = do_surgery(graph, action_nodes, remove_outgoing_edges=True)
     elif dseparation_algo == "naive":
         frontdoor_paths = get_all_directed_paths(graph, action_nodes, outcome_nodes)
     else:
@@ -797,48 +797,50 @@ def identify_frontdoor(
     eligible_variables = (
         get_descendants(graph, action_nodes) - set(outcome_nodes) - set(get_descendants(graph, outcome_nodes))
     )
-    # For simplicity, assuming a one-variable frontdoor set
-    for candidate_var in eligible_variables:
-        # Cond 1: All directed paths intercepted by candidate_var
-        cond1 = check_valid_frontdoor_set(
-            graph,
-            action_nodes,
-            outcome_nodes,
-            parse_state(candidate_var),
-            frontdoor_paths=frontdoor_paths,
-            new_graph=cond1_graph,
-            dseparation_algo=dseparation_algo,
-        )
-        logger.debug("Candidate frontdoor set: {0}, is_dseparated: {1}".format(candidate_var, cond1))
-        if not cond1:
-            continue
-        # Cond 2: No confounding between treatment and candidate var
-        cond2 = check_valid_backdoor_set(
-            graph,
-            action_nodes,
-            parse_state(candidate_var),
-            set(),
-            backdoor_paths=None,
-            new_graph=bdoor_graph1,
-            dseparation_algo=dseparation_algo,
-        )
-        if not cond2:
-            continue
-        # Cond 3: treatment blocks all confounding between candidate_var and outcome
-        bdoor_graph2 = do_surgery(graph, candidate_var, remove_outgoing_edges=True)
-        cond3 = check_valid_backdoor_set(
-            graph,
-            parse_state(candidate_var),
-            outcome_nodes,
-            action_nodes,
-            backdoor_paths=None,
-            new_graph=bdoor_graph2,
-            dseparation_algo=dseparation_algo,
-        )
-        is_valid_frontdoor = cond1 and cond2 and cond3
-        if is_valid_frontdoor:
-            frontdoor_var = candidate_var
-            break
+    eligible_variables = eligible_variables.intersection(set(observed_nodes))
+    set_sizes = range(1, len(eligible_variables) + 1, 1)
+    for size_candidate_set in set_sizes:
+        for candidate_set in itertools.combinations(eligible_variables, size_candidate_set):
+            candidate_set = list(candidate_set)
+            # Cond 1: All directed paths intercepted by candidate_var
+            cond1 = check_valid_frontdoor_set(
+                graph,
+                action_nodes,
+                outcome_nodes,
+                candidate_set,
+                frontdoor_paths=frontdoor_paths,
+                new_graph=cond1_graph,
+                dseparation_algo=dseparation_algo,
+            )
+            logger.debug("Candidate frontdoor set: {0}, Cond1: is_dseparated: {1}".format(candidate_set, cond1))
+            if not cond1:
+                continue
+            # Cond 2: No confounding between treatment and candidate var
+            cond2 = check_valid_backdoor_set(
+                graph,
+                action_nodes,
+                candidate_set,
+                set(),
+                backdoor_paths=None,
+                dseparation_algo=dseparation_algo,
+            )["is_dseparated"]
+            if not cond2:
+                continue
+            # Cond 3: treatment blocks all confounding between candidate_var and outcome
+            bdoor_graph2 = do_surgery(graph, candidate_set, remove_outgoing_edges=True)
+            cond3 = check_valid_backdoor_set(
+                graph,
+                candidate_set,
+                outcome_nodes,
+                action_nodes,
+                backdoor_paths=None,
+                new_graph=bdoor_graph2,
+                dseparation_algo=dseparation_algo,
+            )["is_dseparated"]
+            is_valid_frontdoor = cond1 and cond2 and cond3
+            if is_valid_frontdoor:
+                frontdoor_var = candidate_set
+                break
     return parse_state(frontdoor_var)
 
 

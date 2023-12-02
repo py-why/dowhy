@@ -85,7 +85,7 @@ class CausalGraph:
                     import pydot
 
                     P_list = pydot.graph_from_dot_data(graph)
-                    self._graph = nx.drawing.nx_pydot.from_pydot(P_list[0])
+                    self._graph = nx.DiGraph(nx.drawing.nx_pydot.from_pydot(P_list[0]))
                 except Exception as e:
                     self.logger.error("Error: Pydot cannot be loaded. " + str(e))
                     raise e

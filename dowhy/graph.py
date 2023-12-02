@@ -94,6 +94,7 @@ def check_valid_backdoor_set(
         if new_graph is None:
             # Assume that nodes1 is the treatment
             new_graph = do_surgery(graph, nodes1, remove_outgoing_edges=True)
+
         dseparated = nx.algorithms.d_separated(new_graph, set(nodes1), set(nodes2), set(nodes3))
     elif dseparation_algo == "naive":
         # ignores new_graph parameter, always uses self._graph
@@ -417,7 +418,7 @@ def build_graph_from_str(graph_str: str) -> nx.DiGraph:
                 import pydot
 
                 P_list = pydot.graph_from_dot_data(graph_str)
-                return nx.drawing.nx_pydot.from_pydot(P_list[0])
+                return nx.DiGraph(nx.drawing.nx_pydot.from_pydot(P_list[0]))
             except Exception as e:
                 _logger.error("Error: Pydot cannot be loaded. " + str(e))
                 raise e
