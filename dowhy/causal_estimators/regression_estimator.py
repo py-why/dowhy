@@ -118,7 +118,7 @@ class RegressionEstimator(CausalEstimator):
         self._treatment_value = treatment_value
         self._control_value = control_value
         if need_conditional_estimates is None:
-            need_conditional_estimates = self.need_conditional_estimates 
+            need_conditional_estimates = self.need_conditional_estimates
         # TODO make treatment_value and control value also as local parameters
         # All treatments are set to the same constant value
         effect_estimate = self._do(data, treatment_value) - self._do(data, control_value)
