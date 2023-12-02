@@ -245,7 +245,7 @@ class CausalModel:
     ):
         """Estimate the identified causal effect.
 
-        Currently requires an explicit method name to be specified. Method names follow the convention of identification method followed by the specific estimation method: "[backdoor/iv/frontdoor].estimation_method_name". For a list of supported methods, check out the :doc:`User Guide <user_guide/causal_tasks/estimating_causal_effects/index>`_. Here are some examples.
+        Currently requires an explicit method name to be specified. Method names follow the convention of identification method followed by the specific estimation method: "[backdoor/iv/frontdoor].estimation_method_name". For a list of supported methods, check out the :doc:`User Guide </user_guide/causal_tasks/estimating_causal_effects/index>`. Here are some examples.
 
             * Propensity Score Matching: "backdoor.propensity_score_matching"
             * Propensity Score Stratification: "backdoor.propensity_score_stratification"
@@ -256,7 +256,7 @@ class CausalModel:
             * Regression Discontinuity: "iv.regression_discontinuity"
             * Two Stage Regression: "frontdoor.two_stage_regression"
 
-        In addition, you can directly call any of the EconML estimation methods. The convention is "[backdoor/iv].econml.path-to-estimator-class". For example, for the double machine learning estimator ("DML" class) that is located inside "dml" module of EconML, you can use the method name, "backdoor.econml.dml.DML". See :doc:`this demo notebook <example_notebooks/dowhy-conditional-treatment-effects>`_.
+        In addition, you can directly call any of the EconML estimation methods. The convention is "[backdoor/iv].econml.path-to-estimator-class". For example, for the double machine learning estimator ("DML" class) that is located inside "dml" module of EconML, you can use the method name, "backdoor.econml.dml.DML". See :doc:`this demo notebook </example_notebooks/dowhy-conditional-treatment-effects>`.
 
 
         :param identified_estimand: a probability expression
