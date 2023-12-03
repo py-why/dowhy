@@ -42,7 +42,8 @@ to answer causal questions.
 To introduce this data-generating process, we use an SCM that’s built on top of our causal graph:
 
 >>> from dowhy import gcm
->>> causal_model = gcm.StructuralCausalModel(causal_graph)
+>>> import networkx as nx
+>>> causal_model = gcm.StructuralCausalModel(nx.DiGraph([("X", "Y"), ("Y", "Z")]))
 
 At this point we would normally load our dataset. For this introduction, we generate some synthetic data instead. The API takes data in form of Pandas DataFrames:
 
@@ -99,13 +100,24 @@ The causal model is now ready to be used for :doc:`../causal_tasks/index`.
 Evaluating a fitted SCM
 -----------------------
 
-For evaluating the fitted model, see :doc:`modeling_gcm/model_evaluation`.
+For evaluating the fitted model, see :doc:`model_evaluation`.
 
-Other related GCM topics
-------------------------
+Related example notebooks
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-- :doc:`A basic example <../../example_notebooks/gcm_basic_example>`
-- `A blog post illustrating the usage of DoWhy's GCM features <https://aws.amazon.com/blogs/opensource/root-cause-analysis-with-dowhy-an-open-source-python-library-for-causal-machine-learning/>`_
+- :doc:`../../example_notebooks/gcm_basic_example`
+- :doc:`../../example_notebooks/gcm_draw_samples`
+- :doc:`../../example_notebooks/gcm_rca_microservice_architecture`
+- :doc:`../../example_notebooks/gcm_online_shop`
+- :doc:`../../example_notebooks/gcm_401k_analysis`
+- :doc:`../../example_notebooks/gcm_counterfactual_medical_dry_eyes`
+- :doc:`../../example_notebooks/gcm_supply_chain_dist_change`
+- :doc:`../../example_notebooks/gcm_icc`
+
+
+Other topics
+------------
+
 
 .. toctree::
     :maxdepth: 1

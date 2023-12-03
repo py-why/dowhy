@@ -111,7 +111,7 @@ the chain structure example X→Y→Z again:
     For more insights toward the quality of the fitted graphical causal model, consider using the evaluate_causal_model function after fitting the causal mechanisms.
 
 In this scenario, an empirical distribution is assigned to the root node X, while additive noise models are used for
-nodes Y and Z. In both of these cases, a linear regression model demonstrated the best performance in terms
+nodes Y and Z (see :doc:`graphical_causal_model_types` for more details about the causal mechanism types). In both of these cases, a linear regression model demonstrated the best performance in terms
 of minimizing the mean squared error. A list of evaluated models and their performance is also available. Since we used
 the default parameter for the auto assignment, only a small model zoo is evaluated. However, we can also adjust the
 assigment quality to extend it to more models.

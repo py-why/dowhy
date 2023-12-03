@@ -23,9 +23,7 @@ Next, we'll model cause-effect relationships as a probabilistic causal model and
 >>> from dowhy import gcm
 
 >>> causal_model = gcm.ProbabilisticCausalModel(nx.DiGraph([('X', 'Y'), ('Y', 'Z')])) # X -> Y -> Z
->>> causal_model.set_causal_mechanism('X', gcm.EmpiricalDistribution())
->>> causal_model.set_causal_mechanism('Y', gcm.AdditiveNoiseModel(gcm.ml.create_linear_regressor()))
->>> causal_model.set_causal_mechanism('Z', gcm.AdditiveNoiseModel(gcm.ml.create_linear_regressor()))
+>>> gcm.auto.assign_causal_mechanisms(causal_model, training_data)
 
 >>> gcm.fit(causal_model, training_data)
 
@@ -55,3 +53,10 @@ shift interventions where we shift the random variable X by some value:
     2  1.340949  1.910316   5.882468
     3  1.837919  4.360685  12.565738
     4  3.791410  8.361918  25.477725
+
+Related example notebooks
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- :doc:`../../../example_notebooks/gcm_basic_example`
+- :doc:`../../../example_notebooks/gcm_401k_analysis`
+- :doc:`../../../example_notebooks/gcm_rca_microservice_architecture`

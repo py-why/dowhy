@@ -283,7 +283,7 @@
  </li>
  <li class="toctree-l1">
   <a class="reference internal" href="gcm_online_shop.html">
-   Causal attribution and root-cause analysis of an online shop
+   Causal Attributions and Root-Cause Analysis in an Online Shop
   </a>
  </li>
  <li class="toctree-l1">
@@ -791,7 +791,7 @@ div.rendered_html tbody tr:hover {
 <h1>Finding Root Causes of Changes in a Supply Chain<a class="headerlink" href="#Finding-Root-Causes-of-Changes-in-a-Supply-Chain" title="Permalink to this heading"></a></h1>
 <p>In a supply chain, the number of units of each product in the inventory that is available for shipment is crucial to fulfill customers’ demand faster. For this reason, retailers continuously buy products anticipating customers’ demand in the future.</p>
 <p>Suppose that each week a retailer submits purchase orders (POs) to vendors taking into account future demands for products and capacity constraints to consider for demands. The vendors will then confirm whether they can fulfill some or all of the retailer’s purchase orders. Once confirmed by the vendors and agreed by the retailer, products are then sent to the retailer. All of the confirmed POs, however, may not arrive at once.</p>
-<p><img alt="eabaa2c5a567410b8bfa9fef21a416e3" class="no-scaled-link" src="../_images/supply-chain.png" style="width: 800px;" /></p>
+<p><img alt="509998fb2c4240f48709f1e1c191d421" class="no-scaled-link" src="../_images/supply-chain.png" style="width: 800px;" /></p>
 <section id="Week-over-week-changes">
 <h2>Week-over-week changes<a class="headerlink" href="#Week-over-week-changes" title="Permalink to this heading"></a></h2>
 <p>For this case study, we consider synthetic data inspired from a real-world use case in supply chain. Let us look at data over two weeks, <em>w1</em> and <em>w2</em> in particular.</p>
@@ -1019,8 +1019,8 @@ important factors. For a rather systematic answer, we turn to attribution analys
 </section>
 <section id="Causal-Attribution-Analysis">
 <h3>Causal Attribution Analysis<a class="headerlink" href="#Causal-Attribution-Analysis" title="Permalink to this heading"></a></h3>
-<p>We consider the distribution-change-attribution method based on graphical causal models described in <a class="reference external" href="https://arxiv.org/abs/2102.13384">Budhathoki et al., 2021</a>, which is also implmented in <em>Causality</em>. In summary, given the underlying causal graph of variables, the attribution method attributes the change in the marginal distribution of a target variable (or its summary, such as its mean) to changes in data-generating processes (also called “causal mechanisms”) of variables upstream in the
-causal graph. A causal mechanism of a variable is the conditional distribution of the variable given its <em>direct causes</em>. We can also think of a causal mechanism as an algorithm (or a compute program) in the system that takes the values of direct causes as input and produces the value of the effect as an output. To use the attribution method, we first require the causal graph of the variables, namely <em>demand</em>, <em>constraint</em>, <em>submitted</em>, <em>confirmed</em> and <em>received</em>.</p>
+<p>We consider the distribution-change-attribution method based on graphical causal models described in <a class="reference external" href="https://arxiv.org/abs/2102.13384">Budhathoki et al., 2021</a>, which is also implmented in DoWhy. In summary, given the underlying causal graph of variables, the attribution method attributes the change in the marginal distribution of a target variable (or its summary, such as its mean) to changes in data-generating processes (also called “causal mechanisms”) of variables upstream in the causal
+graph. A causal mechanism of a variable is the conditional distribution of the variable given its <em>direct causes</em>. We can also think of a causal mechanism as an algorithm (or a compute program) in the system that takes the values of direct causes as input and produces the value of the effect as an output. To use the attribution method, we first require the causal graph of the variables, namely <em>demand</em>, <em>constraint</em>, <em>submitted</em>, <em>confirmed</em> and <em>received</em>.</p>
 <section id="Graphical-causal-model">
 <h4>Graphical causal model<a class="headerlink" href="#Graphical-causal-model" title="Permalink to this heading"></a></h4>
 <p>We build the causal graph using domain knowledge. Based on the description of supply chain in the introduction, it is plausible to assume the following causal graph.</p>
@@ -1177,7 +1177,7 @@ For more insights toward the quality of the fitted graphical causal model, consi
 <section id="Attributing-change">
 <h4>Attributing change<a class="headerlink" href="#Attributing-change" title="Permalink to this heading"></a></h4>
 <p>We can now attribute the week-over-week change in the average value of <em>received</em> quantity:</p>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
@@ -1188,10 +1188,15 @@ For more insights toward the quality of the fitted graphical causal model, consi
                                         <span class="s1">&#39;received&#39;</span><span class="p">,</span>
                                         <span class="n">num_samples</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>
                                         <span class="n">difference_estimation_func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x2</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x1</span><span class="p">))</span>
-
-<span class="n">plt</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">contributions</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">contributions</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Contribution&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dowhy.utils</span> <span class="kn">import</span> <span class="n">bar_plot</span>
+<span class="n">bar_plot</span><span class="p">(</span><span class="n">contributions</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s1">&#39;Contribution&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1199,12 +1204,12 @@ For more insights toward the quality of the fitted graphical causal model, consi
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_gcm_supply_chain_dist_change_25_0.png" src="../_images/example_notebooks_gcm_supply_chain_dist_change_25_0.png" />
+<img alt="../_images/example_notebooks_gcm_supply_chain_dist_change_26_0.png" src="../_images/example_notebooks_gcm_supply_chain_dist_change_26_0.png" />
 </div>
 </div>
 <p>These point estimates suggest that changes in the causal mechanisms of <em>demand</em> and <em>confirmed</em> are the main drivers of the change in the average value of <em>received</em> between two weeks. It would be risky, however, to draw conclusions from these point estimates. Therefore, we compute the bootstrap confidence interval for each attribution.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">median_contribs</span><span class="p">,</span> <span class="n">uncertainty_contribs</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">confidence_intervals</span><span class="p">(</span>
@@ -1216,13 +1221,25 @@ For more insights toward the quality of the fitted graphical causal model, consi
                            <span class="n">num_samples</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>
                            <span class="n">difference_estimation_func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span> <span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x2</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x1</span><span class="p">)),</span>
     <span class="n">confidence_level</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span>
-    <span class="n">num_bootstrap_resamples</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-
-<span class="n">yerr_plus</span> <span class="o">=</span> <span class="p">[</span><span class="n">uncertainty_contribs</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">median_contribs</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">median_contribs</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
-<span class="n">yerr_minus</span> <span class="o">=</span> <span class="p">[</span><span class="n">median_contribs</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">-</span> <span class="n">uncertainty_contribs</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">median_contribs</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">median_contribs</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">median_contribs</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">yerr</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">yerr_minus</span><span class="p">,</span> <span class="n">yerr_plus</span><span class="p">]),</span> <span class="n">ecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Contribution&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="n">num_bootstrap_resamples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Evaluate set function: 32it [00:00, 245.73it/s]
+Evaluate set function: 32it [00:00, 347.28it/s]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bar_plot</span><span class="p">(</span><span class="n">median_contribs</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s1">&#39;Contribution&#39;</span><span class="p">,</span> <span class="n">uncertainties</span><span class="o">=</span><span class="n">uncertainty_contribs</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1230,7 +1247,7 @@ For more insights toward the quality of the fitted graphical causal model, consi
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_gcm_supply_chain_dist_change_27_0.png" src="../_images/example_notebooks_gcm_supply_chain_dist_change_27_0.png" />
+<img alt="../_images/example_notebooks_gcm_supply_chain_dist_change_29_0.png" src="../_images/example_notebooks_gcm_supply_chain_dist_change_29_0.png" />
 </div>
 </div>
 <p>Whereas the <span class="math notranslate nohighlight">\(95\%\)</span> confidence intervals for the contributions of <em>demand</em> and <em>confirmed</em> are above <span class="math notranslate nohighlight">\(0\)</span>, those of other nodes are close to <span class="math notranslate nohighlight">\(0\)</span>. Overall, these results suggest that changes in the causal mechanisms of <em>demand</em> and <em>confirmed</em> are the drivers for the observed change in the <em>received</em> quantity week-over-week. Causal mechanisms can change in a real-world system, for instance, after deploying a new subsystem with a different algorithm. In fact, these results are
@@ -1244,7 +1261,7 @@ consistent with the <strong>ground truth</strong> (see Appendix).</p>
 book</a>. Using linear ANMs, we generate data (or draw i.i.d. samples) from the distribution of each variable. We use the Gamma distribution for noise terms mainly to mimic real-world setting, where the distribution of variables often show heavy-tail behaviour. Between two weeks, we only change the data-generating process (causal mechanism) of <em>demand</em> and <em>confirmed</em> respectively by changing the
 value of demand mean from <span class="math notranslate nohighlight">\(2\)</span> to <span class="math notranslate nohighlight">\(4\)</span>, and linear coefficient <span class="math notranslate nohighlight">\(\alpha\)</span> from <span class="math notranslate nohighlight">\(1\)</span> to <span class="math notranslate nohighlight">\(2\)</span>.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>

@@ -15,7 +15,7 @@
         gtag('config', 'G-B139P18WHM');
     </script>
     
-    <title>Explaining Observed Effects and Root-Cause Analysis &#8212; DoWhy  documentation</title>
+    <title>Root-Cause Analysis and Explanation &#8212; DoWhy  documentation</title>
 <script>
   document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
   document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
@@ -54,7 +54,7 @@
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="next" title="Anomaly Attribution" href="anomaly_attribution.html" />
-    <link rel="prev" title="Direct Effect: Quantifying Arrow Strength" href="../estimating_causal_effects/direct_indirect_effects/quantify_arrow_strength.html" />
+    <link rel="prev" title="Quantifying Intrinsic Causal Influence" href="../quantify_causal_influence/icc.html" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="docsearch:language" content="en">
   </head>
@@ -392,33 +392,38 @@
        Estimating average causal effect using GCM
       </a>
      </li>
-     <li class="toctree-l3 has-children">
-      <a class="reference internal" href="../estimating_causal_effects/direct_indirect_effects/index.html">
-       Estimating direct and indirect effects
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../quantify_causal_influence/index.html">
+     Quantify Causal Influence
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/>
+    <label for="toctree-checkbox-8">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../quantify_causal_influence/mediation_analysis.html">
+       Mediation Analysis: Estimating natural direct and indirect effects
       </a>
-      <input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/>
-      <label for="toctree-checkbox-8">
-       <i class="fas fa-chevron-down">
-       </i>
-      </label>
-      <ul>
-       <li class="toctree-l4">
-        <a class="reference internal" href="../estimating_causal_effects/direct_indirect_effects/mediation_analysis.html">
-         Estimating natural direct and indirect effects
-        </a>
-       </li>
-       <li class="toctree-l4">
-        <a class="reference internal" href="../estimating_causal_effects/direct_indirect_effects/quantify_arrow_strength.html">
-         Direct Effect: Quantifying Arrow Strength
-        </a>
-       </li>
-      </ul>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../quantify_causal_influence/quantify_arrow_strength.html">
+       Direct Effect: Quantifying Arrow Strength
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../quantify_causal_influence/icc.html">
+       Quantifying Intrinsic Causal Influence
+      </a>
      </li>
     </ul>
    </li>
    <li class="toctree-l2 current active has-children">
     <a class="current reference internal" href="#">
-     Explaining Observed Effects and Root-Cause Analysis
+     Root-Cause Analysis and Explanation
     </a>
     <input checked="" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" type="checkbox"/>
     <label for="toctree-checkbox-9">
@@ -434,16 +439,6 @@
      <li class="toctree-l3">
       <a class="reference internal" href="distribution_change.html">
        Attributing Distributional Changes
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="icc.html">
-       Quantifying Intrinsic Causal Influence
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="unit_change.html">
-       Unit Change Attribution
       </a>
      </li>
      <li class="toctree-l3">
@@ -596,14 +591,29 @@
               
               <article class="bd-article" role="main">
                 
-  <section id="explaining-observed-effects-and-root-cause-analysis">
-<h1>Explaining Observed Effects and Root-Cause Analysis<a class="headerlink" href="#explaining-observed-effects-and-root-cause-analysis" title="Permalink to this heading"></a></h1>
+  <section id="root-cause-analysis-and-explanation">
+<h1>Root-Cause Analysis and Explanation<a class="headerlink" href="#root-cause-analysis-and-explanation" title="Permalink to this heading"></a></h1>
+<p>DoWhy’s graphical causal model framework offers powerful tools for root cause analysis and explanation of observed
+effects by making use of the decomposition of nodes in a causal graph into single causal mechanisms.</p>
+<p><strong>Attribute Anomalies:</strong> Given anomalous observations (i.e., outliers), we can attribute them to the nodes that have
+caused them. The idea here is to ask the counterfactual question “If node x had behaved differently, would we
+still have observed the anomaly?”. The change in our target node quantifies how much a node contributes to the
+observed anomaly. To ensure a fair attribution, this needs to be estimated systematically for different combinations
+of changes in nodes.</p>
+<p><strong>Distribution Change Attribution:</strong> Given two data sets where the distribution has changed, we attribute the changes to
+the nodes in the graph that have caused the changes. Here, we first identify the data generating mechanisms of nodes that
+have changed and then attribute changes in distribution (e.g., with respect to a change in the variance or in KL divergence)
+to these mechanisms.</p>
+<p><strong>Feature Relevance:</strong> Here, we address the question of how relevant a feature is for a model. Popular packages like
+SHAP address this question by defining a certain set function and estimating the Shapley value for each input feature.
+In our case, we do something similar, but also incorporate the probabilistic nature of a causal mechanism. That is,
+we also incorporate the noise that influences a variable. By this, we can compute the relevance of inputs, but can also
+incorporate the unexplainable part represented by the noise. Furthermore, the Shapley value estimator in DoWhy offers a
+flexible way to define a customized set function.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="anomaly_attribution.html">Anomaly Attribution</a></li>
 <li class="toctree-l1"><a class="reference internal" href="distribution_change.html">Attributing Distributional Changes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="icc.html">Quantifying Intrinsic Causal Influence</a></li>
-<li class="toctree-l1"><a class="reference internal" href="unit_change.html">Unit Change Attribution</a></li>
 <li class="toctree-l1"><a class="reference internal" href="feature_relevance.html">Feature Relevance</a></li>
 </ul>
 </div>
@@ -617,11 +627,11 @@
               <footer class="bd-footer-article">
                   <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-  <a class='left-prev' id="prev-link" href="../estimating_causal_effects/direct_indirect_effects/quantify_arrow_strength.html" title="previous page">
+  <a class='left-prev' id="prev-link" href="../quantify_causal_influence/icc.html" title="previous page">
       <i class="fas fa-angle-left"></i>
       <div class="prev-next-info">
           <p class="prev-next-subtitle">previous</p>
-          <p class="prev-next-title">Direct Effect: Quantifying Arrow Strength</p>
+          <p class="prev-next-title">Quantifying Intrinsic Causal Influence</p>
       </div>
   </a>
   <a class='right-next' id="next-link" href="anomaly_attribution.html" title="next page">

@@ -394,33 +394,38 @@
        Estimating average causal effect using GCM
       </a>
      </li>
-     <li class="toctree-l3 has-children">
-      <a class="reference internal" href="../causal_tasks/estimating_causal_effects/direct_indirect_effects/index.html">
-       Estimating direct and indirect effects
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../causal_tasks/quantify_causal_influence/index.html">
+     Quantify Causal Influence
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/>
+    <label for="toctree-checkbox-8">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../causal_tasks/quantify_causal_influence/mediation_analysis.html">
+       Mediation Analysis: Estimating natural direct and indirect effects
       </a>
-      <input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/>
-      <label for="toctree-checkbox-8">
-       <i class="fas fa-chevron-down">
-       </i>
-      </label>
-      <ul>
-       <li class="toctree-l4">
-        <a class="reference internal" href="../causal_tasks/estimating_causal_effects/direct_indirect_effects/mediation_analysis.html">
-         Estimating natural direct and indirect effects
-        </a>
-       </li>
-       <li class="toctree-l4">
-        <a class="reference internal" href="../causal_tasks/estimating_causal_effects/direct_indirect_effects/quantify_arrow_strength.html">
-         Direct Effect: Quantifying Arrow Strength
-        </a>
-       </li>
-      </ul>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../causal_tasks/quantify_causal_influence/quantify_arrow_strength.html">
+       Direct Effect: Quantifying Arrow Strength
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../causal_tasks/quantify_causal_influence/icc.html">
+       Quantifying Intrinsic Causal Influence
+      </a>
      </li>
     </ul>
    </li>
    <li class="toctree-l2 has-children">
     <a class="reference internal" href="../causal_tasks/root_causing_and_explaining/index.html">
-     Explaining Observed Effects and Root-Cause Analysis
+     Root-Cause Analysis and Explanation
     </a>
     <input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" type="checkbox"/>
     <label for="toctree-checkbox-9">
@@ -436,16 +441,6 @@
      <li class="toctree-l3">
       <a class="reference internal" href="../causal_tasks/root_causing_and_explaining/distribution_change.html">
        Attributing Distributional Changes
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../causal_tasks/root_causing_and_explaining/icc.html">
-       Quantifying Intrinsic Causal Influence
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../causal_tasks/root_causing_and_explaining/unit_change.html">
-       Unit Change Attribution
       </a>
      </li>
      <li class="toctree-l3">
@@ -593,10 +588,17 @@
   <a class="reference internal nav-link" href="#evaluating-a-fitted-scm">
    Evaluating a fitted SCM
   </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#related-example-notebooks">
+     Related example notebooks
+    </a>
+   </li>
+  </ul>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#other-related-gcm-topics">
-   Other related GCM topics
+  <a class="reference internal nav-link" href="#other-topics">
+   Other topics
   </a>
  </li>
 </ul>
@@ -650,7 +652,8 @@ nodes. We will dive much deeper into the details of causal mechanisms and their 
 to answer causal questions.</p>
 <p>To introduce this data-generating process, we use an SCM that’s built on top of our causal graph:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">gcm</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">StructuralCausalModel</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">StructuralCausalModel</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">([(</span><span class="s2">&quot;X&quot;</span><span class="p">,</span> <span class="s2">&quot;Y&quot;</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;Y&quot;</span><span class="p">,</span> <span class="s2">&quot;Z&quot;</span><span class="p">)]))</span>
 </pre></div>
 </div>
 <p>At this point we would normally load our dataset. For this introduction, we generate some synthetic data instead. The API takes data in form of Pandas DataFrames:</p>
@@ -703,14 +706,23 @@ relationships again, even though we didn’t know them before.</p>
 </section>
 <section id="evaluating-a-fitted-scm">
 <h2>Evaluating a fitted SCM<a class="headerlink" href="#evaluating-a-fitted-scm" title="Permalink to this heading"></a></h2>
-<p>For evaluating the fitted model, see <span class="xref std std-doc">modeling_gcm/model_evaluation</span>.</p>
-</section>
-<section id="other-related-gcm-topics">
-<h2>Other related GCM topics<a class="headerlink" href="#other-related-gcm-topics" title="Permalink to this heading"></a></h2>
+<p>For evaluating the fitted model, see <a class="reference internal" href="model_evaluation.html"><span class="doc">Evaluate a GCM</span></a>.</p>
+<section id="related-example-notebooks">
+<h3>Related example notebooks<a class="headerlink" href="#related-example-notebooks" title="Permalink to this heading"></a></h3>
 <ul class="simple">
-<li><p><a class="reference internal" href="../../example_notebooks/gcm_basic_example.html"><span class="doc">A basic example</span></a></p></li>
-<li><p><a class="reference external" href="https://aws.amazon.com/blogs/opensource/root-cause-analysis-with-dowhy-an-open-source-python-library-for-causal-machine-learning/">A blog post illustrating the usage of DoWhy’s GCM features</a></p></li>
+<li><p><a class="reference internal" href="../../example_notebooks/gcm_basic_example.html"><span class="doc">Basic Example for Graphical Causal Models</span></a></p></li>
+<li><p><a class="reference internal" href="../../example_notebooks/gcm_draw_samples.html"><span class="doc">Basic Example for generating samples from a GCM</span></a></p></li>
+<li><p><a class="reference internal" href="../../example_notebooks/gcm_rca_microservice_architecture.html"><span class="doc">Finding the Root Cause of Elevated Latencies in a Microservice Architecture</span></a></p></li>
+<li><p><a class="reference internal" href="../../example_notebooks/gcm_online_shop.html"><span class="doc">Causal Attributions and Root-Cause Analysis in an Online Shop</span></a></p></li>
+<li><p><a class="reference internal" href="../../example_notebooks/gcm_401k_analysis.html"><span class="doc">Impact of 401(k) eligibility on net financial assets</span></a></p></li>
+<li><p><a class="reference internal" href="../../example_notebooks/gcm_counterfactual_medical_dry_eyes.html"><span class="doc">Counterfactual Analysis in a Medical Case</span></a></p></li>
+<li><p><a class="reference internal" href="../../example_notebooks/gcm_supply_chain_dist_change.html"><span class="doc">Finding Root Causes of Changes in a Supply Chain</span></a></p></li>
+<li><p><a class="reference internal" href="../../example_notebooks/gcm_icc.html"><span class="doc">Estimating intrinsic causal influences in real-world examples</span></a></p></li>
 </ul>
+</section>
+</section>
+<section id="other-topics">
+<h2>Other topics<a class="headerlink" href="#other-topics" title="Permalink to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="graphical_causal_model_types.html">Types of graphical causal models</a></li>
