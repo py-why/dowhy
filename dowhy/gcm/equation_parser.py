@@ -63,6 +63,13 @@ def create_causal_model_from_equations(node_equations: str) -> StructuralCausalM
         >>> "Node -> <node_name1>, <node_name2>, ..."
     In case we don't know the causal relationship model between nodes then we can
     use the above format to just define the edges between the nodes.
+
+    Example:
+        >>> scm = \"""
+        X = empirical()
+        Z = norm(loc=0, scale=1)
+        Y = 12 * X + log(Z) + norm(loc=0, scale=1)
+        \"""
     :param node_equations: A string containing equations defining the relationships between nodes.
                             Each equation should be separated by a newline.
 
@@ -78,7 +85,6 @@ def create_causal_model_from_equations(node_equations: str) -> StructuralCausalM
             parsed_args = {}
             node_name, expression = _extract_equation_components(equation)
             _check_node_redundancy(causal_nodes_info, node_name)
-            # func
             causal_nodes_info[node_name] = {}
             root_node_match = re.match(_NOISE_MODEL_PATTERN, expression)
             unknown_model_match = re.match(_UNKNOWN_MODEL_PATTERN, expression)
