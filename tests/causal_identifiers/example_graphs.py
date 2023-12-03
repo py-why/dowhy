@@ -387,3 +387,39 @@ TEST_GRAPH_SOLUTIONS = {
         direct_maximal_adjustment_sets=[{"W1", "M", "W2"}],
     ),
 }
+
+
+TEST_FRONTDOOR_GRAPH_SOLUTIONS = {
+    "valid_singleton": dict(
+        graph_str="digraph {X; Y; Z; M1; X->M1; Z->X; Z->Y; M1->Y;}",
+        observed_variables=["X", "Y", "M1"],
+        valid_frontdoor_sets=[{"M1"}],
+        invalid_frontdoor_sets=[{"Z"}],
+    ),
+    "valid_doubleton": dict(
+        graph_str="digraph {X; Y; Z; M1; M2; X->M1; X->M2; Z->X; Z->Y; M1->Y; M2->Y}",
+        observed_variables=["X", "Y", "M1", "M2"],
+        valid_frontdoor_sets=[
+            {"M1", "M2"},
+        ],
+        invalid_frontdoor_sets=[{"Z"}, {"M1"}, {"M2"}],
+    ),
+    "no_frontdoor": dict(
+        graph_str="digraph{E;X;R;M;Y; E->X;E->R;X->M;R->M;M->Y}",
+        observed_variables=["X", "R", "M", "Y"],
+        valid_frontdoor_sets=[],
+        invalid_frontdoor_sets=[{"M"}, {"M", "E"}, {"M", "R"}],
+    ),
+    "no_frontdoor_simple": dict(
+        graph_str="digraph{X;Y;D;B;X->B;D->B;B->Y;D->Y}",
+        observed_variables=["X", "B", "Y"],
+        valid_frontdoor_sets=[],
+        invalid_frontdoor_sets=[{"B"}, {"D"}],
+    ),
+    "no_frontdoor_in_obs": dict(
+        graph_str="digraph {X; Y; Z; M1; M2; X->M1; X->M2; Z->X; Z->Y; M1->Y; M2->Y}",
+        observed_variables=["X", "Y", "M1", "Z"],
+        valid_frontdoor_sets=[],
+        invalid_frontdoor_sets=[{"Z"}, {"M1"}, {"M2"}, {"M1", "M2"}],
+    ),
+}
