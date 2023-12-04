@@ -103,7 +103,7 @@ def create_causal_model_from_equations(node_equations: str) -> StructuralCausalM
                 causal_nodes_info[node_name]["unknown"] = True
             else:
                 custom_func, noise_eq = expression.rsplit("+", 1)
-                # Find all node names in the expression string
+                # Find all node names in the expression string.
                 parent_node_candidates = re.findall(_NODE_NAME_PATTERN, custom_func)
                 parent_nodes = _get_sorted_parent_nodes(parent_node_candidates)
                 _add_parent_nodes_to_graph(causal_graph, parent_nodes, node_name)
