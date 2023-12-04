@@ -1531,7 +1531,7 @@ definite conclusion at this stage. Thus assigning rooms different to what a cust
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle 588.6462$</div></div>
+$\displaystyle 588.5651$</div></div>
 </div>
 <p>We now consider the scenario when there were no booking changes and recalculate the expected count.</p>
 <div class="nbinput docutils container">
@@ -1555,7 +1555,7 @@ $\displaystyle 588.6462$</div></div>
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle 573.012$</div></div>
+$\displaystyle 572.9357$</div></div>
 </div>
 <p>In the 2nd case, we take the scenario when there were booking changes(&gt;0) and recalculate the expected count.</p>
 <div class="nbinput docutils container">
@@ -1579,7 +1579,7 @@ $\displaystyle 573.012$</div></div>
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle 665.8283$</div></div>
+$\displaystyle 665.85$</div></div>
 </div>
 <p>There is definitely some change happening when the number of booking changes are non-zero. So it gives us a hint that <em>Booking Changes</em> may be affecting room cancellation.</p>
 <p>But is <em>Booking Changes</em> the only confounding variable? What if there were some unobserved confounders, regarding which we have no information(feature) present in our dataset. Would we still be able to make the same claims as before?</p>
@@ -1665,7 +1665,7 @@ as parameters in the function mentioned below.</p>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/__w/dowhy/dowhy/dowhy/causal_model.py:560: UserWarning: 1 variables are assumed unobserved because they are not in the dataset. Configure the logging level to `logging.WARNING` or higher for additional details.
+/__w/dowhy/dowhy/dowhy/causal_model.py:559: UserWarning: 1 variables are assumed unobserved because they are not in the dataset. Configure the logging level to `logging.WARNING` or higher for additional details.
   warnings.warn(
 </pre></div></div>
 </div>
@@ -1708,17 +1708,17 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
             d
-──────────────────────────(E[is_canceled|required_car_parking_spaces,guests,le
+──────────────────────────(E[is_canceled|booking_changes,lead_time,required_ca
 d[different_room_assigned]
 
 
-ad_time,days_in_waiting_list,hotel,is_repeated_guest,booking_changes,total_of_
+r_parking_spaces,days_in_waiting_list,total_of_special_requests,guests,total_s
 
 
 
-special_requests,total_stay])
+tay,hotel,is_repeated_guest])
 
-Estimand assumption 1, Unconfoundedness: If U→{different_room_assigned} and U→is_canceled then P(is_canceled|different_room_assigned,required_car_parking_spaces,guests,lead_time,days_in_waiting_list,hotel,is_repeated_guest,booking_changes,total_of_special_requests,total_stay,U) = P(is_canceled|different_room_assigned,required_car_parking_spaces,guests,lead_time,days_in_waiting_list,hotel,is_repeated_guest,booking_changes,total_of_special_requests,total_stay)
+Estimand assumption 1, Unconfoundedness: If U→{different_room_assigned} and U→is_canceled then P(is_canceled|different_room_assigned,booking_changes,lead_time,required_car_parking_spaces,days_in_waiting_list,total_of_special_requests,guests,total_stay,hotel,is_repeated_guest,U) = P(is_canceled|different_room_assigned,booking_changes,lead_time,required_car_parking_spaces,days_in_waiting_list,total_of_special_requests,guests,total_stay,hotel,is_repeated_guest)
 
 ### Estimand : 2
 Estimand name: iv
@@ -1760,24 +1760,24 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
             d
-──────────────────────────(E[is_canceled|required_car_parking_spaces,guests,le
+──────────────────────────(E[is_canceled|booking_changes,lead_time,required_ca
 d[different_room_assigned]
 
 
-ad_time,days_in_waiting_list,hotel,is_repeated_guest,booking_changes,total_of_
+r_parking_spaces,days_in_waiting_list,total_of_special_requests,guests,total_s
 
 
 
-special_requests,total_stay])
+tay,hotel,is_repeated_guest])
 
-Estimand assumption 1, Unconfoundedness: If U→{different_room_assigned} and U→is_canceled then P(is_canceled|different_room_assigned,required_car_parking_spaces,guests,lead_time,days_in_waiting_list,hotel,is_repeated_guest,booking_changes,total_of_special_requests,total_stay,U) = P(is_canceled|different_room_assigned,required_car_parking_spaces,guests,lead_time,days_in_waiting_list,hotel,is_repeated_guest,booking_changes,total_of_special_requests,total_stay)
+Estimand assumption 1, Unconfoundedness: If U→{different_room_assigned} and U→is_canceled then P(is_canceled|different_room_assigned,booking_changes,lead_time,required_car_parking_spaces,days_in_waiting_list,total_of_special_requests,guests,total_stay,hotel,is_repeated_guest,U) = P(is_canceled|different_room_assigned,booking_changes,lead_time,required_car_parking_spaces,days_in_waiting_list,total_of_special_requests,guests,total_stay,hotel,is_repeated_guest)
 
 ## Realized estimand
-b: is_canceled~different_room_assigned+required_car_parking_spaces+guests+lead_time+days_in_waiting_list+hotel+is_repeated_guest+booking_changes+total_of_special_requests+total_stay
+b: is_canceled~different_room_assigned+booking_changes+lead_time+required_car_parking_spaces+days_in_waiting_list+total_of_special_requests+guests+total_stay+hotel+is_repeated_guest
 Target units: ate
 
 ## Estimate
-Mean value: -0.2622432798823622
+Mean value: -0.2621386241266901
 
 </pre></div></div>
 </div>
@@ -1823,8 +1823,8 @@ Please also refer to the documentation for alternative solver options:
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Add a random common cause
-Estimated effect:-0.2622432798823622
-New effect:-0.26224327988236223
+Estimated effect:-0.2621386241266901
+New effect:-0.26213862412669015
 p value:1.0
 
 </pre></div></div>
@@ -1849,8 +1849,8 @@ p value:1.0
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:-0.2622432798823622
-New effect:0.05478131359225835
+Estimated effect:-0.2621386241266901
+New effect:0.05582167064046347
 p value:0.0
 
 </pre></div></div>
@@ -1875,9 +1875,9 @@ p value:0.0
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a subset of data
-Estimated effect:-0.2622432798823622
-New effect:-0.2622407527926053
-p value:0.8
+Estimated effect:-0.2621386241266901
+New effect:-0.2619889701983931
+p value:0.9199999999999999
 
 </pre></div></div>
 </div>
