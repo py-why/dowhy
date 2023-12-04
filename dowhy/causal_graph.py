@@ -59,7 +59,7 @@ class CausalGraph:
             self._graph = nx.DiGraph(graph)
         elif isinstance(graph, ProbabilisticCausalModel):
             self._graph = nx.DiGraph(graph.graph)
-        elif re.match(r".*\.dot", graph):
+        elif isinstance(graph, str) and re.match(r".*\.dot", graph):
             # load dot file
             try:
                 import pygraphviz as pgv
@@ -74,9 +74,9 @@ class CausalGraph:
                 except Exception as e:
                     self.logger.error("Error: Pydot cannot be loaded. " + str(e))
                     raise e
-        elif re.match(r".*\.gml", graph):
+        elif isinstance(graph, str) and re.match(r".*\.gml", graph):
             self._graph = nx.DiGraph(nx.read_gml(graph))
-        elif re.match(r".*graph\s*\{.*\}\s*", graph):
+        elif isinstance(graph, str) and re.match(r".*graph\s*\{.*\}\s*", graph):
             try:
                 import pygraphviz as pgv
 
@@ -92,11 +92,11 @@ class CausalGraph:
                 except Exception as e:
                     self.logger.error("Error: Pydot cannot be loaded. " + str(e))
                     raise e
-        elif re.match(".*graph\s*\[.*\]\s*", graph):
+        elif isinstance(graph, str) and re.match(".*graph\s*\[.*\]\s*", graph):
             self._graph = nx.DiGraph(nx.parse_gml(graph))
         else:
             error_msg = (
-                "Please provide graph as a networkx DiGraph, GCM model, or as a string or text file in dot, gml format."
+                    "Incorrect format: Please provide graph as a networkx DiGraph, GCM model, or as a string or text file in dot, gml format."
             )
             self.logger.error(error_msg)
             self.logger.error("Error: Incorrect graph format")

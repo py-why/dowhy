@@ -579,6 +579,15 @@ class TestCausalModel(object):
         assert set(pcm.graph.nodes) == {"X", "Y", "Z"}
         assert set(pcm.graph.edges) == {("X", "Y"), ("Y", "Z")}
 
+    def test_incorrect_graph_format(self):
+        data = pd.DataFrame({"X": [0], "Y": [0], "Z": [0]})
+        with pytest.raises(ValueError, match="Incorrect format:"):
+            model = CausalModel(
+                data=data,
+                treatment="Y",
+                outcome="Z",
+                graph=nx.Graph([("X", "Y"), ("Y", "Z")]),
+            )
 
 if __name__ == "__main__":
     pytest.main([__file__])
