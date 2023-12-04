@@ -218,7 +218,6 @@ class CustomEquationModel(PredictionModel):
     def predict(self, X) -> np.ndarray:
         local_dict = {self.parent_nodes[i]: X[:, i] for i in range(len(self.parent_nodes))}
         return shape_into_2d(eval(self.custom_func, _allowed_callables, local_dict))
-        # return shape_into_2d(ne.evaluate(self.custom_func, local_dict=local_dict, sanitize=True))
 
     def clone(self):
         return CustomEquationModel(self.custom_func, self.parent_nodes)
