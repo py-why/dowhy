@@ -1,0 +1,166 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "b72f7198",
+   "metadata": {},
+   "source": [
+    "# Basic Example for generating samples from a GCM"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "8fe6b612",
+   "metadata": {},
+   "source": [
+    "A graphical causal model (GCM) describes the data generation process of the modeled variables. Therefore, after we fit\n",
+    "a GCM, we can also generate completely new samples from it and, thus, can see it as data generator for synthetic data based on the underlying\n",
+    "models. Generating new samples can generally be done by sorting the nodes in topological\n",
+    "order, randomly sample from root-nodes and then propagate the data through the graph by evaluating the downstream\n",
+    "causal mechanisms with randomly sampled noise. The ``dowhy.gcm`` package provides a simple helper function that does\n",
+    "this automatically and, by this, offers a simple API to draw samples from a GCM.\n",
+    "\n",
+    "Lets take a look at the following example:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "f22337ab",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np, pandas as pd\n",
+    "\n",
+    "X = np.random.normal(loc=0, scale=1, size=1000)\n",
+    "Y = 2 * X + np.random.normal(loc=0, scale=1, size=1000)\n",
+    "Z = 3 * Y + np.random.normal(loc=0, scale=1, size=1000)\n",
+    "data = pd.DataFrame(data=dict(X=X, Y=Y, Z=Z))\n",
+    "data.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "1a0bb234",
+   "metadata": {},
+   "source": [
+    "Similar as in the introduction, we generate data for the simple linear DAG X→Y→Z. Lets define the GCM and fit it to the\n",
+    "data:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "0367caeb",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import networkx as nx\n",
+    "import dowhy.gcm as gcm\n",
+    "\n",
+    "causal_model = gcm.StructuralCausalModel(nx.DiGraph([('X', 'Y'), ('Y', 'Z')]))\n",
+    "gcm.auto.assign_causal_mechanisms(causal_model, data) # Automatically assigns additive noise models to non-root nodes\n",
+    "gcm.fit(causal_model, data)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c779d943",
+   "metadata": {
+    "pycharm": {
+     "name": "#%% md\n"
+    }
+   },
+   "source": [
+    "We now learned the generative models of the variables, based on the defined causal graph and the additive noise model assumption.\n",
+    "To generate new samples from this model, we can now simply call:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "eb63a8e1",
+   "metadata": {
+    "collapsed": false,
+    "jupyter": {
+     "outputs_hidden": false
+    },
+    "pycharm": {
+     "name": "#%%\n"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "generated_data = gcm.draw_samples(causal_model, num_samples=1000)\n",
+    "generated_data.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "96b5e58a",
+   "metadata": {
+    "pycharm": {
+     "name": "#%% md\n"
+    }
+   },
+   "source": [
+    "If our modeling assumptions are correct, the generated data should now resemble the observed data distribution, i.e. the generated samples correspond to the joint distribution we defined for our example data at the beginning. One way to make sure of this is to estimate the KL-divergence between observed and generated distribution. For this, we can make use of the evaluation module:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "557db59e",
+   "metadata": {
+    "collapsed": false,
+    "jupyter": {
+     "outputs_hidden": false
+    },
+    "pycharm": {
+     "name": "#%%\n"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "print(gcm.evaluate_causal_model(causal_model, data, evaluate_causal_mechanisms=False, evaluate_invertibility_assumptions=False))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "9d12f880-685b-4110-b83d-3d9837b3223e",
+   "metadata": {},
+   "source": [
+    "This confirms that the generated distribution is close to the observed one. "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f430827d-fc75-4c23-8d2d-3d98605dd927",
+   "metadata": {},
+   "source": [
+    "> While the evaluation provides us insights toward the causal graph structure as well, we cannot confirm the graph structure, only reject it if we find inconsistencies between the dependencies of the observed structure and what the graph represents. In our case, we do not reject the DAG, but there are other equivalent DAGs that would not be rejected as well. To see this, consider the example above - X→Y→Z and X←Y←Z would generate the same observational distribution (since they encode the same conditionals), but only X→Y→Z would generate the correct interventional distribution (e.g., when intervening on Y)."
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.9.16"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

@@ -1,0 +1,458 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "0bbaacaa",
+   "metadata": {},
+   "source": [
+    "# Sensitivity analysis for non-parametric causal estimators\n",
+    "Sensitivity analysis helps us study how robust an estimated effect is when the assumption of no unobserved confounding is violated. That is, how much bias does our estimate have due to omitting  an (unobserved) confounder? Known as the \n",
+    "*omitted variable bias (OVB)*, it gives us a measure of how the inclusion of an omitted common cause (confounder) would have changed the estimated effect. \n",
+    "\n",
+    "This notebook shows how to estimate the OVB for general, non-parametric causal estimators. For gaining intuition, we suggest going through an introductory notebook that describes how to estimate OVB for a a linear estimator: [Sensitivity analysis for linear estimators](https://github.com/py-why/dowhy/blob/master/docs/source/example_notebooks/sensitivity_analysis_testing.ipynb). To recap, in that notebook, we saw how the OVB depended on linear partial R^2 values and used this insight to compute the adjusted estimate values depending on the relative strength of the confounder with the outcome and treatment. We now generalize the technique using the non-parametric partial R^2 and Reisz representers.\n",
+    "\n",
+    "\n",
+    "This notebook is based on *Chernozhukov et al., Long Story Short: Omitted Variable Bias in Causal Machine Learning.  https://arxiv.org/abs/2112.13398*. "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "cf30b925",
+   "metadata": {},
+   "source": [
+    "## I. Sensitivity analysis for partially linear models\n",
+    "We first analyze the sensitivity of a causal estimate when the true data-generating process (DGP) is known to be partially linear. That is, the outcome can be additively decomposed into a linear function of the treatment and a non-linear function of the confounders. We denote the treatment by $T$, outcome by $Y$, observed confounders by $W$ and unobserved confounders by $U$. \n",
+    "$$ Y = g(T, W, U) + \\epsilon = \\theta T + h(W, U) + \\epsilon $$\n",
+    "\n",
+    "However, we cannot estimate the above equation because the confounders $U$ are unobserved. Thus, in practice, a causal estimator uses the following \"short\" equation, \n",
+    "$$ Y = g_s(T, W) + \\epsilon_s = \\theta_s T + h_s(W) + \\epsilon_s $$\n",
+    "\n",
+    "The goal of sensitivity analysis is to answer how far $\\theta_s$ would be from the true $\\theta$. Chernozhukov et al. show that given a special function called Reisz function $\\alpha$, the omitted variable bias, $|\\theta - \\theta_s|$ is bounded by $\\sqrt{E[g-g_s]^2E[\\alpha-\\alpha_s]^2}$. For partial linear models, $\\alpha$ and the \"short\" $\\alpha_s$  are defined as, \n",
+    "$$ \\alpha := \\frac{T - E[T | W, U] )}{E(T - E[T | W, U]) ^ 2}$$\n",
+    "$$ \\alpha_s := \\frac{(T - E[T | W] )}{E(T - E[T | W]) ^ 2} $$\n",
+    "\n",
+    "The bound can be expressed in terms of the *partial* R^2 of the unobserved confounder $U$ with the treatment and outcome, conditioned on the observed confounders $W$. Recall that R^2 of $U$ wrt some target $Z$ is defined as the ratio of variance of the prediction $E[Z|U]$ with the variance of $Z$, $R^2_{Z\\sim U}=\\frac{\\operatorname{Var}(E[Z|U])}{\\operatorname{Var}(Y)}$. We can define the partial R^2 as an extension that measures the additional gain in explanatory power conditioned on some variables $W$. \n",
+    "$$ \\eta^2_{Z\\sim U| W} = \\frac{\\operatorname{Var}(E[Z|W, U]) - \\operatorname{Var}(E[Z|W])}{\\operatorname{Var}(Z) - \\operatorname{Var}(E[Z|W])} $$\n",
+    "\n",
+    "The bound is given by, \n",
+    "$$ (\\theta - \\theta_s)^2 = E[g-g_s]^2E[\\alpha-\\alpha_s]^2 = S^2 C_Y^2 C_T^2 $$ \n",
+    "where, \n",
+    "$$ S^2 = \\frac{E[(Y-g_s)^2]}{E[\\alpha_s^2]}; \\ \\ C_Y^2 = \\eta^2_{Y \\sim U | T, W}, \\ \\ C_T^2 = \\frac{\\eta^2_{T\\sim U | W}}{1 - \\eta^2_{T\\sim U | W}}$$\n",
+    "\n",
+    "\n",
+    "$S^2$ can be estimated from data. The other two parameters need to be specified manually: they convey the strength of the unobserved confounder $U$ on treatment and outcome. Below we show how to create a sensitivity contour plot by specifying a range of plausible values for $\\eta^2_{Y \\sim U | T, W}$ and $\\eta^2_{T\\sim U | W}$. We also show how to benchmark and set these values as a fraction of the maximum partial R^2 due to any subset of the observed covariates. "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "1b67b63e",
+   "metadata": {},
+   "source": [
+    "### Creating a dataset with unobserved confounding "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "bbbab4ea",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "%load_ext autoreload\n",
+    "%autoreload 2"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "ba6f68b9",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Required libraries\n",
+    "import re\n",
+    "import numpy as np\n",
+    "import dowhy\n",
+    "from dowhy import CausalModel\n",
+    "import dowhy.datasets\n",
+    "from dowhy.utils.regression import create_polynomial_function"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "2c386282",
+   "metadata": {},
+   "source": [
+    "We create a dataset with linear relationship between treatment and outcome, following the partial linear data-generating process. $\\beta$ is the true causal effect."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "41c60ca7",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "np.random.seed(101) \n",
+    "data = dowhy.datasets.partially_linear_dataset(beta = 10,\n",
+    "                                               num_common_causes = 7,\n",
+    "                                               num_unobserved_common_causes=1,\n",
+    "                                               strength_unobserved_confounding=10,\n",
+    "                                               num_samples = 1000,\n",
+    "                                               num_treatments = 1,\n",
+    "                                               stddev_treatment_noise = 10,\n",
+    "                                               stddev_outcome_noise = 5\n",
+    "                                                )\n",
+    "display(data)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "5df879f9",
+   "metadata": {},
+   "source": [
+    "The true ATE for this data-generating process is,"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "75882711",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[\"ate\"]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "5308f4dc",
+   "metadata": {},
+   "source": [
+    "To simulate unobserved confounding, we remove one of the common causes from the dataset. \n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "636b6a25",
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "# Observed data \n",
+    "dropped_cols=[\"W0\"]\n",
+    "user_data = data[\"df\"].drop(dropped_cols, axis = 1)\n",
+    "# assumed graph\n",
+    "user_graph = data[\"gml_graph\"]\n",
+    "for col in dropped_cols:\n",
+    "    user_graph = user_graph.replace('node[ id \"{0}\" label \"{0}\"]'.format(col), '')\n",
+    "    user_graph = re.sub('edge\\[ source \"{}\" target \"[vy][0]*\"\\]'.format(col), \"\", user_graph)\n",
+    "user_data"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "4ae95e95",
+   "metadata": {},
+   "source": [
+    "### Obtaining a causal estimate using Model, Identify, Estimate steps\n",
+    "Create a causal model with the \"observed\" data and causal graph."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "207034e5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "model = CausalModel(\n",
+    "            data=user_data,\n",
+    "            treatment=data[\"treatment_name\"],\n",
+    "            outcome=data[\"outcome_name\"],\n",
+    "            graph=user_graph,\n",
+    "            test_significance=None,\n",
+    "        )\n",
+    "model.view_model()\n",
+    "from IPython.display import Image, display\n",
+    "display(Image(filename=\"causal_model.png\"))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "4eaec5dc",
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "# Identify effect\n",
+    "identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)\n",
+    "print(identified_estimand)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "56889b39",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Estimate effect\n",
+    "import econml\n",
+    "from sklearn.ensemble import GradientBoostingRegressor\n",
+    "linear_dml_estimate = model.estimate_effect(identified_estimand, \n",
+    "                                    method_name=\"backdoor.econml.dml.dml.LinearDML\",\n",
+    "                                    method_params={\n",
+    "                                        'init_params': {'model_y':GradientBoostingRegressor(),\n",
+    "                                                        'model_t': GradientBoostingRegressor(),\n",
+    "                                                        'linear_first_stages': False\n",
+    "                                                       },\n",
+    "                                        'fit_params': {'cache_values': True,}\n",
+    "                                     })\n",
+    "print(linear_dml_estimate)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "891068cb",
+   "metadata": {},
+   "source": [
+    "### Sensitivity Analysis using the Refute step\n",
+    "After estimation , we need to check how robust our estimate is against the possibility of unobserved confounders.  We perform sensitivity analysis for the LinearDML estimator assuming that its assumption on data-generating process holds: the true function for $Y$ is partial linear. For computational efficiency, we set <b>cache_values</b> = <b>True</b> in `fit_params` to cache the results of first stage estimation.\n",
+    "\n",
+    "Parameters used:\n",
+    "\n",
+    "* <b>method_name</b>: Refutation method name <br>\n",
+    "* <b>simulation_method</b>: \"non-parametric-partial-R2\" for non Parametric Sensitivity Analysis. \n",
+    "Note that partial linear sensitivity analysis is automatically chosen if LinearDML estimator is used for estimation. \n",
+    "* **partial_r2_confounder_treatment**: $\\eta^2_{T\\sim U | W}$, Partial R2 of unobserved confounder with treatment conditioned on all observed confounders. \n",
+    "* **partial_r2_confounder_outcome**: $\\eta^2_{Y \\sim U | T, W}$, Partial R2 of unobserved confounder with outcome conditioned on treatment and all observed confounders. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "2488ccbb",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "refute = model.refute_estimate(identified_estimand, linear_dml_estimate ,\n",
+    "                               method_name = \"add_unobserved_common_cause\",\n",
+    "                               simulation_method = \"non-parametric-partial-R2\",\n",
+    "                               partial_r2_confounder_treatment = np.arange(0, 0.8, 0.1),\n",
+    "                               partial_r2_confounder_outcome = np.arange(0, 0.8, 0.1)\n",
+    "                              )\n",
+    "print(refute)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "81f1d65b",
+   "metadata": {},
+   "source": [
+    "**Intepretation of the plot.** In the above plot, the x-axis shows hypothetical partial R2 values of unobserved confounder(s) with the treatment. The y-axis shows hypothetical partial R2 of unobserved confounder(s) with the outcome. At <x=0,y=0>, the black diamond shows the original estimate (theta_s) without considering the unobserved confounders.\n",
+    "\n",
+    "The contour levels represent *adjusted* lower confidence bound estimate of the effect, which would be obtained if the unobserved confounder(s) had been included in the estimation model. The red contour line is the critical threshold where the adjusted effect goes to zero. Thus,  confounders with such strength or stronger are sufficient to reverse the sign of the estimated effect and invalidate the estimate's conclusions. This notion can be quantified by outputting the robustness value."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "52b2e904",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "refute.RV"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "3524cb07",
+   "metadata": {},
+   "source": [
+    "The robustness value measures the minimal equal strength of $\\eta^2_{T\\sim U | W}$ and $\\eta^2_{Y \\sim U | T, W}$ such the bound for the average treatment effect would include zero.  It can be between 0 and 1. <br>\n",
+    "A robustness value of 0.45 implies that confounders with $\\eta^2_{T\\sim U | W}$ and $\\eta^2_{Y \\sim U | T, W}$ values less than 0.4 would not be sufficient enough to bring down the estimates to zero. In general, a low robustness value implies that the results can be changed even by the presence of weak confounders whereas a robustness value close to 1 means the treatment effect can handle even strong confounders that may explain all residual variation of the treatment and the outcome."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a1fbcf48",
+   "metadata": {},
+   "source": [
+    "**Benchmarking.** In general, however, providing a plausible range of partial R2 values is difficult. Instead,  we can infer the partial R2 of the unobserved confounder as a multiple of the partial R2 of any subset of observed confounders. So now we just need to specify the effect of unobserved confounding as a multiple/fraction of the observed confounding. This process is known as *benchmarking*."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "7a1f4986",
+   "metadata": {},
+   "source": [
+    "The relevant arguments for bencmarking are:\n",
+    "- <b>benchmark_common_causes</b>: Names of the observed confounders used to bound the strengths of unobserved confounder<br>\n",
+    "- <b>effect_fraction_on_treatment</b>: Strength of association between unobserved confounder and treatment compared to benchmark confounders<br>\n",
+    "- <b>effect_fraction_on_outcome</b>: Strength of association between unobserved confounder and outcome compared to benchmark confounders<br>"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "85eefe08",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "refute_bm = model.refute_estimate(identified_estimand, linear_dml_estimate ,\n",
+    "                               method_name = \"add_unobserved_common_cause\",\n",
+    "                               simulation_method = \"non-parametric-partial-R2\",\n",
+    "                               benchmark_common_causes = [\"W1\"],\n",
+    "                               effect_fraction_on_treatment = 0.2,\n",
+    "                               effect_fraction_on_outcome = 0.2\n",
+    "                              )"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "46b54056",
+   "metadata": {},
+   "source": [
+    "The red triangle shows the estimated partial-R^2 of a chosen benchmark observed covariate with the treatment and outcome. In the above call, we chose *W1* as the benchmark covariate. Under assumption that the unobserved confounder cannot be stronger in its effect on treatment and outcome than the observed benchmark covariate (*W1*), the above plot shows that the mean estimated effect will reduce after accounting for unobserved confounding, but still remain substantially above zero.\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "070f01c6",
+   "metadata": {},
+   "source": [
+    "**Plot types**. The default `plot_type` is to show the `lower_confidence_bound` under a significance level . Other possible values for the `plot_type` are:\n",
+    "* `upper_confidence_bound`: preferably used in cases where the unobserved confounder is expected to lower the estimate.\n",
+    "* `lower_ate_bound`: lower (point) estimate for unconfounded average treatment effect without considering the significance level\n",
+    "* `upper_ate_bound`: upper (point) estimate for unconfounded average treatment effect without considering the significance level\n",
+    "* `bias`: the bias of the obtained estimate compared to the true estimate"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "df23a49b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "refute_bm.plot(plot_type = \"upper_confidence_bound\")\n",
+    "refute_bm.plot(plot_type = \"bias\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "83052508",
+   "metadata": {},
+   "source": [
+    "We can also access the benchmarking results as a data frame."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "934eef00",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "refute_bm.results"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "1fffe64f",
+   "metadata": {},
+   "source": [
+    "## II. Sensitivity Analysis for general non-parametric models\n",
+    "We now perform sensitivity analysis without making any assumption on the true data-generating process. The sensitivity still depends on the partial R2 of unobserved confounder with outcome, $\\eta^2_{Y \\sim U | T, W}$, and a similar parameter for the confounder-treatment relationship. However,  the computation of bounds is more complicated and requires estimation of a special function known as reisz function. Refer to Chernozhukov et al. for details."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "7cff3837",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Estimate effect using a non-parametric estimator\n",
+    "from sklearn.ensemble import GradientBoostingRegressor\n",
+    "estimate_npar = model.estimate_effect(identified_estimand, \n",
+    "                                    method_name=\"backdoor.econml.dml.KernelDML\",\n",
+    "                                    method_params={\n",
+    "                                        'init_params': {'model_y':GradientBoostingRegressor(),\n",
+    "                                                        'model_t': GradientBoostingRegressor(),                                                       },\n",
+    "                                        'fit_params': {},\n",
+    "                                     })\n",
+    "print(estimate_npar)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "5c971de4",
+   "metadata": {},
+   "source": [
+    "To do the sensitivity analysis, we now use the same `non-parametric--partial-R2` method, however the estimation of partial R2 will be based on reisz representers. We use `plugin_reisz=True` to specify that we will be using a plugin reisz function estimator (this is faster and available for binary treatments). Otherwise, we can set it to `False` to estimate reisz function using a loss function."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "946e1237",
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "refute_npar = model.refute_estimate(identified_estimand, estimate_npar,\n",
+    "                               method_name = \"add_unobserved_common_cause\",\n",
+    "                               simulation_method = \"non-parametric-partial-R2\",\n",
+    "                               benchmark_common_causes = [\"W1\"],\n",
+    "                               effect_fraction_on_treatment = 0.2,\n",
+    "                               effect_fraction_on_outcome = 0.2,\n",
+    "                               plugin_reisz=True\n",
+    "                              )\n",
+    "print(refute_npar)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "db63007e",
+   "metadata": {},
+   "source": [
+    "The plot has the same interpretation as before. We obtain a robustness value of 0.66 compared to robustness value of 0.45 for LinearDML estimator.\n",
+    "\n",
+    "Note that the robustness value changes, even though the point estimates from LinearDML and KernelDML are similar. This is because we made different assumptions on the true data-generating process.  "
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3.8.10 ('dowhy-_zBapv7Q-py3.8')",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.10"
+  },
+  "vscode": {
+   "interpreter": {
+    "hash": "dcb481ad5d98e2afacd650b2c07afac80a299b7b701b553e333fc82865502500"
+   }
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

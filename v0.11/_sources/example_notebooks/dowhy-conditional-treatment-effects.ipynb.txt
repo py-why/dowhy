@@ -1,0 +1,558 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Conditional Average Treatment Effects (CATE) with DoWhy and EconML\n",
+    "\n",
+    "This is an experimental feature where we use [EconML](https://github.com/microsoft/econml) methods from DoWhy. Using EconML allows CATE estimation using different methods. \n",
+    "\n",
+    "All four steps of causal inference in DoWhy remain the same: model, identify, estimate, and refute. The key difference is that we now call econml methods in the estimation step. There is also a simpler example using linear regression to understand the intuition behind CATE estimators. \n",
+    "\n",
+    "All datasets are generated using linear structural equations.\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "%load_ext autoreload\n",
+    "%autoreload 2"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "import logging\n",
+    "\n",
+    "import dowhy\n",
+    "from dowhy import CausalModel\n",
+    "import dowhy.datasets\n",
+    "\n",
+    "import econml\n",
+    "import warnings\n",
+    "warnings.filterwarnings('ignore')\n",
+    "\n",
+    "BETA = 10"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data = dowhy.datasets.linear_dataset(BETA, num_common_causes=4, num_samples=10000,\n",
+    "                                    num_instruments=2, num_effect_modifiers=2,\n",
+    "                                     num_treatments=1,\n",
+    "                                    treatment_is_binary=False,\n",
+    "                                    num_discrete_common_causes=2,\n",
+    "                                    num_discrete_effect_modifiers=0,\n",
+    "                                    one_hot_encode=False)\n",
+    "df=data['df']\n",
+    "print(df.head())\n",
+    "print(\"True causal estimate is\", data[\"ate\"])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "model = CausalModel(data=data[\"df\"], \n",
+    "                    treatment=data[\"treatment_name\"], outcome=data[\"outcome_name\"], \n",
+    "                    graph=data[\"gml_graph\"])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "model.view_model()\n",
+    "from IPython.display import Image, display\n",
+    "display(Image(filename=\"causal_model.png\"))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "identified_estimand= model.identify_effect(proceed_when_unidentifiable=True)\n",
+    "print(identified_estimand)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Linear Model \n",
+    "First, let us build some intuition using a linear model for estimating CATE. The effect modifiers (that lead to a heterogeneous treatment effect) can be modeled as interaction terms with the treatment. Thus, their value modulates the effect of treatment. \n",
+    "\n",
+    "Below the estimated effect of changing treatment from 0 to 1. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "linear_estimate = model.estimate_effect(identified_estimand, \n",
+    "                                        method_name=\"backdoor.linear_regression\",\n",
+    "                                       control_value=0,\n",
+    "                                       treatment_value=1)\n",
+    "print(linear_estimate) "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## EconML methods\n",
+    "We now move to the more advanced methods from the EconML package for estimating CATE.\n",
+    "\n",
+    "First, let us look at the double machine learning estimator. Method_name corresponds to the fully qualified name of the class that we want to use. For double ML, it is \"econml.dml.DML\". \n",
+    "\n",
+    "Target units defines the units over which the causal estimate is to be computed. This can be a lambda function filter on the original dataframe, a new Pandas dataframe, or a string corresponding to the three main kinds of target units (\"ate\", \"att\" and \"atc\"). Below we show an example of a lambda function. \n",
+    "\n",
+    "Method_params are passed directly to EconML. For details on allowed parameters, refer to the EconML documentation. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from sklearn.preprocessing import PolynomialFeatures\n",
+    "from sklearn.linear_model import LassoCV\n",
+    "from sklearn.ensemble import GradientBoostingRegressor\n",
+    "dml_estimate = model.estimate_effect(identified_estimand, method_name=\"backdoor.econml.dml.DML\",\n",
+    "                                     control_value = 0,\n",
+    "                                     treatment_value = 1,\n",
+    "                                 target_units = lambda df: df[\"X0\"]>1,  # condition used for CATE\n",
+    "                                 confidence_intervals=False,\n",
+    "                                method_params={\"init_params\":{'model_y':GradientBoostingRegressor(),\n",
+    "                                                              'model_t': GradientBoostingRegressor(),\n",
+    "                                                              \"model_final\":LassoCV(fit_intercept=False), \n",
+    "                                                              'featurizer':PolynomialFeatures(degree=1, include_bias=False)},\n",
+    "                                               \"fit_params\":{}})\n",
+    "print(dml_estimate)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(\"True causal estimate is\", data[\"ate\"])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dml_estimate = model.estimate_effect(identified_estimand, method_name=\"backdoor.econml.dml.DML\",\n",
+    "                                     control_value = 0,\n",
+    "                                     treatment_value = 1,\n",
+    "                                 target_units = 1,  # condition used for CATE\n",
+    "                                 confidence_intervals=False,\n",
+    "                                method_params={\"init_params\":{'model_y':GradientBoostingRegressor(),\n",
+    "                                                              'model_t': GradientBoostingRegressor(),\n",
+    "                                                              \"model_final\":LassoCV(fit_intercept=False), \n",
+    "                                                              'featurizer':PolynomialFeatures(degree=1, include_bias=True)},\n",
+    "                                               \"fit_params\":{}})\n",
+    "print(dml_estimate)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### CATE Object and Confidence Intervals\n",
+    "EconML provides its own methods to compute confidence intervals. Using BootstrapInference in the example below. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from sklearn.preprocessing import PolynomialFeatures\n",
+    "from sklearn.linear_model import LassoCV\n",
+    "from sklearn.ensemble import GradientBoostingRegressor\n",
+    "from econml.inference import BootstrapInference\n",
+    "dml_estimate = model.estimate_effect(identified_estimand, \n",
+    "                                     method_name=\"backdoor.econml.dml.DML\",\n",
+    "                                     target_units = \"ate\",\n",
+    "                                     confidence_intervals=True,\n",
+    "                                     method_params={\"init_params\":{'model_y':GradientBoostingRegressor(),\n",
+    "                                                              'model_t': GradientBoostingRegressor(),\n",
+    "                                                              \"model_final\": LassoCV(fit_intercept=False), \n",
+    "                                                              'featurizer':PolynomialFeatures(degree=1, include_bias=True)},\n",
+    "                                               \"fit_params\":{\n",
+    "                                                               'inference': BootstrapInference(n_bootstrap_samples=100, n_jobs=-1),\n",
+    "                                                            }\n",
+    "                                              })\n",
+    "print(dml_estimate)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Can provide a new inputs as target units and estimate CATE on them."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "test_cols= data['effect_modifier_names'] # only need effect modifiers' values\n",
+    "test_arr = [np.random.uniform(0,1, 10) for _ in range(len(test_cols))] # all variables are sampled uniformly, sample of 10\n",
+    "test_df = pd.DataFrame(np.array(test_arr).transpose(), columns=test_cols)\n",
+    "dml_estimate = model.estimate_effect(identified_estimand, \n",
+    "                                     method_name=\"backdoor.econml.dml.DML\",\n",
+    "                                     target_units = test_df,\n",
+    "                                     confidence_intervals=False,\n",
+    "                                     method_params={\"init_params\":{'model_y':GradientBoostingRegressor(),\n",
+    "                                                              'model_t': GradientBoostingRegressor(),\n",
+    "                                                              \"model_final\":LassoCV(), \n",
+    "                                                              'featurizer':PolynomialFeatures(degree=1, include_bias=True)},\n",
+    "                                               \"fit_params\":{}\n",
+    "                                              })\n",
+    "print(dml_estimate.cate_estimates)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Can also retrieve the raw EconML estimator object for any further operations"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(dml_estimate._estimator_object)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Works with any EconML method\n",
+    "In addition to double machine learning, below we example analyses using orthogonal forests, DRLearner (bug to fix), and neural network-based instrumental variables. "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Binary treatment, Binary outcome"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data_binary = dowhy.datasets.linear_dataset(BETA, num_common_causes=4, num_samples=10000,\n",
+    "                                    num_instruments=1, num_effect_modifiers=2,\n",
+    "                                    treatment_is_binary=True, outcome_is_binary=True)\n",
+    "# convert boolean values to {0,1} numeric\n",
+    "data_binary['df'].v0 = data_binary['df'].v0.astype(int)\n",
+    "data_binary['df'].y = data_binary['df'].y.astype(int)\n",
+    "print(data_binary['df'])\n",
+    "\n",
+    "model_binary = CausalModel(data=data_binary[\"df\"], \n",
+    "                    treatment=data_binary[\"treatment_name\"], outcome=data_binary[\"outcome_name\"], \n",
+    "                    graph=data_binary[\"gml_graph\"])\n",
+    "identified_estimand_binary = model_binary.identify_effect(proceed_when_unidentifiable=True)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### Using DRLearner estimator"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from sklearn.linear_model import LogisticRegressionCV\n",
+    "#todo needs binary y\n",
+    "drlearner_estimate = model_binary.estimate_effect(identified_estimand_binary, \n",
+    "                                method_name=\"backdoor.econml.dr.LinearDRLearner\",\n",
+    "                                confidence_intervals=False,\n",
+    "                                method_params={\"init_params\":{\n",
+    "                                                    'model_propensity': LogisticRegressionCV(cv=3, solver='lbfgs', multi_class='auto')\n",
+    "                                                    },\n",
+    "                                               \"fit_params\":{}\n",
+    "                                              })\n",
+    "print(drlearner_estimate)\n",
+    "print(\"True causal estimate is\", data_binary[\"ate\"])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Instrumental Variable Method"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "dmliv_estimate = model.estimate_effect(identified_estimand, \n",
+    "                                        method_name=\"iv.econml.iv.dml.DMLIV\",\n",
+    "                                        target_units = lambda df: df[\"X0\"]>-1, \n",
+    "                                        confidence_intervals=False,\n",
+    "                                method_params={\"init_params\":{\n",
+    "                                                              'discrete_treatment':False,\n",
+    "                                                              'discrete_instrument':False\n",
+    "                                                             },\n",
+    "                                               \"fit_params\":{}})\n",
+    "print(dmliv_estimate)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Metalearners"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data_experiment = dowhy.datasets.linear_dataset(BETA, num_common_causes=5, num_samples=10000,\n",
+    "                                    num_instruments=2, num_effect_modifiers=5,\n",
+    "                                    treatment_is_binary=True, outcome_is_binary=False)\n",
+    "# convert boolean values to {0,1} numeric\n",
+    "data_experiment['df'].v0 = data_experiment['df'].v0.astype(int)\n",
+    "print(data_experiment['df'])\n",
+    "model_experiment = CausalModel(data=data_experiment[\"df\"], \n",
+    "                    treatment=data_experiment[\"treatment_name\"], outcome=data_experiment[\"outcome_name\"], \n",
+    "                    graph=data_experiment[\"gml_graph\"])\n",
+    "identified_estimand_experiment = model_experiment.identify_effect(proceed_when_unidentifiable=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from sklearn.ensemble import RandomForestRegressor\n",
+    "metalearner_estimate = model_experiment.estimate_effect(identified_estimand_experiment, \n",
+    "                                method_name=\"backdoor.econml.metalearners.TLearner\",\n",
+    "                                confidence_intervals=False,\n",
+    "                                method_params={\"init_params\":{\n",
+    "                                                    'models': RandomForestRegressor()\n",
+    "                                                    },\n",
+    "                                               \"fit_params\":{}\n",
+    "                                              })\n",
+    "print(metalearner_estimate)\n",
+    "print(\"True causal estimate is\", data_experiment[\"ate\"])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Avoiding retraining the estimator "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Once an estimator is fitted, it can be reused to estimate effect on different data points. In this case, you can pass `fit_estimator=False` to `estimate_effect`. This works for any EconML estimator. We show an example for the T-learner below."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# For metalearners, need to provide all the features (except treatmeant and outcome)\n",
+    "metalearner_estimate = model_experiment.estimate_effect(identified_estimand_experiment, \n",
+    "                                method_name=\"backdoor.econml.metalearners.TLearner\",\n",
+    "                                confidence_intervals=False,\n",
+    "                                fit_estimator=False,\n",
+    "                                target_units=data_experiment[\"df\"].drop([\"v0\",\"y\", \"Z0\", \"Z1\"], axis=1)[9995:],                        \n",
+    "                                method_params={})\n",
+    "print(metalearner_estimate)\n",
+    "print(\"True causal estimate is\", data_experiment[\"ate\"])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Refuting the estimate"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Adding a random common cause variable"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "res_random=model.refute_estimate(identified_estimand, dml_estimate, method_name=\"random_common_cause\")\n",
+    "print(res_random)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Adding an unobserved common cause variable"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "res_unobserved=model.refute_estimate(identified_estimand, dml_estimate, method_name=\"add_unobserved_common_cause\",\n",
+    "                                     confounders_effect_on_treatment=\"linear\", confounders_effect_on_outcome=\"linear\",\n",
+    "                                    effect_strength_on_treatment=0.01, effect_strength_on_outcome=0.02)\n",
+    "print(res_unobserved)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Replacing treatment with a random (placebo) variable"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "res_placebo=model.refute_estimate(identified_estimand, dml_estimate,\n",
+    "        method_name=\"placebo_treatment_refuter\", placebo_type=\"permute\",\n",
+    "        num_simulations=10 # at least 100 is good, setting to 10 for speed \n",
+    "        ) \n",
+    "print(res_placebo)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Removing a random subset of the data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "res_subset=model.refute_estimate(identified_estimand, dml_estimate,\n",
+    "        method_name=\"data_subset_refuter\", subset_fraction=0.8,\n",
+    "        num_simulations=10)\n",
+    "print(res_subset)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "More refutation methods to come, especially specific to the CATE estimators."
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.10"
+  },
+  "toc": {
+   "base_numbering": 1,
+   "nav_menu": {},
+   "number_sections": false,
+   "sideBar": true,
+   "skip_h1_title": true,
+   "title_cell": "Table of Contents",
+   "title_sidebar": "Contents",
+   "toc_cell": false,
+   "toc_position": {},
+   "toc_section_display": true,
+   "toc_window_display": false
+  },
+  "vscode": {
+   "interpreter": {
+    "hash": "dcb481ad5d98e2afacd650b2c07afac80a299b7b701b553e333fc82865502500"
+   }
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}
