@@ -95,9 +95,7 @@ class CausalGraph:
         elif isinstance(graph, str) and re.match(".*graph\s*\[.*\]\s*", graph):
             self._graph = nx.DiGraph(nx.parse_gml(graph))
         else:
-            error_msg = (
-                    "Incorrect format: Please provide graph as a networkx DiGraph, GCM model, or as a string or text file in dot, gml format."
-            )
+            error_msg = "Incorrect format: Please provide graph as a networkx DiGraph, GCM model, or as a string or text file in dot, gml format."
             self.logger.error(error_msg)
             self.logger.error("Error: Incorrect graph format")
             raise ValueError(error_msg)

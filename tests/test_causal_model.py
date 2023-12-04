@@ -589,5 +589,6 @@ class TestCausalModel(object):
                 graph=nx.Graph([("X", "Y"), ("Y", "Z")]),
             )
 
+
 if __name__ == "__main__":
     pytest.main([__file__])
