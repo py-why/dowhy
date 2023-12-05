@@ -102,6 +102,7 @@ If you face "Solving environment" problems with conda, then try :code:`conda upd
 If you prefer to use the latest dev version, your dependency management tool will need to point at our GitHub repository.
 
 .. code:: shell
+
     pip install git+https://github.com/py-why/dowhy@main
 
 **Requirements**
