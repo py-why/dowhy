@@ -28,33 +28,32 @@ Using these verbs, DoWhy implements a causal effect estimation API that supports
 * Frontdoor
 * Instrumental variable
 * ID algorithm
-* Mediation (direct and indirect effects)
 
 Once a causal effect is identified, we can choose an estimation method compatible with the identification strategy. For estimating the average causal effect, DoWhy supports the following methods.
 
 * Methods based on matching confounders' values:
-    * Distance-based matching 
+    * Distance-based matching (:py:class:`DistanceMatchingEstimator <dowhy.causal_estimators.DistanceMatchingEstimator>`)
 
 * Methods based on estimating the treatment assignment
-    * Propensity-based Stratification
-    * Propensity Score Matching
-    * Inverse Propensity Weighting
+    * Propensity-based Stratification (:py:class:`PropensityScoreStratificationEstimator <dowhy.causal_estimators.PropensityScoreStratificationEstimator>`)
+    * Propensity Score Matching (:py:class:`PropensityScoreMatchingEstimator <dowhy.causal_estimators.PropensityScoreMatchingEstimator>`)
+    * Inverse Propensity Weighting (:py:class:`PropensityScoreWeightingEstimator <dowhy.causal_estimators.PropensityScoreWeightingEstimator>`)
 
 * Methods based on estimating the outcome model
-    * Linear Regression
-    * Generalized Linear Models, including logistic regression
+    * Linear Regression (:py:class:`LinearRegressionEstimator <dowhy.causal_estimators.LinearRegressionEstimator>`)
+    * Generalized Linear Models, including logistic regression (:py:class:`GeneralizedLinearModelEstimator <dowhy.causal_estimators.GeneralizedLinearModelEstimator>`)
 
 * Methods based on the instrumental variable equation
-    * Binary Instrument/Wald Estimator
-    * Regression discontinuity
+    * Binary Instrument/Wald Estimator (:py:class:`InstrumentalVariableEstimator <dowhy.causal_estimators.InstrumentalVariableEstimator>`)
+    * Regression discontinuity(:py:class:`RegressionDiscontinuityEstimator <dowhy.causal_estimators.RegressionDiscontinuityEstimator>`)
 
-* Methods for front-door criterion and general mediation
-    * Two-stage linear regression
-
-
-For estimating the conditional average causal effect, DoWhy supports calling EconML methods. For more details on EconML, check out their `documentation <https://econml.azurewebsites.net/>`_.  If the data-generating process for the outcome Y can be approximated as a linear function, you may also use the linear regression method for CACE estimation. 
+* Methods for front-door criterion and mediation analysis
+    * Two-stage linear regression (:py:class:`TwoStageRegressionEstimator <dowhy.causal_estimators.TwoStageRegressionEstimator>`)
 
 
+For estimating the conditional average causal effect, DoWhy supports calling EconML methods. For more details on EconML, check out their `documentation <https://econml.azurewebsites.net/>`_.  If the data-generating process for the outcome Y can be approximated as a linear function, you may also use the linear regression method for CACE estimation.
+
+For related notebooks, see :doc:`../../../example_notebooks/nb_index`
 
 .. toctree::
    :maxdepth: 1
@@ -64,4 +63,3 @@ For estimating the conditional average causal effect, DoWhy supports calling Eco
    effect_estimation_with_natural_experiments/index
    conditional_effect_estimation/index
    effect_estimation_with_gcm
-   direct_indirect_effects/index

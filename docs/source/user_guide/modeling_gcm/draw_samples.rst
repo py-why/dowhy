@@ -24,8 +24,8 @@ Lets take a look at the following example:
 3 -1.540165 -3.196612  -9.028178
 4  1.218309  3.867429  12.394407
 
-Similar as in the introduction, we generate data for the simple linear DAG X→Y→Z. Lets define the GCM and fit it to the
-data:
+We now learned the generative models of the variables, based on the defined causal graph and the additive noise model assumption.
+To generate new samples from this model, we can now simply call:
 
 >>> import networkx as nx
 >>> import dowhy.gcm as gcm
@@ -46,17 +46,48 @@ To generate new samples from this model, we can now simply call:
 3 -0.817718 -1.125724  -3.013189
 4  0.520793 -0.081344   0.987426
 
-If our modeling assumptions are correct, the generated data should now resemble the observed data distribution, i.e. the
-generated samples correspond to the joint distribution we defined for our example data at the beginning. A quick
-way to make sure of this is to estimate the KL-divergence between observed and generated distribution:
+If our modeling assumptions are correct, the generated data should now resemble the observed data distribution, i.e.
+the generated samples correspond to the joint distribution we defined for our example data at the beginning. One way
+to make sure of this is to estimate the KL-divergence between observed and generated distribution. For this, we can
+make use of the evaluation module:
 
->>> gcm.divergence.auto_estimate_kl_divergence(data.to_numpy(), generated_data.to_numpy())
-0
+>>> print(gcm.evaluate_causal_model(causal_model, data, evaluate_causal_mechanisms=False, evaluate_invertibility_assumptions=False))
 
-Here, we expect the divergence to be (very) small.
+.. image:: graph_evaluation.png
+    :alt: Causal Graph Falsification
 
-**Note**: We **cannot** validate the correctness of a causal graph this way,
-since any graph from a Markov equivalence class would be sufficient to generate data that is consistent with the observed one,
-but only one particular graph would generate the correct interventional and counterfactual distributions. This is, seeing the example above,
-X→Y→Z and X←Y←Z would generate the same observational distribution (since they encode the same conditionals), but only X→Y→Z would generate the
-correct interventional distribution (e.g. when intervening on Y).
+.. code-block::
+
+    Evaluated and the overall average KL divergence between generated and observed distribution and graph structure. The results are as follows:
+
+    ==== Evaluation of Generated Distribution ====
+    The overall average KL divergence between the generated and observed distribution is 0.014769479715506385
+    The estimated KL divergence indicates an overall very good representation of the data distribution.
+
+    ==== Evaluation of the Causal Graph Structure ====
+    +-------------------------------------------------------------------------------------------------------+
+    |                                         Falsificaton Summary                                          |
+    +-------------------------------------------------------------------------------------------------------+
+    | The given DAG is not informative because 2 / 6 of the permutations lie in the Markov                  |
+    | equivalence class of the given DAG (p-value: 0.33).                                                   |
+    | The given DAG violates 0/1 LMCs and is better than 66.7% of the permuted DAGs (p-value: 0.33).        |
+    | Based on the provided significance level (0.2) and because the DAG is not informative,               |
+    | we do not reject the DAG.                                                                             |
+    +-------------------------------------------------------------------------------------------------------+
+
+    ==== NOTE ====
+    Always double check the made model assumptions with respect to the graph structure and choice of causal mechanisms.
+    All these evaluations give some insight into the goodness of the causal model, but should not be overinterpreted, since some causal relationships can be intrinsically hard to model. Furthermore, many algorithms are fairly robust against misspecifications or poor performances of causal mechanisms.
+
+This confirms that the generated distribution is close to the observed one.
+
+.. note::
+
+    While the evaluation provides us insights toward the causal graph structure as well, we cannot confirm the
+    graph structure, only reject it if we find inconsistencies between the dependencies of the observed structure and what
+    the graph represents. In our case, we do not reject the DAG, but there are other equivalent DAGs that would not be
+    rejected as well. To see this, consider the example above - X→Y→Z and X←Y←Z would generate the same observational
+    distribution (since they encode the same conditionals), but only X→Y→Z would generate the correct interventional
+    distribution (e.g., when intervening on Y).
+
+The next section provides more details about the evaluation method.

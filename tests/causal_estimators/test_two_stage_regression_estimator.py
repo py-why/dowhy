@@ -143,3 +143,37 @@ class TestTwoStageRegressionEstimator(object):
         # Estimate the effect with front-door
         estimate = model.estimate_effect(identified_estimand=estimand, method_name="frontdoor.two_stage_regression")
         assert estimate.value == pytest.approx(0.45, 0.025)
+
+    @mark.parametrize(
+        [
+            "Estimator",
+            "num_treatments",
+            "num_frontdoor_variables",
+        ],
+        [
+            (
+                TwoStageRegressionEstimator,
+                [2, 1],
+                [1, 2],
+            )
+        ],
+    )
+    def test_frontdoor_num_variables_error(self, Estimator, num_treatments, num_frontdoor_variables):
+        estimator_tester = TestEstimator(error_tolerance=0, Estimator=Estimator, identifier_method="frontdoor")
+        with pytest.raises((ValueError, Exception)):
+            estimator_tester.average_treatment_effect_testsuite(
+                num_common_causes=[1, 1],
+                num_instruments=[0, 0],
+                num_effect_modifiers=[0, 0],
+                num_treatments=num_treatments,
+                num_frontdoor_variables=num_frontdoor_variables,
+                treatment_is_binary=[True],
+                outcome_is_binary=[False],
+                confidence_intervals=[
+                    True,
+                ],
+                test_significance=[
+                    False,
+                ],
+                method_params={"num_simulations": 10, "num_null_simulations": 10},
+            )

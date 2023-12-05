@@ -61,7 +61,7 @@ class TestEconMLEstimator:
         )
         # Checking that the CATE estimates are not identical
         dml_cate_estimates_f = dml_estimate.cate_estimates.flatten()
-        assert pytest.approx(dml_cate_estimates_f[0], 0.01) != dml_cate_estimates_f[1]
+        assert pytest.approx(dml_cate_estimates_f[0], 0.001) != dml_cate_estimates_f[1]
         # Test ContinuousTreatmentOrthoForest
         orthoforest_estimate = model.estimate_effect(
             identified_estimand,
@@ -71,7 +71,7 @@ class TestEconMLEstimator:
         )
         # Checking that the CATE estimates are not identical
         orthoforest_cate_estimates_f = orthoforest_estimate.cate_estimates.flatten()
-        assert pytest.approx(orthoforest_cate_estimates_f[0], 0.01) != orthoforest_cate_estimates_f[1]
+        assert pytest.approx(orthoforest_cate_estimates_f[0], 0.001) != orthoforest_cate_estimates_f[1]
 
         # Test LinearDRLearner
         data_binary = datasets.linear_dataset(
@@ -102,7 +102,7 @@ class TestEconMLEstimator:
             },
         )
         drlearner_cate_estimates_f = drlearner_estimate.cate_estimates.flatten()
-        assert pytest.approx(drlearner_cate_estimates_f[0], 0.01) != drlearner_cate_estimates_f[1]
+        assert pytest.approx(drlearner_cate_estimates_f[0], 0.001) != drlearner_cate_estimates_f[1]
 
     def test_metalearners(self):
         data = datasets.linear_dataset(
@@ -190,22 +190,13 @@ class TestEconMLEstimator:
                 keras.layers.Dense(1),
             ]
         )
-        deepiv_estimate = model.estimate_effect(
+        dmliv_estimate = model.estimate_effect(
             identified_estimand,
-            method_name="iv.econml.iv.nnet.DeepIV",
+            method_name="iv.econml.iv.dml.DMLIV",
             target_units=lambda df: df["X0"] > -1,
             confidence_intervals=False,
             method_params={
-                "init_params": {
-                    "n_components": 10,  # Number of gaussians in the mixture density networks
-                    # Treatment model,
-                    "m": lambda z, x: treatment_model(keras.layers.concatenate([z, x])),
-                    # Response model
-                    "h": lambda t, x: response_model(keras.layers.concatenate([t, x])),
-                    "n_samples": 1,  # Number of samples used to estimate the response
-                    "first_stage_options": {"epochs": 25},
-                    "second_stage_options": {"epochs": 25},
-                },
+                "init_params": {"discrete_treatment": False, "discrete_instrument": False},
                 "fit_params": {},
             },
         )

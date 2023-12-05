@@ -74,9 +74,9 @@ using the same API, refer to :doc:`../example_notebooks/dowhy-conditional-treatm
 Graphical causal model-based inference
 ---------------------------------------
 
-For features like root cause analysis, structural analysis and similar, DoWhy uses graphical causal models. The
-language of graphical causal models again offers a variety of causal questions that can be answered. DoWhy's API to
-answer these causal questions follows a simple 3-step recipe as follows:
+For features like root cause analysis, point-wise counterfactual inference, structural analysis and similar, DoWhy uses
+graphical causal models. The language of graphical causal models again offers a variety of causal questions that can
+be answered. DoWhy's API to answer these causal questions follows a simple 3-step recipe as follows:
 
 .. code:: python
 
@@ -96,21 +96,19 @@ answer these causal questions follows a simple 3-step recipe as follows:
     # Step 2: Train our causal model with the data from above:
     gcm.fit(causal_model, data)
 
-    # Step 3: Perform a causal analysis. E.g. we have an:
-    anomalous_record = pd.DataFrame(dict(X=[.7], Y=[100.0], Z=[303.0]))
+    # Step 3: Perform a causal analysis. For instance, root cause analysis, where we observe
+    anomalous_sample = pd.DataFrame(dict(X=[0.1], Y=[6.2], Z=[19]))  # Here, Y is the root cause.
     # ... and would like to answer the question:
     # "Which node is the root cause of the anomaly in Z?":
-    anomaly_attribution = gcm.attribute_anomalies(causal_model, "Z", anomalous_record)
+    anomaly_attribution = gcm.attribute_anomalies(causal_model, "Z", anomalous_sample)
 
-If you want to learn more about this, we recommend starting with
-:doc:`../user_guide/modeling_gcm/index` in
+If you want to learn more about this and other GCM features, we recommend starting with :doc:`../user_guide/modeling_gcm/index` in
 the user guide or check out :doc:`../example_notebooks/gcm_basic_example`.
-
 
 Further resources
 ^^^^^^^^^^^^^^^^^
 
-There's further resources available:
+There are further resources available:
 
 - An introductory `tutorial on causal inference <https://github.com/amit-sharma/causal-inference-tutorial/>`_
 - A comprehensive
@@ -121,5 +119,6 @@ There's further resources available:
   `Foundations of causal inference and its impacts on machine learning <https://note.microsoft.com/MSR-Webinar-DoWhy-Library-Registration-On-Demand.html>`_
 - The PDF book `Elements of Causal Inference <https://mitp-content-server.mit.edu/books/content/sectbyfn?collid=books_pres_0&id=11283&fn=11283.pdf>`_
 - Draft chapters of an upcoming book: `Causal reasoning: Fundamentals and machine learning applications <https://causalinference.gitlab.io/book/>`_
+- A blog post describing one of DoWhy's root cause analysis algorithms via graphical causal models: `New method identifies the root causes of statistical outliers <https://www.amazon.science/blog/new-method-identifies-the-root-causes-of-statistical-outliers>`_
 
 
