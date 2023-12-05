@@ -1,5 +1,4 @@
 """The gcm sub-package provides features built on top of graphical causal model (GCM) based inference."""
-
 from . import auto, config, divergence, ml, shapley, stats, uncertainty, util
 from .anomaly import anomaly_scores, attribute_anomalies
 from .anomaly_scorers import (
@@ -32,3 +31,5 @@ from .stochastic_models import BayesianGaussianMixtureDistribution, EmpiricalDis
 from .unit_change import unit_change
 from .validation import RejectionResult, refute_causal_structure, refute_invertible_model
 from .whatif import average_causal_effect, counterfactual_samples, interventional_samples
+
+from .equation_parser import create_causal_model_from_equations  # isort:skip
