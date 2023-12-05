@@ -134,14 +134,6 @@ dowhy.gcm.falsify module
    :undoc-members:
    :show-inheritance:
 
-dowhy.gcm.feature module
-------------------------
-
-.. automodule:: dowhy.gcm.feature
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 dowhy.gcm.feature\_relevance module
 -----------------------------------
 
@@ -162,6 +154,14 @@ dowhy.gcm.influence module
 --------------------------
 
 .. automodule:: dowhy.gcm.influence
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dowhy.gcm.model\_evaluation module
+----------------------------------
+
+.. automodule:: dowhy.gcm.model_evaluation
    :members:
    :undoc-members:
    :show-inheritance:
