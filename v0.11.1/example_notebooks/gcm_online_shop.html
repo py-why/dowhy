@@ -1,0 +1,1859 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B139P18WHM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-B139P18WHM');
+    </script>
+    
+    <title>Causal Attributions and Root-Cause Analysis in an Online Shop &#8212; DoWhy  documentation</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/design-tabs.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Finding the Root Cause of Elevated Latencies in a Microservice Architecture" href="gcm_rca_microservice_architecture.html" />
+    <link rel="prev" title="Estimating the Effect of a Member Rewards Program" href="dowhy_example_effect_of_memberrewards_program.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-light" alt="Logo image">
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../getting_started/index.html">
+  Getting Started
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../user_guide/index.html">
+  User Guide
+ </a>
+</li>
+
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="nb_index.html">
+  Examples
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../dowhy.html">
+  dowhy package
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../contributing.html">
+  Contributing
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../code_repo.html">
+  Release notes
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../cite.html">
+  Citing this package
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+      <div class="navbar-end-item">
+        <div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        v0.11.1
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.9.1/index.html">v0.9.1</a></dd>
+            <dd><a href="/dowhy/v0.9/index.html">v0.9</a></dd>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.11/index.html">v0.11</a></dd>
+            <dd><a href="/dowhy/v0.10.1/index.html">v0.10.1</a></dd>
+            <dd><a href="/dowhy/v0.10/index.html">v0.10</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Introductory examples
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_simple_example.html">
+   Basic Example for Calculating the Causal Effect
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_basic_example.html">
+   Basic Example for Graphical Causal Models
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_draw_samples.html">
+   Basic Example for generating samples from a GCM
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_confounder_example.html">
+   Confounding Example: Finding causal effects from observed data
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy-conditional-treatment-effects.html">
+   Conditional Average Treatment Effects (CATE) with DoWhy and EconML
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="tutorial-causalinference-machinelearning-using-dowhy-econml.html">
+   Tutorial on Causal Inference and its Connections to Machine Learning (Using DoWhy+EconML)
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_functional_api.html">
+   Functional API Preview
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_mediation_analysis.html">
+   Mediation analysis with DoWhy: Direct and Indirect Effects
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_refuter_notebook.html">
+   Iterating over multiple refutation tests
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_causal_api.html">
+   Demo for the DoWhy causal API
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="do_sampler_demo.html">
+   Do-sampler Introduction
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Real world-inspired examples
+ </span>
+</p>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="DoWhy-The%20Causal%20Story%20Behind%20Hotel%20Booking%20Cancellations.html">
+   Exploring Causes of Hotel Booking Cancellations
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_example_effect_of_memberrewards_program.html">
+   Estimating the Effect of a Member Rewards Program
+  </a>
+ </li>
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   Causal Attributions and Root-Cause Analysis in an Online Shop
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_rca_microservice_architecture.html">
+   Finding the Root Cause of Elevated Latencies in a Microservice Architecture
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_401k_analysis.html">
+   Impact of 401(k) eligibility on net financial assets
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_supply_chain_dist_change.html">
+   Finding Root Causes of Changes in a Supply Chain
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_icc.html">
+   Estimating intrinsic causal influences in real-world examples
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_counterfactual_medical_dry_eyes.html">
+   Counterfactual Analysis in a Medical Case
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_falsify_dag.html">
+   Falsification of User-Given Directed Acyclic Graphs
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Examples on benchmarks datasets
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_ihdp_data_example.html">
+   DoWhy example on ihdp (Infant Health and Development Program) dataset
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_lalonde_example.html">
+   DoWhy example on the Lalonde dataset
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_refutation_testing.html">
+   Applying refutation tests to the Lalonde and IHDP datasets
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_401k_analysis.html">
+   Impact of 401(k) eligibility on net financial assets
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="prediction/dowhy_causal_prediction_demo.html">
+   Demo for DoWhy Causal Prediction on MNIST
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="lalonde_pandas_api.html">
+   Lalonde Pandas API Example
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Modeling and refuting causal assumptions
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="load_graph_example.html">
+   Different ways to load an input graph
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_causal_discovery_example.html">
+   Causal Discovery example
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gcm_falsify_dag.html">
+   Falsification of User-Given Directed Acyclic Graphs
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="sensitivity_analysis_testing.html">
+   Sensitivity Analysis for Regression Models
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="sensitivity_analysis_nonparametric_estimators.html">
+   Sensitivity analysis for non-parametric causal estimators
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_refuter_notebook.html">
+   Iterating over multiple refutation tests
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_refuter_assess_overlap.html">
+   Assessing Support and Overlap with OverRule
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_demo_dummy_outcome_refuter.html">
+   A Simple Example on Creating a Custom Refutation Using User-Defined Outcome Functions
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Miscellaneous
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_estimation_methods.html">
+   DoWhy: Different estimation methods for causal inference
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy-simple-iv-example.html">
+   Simple example on using Instrumental Variables method for estimation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_interpreter.html">
+   DoWhy: Interpreters for Causal Estimators
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_mediation_analysis.html">
+   Mediation analysis with DoWhy: Direct and Indirect Effects
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_multiple_treatments.html">
+   Estimating effect of multiple treatments
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dowhy_efficient_backdoor_example.html">
+   Finding optimal adjustment sets
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="identifying_effects_using_id_algorithm.html">
+   Identifying Effect using ID Algorithm
+  </a>
+ </li>
+</ul>
+
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+    
+    <div class="toc-item">
+      
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
+
+<nav id="bd-toc-nav">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h1 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#">
+   Causal Attributions and Root-Cause Analysis in an Online Shop
+  </a>
+  <ul class="visible nav section-nav flex-column">
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#The-scenario">
+     The scenario
+    </a>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#Step-1:-Define-causal-model">
+     Step 1: Define causal model
+    </a>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#Step-2:-Fit-causal-models-to-data">
+     Step 2: Fit causal models to data
+    </a>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#Step-3:-Answer-causal-questions">
+     Step 3: Answer causal questions
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h3 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#Generate-new-samples">
+       Generate new samples
+      </a>
+     </li>
+     <li class="toc-h3 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#What-are-the-key-factors-influencing-the-variance-in-profit?">
+       What are the key factors influencing the variance in profit?
+      </a>
+     </li>
+     <li class="toc-h3 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#What-are-the-key-factors-explaining-the-Profit-drop-on-a-particular-day?">
+       What are the key factors explaining the Profit drop on a particular day?
+      </a>
+     </li>
+     <li class="toc-h3 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#What-caused-the-profit-drop-in-Q1-2022?">
+       What caused the profit drop in Q1 2022?
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h1 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#Data-generation-process">
+   Data generation process
+  </a>
+ </li>
+</ul>
+
+</nav>
+    </div>
+    
+    <div class="toc-item">
+      
+    </div>
+    
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars and line breaks on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+    white-space: pre;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt .copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+.jp-RenderedHTMLCommon table,
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+.jp-RenderedHTMLCommon thead,
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+.jp-RenderedHTMLCommon tr,
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon td,
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+.jp-RenderedHTMLCommon th,
+div.rendered_html th {
+  font-weight: bold;
+}
+.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+.jp-RenderedHTMLCommon tbody tr:hover,
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+</style>
+<section id="Causal-Attributions-and-Root-Cause-Analysis-in-an-Online-Shop">
+<h1>Causal Attributions and Root-Cause Analysis in an Online Shop<a class="headerlink" href="#Causal-Attributions-and-Root-Cause-Analysis-in-an-Online-Shop" title="Permalink to this heading"></a></h1>
+<p>This notebook is an extended and updated version of the corresponding blog post: <a class="reference external" href="https://aws.amazon.com/blogs/opensource/root-cause-analysis-with-dowhy-an-open-source-python-library-for-causal-machine-learning/">Root Cause Analysis with DoWhy, an Open Source Python Library for Causal Machine Learning</a></p>
+<p>In this example, we look at an online store and analyze how different factors influence our profit. In particular, we want to analyze an unexpected drop in profit and identify the potential root cause of it. For this, we can make use of Graphical Causal Models (GCM).</p>
+<section id="The-scenario">
+<h2>The scenario<a class="headerlink" href="#The-scenario" title="Permalink to this heading"></a></h2>
+<p>Suppose we are selling a smartphone in an online shop with a retail price of $999. The overall profit from the product depends on several factors, such as the number of sold units, operational costs or ad spending. On the other hand, the number of sold units, for instance, depends on the number of visitors on the product page, the price itself and potential ongoing promotions. Suppose we observe a steady profit of our product over the year 2021, but suddenly, there is a significant drop in
+profit at the beginning of 2022. Why?</p>
+<p>In the following scenario, we will use DoWhy to get a better understanding of the causal impacts of factors influencing the profit and to identify the causes for the profit drop. To analyze our problem at hand, we first need to define our belief about the causal relationships. For this, we collect daily records of the different factors affecting profit. These factors are:</p>
+<ul class="simple">
+<li><p><strong>Shopping Event?</strong>: A binary value indicating whether a special shopping event took place, such as Black Friday or Cyber Monday sales.</p></li>
+<li><p><strong>Ad Spend</strong>: Spending on ad campaigns.</p></li>
+<li><p><strong>Page Views</strong>: Number of visits on the product detail page.</p></li>
+<li><p><strong>Unit Price</strong>: Price of the device, which could vary due to temporary discounts.</p></li>
+<li><p><strong>Sold Units</strong>: Number of sold phones.</p></li>
+<li><p><strong>Revenue</strong>: Daily revenue.</p></li>
+<li><p><strong>Operational Cost</strong>: Daily operational expenses which includes production costs, spending on ads, administrative expenses, etc.</p></li>
+<li><p><strong>Profit</strong>: Daily profit.</p></li>
+</ul>
+<p>Looking at these attributes, we can use our domain knowledge to describe the cause-effect relationships in the form of a directed acyclic graph, which represents our causal graph in the following. The graph is shown here:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span>
+<span class="n">Image</span><span class="p">(</span><span class="s1">&#39;online-shop-graph.png&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_online_shop_4_0.png" src="../_images/example_notebooks_gcm_online_shop_4_0.png" />
+</div>
+</div>
+<p>In this scenario we know the following:</p>
+<div class="line-block">
+<div class="line"><strong>Shopping Event?</strong> impacts:</div>
+<div class="line">→ Ad Spend: To promote the product on special shopping events, we require additional ad spending.</div>
+<div class="line">→ Page Views: Shopping events typically attract a large number of visitors to an online retailer due to discounts and various offers.</div>
+<div class="line">→ Unit Price: Typically, retailers offer some discount on the usual retail price on days with a shopping event.</div>
+<div class="line">→ Sold Units: Shopping events often take place during annual celebrations like Christmas, Father’s day, etc, when people often buy more than usual.</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>Ad Spend</strong> impacts:</div>
+<div class="line">→ Page Views: The more we spend on ads, the more likely people will visit the product page.</div>
+<div class="line">→ Operational Cost: Ad spending is part of the operational cost.</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>Page Views</strong> impacts:</div>
+<div class="line">→ Sold Units: The more people visiting the product page, the more likely the product is bought. This is quite obvious seeing that if no one would visit the page, there wouldn’t be any sale.</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>Unit Price</strong> impacts:</div>
+<div class="line">→ Sold Units: The higher/lower the price, the less/more units are sold.</div>
+<div class="line">→ Revenue: The daily revenue typically consist of the product of the number of sold units and unit price.</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>Sold Units</strong> impacts:</div>
+<div class="line">→ Sold Units: Same argument as before, the number of sold units heavily influences the revenue.</div>
+<div class="line">→ Operational Cost: There is a manufacturing cost for each unit we produce and sell. The more units we well the higher the revenue, but also the higher the manufacturing costs.</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>Operational Cost</strong> impacts:</div>
+<div class="line">→ Profit: The profit is based on the generated revenue minus the operational cost.</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>Revenue</strong> impacts:</div>
+<div class="line">→ Profit: Same reason as for the operational cost.</div>
+</div>
+</section>
+<section id="Step-1:-Define-causal-model">
+<h2>Step 1: Define causal model<a class="headerlink" href="#Step-1:-Define-causal-model" title="Permalink to this heading"></a></h2>
+<p>Now, let us model these causal relationships. In the first step, we need to define a so-called structural causal model (SCM), which is a combination of the causal graph and the underlying generative models describing the data generation process.</p>
+<p>The causal graph can be defined via:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+
+<span class="n">causal_graph</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">([(</span><span class="s1">&#39;Page Views&#39;</span><span class="p">,</span> <span class="s1">&#39;Sold Units&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;Revenue&#39;</span><span class="p">,</span> <span class="s1">&#39;Profit&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;Unit Price&#39;</span><span class="p">,</span> <span class="s1">&#39;Sold Units&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;Unit Price&#39;</span><span class="p">,</span> <span class="s1">&#39;Revenue&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;Shopping Event?&#39;</span><span class="p">,</span> <span class="s1">&#39;Page Views&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;Shopping Event?&#39;</span><span class="p">,</span> <span class="s1">&#39;Sold Units&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;Shopping Event?&#39;</span><span class="p">,</span> <span class="s1">&#39;Unit Price&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;Shopping Event?&#39;</span><span class="p">,</span> <span class="s1">&#39;Ad Spend&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;Ad Spend&#39;</span><span class="p">,</span> <span class="s1">&#39;Page Views&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;Ad Spend&#39;</span><span class="p">,</span> <span class="s1">&#39;Operational Cost&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;Sold Units&#39;</span><span class="p">,</span> <span class="s1">&#39;Revenue&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;Sold Units&#39;</span><span class="p">,</span> <span class="s1">&#39;Operational Cost&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;Operational Cost&#39;</span><span class="p">,</span> <span class="s1">&#39;Profit&#39;</span><span class="p">)])</span>
+</pre></div>
+</div>
+</div>
+<p>To verify that we did not forget an edge, we can plot this graph:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dowhy.utils</span> <span class="kn">import</span> <span class="n">plot</span>
+
+<span class="n">plot</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_online_shop_10_0.png" src="../_images/example_notebooks_gcm_online_shop_10_0.png" />
+</div>
+</div>
+<p>Next, we look at the data from 2021:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">pd</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">float_format</span> <span class="o">=</span> <span class="s1">&#39;$</span><span class="si">{:,.2f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span>  <span class="c1"># Format dollar columns</span>
+
+<span class="n">data_2021</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;2021 Data.csv&#39;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="s1">&#39;Date&#39;</span><span class="p">)</span>
+<span class="n">data_2021</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Shopping Event?</th>
+      <th>Ad Spend</th>
+      <th>Page Views</th>
+      <th>Unit Price</th>
+      <th>Sold Units</th>
+      <th>Revenue</th>
+      <th>Operational Cost</th>
+      <th>Profit</th>
+    </tr>
+    <tr>
+      <th>Date</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>2021-01-01</th>
+      <td>False</td>
+      <td>$1,490.49</td>
+      <td>11861</td>
+      <td>$999.00</td>
+      <td>2317</td>
+      <td>$2,314,683.00</td>
+      <td>$1,659,999.89</td>
+      <td>$654,683.11</td>
+    </tr>
+    <tr>
+      <th>2021-01-02</th>
+      <td>False</td>
+      <td>$1,455.92</td>
+      <td>11776</td>
+      <td>$999.00</td>
+      <td>2355</td>
+      <td>$2,352,645.00</td>
+      <td>$1,678,959.08</td>
+      <td>$673,685.92</td>
+    </tr>
+    <tr>
+      <th>2021-01-03</th>
+      <td>False</td>
+      <td>$1,405.82</td>
+      <td>11861</td>
+      <td>$999.00</td>
+      <td>2391</td>
+      <td>$2,388,609.00</td>
+      <td>$1,696,906.14</td>
+      <td>$691,702.86</td>
+    </tr>
+    <tr>
+      <th>2021-01-04</th>
+      <td>False</td>
+      <td>$1,379.30</td>
+      <td>11677</td>
+      <td>$999.00</td>
+      <td>2344</td>
+      <td>$2,341,656.00</td>
+      <td>$1,673,380.64</td>
+      <td>$668,275.36</td>
+    </tr>
+    <tr>
+      <th>2021-01-05</th>
+      <td>False</td>
+      <td>$1,234.20</td>
+      <td>11871</td>
+      <td>$999.00</td>
+      <td>2412</td>
+      <td>$2,409,588.00</td>
+      <td>$1,707,252.61</td>
+      <td>$702,335.39</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>As we see, we have one sample for each day in 2021 with all the variables in the causal graph. Note that in the synthetic data we consider here, shopping events were also generated randomly.</p>
+<p>We defined the causal graph, but we still need to assign generative models to the nodes. We can either manually specify those models, and configure them if needed, or automatically infer “appropriate” models using heuristics from data. We will leverage the latter here:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">gcm</span>
+
+<span class="c1"># Create the structural causal model object</span>
+<span class="n">scm</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">StructuralCausalModel</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">)</span>
+
+<span class="c1"># Automatically assign generative models to each node based on the given data</span>
+<span class="n">auto_assignment_summary</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">auto</span><span class="o">.</span><span class="n">assign_causal_mechanisms</span><span class="p">(</span><span class="n">scm</span><span class="p">,</span> <span class="n">data_2021</span><span class="p">,</span> <span class="n">override_models</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">quality</span><span class="o">=</span><span class="n">gcm</span><span class="o">.</span><span class="n">auto</span><span class="o">.</span><span class="n">AssignmentQuality</span><span class="o">.</span><span class="n">GOOD</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Whenever available, we recommend assigning models based on prior knowledge as then models would closely mimic the physics of the domain, and not rely on nuances of the data. However, here we asked DoWhy to do this for us instead.</p>
+<p>After automatically assign the models, we can print a summary to obtain some insights into the selected models:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">auto_assignment_summary</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+When using this auto assignment function, the given data is used to automatically assign a causal mechanism to each node. Note that causal mechanisms can also be customized and assigned manually.
+The following types of causal mechanisms are considered for the automatic selection:
+
+If root node:
+An empirical distribution, i.e., the distribution is represented by randomly sampling from the provided data. This provides a flexible and non-parametric way to model the marginal distribution and is valid for all types of data modalities.
+
+If non-root node and the data is continuous:
+Additive Noise Models (ANM) of the form X_i = f(PA_i) + N_i, where PA_i are the parents of X_i and the unobserved noise N_i is assumed to be independent of PA_i.To select the best model for f, different regression models are evaluated and the model with the smallest mean squared error is selected.Note that minimizing the mean squared error here is equivalent to selecting the best choice of an ANM.
+
+If non-root node and the data is discrete:
+Discrete Additive Noise Models have almost the same definition as non-discrete ANMs, but come with an additional constraint for f to only return discrete values.
+Note that &#39;discrete&#39; here refers to numerical values with an order. If the data is categorical, consider representing them as strings to ensure proper model selection.
+
+If non-root node and the data is categorical:
+A functional causal model based on a classifier, i.e., X_i = f(PA_i, N_i).
+Here, N_i follows a uniform distribution on [0, 1] and is used to randomly sample a class (category) using the conditional probability distribution produced by a classification model.Here, different model classes are evaluated using the (negative) F1 score and the best performing model class is selected.
+
+In total, 8 nodes were analyzed:
+
+--- Node: Shopping Event?
+Node Shopping Event? is a root node. Therefore, assigning &#39;Empirical Distribution&#39; to the node representing the marginal distribution.
+
+--- Node: Unit Price
+Node Unit Price is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using LinearRegression&#39; to the node.
+This represents the causal relationship as Unit Price := f(Shopping Event?) + N.
+For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
+LinearRegression: 173.89290440470378
+Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
+                (&#39;linearregression&#39;, LinearRegression)]): 173.91231986181572
+HistGradientBoostingRegressor: 424.4940960207522
+
+--- Node: Ad Spend
+Node Ad Spend is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using LinearRegression&#39; to the node.
+This represents the causal relationship as Ad Spend := f(Shopping Event?) + N.
+For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
+LinearRegression: 16052.343243527477
+Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
+                (&#39;linearregression&#39;, LinearRegression)]): 16104.559806520803
+HistGradientBoostingRegressor: 80667.478141064
+
+--- Node: Page Views
+Node Page Views is a non-root node with discrete data. Assigning &#39;Discrete AdditiveNoiseModel using LinearRegression&#39; to the node.
+This represents the discrete causal relationship as Page Views := f(Ad Spend,Shopping Event?) + N.
+For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
+LinearRegression: 83752.2484163109
+Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
+                (&#39;linearregression&#39;, LinearRegression)]): 90424.61859815204
+HistGradientBoostingRegressor: 1639729.7018013946
+
+--- Node: Sold Units
+Node Sold Units is a non-root node with discrete data. Assigning &#39;Discrete AdditiveNoiseModel using LinearRegression&#39; to the node.
+This represents the discrete causal relationship as Sold Units := f(Page Views,Shopping Event?,Unit Price) + N.
+For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
+LinearRegression: 8787.547905531324
+Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
+                (&#39;linearregression&#39;, LinearRegression)]): 24392.192684264253
+HistGradientBoostingRegressor: 214005.22558225208
+
+--- Node: Revenue
+Node Revenue is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using Pipeline&#39; to the node.
+This represents the causal relationship as Revenue := f(Sold Units,Unit Price) + N.
+For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
+Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
+                (&#39;linearregression&#39;, LinearRegression)]): 5.483389617556825e-19
+LinearRegression: 71614558.45236312
+HistGradientBoostingRegressor: 161555764340.88623
+
+--- Node: Operational Cost
+Node Operational Cost is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using LinearRegression&#39; to the node.
+This represents the causal relationship as Operational Cost := f(Ad Spend,Sold Units) + N.
+For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
+LinearRegression: 38.490271594584144
+Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
+                (&#39;linearregression&#39;, LinearRegression)]): 38.68580641051163
+HistGradientBoostingRegressor: 16425306559.610529
+
+--- Node: Profit
+Node Profit is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using LinearRegression&#39; to the node.
+This represents the causal relationship as Profit := f(Operational Cost,Revenue) + N.
+For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
+LinearRegression: 1.1970037546776607e-18
+Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
+                (&#39;linearregression&#39;, LinearRegression)]): 1.9443157573149858e-06
+HistGradientBoostingRegressor: 21578352291.250248
+
+===Note===
+Note, based on the selected auto assignment quality, the set of evaluated models changes.
+For more insights toward the quality of the fitted graphical causal model, consider using the evaluate_causal_model function after fitting the causal mechanisms.
+</pre></div></div>
+</div>
+<p>As we see, while the auto assignment also considered non-linear models, a linear model is sufficient for most relationships, except for Revenue, which is the product of Sold Units and Unit Price.</p>
+</section>
+<section id="Step-2:-Fit-causal-models-to-data">
+<h2>Step 2: Fit causal models to data<a class="headerlink" href="#Step-2:-Fit-causal-models-to-data" title="Permalink to this heading"></a></h2>
+<p>After assigning a model to each node, we need to learn the parameters of the model:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gcm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">scm</span><span class="p">,</span> <span class="n">data_2021</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Fitting causal mechanism of node Operational Cost: 100%|██████████| 8/8 [00:00&lt;00:00, 374.13it/s]
+</pre></div></div>
+</div>
+<p>The fit method learns the parameters of the generative models in each node. Before we continue, let’s have a quick look into the performance of the causal mechanisms and how well they capture the distribution:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">evaluate_causal_model</span><span class="p">(</span><span class="n">scm</span><span class="p">,</span> <span class="n">data_2021</span><span class="p">,</span> <span class="n">compare_mechanism_baselines</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">evaluate_invertibility_assumptions</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Evaluating causal mechanisms...: 100%|██████████| 8/8 [00:00&lt;00:00, 928.69it/s]
+Test permutations of given graph: 100%|██████████| 50/50 [00:15&lt;00:00,  3.27it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_online_shop_22_1.png" src="../_images/example_notebooks_gcm_online_shop_22_1.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Evaluated the performance of the causal mechanisms and the overall average KL divergence between generated and observed distribution and the graph structure. The results are as follows:
+
+==== Evaluation of Causal Mechanisms ====
+The used evaluation metrics are:
+- KL divergence (only for root-nodes): Evaluates the divergence between the generated and the observed distribution.
+- Mean Squared Error (MSE): Evaluates the average squared differences between the observed values and the conditional expectation of the causal mechanisms.
+- Normalized MSE (NMSE): The MSE normalized by the standard deviation for better comparison.
+- R2 coefficient: Indicates how much variance is explained by the conditional expectations of the mechanisms. Note, however, that this can be misleading for nonlinear relationships.
+- F1 score (only for categorical non-root nodes): The harmonic mean of the precision and recall indicating the goodness of the underlying classifier model.
+- (normalized) Continuous Ranked Probability Score (CRPS): The CRPS generalizes the Mean Absolute Percentage Error to probabilistic predictions. This gives insights into the accuracy and calibration of the causal mechanisms.
+NOTE: Every metric focuses on different aspects and they might not consistently indicate a good or bad performance.
+We will mostly utilize the CRPS for comparing and interpreting the performance of the mechanisms, since this captures the most important properties for the causal model.
+
+--- Node Shopping Event?
+- The KL divergence between generated and observed distribution is 0.021248557575463838.
+The estimated KL divergence indicates an overall very good representation of the data distribution.
+
+--- Node Unit Price
+- The MSE is 158.26888727551994.
+- The NMSE is 0.5442715148045221.
+- The R2 coefficient is 0.5867638447218966.
+- The normalized CRPS is 0.10951417014033864.
+The estimated CRPS indicates a very good model performance.
+The mechanism is better or equally good than all 7 baseline mechanisms.
+
+--- Node Ad Spend
+- The MSE is 16949.344070897096.
+- The NMSE is 0.4599403922404206.
+- The R2 coefficient is 0.7881577408805762.
+- The normalized CRPS is 0.2641921446995869.
+The estimated CRPS indicates a good model performance.
+The mechanism is better or equally good than all 7 baseline mechanisms.
+
+--- Node Page Views
+- The MSE is 76422.9698630137.
+- The NMSE is 0.15385424876437398.
+- The R2 coefficient is 0.9741028645602944.
+- The normalized CRPS is 0.06174482921295101.
+The estimated CRPS indicates a very good model performance.
+The mechanism is better or equally good than all 7 baseline mechanisms.
+
+--- Node Sold Units
+- The MSE is 8846.750684931507.
+- The NMSE is 0.135389768018471.
+- The R2 coefficient is 0.9791293243390389.
+- The normalized CRPS is 0.06182505153935758.
+The estimated CRPS indicates a very good model performance.
+The mechanism is better or equally good than all 7 baseline mechanisms.
+
+--- Node Revenue
+- The MSE is 4.247696182614442e-19.
+- The NMSE is 1.171067519259246e-15.
+- The R2 coefficient is 1.0.
+- The normalized CRPS is 2.4758679125145686e-16.
+The estimated CRPS indicates a very good model performance.
+The mechanism is better or equally good than all 7 baseline mechanisms.
+
+--- Node Operational Cost
+- The MSE is 38.54975345373574.
+- The NMSE is 3.984489528715203e-05.
+- The R2 coefficient is 0.9999999959436547.
+- The normalized CRPS is 2.2373671978090065e-05.
+The estimated CRPS indicates a very good model performance.
+The mechanism is better or equally good than all 7 baseline mechanisms.
+
+--- Node Profit
+- The MSE is 1.6039508714735895e-18.
+- The NMSE is 5.881414548904148e-15.
+- The R2 coefficient is 1.0.
+- The normalized CRPS is 2.8725533367493615e-16.
+The estimated CRPS indicates a very good model performance.
+The mechanism is better or equally good than all 7 baseline mechanisms.
+
+==== Evaluation of Generated Distribution ====
+The overall average KL divergence between the generated and observed distribution is 1.1129861771735579
+The estimated KL divergence indicates some mismatches between the distributions.
+
+==== Evaluation of the Causal Graph Structure ====
++-------------------------------------------------------------------------------------------------------+
+|                                         Falsificaton Summary                                          |
++-------------------------------------------------------------------------------------------------------+
+| The given DAG is informative because 0 / 50 of the permutations lie in the Markov                     |
+| equivalence class of the given DAG (p-value: 0.00).                                                   |
+| The given DAG violates 6/18 LMCs and is better than 72.0% of the permuted DAGs (p-value: 0.28).       |
+| Based on the provided significance level (0.2) and because the DAG is informative,                    |
+| we reject the DAG.                                                                                    |
++-------------------------------------------------------------------------------------------------------+
+
+==== NOTE ====
+Always double check the made model assumptions with respect to the graph structure and choice of causal mechanisms.
+All these evaluations give some insight into the goodness of the causal model, but should not be overinterpreted, since some causal relationships can be intrinsically hard to model. Furthermore, many algorithms are fairly robust against misspecifications or poor performances of causal mechanisms.
+</pre></div></div>
+</div>
+<p>The fitted causal mechanisms are fairly good representations of the data generation process, with some minor inaccuracies. However, this is to be expected given the small sample size and relatively small signal-to-noise ratio for many nodes. Most importantly, all the baseline mechanisms did not perform better, which is a good indicator that our model selection is appropriate. Based on the evaluation, we also do not reject the given causal graph.</p>
+<blockquote>
+<div><p>The selection of baseline models or the p-value for graph falsification can be configured as well. For more details, take a look at the corresponding evaluate_causal_model documentation.</p>
+</div></blockquote>
+</section>
+<section id="Step-3:-Answer-causal-questions">
+<h2>Step 3: Answer causal questions<a class="headerlink" href="#Step-3:-Answer-causal-questions" title="Permalink to this heading"></a></h2>
+<section id="Generate-new-samples">
+<h3>Generate new samples<a class="headerlink" href="#Generate-new-samples" title="Permalink to this heading"></a></h3>
+<p>Since we learned about the data generation process, we can also generate new samples:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gcm</span><span class="o">.</span><span class="n">draw_samples</span><span class="p">(</span><span class="n">scm</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Shopping Event?</th>
+      <th>Unit Price</th>
+      <th>Ad Spend</th>
+      <th>Page Views</th>
+      <th>Sold Units</th>
+      <th>Revenue</th>
+      <th>Operational Cost</th>
+      <th>Profit</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>False</td>
+      <td>$999.00</td>
+      <td>$1,134.12</td>
+      <td>11674</td>
+      <td>2395</td>
+      <td>$2,392,605.00</td>
+      <td>$1,698,638.68</td>
+      <td>$693,966.32</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>False</td>
+      <td>$999.00</td>
+      <td>$1,283.40</td>
+      <td>11652</td>
+      <td>2686</td>
+      <td>$2,683,314.00</td>
+      <td>$1,844,285.03</td>
+      <td>$839,028.97</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>False</td>
+      <td>$999.00</td>
+      <td>$1,216.10</td>
+      <td>11639</td>
+      <td>2380</td>
+      <td>$2,377,620.00</td>
+      <td>$1,691,226.93</td>
+      <td>$686,393.07</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>False</td>
+      <td>$999.00</td>
+      <td>$1,422.11</td>
+      <td>11822</td>
+      <td>2372</td>
+      <td>$2,369,628.00</td>
+      <td>$1,687,424.42</td>
+      <td>$682,203.58</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>False</td>
+      <td>$999.00</td>
+      <td>$1,473.02</td>
+      <td>11917</td>
+      <td>2407</td>
+      <td>$2,404,593.00</td>
+      <td>$1,704,983.42</td>
+      <td>$699,609.58</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>True</td>
+      <td>$913.46</td>
+      <td>$2,723.45</td>
+      <td>20341</td>
+      <td>6053</td>
+      <td>$5,529,155.41</td>
+      <td>$3,529,226.02</td>
+      <td>$1,999,929.39</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>False</td>
+      <td>$999.00</td>
+      <td>$1,234.39</td>
+      <td>11756</td>
+      <td>2369</td>
+      <td>$2,366,631.00</td>
+      <td>$1,685,738.50</td>
+      <td>$680,892.50</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>False</td>
+      <td>$999.00</td>
+      <td>$1,465.95</td>
+      <td>12001</td>
+      <td>2384</td>
+      <td>$2,381,616.00</td>
+      <td>$1,693,471.61</td>
+      <td>$688,144.39</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>False</td>
+      <td>$999.00</td>
+      <td>$1,219.27</td>
+      <td>11619</td>
+      <td>2349</td>
+      <td>$2,346,651.00</td>
+      <td>$1,675,725.29</td>
+      <td>$670,925.71</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>False</td>
+      <td>$999.00</td>
+      <td>$1,163.66</td>
+      <td>11615</td>
+      <td>2256</td>
+      <td>$2,253,744.00</td>
+      <td>$1,629,174.20</td>
+      <td>$624,569.80</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>We have drawn 10 samples from the joint distribution following the learned causal relationships.</p>
+</section>
+<section id="What-are-the-key-factors-influencing-the-variance-in-profit?">
+<h3>What are the key factors influencing the variance in profit?<a class="headerlink" href="#What-are-the-key-factors-influencing-the-variance-in-profit?" title="Permalink to this heading"></a></h3>
+<p>At this point, we want to understand which factors drive changes in the Profit. Let us first have a closer look at the Profit over time. For this, we plot the Profit over time for 2021, where the produced plot shows the Profit in dollars on the Y-axis and the time on the X-axis.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_2021</span><span class="p">[</span><span class="s1">&#39;Profit&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ylabel</span><span class="o">=</span><span class="s1">&#39;Profit in $&#39;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="n">rot</span><span class="o">=</span><span class="mi">45</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Axes: xlabel=&#39;Date&#39;, ylabel=&#39;Profit in $&#39;&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_online_shop_30_1.png" src="../_images/example_notebooks_gcm_online_shop_30_1.png" />
+</div>
+</div>
+<p>We see some significant spikes in the Profit across the year. We can further quantify this by looking at the standard deviation:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_2021</span><span class="p">[</span><span class="s1">&#39;Profit&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle 259247.66010978$</div></div>
+</div>
+<p>The estimated standard deviation of ~259247 dollars is quite significant. Looking at the causal graph, we see that Revenue and Operational Cost have a direct impact on the Profit, but which of them contribute the most to the variance? To find this out, we can make use of the direct arrow strength algorithm that quantifies the causal influence of a specific arrow in the graph:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1"># Note: The percentage conversion only makes sense for purely positive attributions.</span>
+<span class="k">def</span> <span class="nf">convert_to_percentage</span><span class="p">(</span><span class="n">value_dictionary</span><span class="p">):</span>
+    <span class="n">total_absolute_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="nb">abs</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value_dictionary</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">/</span> <span class="n">total_absolute_sum</span> <span class="o">*</span> <span class="mi">100</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value_dictionary</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+
+<span class="n">arrow_strengths</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">arrow_strength</span><span class="p">(</span><span class="n">scm</span><span class="p">,</span> <span class="n">target_node</span><span class="o">=</span><span class="s1">&#39;Profit&#39;</span><span class="p">)</span>
+
+<span class="n">plot</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">,</span>
+     <span class="n">causal_strengths</span><span class="o">=</span><span class="n">convert_to_percentage</span><span class="p">(</span><span class="n">arrow_strengths</span><span class="p">),</span>
+     <span class="n">figure_size</span><span class="o">=</span><span class="p">[</span><span class="mi">15</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_online_shop_34_0.png" src="../_images/example_notebooks_gcm_online_shop_34_0.png" />
+</div>
+</div>
+<p>In this causal graph, we see how much each node contributes to the variance in Profit. For simplicity, the contributions are converted to percentages. Since Profit itself is only the difference between Revenue and Operational Cost, we do not expect further factors influencing the variance. As we see, Revenue has more impact than Operational Cost. This makes sense seeing that Revenue typically varies more than Operational Cost due to the stronger dependency on the number of sold units. Note that
+the direct arrow strength method also supports the use of other kinds of measures, for instance, KL divergence.</p>
+<p>While the direct influences are helpful in understanding which direct parents influence the most on the variance in Profit, this mostly confirms our prior belief. The question of which factor is ultimately responsible for this high variance is, however, still unclear. For instance, Revenue itself is based on Sold Units and the Unit Price. Although we could recursively apply the direct arrow strength to all nodes, we would not get a correctly weighted insight into the influence of upstream nodes
+on the variance.</p>
+<p>What are the important causal factors contributing to the variance in Profit? To find this out, we can use the intrinsic causal contribution method that attributes the variance in Profit to the upstream nodes in the causal graph by only considering information that is newly added by a node and not just inherited from its parents. For instance, a node that is simply a rescaled version of its parent would not have any intrinsic contribution. See the corresponding <a class="reference external" href="https://arxiv.org/abs/2007.00714">research
+paper</a> for more details.</p>
+<p>Let’s apply the method to the data:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">iccs</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">intrinsic_causal_influence</span><span class="p">(</span><span class="n">scm</span><span class="p">,</span> <span class="n">target_node</span><span class="o">=</span><span class="s1">&#39;Profit&#39;</span><span class="p">,</span> <span class="n">num_samples_randomization</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Estimating Shapley Values. Average change of Shapley values in run 85 (425 evaluated permutations): 0.34899774120038946%: 100%|██████████| 1/1 [14:02&lt;00:00, 842.65s/it]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dowhy.utils</span> <span class="kn">import</span> <span class="n">bar_plot</span>
+
+<span class="n">bar_plot</span><span class="p">(</span><span class="n">convert_to_percentage</span><span class="p">(</span><span class="n">iccs</span><span class="p">),</span> <span class="n">ylabel</span><span class="o">=</span><span class="s1">&#39;Variance attribution in %&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_online_shop_37_0.png" src="../_images/example_notebooks_gcm_online_shop_37_0.png" />
+</div>
+</div>
+<p>The scores shown in this bar chart are percentages indicating how much variance each node is contributing to Profit — without inheriting the variance from its parents in the causal graph. As we see quite clearly, the Shopping Event has by far the biggest influence on the variance in our Profit. This makes sense, seeing that the sales are heavily impacted during promotion periods like Black Friday or Prime Day and, thus, impact the overall profit. Surprisingly, we also see that factors such as
+the number of sold units or number of page views have a rather small influence, i.e., the large variance in profit can be almost completely explained by the shopping events. Let’s check this visually by marking the days where we had a shopping event. To do so, we use the pandas plot function again, but additionally mark all points in the plot with a vertical red bar where a shopping event occured:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="n">data_2021</span><span class="p">[</span><span class="s1">&#39;Profit&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ylabel</span><span class="o">=</span><span class="s1">&#39;Profit in $&#39;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="n">rot</span><span class="o">=</span><span class="mi">45</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">vlines</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">data_2021</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])[</span><span class="n">data_2021</span><span class="p">[</span><span class="s1">&#39;Shopping Event?&#39;</span><span class="p">]],</span> <span class="n">data_2021</span><span class="p">[</span><span class="s1">&#39;Profit&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">data_2021</span><span class="p">[</span><span class="s1">&#39;Profit&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;matplotlib.collections.LineCollection at 0x7ff073cfe850&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_online_shop_39_1.png" src="../_images/example_notebooks_gcm_online_shop_39_1.png" />
+</div>
+</div>
+<p>We clearly see that the shopping events coincide with the high peaks in profit. While we could have investigated this manually by looking at all kinds of different relationships or using domain knowledge, the tasks gets much more difficult as the complexity of the system increases. With a few lines of code, we obtained these insights from DoWhy.</p>
+</section>
+<section id="What-are-the-key-factors-explaining-the-Profit-drop-on-a-particular-day?">
+<h3>What are the key factors explaining the Profit drop on a particular day?<a class="headerlink" href="#What-are-the-key-factors-explaining-the-Profit-drop-on-a-particular-day?" title="Permalink to this heading"></a></h3>
+<p>After a successful year in terms of profit, newer technologies come to the market and, thus, we want to keep the profit up and get rid of excess inventory by selling more devices. In order to increase the demand, we therefore lower the retail price by 10% at the beginning of 2022. Based on a prior analysis, we know that a decrease of 10% in the price would roughly increase the demand by 13.75%, a slight surplus. Following the price elasticity of demand model, we expect an increase of around
+37.5% in number of Sold Units. Let us take a look if this is true by loading the data for the first day in 2022 and taking the fraction between the numbers of Sold Units from both years for that day:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">first_day_2022</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;2022 First Day.csv&#39;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="s1">&#39;Date&#39;</span><span class="p">)</span>
+<span class="p">(</span><span class="n">first_day_2022</span><span class="p">[</span><span class="s1">&#39;Sold Units&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">data_2021</span><span class="p">[</span><span class="s1">&#39;Sold Units&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle 18.9469141130773$</div></div>
+</div>
+<p>Surprisingly, we only increased the number of sold units by ~19%. This will certainly impact the profit given that the revenue is much smaller than expected. Let us compare it with the previous year at the same time:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">first_day_2022</span><span class="p">[</span><span class="s1">&#39;Profit&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">data_2021</span><span class="p">[</span><span class="s1">&#39;Profit&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="mi">100</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle 8.57891513840979$</div></div>
+</div>
+<p>Indeed, the profit dropped by ~8.5%. Why is this the case seeing that we would expect a much higher demand due to the decreased price? Let us investigate what is going on here.</p>
+<p>In order to figure out what contributed to the Profit drop, we can make use of DoWhy’s anomaly attribution feature. Here, we only need to specify the target node we are interested in (the Profit) and the anomaly sample we want to analyze (the first day of 2022). These results are then plotted in a bar chart indicating the attribution scores of each node for the given anomaly sample:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">attributions</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">attribute_anomalies</span><span class="p">(</span><span class="n">scm</span><span class="p">,</span> <span class="n">target_node</span><span class="o">=</span><span class="s1">&#39;Profit&#39;</span><span class="p">,</span> <span class="n">anomaly_samples</span><span class="o">=</span><span class="n">first_day_2022</span><span class="p">)</span>
+
+<span class="n">bar_plot</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">attributions</span><span class="o">.</span><span class="n">items</span><span class="p">()},</span> <span class="n">ylabel</span><span class="o">=</span><span class="s1">&#39;Anomaly attribution score&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Estimating Shapley Values. Average change of Shapley values in run 31 (155 evaluated permutations): 1.8221126046895921%: 100%|██████████| 1/1 [00:03&lt;00:00,  3.24s/it]
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_online_shop_47_1.png" src="../_images/example_notebooks_gcm_online_shop_47_1.png" />
+</div>
+</div>
+<p>A positive attribution score means that the corresponding node contributed to the observed anomaly, which is in our case the drop in Profit. A negative score of a node indicates that the observed value for the node is actually reducing the likelihood of the anomaly (e.g., a higher demand due to the decreased price should increase the profit). More details about the interpretation of the score can be found in the corresponding <a class="reference external" href="https://proceedings.mlr.press/v162/budhathoki22a.html">reserach
+paper</a>. Interestingly, the Page Views stand out as a factor explaining the Profit drop that day as indicated in the bar chart shown here.</p>
+<p>While this method gives us a point estimate of the attributions for the particular models and parameters we learned, we can also use DoWhy’s confidence interval feature, which incorporates uncertainties about the fitted model parameters and algorithmic approximations:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gcm</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">disable_progress_bars</span><span class="p">()</span>  <span class="c1"># We turn off the progress bars here to reduce the number of outputs.</span>
+
+<span class="n">median_attributions</span><span class="p">,</span> <span class="n">confidence_intervals</span><span class="p">,</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">confidence_intervals</span><span class="p">(</span>
+    <span class="n">gcm</span><span class="o">.</span><span class="n">fit_and_compute</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">attribute_anomalies</span><span class="p">,</span>
+                        <span class="n">scm</span><span class="p">,</span>
+                        <span class="n">bootstrap_training_data</span><span class="o">=</span><span class="n">data_2021</span><span class="p">,</span>
+                        <span class="n">target_node</span><span class="o">=</span><span class="s1">&#39;Profit&#39;</span><span class="p">,</span>
+                        <span class="n">anomaly_samples</span><span class="o">=</span><span class="n">first_day_2022</span><span class="p">),</span>
+    <span class="n">num_bootstrap_resamples</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bar_plot</span><span class="p">(</span><span class="n">median_attributions</span><span class="p">,</span> <span class="n">confidence_intervals</span><span class="p">,</span> <span class="s1">&#39;Anomaly attribution score&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_online_shop_50_0.png" src="../_images/example_notebooks_gcm_online_shop_50_0.png" />
+</div>
+</div>
+<p>Note, in this bar chart we see the median attributions over multiple runs on smaller data sets, where each run re-fits the models and re-evaluates the attributions. We get a similar picture as before, but the confidence interval of the attribution to Sold Units also contains zero, meaning its contribution is insignificant. But some important questions still remain: Was this only a coincidence and, if not, which part in our system has changed? To find this out, we need to collect some more data.</p>
+<blockquote>
+<div><p>Note that the results differ depending on the selected data, since they are sample specific. On other days, other factors could be relevant. Furthermore, note that the analysis (including the confidence intervals) always relies on the modeling assumptions made. In other words, if the models change or have a poor fit, one would also expect different results.</p>
+</div></blockquote>
+</section>
+<section id="What-caused-the-profit-drop-in-Q1-2022?">
+<h3>What caused the profit drop in Q1 2022?<a class="headerlink" href="#What-caused-the-profit-drop-in-Q1-2022?" title="Permalink to this heading"></a></h3>
+<p>While the previous analysis is based on a single observation, let us see if this was just coincidence or if this is a persistent issue. When preparing the quarterly business report, we have some more data available from the first three months. We first check if the profit dropped on average in the first quarter of 2022 as compared to 2021. Similar as before, we can do this by taking the fraction between the average Profit of 2022 and 2021 for the first quarter:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_first_quarter_2021</span> <span class="o">=</span> <span class="n">data_2021</span><span class="p">[</span><span class="n">data_2021</span><span class="o">.</span><span class="n">index</span> <span class="o">&lt;=</span> <span class="s1">&#39;2021-03-31&#39;</span><span class="p">]</span>
+<span class="n">data_first_quarter_2022</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;2022 First Quarter.csv&quot;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="s1">&#39;Date&#39;</span><span class="p">)</span>
+
+<span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">data_first_quarter_2022</span><span class="p">[</span><span class="s1">&#39;Profit&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">/</span> <span class="n">data_first_quarter_2021</span><span class="p">[</span><span class="s1">&#39;Profit&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">*</span> <span class="mi">100</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle 13.0494881794224$</div></div>
+</div>
+<p>Indeed, the profit drop is persistent in the first quarter of 2022. Now, what is the root cause of this? Let us apply the <a class="reference external" href="https://proceedings.mlr.press/v130/budhathoki21a.html">distribution change method</a> to identify the part in the system that has changed:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">median_attributions</span><span class="p">,</span> <span class="n">confidence_intervals</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">confidence_intervals</span><span class="p">(</span>
+    <span class="k">lambda</span><span class="p">:</span> <span class="n">gcm</span><span class="o">.</span><span class="n">distribution_change</span><span class="p">(</span><span class="n">scm</span><span class="p">,</span>
+                                    <span class="n">data_first_quarter_2021</span><span class="p">,</span>
+                                    <span class="n">data_first_quarter_2022</span><span class="p">,</span>
+                                    <span class="n">target_node</span><span class="o">=</span><span class="s1">&#39;Profit&#39;</span><span class="p">,</span>
+                                    <span class="c1"># Here, we are intersted in explaining the differences in the mean.</span>
+                                    <span class="n">difference_estimation_func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bar_plot</span><span class="p">(</span><span class="n">median_attributions</span><span class="p">,</span> <span class="n">confidence_intervals</span><span class="p">,</span> <span class="s1">&#39;Profit change attribution in $&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_online_shop_58_0.png" src="../_images/example_notebooks_gcm_online_shop_58_0.png" />
+</div>
+</div>
+<p>In our case, the distribution change method explains the change in the mean of Profit, i.e., a negative value indicates that a node contributes to a decrease and a positive value to an increase of the mean. Using the bar chart, we get now a very clear picture that the change in Unit Price has actually a slightly positive contribution to the expected Profit due to the increase of Sold Units, but it seems that the issue is coming from the Page Views which has a negative value. While we already
+understood this as a main driver of the drop at the beginning of 2022, we have now isolated and confirmed that something changed for the Page Views as well. Let’s compare the average Page Views with the previous year.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">data_first_quarter_2022</span><span class="p">[</span><span class="s1">&#39;Page Views&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">/</span> <span class="n">data_first_quarter_2021</span><span class="p">[</span><span class="s1">&#39;Page Views&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">*</span> <span class="mi">100</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle 14.347627108364$</div></div>
+</div>
+<p>Indeed, the number of Page Views dropped by ~14%. Since we eliminated all other potential factors, we can now dive deeper into the Page Views and see what is going on there. This is a hypothetical scenario, but we could imagine it could be due to a change in the search algorithm which ranks this product lower in the results and therefore drives fewer customers to the product page. Knowing this, we could now start mitigating the issue.</p>
+</section>
+</section>
+</section>
+<section id="Data-generation-process">
+<h1>Data generation process<a class="headerlink" href="#Data-generation-process" title="Permalink to this heading"></a></h1>
+<p>While the exact same data cannot be reproduced, the following dataset generator should provide quite similar types of data and has various parameters to adjust:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dowhy.datasets</span> <span class="kn">import</span> <span class="n">sales_dataset</span>
+
+<span class="n">data_2021</span> <span class="o">=</span> <span class="n">sales_dataset</span><span class="p">(</span><span class="n">start_date</span><span class="o">=</span><span class="s2">&quot;2021-01-01&quot;</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="s2">&quot;2021-12-31&quot;</span><span class="p">)</span>
+<span class="n">data_2022</span> <span class="o">=</span> <span class="n">sales_dataset</span><span class="p">(</span><span class="n">start_date</span><span class="o">=</span><span class="s2">&quot;2022-01-01&quot;</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="s2">&quot;2022-12-31&quot;</span><span class="p">,</span> <span class="n">change_of_price</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+
+
+              </article>
+              
+
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="dowhy_example_effect_of_memberrewards_program.html" title="previous page">
+      <i class="fas fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">Estimating the Effect of a Member Rewards Program</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="gcm_rca_microservice_architecture.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">Finding the Root Cause of Elevated Latencies in a Microservice Architecture</p>
+  </div>
+  <i class="fas fa-angle-right"></i>
+  </a>
+</div>
+              </footer>
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright 2022, PyWhy contributors.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>

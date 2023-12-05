@@ -1,0 +1,246 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Do-sampler Introduction\n",
+    "by Adam Kelleher\n",
+    "\n",
+    "The \"do-sampler\" is a new feature in do-why. While most potential-outcomes oriented estimators focus on estimating the specific contrast $E[Y_0 - Y_1]$, Pearlian inference focuses on more fundamental quantities like the joint distribution of a set of outcomes Y, $P(Y)$, which can be used to derive other statistics of interest.\n",
+    "\n",
+    "Generally, it's hard to represent a probability distribution non-parametrically. Even if you could, you wouldn't want to gloss over finite-sample problems with you data you used to generate it. With these issues in mind, we decided to represent interventional distributions by sampling from them with an object called to \"do-sampler\". With these samples, we can hope to compute finite-sample statistics of our interventional data. If we bootstrap many such samples, we can even hope for good sampling distributions for these statistics. \n",
+    "\n",
+    "The user should note that this is still an area of active research, so you should be careful about being too confident in bootstrapped error bars from do-samplers.\n",
+    "\n",
+    "Note that do samplers sample from the outcome distribution, and so will vary significantly from sample to sample. To use them to compute outcomes, it's recommended to generate several such samples to get an idea of the posterior variance of your statistic of interest.\n",
+    "\n",
+    "## Pearlian Interventions\n",
+    "\n",
+    "Following the notion of an intervention in a Pearlian causal model, our do-samplers implement a sequence of steps:\n",
+    "\n",
+    "1. Disrupt causes\n",
+    "2. Make Effective\n",
+    "3. Propagate and sample\n",
+    "\n",
+    "In the first stage, we imagine cutting the in-edges to all of the variables we're intervening on. In the second stage, we set the value of those variables to their interventional quantities. In the third stage, we propagate that value forward through our model to compute interventional outcomes with a sampling procedure.\n",
+    "\n",
+    "In practice, there are many ways we can implement these steps. They're most explicit when we build the model as a linear bayesian network in PyMC3, which is what underlies the MCMC do sampler. In that case, we fit one bayesian network to the data, then construct a new network representing the interventional network. The structural equations are set with the parameters fit in the initial network, and we sample from that new network to get our do sample.\n",
+    "\n",
+    "In the weighting do sampler, we abstractly think of \"disrupting the causes\" by accounting for selection into the causal state through propensity score estimation. These scores contain the information used to block back-door paths, and so have the same statistics effect as cutting edges into the causal state. We make the treatment effective by selecting the subset of our data set with the correct value of the causal state. Finally, we generated a weighted random sample using inverse propensity weighting to get our do sample.\n",
+    "\n",
+    "There are other ways you could implement these three steps, but the formula is the same. We've abstracted them out as abstract class methods which you should override if you'd like to create your own do sampler!\n",
+    "\n",
+    "## Statefulness\n",
+    "\n",
+    "The do sampler when accessed through the high-level pandas API is stateless by default.This makes it intuitive to work with, and you can generate different samples with repeated calls to the `pandas.DataFrame.causal.do`. It can be made stateful, which is sometimes useful. \n",
+    "\n",
+    "The 3-stage process we mentioned before is implemented by passing an internal `pandas.DataFrame` through each of the three stages, but regarding it as temporary. The internal dataframe is reset by default before returning the result.\n",
+    "\n",
+    "It can be much more efficient to maintain state in the do sampler between generating samples. This is especially true when step 1 requires fitting an expensive model, as is the case with the MCMC do sampler, the kernel density sampler, and the weighting sampler. \n",
+    "\n",
+    "Instead of re-fitting the model for each sample, you'd like to fit it once, and then generate many samples from the do sampler. You can do this by setting the kwarg `stateful=True` when you call the `pandas.DataFrame.causal.do` method. To reset the state of the dataframe (deleting the model as well as the internal dataframe), you can call the `pandas.DataFrame.causal.reset` method.\n",
+    "\n",
+    "Through the lower-level API, the sampler is stateful by default. The assumption is that a \"power user\" who is using the low-level API will want more control over the sampling process. In this case, state is carried by internal dataframe `self._df`, which is a copy of the dataframe passed on instantiation. The original dataframe is kept in `self._data`, and is used when the user resets state. \n",
+    "\n",
+    "## Integration\n",
+    "\n",
+    "The do-sampler is built on top of the identification abstraction used throughout do-why. It automatically performs an identification, and builds any models it needs automatically using this identification.\n",
+    "\n",
+    "## Specifying Interventions\n",
+    "\n",
+    "There is a kwarg on the `dowhy.do_sampler.DoSampler` object called `keep_original_treatment`. While an intervention might be to set all units treatment values to some specific value, it's often natural to keep them set as they were, and instead remove confounding bias during effect estimation. If you'd prefer not to specify an intervention, you can set the kwarg like `keep_original_treatment=True`, and the second stage of the 3-stage process will be skipped. In that case, any intervention specified on sampling will be ignored.\n",
+    "\n",
+    "If the `keep_original_treatment` flag is set to false (it is by default), then you must specify an intervention when you sample from the do sampler. For details, see the demo below!\n",
+    "\n",
+    "\n",
+    "## Demo\n",
+    "\n",
+    "First, let's generate some data and a causal model. Here, Z confounds our causal state, D, with the outcome, Y."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import os, sys\n",
+    "sys.path.append(os.path.abspath(\"../../../\"))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "import dowhy.api"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "N = 5000\n",
+    "\n",
+    "z = np.random.uniform(size=N)\n",
+    "d = np.random.binomial(1., p=1./(1. + np.exp(-5. * z)))\n",
+    "y = 2. * z + d + 0.1 * np.random.normal(size=N)\n",
+    "\n",
+    "df = pd.DataFrame({'Z': z, 'D': d, 'Y': y})"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "(df[df.D == 1].mean() - df[df.D == 0].mean())['Y']"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "So the naive effect is around 60% high. Now, let's build a causal model for this data."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from dowhy import CausalModel\n",
+    "\n",
+    "causes = ['D']\n",
+    "outcomes = ['Y']\n",
+    "common_causes = ['Z']\n",
+    "\n",
+    "model = CausalModel(df, \n",
+    "                    causes,\n",
+    "                    outcomes,\n",
+    "                    common_causes=common_causes)\n",
+    "nx_graph = model._graph._graph"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Now that we have a model, we can try to identify the causal effect."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "identification = model.identify_effect(proceed_when_unidentifiable=True)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Identification works! We didn't actually need to do this yet, since it will happen internally with the do sampler, but it can't hurt to check that identification works before proceeding. Now, let's build the sampler."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from dowhy.do_samplers.weighting_sampler import WeightingSampler\n",
+    "\n",
+    "sampler = WeightingSampler(graph=nx_graph,\n",
+    "                           action_nodes=causes,\n",
+    "                           outcome_nodes=outcomes,\n",
+    "                           observed_nodes=df.columns.tolist(),\n",
+    "                           data=df,\n",
+    "                           keep_original_treatment=True,\n",
+    "                           variable_types={'D': 'b', 'Z': 'c', 'Y': 'c'}\n",
+    "                          )\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Now, we can just sample from the interventional distribution! Since we set the `keep_original_treatment` flag to `False`, any treatment we pass here will be ignored. Here, we'll just pass `None` to acknowledge that we know we don't want to pass anything.\n",
+    "\n",
+    "If you'd prefer to specify an intervention, you can just put the interventional value here instead as a list or numpy array.\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "interventional_df = sampler.do_sample(None)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "(interventional_df[interventional_df.D == 1].mean() - interventional_df[interventional_df.D == 0].mean())['Y']"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Now we're much closer to the true effect, which is around 1.0!"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.10"
+  },
+  "toc": {
+   "base_numbering": 1,
+   "nav_menu": {},
+   "number_sections": false,
+   "sideBar": true,
+   "skip_h1_title": true,
+   "title_cell": "Table of Contents",
+   "title_sidebar": "Contents",
+   "toc_cell": false,
+   "toc_position": {},
+   "toc_section_display": true,
+   "toc_window_display": false
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}

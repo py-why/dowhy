@@ -1,0 +1,419 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Functional API Preview\n",
+    "\n",
+    "This notebook is part of a set of notebooks that provides a preview of the proposed functional API for dowhy. For details on the new API for DoWhy, check out https://github.com/py-why/dowhy/wiki/API-proposal-for-v1 It is a work-in-progress and is updated as we add new functionality. We welcome your feedback through Discord or on the Discussions page.\n",
+    "This functional API is designed with backwards compatibility. So both the old and new API will continue to co-exist and work for the immediate new releases. Gradually the old API using CausalModel will be deprecated in favor of the new API. \n",
+    "\n",
+    "The current Functional API covers:\n",
+    "* Identify Effect:\n",
+    "  * `identify_effect(...)`: Run the identify effect algorithm using defaults just provide the graph, treatment and outcome.\n",
+    "  * `auto_identify_effect(...)`: More configurable version of `identify_effect(...)`.\n",
+    "  * `id_identify_effect(...)`: Identify Effect using the ID-Algorithm.\n",
+    "* Refute Estimate:\n",
+    "  * `refute_estimate`: Function to run a set of the refuters below with the default parameters.\n",
+    "  * `refute_bootstrap`: Refute an estimate by running it on a random sample of the data containing measurement error in the confounders.\n",
+    "  * `refute_data_subset`: Refute an estimate by rerunning it on a random subset of the original data.\n",
+    "  * `refute_random_common_cause`: Refute an estimate by introducing a randomly generated confounder (that may have been unobserved).\n",
+    "  * `refute_placebo_treatment`: Refute an estimate by replacing treatment with a randomly-generated placebo variable.\n",
+    "  * `sensitivity_simulation`: Add an unobserved confounder for refutation (Simulation of an unobserved confounder).\n",
+    "  * `sensitivity_linear_partial_r2`: Add an unobserved confounder for refutation (Linear partial R2 : Sensitivity Analysis for linear models).\n",
+    "  * `sensitivity_non_parametric_partial_r2`: Add an unobserved confounder for refutation (Non-Parametric partial R2 based : Sensitivity Analyis for non-parametric models).\n",
+    "  * `sensitivity_e_value`: Computes E-value for point estimate and confidence limits. Benchmarks E-values against measured confounders using Observed Covariate E-values. Plots E-values and Observed\n",
+    "        Covariate E-values.\n",
+    "  * `refute_dummy_outcome`: Refute an estimate by introducing a randomly generated confounder (that may have been unobserved)."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Import Dependencies"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Config dict to set the logging level\n",
+    "import logging.config\n",
+    "\n",
+    "from dowhy import CausalModel  # We still need this as we haven't created the functional API for effect estimation\n",
+    "from dowhy.causal_estimators.econml import Econml\n",
+    "from dowhy.causal_estimators.propensity_score_matching_estimator import PropensityScoreMatchingEstimator\n",
+    "from dowhy.causal_graph import CausalGraph\n",
+    "from dowhy.graph import build_graph\n",
+    "\n",
+    "# Functional API imports\n",
+    "from dowhy.causal_identifier import (\n",
+    "    BackdoorAdjustment,\n",
+    "    EstimandType,\n",
+    "    identify_effect,\n",
+    "    identify_effect_auto,\n",
+    "    identify_effect_id,\n",
+    ")\n",
+    "from dowhy.causal_refuters import (\n",
+    "    refute_bootstrap,\n",
+    "    refute_data_subset,\n",
+    "    refute_estimate,\n",
+    ")\n",
+    "from dowhy.datasets import linear_dataset\n",
+    "\n",
+    "DEFAULT_LOGGING = {\n",
+    "    \"version\": 1,\n",
+    "    \"disable_existing_loggers\": False,\n",
+    "    \"loggers\": {\n",
+    "        \"\": {\n",
+    "            \"level\": \"WARN\",\n",
+    "        },\n",
+    "    },\n",
+    "}\n",
+    "\n",
+    "\n",
+    "# set random seed for deterministic dataset generation \n",
+    "# and avoid problems when running tests\n",
+    "import numpy as np\n",
+    "np.random.seed(1)\n",
+    "\n",
+    "logging.config.dictConfig(DEFAULT_LOGGING)\n",
+    "# Disabling warnings output\n",
+    "import warnings\n",
+    "from sklearn.exceptions import DataConversionWarning\n",
+    "\n",
+    "warnings.filterwarnings(action=\"ignore\", category=DataConversionWarning)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Create the Datasets"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Parameters for creating the Dataset\n",
+    "TREATMENT_IS_BINARY = True\n",
+    "BETA = 10\n",
+    "NUM_SAMPLES = 500\n",
+    "NUM_CONFOUNDERS = 3\n",
+    "NUM_INSTRUMENTS = 2\n",
+    "NUM_EFFECT_MODIFIERS = 2\n",
+    "\n",
+    "# Creating a Linear Dataset with the given parameters\n",
+    "data = linear_dataset(\n",
+    "    beta=BETA,\n",
+    "    num_common_causes=NUM_CONFOUNDERS,\n",
+    "    num_instruments=NUM_INSTRUMENTS,\n",
+    "    num_effect_modifiers=NUM_EFFECT_MODIFIERS,\n",
+    "    num_samples=NUM_SAMPLES,\n",
+    "    treatment_is_binary=True,\n",
+    ")\n",
+    "\n",
+    "data_2 = linear_dataset(\n",
+    "    beta=BETA,\n",
+    "    num_common_causes=NUM_CONFOUNDERS,\n",
+    "    num_instruments=NUM_INSTRUMENTS,\n",
+    "    num_effect_modifiers=NUM_EFFECT_MODIFIERS,\n",
+    "    num_samples=NUM_SAMPLES,\n",
+    "    treatment_is_binary=True,\n",
+    ")\n",
+    "\n",
+    "treatment_name = data[\"treatment_name\"]\n",
+    "print(treatment_name)\n",
+    "outcome_name = data[\"outcome_name\"]\n",
+    "print(outcome_name)\n",
+    "\n",
+    "graph = build_graph(\n",
+    "    action_nodes=treatment_name,\n",
+    "    outcome_nodes=outcome_name,\n",
+    "    effect_modifier_nodes=data[\"effect_modifier_names\"],\n",
+    "    common_cause_nodes=data[\"common_causes_names\"],\n",
+    ")\n",
+    "observed_nodes = data[\"df\"].columns.tolist()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Identify Effect - Functional API (Preview)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Default identify_effect call example:\n",
+    "identified_estimand = identify_effect(graph, treatment_name, outcome_name, observed_nodes)\n",
+    "\n",
+    "# auto_identify_effect example with extra parameters:\n",
+    "identified_estimand_auto = identify_effect_auto(\n",
+    "    graph,\n",
+    "    treatment_name,\n",
+    "    outcome_name,\n",
+    "    observed_nodes,\n",
+    "    estimand_type=EstimandType.NONPARAMETRIC_ATE,\n",
+    "    backdoor_adjustment=BackdoorAdjustment.BACKDOOR_EFFICIENT,\n",
+    ")\n",
+    "\n",
+    "# id_identify_effect example:\n",
+    "identified_estimand_id = identify_effect_id(\n",
+    "    graph, treatment_name, outcome_name\n",
+    ")  # Note that the return type for id_identify_effect is IDExpression and not IdentifiedEstimand\n",
+    "\n",
+    "print(identified_estimand)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Estimate Effect - Functional API (Preview)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Basic Estimate Effect function\n",
+    "estimator = PropensityScoreMatchingEstimator(\n",
+    "    identified_estimand=identified_estimand,\n",
+    "    test_significance=None,\n",
+    "    evaluate_effect_strength=False,\n",
+    "    confidence_intervals=False,\n",
+    ").fit(\n",
+    "    data=data[\"df\"],\n",
+    "    effect_modifier_names=data[\"effect_modifier_names\"]\n",
+    ")\n",
+    "\n",
+    "estimate = estimator.estimate_effect(\n",
+    "    data=data[\"df\"],\n",
+    "    control_value=0,\n",
+    "    treatment_value=1,\n",
+    "    target_units=\"ate\",\n",
+    ")\n",
+    "\n",
+    "# Using same estimator with different data\n",
+    "second_estimate = estimator.estimate_effect(\n",
+    "    data=data_2[\"df\"],\n",
+    "    control_value=0,\n",
+    "    treatment_value=1,\n",
+    "    target_units=\"ate\",\n",
+    ")\n",
+    "\n",
+    "print(estimate)\n",
+    "print(\"-----------\")\n",
+    "print(second_estimate)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# EconML estimator example\n",
+    "from econml.dml import DML\n",
+    "from sklearn.linear_model import LassoCV\n",
+    "from sklearn.preprocessing import PolynomialFeatures\n",
+    "\n",
+    "from sklearn.ensemble import GradientBoostingRegressor\n",
+    "\n",
+    "estimator = Econml(\n",
+    "    identified_estimand=identified_estimand,\n",
+    "    econml_estimator=DML(\n",
+    "        model_y=GradientBoostingRegressor(),\n",
+    "        model_t=GradientBoostingRegressor(),\n",
+    "        model_final=LassoCV(fit_intercept=False),\n",
+    "        featurizer=PolynomialFeatures(degree=1, include_bias=True),\n",
+    "    ),\n",
+    ").fit(\n",
+    "    data=data[\"df\"],\n",
+    "    effect_modifier_names=data[\"effect_modifier_names\"],\n",
+    ")\n",
+    "\n",
+    "estimate_econml = estimator.estimate_effect(\n",
+    "    data=data[\"df\"],\n",
+    "    control_value=0,\n",
+    "    treatment_value=1,\n",
+    "    target_units=\"ate\",\n",
+    ")\n",
+    "\n",
+    "print(estimate)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Refute Estimate - Functional API (Preview)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# You can call the refute_estimate function for executing several refuters using default parameters\n",
+    "# Currently this function does not support sensitivity_* functions\n",
+    "refutation_results = refute_estimate(\n",
+    "    data[\"df\"],\n",
+    "    identified_estimand,\n",
+    "    estimate,\n",
+    "    treatment_name=treatment_name,\n",
+    "    outcome_name=outcome_name,\n",
+    "    refuters=[refute_bootstrap, refute_data_subset],\n",
+    ")\n",
+    "\n",
+    "for result in refutation_results:\n",
+    "    print(result)\n",
+    "\n",
+    "# Or you can execute refute methods directly\n",
+    "# You can change the refute_bootstrap - refute_data_subset for any of the other refuters and add the missing parameters\n",
+    "\n",
+    "bootstrap_refutation = refute_bootstrap(data[\"df\"], identified_estimand, estimate)\n",
+    "print(bootstrap_refutation)\n",
+    "\n",
+    "data_subset_refutation = refute_data_subset(data[\"df\"], identified_estimand, estimate)\n",
+    "print(data_subset_refutation)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Backwards Compatibility\n",
+    "\n",
+    "This section shows replicating the same results using only the CausalModel API"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Create Causal Model\n",
+    "causal_model = CausalModel(data=data[\"df\"], treatment=treatment_name, outcome=outcome_name, graph=data[\"gml_graph\"])\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Identify Effect"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "identified_estimand_causal_model_api = (\n",
+    "    causal_model.identify_effect()\n",
+    ")  # graph, treatment and outcome comes from the causal_model object\n",
+    "\n",
+    "print(identified_estimand_causal_model_api)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Estimate Effect"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "estimate_causal_model_api = causal_model.estimate_effect(\n",
+    "    identified_estimand_causal_model_api, method_name=\"backdoor.propensity_score_matching\"\n",
+    ")\n",
+    "\n",
+    "print(estimate_causal_model_api)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Refute Estimate"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "bootstrap_refutation_causal_model_api = causal_model.refute_estimate(identified_estimand_causal_model_api, estimate_causal_model_api, \"bootstrap_refuter\")\n",
+    "print(bootstrap_refutation_causal_model_api)\n",
+    "\n",
+    "data_subset_refutation_causal_model_api = causal_model.refute_estimate(\n",
+    "    identified_estimand_causal_model_api, estimate_causal_model_api, \"data_subset_refuter\"\n",
+    ")\n",
+    "\n",
+    "print(data_subset_refutation_causal_model_api)"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.10"
+  },
+  "toc": {
+   "base_numbering": 1,
+   "nav_menu": {},
+   "number_sections": false,
+   "sideBar": true,
+   "skip_h1_title": true,
+   "title_cell": "Table of Contents",
+   "title_sidebar": "Contents",
+   "toc_cell": false,
+   "toc_position": {},
+   "toc_section_display": true,
+   "toc_window_display": false
+  },
+  "vscode": {
+   "interpreter": {
+    "hash": "dcb481ad5d98e2afacd650b2c07afac80a299b7b701b553e333fc82865502500"
+   }
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}
