@@ -92,7 +92,9 @@ Install the latest `release <https://pypi.org/project/dowhy/>`__ using poetry.
 Install the latest `release <https://anaconda.org/conda-forge/dowhy>`__ using conda.
 
 .. code:: shell
+
    conda install -c conda-forge dowhy
+
 If you face "Solving environment" problems with conda, then try :code:`conda update --all` and then install dowhy. If that does not work, then use :code:`conda config --set channel_priority false` and try to install again. If the problem persists, please `add your issue here <https://github.com/microsoft/dowhy/issues/197>`_.
 
 **Development Version**
