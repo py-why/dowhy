@@ -374,7 +374,7 @@ def _convert_to_numeric(*args) -> List[np.ndarray]:
             if isinstance(X[0, col], bool):
                 X[:, col] = X[:, col].astype(str)
 
-        result.append(auto_apply_encoders(X, auto_fit_encoders(X)))
+        result.append(auto_apply_encoders(X, auto_fit_encoders(X)).astype(float))
 
     return result
 

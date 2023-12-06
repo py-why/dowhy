@@ -328,6 +328,14 @@ def test_given_almost_constant_data_when_perform_kernel_based_test_then_does_not
     )
 
 
+def test_given_data_with_boolean_and_object_type_when_kernel_based_then_does_not_raise_error():
+    kernel_based(
+        np.array([1, 2, 3, 4, 5, 6], dtype=object),
+        np.array([[1, False], [2, True], [3, False], [4, False], [5, True], [6, True]], dtype=object),
+        np.array([False, True, False, False, True, True], dtype=object),
+    )
+
+
 def _generate_categorical_data(num_samples=1000):
     x = np.random.normal(0, 1, num_samples)
     z = []
