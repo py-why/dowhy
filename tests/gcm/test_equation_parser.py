@@ -98,3 +98,6 @@ def _assign_causal_mechanisms(causal_model):
     causal_model.set_causal_mechanism(
         "X3", AdditiveNoiseModel(create_linear_regressor_with_given_parameters(coefficients=np.array([0.5])))
     )
+
+
+test_equation_parser_fit_func_is_giving_correct_results()
