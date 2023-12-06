@@ -134,6 +134,25 @@ class CausalModel:
             logger=self.logger,
         )
 
+    def get_estimator(self, method_name):
+        """
+        Retrieves an existing CausalEstimator object matching the given `method_name`.
+
+        CausalEstimator objects are created in `estimate_effect()` and stored in a cache for reuse.
+        Different instances can be created for different methods.
+        They may be reused multiple times on different data with `estimate_effect(fit_estimator=False)`.
+        This is useful for e.g. estimating effects on different samples of the same dataset.
+
+        The `CausalEstimate` object returned by `estimate_effect()` also has a reference to the `CausalEstimator` object used to produce it:
+
+        `effect = model.estimate_effect(...)`
+        `effect.estimator  # returns the fitted CausalEstimator estimator object`
+
+        :param method_name: name of the estimation method to be used.
+        :returns: An instance of CausalEstimator for the given method, if it exists, or None.
+        """
+        return self._estimator_cache.get(method_name)
+
     def init_graph(self, graph, identify_vars):
         """
         Initialize self._graph using graph provided by the user.
@@ -318,9 +337,13 @@ class CausalModel:
 
             identified_estimand.set_identifier_method(identifier_name)
 
-            if not fit_estimator and method_name in self._estimator_cache:
-                causal_estimator = self._estimator_cache[method_name]
-            else:
+            # If not fit_estimator, attempt to retrieve existing estimator.
+            # Keep original behaviour to create new estimator if none found.
+            causal_estimator = None
+            if not fit_estimator:
+                causal_estimator = self.get_estimator(method_name)
+
+            if causal_estimator is None:
                 causal_estimator = causal_estimator_class(
                     identified_estimand,
                     test_significance=test_significance,
@@ -521,9 +544,9 @@ class CausalModel:
                 a = all_nodes[i]
                 b = all_nodes[j]
                 if i < j:
-                    temp_arr = all_nodes[:i] + all_nodes[i + 1 : j] + all_nodes[j + 1 :]
+                    temp_arr = all_nodes[:i] + all_nodes[i + 1: j] + all_nodes[j + 1:]
                 else:
-                    temp_arr = all_nodes[:j] + all_nodes[j + 1 : i] + all_nodes[i + 1 :]
+                    temp_arr = all_nodes[:j] + all_nodes[j + 1: i] + all_nodes[i + 1:]
                 k_sized_lists = list(combinations(temp_arr, k))
                 for k_list in k_sized_lists:
                     if self._graph.check_dseparation([str(a)], [str(b)], k_list) == True:
