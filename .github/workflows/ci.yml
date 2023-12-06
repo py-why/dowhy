@@ -70,6 +70,14 @@ jobs:
     - name: Test EconML based functionality
       run: poetry run poe test_econml
 
+    - name: Test README errors for PyPI
+      run: |
+          pip install poetry-dynamic-versioning
+          pip install twine
+          poetry-dynamic-versioning
+          poetry build
+          twine check dist/*
+
     - name: Notify Discord
       if: failure() && github.ref == 'refs/heads/main'
       uses: th0th/notify-discord@v0.4.1
