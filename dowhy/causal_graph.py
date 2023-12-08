@@ -4,6 +4,7 @@ import re
 
 import networkx as nx
 
+from dowhy.gcm.causal_models import ProbabilisticCausalModel
 from dowhy.utils.api import parse_state
 from dowhy.utils.graph_operations import daggity_to_dot
 from dowhy.utils.plotting import plot
@@ -13,7 +14,7 @@ class CausalGraph:
 
     """Class for creating and modifying the causal graph.
 
-    Accepts a graph string (or a text file) in gml format (preferred) and dot format. Graphviz-like attributes can be set for edges and nodes. E.g. style="dashed" as an edge attribute ensures that the edge is drawn with a dashed line.
+    Accepts a networkx DiGraph, a :py:class:`ProbabilisticCausalModel <dowhy.gcm.ProbabilisticCausalModel`, a graph string (or a text file) in gml format (preferred) or dot format. Graphviz-like attributes can be set for edges and nodes. E.g. style="dashed" as an edge attribute ensures that the edge is drawn with a dashed line.
 
      If a graph string is not given, names of treatment, outcome, and confounders, instruments and effect modifiers (if any) can be provided to create the graph.
     """
@@ -54,7 +55,11 @@ class CausalGraph:
         if graph is None:
             self._graph = nx.DiGraph()
             self._graph = self.build_graph(common_cause_names, instrument_names, effect_modifier_names, mediator_names)
-        elif re.match(r".*\.dot", graph):
+        elif isinstance(graph, nx.DiGraph):
+            self._graph = nx.DiGraph(graph)
+        elif isinstance(graph, ProbabilisticCausalModel):
+            self._graph = nx.DiGraph(graph.graph)
+        elif isinstance(graph, str) and re.match(r".*\.dot", graph):
             # load dot file
             try:
                 import pygraphviz as pgv
@@ -69,9 +74,9 @@ class CausalGraph:
                 except Exception as e:
                     self.logger.error("Error: Pydot cannot be loaded. " + str(e))
                     raise e
-        elif re.match(r".*\.gml", graph):
+        elif isinstance(graph, str) and re.match(r".*\.gml", graph):
             self._graph = nx.DiGraph(nx.read_gml(graph))
-        elif re.match(r".*graph\s*\{.*\}\s*", graph):
+        elif isinstance(graph, str) and re.match(r".*graph\s*\{.*\}\s*", graph):
             try:
                 import pygraphviz as pgv
 
@@ -83,16 +88,24 @@ class CausalGraph:
                     import pydot
 
                     P_list = pydot.graph_from_dot_data(graph)
-                    self._graph = nx.drawing.nx_pydot.from_pydot(P_list[0])
+                    self._graph = nx.DiGraph(nx.drawing.nx_pydot.from_pydot(P_list[0]))
                 except Exception as e:
                     self.logger.error("Error: Pydot cannot be loaded. " + str(e))
                     raise e
-        elif re.match(".*graph\s*\[.*\]\s*", graph):
+        elif isinstance(graph, str) and re.match(".*graph\s*\[.*\]\s*", graph):
             self._graph = nx.DiGraph(nx.parse_gml(graph))
         else:
-            self.logger.error("Error: Please provide graph (as string or text file) in dot or gml format.")
+            error_msg = "Incorrect format: Please provide graph as a networkx DiGraph, GCM model, or as a string or text file in dot, gml format."
+            self.logger.error(error_msg)
             self.logger.error("Error: Incorrect graph format")
-            raise ValueError
+            raise ValueError(error_msg)
+
+        if observed_node_names is None and (
+            isinstance(graph, nx.DiGraph) or isinstance(graph, ProbabilisticCausalModel)
+        ):
+            observed_node_names = list(self._graph.nodes)
+        # TODO This functionality needs to be deprecated. It is a convenience function but can introduce confusion
+        # as we are now including the option to initialize CausalGraph with DiGraph or GCM model.
         if missing_nodes_as_confounders:
             self._graph = self.add_missing_nodes_as_common_causes(observed_node_names)
         # Adding node attributes

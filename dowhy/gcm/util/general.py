@@ -1,7 +1,3 @@
-"""Functions in this module should be considered experimental, meaning there might be breaking API changes in the
-future.
-"""
-
 import random
 from typing import Dict, Optional, Union
 
@@ -198,6 +194,15 @@ def has_categorical(X: np.ndarray) -> bool:
             return True
 
     return False
+
+
+def is_discrete(X: np.ndarray) -> bool:
+    """Checks if all values in the given array are discrete.
+
+    :param X: Input array to check.
+    :return: True if all values in the input are discrete, False otherwise.
+    """
+    return np.all(X == np.floor(X))
 
 
 def setdiff2d(ar1: np.ndarray, ar2: np.ndarray, assume_unique: bool = False) -> np.ndarray:

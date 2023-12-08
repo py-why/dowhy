@@ -4,7 +4,7 @@ import pandas as pd
 from _pytest.python_api import approx
 
 from dowhy.utils import plot, plot_adjacency_matrix
-from dowhy.utils.plotting import _calc_arrow_width
+from dowhy.utils.plotting import _calc_arrow_width, bar_plot
 
 
 def test_when_plot_does_not_raise_exception():
@@ -48,3 +48,11 @@ def test_calc_arrow_width():
     assert _calc_arrow_width(0.5, max_strength=0.5) == approx(4.1, abs=0.01)
     assert _calc_arrow_width(0.35, max_strength=0.5) == approx(2.9, abs=0.01)
     assert _calc_arrow_width(100, max_strength=101) == approx(4.06, abs=0.01)
+
+
+def test_given_misspecified_uncertainties_when_bar_plot_then_does_not_raise_error():
+    bar_plot({"X": 1, "Y": 2, "Z": 3}, uncertainties={"X": (1.1, 0.9), "Y": (1.5, 2.1)})
+    bar_plot({"X": 1, "Y": 2}, uncertainties={"X": (10**-2, 10**-1), "Y": (10**-2, 10**-1)})
+    bar_plot({"X": 1}, uncertainties={"X": (0, 1)})
+    bar_plot({"X": 1}, uncertainties={"X": (0, 0.99999999999)})
+    bar_plot({"X": 1}, uncertainties={"X": (1 - 10**-15, 1 + 10**-15)})

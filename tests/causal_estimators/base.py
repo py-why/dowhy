@@ -1,7 +1,8 @@
 import itertools
 
 import dowhy.datasets
-from dowhy import CausalModel
+from dowhy import EstimandType, identify_effect_auto
+from dowhy.graph import build_graph_from_str
 
 
 class TestEstimator(object):
@@ -52,15 +53,13 @@ class TestEstimator(object):
         else:
             raise ValueError("Dataset type not supported.")
 
-        model = CausalModel(
-            data=data["df"],
-            treatment=data["treatment_name"],
-            outcome=data["outcome_name"],
-            graph=data["gml_graph"],
-            proceed_when_unidentifiable=True,
-            test_significance=test_significance,
+        target_estimand = identify_effect_auto(
+            build_graph_from_str(data["gml_graph"]),
+            observed_nodes=list(data["df"].columns),
+            action_nodes=data["treatment_name"],
+            outcome_nodes=data["outcome_name"],
+            estimand_type=EstimandType.NONPARAMETRIC_ATE,
         )
-        target_estimand = model.identify_effect()
         target_estimand.set_identifier_method(self._identifier_method)
         estimator_ate = self._Estimator(
             identified_estimand=target_estimand,
@@ -158,15 +157,13 @@ class TestEstimator(object):
             self.average_treatment_effect_test(**cfg)
 
     def custom_data_average_treatment_effect_test(self, data):
-        model = CausalModel(
-            data=data["df"],
-            treatment=data["treatment_name"],
-            outcome=data["outcome_name"],
-            graph=data["gml_graph"],
-            proceed_when_unidentifiable=True,
-            test_significance=None,
+        target_estimand = identify_effect_auto(
+            build_graph_from_str(data["gml_graph"]),
+            observed_nodes=list(data["df"].columns),
+            action_nodes=data["treatment_name"],
+            outcome_nodes=data["outcome_name"],
+            estimand_type=EstimandType.NONPARAMETRIC_ATE,
         )
-        target_estimand = model.identify_effect()
         estimator_ate = self._Estimator(
             identified_estimand=target_estimand,
             test_significance=None,

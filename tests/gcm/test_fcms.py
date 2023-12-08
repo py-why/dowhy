@@ -12,6 +12,7 @@ from scipy.stats import norm
 from dowhy.gcm import (
     AdditiveNoiseModel,
     ClassifierFCM,
+    DiscreteAdditiveNoiseModel,
     EmpiricalDistribution,
     PostNonlinearModel,
     ProbabilisticCausalModel,
@@ -21,7 +22,7 @@ from dowhy.gcm import (
     fit,
 )
 from dowhy.gcm.auto import assign_causal_mechanisms
-from dowhy.gcm.divergence import estimate_kl_divergence_continuous
+from dowhy.gcm.divergence import estimate_kl_divergence_continuous_clf
 from dowhy.gcm.ml import (
     SklearnRegressionModel,
     create_linear_regressor,
@@ -33,6 +34,7 @@ from dowhy.gcm.ml.regression import (
     InvertibleIdentityFunction,
     InvertibleLogarithmicFunction,
 )
+from dowhy.gcm.util.general import is_discrete
 
 
 def test_given_linear_data_when_fit_causal_graph_with_linear_anm_then_learns_correct_coefficients():
@@ -65,7 +67,7 @@ def test_given_linear_data_when_draw_samples_from_fitted_anm_then_generates_corr
     generated_samples = scm.causal_mechanism("X1").draw_samples(np.array([2] * 1000))
     assert np.mean(generated_samples) == approx(6, abs=0.05)
     assert np.std(generated_samples) == approx(0.1, abs=0.05)
-    assert estimate_kl_divergence_continuous(
+    assert estimate_kl_divergence_continuous_clf(
         test_data["X1"].to_numpy(), draw_samples(scm, 10000)["X1"].to_numpy()
     ) == approx(0, abs=0.05)
 
@@ -102,7 +104,7 @@ def test_given_categorical_input_data_when_draw_from_fitted_causal_graph_with_li
         test_data[:, 2].astype(float).reshape(-1, 1)
     )
 
-    assert estimate_kl_divergence_continuous(test_data[:, 2], draw_samples(scm, 1000)["X2"].to_numpy()) == approx(
+    assert estimate_kl_divergence_continuous_clf(test_data[:, 2], draw_samples(scm, 1000)["X2"].to_numpy()) == approx(
         0, abs=0.05
     )
 
@@ -239,6 +241,40 @@ def test_given_logarithmic_data_when_fit_post_non_linear_sem_with_invertible_log
     sem_fitted.fit(X, Y)
 
     assert sem_fitted.prediction_model.sklearn_model.coef_ == approx(np.array([2]), abs=0.05)
+
+
+@flaky(max_runs=3)
+def test_given_discrete_target_data_when_fit_discrete_additive_noise_model_then_behaves_as_expected():
+    X = np.random.normal(0, 1, (1000, 2))
+    X[X > 3] = 3
+    X[X < -3] = -3
+    Y = np.round(np.sum(X, axis=1))
+
+    danm = DiscreteAdditiveNoiseModel(create_linear_regressor())
+    danm.fit(X, Y)
+
+    test_X = np.random.normal(0, 1, (1000, 2))
+    test_X[test_X > 3] = 3
+    test_X[test_X < -3] = -3
+    test_Y = np.round(np.sum(test_X, axis=1)).reshape(-1)
+
+    assert danm.evaluate(test_X, np.zeros(1000)).reshape(-1) == approx(test_Y, abs=3)
+    assert danm.evaluate(test_X, np.zeros(1000)).reshape(-1) == approx(test_Y, abs=3)
+    assert is_discrete(danm.draw_samples(test_X))
+
+    assert danm.estimate_noise(np.array([0, 1, 2]), np.array([[-1, 1], [0, 0], [0, 1]])).reshape(-1) == approx(
+        np.array([0, 1, 1])
+    )
+
+    X = np.array([0.1, 10.5, 20, 30.7, 40.3])
+    Y = np.floor(X)  # Y has only 0, 10, 20, 30, 40
+
+    danm = DiscreteAdditiveNoiseModel(create_linear_regressor())
+    danm.fit(X, Y)
+
+    assert danm.evaluate(np.array([-100, -32.4, 0.4, 4, 9, 11, 30.1, 101.4, 0.9]), np.zeros(9)) == approx(
+        [-100, -32, 0, 4, 9, 11, 30, 101, 1]
+    )
 
 
 def _generate_data_with_categorical_input():

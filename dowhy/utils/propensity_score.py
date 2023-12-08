@@ -1,14 +1,9 @@
-import logging
-
 import numpy as np
 import pandas as pd
 from pandas import get_dummies
-from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import LabelEncoder
 from statsmodels.nonparametric.kernel_density import EstimatorSettings, KDEMultivariateConditional
-
-import dowhy.utils.api as api
 
 
 def propensity_of_treatment_score(data, covariates, treatment, model="logistic", variable_types=None):

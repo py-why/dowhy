@@ -1,6 +1,3 @@
-import networkx as nx
-import numpy as np
-
 from dowhy.graph_learners import GraphLearner
 from dowhy.utils.graph_operations import *
 

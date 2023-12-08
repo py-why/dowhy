@@ -1,7 +1,4 @@
-"""This module provides functions to estimate causal influences.
-
-Functions in this module should be considered experimental, meaning there might be breaking API changes in the future.
-"""
+"""This module provides functions to estimate causal influences."""
 import logging
 import warnings
 from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Union, cast
@@ -243,10 +240,11 @@ def intrinsic_causal_influence(
     :param prediction_model: Prediction model for estimating the functional relationship between subsets of ancestor
                              noise terms and the target node. This can be an instance of a PredictionModel, the string
                              'approx' or the string 'exact'. With 'exact', the underlying causal models in the graph
-                             are utilized directly by propagating given noise inputs through the graph. This is
-                             generally more accurate but slow. With 'approx', an appropriate model is selected and
-                             trained based on sampled data from the graph, which is less accurate but faster. A more
-                             detailed treatment on why we need this parameter is also provided in :ref:`icc`.
+                             are utilized directly by propagating given noise inputs through the graph, which ensures
+                             that generated samples follow the fitted models. In contrast, the 'approx' method involves
+                             selecting and training a suitable model based on data sampled from the graph. This might
+                             lead to deviations from the outcomes of the fitted models, but is faster and can be more
+                             robust in certain settings.
     :param attribution_func: Optional attribution function to measure the statistical property of the target node. This
                              function expects two inputs; predictions after the randomization of certain features (i.e.
                              samples from noise nodes) and a baseline where no features were randomized. The baseline
@@ -325,9 +323,11 @@ def intrinsic_causal_influence_sample(
     target_node: Any,
     baseline_samples: pd.DataFrame,
     noise_feature_samples: Optional[pd.DataFrame] = None,
+    prediction_model: Union[PredictionModel, ClassificationModel, str] = "approx",
     subset_scoring_func: Optional[Callable[[np.ndarray, np.ndarray], Union[np.ndarray, float]]] = None,
     num_noise_feature_samples: int = 5000,
     max_batch_size: int = 100,
+    auto_assign_quality: auto.AssignmentQuality = auto.AssignmentQuality.GOOD,
     shapley_config: Optional[ShapleyConfig] = None,
 ) -> List[Dict[Any, Any]]:
     """Estimates the intrinsic causal impact of upstream nodes on a specified target_node, using the provided
@@ -342,9 +342,17 @@ def intrinsic_causal_influence_sample(
     :param causal_model: The fitted invertible structural causal model.
     :param target_node: Node of interest.
     :param baseline_samples: Samples for which the influence should be estimated.
-    :param noise_feature_samples: Optional noise samples of upstream nodes used as 'background' samples.. If None is
+    :param noise_feature_samples: Optional noise samples of upstream nodes used as 'background' samples. If None is
                                   given, new noise samples are generated based on the graph. These samples are used for
                                   randomizing features that are not in the subset.
+    :param prediction_model: Prediction model for estimating the functional relationship between subsets of ancestor
+                             noise terms and the target node. This can be an instance of a PredictionModel, the string
+                             'approx' or the string 'exact'. With 'exact', the underlying causal models in the graph
+                             are utilized directly by propagating given noise inputs through the graph, which ensures
+                             that generated samples follow the fitted models. In contrast, the 'approx' method involves
+                             selecting and training a suitable model based on data sampled from the graph. This might
+                             lead to deviations from the outcomes of the fitted models, but is faster and can be more
+                             robust in certain settings.
     :param subset_scoring_func: Set function for estimating the quantity of interest based. This function
                                 expects two inputs; the outcome of the model for some samples if certain features are permuted and the
                                 outcome of the model for the same samples when no features were permuted. By default,
@@ -353,6 +361,7 @@ def intrinsic_causal_influence_sample(
                                       This parameter indicates how many.
     :param max_batch_size: Maximum batch size for estimating multiple predictions at once. This has a significant influence on the
                           overall memory usage. If set to -1, all samples are used in one batch.
+    :param auto_assign_quality: Auto assign quality for the 'approx' prediction_model option.
     :param shapley_config: :class:`~dowhy.gcm.shapley.ShapleyConfig` for the Shapley estimator.
     :return: A list of dictionaries indicating the intrinsic causal influence of a node on the target for a particular
              sample. This is, each dictionary belongs to one baseline sample.
@@ -376,21 +385,32 @@ def intrinsic_causal_influence_sample(
     if subset_scoring_func is None:
         subset_scoring_func = means_difference
 
+    target_samples = feature_samples[target_node].to_numpy()
+    node_names = noise_feature_samples.columns
+    noise_feature_samples, target_samples = shape_into_2d(noise_feature_samples.to_numpy(), target_samples)
+
+    prediction_method = _get_icc_noise_function(
+        causal_model,
+        target_node,
+        prediction_model,
+        noise_feature_samples,
+        node_names,
+        target_samples,
+        auto_assign_quality,
+        False,  # Currently only supports continues target since we need to reconstruct its noise term.
+    )
+
     shapley_vales = feature_relevance_sample(
-        _get_icc_noise_function(
-            causal_model, target_node, "exact", noise_feature_samples, noise_feature_samples.columns, None, None, False
-        ),
-        feature_samples=noise_feature_samples.to_numpy(),
-        baseline_samples=compute_noise_from_data(causal_model, baseline_samples)[
-            noise_feature_samples.columns
-        ].to_numpy(),
+        prediction_method,
+        feature_samples=noise_feature_samples,
+        baseline_samples=compute_noise_from_data(causal_model, baseline_samples)[node_names].to_numpy(),
         subset_scoring_func=subset_scoring_func,
         max_batch_size=max_batch_size,
         shapley_config=shapley_config,
     )
 
     return [
-        {(predecessor, target_node): shapley_vales[i][q] for q, predecessor in enumerate(noise_feature_samples.columns)}
+        {(predecessor, target_node): shapley_vales[i][q] for q, predecessor in enumerate(node_names)}
         for i in range(shapley_vales.shape[0])
     ]
 
@@ -432,7 +452,7 @@ def _estimate_iccs(
 
 
 def _get_icc_noise_function(
-    causal_model: InvertibleStructuralCausalModel,
+    causal_model: StructuralCausalModel,
     target_node: Any,
     prediction_model: Union[PredictionModel, ClassificationModel, str],
     noise_samples: np.ndarray,
@@ -453,7 +473,7 @@ def _get_icc_noise_function(
         return prediction_model.predict
 
     if prediction_model == "approx":
-        prediction_model = auto.select_model(noise_samples, target_samples, auto_assign_quality)
+        prediction_model = auto.select_model(noise_samples, target_samples, auto_assign_quality)[0]
         prediction_model.fit(noise_samples, target_samples)
 
         if target_is_categorical:

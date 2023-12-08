@@ -10,138 +10,204 @@ These examples are also available on `GitHub <https://github
 Introductory examples
 ---------------------
 
-.. card-carousel:: 3
+.. grid:: 2
 
-    .. card:: :doc:`dowhy_simple_example`
+    .. grid-item-card:: :doc:`dowhy_simple_example`
 
         .. image:: ../_static/effect-estimation-estimand-expression.png
-        +++
-        | **Level:** Beginner
-        | **Task:** Effect estimation
-
-    .. card:: :doc:`dowhy_confounder_example`
+            :align: center
 
         +++
         | **Level:** Beginner
         | **Task:** Effect estimation
 
-    .. card:: :doc:`dowhy-conditional-treatment-effects`
-
-        +++
-        | **Level:** Beginner
-        | **Task:** Conditional effect estimation
-
-    .. card:: :doc:`gcm_basic_example`
+    .. grid-item-card:: :doc:`gcm_basic_example`
 
         .. image:: ../_static/graph-xyz.png
-            :width: 50px
+            :height: 120px
             :align: center
 
         +++
         | **Level:** Beginner
         | **Task:** Intervention via GCM
-    
-    .. card:: :doc:`tutorial-causalinference-machinelearning-using-dowhy-econml`
+
+.. grid:: 2
+
+    .. grid-item-card:: :doc:`gcm_draw_samples`
+
+        .. image:: ../_static/draw-samples.png
+            :height: 120px
+            :align: center
+
+        +++
+        | **Level:** Beginner
+        | **Task:** Sample generation
+
+    .. grid-item-card:: :doc:`dowhy_confounder_example`
+
+        .. image:: ../_static/confounder-example.png
+            :height: 120px
+            :align: center
+
+        +++
+        | **Level:** Beginner
+        | **Task:** Effect estimation
+
+.. grid:: 2
+
+    .. grid-item-card:: :doc:`dowhy-conditional-treatment-effects`
+
+        .. image:: ../_static/conditional-treatment-effect.png
+            :height: 120px
+            :align: center
+
+        +++
+        | **Level:** Beginner
+        | **Task:** Conditional effect estimation
+
+    .. grid-item-card:: :doc:`tutorial-causalinference-machinelearning-using-dowhy-econml`
+
+        .. image:: ../_static/dowhy-econml-tutorial.png
+            :height: 120px
+            :align: center
 
         +++
         | **Level:** Beginner
         | **Task:** All
 
-    .. card:: :doc:`dowhy_functional_api`
-
-        +++
-        | **Level:** Beginner
-        | **Task:** All
 
 Real world-inspired examples
 ----------------------------
 
-.. card-carousel:: 3
+.. grid:: 2
 
-    .. card:: :doc:`DoWhy-The Causal Story Behind Hotel Booking Cancellations`
+    .. grid-item-card:: :doc:`DoWhy-The Causal Story Behind Hotel Booking Cancellations`
 
         .. image:: ../_static/hotel-bookings.png
+            :height: 120px
+            :align: center
         +++
         | **Level:** Beginner
         | **Task:** Effect estimation
 
-    .. card:: :doc:`dowhy_example_effect_of_memberrewards_program`
+    .. grid-item-card:: :doc:`dowhy_example_effect_of_memberrewards_program`
 
         .. image:: ../_static/membership-program-graph.png
+            :height: 120px
+            :align: center
         +++
         | **Level:** Beginner
         | **Task:** Effect estimation
 
-    .. card:: :doc:`gcm_rca_microservice_architecture`
+.. grid:: 2
 
-        .. image:: ../_static/microservice-architecture.png
+    .. grid-item-card:: :doc:`gcm_online_shop`
 
+        .. image:: ../_static/online-shop.png
+            :height: 120px
+            :align: center
         +++
         | **Level:** Beginner
-        | **Task:** Root cause analysis, intervention via GCM
+        | **Task:** Quantify causal effects and root cause analysis via GCM
 
-    .. card:: :doc:`gcm_401k_analysis`
+    .. grid-item-card:: :doc:`gcm_rca_microservice_architecture`
 
+        .. image:: ../_static/microservice-architecture.png
+            :height: 120px
+            :align: center
+        +++
+        | **Level:** Beginner
+        | **Task:** Root cause analysis, intervention, counterfactual via GCM
+
+.. grid:: 2
+
+    .. grid-item-card:: :doc:`gcm_401k_analysis`
+
+        .. image:: ../_static/401k-example.png
+            :height: 120px
+            :align: center
         +++
         | **Level:** Advanced
         | **Task:** Intervention via GCM
 
-    .. card:: :doc:`gcm_supply_chain_dist_change`
+    .. grid-item-card:: :doc:`gcm_supply_chain_dist_change`
 
         .. image:: ../_static/supply-chain.png
-
+            :height: 120px
+            :align: center
         +++
         | **Level:** Advanced
         | **Task:** Root cause analysis via GCM
 
-    .. card:: :doc:`gcm_counterfactual_medical_dry_eyes`
+.. grid:: 2
 
+    .. grid-item-card:: :doc:`gcm_icc`
+
+        .. image:: ../_static/icc-example.jpg
+            :width: 200px
+            :align: center
+        +++
+        | **Level:** Advanced
+        | **Task:** Intrinsic causal influence via GCM
+
+    .. grid-item-card:: :doc:`gcm_counterfactual_medical_dry_eyes`
+
+        .. image:: ../_static/gcm-counterfactual-example.png
+            :width: 200px
+            :align: center
         +++
         | **Level:** Advanced
         | **Task:** Counterfactuals via GCM
 
-    .. card:: :doc:`gcm_falsify_dag`
+.. grid:: 2
 
+    .. grid-item-card:: :doc:`gcm_falsify_dag`
+
+        .. image:: ../_static/gcm-falsify-example.png
+            :height: 120px
+            :align: center
         +++
         | **Level:** Advanced
-        | **Task:** Falsifying User-Given DAGs
+        | **Task:** Falsifying Causal Graph
 
 Examples on benchmark datasets
 -------------------------------
 
-.. card-carousel:: 3
+.. grid:: 3
 
-    .. card:: :doc:`dowhy_ihdp_data_example`
-
-        +++
-        | **Level:** Advanced
-        | **Task:** Effect inference
-
-    .. card:: :doc:`dowhy_lalonde_example`
+    .. grid-item-card:: :doc:`dowhy_ihdp_data_example`
 
         +++
         | **Level:** Advanced
         | **Task:** Effect inference
 
-    .. card:: :doc:`dowhy_refutation_testing`
+    .. grid-item-card:: :doc:`dowhy_lalonde_example`
 
         +++
         | **Level:** Advanced
         | **Task:** Effect inference
 
-    .. card:: :doc:`gcm_401k_analysis`
+    .. grid-item-card:: :doc:`dowhy_refutation_testing`
+
+        +++
+        | **Level:** Advanced
+        | **Task:** Effect inference
+
+.. grid:: 3
+
+    .. grid-item-card:: :doc:`gcm_401k_analysis`
 
         +++
         | **Level:** Advanced
         | **Task:** GCM inference
 
-    .. card:: :doc:`prediction/dowhy_causal_prediction_demo`
+    .. grid-item-card:: :doc:`prediction/dowhy_causal_prediction_demo`
 
         +++
         | **Level:** Advanced
         | **Task:** Prediction
 
-    .. card:: :doc:`lalonde_pandas_api`
+    .. grid-item-card:: :doc:`lalonde_pandas_api`
 
         +++
         | **Level:** Advanced
@@ -151,51 +217,55 @@ Examples on benchmark datasets
 Modeling and refuting causal assumptions
 ----------------------------------------
 
-.. card-carousel:: 3
+.. grid:: 3
 
-    .. card:: :doc:`load_graph_example`
-
-        +++
-        | **Level:** Beginner
-        | **Task:** All
-
-    .. card:: :doc:`dowhy_causal_discovery_example`
+    .. grid-item-card:: :doc:`load_graph_example`
 
         +++
         | **Level:** Beginner
         | **Task:** All
 
-    .. card:: :doc:`gcm_falsify_dag`
+    .. grid-item-card:: :doc:`dowhy_causal_discovery_example`
+
+        +++
+        | **Level:** Beginner
+        | **Task:** All
+
+    .. grid-item-card:: :doc:`gcm_falsify_dag`
 
         +++
         | **Level:** Advanced
         | **Task:** All
 
-    .. card:: :doc:`sensitivity_analysis_testing`
+.. grid:: 3
+
+    .. grid-item-card:: :doc:`sensitivity_analysis_testing`
 
         +++
         | **Level:** Beginner
         | **Task:** Effect inference
 
-    .. card:: :doc:`sensitivity_analysis_nonparametric_estimators`
+    .. grid-item-card:: :doc:`sensitivity_analysis_nonparametric_estimators`
 
         +++
         | **Level:** Advanced
         | **Task:** Effect inference
 
-    .. card:: :doc:`dowhy_refuter_notebook`
+    .. grid-item-card:: :doc:`dowhy_refuter_notebook`
 
         +++
         | **Level:** Beginner
         | **Task:** Effect inference
 
-    .. card:: :doc:`dowhy_refuter_assess_overlap`
+.. grid:: 3
+
+    .. grid-item-card:: :doc:`dowhy_refuter_assess_overlap`
 
         +++
         | **Level:** Advanced
         | **Task:** Effect inference
 
-    .. card:: :doc:`dowhy_demo_dummy_outcome_refuter`
+    .. grid-item-card:: :doc:`dowhy_demo_dummy_outcome_refuter`
 
         +++
         | **Level:** Advanced
@@ -204,52 +274,50 @@ Modeling and refuting causal assumptions
 Miscellaneous
 -------------
 
-.. card-carousel:: 3
+.. grid:: 3
 
-    .. card:: :doc:`gcm_draw_samples`
-
-        +++
-        | **Level:** Beginner
-        | **Task:** GCM inference
-
-
-    .. card:: :doc:`dowhy_estimation_methods`
+    .. grid-item-card:: :doc:`dowhy_estimation_methods`
 
         +++
         | **Level:** Beginner
         | **Task:** Effect inference
 
-    .. card:: :doc:`dowhy-simple-iv-example`
+    .. grid-item-card:: :doc:`dowhy-simple-iv-example`
 
         +++
         | **Level:** Beginner
         | **Task:** Effect inference
 
-    .. card:: :doc:`dowhy_interpreter`
+    .. grid-item-card:: :doc:`dowhy_interpreter`
 
         +++
         | **Level:** Beginner
         | **Task:** Effect inference
-        
-    .. card:: :doc:`dowhy_mediation_analysis`
+
+
+.. grid:: 3
+
+    .. grid-item-card:: :doc:`dowhy_mediation_analysis`
 
         +++
         | **Level:** Advanced
         | **Task:** Effect inference
         
-    .. card:: :doc:`dowhy_multiple_treatments`
+    .. grid-item-card:: :doc:`dowhy_multiple_treatments`
 
         +++
         | **Level:** Advanced
         | **Task:** Effect inference
 
-    .. card:: :doc:`dowhy_efficient_backdoor_example`
+    .. grid-item-card:: :doc:`dowhy_efficient_backdoor_example`
 
         +++
         | **Level:** Advanced
         | **Task:** Effect inference
 
-    .. card:: :doc:`identifying_effects_using_id_algorithm`
+.. grid:: 3
+
+    .. grid-item-card:: :doc:`identifying_effects_using_id_algorithm`
 
         +++
         | **Level:** Advanced
@@ -262,9 +330,10 @@ Miscellaneous
    :hidden:
 
    dowhy_simple_example
-   dowhy_confounder_example   
-   dowhy-conditional-treatment-effects
    gcm_basic_example
+   gcm_draw_samples
+   dowhy_confounder_example
+   dowhy-conditional-treatment-effects
    tutorial-causalinference-machinelearning-using-dowhy-econml
    dowhy_functional_api
    dowhy_mediation_analysis
@@ -279,9 +348,11 @@ Miscellaneous
 
    DoWhy-The Causal Story Behind Hotel Booking Cancellations
    dowhy_example_effect_of_memberrewards_program
+   gcm_online_shop
    gcm_rca_microservice_architecture
    gcm_401k_analysis
    gcm_supply_chain_dist_change
+   gcm_icc
    gcm_counterfactual_medical_dry_eyes
    gcm_falsify_dag
 
@@ -317,7 +388,6 @@ Miscellaneous
    :caption: Miscellaneous
    :hidden:
 
-   gcm_draw_samples
    dowhy_estimation_methods
    dowhy-simple-iv-example
    dowhy_interpreter
@@ -325,5 +395,3 @@ Miscellaneous
    dowhy_multiple_treatments
    dowhy_efficient_backdoor_example
    identifying_effects_using_id_algorithm
-
-

@@ -1,16 +1,16 @@
-#  Copyright 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
-
 from functools import partial
 
 import networkx as nx
 import numpy as np
 import pandas as pd
+import pytest
 from flaky import flaky
 
 from dowhy.datasets import generate_random_graph
 from dowhy.gcm.falsify import (
     FalsifyConst,
     _PermuteNodes,
+    falsify_graph,
     run_validations,
     validate_cm,
     validate_lmc,
@@ -360,3 +360,18 @@ def test_given_minimal_DAG_when_validating_causal_minimality_then_report_no_viol
 
     assert summary[FalsifyConst.VALIDATE_CM][FalsifyConst.N_VIOLATIONS] == 0
     assert summary[FalsifyConst.VALIDATE_CM][FalsifyConst.N_TESTS] == 2
+
+
+def test_given_data_of_only_a_subset_of_nodes_when_falsify_and_set_allow_data_subset_to_false_then_raise_error():
+    with pytest.raises(ValueError):
+        falsify_graph(
+            nx.DiGraph([("X", "Y"), ("Y", "Z")]),
+            pd.DataFrame({"X": np.random.random(10), "Y": np.random.random(10)}),
+            allow_data_subset=False,
+        )
+
+
+def test_given_no_data_when_falsify_then_does_not_raise_error_but_cannot_evaluate():
+    assert not falsify_graph(nx.DiGraph([("X", "Y"), ("Y", "Z")]), pd.DataFrame({})).can_evaluate
+
+    assert not falsify_graph(nx.DiGraph([("X", "Y"), ("Y", "Z")]), pd.DataFrame({"X": []})).can_evaluate

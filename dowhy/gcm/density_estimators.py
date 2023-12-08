@@ -1,8 +1,4 @@
-"""This module contains implementations of different density estimators.
-
-Classes and functions in this module should be considered experimental, meaning there might be breaking API changes in
-the future.
-"""
+"""This module contains implementations of different density estimators."""
 
 from typing import Optional
 

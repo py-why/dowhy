@@ -32,7 +32,7 @@ jobs:
         test-group: [1, 2, 3, 4, 5, 6]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
@@ -69,6 +69,14 @@ jobs:
 
     - name: Test EconML based functionality
       run: poetry run poe test_econml
+
+    - name: Test README errors for PyPI
+      run: |
+          pip install poetry-dynamic-versioning
+          pip install twine
+          poetry-dynamic-versioning
+          poetry build
+          twine check dist/*
 
     - name: Notify Discord
       if: failure() && github.ref == 'refs/heads/main'

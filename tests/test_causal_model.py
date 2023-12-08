@@ -1,3 +1,4 @@
+import networkx as nx
 import pandas as pd
 import pytest
 from flaky import flaky
@@ -7,6 +8,9 @@ from sklearn import linear_model
 import dowhy
 import dowhy.datasets
 from dowhy import CausalModel
+from dowhy.causal_graph import CausalGraph
+from dowhy.gcm import ProbabilisticCausalModel, StructuralCausalModel
+from dowhy.utils.graph_operations import daggity_to_dot
 
 
 class TestCausalModel(object):
@@ -312,6 +316,91 @@ class TestCausalModel(object):
         assert "Unobserved Confounders" not in all_nodes
 
     @mark.parametrize(
+        ["beta", "num_instruments", "num_samples", "num_treatments"],
+        [
+            (10, 1, 100, 1),
+        ],
+    )
+    def test_graph_input_nx(self, beta, num_instruments, num_samples, num_treatments):
+        num_common_causes = 5
+        data = dowhy.datasets.linear_dataset(
+            beta=beta,
+            num_common_causes=num_common_causes,
+            num_instruments=num_instruments,
+            num_samples=num_samples,
+            num_treatments=num_treatments,
+            treatment_is_binary=True,
+        )
+        nx_graph = nx.DiGraph(nx.parse_gml(data["gml_graph"]))
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=nx_graph,
+            proceed_when_unidentifiable=True,
+            test_significance=None,
+        )
+        # removing two common causes
+        daggity_file = "tests/sample_dag.txt"
+        with open(daggity_file, "r") as text_file:
+            graph_str = text_file.read()
+        graph_str = daggity_to_dot(graph_str)
+        graph_str = graph_str.replace("\n", " ")
+        import pygraphviz as pgv
+
+        nx_graph2 = pgv.AGraph(graph_str, strict=True, directed=True)
+        nx_graph2 = nx.drawing.nx_agraph.from_agraph(nx_graph2)
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=nx_graph2,
+            proceed_when_unidentifiable=True,
+            test_significance=None,
+            missing_nodes_as_confounders=True,
+        )
+        common_causes = model.get_common_causes()
+        assert all(node_name in common_causes for node_name in ["X1", "X2"])
+        all_nodes = model._graph.get_all_nodes(include_unobserved=True)
+        assert all(
+            node_name in all_nodes for node_name in ["Unobserved Confounders", "X0", "X1", "X2", "Z0", "v0", "y"]
+        )
+        all_nodes = model._graph.get_all_nodes(include_unobserved=False)
+        assert "Unobserved Confounders" not in all_nodes
+
+    @mark.parametrize(
+        ["beta", "num_effect_modifiers", "num_samples"],
+        [
+            (10, 0, 100),
+            (10, 1, 100),
+        ],
+    )
+    def test_cate_estimates_regression(self, beta, num_effect_modifiers, num_samples):
+        data = dowhy.datasets.linear_dataset(
+            beta=beta,
+            num_common_causes=2,
+            num_samples=num_samples,
+            num_treatments=1,
+            treatment_is_binary=True,
+            num_effect_modifiers=num_effect_modifiers,
+        )
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+            test_significance=None,
+        )
+        identified_estimand = model.identify_effect()
+        linear_estimate = model.estimate_effect(
+            identified_estimand, method_name="backdoor.linear_regression", control_value=0, treatment_value=1
+        )
+        if num_effect_modifiers == 0:
+            assert linear_estimate.conditional_estimates is None
+        else:
+            assert linear_estimate.conditional_estimates is not None
+
+    @mark.parametrize(
         ["num_variables", "num_samples"],
         [
             (5, 5000),
@@ -497,6 +586,40 @@ class TestCausalModel(object):
             f"and with level `logging.WARNING` and this content '{expected_logging_message}'. "
             f"Only the following log records were emitted instead: '{caplog.records}'."
         )
+
+    def test_compability_with_gcm(self):
+        data = pd.DataFrame({"X": [0], "Y": [0], "Z": [0]})
+        model = CausalModel(
+            data=data,
+            treatment="Y",
+            outcome="Z",
+            graph=StructuralCausalModel(nx.DiGraph([("X", "Y"), ("Y", "Z")])),
+        )
+
+        assert set(model._graph._graph.nodes) == {"X", "Y", "Z"}
+        assert set(model._graph._graph.edges) == {("X", "Y"), ("Y", "Z")}
+
+        causal_graph = CausalGraph("Y", "Z", graph=StructuralCausalModel(nx.DiGraph([("X", "Y"), ("Y", "Z")])))
+        assert set(causal_graph._graph.nodes) == {"X", "Y", "Z"}
+        assert set(causal_graph._graph.edges) == {("X", "Y"), ("Y", "Z")}
+
+        pcm = ProbabilisticCausalModel(model)
+        assert set(pcm.graph.nodes) == {"X", "Y", "Z"}
+        assert set(pcm.graph.edges) == {("X", "Y"), ("Y", "Z")}
+
+        pcm = ProbabilisticCausalModel(model._graph)
+        assert set(pcm.graph.nodes) == {"X", "Y", "Z"}
+        assert set(pcm.graph.edges) == {("X", "Y"), ("Y", "Z")}
+
+    def test_incorrect_graph_format(self):
+        data = pd.DataFrame({"X": [0], "Y": [0], "Z": [0]})
+        with pytest.raises(ValueError, match="Incorrect format:"):
+            model = CausalModel(
+                data=data,
+                treatment="Y",
+                outcome="Z",
+                graph=nx.Graph([("X", "Y"), ("Y", "Z")]),
+            )
 
 
 if __name__ == "__main__":

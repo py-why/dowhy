@@ -1,6 +1,7 @@
 import networkx as nx
 import numpy as np
 import pandas as pd
+import pytest
 from _pytest.python_api import approx
 from flaky import flaky
 from pytest import mark
@@ -9,7 +10,15 @@ from sklearn.linear_model import ElasticNetCV, LassoCV, LinearRegression, Logist
 from sklearn.naive_bayes import GaussianNB
 from sklearn.pipeline import Pipeline
 
-from dowhy.gcm import ProbabilisticCausalModel, draw_samples, fit
+from dowhy.gcm import (
+    AdditiveNoiseModel,
+    DiscreteAdditiveNoiseModel,
+    EmpiricalDistribution,
+    ProbabilisticCausalModel,
+    StructuralCausalModel,
+    draw_samples,
+    fit,
+)
 from dowhy.gcm.auto import AssignmentQuality, assign_causal_mechanisms, has_linear_relationship
 
 
@@ -205,6 +214,20 @@ def test_given_polynomial_classification_data_with_categorical_input_when_auto_a
     assign_causal_mechanisms(causal_model, pd.DataFrame(data), quality=AssignmentQuality.GOOD, override_models=True)
 
 
+def test_given_continuous_and_discrete_data_when_auto_assign_then_correct_assigns_discrete_anm():
+    causal_model = ProbabilisticCausalModel(nx.DiGraph([("X", "Y"), ("Y", "Z")]))
+    data = {
+        "X": np.random.normal(0, 1, 100),
+        "Y": np.random.choice(2, 100, replace=True),
+        "Z": np.random.normal(0, 1, 100),
+    }
+
+    assign_causal_mechanisms(causal_model, pd.DataFrame(data), quality=AssignmentQuality.GOOD)
+    assert isinstance(causal_model.causal_mechanism("X"), EmpiricalDistribution)
+    assert isinstance(causal_model.causal_mechanism("Y"), DiscreteAdditiveNoiseModel)
+    assert isinstance(causal_model.causal_mechanism("Z"), AdditiveNoiseModel)
+
+
 def test_when_auto_called_from_main_namespace_returns_no_attribute_error():
     from dowhy import gcm
 
@@ -313,3 +336,168 @@ def test_given_data_with_rare_categorical_features_when_calling_has_linear_relat
     Y = np.append(np.array(["Class1"] * 10), np.array(["Class2"] * 10))
 
     assert has_linear_relationship(X, Y)
+
+
+@flaky(max_runs=2)
+def test_given_continuous_data_when_print_auto_summary_then_returns_expected_formats():
+    X, Y = _generate_non_linear_regression_data()
+
+    causal_model = ProbabilisticCausalModel(
+        nx.DiGraph([("X0", "Y"), ("X1", "Y"), ("X2", "Y"), ("X3", "Y"), ("X4", "Y")])
+    )
+    data = {"X" + str(i): X[:, i] for i in range(X.shape[1])}
+    data.update({"Y": Y})
+
+    summary_result = assign_causal_mechanisms(causal_model, pd.DataFrame(data))
+    summary_string = str(summary_result)
+
+    assert "X0" in summary_result._nodes
+    assert "X1" in summary_result._nodes
+    assert "X2" in summary_result._nodes
+    assert "X3" in summary_result._nodes
+    assert "X4" in summary_result._nodes
+    assert "Y" in summary_result._nodes
+
+    assert len(summary_result._nodes["X0"]["model_performances"]) == 0
+    assert len(summary_result._nodes["X1"]["model_performances"]) == 0
+    assert len(summary_result._nodes["X2"]["model_performances"]) == 0
+    assert len(summary_result._nodes["X3"]["model_performances"]) == 0
+    assert len(summary_result._nodes["X4"]["model_performances"]) == 0
+    assert len(summary_result._nodes["Y"]["model_performances"]) > 0
+
+    assert (
+        """When using this auto assignment function, the given data is used to automatically assign a causal mechanism to each node. Note that causal mechanisms can also be customized and assigned manually.
+The following types of causal mechanisms are considered for the automatic selection:
+
+If root node:
+An empirical distribution, i.e., the distribution is represented by randomly sampling from the provided data. This provides a flexible and non-parametric way to model the marginal distribution and is valid for all types of data modalities.
+
+If non-root node and the data is continuous:
+Additive Noise Models (ANM) of the form X_i = f(PA_i) + N_i, where PA_i are the parents of X_i and the unobserved noise N_i is assumed to be independent of PA_i.To select the best model for f, different regression models are evaluated and the model with the smallest mean squared error is selected.Note that minimizing the mean squared error here is equivalent to selecting the best choice of an ANM.
+
+If non-root node and the data is discrete:
+Discrete Additive Noise Models have almost the same definition as non-discrete ANMs, but come with an additional constraint for f to only return discrete values.
+Note that 'discrete' here refers to numerical values with an order. If the data is categorical, consider representing them as strings to ensure proper model selection.
+
+If non-root node and the data is categorical:
+A functional causal model based on a classifier, i.e., X_i = f(PA_i, N_i).
+Here, N_i follows a uniform distribution on [0, 1] and is used to randomly sample a class (category) using the conditional probability distribution produced by a classification model.Here, different model classes are evaluated using the (negative) F1 score and the best performing model class is selected.
+
+In total, 6 nodes were analyzed:
+
+--- Node: X0
+Node X0 is a root node. Therefore, assigning 'Empirical Distribution' to the node representing the marginal distribution.
+
+--- Node: X1
+Node X1 is a root node. Therefore, assigning 'Empirical Distribution' to the node representing the marginal distribution.
+
+--- Node: X2
+Node X2 is a root node. Therefore, assigning 'Empirical Distribution' to the node representing the marginal distribution.
+
+--- Node: X3
+Node X3 is a root node. Therefore, assigning 'Empirical Distribution' to the node representing the marginal distribution.
+
+--- Node: X4
+Node X4 is a root node. Therefore, assigning 'Empirical Distribution' to the node representing the marginal distribution.
+
+--- Node: Y
+Node Y is a non-root node with continuous data. Assigning 'AdditiveNoiseModel using """
+        in summary_string
+    )
+    assert "This represents the causal relationship as Y := f(X0,X1,X2,X3,X4) + N." in summary_string
+    assert "For the model selection, the following models were evaluated on the mean squared error (MSE) metric:"
+    assert (
+        """===Note===
+Note, based on the selected auto assignment quality, the set of evaluated models changes.
+For more insights toward the quality of the fitted graphical causal model, consider using the evaluate_causal_model function after fitting the causal mechanisms."""
+        in summary_string
+    )
+
+
+@flaky(max_runs=2)
+def test_given_categorical_data_when_print_auto_summary_then_returns_expected_formats():
+    X, Y = _generate_linear_classification_data()
+
+    causal_model = ProbabilisticCausalModel(
+        nx.DiGraph([("X0", "Y"), ("X1", "Y"), ("X2", "Y"), ("X3", "Y"), ("X4", "Y")])
+    )
+    data = {"X" + str(i): X[:, i] for i in range(X.shape[1])}
+    data.update({"Y": Y})
+
+    summary_result = assign_causal_mechanisms(causal_model, pd.DataFrame(data))
+    summary_string = str(summary_result)
+
+    assert "X0" in summary_result._nodes
+    assert "X1" in summary_result._nodes
+    assert "X2" in summary_result._nodes
+    assert "X3" in summary_result._nodes
+    assert "X4" in summary_result._nodes
+    assert "Y" in summary_result._nodes
+
+    assert len(summary_result._nodes["X0"]["model_performances"]) == 0
+    assert len(summary_result._nodes["X1"]["model_performances"]) == 0
+    assert len(summary_result._nodes["X2"]["model_performances"]) == 0
+    assert len(summary_result._nodes["X3"]["model_performances"]) == 0
+    assert len(summary_result._nodes["X4"]["model_performances"]) == 0
+    assert len(summary_result._nodes["Y"]["model_performances"]) > 0
+
+    assert (
+        """The following types of causal mechanisms are considered for the automatic selection:
+
+If root node:
+An empirical distribution, i.e., the distribution is represented by randomly sampling from the provided data. This provides a flexible and non-parametric way to model the marginal distribution and is valid for all types of data modalities.
+
+If non-root node and the data is continuous:
+Additive Noise Models (ANM) of the form X_i = f(PA_i) + N_i, where PA_i are the parents of X_i and the unobserved noise N_i is assumed to be independent of PA_i.To select the best model for f, different regression models are evaluated and the model with the smallest mean squared error is selected.Note that minimizing the mean squared error here is equivalent to selecting the best choice of an ANM.
+
+If non-root node and the data is discrete:
+Discrete Additive Noise Models have almost the same definition as non-discrete ANMs, but come with an additional constraint for f to only return discrete values.
+Note that 'discrete' here refers to numerical values with an order. If the data is categorical, consider representing them as strings to ensure proper model selection.
+
+If non-root node and the data is categorical:
+A functional causal model based on a classifier, i.e., X_i = f(PA_i, N_i).
+Here, N_i follows a uniform distribution on [0, 1] and is used to randomly sample a class (category) using the conditional probability distribution produced by a classification model.Here, different model classes are evaluated using the (negative) F1 score and the best performing model class is selected.
+
+In total, 6 nodes were analyzed:
+
+--- Node: X0
+Node X0 is a root node. Therefore, assigning 'Empirical Distribution' to the node representing the marginal distribution.
+
+--- Node: X1
+Node X1 is a root node. Therefore, assigning 'Empirical Distribution' to the node representing the marginal distribution.
+
+--- Node: X2
+Node X2 is a root node. Therefore, assigning 'Empirical Distribution' to the node representing the marginal distribution.
+
+--- Node: X3
+Node X3 is a root node. Therefore, assigning 'Empirical Distribution' to the node representing the marginal distribution.
+
+--- Node: X4
+Node X4 is a root node. Therefore, assigning 'Empirical Distribution' to the node representing the marginal distribution.
+
+--- Node: Y
+Node Y is a non-root node with categorical data. Assigning 'Classifier FCM based on """
+        in summary_string
+    )
+    assert "This represents the causal relationship as Y := f(X0,X1,X2,X3,X4,N)." in summary_string
+    assert "For the model selection, the following models were evaluated on the (negative) F1 metric:" in summary_string
+    assert (
+        """===Note===
+Note, based on the selected auto assignment quality, the set of evaluated models changes.
+For more insights toward the quality of the fitted graphical causal model, consider using the evaluate_causal_model function after fitting the causal mechanisms."""
+        in summary_string
+    )
+
+
+def test_given_imbalanced_classes_when_auto_assign_mechanism_then_handles_as_expected():
+    X = np.random.normal(0, 1, 1000)
+    Y = np.array(["OneClass"] * 1000)
+
+    with pytest.raises(ValueError):
+        assign_causal_mechanisms(StructuralCausalModel(nx.DiGraph([("X", "Y")])), pd.DataFrame({"X": X, "Y": Y}))
+
+    # Having at least one sample from the second class should not raise an error.
+    X = np.append(X, 0)
+    Y = np.append(Y, "RareClass")
+
+    assign_causal_mechanisms(StructuralCausalModel(nx.DiGraph([("X", "Y")])), pd.DataFrame({"X": X, "Y": Y}))

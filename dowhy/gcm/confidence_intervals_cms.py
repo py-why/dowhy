@@ -1,7 +1,4 @@
-"""This module provides functionality to estimate confidence intervals via bootstrapping the fitting and sampling.
-
-Functions in this module should be considered experimental, meaning there might be breaking API changes in the future.
-"""
+"""This module provides functionality to estimate confidence intervals via bootstrapping the fitting and sampling."""
 
 from functools import partial
 from typing import Any, Callable, Dict, Optional, Union

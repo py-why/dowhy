@@ -6,7 +6,7 @@ import pandas as pd
 from joblib import Parallel, delayed
 from tqdm.auto import tqdm
 
-from dowhy.causal_estimator import CausalEstimate, CausalEstimator
+from dowhy.causal_estimator import CausalEstimate
 from dowhy.causal_estimators.econml import Econml
 from dowhy.causal_identifier import IdentifiedEstimand
 from dowhy.causal_refuter import CausalRefutation, CausalRefuter, test_significance

@@ -1,6 +1,3 @@
-"""Functions in this module should be considered experimental, meaning there might be breaking API changes in the
-future.
-"""
 from typing import Callable, List, Optional, Union
 
 import numpy as np

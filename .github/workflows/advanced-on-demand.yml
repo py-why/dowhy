@@ -17,7 +17,7 @@ jobs:
     if: ${{ github.event.comment.body == 'test advanced'}}
     steps:
       - name: Message Initiating
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             github.issues.createComment({
@@ -28,7 +28,7 @@ jobs:
             });
       - name: Get PR SHA
         id: sha
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           result-encoding: string
           script: |
@@ -40,7 +40,7 @@ jobs:
             });
             return pr.data.head.sha
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ steps.sha.outputs.result }}
 
@@ -69,7 +69,7 @@ jobs:
 
       - name: Message success
         if: ${{ success() }}
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             github.issues.createComment({
@@ -80,7 +80,7 @@ jobs:
             });
       - name: Message failure
         if: ${{ failure() }}
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             github.issues.createComment({

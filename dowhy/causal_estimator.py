@@ -1,8 +1,7 @@
 import copy
 import logging
 from collections import namedtuple
-from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -711,7 +710,7 @@ def estimate_effect(
     elif identified_estimand.estimands[identifier_name] is None:
         logger.error("No valid identified estimand available.")
         return CausalEstimate(
-            None, None, None, None, None, control_value=control_value, treatment_value=treatment_value
+            None, None, None, None, None, None, control_value=control_value, treatment_value=treatment_value
         )
 
     if fit_estimator:

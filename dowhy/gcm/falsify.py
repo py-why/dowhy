@@ -1,7 +1,4 @@
-"""This module provides functionality to falsify a user-given DAG given observed data.
-
-Functions in this module should be considered experimental, meaning there might be breaking API changes in the future.
-"""
+"""This module provides functionality to falsify a user-given DAG given observed data."""
 import warnings
 from dataclasses import dataclass, field
 from enum import Enum, auto
@@ -22,7 +19,6 @@ import dowhy.gcm.config as config
 from dowhy.gcm.independence_test import kernel_based
 from dowhy.gcm.util import plot
 from dowhy.gcm.util.general import set_random_seed
-from dowhy.gcm.validation import _get_non_descendants
 from dowhy.graph import DirectedGraph, get_ordered_predecessors
 
 VIOLATION_COLOR = "red"
@@ -501,6 +497,9 @@ class EvaluationResult:
 
     def _can_evaluate(self):
         can_evaluate = True
+        if self.summary[FalsifyConst.VALIDATE_LMC][FalsifyConst.N_TESTS] == 0:
+            return False
+
         for m in (FalsifyConst.VALIDATE_LMC, FalsifyConst.VALIDATE_TPA):
             if m not in self.summary:
                 can_evaluate = False
@@ -521,6 +520,7 @@ def falsify_graph(
     n_jobs: Optional[int] = None,
     plot_histogram: bool = False,
     plot_kwargs: Optional[Dict] = None,
+    allow_data_subset: bool = True,
 ) -> EvaluationResult:
     """
     Falsify a given DAG using observational data.
@@ -567,14 +567,24 @@ def falsify_graph(
     :param n_jobs: Number of jobs to use for parallel execution of (conditional) independence tests.
     :param plot_histogram: Plot histogram of results from permutation baseline.
     :param plot_kwargs: Additional plot arguments to be passed to plot_evaluation_results.
+    :param allow_data_subset: If True, performs the evaluation even if data is only available for a subset of nodes.
+                                   If False, raises an error if not all nodes have data available.
     :return: EvaluationResult
     """
+    if not allow_data_subset and not set([str(node) for node in causal_graph.nodes]).issubset(
+        set([str(col) for col in data.columns])
+    ):
+        raise ValueError(
+            "Did not find data for all nodes of the given graph! Make sure that the node names coincide "
+            "with the column names in the data."
+        )
+
     n_jobs = config.default_n_jobs if n_jobs is None else n_jobs
     show_progress_bar = config.show_progress_bars if show_progress_bar is None else show_progress_bar
     p_values_memory = _PValuesMemory()
 
     if n_permutations is None:
-        n_permutations = int(1 / significance_level) if not plot_histogram else -1
+        n_permutations = int(1 / significance_level)
 
     if not plot_kwargs:
         plot_kwargs = {}
@@ -628,10 +638,10 @@ def falsify_graph(
         summary[m][FalsifyConst.GIVEN_VIOLATIONS] = summary_given[m][FalsifyConst.N_VIOLATIONS]
         summary[m][FalsifyConst.N_TESTS] = summary_given[m][FalsifyConst.N_TESTS]
         summary[m][FalsifyConst.F_PERM_VIOLATIONS] = [
-            perm[FalsifyConst.N_VIOLATIONS] / perm[FalsifyConst.N_TESTS] for perm in summary_perm[m]
+            perm[FalsifyConst.N_VIOLATIONS] / max(1, perm[FalsifyConst.N_TESTS]) for perm in summary_perm[m]
         ]
-        summary[m][FalsifyConst.F_GIVEN_VIOLATIONS] = (
-            summary[m][FalsifyConst.GIVEN_VIOLATIONS] / summary[m][FalsifyConst.N_TESTS]
+        summary[m][FalsifyConst.F_GIVEN_VIOLATIONS] = summary[m][FalsifyConst.GIVEN_VIOLATIONS] / max(
+            1, summary[m][FalsifyConst.N_TESTS]
         )
         summary[m][FalsifyConst.P_VALUE] = sum(
             [
@@ -657,7 +667,7 @@ def falsify_graph(
         significance_level=significance_level,
         suggestions={m: summary_given[m] for m in summary_given if m not in validation_methods},
     )
-    if plot_histogram:
+    if plot_histogram and result.can_evaluate:
         plot_evaluation_results(result, **plot_kwargs)
     return result
 
@@ -973,3 +983,10 @@ def _to_frozenset(x: Union[Set, List, str]):
     if isinstance(x, str):
         return frozenset({x})
     return frozenset(x)
+
+
+def _get_non_descendants(causal_graph: DirectedGraph, node: Any, exclude_parents: bool = False) -> List[Any]:
+    nodes_to_exclude = nx.descendants(causal_graph, node).union({node})
+    if exclude_parents:
+        nodes_to_exclude = nodes_to_exclude.union(causal_graph.predecessors(node))
+    return list(set(causal_graph.nodes).difference(nodes_to_exclude))

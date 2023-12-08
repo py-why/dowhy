@@ -84,6 +84,9 @@ class TwoStageRegressionEstimator(CausalEstimator):
         )
         self.logger.info("INFO: Using Two Stage Regression Estimator")
         # Check if the treatment is one-dimensional
+        if len(self._target_estimand.treatment_variable) > 1:
+            error_msg = str(self.__class__) + "cannot handle more than one treatment variable"
+            raise Exception(error_msg)
         modified_target_estimand = copy.deepcopy(self._target_estimand)
         modified_target_estimand.identifier_method = "backdoor"
         modified_target_estimand.backdoor_variables = self._target_estimand.mediation_first_stage_confounders
@@ -125,7 +128,6 @@ class TwoStageRegressionEstimator(CausalEstimator):
                 )
             )
         else:
-            modified_target_estimand = copy.deepcopy(self._target_estimand)
             self._second_stage_model = self.__class__.DEFAULT_SECOND_STAGE_MODEL(
                 modified_target_estimand,
                 test_significance=self._significance_test,
@@ -174,23 +176,32 @@ class TwoStageRegressionEstimator(CausalEstimator):
         if self._target_estimand.identifier_method == "frontdoor":
             self.logger.debug("Front-door variable used:" + ",".join(self._target_estimand.get_frontdoor_variables()))
             self._frontdoor_variables_names = self._target_estimand.get_frontdoor_variables()
-
             if self._frontdoor_variables_names:
+                if len(self._frontdoor_variables_names) > 1:
+                    raise ValueError(
+                        "Only singleton frontdoor variables are supported for estimation using TwoStageRegression."
+                    )
                 self._frontdoor_variables = data[self._frontdoor_variables_names]
             else:
                 self._frontdoor_variables = None
                 error_msg = "No front-door variable present. Two stage regression is not applicable"
                 self.logger.error(error_msg)
+                raise ValueError(error_msg)
         elif self._target_estimand.identifier_method == "mediation":
             self.logger.debug("Mediators used:" + ",".join(self._target_estimand.get_mediator_variables()))
             self._mediators_names = self._target_estimand.get_mediator_variables()
 
             if self._mediators_names:
+                if len(self._mediators_names) > 1:
+                    raise ValueError(
+                        "Only singleton mediator variables are supported for estimation using TwoStageRegression."
+                    )
                 self._mediators = data[self._mediators_names]
             else:
                 self._mediators = None
                 error_msg = "No mediator variable present. Two stage regression is not applicable"
                 self.logger.error(error_msg)
+                raise ValueError(error_msg)
         elif self._target_estimand.identifier_method == "iv":
             self.logger.debug(
                 "Instrumental variables used:" + ",".join(self._target_estimand.get_instrumental_variables())

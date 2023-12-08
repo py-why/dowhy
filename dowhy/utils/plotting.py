@@ -145,12 +145,20 @@ def bar_plot(
 
     if uncertainties is None:
         uncertainties = {node: [values[node], values[node]] for node in values}
+    else:
+        for node in values:
+            if node not in uncertainties:
+                uncertainties[node] = [values[node], values[node]]
 
     figure, ax = plt.subplots(figsize=figure_size)
-    ci_plus = [uncertainties[node][1] - values[node] for node in values.keys()]
-    ci_minus = [values[node] - uncertainties[node][0] for node in values.keys()]
+    ci_plus = np.array([uncertainties[node][1] - values[node] for node in values.keys()])
+    ci_minus = np.array([values[node] - uncertainties[node][0] for node in values.keys()])
+
+    is_negative_yerr = np.logical_or(ci_plus < 0, ci_minus < 0)
+    ci_plus[is_negative_yerr] = 0
+    ci_minus[is_negative_yerr] = 0
+
     yerr = np.array([ci_minus, ci_plus])
-    yerr[abs(yerr) < 10**-7] = 0
     plt.bar(values.keys(), values.values(), yerr=yerr, ecolor="#1E88E5", color="#ff0d57", width=bar_width)
     plt.ylabel(ylabel)
     plt.xticks(rotation=xticks_rotation)

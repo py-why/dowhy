@@ -1,7 +1,4 @@
-"""This module provides functionality for fitting probabilistic causal models and drawing samples from them.
-
-Functions in this module should be considered experimental, meaning there might be breaking API changes in the future.
-"""
+"""This module provides functionality for fitting probabilistic causal models and drawing samples from them."""
 
 from typing import Any
 
@@ -20,11 +17,31 @@ from dowhy.gcm.causal_models import (
 from dowhy.graph import get_ordered_predecessors, is_root_node
 
 
-def fit(causal_model: ProbabilisticCausalModel, data: pd.DataFrame):
-    """Learns generative causal models of nodes in the causal graph from data.
+def fit(causal_model: ProbabilisticCausalModel, data: pd.DataFrame, return_evaluation_summary: bool = False):
+    """Fits the causal mechanism of each node to the data. This is done by iterating over the nodes in the graph and
+    fitting their assigned causal mechanisms individually to the data by calling the corresponding fit function. Due to
+    the modularity assumption, we can fit each mechanism in the graph independently of the other mechanisms. For root
+    nodes, the training data is the corresponding column in the provided data. For non-root nodes, the data is based on
+    a node's parents and the node itself. Before a node is fitted, this function first validates whether the assigned
+    mechanism is valid, i.e., whether a root node follows a StochasticModel and whether a non-root node follows a
+    ConditionalStochasticModel.
 
-    :param causal_model: The causal model containing the mechanisms that will be fitted.
+    The details of fitting a causal mechanism depend on their implementation. For example, if a node follows an additive
+    noise model X_i = f_i(PA_i) + N_i, where N_i is unobserved noise, the fitting involves fitting the function f_i
+    (which could be any scikit-learn regressor) to the data and modeling the distribution N_i based on the residuals
+    X_i - f_i(PA_i). For more details on how each individual mechanism is fitted, refer to the corresponding
+    documentation, since these are individual implementation details.
+
+    This function optionally, returns a summary of different metrics of the causal mechanisms evaluated via
+    cross-validation. Note, this will use the evaluate_causal_model method. For more detailed and extensive evaluations,
+    consider using the evaluate_causal_model method directly.
+
+    :param causal_model: The causal model containing the mechanisms of the node that will be fitted.
     :param data: Observations of nodes in the causal model.
+    :param return_evaluation_summary: If True, returns a summary of the performances of the fitted mechanisms using the
+                                      evaluate_causal_model method. If False, nothing is returned.
+    :return: Optionally, a CausalModelEvaluationResult summarizing the performances of the causal mechanisms via
+             cross-validation.
     """
     progress_bar = tqdm(
         causal_model.graph.nodes,
@@ -43,6 +60,19 @@ def fit(causal_model: ProbabilisticCausalModel, data: pd.DataFrame):
         progress_bar.set_description("Fitting causal mechanism of node %s" % node)
 
         fit_causal_model_of_target(causal_model, node, data)
+
+    if return_evaluation_summary:
+        from dowhy.gcm import evaluate_causal_model
+
+        return evaluate_causal_model(
+            causal_model,
+            data,
+            evaluate_causal_mechanisms=True,
+            compare_mechanism_baselines=False,
+            evaluate_invertibility_assumptions=False,
+            evaluate_overall_kl_divergence=False,
+            evaluate_causal_structure=False,
+        )
 
 
 def fit_causal_model_of_target(
@@ -92,11 +122,11 @@ def draw_samples(causal_model: ProbabilisticCausalModel, num_samples: int) -> pd
         causal_mechanism = causal_model.causal_mechanism(node)
 
         if is_root_node(causal_model.graph, node):
-            drawn_samples[node] = causal_mechanism.draw_samples(num_samples).reshape(-1)
+            drawn_samples[node] = causal_mechanism.draw_samples(num_samples).squeeze()
         else:
             drawn_samples[node] = causal_mechanism.draw_samples(
                 _parent_samples_of(node, causal_model, drawn_samples)
-            ).reshape(-1)
+            ).squeeze()
 
     return drawn_samples
 

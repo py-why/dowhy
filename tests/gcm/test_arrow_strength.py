@@ -17,9 +17,13 @@ from dowhy.gcm import (
     fit,
 )
 from dowhy.gcm.auto import assign_causal_mechanisms
-from dowhy.gcm.divergence import estimate_kl_divergence_continuous
+from dowhy.gcm.divergence import estimate_kl_divergence_continuous_knn
 from dowhy.gcm.influence import arrow_strength_of_model
-from dowhy.gcm.ml import create_linear_regressor, create_logistic_regression_classifier
+from dowhy.gcm.ml import (
+    create_linear_regressor,
+    create_linear_regressor_with_given_parameters,
+    create_logistic_regression_classifier,
+)
 
 
 @pytest.fixture
@@ -34,10 +38,11 @@ def preserve_random_generator_state():
 @flaky(max_runs=5)
 def test_given_kl_divergence_attribution_func_when_estimate_arrow_strength_then_returns_expected_results():
     causal_strengths = arrow_strength(
-        _create_causal_model(), "X2", difference_estimation_func=estimate_kl_divergence_continuous
+        _create_causal_model(), "X2", difference_estimation_func=estimate_kl_divergence_continuous_knn
     )
-    assert causal_strengths[("X0", "X2")] == approx(2.76, abs=0.4)
-    assert causal_strengths[("X1", "X2")] == approx(1.6, abs=0.4)
+
+    assert causal_strengths[("X0", "X2")] == approx(1.2, abs=0.2)
+    assert causal_strengths[("X1", "X2")] == approx(0.3, abs=0.1)
 
 
 @flaky(max_runs=5)
@@ -199,12 +204,18 @@ def _create_causal_model():
     causal_model = ProbabilisticCausalModel(nx.DiGraph([("X1", "X2"), ("X0", "X2")]))
     causal_model.set_causal_mechanism("X1", ScipyDistribution(stats.norm, loc=0, scale=1))
     causal_model.set_causal_mechanism("X0", ScipyDistribution(stats.norm, loc=0, scale=1))
-    causal_model.set_causal_mechanism("X2", AdditiveNoiseModel(prediction_model=create_linear_regressor()))
+    causal_model.set_causal_mechanism(
+        "X2",
+        AdditiveNoiseModel(
+            prediction_model=create_linear_regressor_with_given_parameters([3, 1]),
+            noise_model=ScipyDistribution(stats.norm, loc=0, scale=1),
+        ),
+    )
 
     X0 = np.random.normal(0, 1, 1000)
     X1 = np.random.normal(0, 1, 1000)
 
-    test_data = pd.DataFrame({"X0": X0, "X1": X1, "X2": 3 * X0 + X1 + np.random.normal(0, 0.2, X0.shape[0])})
+    test_data = pd.DataFrame({"X0": X0, "X1": X1, "X2": 3 * X0 + X1 + np.random.normal(0, 1, X0.shape[0])})
     fit(causal_model, test_data)
 
     return causal_model

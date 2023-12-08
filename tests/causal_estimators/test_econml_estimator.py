@@ -28,7 +28,7 @@ class TestEconMLEstimator:
         data = datasets.linear_dataset(
             10,
             num_common_causes=4,
-            num_samples=10000,
+            num_samples=1000,
             num_instruments=2,
             num_effect_modifiers=2,
             num_treatments=1,
@@ -59,6 +59,9 @@ class TestEconMLEstimator:
                 "fit_params": {},
             },
         )
+        # Checking that the CATE estimates are not identical
+        dml_cate_estimates_f = dml_estimate.cate_estimates.flatten()
+        assert pytest.approx(dml_cate_estimates_f[0], 0.001) != dml_cate_estimates_f[1]
         # Test ContinuousTreatmentOrthoForest
         orthoforest_estimate = model.estimate_effect(
             identified_estimand,
@@ -66,11 +69,15 @@ class TestEconMLEstimator:
             target_units=lambda df: df["X0"] > 2,
             method_params={"init_params": {"n_trees": 10}, "fit_params": {}},
         )
+        # Checking that the CATE estimates are not identical
+        orthoforest_cate_estimates_f = orthoforest_estimate.cate_estimates.flatten()
+        assert pytest.approx(orthoforest_cate_estimates_f[0], 0.001) != orthoforest_cate_estimates_f[1]
+
         # Test LinearDRLearner
         data_binary = datasets.linear_dataset(
             10,
             num_common_causes=4,
-            num_samples=10000,
+            num_samples=1000,
             num_instruments=2,
             num_effect_modifiers=2,
             treatment_is_binary=True,
@@ -94,6 +101,48 @@ class TestEconMLEstimator:
                 "fit_params": {},
             },
         )
+        drlearner_cate_estimates_f = drlearner_estimate.cate_estimates.flatten()
+        assert pytest.approx(drlearner_cate_estimates_f[0], 0.001) != drlearner_cate_estimates_f[1]
+
+    def test_metalearners(self):
+        data = datasets.linear_dataset(
+            10,
+            num_common_causes=4,
+            num_samples=1000,
+            num_instruments=2,
+            num_effect_modifiers=2,
+            num_treatments=1,
+            treatment_is_binary=True,
+        )
+        df = data["df"]
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            effect_modifiers=data["effect_modifier_names"],
+            graph=data["gml_graph"],
+        )
+        identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        # Test LinearDML
+        sl_estimate = model.estimate_effect(
+            identified_estimand,
+            method_name="backdoor.econml.metalearners.SLearner",
+            target_units="ate",
+            method_params={"init_params": {"overall_model": GradientBoostingRegressor()}, "fit_params": {}},
+        )
+        # checking that CATE estimates are not identical
+        sl_cate_estimates_f = sl_estimate.cate_estimates.flatten()
+        assert pytest.approx(sl_cate_estimates_f[0], 0.01) != sl_cate_estimates_f[1]
+
+        # predict on new data
+        sl_estimate_test = model.estimate_effect(
+            identified_estimand,
+            method_name="backdoor.econml.metalearners.SLearner",
+            fit_estimator=False,
+            target_units=data["df"].sample(frac=0.1),
+        )
+        sl_cate_estimates_test_f = sl_estimate_test.cate_estimates.flatten()
+        assert pytest.approx(sl_cate_estimates_test_f[0], 0.01) != sl_cate_estimates_test_f[1]
 
     def test_iv_estimators(self):
         keras = pytest.importorskip("keras")
@@ -101,7 +150,7 @@ class TestEconMLEstimator:
         data = datasets.linear_dataset(
             10,
             num_common_causes=4,
-            num_samples=10000,
+            num_samples=1000,
             num_instruments=2,
             num_effect_modifiers=2,
             num_treatments=1,
@@ -141,22 +190,13 @@ class TestEconMLEstimator:
                 keras.layers.Dense(1),
             ]
         )
-        deepiv_estimate = model.estimate_effect(
+        dmliv_estimate = model.estimate_effect(
             identified_estimand,
-            method_name="iv.econml.iv.nnet.DeepIV",
+            method_name="iv.econml.iv.dml.DMLIV",
             target_units=lambda df: df["X0"] > -1,
             confidence_intervals=False,
             method_params={
-                "init_params": {
-                    "n_components": 10,  # Number of gaussians in the mixture density networks
-                    # Treatment model,
-                    "m": lambda z, x: treatment_model(keras.layers.concatenate([z, x])),
-                    # Response model
-                    "h": lambda t, x: response_model(keras.layers.concatenate([t, x])),
-                    "n_samples": 1,  # Number of samples used to estimate the response
-                    "first_stage_options": {"epochs": 25},
-                    "second_stage_options": {"epochs": 25},
-                },
+                "init_params": {"discrete_treatment": False, "discrete_instrument": False},
                 "fit_params": {},
             },
         )
@@ -164,7 +204,7 @@ class TestEconMLEstimator:
         data = datasets.linear_dataset(
             10,
             num_common_causes=4,
-            num_samples=10000,
+            num_samples=1000,
             num_instruments=1,
             num_effect_modifiers=2,
             num_treatments=1,

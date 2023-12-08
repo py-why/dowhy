@@ -8,6 +8,7 @@ from pytest import approx
 from dowhy.gcm import (
     AdditiveNoiseModel,
     ClassifierFCM,
+    DiscreteAdditiveNoiseModel,
     EmpiricalDistribution,
     InvertibleStructuralCausalModel,
     ProbabilisticCausalModel,
@@ -17,7 +18,11 @@ from dowhy.gcm import (
     fit,
     interventional_samples,
 )
-from dowhy.gcm.ml import create_linear_regressor, create_logistic_regression_classifier
+from dowhy.gcm.ml import (
+    create_hist_gradient_boost_regressor,
+    create_linear_regressor,
+    create_logistic_regression_classifier,
+)
 
 
 def _create_and_fit_simple_probabilistic_causal_model():
@@ -243,3 +248,33 @@ def test_given_binary_target_when_estimate_average_causal_effect_then_return_exp
         interventions_reference={"T": lambda x: 0},
         num_samples_to_draw=1000,
     ) == approx(0.5, abs=0.1)
+
+
+@flaky(max_runs=3)
+def test_given_discrete_data_when_performing_interventions_then_returns_correct_samples():
+    X = np.random.normal(0, 1, 1000)
+    Y = []
+    for x in X:
+        if x < -1.5:
+            Y.append(-1)
+        elif -1.5 <= x <= 1.5:
+            Y.append(0)
+        else:
+            Y.append(1)
+    Y = np.array(Y)
+    Z = 2 * Y + np.random.normal(0, 0.1, 1000)
+
+    causal_model = ProbabilisticCausalModel(nx.DiGraph([("X", "Y"), ("Y", "Z")]))
+    causal_model.set_causal_mechanism("X", EmpiricalDistribution())
+    causal_model.set_causal_mechanism(
+        "Y", DiscreteAdditiveNoiseModel(prediction_model=create_hist_gradient_boost_regressor())
+    )
+    causal_model.set_causal_mechanism("Z", AdditiveNoiseModel(prediction_model=create_linear_regressor()))
+    data = pd.DataFrame({"X": X, "Y": Y, "Z": Z})
+
+    fit(causal_model, data)
+
+    samples = interventional_samples(causal_model, {"X": lambda x: -2}, num_samples_to_draw=1000)
+    assert np.all(samples["X"].to_numpy() == -2)
+    assert np.median(samples["Y"].to_numpy()) == -1
+    assert np.mean(samples["Z"].to_numpy()) == approx(-2, abs=0.05)

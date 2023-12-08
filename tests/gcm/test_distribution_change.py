@@ -55,6 +55,26 @@ def test_given_two_graphs_fitted_on_data_sets_with_different_mechanisms_when_eva
 
 
 @flaky(max_runs=5)
+def test_given_list_of_invariant_nodes_to_remove_return_expected_results():
+    original_observations, outlier_observations = _generate_data()
+
+    causal_model = ProbabilisticCausalModel(nx.DiGraph([("X0", "X1"), ("X0", "X2"), ("X2", "X3")]))
+    _assign_causal_mechanisms(causal_model)
+
+    results = distribution_change(
+        causal_model,
+        original_observations,
+        outlier_observations,
+        "X3",
+        shapley_config=ShapleyConfig(n_jobs=1),
+        invariant_nodes=["X0", "X1"],
+    )
+
+    assert results["X3"] > results["X2"]
+    assert results["X0"] == approx(0)
+
+
+@flaky(max_runs=5)
 def test_when_using_distribution_change_without_fdrc_then_returns_valid_results():
     original_observations, outlier_observations = _generate_data()
 
