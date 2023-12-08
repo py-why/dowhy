@@ -176,6 +176,11 @@ def bar_plot(
 
 
 def _calc_arrow_width(strength: float, max_strength: float):
+    if max_strength == 0:
+        return 4.1
+    elif max_strength < 0:
+        raise ValueError("Got a negative strength! The strength needs to be positive.")
+
     return 0.1 + 4.0 * float(abs(strength)) / float(max_strength)
 
 
