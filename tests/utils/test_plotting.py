@@ -1,9 +1,11 @@
 import networkx as nx
 import numpy as np
 import pandas as pd
+import pytest
 from _pytest.python_api import approx
 
 from dowhy.utils import plot, plot_adjacency_matrix
+from dowhy.utils.networkx_plotting import plot_causal_graph_networkx
 from dowhy.utils.plotting import _calc_arrow_width, bar_plot
 
 
@@ -48,6 +50,10 @@ def test_calc_arrow_width():
     assert _calc_arrow_width(0.5, max_strength=0.5) == approx(4.1, abs=0.01)
     assert _calc_arrow_width(0.35, max_strength=0.5) == approx(2.9, abs=0.01)
     assert _calc_arrow_width(100, max_strength=101) == approx(4.06, abs=0.01)
+    assert _calc_arrow_width(100, max_strength=0) == 4.1
+
+    with pytest.raises(ValueError):
+        _calc_arrow_width(100, max_strength=-1)
 
 
 def test_given_misspecified_uncertainties_when_bar_plot_then_does_not_raise_error():

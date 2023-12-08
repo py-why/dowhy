@@ -32,7 +32,7 @@ def plot_causal_graph_networkx(
         if (source, target) not in causal_strengths:
             causal_strengths[(source, target)] = strength
 
-        if strength is not None:
+        if causal_strengths[(source, target)] is not None:
             max_strength = max(max_strength, abs(causal_strengths[(source, target)]))
 
         if (source, target) not in colors:
