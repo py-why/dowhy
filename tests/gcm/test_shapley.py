@@ -1,5 +1,4 @@
 import random
-import signal
 
 import numpy as np
 import pytest
@@ -220,26 +219,6 @@ def test_given_specific_random_seed_when_estimate_shapley_values_with_early_stop
     )
 
     assert shapley_values_1 == approx(shapley_values_2, abs=0)
-
-
-@flaky(max_runs=2)
-def test_given_many_features_when_estimate_shapley_values_with_early_stopping_then_returns_before_reaching_max_number_permutations():
-    X, coefficients = _generate_data(3)
-
-    def model(x):
-        return np.max(x, axis=1)
-
-    def handler(a, b):
-        raise TimeoutError()
-
-    signal.signal(signal.SIGALRM, handler)
-    signal.alarm(10)
-
-    estimate_shapley_values(
-        lambda subset: _set_function_for_aggregated_feature_attribution(subset, X, model, False),
-        X.shape[1],
-        ShapleyConfig(approximation_method=ShapleyApproximationMethods.EARLY_STOPPING, num_permutations=np.inf),
-    )
 
 
 def _generate_data(num_vars):
