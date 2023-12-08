@@ -19,7 +19,6 @@ from dowhy.gcm._noise import noise_samples_of_ancestors
 from dowhy.gcm.influence import intrinsic_causal_influence_sample
 from dowhy.gcm.ml import (
     create_hist_gradient_boost_classifier,
-    create_hist_gradient_boost_regressor,
     create_linear_regressor,
     create_linear_regressor_with_given_parameters,
 )

@@ -2,7 +2,7 @@ import tempfile
 
 import numpy as np
 from flaky import flaky
-from pytest import approx, importorskip, mark
+from pytest import approx, importorskip
 from sklearn.model_selection import train_test_split
 
 from dowhy.gcm.causal_mechanisms import AdditiveNoiseModel, ClassifierFCM

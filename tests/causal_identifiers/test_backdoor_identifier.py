@@ -1,5 +1,3 @@
-import pytest
-
 from dowhy.causal_identifier import AutoIdentifier, BackdoorAdjustment
 from dowhy.causal_identifier.identify_effect import EstimandType
 

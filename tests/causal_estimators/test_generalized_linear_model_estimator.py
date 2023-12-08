@@ -1,10 +1,9 @@
-import pytest
 import statsmodels.api as sm
 from pytest import mark
 
 from dowhy.causal_estimators.generalized_linear_model_estimator import GeneralizedLinearModelEstimator
 
-from .base import TestEstimator
+from .base import SimpleEstimator
 
 
 @mark.usefixtures("fixed_seed")
@@ -59,7 +58,7 @@ class TestGeneralizedLinearModelEstimator(object):
         outcome_is_binary,
         identifier_method,
     ):
-        estimator_tester = TestEstimator(error_tolerance, Estimator, identifier_method)
+        estimator_tester = SimpleEstimator(error_tolerance, Estimator, identifier_method)
         estimator_tester.average_treatment_effect_testsuite(
             num_common_causes=num_common_causes,
             num_instruments=num_instruments,

@@ -388,7 +388,6 @@ TEST_GRAPH_SOLUTIONS = {
     ),
 }
 
-
 TEST_FRONTDOOR_GRAPH_SOLUTIONS = {
     "valid_singleton": dict(
         graph_str="digraph {X; Y; Z; M1; X->M1; Z->X; Z->Y; M1->Y;}",

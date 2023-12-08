@@ -5,15 +5,7 @@ from flaky import flaky
 from pytest import approx
 from scipy import stats
 
-from dowhy.gcm import (
-    AdditiveNoiseModel,
-    ClassifierFCM,
-    ScipyDistribution,
-    StructuralCausalModel,
-    auto,
-    confidence_intervals,
-    fit,
-)
+from dowhy.gcm import AdditiveNoiseModel, ClassifierFCM, ScipyDistribution, StructuralCausalModel, auto, fit
 from dowhy.gcm.feature_relevance import feature_relevance_distribution, feature_relevance_sample, parent_relevance
 from dowhy.gcm.ml import create_linear_regressor, create_logistic_regression_classifier
 from dowhy.gcm.shapley import ShapleyApproximationMethods, ShapleyConfig

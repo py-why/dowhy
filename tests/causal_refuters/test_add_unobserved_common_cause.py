@@ -5,14 +5,12 @@ import pytest
 import statsmodels.api as sm
 from pytest import mark
 from sklearn.ensemble import GradientBoostingRegressor
-from sklearn.linear_model import LassoCV
-from sklearn.preprocessing import PolynomialFeatures
 
 import dowhy.datasets
 from dowhy import CausalModel
 from dowhy.causal_refuters.evalue_sensitivity_analyzer import EValueSensitivityAnalyzer
 
-from .base import TestRefuter
+from .base import SimpleRefuter
 
 
 @mark.usefixtures("fixed_seed")
@@ -26,7 +24,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
     def test_refutation_binary_treatment(
         self, error_tolerance, estimator_method, effect_strength_on_t, effect_strength_on_y
     ):
-        refuter_tester = TestRefuter(
+        refuter_tester = SimpleRefuter(
             error_tolerance,
             estimator_method,
             "add_unobserved_common_cause",
@@ -46,7 +44,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
     def test_refutation_continuous_treatment(
         self, error_tolerance, estimator_method, effect_strength_on_t, effect_strength_on_y
     ):
-        refuter_tester = TestRefuter(
+        refuter_tester = SimpleRefuter(
             error_tolerance,
             estimator_method,
             "add_unobserved_common_cause",
@@ -67,7 +65,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
     def test_refutation_continuous_treatment_range_both_treatment_outcome(
         self, mock_fig, error_tolerance, estimator_method, effect_strength_on_t, effect_strength_on_y
     ):
-        refuter_tester = TestRefuter(
+        refuter_tester = SimpleRefuter(
             error_tolerance,
             estimator_method,
             "add_unobserved_common_cause",
@@ -89,7 +87,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
     def test_refutation_continuous_treatment_range_treatment(
         self, mock_fig, error_tolerance, estimator_method, effect_strength_on_t, effect_strength_on_y
     ):
-        refuter_tester = TestRefuter(
+        refuter_tester = SimpleRefuter(
             error_tolerance,
             estimator_method,
             "add_unobserved_common_cause",
@@ -111,7 +109,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
     def test_refutation_continuous_treatment_range_outcome(
         self, mock_fig, error_tolerance, estimator_method, effect_strength_on_t, effect_strength_on_y
     ):
-        refuter_tester = TestRefuter(
+        refuter_tester = SimpleRefuter(
             error_tolerance,
             estimator_method,
             "add_unobserved_common_cause",

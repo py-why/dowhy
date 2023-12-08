@@ -1,12 +1,10 @@
 import random
 
-import pandas as pd
-import pytest
 from pytest import mark
 
 import dowhy.datasets
 
-from .base import TestRefuter
+from .base import SimpleRefuter
 
 
 @mark.usefixtures("fixed_seed")
@@ -15,21 +13,21 @@ class TestPlaceboRefuter(object):
         ["error_tolerance", "estimator_method", "num_samples"], [(0.03, "backdoor.linear_regression", 1000)]
     )
     def test_refutation_placebo_refuter_continuous(self, error_tolerance, estimator_method, num_samples):
-        refuter_tester = TestRefuter(error_tolerance, estimator_method, "placebo_treatment_refuter")
+        refuter_tester = SimpleRefuter(error_tolerance, estimator_method, "placebo_treatment_refuter")
         refuter_tester.continuous_treatment_testsuite(num_samples=num_samples)  # Run both
 
     @mark.parametrize(
         ["error_tolerance", "estimator_method", "num_samples"], [(0.1, "backdoor.propensity_score_matching", 5000)]
     )
     def test_refutation_placebo_refuter_binary(self, error_tolerance, estimator_method, num_samples):
-        refuter_tester = TestRefuter(error_tolerance, estimator_method, "placebo_treatment_refuter")
+        refuter_tester = SimpleRefuter(error_tolerance, estimator_method, "placebo_treatment_refuter")
         refuter_tester.binary_treatment_testsuite(tests_to_run="atleast-one-common-cause", num_samples=num_samples)
 
     @mark.parametrize(
         ["error_tolerance", "estimator_method", "num_samples"], [(0.1, "backdoor.linear_regression", 5000)]
     )
     def test_refutation_placebo_refuter_category(self, error_tolerance, estimator_method, num_samples):
-        refuter_tester = TestRefuter(error_tolerance, estimator_method, "placebo_treatment_refuter")
+        refuter_tester = SimpleRefuter(error_tolerance, estimator_method, "placebo_treatment_refuter")
         refuter_tester.categorical_treatment_testsuite(tests_to_run="atleast-one-common-cause", num_samples=num_samples)
 
     @mark.parametrize(
@@ -38,7 +36,7 @@ class TestPlaceboRefuter(object):
     def test_refutation_placebo_refuter_category_non_consecutive_index(
         self, error_tolerance, estimator_method, num_samples
     ):
-        refuter_tester = TestRefuter(error_tolerance, estimator_method, "placebo_treatment_refuter")
+        refuter_tester = SimpleRefuter(error_tolerance, estimator_method, "placebo_treatment_refuter")
         data = dowhy.datasets.linear_dataset(
             beta=10,
             num_common_causes=1,

@@ -1,11 +1,8 @@
 import numpy as np
 import pandas as pd
-import pytest
 
 from dowhy import CausalModel
-from dowhy.causal_identifier import AutoIdentifier, BackdoorAdjustment
 from dowhy.causal_identifier.auto_identifier import identify_frontdoor
-from dowhy.causal_identifier.identify_effect import EstimandType
 
 from .base import IdentificationTestFrontdoorGraphSolution, example_frontdoor_graph_solution
 

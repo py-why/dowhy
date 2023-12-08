@@ -6,7 +6,7 @@ from pytest import mark
 from dowhy import CausalModel
 from dowhy.causal_estimators.two_stage_regression_estimator import TwoStageRegressionEstimator
 
-from .base import TestEstimator
+from .base import SimpleEstimator
 
 
 @mark.usefixtures("fixed_seed")
@@ -57,7 +57,7 @@ class TestTwoStageRegressionEstimator(object):
         treatment_is_binary,
         outcome_is_binary,
     ):
-        estimator_tester = TestEstimator(error_tolerance, Estimator, identifier_method="frontdoor")
+        estimator_tester = SimpleEstimator(error_tolerance, Estimator, identifier_method="frontdoor")
         estimator_tester.average_treatment_effect_testsuite(
             num_common_causes=num_common_causes,
             num_instruments=num_instruments,
@@ -159,7 +159,7 @@ class TestTwoStageRegressionEstimator(object):
         ],
     )
     def test_frontdoor_num_variables_error(self, Estimator, num_treatments, num_frontdoor_variables):
-        estimator_tester = TestEstimator(error_tolerance=0, Estimator=Estimator, identifier_method="frontdoor")
+        estimator_tester = SimpleEstimator(error_tolerance=0, Estimator=Estimator, identifier_method="frontdoor")
         with pytest.raises((ValueError, Exception)):
             estimator_tester.average_treatment_effect_testsuite(
                 num_common_causes=[1, 1],

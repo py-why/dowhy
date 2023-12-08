@@ -1,11 +1,10 @@
-import itertools
 import re
 
 import numpy as np
 import pandas as pd
 import pytest
 from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
-from sklearn.linear_model import LogisticRegression, LogisticRegressionCV
+from sklearn.linear_model import LogisticRegressionCV
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import PolynomialFeatures
 
