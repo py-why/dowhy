@@ -2,7 +2,6 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 from flaky import flaky
-from pytest import approx
 
 from dowhy.gcm import (
     AdditiveNoiseModel,
@@ -10,8 +9,8 @@ from dowhy.gcm import (
     ProbabilisticCausalModel,
     create_causal_model_from_equations,
     fit,
-    interventional_samples,
 )
+from dowhy.gcm.causal_mechanisms import ConditionalStochasticModel
 from dowhy.gcm.ml import create_linear_regressor_with_given_parameters
 
 
@@ -64,6 +63,22 @@ def test_unknown_causal_model_relationship_is_undefined():
         raise AssertionError("The causal mechanism is defined for unknown model node!")
     except KeyError as ke:
         pass
+
+
+def test_known_causal_model_node_is_correctly_identified():
+    causal_model = create_causal_model_from_equations(
+        """
+    A = norm(loc=0,scale=0.1)
+    B = norm(loc=0, scale=0.1)
+    Y = 0.5*B + 2*A+ norm(loc=0, scale=0.1)
+    Z->Y,A
+    C = exp(A) + 5 * Z + parametric()
+    """
+    )
+    list_of_nodes = {"A", "B", "C", "Z", "Y"}
+    list_of_nodes_from_graph = set(causal_model.graph.nodes)
+    assert list_of_nodes.issubset(list_of_nodes_from_graph) and list_of_nodes_from_graph.issubset(list_of_nodes)
+    assert isinstance(causal_model.causal_mechanism("C"), ConditionalStochasticModel)
 
 
 def _generate_data():

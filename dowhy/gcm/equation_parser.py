@@ -81,7 +81,7 @@ def create_causal_model_from_equations(node_equations: str) -> StructuralCausalM
             _check_node_redundancy(causal_nodes_info, node_name)
             causal_nodes_info[node_name] = {}
             root_node_match = re.match(_NOISE_MODEL_PATTERN, expression)
-            unknown_model_match = re.match(_UNKNOWN_MODEL_PATTERN, expression)
+            unknown_model_match = _check_if_model_is_unknown(equation, expression)
             causal_graph.add_node(node_name)
             if root_node_match:
                 causal_mechanism_name = root_node_match.group(1)
@@ -194,6 +194,13 @@ def _sanitize_input_expression(expression: str, banned_characters: list) -> None
             raise ValueError(f"'{char}' in the expression '{expression}' is not allowed because of security reasons")
     if re.search(r"[^0-9\+\-\*\/]+\.[^0-9\+\-\*\/]+", expression):
         raise ValueError(f"'.' can only be used incase of specifying decimals because of security reasons")
+
+
+def _check_if_model_is_unknown(equation: str, expression: str) -> bool:
+    if "->" in equation:
+        if re.match(_UNKNOWN_MODEL_PATTERN, expression):
+            return True
+    return False
 
 
 class CustomEquationModel(PredictionModel):
