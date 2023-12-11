@@ -1,9 +1,8 @@
-import pytest
 from pytest import mark
 
 from dowhy.causal_estimators.regression_discontinuity_estimator import RegressionDiscontinuityEstimator
 
-from .base import TestEstimator
+from .base import SimpleEstimator
 
 
 @mark.usefixtures("fixed_seed")
@@ -54,7 +53,7 @@ class TestRegressionDiscontinuityEstimator(object):
         outcome_is_binary,
         identifier_method,
     ):
-        estimator_tester = TestEstimator(error_tolerance, Estimator, identifier_method=identifier_method)
+        estimator_tester = SimpleEstimator(error_tolerance, Estimator, identifier_method=identifier_method)
         estimator_tester.average_treatment_effect_testsuite(
             num_common_causes=num_common_causes,
             num_instruments=num_instruments,

@@ -100,7 +100,7 @@ def test_given_categorical_variables_when_draw_interventional_samples_then_retur
     X1 = np.random.choice(2, 5000).astype(str)
 
     X2 = []
-    for (x0, x1) in zip(X0, X1):
+    for x0, x1 in zip(X0, X1):
         if x1 == "0":
             X2.append(x0 + 2 > 0)
         else:

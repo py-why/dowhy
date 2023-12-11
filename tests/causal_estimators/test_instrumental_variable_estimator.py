@@ -5,7 +5,7 @@ from pytest import mark
 
 from dowhy.causal_estimators.instrumental_variable_estimator import InstrumentalVariableEstimator
 
-from .base import TestEstimator
+from .base import SimpleEstimator
 
 
 @mark.usefixtures("fixed_seed")
@@ -52,7 +52,7 @@ class TestInstrumentalVariableEstimator(object):
         outcome_is_binary,
         identifier_method,
     ):
-        estimator_tester = TestEstimator(error_tolerance, Estimator, identifier_method=identifier_method)
+        estimator_tester = SimpleEstimator(error_tolerance, Estimator, identifier_method=identifier_method)
         # Not using testsuite from .base/TestEstimtor, custom code below
         args_dict = {
             "num_common_causes": num_common_causes,

@@ -1,12 +1,8 @@
-import numpy as np
-import pytest
 from pytest import mark
-from sklearn.linear_model import LinearRegression
 
-import dowhy.api
 from dowhy.causal_estimators.propensity_score_weighting_estimator import PropensityScoreWeightingEstimator
 
-from .base import TestEstimator
+from .base import SimpleEstimator
 
 
 @mark.usefixtures("fixed_seed")
@@ -54,7 +50,7 @@ class TestPropensityScoreWeightingEstimator(object):
         treatment_is_binary,
         outcome_is_binary,
     ):
-        estimator_tester = TestEstimator(error_tolerance, Estimator)
+        estimator_tester = SimpleEstimator(error_tolerance, Estimator)
         estimator_tester.average_treatment_effect_testsuite(
             num_common_causes=num_common_causes,
             num_instruments=num_instruments,

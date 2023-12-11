@@ -5,7 +5,7 @@ from dowhy import EstimandType, identify_effect_auto
 from dowhy.graph import build_graph_from_str
 
 
-class TestEstimator(object):
+class SimpleEstimator(object):
     def __init__(self, error_tolerance, Estimator, identifier_method="backdoor"):
         print("Error tolerance is", error_tolerance)
         self._error_tolerance = error_tolerance
