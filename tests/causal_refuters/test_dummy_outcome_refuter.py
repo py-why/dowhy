@@ -1,10 +1,6 @@
-import pdb
-
-import numpy as np
-import pytest
 from pytest import mark
 
-from .base import TestRefuter
+from .base import SimpleRefuter
 
 
 def simple_linear_outcome_model(X_train, output_train):
@@ -17,7 +13,7 @@ def simple_linear_outcome_model(X_train, output_train):
 class TestDummyOutcomeRefuter(object):
     @mark.parametrize(["error_tolerence", "estimator_method"], [(0.03, "iv.instrumental_variable")])
     def test_refutation_dummy_outcome_refuter_default_continuous_treatment(self, error_tolerence, estimator_method):
-        refuter_tester = TestRefuter(error_tolerence, estimator_method, "dummy_outcome_refuter")
+        refuter_tester = SimpleRefuter(error_tolerence, estimator_method, "dummy_outcome_refuter")
         refuter_tester.continuous_treatment_testsuite(num_dummyoutcome_simulations=100)
 
     @mark.parametrize(
@@ -26,7 +22,7 @@ class TestDummyOutcomeRefuter(object):
     def test_refutation_dummy_outcome_refuter_default_binary_treatment(
         self, error_tolerence, estimator_method, num_samples
     ):
-        refuter_tester = TestRefuter(error_tolerence, estimator_method, "dummy_outcome_refuter")
+        refuter_tester = SimpleRefuter(error_tolerence, estimator_method, "dummy_outcome_refuter")
         refuter_tester.binary_treatment_testsuite(tests_to_run="atleast-one-common-cause", num_samples=num_samples)
 
     @mark.parametrize(
@@ -36,7 +32,7 @@ class TestDummyOutcomeRefuter(object):
     def test_refutation_dummy_outcome_refuter_randomly_generated_continuous_treatment(
         self, error_tolerence, estimator_method, transformations
     ):
-        refuter_tester = TestRefuter(
+        refuter_tester = SimpleRefuter(
             error_tolerence, estimator_method, "dummy_outcome_refuter", transformations=transformations
         )
 
@@ -49,7 +45,7 @@ class TestDummyOutcomeRefuter(object):
     def test_refutation_dummy_outcome_refuter_randomly_generated_binary_treatment(
         self, error_tolerence, estimator_method, transformations, num_samples
     ):
-        refuter_tester = TestRefuter(
+        refuter_tester = SimpleRefuter(
             error_tolerence, estimator_method, "dummy_outcome_refuter", transformations=transformations
         )
 
@@ -62,7 +58,7 @@ class TestDummyOutcomeRefuter(object):
     def test_refutation_dummy_outcome_refuter_permute_data_continuous_treatment(
         self, error_tolerence, estimator_method, transformations
     ):
-        refuter_tester = TestRefuter(
+        refuter_tester = SimpleRefuter(
             error_tolerence, estimator_method, "dummy_outcome_refuter", transformations=transformations
         )
 
@@ -75,7 +71,7 @@ class TestDummyOutcomeRefuter(object):
     def test_refutation_dummy_outcome_refuter_permute_data_binary_treatment(
         self, error_tolerence, estimator_method, transformations, num_samples
     ):
-        refuter_tester = TestRefuter(
+        refuter_tester = SimpleRefuter(
             error_tolerence, estimator_method, "dummy_outcome_refuter", transformations=transformations
         )
 
@@ -88,7 +84,7 @@ class TestDummyOutcomeRefuter(object):
     def test_refutation_dummy_outcome_refuter_custom_function_linear_regression_with_noise_continuous_treatment(
         self, error_tolerence, estimator_method, transformations
     ):
-        refuter_tester = TestRefuter(
+        refuter_tester = SimpleRefuter(
             error_tolerence, estimator_method, "dummy_outcome_refuter", transformations=transformations
         )
         refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
@@ -101,7 +97,7 @@ class TestDummyOutcomeRefuter(object):
     def test_refutation_dummy_outcome_refuter_custom_function_linear_regression_with_noise_binary_treatment(
         self, error_tolerence, estimator_method, transformations, num_samples
     ):
-        refuter_tester = TestRefuter(
+        refuter_tester = SimpleRefuter(
             error_tolerence, estimator_method, "dummy_outcome_refuter", transformations=transformations
         )
         refuter_tester.binary_treatment_testsuite(tests_to_run="atleast-one-common-cause", num_samples=num_samples)
@@ -119,7 +115,7 @@ class TestDummyOutcomeRefuter(object):
     def test_refutation_dummy_outcome_refuter_custom_function_linear_regression_with_permute_continuous_treatment(
         self, error_tolerence, estimator_method, transformations
     ):
-        refuter_tester = TestRefuter(
+        refuter_tester = SimpleRefuter(
             error_tolerence, estimator_method, "dummy_outcome_refuter", transformations=transformations
         )
         refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
@@ -139,7 +135,7 @@ class TestDummyOutcomeRefuter(object):
     def test_refutation_dummy_outcome_refuter_custom_function_linear_regression_with_permute_binary_treatment(
         self, error_tolerence, estimator_method, transformations, num_samples
     ):
-        refuter_tester = TestRefuter(
+        refuter_tester = SimpleRefuter(
             error_tolerence, estimator_method, "dummy_outcome_refuter", transformations=transformations
         )
         refuter_tester.binary_treatment_testsuite(tests_to_run="atleast-one-common-cause", num_samples=num_samples)
@@ -151,7 +147,7 @@ class TestDummyOutcomeRefuter(object):
     def test_refutation_dummy_outcome_refuter_internal_linear_regression_continuous_treatment(
         self, error_tolerence, estimator_method, transformations
     ):
-        refuter_tester = TestRefuter(
+        refuter_tester = SimpleRefuter(
             error_tolerence, estimator_method, "dummy_outcome_refuter", transformations=transformations
         )
         refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
@@ -170,7 +166,7 @@ class TestDummyOutcomeRefuter(object):
     def test_refutation_dummy_outcome_refuter_internal_linear_regression_binary_treatment(
         self, error_tolerence, estimator_method, transformations, num_samples
     ):
-        refuter_tester = TestRefuter(
+        refuter_tester = SimpleRefuter(
             error_tolerence, estimator_method, "dummy_outcome_refuter", transformations=transformations
         )
         refuter_tester.binary_treatment_testsuite(tests_to_run="atleast-one-common-cause", num_samples=num_samples)
@@ -182,7 +178,7 @@ class TestDummyOutcomeRefuter(object):
     def test_refutation_dummy_outcome_refuter_internal_knn_continuous_treatment(
         self, error_tolerence, estimator_method, transformations
     ):
-        refuter_tester = TestRefuter(
+        refuter_tester = SimpleRefuter(
             error_tolerence, estimator_method, "dummy_outcome_refuter", transformations=transformations
         )
         refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
@@ -201,7 +197,7 @@ class TestDummyOutcomeRefuter(object):
     def test_refutation_dummy_outcome_refuter_internal_knn_binary_treatment(
         self, error_tolerence, estimator_method, transformations, num_samples
     ):
-        refuter_tester = TestRefuter(
+        refuter_tester = SimpleRefuter(
             error_tolerence, estimator_method, "dummy_outcome_refuter", transformations=transformations
         )
         refuter_tester.binary_treatment_testsuite(tests_to_run="atleast-one-common-cause", num_samples=num_samples)
@@ -220,7 +216,7 @@ class TestDummyOutcomeRefuter(object):
     def test_refutation_dummy_outcome_refuter_internal_svm_continuous_treatment(
         self, error_tolerence, estimator_method, transformations, num_samples
     ):
-        refuter_tester = TestRefuter(
+        refuter_tester = SimpleRefuter(
             error_tolerence, estimator_method, "dummy_outcome_refuter", transformations=transformations
         )
         refuter_tester.continuous_treatment_testsuite(num_samples=num_samples, tests_to_run="atleast-one-common-cause")
@@ -239,7 +235,7 @@ class TestDummyOutcomeRefuter(object):
     def test_refutation_dummy_outcome_refuter_internal_svm_binary_treatment(
         self, error_tolerence, estimator_method, transformations, num_samples
     ):
-        refuter_tester = TestRefuter(
+        refuter_tester = SimpleRefuter(
             error_tolerence, estimator_method, "dummy_outcome_refuter", transformations=transformations
         )
         refuter_tester.binary_treatment_testsuite(num_samples=num_samples, tests_to_run="atleast-one-common-cause")
@@ -258,7 +254,7 @@ class TestDummyOutcomeRefuter(object):
     def test_refutation_dummy_outcome_refuter_internal_random_forest_continuous_treatment(
         self, error_tolerence, estimator_method, transformations, num_samples
     ):
-        refuter_tester = TestRefuter(
+        refuter_tester = SimpleRefuter(
             error_tolerence, estimator_method, "dummy_outcome_refuter", transformations=transformations
         )
         refuter_tester.continuous_treatment_testsuite(num_samples, tests_to_run="atleast-one-common-cause")
@@ -277,7 +273,7 @@ class TestDummyOutcomeRefuter(object):
     def test_refutation_dummy_outcome_refuter_internal_random_forest_binary_treatment(
         self, error_tolerence, estimator_method, transformations, num_samples
     ):
-        refuter_tester = TestRefuter(
+        refuter_tester = SimpleRefuter(
             error_tolerence, estimator_method, "dummy_outcome_refuter", transformations=transformations
         )
         refuter_tester.binary_treatment_testsuite(num_samples, tests_to_run="atleast-one-common-cause")
@@ -300,7 +296,7 @@ class TestDummyOutcomeRefuter(object):
     def test_refutation_dummy_outcome_refuter_internal_neural_network_continuous_treatment(
         self, error_tolerence, estimator_method, transformations
     ):
-        refuter_tester = TestRefuter(
+        refuter_tester = SimpleRefuter(
             error_tolerence, estimator_method, "dummy_outcome_refuter", transformations=transformations
         )
         refuter_tester.continuous_treatment_testsuite(tests_to_run="atleast-one-common-cause")
@@ -323,7 +319,7 @@ class TestDummyOutcomeRefuter(object):
     def test_refutation_dummy_outcome_refuter_internal_neural_network_binary_treatment(
         self, error_tolerence, estimator_method, transformations, num_samples
     ):
-        refuter_tester = TestRefuter(
+        refuter_tester = SimpleRefuter(
             error_tolerence, estimator_method, "dummy_outcome_refuter", transformations=transformations
         )
         refuter_tester.binary_treatment_testsuite(num_samples=num_samples, tests_to_run="atleast-one-common-cause")

@@ -123,7 +123,7 @@ def test_given_continuous_and_categorical_variables_when_get_noise_dependent_fun
     X1 = np.random.choice(2, 1000).astype(str)
 
     X2 = []
-    for (x0, x1) in zip(X0, X1):
+    for x0, x1 in zip(X0, X1):
         if x1 == "0":
             x = np.random.normal(0, 1)
         else:

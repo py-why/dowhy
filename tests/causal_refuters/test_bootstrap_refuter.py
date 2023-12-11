@@ -1,8 +1,6 @@
-import numpy as np
-import pytest
 from pytest import mark
 
-from .base import TestRefuter
+from .base import SimpleRefuter
 
 
 @mark.usefixtures("fixed_seed")
@@ -17,14 +15,14 @@ class TestDataSubsetRefuter(object):
         ["error_tolerance", "estimator_method", "num_samples"], [(0.05, "iv.instrumental_variable", 1000)]
     )
     def test_refutation_bootstrap_refuter_continuous(self, error_tolerance, estimator_method, num_samples):
-        refuter_tester = TestRefuter(error_tolerance, estimator_method, "bootstrap_refuter")
+        refuter_tester = SimpleRefuter(error_tolerance, estimator_method, "bootstrap_refuter")
         refuter_tester.continuous_treatment_testsuite(num_samples=num_samples)  # Run both
 
     @mark.parametrize(
         ["error_tolerance", "estimator_method", "num_samples"], [(0.05, "backdoor.propensity_score_matching", 1000)]
     )
     def test_refutation_bootstrap_refuter_binary(self, error_tolerance, estimator_method, num_samples):
-        refuter_tester = TestRefuter(error_tolerance, estimator_method, "bootstrap_refuter")
+        refuter_tester = SimpleRefuter(error_tolerance, estimator_method, "bootstrap_refuter")
         refuter_tester.binary_treatment_testsuite(tests_to_run="atleast-one-common-cause", num_samples=num_samples)
 
     @mark.parametrize(
@@ -34,7 +32,7 @@ class TestDataSubsetRefuter(object):
     def test_refutation_bootstrap_refuter_continuous_integer_argument(
         self, error_tolerance, estimator_method, num_common_causes, required_variables, num_samples
     ):
-        refuter_tester = TestRefuter(
+        refuter_tester = SimpleRefuter(
             error_tolerance,
             estimator_method,
             "bootstrap_refuter",
@@ -51,7 +49,7 @@ class TestDataSubsetRefuter(object):
     def test_refutation_bootstrap_refuter_continuous_list_argument(
         self, error_tolerance, estimator_method, num_common_causes, required_variables, num_samples
     ):
-        refuter_tester = TestRefuter(
+        refuter_tester = SimpleRefuter(
             error_tolerance, estimator_method, "bootstrap_refuter", required_variables=required_variables
         )
         refuter_tester.continuous_treatment_testsuite(
@@ -65,7 +63,7 @@ class TestDataSubsetRefuter(object):
     def test_refutation_bootstrap_refuter_binary_integer_argument(
         self, error_tolerance, estimator_method, num_common_causes, required_variables, num_samples
     ):
-        refuter_tester = TestRefuter(
+        refuter_tester = SimpleRefuter(
             error_tolerance, estimator_method, "bootstrap_refuter", required_variables=required_variables
         )
         refuter_tester.binary_treatment_testsuite(
@@ -79,7 +77,7 @@ class TestDataSubsetRefuter(object):
     def test_refutation_bootstrap_refuter_binary_list_argument(
         self, error_tolerance, estimator_method, num_common_causes, required_variables, num_samples
     ):
-        refuter_tester = TestRefuter(
+        refuter_tester = SimpleRefuter(
             error_tolerance, estimator_method, "bootstrap_refuter", required_variables=required_variables
         )
         refuter_tester.binary_treatment_testsuite(
@@ -93,7 +91,7 @@ class TestDataSubsetRefuter(object):
     def test_refutation_bootstrap_refuter_continuous_list_negative_argument(
         self, error_tolerance, estimator_method, num_common_causes, required_variables, num_samples
     ):
-        refuter_tester = TestRefuter(
+        refuter_tester = SimpleRefuter(
             error_tolerance, estimator_method, "bootstrap_refuter", required_variables=required_variables
         )
         refuter_tester.continuous_treatment_testsuite(
@@ -107,7 +105,7 @@ class TestDataSubsetRefuter(object):
     def test_refutation_bootstrap_refuter_binary_list_negative_argument(
         self, error_tolerance, estimator_method, num_common_causes, required_variables, num_samples
     ):
-        refuter_tester = TestRefuter(
+        refuter_tester = SimpleRefuter(
             error_tolerance, estimator_method, "bootstrap_refuter", required_variables=required_variables
         )
         refuter_tester.binary_treatment_testsuite(
