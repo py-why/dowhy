@@ -119,3 +119,66 @@ Now we can use this in our ANMs instead:
     features internally based on their **alphabetical order**. For instance, in case of the MyCustomModel above, if
     the names of the input features are 'X2' and 'X1', the model should expect 'X1' in the first input and 'X2' in
     the second column.
+
+Creating causal model (GCM) from equations
+------------------------------------------------------
+
+
+In the above section, we saw how ground truth models can be created and used for a node. Now in cases where we know the ground truth for almost all of the nodes and we want to create a custom causal model out of it without writing a lot of code.
+That is when creating a graphical causal model (GCM) from equations serves as a robust utility, enabling the generation of a causal model by defining relationships between nodes.
+This functionality proves highly valuable when the inter-node relationships are known, providing a means to construct a custom causal model. In this section, we'll dive deeper into how to use this feature.
+
+
+
+
+**Defining Equations:**
+   - The functionality supports three equation formats: root node equation, non-root node equation, and an equation for an unknown causal relationship.
+   - Structure for each node type:
+        1. Root Node
+            <node_name> = :math:`N_i`
+        2. Non-root Node
+            <node_name> = :math:`f_i(PA_i) + N_i`
+        3. Unknown relationship of node with its parent nodes
+            <node_name> -> PA_i,...
+
+   - Note here in the above structure, the :math:`N_i` is the noise model and the :math:`f_i(PA_i)` notation is the functional causal model or simply a function which defines the relationship between the current node and its parent nodes.
+   - Root node equation defines the relationship for a root node, specifying a noise model. Non-root node equation extends this by incorporating a function expression involving other nodes and a noise model. Unknown causal model equation is used when the exact relationship between nodes is unknown, only specifying the edges.
+
+**Defining Noise Models(N):**
+   - The noise models include options like empirical, Bayesian Gaussian mixture, parametric, and those from the `scipy.stats` library. Lets look at each option in detail -
+        1. empirical(): An implementation of a stochastic model class.
+        2. bayesiangaussianmixture(): An implementation of a stochastic model class.
+        3. parametric(): Use it when you want the system to find the best continuous distribution for the data.
+        4. <scipy_function>(): You can specify continuous distribution functions defined in `scipy.stats <https://docs.scipy.org/doc/scipy/reference/stats.html#continuous-distributions>`_ library.
+
+**Defining Functional Causal Models(F(X)):**
+   - Relationships between child and parent nodes can be defined in a expression which supports almost all the airthematic operations and functions under `numpy <https://numpy.org/doc/stable/reference/index.html>`_ library
+
+**Undefined/Unknown relationships for Nodes:**
+   - In case when the relationship between the child and parent nodes are unknown, the user can define such nodes as given below example -
+    :math:`X_i -> PA_i, PA_i`
+
+**Example**
+   - Users can provide a string containing equations representing the causal relationships between nodes.
+
+.. code-block:: python
+
+   from dowhy import gcm
+   from dowhy.utils import plot
+
+   scm = """
+   X = empirical()
+   Y = norm(loc=0, scale=1)
+   Z = 12 * X + log(Y) + norm(loc=0, scale=1)
+   """
+   causal_model = gcm.create_causal_model_from_equations(scm)
+   print(plot(causal_model.graph))
+.. image:: causal_graph.png
+   :width: 80%
+   :align: center
+
+|
+
+.. note::
+   - The functionality sanitizes the input equations to prevent security vulnerabilities.
+   - The naming of the nodes is currently restricted to python variable naming constraints which means that the name of node can only contain alphabets, numbers (not at the start) and '_' character.
