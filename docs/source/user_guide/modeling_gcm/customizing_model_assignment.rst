@@ -169,7 +169,7 @@ This functionality proves highly valuable when the inter-node relationships are 
    scm = """
    X = empirical()
    Y = norm(loc=0, scale=1)
-   Z = 12 * X + log(Y) + norm(loc=0, scale=1)
+   Z = 12 * X + log(abs(Y)) + norm(loc=0, scale=1)
    """
    causal_model = gcm.create_causal_model_from_equations(scm)
    print(plot(causal_model.graph))
