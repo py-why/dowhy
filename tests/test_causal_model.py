@@ -621,6 +621,49 @@ class TestCausalModel(object):
                 graph=nx.Graph([("X", "Y"), ("Y", "Z")]),
             )
 
+    def test_causal_estimator_cache(self):
+        """
+        Tests that CausalEstimator objects can be consistently retrieved from CausalEstimate and CausalModel objects.
+        """
+        beta = 10
+        num_samples = 100
+        num_treatments = 1
+        num_common_causes = 5
+        data = dowhy.datasets.linear_dataset(
+            beta=beta,
+            num_common_causes=num_common_causes,
+            num_samples=num_samples,
+            num_treatments=num_treatments,
+            treatment_is_binary=True,
+        )
+
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+            proceed_when_unidentifiable=True,
+            test_significance=None,
+        )
+
+        identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        methods = [
+            "backdoor.linear_regression",
+            "backdoor.propensity_score_matching",
+        ]
+        estimates = []
+        estimates.append(
+            model.estimate_effect(identified_estimand, method_name=methods[0], control_value=0, treatment_value=1)
+        )
+        estimates.append(
+            model.estimate_effect(identified_estimand, method_name=methods[1], control_value=0, treatment_value=1)
+        )
+
+        # Default == operator tests if same object. If same object, don't need to check type.
+        assert (estimates[0].estimator) == model.get_estimator(methods[0])
+        assert (estimates[1].estimator) == model.get_estimator(methods[1])
+        assert (estimates[0].estimator) != model.get_estimator(methods[1])  # check not same object
+
 
 if __name__ == "__main__":
     pytest.main([__file__])
