@@ -5,6 +5,7 @@ import pandas as pd
 import statsmodels.api as sm
 
 from dowhy.causal_estimator import CausalEstimate, CausalEstimator, IdentifiedEstimand
+from dowhy.utils.encoding import one_hot_encode
 
 
 class RegressionEstimator(CausalEstimator):
@@ -70,6 +71,53 @@ class RegressionEstimator(CausalEstimator):
 
         self.model = None
 
+        # Data encoders
+        # encoder_drop_first will not encode the first category value with a bit in 1-hot encoding.
+        # It will be implicit instead, by the absence of any bit representing this value in the relevant columns.
+        # Set to False to include a bit for each value of every categorical variable.
+        self.encoder_drop_first = True
+        self.reset_encoders()
+
+    def reset_encoders(self):
+        """
+        Removes any reference to data encoders, causing them to be re-created on next `fit()`.
+
+        It's important that data is consistently encoded otherwise models will produce inconsistent output.
+        In particular, categorical variables are one-hot encoded; the mapping of original data values
+        must be identical between model training/fitting and inference time.
+
+        Encoders are reset when `fit()` is called again, as the data is assumed to have changed.
+
+        A separate encoder is used for each subset of variables (treatment, common causes and effect modifiers).
+        """
+        self._encoders = {
+            "treatment": None,
+            "observed_common_causes": None,
+            "effect_modifiers": None,
+        }
+
+    def _encode(self, data: pd.DataFrame, encoder_name: str):
+        """
+        Encodes categorical columns in the given data, returning a new dataframe containing
+        all original data and the encoded columns. Numerical data is unchanged, categorical
+        types are one-hot encoded. `encoder_name` identifies a specific encoder to be used
+        if available, or created if not. The encoder can be reused in subsequent calls.
+
+        :param data: Data to encode.
+        :param encoder_name: The name for the encoder to be used.
+        :returns: The encoded data.
+        """
+        existing_encoder = self._encoders.get(encoder_name)
+        encoded_variables, encoder = one_hot_encode(
+            data,
+            drop_first=self.encoder_drop_first,
+            encoder=existing_encoder,
+        )
+
+        # Remember encoder
+        self._encoders[encoder_name] = encoder
+        return encoded_variables
+
     def fit(
         self,
         data: pd.DataFrame,
@@ -84,13 +132,14 @@ class RegressionEstimator(CausalEstimator):
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
+        self.reset_encoders()  # Forget any existing encoders
         self._set_effect_modifiers(data, effect_modifier_names)
 
         self.logger.debug("Back-door variables used:" + ",".join(self._target_estimand.get_backdoor_variables()))
         self._observed_common_causes_names = self._target_estimand.get_backdoor_variables()
         if len(self._observed_common_causes_names) > 0:
             self._observed_common_causes = data[self._observed_common_causes_names]
-            self._observed_common_causes = pd.get_dummies(self._observed_common_causes, drop_first=True)
+            self._observed_common_causes = self._encode(self._observed_common_causes, "observed_common_causes")
         else:
             self._observed_common_causes = None
 
@@ -148,14 +197,42 @@ class RegressionEstimator(CausalEstimator):
         est = self.estimate_effect(data=data_df, need_conditional_estimates=False)
         return est.value
 
+    def _set_effect_modifiers(self, data: pd.DataFrame, effect_modifier_names: Optional[List[str]] = None):
+        """Sets the effect modifiers for the estimator
+        Modifies need_conditional_estimates accordingly to effect modifiers value
+        :param effect_modifiers: Variables on which to compute separate
+            effects, or return a heterogeneous effect function. Not all
+            methods support this currently.
+        """
+        self._effect_modifiers = effect_modifier_names
+        if effect_modifier_names is not None:
+            self._effect_modifier_names = [cname for cname in effect_modifier_names if cname in data.columns]
+            if len(self._effect_modifier_names) > 0:
+                self._effect_modifiers = data[self._effect_modifier_names]
+                self._effect_modifiers = self._encode(self._effect_modifiers, "effect_modifiers")
+                self.logger.debug("Effect modifiers: " + ",".join(self._effect_modifier_names))
+            else:
+                self._effect_modifier_names = []
+        else:
+            self._effect_modifier_names = []
+
+        self.need_conditional_estimates = (
+            self.need_conditional_estimates
+            if self.need_conditional_estimates != "auto"
+            else (self._effect_modifier_names and len(self._effect_modifier_names) > 0)
+        )
+
     def _build_features(self, data_df: pd.DataFrame, treatment_values=None):
-        treatment_vals = pd.get_dummies(data_df[self._target_estimand.treatment_variable], drop_first=True)
+        treatment_vals = self._encode(data_df[self._target_estimand.treatment_variable], "treatment")
+
         if len(self._observed_common_causes_names) > 0:
             observed_common_causes_vals = data_df[self._observed_common_causes_names]
-            observed_common_causes_vals = pd.get_dummies(observed_common_causes_vals, drop_first=True)
+            observed_common_causes_vals = self._encode(observed_common_causes_vals, "observed_common_causes")
+
         if self._effect_modifier_names:
             effect_modifiers_vals = data_df[self._effect_modifier_names]
-            effect_modifiers_vals = pd.get_dummies(effect_modifiers_vals, drop_first=True)
+            effect_modifiers_vals = self._encode(effect_modifiers_vals, "effect_modifiers")
+
         # Fixing treatment value to the specified value, if provided
         if treatment_values is not None:
             treatment_vals = treatment_values
@@ -164,6 +241,7 @@ class RegressionEstimator(CausalEstimator):
         # treatment_vals and data_df should have same number of rows
         if treatment_vals.shape[0] != data_df.shape[0]:
             raise ValueError("Provided treatment values and dataframe should have the same length.")
+
         # Bulding the feature matrix
         n_treatment_cols = 1 if len(treatment_vals.shape) == 1 else treatment_vals.shape[1]
         n_samples = treatment_vals.shape[0]
@@ -195,32 +273,25 @@ class RegressionEstimator(CausalEstimator):
         """
 
         if data_df is None:
-            data_df = self._data
+            data_df = self._data.copy()
+        else:
+            data_df = data_df.copy()  # don't modify arg
+
+        # Replace treatment values with value supplied; note: Don't change column datatype!
+        original_type = data_df[self._target_estimand.treatment_variable].dtypes
+        data_df[self._target_estimand.treatment_variable] = treatment_val
+        data_df[self._target_estimand.treatment_variable] = data_df[self._target_estimand.treatment_variable].astype(
+            original_type, copy=False
+        )
+
+        return self.predict(data_df)
+
+    def predict(self, data_df):
         if not self.model:
             # The model is always built on the entire data
-            _, self.model = self._build_model(data_df)
-        # Replacing treatment values by given x
-        # First, create interventional tensor in original space
-        interventional_treatment_values = np.full(
-            (data_df.shape[0], len(self._target_estimand.treatment_variable)), treatment_val
-        )
-        # Then, use pandas to ensure that the dummies are assigned correctly for a categorical treatment
-        interventional_treatment_2d = pd.concat(
-            [
-                data_df[self._target_estimand.treatment_variable].copy(),
-                pd.DataFrame(
-                    data=interventional_treatment_values,
-                    columns=data_df[self._target_estimand.treatment_variable].columns,
-                ),
-            ],
-            axis=0,
-        ).astype(data_df[self._target_estimand.treatment_variable].dtypes, copy=False)
-        interventional_treatment_2d = pd.get_dummies(interventional_treatment_2d, drop_first=True)
-        interventional_treatment_2d = interventional_treatment_2d[
-            data_df[self._target_estimand.treatment_variable].shape[0] :
-        ]
+            _, self.model = self._build_model()
 
-        new_features = self._build_features(data_df, treatment_values=interventional_treatment_2d)
+        new_features = self._build_features(data_df=data_df)
         interventional_outcomes = self.predict_fn(data_df, self.model, new_features)
         return interventional_outcomes
 
