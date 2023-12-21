@@ -350,7 +350,7 @@ class CausalEstimator:
         bootstrap_variations = [bootstrap_estimate - estimate_value for bootstrap_estimate in bootstrap_estimates]
         sorted_bootstrap_variations = np.sort(bootstrap_variations)
 
-        # Now we take the (1- p)th and the (p)th variations, where p is the chosen confidence level
+        # Now we take the (1-p)/2 th and the 1-(1-p)/2 th variations, where p is the chosen confidence level
         left_fraction = (1 - confidence_level)/2 
         right_fraction = 1 - left_fraction 
         upper_bound_index = int(left_fraction * len(sorted_bootstrap_variations))
