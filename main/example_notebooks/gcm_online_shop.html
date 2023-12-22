@@ -1087,67 +1087,67 @@ In total, 8 nodes were analyzed:
 Node Shopping Event? is a root node. Therefore, assigning &#39;Empirical Distribution&#39; to the node representing the marginal distribution.
 
 --- Node: Unit Price
-Node Unit Price is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using Pipeline&#39; to the node.
+Node Unit Price is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using LinearRegression&#39; to the node.
 This represents the causal relationship as Unit Price := f(Shopping Event?) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
+LinearRegression: 175.17633443139448
 Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 150.00318618815328
-LinearRegression: 150.0037543388642
-HistGradientBoostingRegressor: 423.85501138653456
+                (&#39;linearregression&#39;, LinearRegression)]): 175.19131685329452
+HistGradientBoostingRegressor: 423.6635155790751
 
 --- Node: Ad Spend
 Node Ad Spend is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using Pipeline&#39; to the node.
 This represents the causal relationship as Ad Spend := f(Shopping Event?) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
 Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 16090.003301247349
-LinearRegression: 16243.519187310449
-HistGradientBoostingRegressor: 80955.02581037775
+                (&#39;linearregression&#39;, LinearRegression)]): 15911.651520061652
+LinearRegression: 15979.739140283582
+HistGradientBoostingRegressor: 80460.91353893482
 
 --- Node: Page Views
 Node Page Views is a non-root node with discrete data. Assigning &#39;Discrete AdditiveNoiseModel using LinearRegression&#39; to the node.
 This represents the discrete causal relationship as Page Views := f(Ad Spend,Shopping Event?) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
-LinearRegression: 84767.83409391469
+LinearRegression: 78464.89354312413
 Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 91863.167265651
-HistGradientBoostingRegressor: 1385590.060542061
+                (&#39;linearregression&#39;, LinearRegression)]): 93941.16194591319
+HistGradientBoostingRegressor: 1320714.413734781
 
 --- Node: Sold Units
 Node Sold Units is a non-root node with discrete data. Assigning &#39;Discrete AdditiveNoiseModel using LinearRegression&#39; to the node.
 This represents the discrete causal relationship as Sold Units := f(Page Views,Shopping Event?,Unit Price) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
-LinearRegression: 9080.883615056722
+LinearRegression: 9042.543547279072
 Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 19679.522159209464
-HistGradientBoostingRegressor: 225479.3920163
+                (&#39;linearregression&#39;, LinearRegression)]): 9935.955127684916
+HistGradientBoostingRegressor: 259388.24920132113
 
 --- Node: Revenue
 Node Revenue is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using Pipeline&#39; to the node.
 This represents the causal relationship as Revenue := f(Sold Units,Unit Price) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
 Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 4.544737873706361e-19
-LinearRegression: 68326796.232988
-HistGradientBoostingRegressor: 137353882879.47746
+                (&#39;linearregression&#39;, LinearRegression)]): 6.624029711349794e-19
+LinearRegression: 66374215.102242604
+HistGradientBoostingRegressor: 147552510375.1604
 
 --- Node: Operational Cost
-Node Operational Cost is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using Pipeline&#39; to the node.
+Node Operational Cost is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using LinearRegression&#39; to the node.
 This represents the causal relationship as Operational Cost := f(Ad Spend,Sold Units) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
+LinearRegression: 38.82118020767639
 Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 38.532771248606664
-LinearRegression: 38.81563946191294
-HistGradientBoostingRegressor: 16313064526.622488
+                (&#39;linearregression&#39;, LinearRegression)]): 39.0752890148755
+HistGradientBoostingRegressor: 16253261836.443348
 
 --- Node: Profit
 Node Profit is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using LinearRegression&#39; to the node.
 This represents the causal relationship as Profit := f(Operational Cost,Revenue) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
-LinearRegression: 1.428584883095198e-18
+LinearRegression: 1.5756576503970846e-18
 Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 1.4023396159279364e-06
-HistGradientBoostingRegressor: 21981130384.56327
+                (&#39;linearregression&#39;, LinearRegression)]): 3.059528794737108e-06
+HistGradientBoostingRegressor: 20917848268.826874
 
 ===Note===
 Note, based on the selected auto assignment quality, the set of evaluated models changes.
@@ -1172,7 +1172,7 @@ For more insights toward the quality of the fitted graphical causal model, consi
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node Operational Cost: 100%|██████████| 8/8 [00:00&lt;00:00, 362.02it/s]
+Fitting causal mechanism of node Operational Cost: 100%|██████████| 8/8 [00:00&lt;00:00, 368.70it/s]
 </pre></div></div>
 </div>
 <p>The fit method learns the parameters of the generative models in each node. Before we continue, let’s have a quick look into the performance of the causal mechanisms and how well they capture the distribution:</p>
@@ -1189,8 +1189,8 @@ Fitting causal mechanism of node Operational Cost: 100%|████████
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Evaluating causal mechanisms...: 100%|██████████| 8/8 [00:00&lt;00:00, 993.06it/s]
-Test permutations of given graph: 100%|██████████| 50/50 [00:15&lt;00:00,  3.23it/s]
+Evaluating causal mechanisms...: 100%|██████████| 8/8 [00:00&lt;00:00, 872.79it/s]
+Test permutations of given graph: 100%|██████████| 50/50 [00:15&lt;00:00,  3.16it/s]
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -1219,67 +1219,67 @@ NOTE: Every metric focuses on different aspects and they might not consistently 
 We will mostly utilize the CRPS for comparing and interpreting the performance of the mechanisms, since this captures the most important properties for the causal model.
 
 --- Node Shopping Event?
-- The KL divergence between generated and observed distribution is 0.021999971139674227.
+- The KL divergence between generated and observed distribution is 0.007991987966167324.
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
 --- Node Unit Price
-- The MSE is 137.9160473182704.
-- The NMSE is 0.5019236354364343.
-- The R2 coefficient is 0.7038909991506184.
-- The normalized CRPS is 0.09782640826396319.
+- The MSE is 152.37081418767792.
+- The NMSE is 0.5677910860814592.
+- The R2 coefficient is 0.5892957279080402.
+- The normalized CRPS is 0.10791392222822645.
 The estimated CRPS indicates a very good model performance.
 The mechanism is better or equally good than all 7 baseline mechanisms.
 
 --- Node Ad Spend
-- The MSE is 15915.92054121787.
-- The NMSE is 0.452947881898489.
-- The R2 coefficient is 0.7923565586098824.
-- The normalized CRPS is 0.2594735286100392.
+- The MSE is 15754.377423198943.
+- The NMSE is 0.4842755771782327.
+- The R2 coefficient is 0.7550276557216087.
+- The normalized CRPS is 0.2778399221122914.
 The estimated CRPS indicates a good model performance.
 The mechanism is better or equally good than all 7 baseline mechanisms.
 
 --- Node Page Views
-- The MSE is 95780.29863013697.
-- The NMSE is 0.17140867719649805.
-- The R2 coefficient is 0.9695729551343713.
-- The normalized CRPS is 0.07310737371295731.
+- The MSE is 77798.23561643837.
+- The NMSE is 0.15577059221953227.
+- The R2 coefficient is 0.9739011437885559.
+- The normalized CRPS is 0.06450411423895613.
 The estimated CRPS indicates a very good model performance.
 The mechanism is better or equally good than all 7 baseline mechanisms.
 
 --- Node Sold Units
-- The MSE is 8935.164383561645.
-- The NMSE is 0.12511295757710003.
-- The R2 coefficient is 0.9834680984347219.
-- The normalized CRPS is 0.05946526223388247.
+- The MSE is 8672.024657534246.
+- The NMSE is 0.12849076878988686.
+- The R2 coefficient is 0.981799115135073.
+- The normalized CRPS is 0.057665583203590234.
 The estimated CRPS indicates a very good model performance.
 The mechanism is better or equally good than all 7 baseline mechanisms.
 
 --- Node Revenue
-- The MSE is 4.990300410344239e-19.
-- The NMSE is 8.886278056459783e-16.
+- The MSE is 3.0832927535341196e-19.
+- The NMSE is 9.151604421727408e-16.
 - The R2 coefficient is 1.0.
-- The normalized CRPS is 2.0058414594437284e-16.
+- The normalized CRPS is 1.9049967083247628e-16.
 The estimated CRPS indicates a very good model performance.
 The mechanism is better or equally good than all 7 baseline mechanisms.
 
 --- Node Operational Cost
-- The MSE is 39.013666959480766.
-- The NMSE is 1.7841972720268768e-05.
-- The R2 coefficient is 0.999999999661496.
-- The normalized CRPS is 9.802803084136755e-06.
+- The MSE is 38.951272331975176.
+- The NMSE is 1.8132162090697644e-05.
+- The R2 coefficient is 0.9999999996527258.
+- The normalized CRPS is 1.0134957032728965e-05.
 The estimated CRPS indicates a very good model performance.
 The mechanism is better or equally good than all 7 baseline mechanisms.
 
 --- Node Profit
-- The MSE is 1.520147984374282e-18.
-- The NMSE is 8.321982490430648e-15.
+- The MSE is 1.745491237278889e-18.
+- The NMSE is 5.131554673654998e-15.
 - The R2 coefficient is 1.0.
-- The normalized CRPS is 4.2836443676824026e-16.
+- The normalized CRPS is 3.258424276212231e-16.
 The estimated CRPS indicates a very good model performance.
 The mechanism is better or equally good than all 7 baseline mechanisms.
 
 ==== Evaluation of Generated Distribution ====
-The overall average KL divergence between the generated and observed distribution is 1.0085203183586426
+The overall average KL divergence between the generated and observed distribution is 1.0556349797929647
 The estimated KL divergence indicates some mismatches between the distributions.
 
 ==== Evaluation of the Causal Graph Structure ====
@@ -1288,9 +1288,9 @@ The estimated KL divergence indicates some mismatches between the distributions.
 +-------------------------------------------------------------------------------------------------------+
 | The given DAG is informative because 0 / 50 of the permutations lie in the Markov                     |
 | equivalence class of the given DAG (p-value: 0.00).                                                   |
-| The given DAG violates 6/18 LMCs and is better than 76.0% of the permuted DAGs (p-value: 0.24).       |
+| The given DAG violates 6/18 LMCs and is better than 86.0% of the permuted DAGs (p-value: 0.14).       |
 | Based on the provided significance level (0.2) and because the DAG is informative,                    |
-| we reject the DAG.                                                                                    |
+| we do not reject the DAG.                                                                             |
 +-------------------------------------------------------------------------------------------------------+
 
 ==== NOTE ====
@@ -1352,113 +1352,113 @@ All these evaluations give some insight into the goodness of the causal model, b
   <tbody>
     <tr>
       <th>0</th>
-      <td>False</td>
-      <td>$999.00</td>
-      <td>$1,288.25</td>
-      <td>11674</td>
-      <td>2327</td>
-      <td>$2,324,673.00</td>
-      <td>$1,664,790.63</td>
-      <td>$659,882.37</td>
+      <td>True</td>
+      <td>$913.46</td>
+      <td>$2,536.04</td>
+      <td>20179</td>
+      <td>5951</td>
+      <td>$5,435,982.79</td>
+      <td>$3,478,039.42</td>
+      <td>$1,957,943.37</td>
     </tr>
     <tr>
       <th>1</th>
       <td>False</td>
       <td>$999.00</td>
-      <td>$1,437.14</td>
-      <td>11795</td>
-      <td>1758</td>
-      <td>$1,756,242.00</td>
-      <td>$1,380,442.97</td>
-      <td>$375,799.03</td>
+      <td>$1,146.33</td>
+      <td>11593</td>
+      <td>2387</td>
+      <td>$2,384,613.00</td>
+      <td>$1,694,661.22</td>
+      <td>$689,951.78</td>
     </tr>
     <tr>
       <th>2</th>
       <td>False</td>
       <td>$999.00</td>
-      <td>$1,428.01</td>
-      <td>11756</td>
-      <td>2346</td>
-      <td>$2,343,654.00</td>
-      <td>$1,674,445.72</td>
-      <td>$669,208.28</td>
+      <td>$1,449.53</td>
+      <td>11823</td>
+      <td>2322</td>
+      <td>$2,319,678.00</td>
+      <td>$1,662,457.33</td>
+      <td>$657,220.67</td>
     </tr>
     <tr>
       <th>3</th>
       <td>False</td>
       <td>$999.00</td>
-      <td>$1,398.16</td>
-      <td>11772</td>
-      <td>2366</td>
-      <td>$2,363,634.00</td>
-      <td>$1,684,403.17</td>
-      <td>$679,230.83</td>
+      <td>$1,237.81</td>
+      <td>11535</td>
+      <td>2303</td>
+      <td>$2,300,697.00</td>
+      <td>$1,652,756.12</td>
+      <td>$647,940.88</td>
     </tr>
     <tr>
       <th>4</th>
       <td>False</td>
       <td>$999.00</td>
-      <td>$1,377.66</td>
-      <td>11886</td>
-      <td>2458</td>
-      <td>$2,455,542.00</td>
-      <td>$1,730,382.20</td>
-      <td>$725,159.80</td>
+      <td>$1,296.94</td>
+      <td>11620</td>
+      <td>2245</td>
+      <td>$2,242,755.00</td>
+      <td>$1,623,799.33</td>
+      <td>$618,955.67</td>
     </tr>
     <tr>
       <th>5</th>
       <td>False</td>
       <td>$999.00</td>
-      <td>$1,310.76</td>
-      <td>11830</td>
-      <td>2378</td>
-      <td>$2,375,622.00</td>
-      <td>$1,690,324.81</td>
-      <td>$685,297.19</td>
+      <td>$1,349.16</td>
+      <td>11776</td>
+      <td>2345</td>
+      <td>$2,342,655.00</td>
+      <td>$1,673,858.16</td>
+      <td>$668,796.84</td>
     </tr>
     <tr>
       <th>6</th>
       <td>False</td>
       <td>$999.00</td>
-      <td>$1,259.66</td>
-      <td>11622</td>
-      <td>2317</td>
-      <td>$2,314,683.00</td>
-      <td>$1,659,771.39</td>
-      <td>$654,911.61</td>
+      <td>$1,234.20</td>
+      <td>11832</td>
+      <td>2383</td>
+      <td>$2,380,617.00</td>
+      <td>$1,692,744.72</td>
+      <td>$687,872.28</td>
     </tr>
     <tr>
       <th>7</th>
       <td>False</td>
       <td>$999.00</td>
-      <td>$1,416.75</td>
-      <td>11844</td>
-      <td>2358</td>
-      <td>$2,355,642.00</td>
-      <td>$1,680,425.80</td>
-      <td>$675,216.20</td>
+      <td>$1,336.43</td>
+      <td>11869</td>
+      <td>2410</td>
+      <td>$2,407,590.00</td>
+      <td>$1,706,346.56</td>
+      <td>$701,243.44</td>
     </tr>
     <tr>
       <th>8</th>
       <td>False</td>
       <td>$999.00</td>
-      <td>$800.14</td>
-      <td>11352</td>
-      <td>2254</td>
-      <td>$2,251,746.00</td>
-      <td>$1,627,813.04</td>
-      <td>$623,932.96</td>
+      <td>$1,386.02</td>
+      <td>11736</td>
+      <td>2277</td>
+      <td>$2,274,723.00</td>
+      <td>$1,639,898.95</td>
+      <td>$634,824.05</td>
     </tr>
     <tr>
       <th>9</th>
       <td>False</td>
       <td>$999.00</td>
-      <td>$1,306.26</td>
-      <td>11676</td>
-      <td>2265</td>
-      <td>$2,262,735.00</td>
-      <td>$1,633,807.60</td>
-      <td>$628,927.40</td>
+      <td>$1,494.94</td>
+      <td>11838</td>
+      <td>2555</td>
+      <td>$2,552,445.00</td>
+      <td>$1,778,997.60</td>
+      <td>$773,447.40</td>
     </tr>
   </tbody>
 </table>
@@ -1558,7 +1558,7 @@ paper</a> for more details.</p>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Estimating Shapley Values. Average change of Shapley values in run 55 (275 evaluated permutations): 0.7769300967710474%: 100%|██████████| 1/1 [14:34&lt;00:00, 874.69s/it]
+Estimating Shapley Values. Average change of Shapley values in run 48 (240 evaluated permutations): 1.0402341242704312%: 100%|██████████| 1/1 [13:42&lt;00:00, 822.99s/it]
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -1597,7 +1597,7 @@ the number of sold units or number of page views have a rather small influence, 
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.LineCollection at 0x7fb237dea400&gt;
+&lt;matplotlib.collections.LineCollection at 0x7f8721dded90&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1664,7 +1664,7 @@ $\displaystyle 8.57891513840979$</div></div>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Estimating Shapley Values. Average change of Shapley values in run 28 (140 evaluated permutations): 1.7942427930080218%: 100%|██████████| 1/1 [00:03&lt;00:00,  3.06s/it]
+Estimating Shapley Values. Average change of Shapley values in run 25 (125 evaluated permutations): 1.8298549481142512%: 100%|██████████| 1/1 [00:02&lt;00:00,  2.93s/it]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
