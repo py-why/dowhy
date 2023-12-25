@@ -174,6 +174,7 @@
             <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
             <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
             <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.11.1/index.html">v0.11.1</a></dd>
             <dd><a href="/dowhy/v0.11/index.html">v0.11</a></dd>
             <dd><a href="/dowhy/v0.10.1/index.html">v0.10.1</a></dd>
             <dd><a href="/dowhy/v0.10/index.html">v0.10</a></dd>
@@ -585,6 +586,11 @@
    Using ground truth models
   </a>
  </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#creating-causal-model-gcm-from-equations">
+   Creating causal model (GCM) from equations
+  </a>
+ </li>
 </ul>
 
 </nav>
@@ -713,6 +719,92 @@ implements the <code class="xref py py-class docutils literal notranslate"><span
 features internally based on their <strong>alphabetical order</strong>. For instance, in case of the MyCustomModel above, if
 the names of the input features are ‘X2’ and ‘X1’, the model should expect ‘X1’ in the first input and ‘X2’ in
 the second column.</p>
+</div>
+</section>
+<section id="creating-causal-model-gcm-from-equations">
+<h2>Creating causal model (GCM) from equations<a class="headerlink" href="#creating-causal-model-gcm-from-equations" title="Permalink to this heading"></a></h2>
+<p>In the above section, we saw how ground truth models can be created and used for a node. Now in cases where we know the ground truth for almost all of the nodes and we want to create a custom causal model out of it without writing a lot of code.
+That is when creating a graphical causal model (GCM) from equations serves as a robust utility, enabling the generation of a causal model by defining relationships between nodes.
+This functionality proves highly valuable when the inter-node relationships are known, providing a means to construct a custom causal model. In this section, we’ll dive deeper into how to use this feature.</p>
+<dl>
+<dt><strong>Defining Equations:</strong></dt><dd><ul class="simple">
+<li><p>The functionality supports three equation formats: root node equation, non-root node equation, and an equation for an unknown causal relationship.</p></li>
+<li><dl class="simple">
+<dt>Structure for each node type:</dt><dd><ol class="arabic simple">
+<li><dl class="simple">
+<dt>Root Node</dt><dd><p>&lt;node_name&gt; = <span class="math notranslate nohighlight">\(N_i\)</span></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Non-root Node</dt><dd><p>&lt;node_name&gt; = <span class="math notranslate nohighlight">\(f_i(PA_i) + N_i\)</span></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Unknown relationship of node with its parent nodes</dt><dd><p>&lt;node_name&gt; -&gt; PA_i,…</p>
+</dd>
+</dl>
+</li>
+</ol>
+</dd>
+</dl>
+</li>
+<li><p>Note here in the above structure, the <span class="math notranslate nohighlight">\(N_i\)</span> is the noise model and the <span class="math notranslate nohighlight">\(f_i(PA_i)\)</span> notation is the functional causal model or simply a function which defines the relationship between the current node and its parent nodes.</p></li>
+<li><p>Root node equation defines the relationship for a root node, specifying a noise model. Non-root node equation extends this by incorporating a function expression involving other nodes and a noise model. Unknown causal model equation is used when the exact relationship between nodes is unknown, only specifying the edges.</p></li>
+</ul>
+</dd>
+<dt><strong>Defining Noise Models(N):</strong></dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt>The noise models include options like empirical, Bayesian Gaussian mixture, parametric, and those from the <cite>scipy.stats</cite> library. Lets look at each option in detail -</dt><dd><ol class="arabic simple">
+<li><p>empirical(): An implementation of a stochastic model class.</p></li>
+<li><p>bayesiangaussianmixture(): An implementation of a stochastic model class.</p></li>
+<li><p>parametric(): Use it when you want the system to find the best continuous distribution for the data.</p></li>
+<li><p>&lt;scipy_function&gt;(): You can specify continuous distribution functions defined in <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/stats.html#continuous-distributions">scipy.stats</a> library.</p></li>
+</ol>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+<dt><strong>Defining Functional Causal Models(F(X)):</strong></dt><dd><ul class="simple">
+<li><p>Relationships between child and parent nodes can be defined in a expression which supports almost all the airthematic operations and functions under <a class="reference external" href="https://numpy.org/doc/stable/reference/index.html">numpy</a> library</p></li>
+</ul>
+</dd>
+<dt><strong>Undefined/Unknown relationships for Nodes:</strong></dt><dd><ul class="simple">
+<li><p>In case when the relationship between the child and parent nodes are unknown, the user can define such nodes as given below example -</p></li>
+</ul>
+<blockquote>
+<div><p><span class="math notranslate nohighlight">\(X_i -&gt; PA_i, PA_i\)</span></p>
+</div></blockquote>
+</dd>
+<dt><strong>Example</strong></dt><dd><ul class="simple">
+<li><p>Users can provide a string containing equations representing the causal relationships between nodes.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">gcm</span>
+<span class="kn">from</span> <span class="nn">dowhy.utils</span> <span class="kn">import</span> <span class="n">plot</span>
+
+<span class="n">scm</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">X = empirical()</span>
+<span class="s2">Y = norm(loc=0, scale=1)</span>
+<span class="s2">Z = 12 * X + log(abs(Y)) + norm(loc=0, scale=1)</span>
+<span class="s2">&quot;&quot;&quot;</span>
+<span class="n">causal_model</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">create_causal_model_from_equations</span><span class="p">(</span><span class="n">scm</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">plot</span><span class="p">(</span><span class="n">causal_model</span><span class="o">.</span><span class="n">graph</span><span class="p">))</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="../../_images/causal_graph.png"><img alt="../../_images/causal_graph.png" class="align-center" src="../../_images/causal_graph.png" style="width: 80%;" /></a>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>The functionality sanitizes the input equations to prevent security vulnerabilities.</p></li>
+<li><p>The naming of the nodes is currently restricted to python variable naming constraints which means that the name of node can only contain alphabets, numbers (not at the start) and ‘_’ character.</p></li>
+</ul>
 </div>
 </section>
 </section>
