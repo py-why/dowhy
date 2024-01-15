@@ -39,7 +39,7 @@ If you are new to causal inference, this user guide helps you understand the dif
 If you are familiar with causal inference, you can jump right into code examples. 
 To see DoWhy in action, check out how it can be applied to estimate the effect
 of a subscription or rewards program for customers [`Rewards notebook
-<https://github.com/microsoft/py-why/blob/main/docs/source/example_notebooks/dowhy_example_effect_of_memberrewards_program.ipynb>`_]
+<https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/dowhy_example_effect_of_memberrewards_program.ipynb>`_]
 and for implementing and evaluating causal inference methods on benchmark datasets like the
 `Infant Health and Development Program (IHDP) <https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/dowhy_ihdp_data_example.ipynb>`_
 dataset, `Infant Mortality (Twins) <https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/dowhy_twins_example.ipynb>`_
