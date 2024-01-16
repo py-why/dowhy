@@ -11,6 +11,7 @@ from sklearn.utils import resample
 import dowhy.interpreters as interpreters
 from dowhy.causal_identifier.identified_estimand import IdentifiedEstimand
 from dowhy.utils.api import parse_state
+from dowhy.utils.encoding import Encoders
 
 logger = logging.getLogger(__name__)
 
@@ -112,6 +113,35 @@ class CausalEstimator:
         self._bootstrap_estimates = None
         self._bootstrap_null_estimates = None
 
+        self._encoders = Encoders()
+
+    def reset_encoders(self):
+        """
+        Removes any reference to data encoders, causing them to be re-created on next `fit()`.
+
+        It's important that data is consistently encoded otherwise models will produce inconsistent output.
+        In particular, categorical variables are one-hot encoded; the mapping of original data values
+        must be identical between model training/fitting and inference time.
+
+        Encoders are reset when `fit()` is called again, as the data is assumed to have changed.
+
+        A separate encoder is used for each subset of variables (treatment, common causes and effect modifiers).
+        """
+        self._encoders.reset()
+
+    def _encode(self, data: pd.DataFrame, encoder_name: str):
+        """
+        Encodes categorical columns in the given data, returning a new dataframe containing
+        all original data and the encoded columns. Numerical data is unchanged, categorical
+        types are one-hot encoded. `encoder_name` identifies a specific encoder to be used
+        if available, or created if not. The encoder can be reused in subsequent calls.
+
+        :param data: Data to encode.
+        :param encoder_name: The name for the encoder to be used.
+        :returns: The encoded data.
+        """
+        return self._encoders.encode(data, encoder_name)
+
     def _set_effect_modifiers(self, data: pd.DataFrame, effect_modifier_names: Optional[List[str]] = None):
         """Sets the effect modifiers for the estimator
         Modifies need_conditional_estimates accordingly to effect modifiers value
@@ -124,7 +154,7 @@ class CausalEstimator:
             self._effect_modifier_names = [cname for cname in effect_modifier_names if cname in data.columns]
             if len(self._effect_modifier_names) > 0:
                 self._effect_modifiers = data[self._effect_modifier_names]
-                self._effect_modifiers = pd.get_dummies(self._effect_modifiers, drop_first=True)
+                self._effect_modifiers = self._encode(self._effect_modifiers, "effect_modifiers")
                 self.logger.debug("Effect modifiers: " + ",".join(self._effect_modifier_names))
             else:
                 self._effect_modifier_names = []
@@ -234,7 +264,10 @@ class CausalEstimator:
                 effect_modifier_names[i] = prefix + str(em)
         # Grouping by effect modifiers and computing effect separately
         by_effect_mods = data.groupby(effect_modifier_names)
-        cond_est_fn = lambda x: self._do(self._treatment_value, x) - self._do(self._control_value, x)
+
+        def cond_est_fn(x):
+            return self._do(self._treatment_value, x) - self._do(self._control_value, x)
+
         conditional_estimates = by_effect_mods.apply(estimate_effect_fn)
         # Deleting the temporary categorical columns
         for em in effect_modifier_names:

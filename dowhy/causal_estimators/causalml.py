@@ -116,6 +116,7 @@ class Causalml(CausalEstimator):
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
+        self.reset_encoders()  # Forget any existing encoders
         self._set_effect_modifiers(data, effect_modifier_names)
 
         # Check the backdoor variables being used
@@ -127,7 +128,7 @@ class Causalml(CausalEstimator):
             # Get the data of the unobserved confounders
             self._observed_common_causes = data[self._observed_common_causes_names]
             # One hot encode the data if they are categorical
-            self._observed_common_causes = pd.get_dummies(self._observed_common_causes, drop_first=True)
+            self._observed_common_causes = self._encode(self._observed_common_causes, "observed_common_causes")
         else:
             self._observed_common_causes = []
 
@@ -138,7 +139,7 @@ class Causalml(CausalEstimator):
         self._instrumental_variable_names = self._target_estimand.instrumental_variables
         if self._instrumental_variable_names:
             self._instrumental_variables = data[self._instrumental_variable_names]
-            self._instrumental_variables = pd.get_dummies(self._instrumental_variables, drop_first=True)
+            self._instrumental_variables = self._encode(self._instrumental_variables, "instrumental_variables")
         else:
             self._instrumental_variables = []
 
