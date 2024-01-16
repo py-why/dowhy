@@ -44,45 +44,45 @@ jobs:
         with:
           poetry-version: ${{ matrix.poetry-version }}
 
-        - name: Install graphviz
-          run: |
-            sudo apt install graphviz libgraphviz-dev graphviz-dev pkg-config
+      - name: Install graphviz
+        run: |
+          sudo apt install graphviz libgraphviz-dev graphviz-dev pkg-config
 
-        - name: Install dependencies
-          run: |
-            python -m pip install --upgrade pip
-            echo "installing poetry dependencies"
-            poetry install -E plotting -E pygraphviz
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          echo "installing poetry dependencies"
+          poetry install -E plotting -E pygraphviz
 
-        - name: Lint
-          run: poetry run poe lint
+      - name: Lint
+        run: poetry run poe lint
 
-        - name: Check Formatting
-          run: poetry run poe format_check
+      - name: Check Formatting
+        run: poetry run poe format_check
 
-        - name: Test
-          run: poetry run poe test --splits 6 --group ${{ matrix.test-group }}
+      - name: Test
+        run: poetry run poe test --splits 6 --group ${{ matrix.test-group }}
 
-        - name: Install EconML dependency
-          run: |
-            poetry install -E plotting -E pygraphviz -E econml
+      - name: Install EconML dependency
+        run: |
+          poetry install -E plotting -E pygraphviz -E econml
 
-        - name: Test EconML based functionality
-          run: poetry run poe test_econml
+      - name: Test EconML based functionality
+        run: poetry run poe test_econml
 
-        - name: Test README errors for PyPI
-          run: |
-              pip install poetry-dynamic-versioning
-              pip install twine
-              poetry-dynamic-versioning
-              poetry build
-              twine check dist/*
+      - name: Test README errors for PyPI
+        run: |
+            pip install poetry-dynamic-versioning
+            pip install twine
+            poetry-dynamic-versioning
+            poetry build
+            twine check dist/*
 
-        - name: Notify Discord
-          if: failure() && github.ref == 'refs/heads/main'
-          uses: th0th/notify-discord@v0.4.1
-          env:
-            DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK }}
-            GITHUB_ACTOR: ${{ github.actor }}
-            GITHUB_JOB_NAME: CI Failed on Main
-            GITHUB_JOB_STATUS: ${{ job.status }}
+      - name: Notify Discord
+        if: failure() && github.ref == 'refs/heads/main'
+        uses: th0th/notify-discord@v0.4.1
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_JOB_NAME: CI Failed on Main
+          GITHUB_JOB_STATUS: ${{ job.status }}
