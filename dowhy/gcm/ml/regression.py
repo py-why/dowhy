@@ -1,6 +1,3 @@
-"""Functions and classes in this module should be considered experimental, meaning there might be breaking API changes
-in the future.
-"""
 from abc import abstractmethod
 from typing import Any
 
@@ -57,15 +54,29 @@ class SklearnRegressionModel(PredictionModel):
         """
         return SklearnRegressionModel(sklearn_mdl=sklearn.clone(self._sklearn_mdl))
 
+    def __str__(self):
+        return str(self._sklearn_mdl)
+
+
+class LinearRegressionWithFixedParameter(PredictionModel):
+    def __init__(self, coefficients: np.ndarray, intercept: float):
+        self.coefficients = coefficients
+        self.intercept = intercept
+
+    def fit(self, X: np.ndarray, Y: np.ndarray) -> None:
+        pass
+
+    def predict(self, X: np.ndarray) -> np.ndarray:
+        return (np.dot(shape_into_2d(X), self.coefficients) + self.intercept).reshape(-1, 1)
+
+    def clone(self):
+        return LinearRegressionWithFixedParameter(coefficients=self.coefficients, intercept=self.intercept)
+
 
 def create_linear_regressor_with_given_parameters(
-    coefficients: np.ndarray, intercept: float = 0, **kwargs
-) -> SklearnRegressionModel:
-    linear_model = LinearRegression(**kwargs)
-    linear_model.coef_ = coefficients
-    linear_model.intercept_ = intercept
-
-    return SklearnRegressionModel(linear_model)
+    coefficients: np.ndarray, intercept: float = 0
+) -> LinearRegressionWithFixedParameter:
+    return LinearRegressionWithFixedParameter(np.array(coefficients), intercept)
 
 
 def create_linear_regressor(**kwargs) -> SklearnRegressionModel:

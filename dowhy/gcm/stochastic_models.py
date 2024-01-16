@@ -1,7 +1,4 @@
-"""This module defines multiple implementations of the abstract class :class:`~dowhy.gcm.graph.StochasticModel`.
-
-Classes in this module should be considered experimental, meaning there might be breaking API changes in the future.
-"""
+"""This module defines multiple implementations of the abstract class :class:`~dowhy.gcm.graph.StochasticModel`."""
 
 import warnings
 from typing import Dict, Optional, Tuple, Union
@@ -14,7 +11,6 @@ from sklearn.metrics import silhouette_score
 from sklearn.mixture import BayesianGaussianMixture
 
 from dowhy.gcm.causal_mechanisms import StochasticModel
-from dowhy.gcm.divergence import estimate_kl_divergence_continuous
 from dowhy.gcm.util.general import shape_into_2d
 
 _CONTINUOUS_DISTRIBUTIONS = [
@@ -127,7 +123,9 @@ class ScipyDistribution(StochasticModel):
                 generated_samples = distribution.rvs(size=distribution_samples.shape[0], loc=loc, scale=scale, *arg)
 
                 # Check the KL divergence between the distribution of the given and fitted distribution.
-                divergence = estimate_kl_divergence_continuous(distribution_samples, generated_samples)
+                from dowhy.gcm.divergence import estimate_kl_divergence_continuous_knn
+
+                divergence = estimate_kl_divergence_continuous_knn(distribution_samples, generated_samples)
                 if divergence < divergence_threshold:
                     currently_best_distribution = distribution
                     currently_best_parameters = params
@@ -176,6 +174,9 @@ class ScipyDistribution(StochasticModel):
 
         return parameters_dictionary
 
+    def __str__(self) -> str:
+        return str(self._distribution.name) + " distribution"
+
 
 class EmpiricalDistribution(StochasticModel):
     """An implementation of a stochastic model that uniformly samples from data samples. By randomly returning a sample
@@ -201,6 +202,9 @@ class EmpiricalDistribution(StochasticModel):
 
     def clone(self):
         return EmpiricalDistribution()
+
+    def __str__(self):
+        return "Empirical Distribution"
 
 
 class BayesianGaussianMixtureDistribution(StochasticModel):
@@ -247,7 +251,7 @@ class BayesianGaussianMixtureDistribution(StochasticModel):
         return shape_into_2d(self._gmm_model.sample(num_samples)[0])
 
     def __str__(self) -> str:
-        return "Approximated data distribution"
+        return "Gaussian Mixture Distribution"
 
     def clone(self):
         return BayesianGaussianMixtureDistribution()

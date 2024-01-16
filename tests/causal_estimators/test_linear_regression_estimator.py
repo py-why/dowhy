@@ -1,9 +1,8 @@
-import pytest
 from pytest import mark
 
 from dowhy.causal_estimators.linear_regression_estimator import LinearRegressionEstimator
 
-from .base import TestEstimator
+from .base import SimpleEstimator
 
 
 @mark.usefixtures("fixed_seed")
@@ -92,7 +91,7 @@ class TestLinearRegressionEstimator(object):
         treatment_is_category,
         outcome_is_binary,
     ):
-        estimator_tester = TestEstimator(error_tolerance, Estimator)
+        estimator_tester = SimpleEstimator(error_tolerance, Estimator)
         estimator_tester.average_treatment_effect_testsuite(
             num_common_causes=num_common_causes,
             num_instruments=num_instruments,

@@ -1,8 +1,7 @@
 import copy
 import logging
 from collections import namedtuple
-from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -351,9 +350,11 @@ class CausalEstimator:
         bootstrap_variations = [bootstrap_estimate - estimate_value for bootstrap_estimate in bootstrap_estimates]
         sorted_bootstrap_variations = np.sort(bootstrap_variations)
 
-        # Now we take the (1- p)th and the (p)th variations, where p is the chosen confidence level
-        upper_bound_index = int((1 - confidence_level) * len(sorted_bootstrap_variations))
-        lower_bound_index = int(confidence_level * len(sorted_bootstrap_variations))
+        # Now we take the (1-p)/2 th and the 1-(1-p)/2 th variations, where p is the chosen confidence level
+        left_fraction = (1 - confidence_level) / 2
+        right_fraction = 1 - left_fraction
+        upper_bound_index = int(left_fraction * len(sorted_bootstrap_variations))
+        lower_bound_index = int(right_fraction * len(sorted_bootstrap_variations))
 
         # Get the lower and upper bounds by subtracting the variations from the estimate
         lower_bound = estimate_value - sorted_bootstrap_variations[lower_bound_index]
@@ -711,7 +712,7 @@ def estimate_effect(
     elif identified_estimand.estimands[identifier_name] is None:
         logger.error("No valid identified estimand available.")
         return CausalEstimate(
-            None, None, None, None, None, control_value=control_value, treatment_value=treatment_value
+            None, None, None, None, None, None, control_value=control_value, treatment_value=treatment_value
         )
 
     if fit_estimator:

@@ -1,6 +1,3 @@
-"""Functions and classes in this module should be considered experimental, meaning there might be breaking API changes
-in the future.
-"""
 from abc import abstractmethod
 from typing import List
 
@@ -79,7 +76,7 @@ def create_ada_boost_classifier(**kwargs) -> SklearnClassificationModel:
 
 
 def create_support_vector_classifier(**kwargs) -> SklearnClassificationModel:
-    return SklearnClassificationModel(SVC(**kwargs))
+    return SklearnClassificationModel(SVC(**kwargs, probability=True))
 
 
 def create_knn_classifier(**kwargs) -> SklearnClassificationModel:

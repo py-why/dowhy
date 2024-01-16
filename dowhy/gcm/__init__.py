@@ -1,7 +1,4 @@
-"""The gcm sub-package provides features built on top of graphical causal model (GCM) based inference. The status of
-this addition and its API is considered experimental, meaning there might be breaking changes to its API in the
-future.
-"""
+"""The gcm sub-package provides features built on top of graphical causal model (GCM) based inference."""
 
 from . import auto, config, divergence, ml, shapley, stats, uncertainty, util
 from .anomaly import anomaly_scores, attribute_anomalies
@@ -13,7 +10,7 @@ from .anomaly_scorers import (
     MedianDeviationScorer,
     RescaledMedianCDFQuantileScorer,
 )
-from .causal_mechanisms import AdditiveNoiseModel, ClassifierFCM, PostNonlinearModel
+from .causal_mechanisms import AdditiveNoiseModel, ClassifierFCM, DiscreteAdditiveNoiseModel, PostNonlinearModel
 from .causal_models import InvertibleStructuralCausalModel, ProbabilisticCausalModel, StructuralCausalModel
 from .confidence_intervals import confidence_intervals
 from .confidence_intervals_cms import bootstrap_sampling, fit_and_compute
@@ -30,7 +27,10 @@ from .independence_test import (
 )
 from .influence import arrow_strength, intrinsic_causal_influence
 from .ml import ClassificationModel, PredictionModel
+from .model_evaluation import evaluate_causal_model
 from .stochastic_models import BayesianGaussianMixtureDistribution, EmpiricalDistribution, ScipyDistribution
 from .unit_change import unit_change
 from .validation import RejectionResult, refute_causal_structure, refute_invertible_model
 from .whatif import average_causal_effect, counterfactual_samples, interventional_samples
+
+from .equation_parser import create_causal_model_from_equations  # isort:skip

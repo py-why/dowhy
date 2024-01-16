@@ -1,22 +1,14 @@
-import numpy as np
-import pandas as pd
 import pytest
-from numpy.core.fromnumeric import var
 
-from dowhy import CausalModel
+from dowhy import identify_effect_id
+from dowhy.graph import build_graph_from_str
 
 
 class TestIDIdentifier(object):
     def test_1(self):
-        treatment = "T"
-        outcome = "Y"
-        causal_graph = "digraph{T->Y;}"
-        columns = list(treatment) + list(outcome)
-        df = pd.DataFrame(columns=columns)
-
-        # Calculate causal effect twice: once for unit (t=1, c=0), once for specific increase (t=100, c=50)
-        causal_model = CausalModel(df, treatment, outcome, graph=causal_graph)
-        identified_estimand = causal_model.identify_effect(method_name="id-algorithm")
+        identified_estimand = identify_effect_id(
+            build_graph_from_str("digraph{T->Y;}"), action_nodes=["T"], outcome_nodes=["Y"]
+        )
 
         # Only P(Y|T) should be present for test to succeed.
         identified_str = identified_estimand.__str__()
@@ -27,30 +19,16 @@ class TestIDIdentifier(object):
         """
         Test undirected edge between treatment and outcome.
         """
-        treatment = "T"
-        outcome = "Y"
-        causal_graph = "digraph{T->Y; Y->T;}"
-        columns = list(treatment) + list(outcome)
-        df = pd.DataFrame(columns=columns)
-
-        # Calculate causal effect twice: once for unit (t=1, c=0), once for specific increase (t=100, c=50)
-        causal_model = CausalModel(df, treatment, outcome, graph=causal_graph)
-
         # Since undirected graph, identify effect must throw an error.
         with pytest.raises(Exception):
-            identified_estimand = causal_model.identify_effect(method_name="id-algorithm")
+            identified_estimand = identify_effect_id(
+                build_graph_from_str("digraph{T->Y; Y->T;}"), action_nodes=["T"], outcome_nodes=["Y"]
+            )
 
     def test_3(self):
-        treatment = "T"
-        outcome = "Y"
-        variables = ["X1"]
-        causal_graph = "digraph{T->X1;X1->Y;}"
-        columns = list(treatment) + list(outcome) + list(variables)
-        df = pd.DataFrame(columns=columns)
-
-        # Calculate causal effect twice: once for unit (t=1, c=0), once for specific increase (t=100, c=50)
-        causal_model = CausalModel(df, treatment, outcome, graph=causal_graph)
-        identified_estimand = causal_model.identify_effect(method_name="id-algorithm")
+        identified_estimand = identify_effect_id(
+            build_graph_from_str("digraph{T->X1;X1->Y;}"), action_nodes=["T"], outcome_nodes=["Y"]
+        )
 
         # Compare with ground truth
         identified_str = identified_estimand.__str__()
@@ -58,16 +36,9 @@ class TestIDIdentifier(object):
         assert identified_str == gt_str
 
     def test_4(self):
-        treatment = "T"
-        outcome = "Y"
-        variables = ["X1"]
-        causal_graph = "digraph{T->Y;T->X1;X1->Y;}"
-        columns = list(treatment) + list(outcome) + list(variables)
-        df = pd.DataFrame(columns=columns)
-
-        # Calculate causal effect twice: once for unit (t=1, c=0), once for specific increase (t=100, c=50)
-        causal_model = CausalModel(df, treatment, outcome, graph=causal_graph)
-        identified_estimand = causal_model.identify_effect(method_name="id-algorithm")
+        identified_estimand = identify_effect_id(
+            build_graph_from_str("digraph{T->Y;T->X1;X1->Y;}"), action_nodes=["T"], outcome_nodes=["Y"]
+        )
 
         # Compare with ground truth
         identified_str = identified_estimand.__str__()
@@ -75,16 +46,9 @@ class TestIDIdentifier(object):
         assert identified_str == gt_str
 
     def test_5(self):
-        treatment = "T"
-        outcome = "Y"
-        variables = ["X1", "X2"]
-        causal_graph = "digraph{T->Y;X1->T;X1->Y;X2->T;}"
-        columns = list(treatment) + list(outcome) + list(variables)
-        df = pd.DataFrame(columns=columns)
-
-        # Calculate causal effect twice: once for unit (t=1, c=0), once for specific increase (t=100, c=50)
-        causal_model = CausalModel(df, treatment, outcome, graph=causal_graph)
-        identified_estimand = causal_model.identify_effect(method_name="id-algorithm")
+        identified_estimand = identify_effect_id(
+            build_graph_from_str("digraph{T->Y;X1->T;X1->Y;X2->T;}"), action_nodes=["T"], outcome_nodes=["Y"]
+        )
 
         # Compare with ground truth
         set_a = set(identified_estimand._product[0]._product[0]._product[0]["outcome_vars"]._set)
@@ -98,16 +62,9 @@ class TestIDIdentifier(object):
         assert len(set_d) == 0
 
     def test_6(self):
-        treatment = "T"
-        outcome = "Y"
-        variables = ["X1"]
-        causal_graph = "digraph{T;X1->Y;}"
-        columns = list(treatment) + list(outcome) + list(variables)
-        df = pd.DataFrame(columns=columns)
-
-        # Calculate causal effect twice: once for unit (t=1, c=0), once for specific increase (t=100, c=50)
-        causal_model = CausalModel(df, treatment, outcome, graph=causal_graph)
-        identified_estimand = causal_model.identify_effect(method_name="id-algorithm")
+        identified_estimand = identify_effect_id(
+            build_graph_from_str("digraph{T;X1->Y;}"), action_nodes=["T"], outcome_nodes=["Y"]
+        )
 
         # Compare with ground truth
         identified_str = identified_estimand.__str__()

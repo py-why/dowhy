@@ -1,6 +1,6 @@
 import numpy as np
-from scipy.interpolate import LinearNDInterpolator, interp1d
-from statsmodels.nonparametric.kernel_density import EstimatorSettings, KDEMultivariate, KDEMultivariateConditional
+from scipy.interpolate import interp1d
+from statsmodels.nonparametric.kernel_density import EstimatorSettings, KDEMultivariateConditional
 
 from dowhy.do_sampler import DoSampler
 

@@ -6,22 +6,27 @@ name: Publish Package
 on:
   release:
     types: [created]
+  workflow_dispatch:
 
 jobs:
   deploy:
-
+    name: Upload release to PyPI
     runs-on: ubuntu-latest
-
+    environment: release
+    permissions:
+      id-token: write
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: Set up Python 3.9
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.9'
     
     - name: Install Poetry
-      uses: abatilo/actions-poetry@v2.3.0
+      uses: abatilo/actions-poetry@v3.0.0
       with:
         poetry-version: '1.5.1'
 
@@ -35,4 +40,5 @@ jobs:
       run: |
         poetry-dynamic-versioning
         poetry build
-        poetry publish --username ${{ secrets.PYPI_USERNAME }} --password ${{ secrets.PYPI_PASSWORD }}
+    - name: Publish package distributions to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1

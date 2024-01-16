@@ -41,5 +41,25 @@ additive noise model (ANM) of the form :math:`X_i = f_i(PA_i, N_i) = f'_i(PA_i) 
 standard regression models. The noise then becomes simply the residual.
 
 For causal questions like treatment effect estimation, modeling rung 2 is sufficient. On the other hand, to determine
-root causes by asking "Would the target have been an outlier if node X behaved differently?", rung 3 is required. Note
-that DoWhy generally uses invertible FCMs, such as ANMs, when models are assigned automatically.
+root causes by asking "Would the target have been an outlier if node X behaved differently?", rung 3 is required. The
+following provides an overview of available types of causal mechanisms that are supported out-of-the box:
+
+Available Causal Mechanisms
+---------------------------
+
+To support causal mechanisms that can be used for any of the types of causal models above, we have simple interfaces
+that a causal mechanism needs to implement. For instance, to use a causal mechanism in a PCM, one only needs to
+implement a method that expects samples from the parent nodes and returns samples from the conditional distribution.
+Having these lightweight interfaces allows easily using your own and customized types of causal mechanisms for different
+use cases. However, DoWhy also has different types of mechanisms, specifically functional causal models, implemented
+natively supporting different types of data:
+
+- `Additive Noise Models <https://papers.nips.cc/paper_files/paper/2008/file/f7664060cc52bc6f3d620bcedc94a4b6-Paper.pdf>`_ (continuous data) of the form :math:`X_i = f_i(PA_i) + N_i`, where :math:`f_i` can be any kind of regression function (e.g., from scikit-learn) and the noise :math:`N_i` is unobserved noise. When fitting an ANM, this then boils down to fitting the :math:`f_i` model (e.g., via least squares) and fitting :math:`N_i` based on the residuals :math:`N_i = X_i - f_i(PA_i)`. As mentioned throughout the user guide, ANMs are the most commonly used types of causal models due to their simplicity and ability to answer counterfactual questions.
+- `Post-nonlinear models <https://arxiv.org/ftp/arxiv/papers/1205/1205.2599.pdf>`_ (continuous data) of the form :math:`X_i = g_i(f_i(PA_i) + N_i)`, where :math:`g_i` is assumed to be invertible. These are a generalization of ANMs, allowing more complex relationships between :math:`N_i` and :math:`PA_i`.
+- `Discrete Additive Noise Models <https://pubmed.ncbi.nlm.nih.gov/21464504/>`_ (discrete data), which have a similar definition as ANMs but are restricted to discrete values.
+- `Classifier-based Functional Causal Models <https://mitpress.mit.edu/9780262037310/elements-of-causal-inference/>`_ (categorical data) of the form :math:`X_i = f_i(PA_i, N_i)`, which cannot be used for rung 3 queries, since :math:`f_i` is typically not invertible here with respect to :math:`N_i`, but can be used for algorithms relying only on interventional queries (rung 2). Here, :math:`f_i` can be based on any classification model (e.g., from scikit-learn) and :math:`N_i` is by definition a uniform distribution on [0, 1] used to sample from the conditional class probabilities.
+
+In all mechanisms, causal sufficiency is assumed, i.e., :math:`N_i` is assumed to be independent of :math:`PA_i`. More
+details and justification of these types of causal mechanisms can be found in the correspondingly linked papers. Note
+that when using the auto assignment function, DoWhy tries to use invertible FCMs, such as ANMs, due to their flexibility
+in addressing rung 3 queries. For categorical data, make sure to represent them as strings.

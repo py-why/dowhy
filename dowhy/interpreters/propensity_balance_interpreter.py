@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 
 from dowhy.causal_estimator import CausalEstimate
-from dowhy.causal_estimators.propensity_score_estimator import PropensityScoreEstimator
 from dowhy.causal_estimators.propensity_score_stratification_estimator import PropensityScoreStratificationEstimator
 from dowhy.interpreters.visual_interpreter import VisualInterpreter
 

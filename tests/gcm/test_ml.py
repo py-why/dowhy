@@ -1,9 +1,15 @@
 import numpy as np
+import pytest
 from flaky import flaky
 from pytest import approx
 from sklearn.linear_model import LogisticRegression
 
-from dowhy.gcm.ml import SklearnClassificationModel, create_linear_regressor, create_logistic_regression_classifier
+from dowhy.gcm.ml import (
+    SklearnClassificationModel,
+    create_linear_regressor,
+    create_linear_regressor_with_given_parameters,
+    create_logistic_regression_classifier,
+)
 
 
 @flaky(max_runs=5)
@@ -78,3 +84,23 @@ def test_when_cloning_sklearn_classification_model_then_returns_a_cloned_object(
     assert isinstance(cloned_mdl.sklearn_model, LogisticRegression)
     assert mdl != cloned_mdl
     assert cloned_mdl.sklearn_model != logistic_regression_model
+
+
+def test_when_using_linear_regressor_with_given_parameters_then_fit_does_not_override_parameters():
+    mdl = create_linear_regressor_with_given_parameters([1, 2, 3], 4)
+
+    assert mdl.coefficients == pytest.approx([1, 2, 3])
+    assert mdl.intercept == 4
+
+    mdl.fit(np.random.normal(0, 1, (100, 3)), np.arange(100))
+
+    assert mdl.coefficients == pytest.approx([1, 2, 3])
+    assert mdl.intercept == 4
+
+
+def test_when_predict_with_linear_regressor_with_given_parameters_then_returns_expected_results():
+    mdl = create_linear_regressor_with_given_parameters([2], 4)
+
+    assert mdl.predict(np.array([0])) == approx(4)
+    assert mdl.predict(np.array([1])) == approx(6)
+    assert mdl.predict(np.array([0, 1, 2, 3])) == approx([4, 6, 8, 10])

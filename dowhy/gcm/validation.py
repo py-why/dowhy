@@ -1,8 +1,4 @@
-"""Contains a method to reject the causal graph and validate causal mechanisms such as post non-linear models.
-
-Classes and functions in this module should be considered experimental, meaning there might be breaking API changes in
-the future.
-"""
+"""Contains a method to reject the causal graph and validate causal mechanisms such as post non-linear models."""
 from enum import Enum, auto
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 

@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 
-from dowhy.causal_estimator import CausalEstimate, CausalEstimator
+from dowhy.causal_estimator import CausalEstimate
 from dowhy.causal_estimators.econml import Econml
 from dowhy.causal_estimators.generalized_linear_model_estimator import GeneralizedLinearModelEstimator
 from dowhy.causal_estimators.linear_regression_estimator import LinearRegressionEstimator

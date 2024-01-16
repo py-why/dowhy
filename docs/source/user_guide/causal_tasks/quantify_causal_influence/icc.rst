@@ -3,8 +3,8 @@ Quantifying Intrinsic Causal Influence
 
 By quantifying intrinsic causal influence, we answer the question:
 
-    **How strong is the causal influence of a source node to a target node
-    that is not inherited from the parents of the source node?**
+    **How strong is the causal influence of an upstream node to a target node
+    that is not inherited from the parents of the upstream node?**
 
 Naturally, descendants will have a zero intrinsic causal influence on the target node. This method is based on the paper:
 
@@ -39,7 +39,7 @@ To see how the method works, let us generate some data following the example abo
 
 Note the larger standard deviation of the 'noise' in :math:`X`.
 
-Next, we will model cause-effect relationships as a structural causal model and fit it to the data. Here, we are using
+Next, we will model cause-effect relationships as a structural causal model using DoWhy's GCM framework and fit it to the data. Here, we are using
 the auto module to automatically assign causal mechanisms:
 
 >>> causal_model = gcm.StructuralCausalModel(nx.DiGraph([('X', 'Y'), ('Y', 'Z')])) # X -> Y -> Z
@@ -57,6 +57,13 @@ Note that, although we use a linear relationship here, the method can also handl
 **Interpreting the results:** We estimated the intrinsic causal influence of ancestors of
 :math:`Z`, including itself, to its variance (the default measure). These contributions sum up to the variance of :math:`Z`.
 As we see here, we observe that ~92% of the variance of :math:`Z` comes from :math:`X`.
+
+Related example notebooks
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- :doc:`../../../example_notebooks/gcm_icc`
+- :doc:`../../../example_notebooks/gcm_online_shop`
+
 
 .. _understand-method-icc:
 
@@ -119,7 +126,7 @@ Here, we explicitly defined the variance in the parameter ``attribution_func`` a
   in other quantities, such as absolute deviations. This can also be simply computed by replacing
   the ``attribution_func`` with a custom function:
 
-  >>> mean_absolute_deviation_estimator = lambda x: np.mean(abs(x))
+  >>> mean_absolute_deviation_estimator = lambda x, y: np.mean(abs(x-y))
   >>> node_to_contribution = gcm.intrinsic_causal_influence(causal_model, 'Z',
   >>>                                                      prediction_model_from_noises_to_target,
   >>>                                                      attribution_func=mean_absolute_deviation_estimator)

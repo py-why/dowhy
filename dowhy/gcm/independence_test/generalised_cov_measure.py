@@ -87,8 +87,4 @@ def _create_model(
     if not isinstance(model, AssignmentQuality):
         return model()
     else:
-        return select_model(
-            input_features,
-            target,
-            model,
-        )
+        return select_model(input_features, target, model)[0]

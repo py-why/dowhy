@@ -4,7 +4,7 @@ import dowhy.datasets
 from dowhy import CausalModel
 
 
-class TestRefuter(object):
+class SimpleRefuter(object):
     def __init__(
         self,
         error_tolerance,
