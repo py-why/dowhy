@@ -120,6 +120,7 @@ class Econml(CausalEstimator):
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
+        self.reset_encoders()  # Forget any existing encoders
         self._set_effect_modifiers(data, effect_modifier_names)
         # Save parameters for later refutter fitting
         self._econml_fit_params = kwargs
@@ -148,12 +149,12 @@ class Econml(CausalEstimator):
                 # Also only update self._effect_modifiers, and create a copy of self._effect_modifier_names
                 # the latter can be used by other estimator methods later
                 self._effect_modifiers = data[effect_modifier_names]
-                self._effect_modifiers = pd.get_dummies(self._effect_modifiers, drop_first=True)
+                self._effect_modifiers = self._encode(self._effect_modifiers, "effect_modifiers")
                 self._effect_modifier_names = effect_modifier_names
             self.logger.debug("Effect modifiers: " + ",".join(effect_modifier_names))
         if self._observed_common_causes_names:
             self._observed_common_causes = data[self._observed_common_causes_names]
-            self._observed_common_causes = pd.get_dummies(self._observed_common_causes, drop_first=True)
+            self._observed_common_causes = self._encode(self._observed_common_causes, "observed_common_causes")
         else:
             self._observed_common_causes = None
         self.logger.debug("Back-door variables used:" + ",".join(self._observed_common_causes_names))
@@ -165,7 +166,7 @@ class Econml(CausalEstimator):
             self.estimating_instrument_names = parse_state(self.iv_instrument_name)
         if self.estimating_instrument_names:
             self._estimating_instruments = data[self.estimating_instrument_names]
-            self._estimating_instruments = pd.get_dummies(self._estimating_instruments, drop_first=True)
+            self._estimating_instruments = self._encode(self._estimating_instruments, "estimating_instruments")
         else:
             self._estimating_instruments = None
 

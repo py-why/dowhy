@@ -98,6 +98,7 @@ class RegressionDiscontinuityEstimator(CausalEstimator):
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
+        self.reset_encoders()  # Forget any existing encoders
         self._set_effect_modifiers(data, effect_modifier_names)
 
         self.rd_variable = data[self.rd_variable_name]
