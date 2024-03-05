@@ -85,9 +85,13 @@ def kernel_based(
 
         if Z is None:
             X, Y = _convert_to_numeric(*shape_into_2d(X, Y))
+            if np.any(np.isnan(X)) or np.any(np.isnan(Y)):
+                raise ValueError("Data contains NaN values! Remove or replace missing values first.")
             return KCI_UInd(**kwargs).compute_pvalue(X, Y)[0]
         else:
             X, Y, Z = _convert_to_numeric(*shape_into_2d(X, Y, Z))
+            if np.any(np.isnan(X)) or np.any(np.isnan(Y)) or np.any(np.isnan(Z)):
+                raise ValueError("Data contains NaN values! Remove or replace missing values first.")
             return KCI_CInd(**kwargs).compute_pvalue(X, Y, Z)[0]
 
     random_indices = [
