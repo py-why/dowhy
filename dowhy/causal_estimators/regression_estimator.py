@@ -122,7 +122,7 @@ class RegressionEstimator(CausalEstimator):
             need_conditional_estimates = self.need_conditional_estimates
         # TODO make treatment_value and control value also as local parameters
         # All treatments are set to the same constant value
-        effect_estimate = self._do(data, treatment_value) - self._do(data, control_value)
+        effect_estimate = self._do(treatment_value, data) - self._do(control_value, data)
         conditional_effect_estimates = None
         if need_conditional_estimates:
             conditional_effect_estimates = self._estimate_conditional_effects(
@@ -222,6 +222,10 @@ class RegressionEstimator(CausalEstimator):
         interventional_outcomes = self.predict_fn(data_df, self.model, new_features)
         return interventional_outcomes
 
-    def _do(self, data_df: pd.DataFrame, treatment_val):
+    def _do(
+        self,
+        treatment_val,
+        data_df: pd.DataFrame,
+    ):
         interventional_outcomes = self.interventional_outcomes(data_df, treatment_val)
         return interventional_outcomes.mean()

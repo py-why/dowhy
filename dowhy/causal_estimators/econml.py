@@ -278,7 +278,7 @@ class Econml(CausalEstimator):
         """Returns None if the confidence interval has not been calculated."""
         return self.effect_intervals
 
-    def _do(self, x):
+    def _do(self, x, data_df=None):
         raise NotImplementedError
 
     def construct_symbolic_estimator(self, estimand):
