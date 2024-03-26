@@ -1,9 +1,10 @@
 import numpy as np
 import pandas as pd
-from pandas import get_dummies
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import LabelEncoder
 from statsmodels.nonparametric.kernel_density import EstimatorSettings, KDEMultivariateConditional
+
+from dowhy.utils.encoding import one_hot_encode
 
 
 def propensity_of_treatment_score(data, covariates, treatment, model="logistic", variable_types=None):
@@ -114,8 +115,14 @@ def binarize_discrete(data, covariates, variable_types):
     if variable_types:
         for variable in covariates:
             variable_type = variable_types[variable]
+            # variable_type:
+            #  A dictionary containing the variable's names and types. 'c' for continuous, 'o'
+            #  for ordered, 'd' for discrete, and 'u' for unordered discrete.
             if variable_type in ["d", "o", "u"]:
-                dummies = get_dummies(data[variable])
+                # [] notation to retain DataFrame rather than Series.
+                # For one_hot_encode type must be categorical, or it won't encode.
+                variable_data = data.loc[:, [variable]].astype(str)
+                dummies, _ = one_hot_encode(variable_data)  # Original impl. pd.get_dummies, drop_first default is False
                 dummies.columns = [variable + str(col) for col in dummies.columns]
                 dummies = dummies[dummies.columns[:-1]]
                 covariates += list(dummies.columns)

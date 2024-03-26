@@ -60,3 +60,53 @@ def one_hot_encode(data: pd.DataFrame, columns=None, drop_first: bool = False, e
     df_result = pd.concat([df_columns_to_keep, df_encoded], axis=1)
 
     return df_result, encoder
+
+
+class Encoders:
+    """Categorical data One-Hot encoding helper object.
+
+    Initializes a factory object which manages a set of sklearn.preprocessing.OneHotEncoder instances,
+    although the `encode()` method can be overriden to replace these with your preferred encoder.
+
+    Each Encoder instance is given a name to retrieve it in future, and is used to encode
+    a different set of variables.
+    """
+
+    def __init__(self, drop_first=True):
+        """Initializes an instance and calls `reset_encoders()`.
+
+        :param drop_first: If true, will not encode the first category value with a bit in 1-hot encoding.
+            It will be implicit instead, by the absence of any bit representing this value in the relevant columns.
+            Set to False to include a bit for each value of every categorical variable.
+        """
+        self.drop_first = drop_first
+        self.reset()
+
+    def reset(self):
+        """
+        Removes any reference to data encoders, causing them to be re-created on next `encode()`.
+        A separate encoder is used for each named set of variables.
+        """
+        self._encoders = {}
+
+    def encode(self, data: pd.DataFrame, encoder_name: str):
+        """
+        Encodes categorical columns in the given data, returning a new dataframe containing
+        all original data and the encoded columns. Numerical data is unchanged, categorical
+        types are one-hot encoded. `encoder_name` identifies a specific encoder to be used
+        if available, or created if not. The encoder can be reused in subsequent calls.
+
+        :param data: Data to encode.
+        :param encoder_name: The name for the encoder to be used.
+        :returns: The encoded data.
+        """
+        existing_encoder = self._encoders.get(encoder_name)
+        encoded_variables, encoder = one_hot_encode(
+            data,
+            drop_first=self.drop_first,
+            encoder=existing_encoder,
+        )
+
+        # Remember encoder
+        self._encoders[encoder_name] = encoder
+        return encoded_variables

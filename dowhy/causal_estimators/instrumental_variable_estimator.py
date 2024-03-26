@@ -92,6 +92,7 @@ class InstrumentalVariableEstimator(CausalEstimator):
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
+        self.reset_encoders()  # Forget any existing encoders
         self._set_effect_modifiers(data, effect_modifier_names)
 
         self.estimating_instrument_names = self._target_estimand.instrumental_variables

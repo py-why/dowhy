@@ -19,6 +19,7 @@ from dowhy.causal_identifier.identified_estimand import IdentifiedEstimand
 from dowhy.causal_refuter import CausalRefutation, CausalRefuter, choose_variables
 from dowhy.causal_refuters.evalue_sensitivity_analyzer import EValueSensitivityAnalyzer
 from dowhy.causal_refuters.linear_sensitivity_analyzer import LinearSensitivityAnalyzer
+from dowhy.utils.encoding import Encoders
 
 logger = logging.getLogger(__name__)
 
@@ -201,6 +202,41 @@ class AddUnobservedCommonCause(CausalRefuter):
         )
 
 
+def preprocess_observed_common_causes(
+    data: pd.DataFrame,
+    target_estimand: IdentifiedEstimand,
+    no_common_causes_error_message: str,
+):
+    """
+    Preprocesses backdoor variables (observed common causes) and returns the pre-processed matrix.
+
+    At least one backdoor (common cause) variable is required. Raises an exception if none present.
+
+    Preprocessing has two steps:
+    1. Categorical encoding.
+    2. Standardization.
+
+    :param data: All data, some of which needs preprocessing.
+    :param target_estimand: Estimand for desired effect including definition of backdoor variables.
+    :param no_common_causes_error_message: Message to be displayed with ValueError if no backdoor variable present.
+    :return: DataFrame containing pre-processed data.
+    """
+
+    # 1. Categorical encoding of relevant variables
+    observed_common_causes_names = target_estimand.get_backdoor_variables()
+    if len(observed_common_causes_names) > 0:
+        # The encoded data is only used to calculate a parameter, so the encoder can be discarded.
+        observed_common_causes = data[observed_common_causes_names]
+        encoders = Encoders()
+        observed_common_causes = encoders.encode(observed_common_causes, "observed_common_causes")
+    else:
+        raise ValueError(no_common_causes_error_message)
+
+    # 2. Standardizing the data
+    observed_common_causes = StandardScaler().fit_transform(observed_common_causes)
+    return observed_common_causes
+
+
 def _infer_default_kappa_t(
     data: pd.DataFrame,
     target_estimand: IdentifiedEstimand,
@@ -210,19 +246,10 @@ def _infer_default_kappa_t(
     len_kappa_t: int = 10,
 ):
     """Infer default effect strength of simulated confounder on treatment."""
-    observed_common_causes_names = target_estimand.get_backdoor_variables()
-    if len(observed_common_causes_names) > 0:
-        observed_common_causes = data[observed_common_causes_names]
-        observed_common_causes = pd.get_dummies(observed_common_causes, drop_first=True)
-    else:
-        raise ValueError(
-            "There needs to be at least one common cause to"
-            + "automatically compute the default value of kappa_t."
-            + " Provide a value for kappa_t"
-        )
     t = data[treatment_name]
-    # Standardizing the data
-    observed_common_causes = StandardScaler().fit_transform(observed_common_causes)
+    no_common_causes_error_message = "There needs to be at least one common cause to automatically compute the default value of kappa_t. Provide a value for kappa_t"
+    observed_common_causes = preprocess_observed_common_causes(data, target_estimand, no_common_causes_error_message)
+
     if effect_on_t == "binary_flip":
         # Fit a model containing all confounders and compare predictions
         # using all features compared to all features except a given
@@ -272,19 +299,10 @@ def _infer_default_kappa_y(
     len_kappa_y: int = 10,
 ):
     """Infer default effect strength of simulated confounder on treatment."""
-    observed_common_causes_names = target_estimand.get_backdoor_variables()
-    if len(observed_common_causes_names) > 0:
-        observed_common_causes = data[observed_common_causes_names]
-        observed_common_causes = pd.get_dummies(observed_common_causes, drop_first=True)
-    else:
-        raise ValueError(
-            "There needs to be at least one common cause to"
-            + "automatically compute the default value of kappa_y."
-            + " Provide a value for kappa_y"
-        )
     y = data[outcome_name]
-    # Standardizing the data
-    observed_common_causes = StandardScaler().fit_transform(observed_common_causes)
+    no_common_causes_error_message = "There needs to be at least one common cause to automatically compute the default value of kappa_y. Provide a value for kappa_y"
+    observed_common_causes = preprocess_observed_common_causes(data, target_estimand, no_common_causes_error_message)
+
     if effect_on_y == "binary_flip":
         # Fit a model containing all confounders and compare predictions
         # using all features compared to all features except a given

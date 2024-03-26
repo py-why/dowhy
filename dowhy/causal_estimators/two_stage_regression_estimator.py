@@ -167,6 +167,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
+        self.reset_encoders()  # Forget any existing encoders
         self._set_effect_modifiers(data, effect_modifier_names)
 
         if len(self._target_estimand.treatment_variable) > 1:
@@ -315,10 +316,12 @@ class TwoStageRegressionEstimator(CausalEstimator):
         treatment_vals = data_df[self._target_estimand.treatment_variable]
         if len(self._observed_common_causes_names) > 0:
             observed_common_causes_vals = data_df[self._observed_common_causes_names]
-            observed_common_causes_vals = pd.get_dummies(observed_common_causes_vals, drop_first=True)
+            observed_common_causes_vals = self._encode(observed_common_causes_vals, "observed_common_causes")
+
         if self._effect_modifier_names:
             effect_modifiers_vals = data_df[self._effect_modifier_names]
-            effect_modifiers_vals = pd.get_dummies(effect_modifiers_vals, drop_first=True)
+            effect_modifiers_vals = self._encode(effect_modifiers_vals, "effect_modifiers")
+
         if type(treatment_vals) is not np.ndarray:
             treatment_vals = treatment_vals.to_numpy()
         if treatment_vals.shape[0] != data_df.shape[0]:

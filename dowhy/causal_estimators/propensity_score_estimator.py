@@ -93,6 +93,7 @@ class PropensityScoreEstimator(CausalEstimator):
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
+        self.reset_encoders()  # Forget any existing encoders
         self._set_effect_modifiers(data, effect_modifier_names)
 
         self.logger.debug("Back-door variables used:" + ",".join(self._target_estimand.get_backdoor_variables()))
@@ -103,7 +104,8 @@ class PropensityScoreEstimator(CausalEstimator):
             # Convert the categorical variables into dummy/indicator variables
             # Basically, this gives a one hot encoding for each category
             # The first category is taken to be the base line.
-            self._observed_common_causes = pd.get_dummies(self._observed_common_causes, drop_first=True)
+            self._observed_common_causes = self._encode(self._observed_common_causes, "observed_common_causes")
+
         else:
             self._observed_common_causes = None
             error_msg = "No common causes/confounders present. Propensity score based methods are not applicable"
