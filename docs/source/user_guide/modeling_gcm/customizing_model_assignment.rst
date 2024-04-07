@@ -16,7 +16,7 @@ To understand this, let's pull up the mental model for a probabilistic causal mo
 
 On the left, it shows a trivial causal graph :math:`X \rightarrow Y`. :math:`X` is a so-called root
 node (it has no parents), :math:`Y` is a non-root node (it *has* parents). We fundamentally
-distinguishes between these two types of nodes.
+distinguish between these two types of nodes.
 
 For root nodes such as :math:`X`, the distribution :math:`P_x` is modeled using a stochastic model.
 Non-root nodes such as :math:`Y` are modelled using a *conditional* stochastic model. DoWhy's gcm package
@@ -41,8 +41,8 @@ case, we can explicitly assign this:
 
 For the non-root node Y, let's use an additive noise model (ANM), represented by the
 :class:`~dowhy.gcm.causal_mechanisms.AdditiveNoiseModel` class. It has a
-structural assignment of the form: :math:`Y := f(X) + N`. Here, f is a deterministic prediction
-function, whereas N is a noise term. Let's put all of this together:
+structural assignment of the form: :math:`Y := f(X) + N`. Here, :math:`f` is a deterministic prediction
+function, whereas :math:`N` is a noise term. Let's put all of this together:
 
 >>> causal_model.set_causal_mechanism('Y',
 >>>                                   gcm.AdditiveNoiseModel(prediction_model=gcm.ml.create_linear_regressor(),
@@ -56,7 +56,7 @@ The rather interesting part here is the ``prediction_model``, which corresponds 
     def predict(self, X: np.ndarray) -> np.ndarray: ...
 
 This interface is very analogous to model interfaces in many machine learning libraries, such as
-`Scikit Learn <https://scikit-learn.org>`_. In fact the gcm package provides multiple adapter classes to
+`Scikit Learn <https://scikit-learn.org>`_. In fact, the gcm package provides multiple adapter classes to
 make libraries such as Scikit Learn interoperable.
 
 Now that we have associated a data-generating process to each node in the causal graph, let us
@@ -149,10 +149,10 @@ This functionality proves highly valuable when the inter-node relationships are 
         1. empirical(): An implementation of a stochastic model class.
         2. bayesiangaussianmixture(): An implementation of a stochastic model class.
         3. parametric(): Use it when you want the system to find the best continuous distribution for the data.
-        4. <scipy_function>(): You can specify continuous distribution functions defined in `scipy.stats <https://docs.scipy.org/doc/scipy/reference/stats.html#continuous-distributions>`_ library.
+        4. <scipy_function>(): You can specify continuous distribution functions defined in the `scipy.stats <https://docs.scipy.org/doc/scipy/reference/stats.html#continuous-distributions>`_ library.
 
 **Defining Functional Causal Models(F(X)):**
-   - Relationships between child and parent nodes can be defined in a expression which supports almost all the airthematic operations and functions under `numpy <https://numpy.org/doc/stable/reference/index.html>`_ library
+   - Relationships between child and parent nodes can be defined in a expression which supports almost all the airthematic operations and functions in the `numpy <https://numpy.org/doc/stable/reference/index.html>`_ library
 
 **Undefined/Unknown relationships for Nodes:**
    - In case when the relationship between the child and parent nodes are unknown, the user can define such nodes as given below example -
