@@ -30,7 +30,7 @@ def plot_causal_graph_graphviz(
         layout_prog = "dot"
 
     max_strength = 0.0
-    for (source, target, strength) in causal_graph.edges(data="CAUSAL_STRENGTH", default=None):
+    for source, target, strength in causal_graph.edges(data="CAUSAL_STRENGTH", default=None):
         if (source, target) not in causal_strengths:
             causal_strengths[(source, target)] = strength
         if causal_strengths[(source, target)] is not None:
@@ -46,7 +46,7 @@ def plot_causal_graph_graphviz(
         else:
             pygraphviz_graph.add_node(node)
 
-    for (source, target) in causal_graph.edges():
+    for source, target in causal_graph.edges():
         causal_strength = causal_strengths[(source, target)]
         color = colors[(source, target)]
         if causal_strength is not None:

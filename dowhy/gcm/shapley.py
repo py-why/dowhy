@@ -592,7 +592,7 @@ def _evaluate_set_function(
     )
 
     subset_to_result_map = {}
-    for (subset, result) in zip(evaluation_subsets, subset_results):
+    for subset, result in zip(evaluation_subsets, subset_results):
         subset_to_result_map[subset] = result
 
     return subset_to_result_map

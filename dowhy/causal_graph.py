@@ -11,7 +11,6 @@ from dowhy.utils.plotting import plot
 
 
 class CausalGraph:
-
     """Class for creating and modifying the causal graph.
 
     Accepts a networkx DiGraph, a :py:class:`ProbabilisticCausalModel <dowhy.gcm.ProbabilisticCausalModel`, a graph string (or a text file) in gml format (preferred) or dot format. Graphviz-like attributes can be set for edges and nodes. E.g. style="dashed" as an edge attribute ensures that the edge is drawn with a dashed line.

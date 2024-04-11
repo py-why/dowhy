@@ -1,4 +1,5 @@
 """This module defines the fundamental interfaces and functions related to causal graphs."""
+
 import itertools
 import logging
 import re

@@ -1,4 +1,5 @@
 """This module provides functions to estimate causal influences."""
+
 import logging
 import warnings
 from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Union, cast

@@ -7,7 +7,6 @@ from dowhy.utils.api import parse_state
 
 
 class IdentifiedEstimand:
-
     """Class for storing a causal estimand, typically as a result of the identification step."""
 
     def __init__(

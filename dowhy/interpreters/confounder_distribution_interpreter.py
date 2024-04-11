@@ -64,7 +64,6 @@ class ConfounderDistributionInterpreter(VisualInterpreter):
         ax.legend()
 
     def interpret(self, data: pd.DataFrame):
-
         """
         Shows distribution changes for confounding variables before and after applying inverse propensity weights.
         """

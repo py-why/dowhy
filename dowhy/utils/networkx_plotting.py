@@ -28,7 +28,7 @@ def plot_causal_graph_networkx(
         colors = deepcopy(colors)
 
     max_strength = 0.0
-    for (source, target, strength) in causal_graph.edges(data="CAUSAL_STRENGTH", default=None):
+    for source, target, strength in causal_graph.edges(data="CAUSAL_STRENGTH", default=None):
         if (source, target) not in causal_strengths:
             causal_strengths[(source, target)] = strength
 
