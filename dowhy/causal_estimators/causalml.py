@@ -11,11 +11,9 @@ from dowhy.causal_identifier import IdentifiedEstimand
 
 
 class _CausalmlEstimator(Protocol):
-    def estimate_ate(self, *args, **kwargs):
-        ...
+    def estimate_ate(self, *args, **kwargs): ...
 
-    def fit_predict(self, *args, **kwargs):
-        ...
+    def fit_predict(self, *args, **kwargs): ...
 
 
 logger = logging.getLogger(__name__)

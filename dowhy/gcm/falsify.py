@@ -1,4 +1,5 @@
 """This module provides functionality to falsify a user-given DAG given observed data."""
+
 import warnings
 from dataclasses import dataclass, field
 from enum import Enum, auto

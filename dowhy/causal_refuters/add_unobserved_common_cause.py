@@ -29,7 +29,6 @@ DEFAULT_C_STAR_MAX = 1000
 
 
 class AddUnobservedCommonCause(CausalRefuter):
-
     """Add an unobserved confounder for refutation.
 
     AddUnobservedCommonCause class supports three methods:

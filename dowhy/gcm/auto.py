@@ -157,7 +157,7 @@ class AutoAssignmentSummary:
                     % self._nodes[node]["model_performances"][0][2]
                 )
 
-                for (model, performance, metric_name) in self._nodes[node]["model_performances"]:
+                for model, performance, metric_name in self._nodes[node]["model_performances"]:
                     summary_strings.append("%s: %s" % (str(model()).replace("()", ""), str(performance)))
 
         summary_strings.append(
@@ -344,7 +344,7 @@ def assign_causal_mechanisms(
                 + ",N).",
             )
 
-        for (model, performance, metric_name) in model_performances:
+        for model, performance, metric_name in model_performances:
             auto_assignment_summary.add_model_performance(node, model, performance, metric_name)
 
     return auto_assignment_summary

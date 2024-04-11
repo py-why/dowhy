@@ -1,6 +1,7 @@
 """ Regression based (conditional) independence test. Testing independence via regression, i.e. if a variable has
 information about another variable, then they are dependent.
 """
+
 from typing import Callable, List, Optional, Union
 
 import numpy as np
