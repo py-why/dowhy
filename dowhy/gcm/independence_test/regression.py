@@ -11,7 +11,7 @@ from sklearn.model_selection import KFold
 from sklearn.preprocessing import scale
 
 import dowhy.gcm.config as config
-from dowhy.gcm.stats import estimate_ftest_pvalue, quantile_based_fwer
+from dowhy.gcm.stats import estimate_ftest_pvalue, merge_p_values_average
 from dowhy.gcm.util.general import auto_apply_encoders, auto_fit_encoders, set_random_seed, shape_into_2d
 
 
@@ -21,7 +21,7 @@ def regression_based(
     Z: Optional[np.ndarray] = None,
     max_num_components_all_inputs: int = 40,
     k_folds: int = 3,
-    p_value_adjust_func: Callable[[Union[np.ndarray, List[float]]], float] = quantile_based_fwer,
+    p_value_adjust_func: Callable[[Union[np.ndarray, List[float]]], float] = merge_p_values_average,
     max_samples_per_fold: int = -1,
     n_jobs: Optional[int] = None,
 ) -> float:
