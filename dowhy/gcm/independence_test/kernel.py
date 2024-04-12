@@ -8,7 +8,7 @@ from sklearn.preprocessing import scale
 
 import dowhy.gcm.config as config
 from dowhy.gcm.independence_test.kernel_operation import approximate_rbf_kernel_features
-from dowhy.gcm.stats import quantile_based_fwer
+from dowhy.gcm.stats import merge_p_values_average
 from dowhy.gcm.util.general import auto_apply_encoders, auto_fit_encoders, set_random_seed, shape_into_2d
 
 
@@ -20,7 +20,7 @@ def kernel_based(
     bootstrap_num_runs: int = 10,
     max_num_samples_run: int = 2000,
     bootstrap_n_jobs: Optional[int] = None,
-    p_value_adjust_func: Callable[[Union[np.ndarray, List[float]]], float] = quantile_based_fwer,
+    p_value_adjust_func: Callable[[Union[np.ndarray, List[float]]], float] = merge_p_values_average,
     **kwargs,
 ) -> float:
     """Prepares the data and uses kernel (conditional) independence test. The independence test estimates a p-value
@@ -124,7 +124,7 @@ def approx_kernel_based(
     bootstrap_num_runs: int = 10,
     bootstrap_num_samples: int = 1000,
     bootstrap_n_jobs: Optional[int] = None,
-    p_value_adjust_func: Callable[[Union[np.ndarray, List[float]]], float] = quantile_based_fwer,
+    p_value_adjust_func: Callable[[Union[np.ndarray, List[float]]], float] = merge_p_values_average,
 ) -> float:
     """Implementation of the Randomized Conditional Independence Test. The independence test estimates a p-value
     for the null hypothesis that X and Y are independent (given Z). Depending whether Z is given, a conditional or

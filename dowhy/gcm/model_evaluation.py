@@ -43,7 +43,7 @@ from dowhy.gcm.ml.classification import (
     create_polynom_logistic_regression_classifier,
 )
 from dowhy.gcm.ml.regression import create_ada_boost_regressor, create_extra_trees_regressor, create_polynom_regressor
-from dowhy.gcm.stats import quantile_based_fwer
+from dowhy.gcm.stats import merge_p_values_average
 from dowhy.gcm.util.general import is_categorical, set_random_seed, shape_into_2d
 from dowhy.graph import get_ordered_predecessors, is_root_node
 
@@ -599,7 +599,7 @@ def _evaluate_invertibility_assumptions(
                         parent_samples[random_indices],
                     )
                 )
-            all_pnl_p_values[node] = quantile_based_fwer(tmp_p_values)
+            all_pnl_p_values[node] = merge_p_values_average(tmp_p_values)
 
     if len(all_pnl_p_values) == 0:
         return all_pnl_p_values

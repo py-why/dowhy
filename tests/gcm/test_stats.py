@@ -10,7 +10,7 @@ from dowhy.gcm.ml import (
     create_linear_regressor,
     create_logistic_regression_classifier,
 )
-from dowhy.gcm.stats import estimate_ftest_pvalue, marginal_expectation, quantile_based_fwer
+from dowhy.gcm.stats import estimate_ftest_pvalue, marginal_expectation, merge_p_values_average, merge_p_values_quantile
 from dowhy.gcm.util.general import geometric_median
 
 
@@ -27,47 +27,65 @@ def test_when_estimate_geometric_median_then_returns_correct_median_vector():
     assert gm[1] == approx(-5, abs=0.5)
 
 
-def test_when_apply_quantile_based_fwer_control_then_returns_single_adjusted_pvalue():
+def test_when_merge_p_values_quantile_then_returns_single_adjusted_pvalue():
     p_values = np.array([0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1])
-    assert quantile_based_fwer(p_values, quantile=0.5) == 0.055 / 0.5
-    assert quantile_based_fwer(p_values, quantile=0.25) == 0.0325 / 0.25
-    assert quantile_based_fwer(p_values, quantile=0.75) == 0.0775 / 0.75
+    assert merge_p_values_quantile(p_values, quantile=0.5) == 0.055 / 0.5
+    assert merge_p_values_quantile(p_values, quantile=0.25) == 0.0325 / 0.25
+    assert merge_p_values_quantile(p_values, quantile=0.75) == 0.0775 / 0.75
 
     assert (
-        quantile_based_fwer(np.array([0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 1]), quantile=0.5)
+        merge_p_values_quantile(np.array([0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 1]), quantile=0.5)
         == 0.06 / 0.5
     )
-    assert quantile_based_fwer(np.array([0.9, 0.95, 1]), quantile=0.5) == 1
-    assert quantile_based_fwer(np.array([0, 0, 0]), quantile=0.5) == 0
-    assert quantile_based_fwer(np.array([0.33]), quantile=0.5) == 0.33
+    assert merge_p_values_quantile(np.array([0.9, 0.95, 1]), quantile=0.5) == 1
+    assert merge_p_values_quantile(np.array([0, 0, 0]), quantile=0.5) == 0
+    assert merge_p_values_quantile(np.array([0.33]), quantile=0.5) == 0.33
 
 
-def test_given_p_values_with_nans_when_using_quantile_based_fwer_then_ignores_the_nan_values():
+def test_given_p_values_with_nans_when_merge_p_values_quantile_then_ignores_the_nan_values():
     p_values = np.array([0.01, np.nan, 0.02, 0.03, 0.04, 0.05, np.nan, 0.06, 0.07, 0.08, 0.09, 0.1])
-    assert quantile_based_fwer(p_values, quantile=0.5) == 0.055 / 0.5
+    assert merge_p_values_quantile(p_values, quantile=0.5) == 0.055 / 0.5
 
 
-def test_given_p_values_with_scaling_when_apply_quantile_based_fwer_control_then_returns_single_adjusted_pvalue():
+def test_given_p_values_with_scaling_when_merge_p_values_quantile_then_returns_single_adjusted_pvalue():
     p_values = np.array([0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1])
     p_values_scaling = np.array([2, 2, 1, 2, 1, 3, 1, 2, 4, 1])
 
-    assert quantile_based_fwer(p_values, p_values_scaling, quantile=0.5) == approx(0.15)
-    assert quantile_based_fwer(p_values, p_values_scaling, quantile=0.25) == approx(0.17)
-    assert quantile_based_fwer(p_values, p_values_scaling, quantile=0.75) == approx(0.193, abs=0.001)
+    assert merge_p_values_quantile(p_values, p_values_scaling, quantile=0.5) == approx(0.15)
+    assert merge_p_values_quantile(p_values, p_values_scaling, quantile=0.25) == approx(0.17)
+    assert merge_p_values_quantile(p_values, p_values_scaling, quantile=0.75) == approx(0.193, abs=0.001)
 
 
-def test_given_invalid_inputs_when_apply_quantile_based_fwer_control_then_raises_error():
+def test_given_invalid_inputs_when_merge_p_values_quantile_then_raises_error():
     with pytest.raises(ValueError):
-        assert quantile_based_fwer(np.array([0.1, 0.5, 1]), quantile=0)
-
-    with pytest.raises(ValueError):
-        assert quantile_based_fwer(np.array([0.1, 0.5, 1]), np.array([1, 2]), quantile=0.1)
+        assert merge_p_values_quantile(np.array([0.1, 0.5, 1]), quantile=0)
 
     with pytest.raises(ValueError):
-        assert quantile_based_fwer(np.array([0.1, 0.5, 1]), quantile=1.1)
+        assert merge_p_values_quantile(np.array([0.1, 0.5, 1]), np.array([1, 2]), quantile=0.1)
 
     with pytest.raises(ValueError):
-        assert quantile_based_fwer(np.array([0.1, 0.5, 1]), quantile=-0.5)
+        assert merge_p_values_quantile(np.array([0.1, 0.5, 1]), quantile=1.1)
+
+    with pytest.raises(ValueError):
+        assert merge_p_values_quantile(np.array([0.1, 0.5, 1]), quantile=-0.5)
+
+
+def test_when_merge_p_values_average_without_randomization_then_returns_expected_results():
+    assert merge_p_values_average([0]) == 0
+    assert merge_p_values_average([1]) == 1
+    assert merge_p_values_average([0, 1]) == approx(1.0)
+    assert merge_p_values_average([0, 0, 1]) == 0
+    assert merge_p_values_average([0, 0.5, 0.5, np.nan, 1, np.nan]) == approx(1.0)
+    assert merge_p_values_average([0, 0, 1, 1, 1]) == approx(1.0)
+
+
+@flaky(max_runs=3)
+def test_when_merge_p_values_average_with_randomization_then_returns_expected_results():
+    assert merge_p_values_average([0], randomization=True) == 0
+    assert merge_p_values_average([1], randomization=True) == 1
+    assert merge_p_values_average([0, 1], randomization=True) == approx(0.0, abs=0.01)
+    assert merge_p_values_average([0, 0, 1], randomization=True) == approx(0.0, abs=0.01)
+    assert merge_p_values_average([0, np.nan, 0, np.nan, 1, 1], randomization=True) == approx(0.0, abs=0.01)
 
 
 def test_when_evaluate_marginal_expectation_without_averaging_result_then_returned_results_have_correct_format():

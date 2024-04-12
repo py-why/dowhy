@@ -9,14 +9,51 @@ from dowhy.gcm.constant import EPS
 from dowhy.gcm.util.general import shape_into_2d
 
 
-def quantile_based_fwer(
+def merge_p_values_average(p_values: Union[np.ndarray, List[float]], randomization: bool = False) -> float:
+    """A statistically sound method to merge multiple potentially dependent p-values into one. This is a statistically
+    improved (i.e., more powerful) version of the "twice the average" rule, following Theorem 5.3
+    (second equation, F_UA) in
+
+    M. Gasparini, R. Wang, and A. Ramdas, *Combining exchangeable p-values*, arXiv 2404.03484, 2024
+
+    Note, if randomization is False, we have u = 1 here. Generally, randomization requires fewer assumptions but leads
+    to non-deterministic behavior.
+
+    :param p_values: A list or array of p-values.
+    :param randomization: If True, u is taken uniformly randomly from [0, 1] (non-deterministic). If False, u is set
+    to 1 (deterministic). Randomization is generally more powerful but provides non-deterministic results.
+    :return: A single p-value based on the given p-values.
+    """
+    if len(p_values) == 0:
+        raise ValueError("Given list of p-values is empty!")
+
+    if np.all(np.isnan(p_values)):
+        return float(np.nan)
+
+    if randomization:
+        u = float(np.random.uniform(0, 1))
+    else:
+        u = 1
+
+    p_values = np.array(p_values)
+    p_values = p_values[~np.isnan(p_values)]
+    p_values.sort()
+
+    K = len(p_values)
+
+    return min(
+        1.0, float(np.min([2 * np.mean(p_values[:m]) / (2 - (K * u / m)) for m in range(1, K + 1) if (K * u / m) < 2]))
+    )
+
+
+def merge_p_values_quantile(
     p_values: Union[np.ndarray, List[float]], p_values_scaling: Optional[np.ndarray] = None, quantile: float = 0.5
 ) -> float:
-    """Applies a quantile based family wise error rate (FWER) control to the given p-values. This is based on the
+    """Applies a quantile based approach to merge multiple potentially dependent p-values to one. This is based on the
     approach described in:
 
-    Meinshausen, N., Meier, L. and Buehlmann, P. (2009).
-    p-values for high-dimensional regression. J. Amer. Statist. Assoc.104 1671–1681
+    Meinshausen, N., Meier, L. and Buehlmann, P., *p-values for high-dimensional regression*,
+    J. Amer. Statist. Assoc.104 1671–1681, 2009
 
     :param p_values: A list or array of p-values.
     :param p_values_scaling: An optional list of scaling factors for each p-value.
