@@ -13,18 +13,18 @@ def test_complete_adjsutment():
     G.add_edge("Z", "Y", G.directed_edge_name)
     G.add_edge("X", "Y", G.directed_edge_name)
 
-    cad = CompleteAdjustment()
+    cad = CompleteAdjustment(G, {"X"}, {"Y"})
 
-    assert cad.adjustable(G, {"X"}, {"Y"})
+    assert cad.adjustable()
 
 
     G = MAG()
     G.add_edge("X", "Z", G.directed_edge_name)
     G.add_edge("X", "Y", G.directed_edge_name)
 
-    cad = CompleteAdjustment()
+    cad = CompleteAdjustment(G, {"X"}, {"Y"})
 
-    assert cad.adjustable(G, {"X"}, {"Y"})
+    assert cad.adjustable()
 
 
     G = MAG()
@@ -33,9 +33,9 @@ def test_complete_adjsutment():
     G.add_edge("U", "X", G.directed_edge_name)
     G.add_edge("U", "Y", G.directed_edge_name)
 
-    cad = CompleteAdjustment()
+    cad = CompleteAdjustment(G, {"X"}, {"Y"})
 
-    assert not cad.adjustable(G, {"X"}, {"Y"})
+    assert not cad.adjustable()
 
 
     #  CPDAGs
@@ -56,9 +56,9 @@ def test_complete_adjsutment():
     G.add_edge("A", "I", G.circle_edge_name)
     G.add_edge("I", "A", G.circle_edge_name)
 
-    cad = CompleteAdjustment()
+    cad = CompleteAdjustment(G, {"X"},{"Y"})
 
-    assert cad.adjustable(G, {"X"},{"Y"})
+    assert cad.adjustable()
 
     # MAG
 
@@ -71,9 +71,9 @@ def test_complete_adjsutment():
     G.add_edge("F", "C", G.directed_edge_name)
     G.add_edge("F", "E", G.directed_edge_name)
 
-    cad = CompleteAdjustment()
+    cad = CompleteAdjustment(G, {"A", "D"}, {"E","F"})
 
-    assert cad.adjustable(G, {"A", "D"}, {"E","F"})
+    assert cad.adjustable()
 
     G = MAG()
     G.add_edge("A", "B", G.directed_edge_name)
@@ -85,9 +85,9 @@ def test_complete_adjsutment():
     G.add_edge("F", "E", G.directed_edge_name)
     G.add_edge("A", "F", G.directed_edge_name)
 
-    cad = CompleteAdjustment()
+    cad = CompleteAdjustment(G, {"A", "D"}, {"E","F"} )
 
-    assert not cad.adjustable(G, {"A", "D"}, {"E","F"} )
+    assert not cad.adjustable()
 
 
     G = MAG()
@@ -102,9 +102,9 @@ def test_complete_adjsutment():
     G.add_edge("H", "A", G.directed_edge_name)
     G.add_edge("I", "A", G.directed_edge_name)
 
-    cad = CompleteAdjustment()
+    cad = CompleteAdjustment(G, {"A", "D"}, {"E"} )
 
-    assert cad.adjustable(G, {"A", "D"}, {"E"} )
+    assert cad.adjustable()
 
     G = MAG()
     G.add_edge("B", "A", G.directed_edge_name)
@@ -115,9 +115,9 @@ def test_complete_adjsutment():
     G.add_edge("F", "A", G.directed_edge_name)
     G.add_edge("A", "D", G.directed_edge_name)
 
-    cad = CompleteAdjustment()
+    cad = CompleteAdjustment(G, {"A", "C"}, {"D"})
 
-    assert not cad.adjustable(G, {"A", "C"}, {"D"} )
+    assert not cad.adjustable()
 
     # PAG
 
@@ -134,9 +134,9 @@ def test_complete_adjsutment():
     G.add_edge("A", "H", G.circle_edge_name)
     G.add_edge("A", "I", G.circle_edge_name)
 
-    cad = CompleteAdjustment()
+    cad = CompleteAdjustment(G, {"A", "D"}, {"E"} )
 
-    assert cad.adjustable(G, {"A", "D"}, {"E"} )
+    assert cad.adjustable()
 
 
 
