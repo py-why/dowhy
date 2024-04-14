@@ -103,12 +103,7 @@ class DistanceMatchingEstimator(CausalEstimator):
         self.matched_indices_att = None
         self.matched_indices_atc = None
 
-    def fit(
-        self,
-        data: pd.DataFrame, 
-        effect_modifier_names: Optional[List[str]] = None,
-        exact_match_cols=None
-    ):
+    def fit(self, data: pd.DataFrame, effect_modifier_names: Optional[List[str]] = None, exact_match_cols=None):
         """
         Fits the estimator with data for effect estimation
         :param data: data frame containing the data
@@ -121,7 +116,7 @@ class DistanceMatchingEstimator(CausalEstimator):
                     methods support this currently.
         """
         self.exact_match_cols = exact_match_cols
-        self._fit_params = {'exact_match_cols': exact_match_cols}
+        self._fit_params = {"exact_match_cols": exact_match_cols}
         self.reset_encoders()  # Forget any existing encoders
         self._set_effect_modifiers(data, effect_modifier_names)
 

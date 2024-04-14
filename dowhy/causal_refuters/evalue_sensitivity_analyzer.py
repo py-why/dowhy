@@ -262,7 +262,7 @@ class EValueSensitivityAnalyzer:
             new_estimator.fit(
                 self.data,
                 effect_modifier_names=self.estimate.estimator._effect_modifier_names,
-                **new_estimator._fit_params if hasattr(new_estimator, "_fit_params") else {}
+                **new_estimator._fit_params if hasattr(new_estimator, "_fit_params") else {},
             )
 
             # new effect estimate
