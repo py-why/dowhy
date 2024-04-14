@@ -119,6 +119,7 @@ class Econml(CausalEstimator):
         self._set_effect_modifiers(data, effect_modifier_names)
         # Save parameters for later refutter fitting
         self._econml_fit_params = kwargs
+        self._fit_params = kwargs
 
         self._observed_common_causes_names = self._target_estimand.get_backdoor_variables().copy()
 
