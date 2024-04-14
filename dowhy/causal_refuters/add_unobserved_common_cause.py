@@ -842,8 +842,8 @@ def sensitivity_simulation(
         new_estimator = estimate.estimator.get_new_estimator_object(target_estimand)
         new_estimator.fit(
             new_data,
-            estimate.estimator._effect_modifier_names,
-            **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
+            effect_modifier_names=estimate.estimator._effect_modifier_names,
+            **new_estimator._fit_params if hasattr(new_estimator, "_fit_params") else {}
         )
         new_effect = new_estimator.estimate_effect(
             new_data,
@@ -890,8 +890,8 @@ def sensitivity_simulation(
                     new_estimator = estimate.estimator.get_new_estimator_object(target_estimand)
                     new_estimator.fit(
                         new_data,
-                        estimate.estimator._effect_modifier_names,
-                        **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
+                        effect_modifier_names=estimate.estimator._effect_modifier_names,
+                        **new_estimator._fit_params if hasattr(new_estimator, "_fit_params") else {}
                     )
                     new_effect = new_estimator.estimate_effect(
                         new_data,
@@ -966,8 +966,8 @@ def sensitivity_simulation(
                 new_estimator = estimate.estimator.get_new_estimator_object(target_estimand)
                 new_estimator.fit(
                     new_data,
-                    estimate.estimator._effect_modifier_names,
-                    **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
+                    effect_modifier_names=estimate.estimator._effect_modifier_names,
+                    **new_estimator._fit_params if hasattr(new_estimator, "_fit_params") else {}
                 )
                 new_effect = new_estimator.estimate_effect(
                     new_data,
@@ -1024,8 +1024,8 @@ def sensitivity_simulation(
                 new_estimator = estimate.estimator.get_new_estimator_object(target_estimand)
                 new_estimator.fit(
                     new_data,
-                    estimate.estimator._effect_modifier_names,
-                    **new_estimator._econml_fit_params if isinstance(new_estimator, Econml) else {},
+                    effect_modifier_names=estimate.estimator._effect_modifier_names,
+                    **new_estimator._fit_params if hasattr(new_estimator, "_fit_params") else {}
                 )
                 new_effect = new_estimator.estimate_effect(
                     new_data,
