@@ -843,7 +843,7 @@ def sensitivity_simulation(
         new_estimator.fit(
             new_data,
             effect_modifier_names=estimate.estimator._effect_modifier_names,
-            **new_estimator._fit_params if hasattr(new_estimator, "_fit_params") else {}
+            **new_estimator._fit_params if hasattr(new_estimator, "_fit_params") else {},
         )
         new_effect = new_estimator.estimate_effect(
             new_data,
@@ -891,7 +891,7 @@ def sensitivity_simulation(
                     new_estimator.fit(
                         new_data,
                         effect_modifier_names=estimate.estimator._effect_modifier_names,
-                        **new_estimator._fit_params if hasattr(new_estimator, "_fit_params") else {}
+                        **new_estimator._fit_params if hasattr(new_estimator, "_fit_params") else {},
                     )
                     new_effect = new_estimator.estimate_effect(
                         new_data,
@@ -967,7 +967,7 @@ def sensitivity_simulation(
                 new_estimator.fit(
                     new_data,
                     effect_modifier_names=estimate.estimator._effect_modifier_names,
-                    **new_estimator._fit_params if hasattr(new_estimator, "_fit_params") else {}
+                    **new_estimator._fit_params if hasattr(new_estimator, "_fit_params") else {},
                 )
                 new_effect = new_estimator.estimate_effect(
                     new_data,
@@ -1025,7 +1025,7 @@ def sensitivity_simulation(
                 new_estimator.fit(
                     new_data,
                     effect_modifier_names=estimate.estimator._effect_modifier_names,
-                    **new_estimator._fit_params if hasattr(new_estimator, "_fit_params") else {}
+                    **new_estimator._fit_params if hasattr(new_estimator, "_fit_params") else {},
                 )
                 new_effect = new_estimator.estimate_effect(
                     new_data,
