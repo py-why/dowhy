@@ -140,7 +140,7 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
                         num_strata,
                         self.clipping_threshold,
                     )
-                    num_ret_strata = clipped.groupby(["strata"]).count().reset_index()
+                    num_ret_strata = clipped.groupby(["strata"], observed=False).count().reset_index()
                     # At least 90% of the strata should be included in analysis
                     if num_ret_strata.shape[0] >= 0.5 * num_strata:
                         strata_found = True
@@ -172,7 +172,7 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
             )
 
         # sum weighted outcomes over all strata  (weight by treated population)
-        weighted_outcomes = clipped.groupby("strata").agg(
+        weighted_outcomes = clipped.groupby("strata", observed=False).agg(
             {self._target_estimand.treatment_variable[0]: ["sum"], "dbar": ["sum"], "d_y": ["sum"], "dbar_y": ["sum"]}
         )
         weighted_outcomes.columns = ["_".join(x) for x in weighted_outcomes.columns.to_numpy().ravel()]
@@ -233,7 +233,7 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
             data[self._target_estimand.treatment_variable[0]] * data[self._target_estimand.outcome_variable[0]]
         )
         data["dbar_y"] = data["dbar"] * data[self._target_estimand.outcome_variable[0]]
-        stratified = data.groupby("strata")
+        stratified = data.groupby("strata", observed=False)
         clipped = stratified.filter(
             lambda strata: min(
                 strata.loc[strata[self._target_estimand.treatment_variable[0]] == 1].shape[0],
@@ -244,7 +244,7 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
         self.logger.debug(
             "After using clipping_threshold={0}, here are the number of data points in each strata:\n {1}".format(
                 clipping_threshold,
-                clipped.groupby(["strata", self._target_estimand.treatment_variable[0]])[
+                clipped.groupby(["strata", self._target_estimand.treatment_variable[0]], observed=False)[
                     self._target_estimand.outcome_variable
                 ].count(),
             )
