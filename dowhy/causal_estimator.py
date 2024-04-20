@@ -234,7 +234,7 @@ class CausalEstimator:
                 data[prefix + str(em)] = pd.qcut(data[em], num_quantiles, duplicates="drop")
                 effect_modifier_names[i] = prefix + str(em)
         # Grouping by effect modifiers and computing effect separately
-        by_effect_mods = data.groupby(effect_modifier_names)
+        by_effect_mods = data.groupby(effect_modifier_names, observed=False)
         cond_est_fn = lambda x: self._do(self._treatment_value, x) - self._do(self._control_value, x)
         conditional_estimates = by_effect_mods.apply(estimate_effect_fn)
         # Deleting the temporary categorical columns

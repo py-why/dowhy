@@ -251,7 +251,7 @@ you can use the namespace as follows.
     data['df'].causal.do(x='v0', # name of treatment variable
                          variable_types={'v0': 'b', 'y': 'c', 'W0': 'c'},
                          outcome='y',
-                         common_causes=['W0']).groupby('v0').mean().plot(y='y', kind='bar')
+                         common_causes=['W0']).groupby('v0', observed=False).mean().plot(y='y', kind='bar')
 
 .. image:: https://raw.githubusercontent.com/microsoft/dowhy/main/docs/images/do_barplot.png
 

@@ -748,7 +748,7 @@ def preprocess_data_by_treatment(
     variable_type = data[treatment_variable_name].dtypes
 
     if bool == variable_type:
-        groups = data.groupby(treatment_variable_name)
+        groups = data.groupby(treatment_variable_name, observed=False)
         return groups
     # We use string arguments to account for both 32 and 64 bit varaibles
     elif "float" in variable_type.name or "int" in variable_type.name:
@@ -757,14 +757,14 @@ def preprocess_data_by_treatment(
         std_dev = data[treatment_variable_name].std()
         num_bins = (data.max() - data.min()) / (bucket_size_scale_factor * std_dev)
         data["bins"] = pd.cut(data[treatment_variable_name], num_bins)
-        groups = data.groupby("bins")
+        groups = data.groupby("bins", observed=False)
         data.drop("bins", axis=1, inplace=True)
         return groups
 
     elif "categorical" in variable_type.name:
         # Action for categorical variables
-        groups = data.groupby(treatment_variable_name)
-        groups = data.groupby("bins")
+        groups = data.groupby(treatment_variable_name, observed=False)
+        groups = data.groupby("bins", observed=False)
         return groups
     else:
         raise ValueError("Passed {}. Expected bool, float, int or categorical.".format(variable_type.name))
