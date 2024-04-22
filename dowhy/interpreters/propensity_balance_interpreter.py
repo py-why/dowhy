@@ -41,38 +41,38 @@ class PropensityBalanceInterpreter(VisualInterpreter):
         )
 
         # First, calculating mean differences by strata
-        mean_diff = df_long.groupby(self.estimate._treatment_name + ["common_cause_id", "strata"]).agg(
+        mean_diff = df_long.groupby(self.estimate._treatment_name + ["common_cause_id", "strata"], observed=False).agg(
             mean_w=("W", np.mean)
         )
         mean_diff = (
-            mean_diff.groupby(["common_cause_id", "strata"]).transform(lambda x: x.max() - x.min()).reset_index()
+            mean_diff.groupby(["common_cause_id", "strata"], observed=False).transform(lambda x: x.max() - x.min()).reset_index()
         )
         mean_diff = mean_diff.query("v0==True")
         size_by_w_strata = (
-            df_long.groupby(["common_cause_id", "strata"]).agg(size=("propensity_score", np.size)).reset_index()
+            df_long.groupby(["common_cause_id", "strata"], observed=False).agg(size=("propensity_score", np.size)).reset_index()
         )
-        size_by_strata = df_long.groupby(["common_cause_id"]).agg(size=("propensity_score", np.size)).reset_index()
+        size_by_strata = df_long.groupby(["common_cause_id"], observed=False).agg(size=("propensity_score", np.size)).reset_index()
         size_by_strata = pd.merge(size_by_w_strata, size_by_strata, on="common_cause_id")
         mean_diff_strata = pd.merge(mean_diff, size_by_strata, on=("common_cause_id", "strata"))
 
-        stddev_by_w_strata = df_long.groupby(["common_cause_id", "strata"]).agg(stddev=("W", np.std)).reset_index()
+        stddev_by_w_strata = df_long.groupby(["common_cause_id", "strata"], observed=False).agg(stddev=("W", np.std)).reset_index()
         mean_diff_strata = pd.merge(mean_diff_strata, stddev_by_w_strata, on=["common_cause_id", "strata"])
         mean_diff_strata["scaled_mean"] = (mean_diff_strata["mean_w"] / mean_diff_strata["stddev"]) * (
             mean_diff_strata["size_x"] / mean_diff_strata["size_y"]
         )
         mean_diff_strata = (
-            mean_diff_strata.groupby("common_cause_id").agg(std_mean_diff=("scaled_mean", np.sum)).reset_index()
+            mean_diff_strata.groupby("common_cause_id", observed=False).agg(std_mean_diff=("scaled_mean", np.sum)).reset_index()
         )
 
         # Second, without strata
-        mean_diff_overall = df_long.groupby(self.estimate._treatment_name + ["common_cause_id"]).agg(
+        mean_diff_overall = df_long.groupby(self.estimate._treatment_name + ["common_cause_id"], observed=False).agg(
             mean_w=("W", np.mean)
         )
         mean_diff_overall = (
-            mean_diff_overall.groupby("common_cause_id").transform(lambda x: x.max() - x.min()).reset_index()
+            mean_diff_overall.groupby("common_cause_id", observed=False).transform(lambda x: x.max() - x.min()).reset_index()
         )
         mean_diff_overall = mean_diff_overall[mean_diff_overall[self.estimate._treatment_name[0]] == True]  # TODO
-        stddev_overall = df_long.groupby(["common_cause_id"]).agg(stddev=("W", np.std)).reset_index()
+        stddev_overall = df_long.groupby(["common_cause_id"], observed=False).agg(stddev=("W", np.std)).reset_index()
         mean_diff_overall = pd.merge(mean_diff_overall, stddev_overall, on=["common_cause_id"])
         mean_diff_overall["std_mean_diff"] = mean_diff_overall["mean_w"] / mean_diff_overall["stddev"]
 
@@ -86,7 +86,7 @@ class PropensityBalanceInterpreter(VisualInterpreter):
 
         plt.style.use("seaborn-white")
         fig, ax = plt.subplots(1, 1)
-        for label, subdf in plot_df.groupby("common_cause_id"):
+        for label, subdf in plot_df.groupby("common_cause_id", observed=False):
             subdf.plot(kind="line", x="sample", y="std_mean_diff", ax=ax, label=label)
         plt.legend(title="Common causes")
         plt.ylabel("Standardized mean difference between treatment and control")

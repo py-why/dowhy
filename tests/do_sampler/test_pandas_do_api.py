@@ -200,7 +200,7 @@ class TestPandasDoAPI(object):
 
         data["df"].causal.do(
             x="v0", variable_types=variable_types, outcome="y", proceed_when_unidentifiable=True, common_causes=["W0"]
-        ).groupby("v0").mean()
+        ).groupby("v0", observed=False).mean()
         assert True
 
     @mark.parametrize(
@@ -216,7 +216,7 @@ class TestPandasDoAPI(object):
 
         data["df"].causal.do(
             x="v0", variable_types=variable_types, outcome="y", proceed_when_unidentifiable=True, common_causes=["W0"]
-        ).groupby("v0").mean()
+        ).groupby("v0", observed=False).mean()
         assert True
 
     @mark.parametrize(
@@ -232,7 +232,7 @@ class TestPandasDoAPI(object):
 
         data["df"].causal.do(
             x="v0", variable_types=variable_types, outcome="y", proceed_when_unidentifiable=True, common_causes=["W0"]
-        ).groupby("v0").mean()
+        ).groupby("v0", observed=False).mean()
         assert True
 
     @mark.parametrize(

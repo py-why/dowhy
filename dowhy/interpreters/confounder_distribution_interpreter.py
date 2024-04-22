@@ -81,10 +81,10 @@ class ConfounderDistributionInterpreter(VisualInterpreter):
 
         # before weights are applied we count number rows in each category
         # which is equivalent to summing over weight=1
-        barplot_df_before = df.groupby([self.var_name, treated]).size().reset_index(name="count")
+        barplot_df_before = df.groupby([self.var_name, treated], observed=False).size().reset_index(name="count")
 
         # after weights are applied we need to sum over the given weights
-        barplot_df_after = df.groupby([self.var_name, treated]).agg({"weight": np.sum}).reset_index()
+        barplot_df_after = df.groupby([self.var_name, treated], observed=False).agg({"weight": np.sum}).reset_index()
         barplot_df_after.rename(columns={"weight": "count"}, inplace=True)
 
         title1 = "Distribution of " + self.var_name + " before applying the weights"
