@@ -1,7 +1,6 @@
 from typing import Callable, List, Optional, Union
 
 import numpy as np
-from numpy.matlib import repmat
 from scipy import stats
 from sklearn.linear_model import LinearRegression
 
@@ -146,7 +145,7 @@ def marginal_expectation(
     # baseline_noise_samples.shape[0] * feature_samples.shape[0]. Here, we reduce it to
     # batch_size * feature_samples.shape[0]. If the batch_size would be set 1, then each baseline_noise_samples is
     # evaluated one by one in a for-loop.
-    inputs = repmat(feature_samples, batch_size, 1)
+    inputs = np.tile(feature_samples, (batch_size, 1))
     for offset in range(0, baseline_samples.shape[0], batch_size):
         # Each batch consist of at most batch_size * feature_samples.shape[0] many samples. If there are multiple
         # batches, the offset indicates the index of the current baseline_noise_samples that has not been evaluated yet.
