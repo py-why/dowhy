@@ -122,12 +122,18 @@ Optionally, if you wish to input graphs in the dot format, then install pydot (o
 For better-looking graphs, you can optionally install pygraphviz. To proceed,
 first install graphviz and then pygraphviz (on Ubuntu and Ubuntu WSL).
 
+.. note::
+    Installing pygraphviz can cause problems on some platforms.
+    One way that works for most Linux distributions is to
+    first install graphviz and then pygraphviz as shown below.
+    Otherwise, please consult the documentation of `pygraphviz <https://pygraphviz.github.io/documentation/stable/install.html>`_.
+
 .. code:: shell
 
     sudo apt install graphviz libgraphviz-dev graphviz-dev pkg-config
-    ## from https://github.com/pygraphviz/pygraphviz/issues/71
-    pip install pygraphviz --install-option="--include-path=/usr/include/graphviz" \
-    --install-option="--library-path=/usr/lib/graphviz/"
+    pip install --global-option=build_ext \
+    --global-option="-I/usr/local/include/graphviz/" \
+    --global-option="-L/usr/local/lib/graphviz" pygraphviz
 
 Example: Effect identification and estimation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

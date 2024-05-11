@@ -36,8 +36,9 @@ The following steps allow you to contribute code to DoWhy.
    .. code:: shell
 
        sudo apt install graphviz libgraphviz-dev graphviz-dev pkg-config
-       pip install pygraphviz --install-option="--include-path=/usr/include/graphviz" \
-       --install-option="--library-path=/usr/lib/graphviz/"
+       pip install --global-option=build_ext \
+       --global-option="-I/usr/local/include/graphviz/" \
+       --global-option="-L/usr/local/lib/graphviz" pygraphviz
 
 #. (optional) add dowhy as an upstream remote to keep your
    fork up-to-date with DoWhy's main branch.
