@@ -1,5 +1,6 @@
 from typing import Any, List, Optional, Union
 
+import numpy as np
 import pandas as pd
 from sklearn.neighbors import NearestNeighbors
 
@@ -130,12 +131,20 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
 
         att = 0
         numtreatedunits = treated.shape[0]
-        for i in range(numtreatedunits):
-            treated_outcome = treated.iloc[i][self._target_estimand.outcome_variable[0]].item()
-            control_outcome = control.iloc[indices[i]][self._target_estimand.outcome_variable[0]].item()
-            att += treated_outcome - control_outcome
 
-        att /= numtreatedunits
+        outcome_variable = self._target_estimand.outcome_variable[0]
+        treated_outcomes = treated[outcome_variable]
+        control_outcomes = [control.iloc[i][outcome_variable].item() for i in indices]  # TODO: Further vectorize this
+
+        att = np.mean(treated_outcomes - control_outcomes)
+
+        # for i in range(numtreatedunits):
+
+        #     treated_outcome = treated.iloc[i][self._target_estimand.outcome_variable[0]].item()
+        #     control_outcome = control.iloc[indices[i]][self._target_estimand.outcome_variable[0]].item()
+        #     att += treated_outcome - control_outcome
+
+        # att /= numtreatedunits
 
         # Now computing ATC
         treated_neighbors = NearestNeighbors(n_neighbors=1, algorithm="ball_tree").fit(
@@ -144,12 +153,19 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
         distances, indices = treated_neighbors.kneighbors(control[self.propensity_score_column].values.reshape(-1, 1))
         atc = 0
         numcontrolunits = control.shape[0]
-        for i in range(numcontrolunits):
-            control_outcome = control.iloc[i][self._target_estimand.outcome_variable[0]].item()
-            treated_outcome = treated.iloc[indices[i]][self._target_estimand.outcome_variable[0]].item()
-            atc += treated_outcome - control_outcome
 
-        atc /= numcontrolunits
+        outcome_variable = self._target_estimand.outcome_variable[0]
+        control_outcome = control[outcome_variable]
+        treated_outcome = [treated.iloc[i][outcome_variable].item() for i in indices]  # TODO: Further vectorize this
+
+        atc = np.mean(treated_outcome - control_outcome)
+
+        # for i in range(numcontrolunits):
+        #     control_outcome = control.iloc[i][self._target_estimand.outcome_variable[0]].item()
+        #     treated_outcome = treated.iloc[indices[i]][self._target_estimand.outcome_variable[0]].item()
+        #     atc += treated_outcome - control_outcome
+
+        # atc /= numcontrolunits
 
         if target_units == "att":
             est = att
