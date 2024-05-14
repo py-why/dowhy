@@ -1,7 +1,6 @@
 import numpy as np
 import pytest
 from flaky import flaky
-from numpy.matlib import repmat
 from pytest import approx
 
 from dowhy.gcm.ml import (
@@ -431,7 +430,7 @@ def test_given_nonlinear_categorical_data_when_evaluate_marginal_expectation_the
 def test_given_different_batch_sizes_when_estimating_marginal_expectation_then_returns_correct_marginal_expectations():
     X = np.random.normal(0, 1, (34, 3))
     feature_samples = np.random.normal(0, 1, (123, 3))
-    expected_non_aggregated = np.array([repmat(X[i, :], feature_samples.shape[0], 1) for i in range(X.shape[0])])
+    expected_non_aggregated = np.array([np.tile(X[i, :], (feature_samples.shape[0], 1)) for i in range(X.shape[0])])
 
     def my_pred_func(X: np.ndarray) -> np.ndarray:
         return X.copy()

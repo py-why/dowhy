@@ -7,7 +7,6 @@ from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Union, 
 import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
-from numpy.matlib import repmat
 
 import dowhy.gcm.auto as auto
 from dowhy.gcm import feature_relevance_sample
@@ -175,7 +174,7 @@ def _estimate_direct_strength(
     average_difference_result = 0
     converged_run = 0
     for run, sample in enumerate(distribution_samples):
-        tmp_samples = repmat(sample, num_samples_conditional, 1)
+        tmp_samples = np.tile(sample, (num_samples_conditional, 1))
 
         rnd_permutation = np.random.choice(distribution_samples.shape[0], num_samples_conditional, replace=False)
 
@@ -436,7 +435,9 @@ def _estimate_iccs(
             # In case of the empty subset (all are jointly randomize), it boils down to taking the average over all
             # predictions, seeing that the randomization yields the same values for each sample of interest (none of the
             # samples of interest are used to replace a (jointly) 'randomized' sample).
-            predictions = repmat(np.mean(prediction_method(noise_samples), axis=0), baseline_noise_samples.shape[0], 1)
+            predictions = np.tile(
+                np.mean(prediction_method(noise_samples), axis=0), (baseline_noise_samples.shape[0], 1)
+            )
         else:
             predictions = marginal_expectation(
                 prediction_method,

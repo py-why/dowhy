@@ -2,7 +2,6 @@ from typing import Any, Callable, Dict, Optional, Union
 
 import numpy as np
 import pandas as pd
-from numpy.matlib import repmat
 from tqdm import tqdm
 
 from dowhy.gcm import config
@@ -40,7 +39,9 @@ def conditional_anomaly_scores(
 
     result = np.zeros(parent_samples.shape[0])
     for i in range(parent_samples.shape[0]):
-        samples_from_conditional = causal_mechanism.draw_samples(repmat(parent_samples[i], num_samples_conditional, 1))
+        samples_from_conditional = causal_mechanism.draw_samples(
+            np.tile(parent_samples[i], (num_samples_conditional, 1))
+        )
         anomaly_scorer = anomaly_scorer_factory()
         anomaly_scorer.fit(samples_from_conditional)
         result[i] = anomaly_scorer.score(target_samples[i])[0]
