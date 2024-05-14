@@ -13,6 +13,12 @@ of upstream nodes following the paper:
     Kailash Budhathoki, Dominik Janzing, Patrick Blöbaum, Hoiyi Ng. `Why did the distribution change? <http://proceedings.mlr.press/v130/budhathoki21a/budhathoki21a.pdf>`_
     Proceedings of The 24th International Conference on Artificial Intelligence and Statistics, PMLR 130:1666-1674, 2021.
 
+Additionally, for explaining changes in the mean of the target variable (or other mean-like summary statistics),
+DoWhy implements a multiply-robust causal change attribution method, which uses a combination of regression and re-weighting
+to make the final estimates less sensitive to estimation error. This method was presented in the following paper:
+
+    Quintas-Martinez, V., Bahadori, M. T., Santiago, E., Mu, J., Janzing, D., and Heckerman, D. `Multiply-Robust Causal Change Attribution <https://arxiv.org/abs/2404.08839>` 
+    Proceedings of the 41st International Conference on Machine Learning, Vienna, Austria. PMLR 235, 2024.
 
 How to use it
 ^^^^^^^^^^^^^^
@@ -54,7 +60,18 @@ Finally, we attribute changes in distributions of :math:`W` to changes in causal
 
 Although the distribution of :math:`W` has changed as well, the method attributes the change almost completely to :math:`Z`
 with negligible scores for the other variables. This is in line with our expectations since we only altered the mechanism of
-:math:`Z`. Note that the unit of the scores depends on the used measure (see the next section).
+:math:`Z`.
+
+The multiply-robust method works similarly:
+
+>>> attributions_robust = gcm.distribution_change_robust(causal_model, data_old, data_new, 'W')
+>>> attributions_robust
+{W: 0.012386916935751025, X: -0.0002994129507127999, Y: 0.006618489296759587, Z: 0.6448455410771148}
+
+As before, we estimate a large attribution score for :math:`Z`, and a score close to 0 for the other variables.
+Note that the unit of the attribution scores depends on the used measure (see the next section). By default,
+``distribution_change`` decomposes changes in the KL divergence to the original distribution, whereas 
+``distribution_change_robust`` decomposes changes in the mean of the target node :math:`W`.
 
 As the reader may have noticed, there is no fitting step involved when using this method. The
 reason is, that this function will call ``fit`` internally. To be precise, this function will
@@ -67,12 +84,12 @@ Related example notebooks
 - :doc:`../../../example_notebooks/gcm_rca_microservice_architecture`
 - :doc:`../../../example_notebooks/gcm_online_shop`
 - :doc:`../../../example_notebooks/gcm_supply_chain_dist_change`
-
+- :doc:`../../../example_notebooks/gcm_cps2015_dist_change_robust.ipynb`
 
 Understanding the method
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-The idea behind this method is to *systematically* replace the causal mechanism learned based on the old dataset with
+The idea behind these methods is to *systematically* replace the causal mechanism learned based on the old dataset with
 the mechanism learned based on the new dataset. After each replacement, new samples are generated for the target node,
 where the data generation process is a mixture of old and new mechanisms. Our goal is to identify the mechanisms that
 have changed, which would lead to a different marginal distribution of the target, while unchanged mechanisms would result
@@ -81,7 +98,13 @@ replace the mechanisms. This enables us to identify which nodes have changed and
 respect to some measure. Note that a change in the mechanism could be due to a functional change in the underlying model
 or a change in the (unobserved) noise distribution. However, both changes would lead to a change in the mechanism.
 
-The steps here are as follows:
+The main difference between ``distribution_change`` and ``distribution_change_robust`` is in how the attribution measures are computed.
+``distribution_change`` first learns the conditional distributions of each node in the 'old' and in the 'new' data, and then uses these
+estimates to compute the attribution measure. ``distribution_change_robust`` does not learn the entire conditional distributions, but 
+rather the conditional means (regression) and importance weights (re-weighting), which are then combined to compute the attribution measure.
+The final step, using Shapley values to combine these attribution measures into a meaningful score, is the same for both methods.
+
+The steps in ``distribution_change`` are as follows:
 
 .. image:: dist_change.png
    :align: center
@@ -93,3 +116,12 @@ The steps here are as follows:
 4. Attribute the change in the marginal given :math:`T` to :math:`X_j` using Shapley values by comparing :math:`P^{X_n}_{T \bigcup \{j\}}` and :math:`P^{X_n}_{T}`. Here, we can use different measures to capture the change, such as KL divergence to the original distribution or difference in variances etc.
 
 For more detailed explanation, see the corresponding paper: `Why did the distribution change? <http://proceedings.mlr.press/v130/budhathoki21a/budhathoki21a.pdf>`_
+
+The steps in ``distribution_change_robust`` are the following:
+
+1. Learn the regression functions: Using a regression algorithm, we estimate the dependence between each node and its parents in the 'new' data if we wish to shift its causal mechanism, or in the 'old' data, if we wish to keep that node unchanged.
+2. Learn the importance weights: Using a classification algorithm, we estimate importance weights that place higher weight on data points where a given causal mechanism resembles the 'new' data more. 
+3. A combination of the regressions and the weights allows us to estimate the mean of the target node under the distribution :math:`\tilde P^{X_n}_T = \sum_{x_1, ..., x_{n-1}} \prod_{j \in T} \tilde P_{X_j | PA_j} \prod_{j \notin T} P_{X_j | PA_j}`, where the causal mechanisms in :math:`T \subseteq \{1, ..., n\}` have been shifted to be as in the 'new' data.
+4. Attribute the change in the marginal given :math:`T` to :math:`X_j` using Shapley values by comparing :math:`P^{X_n}_{T \bigcup \{j\}}` and :math:`P^{X_n}_{T}`.
+
+For more detailed explanation, see the corresponding paper: `Multiply-Robust Causal Change Attribution <https://arxiv.org/abs/2404.08839>`_
