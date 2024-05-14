@@ -1,7 +1,8 @@
 """
 This module implements the estimators for causal change attribution in the following paper:
-Quintas-Martinez, V., Bahadori, M. T., Santiago, E., Mu, J., Janzing, D., and Heckerman, D. 
-Multiply-Robust Causal Change Attribution (ICML 2024)
+Quintas-Martinez, V., Bahadori, M. T., Santiago, E., Mu, J., Janzing, D., and Heckerman, D. (2024)
+"Multiply-Robust Causal Change Attribution" in Proceedings of the 41st International Conference on 
+Machine Learning, Vienna, Austria. PMLR 235.
 https://arxiv.org/abs/2404.08839
 """
 
