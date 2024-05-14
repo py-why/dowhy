@@ -6,7 +6,6 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
-from numpy.matlib import repmat
 from scipy.stats import mode
 from sklearn.metrics import f1_score, mean_squared_error, r2_score
 from sklearn.model_selection import KFold
@@ -730,7 +729,7 @@ def crps(
         all_classes = np.unique(Y)
 
         for x, y in zip(X, Y):
-            samples = conditional_sampling_method(repmat(x, num_conditional_samples, 1))
+            samples = conditional_sampling_method(np.tile(x, (num_conditional_samples, 1)))
 
             sample_categorical_crps = []
             for cat in all_classes:
@@ -749,7 +748,7 @@ def crps(
 
         for x, y in zip(X, Y):
             crps_values.append(
-                empirical_crps(conditional_sampling_method(repmat(x, num_conditional_samples, 1)) / std_Y, y / std_Y)
+                empirical_crps(conditional_sampling_method(np.tile(x, (num_conditional_samples, 1))) / std_Y, y / std_Y)
             )
 
     return float(np.mean(np.array(crps_values)))
