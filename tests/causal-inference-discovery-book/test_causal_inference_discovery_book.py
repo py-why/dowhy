@@ -1,6 +1,6 @@
 """
 Note: The tests below are taken from the book 'Causal Inference and Discovery in Python' (https://www.packtpub.com/product/causal-inference-and-discovery-in-python/9781804612989)
-by Aleksander Molak (https://github.com/AlxndrMlk)
+by Aleksander Molak (https://github.com/AlxndrMlk). Other than the assert statements, all of the code below is taken from the book.
 """
 
 import numpy as np
@@ -195,3 +195,5 @@ class TestCausalInferenceDiscoveryBook(object):
         refute_subset = model.refute_estimate(
             estimand=estimand, estimate=estimate, method_name="data_subset_refuter", subset_fraction=0.4
         )
+
+        assert refute_subset is not None
