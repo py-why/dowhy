@@ -1,26 +1,28 @@
 """
 This module implements the estimators for causal change attribution in the following paper:
-Quintas-Martinez, V., Bahadori, M. T., Santiago, E., Mu, J., Janzing, D., and Heckerman, D. (2024)
-"Multiply-Robust Causal Change Attribution" in Proceedings of the 41st International Conference on 
-Machine Learning, Vienna, Austria. PMLR 235.
+Quintas-Martinez, V., Bahadori, M. T., Santiago, E., Mu, J., Janzing, D., and Heckerman, D.
+Multiply-Robust Causal Change Attribution, Proceedings of the 41st International Conference on 
+Machine Learning, Vienna, Austria. PMLR 235, 2024.
 https://arxiv.org/abs/2404.08839
 """
 
 import warnings
 from itertools import groupby
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Optional
 
 import networkx as nx
 import numpy as np
 import pandas as pd
 from sklearn.base import is_classifier, is_regressor
-from sklearn.linear_model import LinearRegression, LogisticRegression
-from sklearn.model_selection import KFold, train_test_split
+from sklearn.model_selection import StratifiedKFold, train_test_split
 from statsmodels.stats.weightstats import DescrStatsW
 
 from dowhy.gcm.causal_models import ProbabilisticCausalModel
+from dowhy.gcm.ml.classification import create_logistic_regression_classifier
+from dowhy.gcm.ml.prediction_model import PredictionModel
+from dowhy.gcm.ml.regression import create_linear_regressor
 from dowhy.gcm.shapley import ShapleyConfig, estimate_shapley_values
-from dowhy.graph import DirectedGraph, node_connected_subgraph_view
+from dowhy.graph import node_connected_subgraph_view
 
 
 class ThetaC:
@@ -79,10 +81,7 @@ class ThetaC:
         y_train,
         T_train,
         w_train=None,
-        regressor=LinearRegression,
-        regressor_args=(),
-        regressor_kwargs=None,
-        regressor_fit_kwargs=None,
+        regressor: PredictionModel = create_linear_regressor,
     ):
         """
         This function trains the nested regression estimators, that will be stored in self.reg_dict.
@@ -94,26 +93,20 @@ class ThetaC:
         w_train = optional (n_train,) np.array with sample weights for the train data.
 
         regressor = the regression estimator: a class supporting .fit and .predict methods.
-        regressor_args = a tuple of positional args for regressor.__init__.
-        regressor_kwargs = a dictionary of keyword args for regressor.__init__.
-        regressor_fit_kwargs = a dictionary of keyword args for regressor.fit.
         """
-
-        regressor_kwargs = {} if regressor_kwargs is None else regressor_kwargs
-        regressor_fit_kwargs = {} if regressor_fit_kwargs is None else regressor_fit_kwargs
 
         # Train gamma_K:
         ind = T_train == self.C_simpl[-1][0]  # Select sample C_{K+1} \in {0,1}
         var = [a for b in self.C_simpl[:-1] for a in b[1]]  # Select right variables
-        self.reg_dict[self.K_simpl - 1] = regressor(*regressor_args, **regressor_kwargs)
+        self.reg_dict[self.K_simpl - 1] = regressor()
         if w_train is not None:
             self.reg_dict[self.K_simpl - 1].fit(
-                X_train[np.ix_(ind, var)], self.h_fn(y_train[ind]), sample_weight=w_train[ind], **regressor_fit_kwargs
+                X_train[np.ix_(ind, var)],
+                self.h_fn(y_train[ind]),
+                sample_weight=w_train[ind],
             )
         else:
-            self.reg_dict[self.K_simpl - 1].fit(
-                X_train[np.ix_(ind, var)], self.h_fn(y_train[ind]), **regressor_fit_kwargs
-            )
+            self.reg_dict[self.K_simpl - 1].fit(X_train[np.ix_(ind, var)], self.h_fn(y_train[ind]))
 
         # Train gamma_k for k = K-1, K-2, ..., 1:
         for k in range(2, self.K_simpl + 1):
@@ -121,13 +114,11 @@ class ThetaC:
             var_new = [a for b in self.C_simpl[:-k] for a in b[1]]  # Select right variables
             # Use the fitted values from previous regression
             new_y = self.reg_dict[self.K_simpl - k + 1].predict(X_train[np.ix_(ind, var)])
-            self.reg_dict[self.K_simpl - k] = regressor(*regressor_args, **regressor_kwargs)
+            self.reg_dict[self.K_simpl - k] = regressor()
             if w_train is not None:
-                self.reg_dict[self.K_simpl - k].fit(
-                    X_train[np.ix_(ind, var_new)], new_y, sample_weight=w_train[ind], **regressor_fit_kwargs
-                )
+                self.reg_dict[self.K_simpl - k].fit(X_train[np.ix_(ind, var_new)], new_y, sample_weight=w_train[ind])
             else:
-                self.reg_dict[self.K_simpl - k].fit(X_train[np.ix_(ind, var_new)], new_y, **regressor_fit_kwargs)
+                self.reg_dict[self.K_simpl - k].fit(X_train[np.ix_(ind, var_new)], new_y)
             var = var_new
 
     def _train_cla(
@@ -136,17 +127,11 @@ class ThetaC:
         T_train,
         X_eval,
         w_train=None,
-        classifier=LogisticRegression,
-        classifier_args=(),
-        classifier_kwargs=None,
-        classifier_fit_kwargs=None,
-        calibrator=None,
+        classifier: PredictionModel = create_logistic_regression_classifier,
+        calibrator: Optional[PredictionModel] = None,
         X_calib=None,
         T_calib=None,
         w_calib=None,
-        calibrator_args=(),
-        calibrator_kwargs=None,
-        calibrator_fit_kwargs=None,
     ):
         """
         This function trains the classification estimators for the weights, that will be stored in self.cla_dict.
@@ -160,45 +145,35 @@ class ThetaC:
         w_train = optional (n_train,) np.array with sample weights for the training set.
 
         classifier = the classification estimator: a class supporting .fit and .predict_proba methods.
-        classifier_args = a tuple of positional args for classifier.__init__.
-        classifier_kwargs = a dictionary of keyword args for classifier.__init__.
-        classifier_fit_kwargs = a dictionary of keyword args for classifier.fit.
 
         calibrator = Optional, a method for probability calibration on a calibration set.
                      This could be a regressor (e.g. sklearn.isotonic.IsotonicRegression) or
                      a classifier (e.g. sklearn.LogisticRegression).
                      No need to do this if classifier is a sklearn.calibration.CalibratedClassifierCV learner.
+
         X_calib = (n_calib, K) np.array with the X data (explanatory variables) for the calibration set.
         T_calib = (n_calib,) np.array with the T data (sample indicator) for the calibration set.
         w_calib = optional (n_calib,) np.array with sample weights for the calibration set.
-        calibrator_args = a tuple of positional args for calibrator.__init__.
-        calibrator_kwargs = a dictionary of keyword args for calibrator.__init__.
-        calibrator_fit_kwargs = a dictionary of keyword args for calibrator.fit.
         """
-
-        classifier_kwargs = {} if classifier_kwargs is None else classifier_kwargs
-        classifier_fit_kwargs = {} if classifier_fit_kwargs is None else classifier_fit_kwargs
-        calibrator_args = {} if calibrator_args is None else calibrator_args
-        calibrator_fit_kwargs = {} if calibrator_fit_kwargs is None else calibrator_fit_kwargs
 
         # Train classifiers that will go into alpha_k for k = 1, ..., K:
         for k in range(self.K_simpl):
             var = [a for b in self.C_simpl[: (k + 1)] for a in b[1]]  # Select right variables
-            self.cla_dict[k] = classifier(*classifier_args, **classifier_kwargs)
+            self.cla_dict[k] = classifier()
             if w_train is not None:
-                self.cla_dict[k].fit(X_train[:, var], T_train, sample_weight=w_train, **classifier_fit_kwargs)
+                self.cla_dict[k].fit(X_train[:, var], T_train, sample_weight=w_train)
             else:
-                self.cla_dict[k].fit(X_train[:, var], T_train, **classifier_fit_kwargs)
+                self.cla_dict[k].fit(X_train[:, var], T_train)
 
             # For the case where you want to calibrate on different data,
             # No need if classifier is CalibratedClassifierCv
             if calibrator is not None:
                 proba = self.cla_dict[k].predict_proba(X_calib[:, var])[:, [1]]
-                self.calib_dict[k] = calibrator(*calibrator_args, **calibrator_kwargs)
+                self.calib_dict[k] = calibrator()
                 if w_train is not None:
-                    self.calib_dict[k].fit(proba, T_calib, sample_weight=w_calib, **calibrator_fit_kwargs)
+                    self.calib_dict[k].fit(proba, T_calib, sample_weight=w_calib)
                 else:
-                    self.calib_dict[k].fit(proba, T_calib, **calibrator_fit_kwargs)
+                    self.calib_dict[k].fit(proba, T_calib)
 
         var = [a for b in self.C_simpl[:-1] for a in b[1]]  # Select right variables
         p = self.cla_dict[self.K_simpl - 1].predict_proba(X_eval[:, var])[:, 1]
@@ -294,21 +269,12 @@ class ThetaC:
         w_eval=None,
         w_train=None,
         method="MR",
-        regressor=LinearRegression,
-        regressor_args=(),
-        regressor_kwargs={},
-        regressor_fit_kwargs={},
-        classifier=LogisticRegression,
-        classifier_args=(),
-        classifier_kwargs=None,
-        classifier_fit_kwargs=None,
-        calibrator=None,
+        regressor: PredictionModel = create_linear_regressor,
+        classifier: PredictionModel = create_logistic_regression_classifier,
+        calibrator: Optional[PredictionModel] = None,
         X_calib=None,
         T_calib=None,
         w_calib=None,
-        calibrator_args=(),
-        calibrator_kwargs=None,
-        calibrator_fit_kwargs=None,
         all_indep=False,
         crop=1e-3,
     ):
@@ -331,25 +297,17 @@ class ThetaC:
         method = One of 'regression', 're-weighting', 'MR'. By default, 'MR'.
 
         regressor = the regression estimator: a class supporting .fit and .predict methods.
-        regressor_args = a tuple of positional args for regressor.__init__.
-        regressor_kwargs = a dictionary of keyword args for regressor.__init__.
-        regressor_fit_kwargs = a dictionary of keyword args for regressor.fit.
 
         classifier = the classification estimator: a class supporting .fit and .predict_proba methods.
-        classifier_args = a tuple of positional args for classifier.__init__.
-        classifier_kwargs = a dictionary of keyword args for classifier.__init__.
-        classifier_fit_kwargs = a dictionary of keyword args for classifier.fit.
 
         calibrator = Optional, a method for probability calibration on a calibration set.
                      This could be a regressor (e.g. sklearn.isotonic.IsotonicRegression) or
                      a classifier (e.g. sklearn.LogisticRegression).
                      No need to do this if classifier is a sklearn.calibration.CalibratedClassifierCV learner.
+
         X_calib = (n_calib, K) np.array with the X data (explanatory variables) for the calibration set.
         T_calib = (n_calib,) np.array with the T data (sample indicator) for the calibration set.
         w_calib = optional (n_calib,) np.array with sample weights for the calibration set.
-        calibrator_args = a tuple of positional args for calibrator.__init__.
-        calibrator_kwargs = a dictionary of keyword args for calibrator.__init__.
-        calibrator_fit_kwargs = a dictionary of keyword args for calibrator.fit.
 
         all_indep = boolean, True if all explanatory variables are independent (used for self._simplify_C).
         crop = float, all predicted probabilities from the classifier will be cropped below at this lower bound,
@@ -358,13 +316,6 @@ class ThetaC:
         Returns:
         theta_scores = (n_eval,) np.array of scores, such that theta_hat = np.mean(theta_scores).
         """
-
-        regressor_kwargs = {} if regressor_kwargs is None else regressor_kwargs
-        regressor_fit_kwargs = {} if regressor_fit_kwargs is None else regressor_fit_kwargs
-        classifier_kwargs = {} if classifier_kwargs is None else classifier_kwargs
-        classifier_fit_kwargs = {} if classifier_fit_kwargs is None else classifier_fit_kwargs
-        calibrator_args = {} if calibrator_args is None else calibrator_args
-        calibrator_fit_kwargs = {} if calibrator_fit_kwargs is None else calibrator_fit_kwargs
 
         if w_eval is None:
             n0, n1, n = np.sum(1 - T_eval), np.sum(T_eval), T_eval.shape[0]
@@ -384,9 +335,6 @@ class ThetaC:
                     T_train,
                     w_train=w_train,
                     regressor=regressor,
-                    regressor_args=regressor_args,
-                    regressor_kwargs=regressor_kwargs,
-                    regressor_fit_kwargs=regressor_fit_kwargs,
                 )
 
                 ind = T_eval == self.C_simpl[0][0]  # Select sample C_1 \in {0,1}
@@ -413,24 +361,13 @@ class ThetaC:
                     X_eval,
                     w_train=w_train,
                     classifier=classifier,
-                    classifier_args=classifier_args,
-                    classifier_kwargs=classifier_kwargs,
-                    classifier_fit_kwargs=classifier_fit_kwargs,
                     calibrator=calibrator,
                     X_calib=X_calib,
                     T_calib=T_calib,
                     w_calib=w_calib,
-                    calibrator_args=calibrator_args,
-                    calibrator_kwargs=calibrator_kwargs,
-                    calibrator_fit_kwargs=calibrator_fit_kwargs,
                 )
 
-                if "class_weight" not in classifier_kwargs:
-                    ratio = n1 / n0
-                elif classifier_kwargs["class_weight"] == "balanced":
-                    ratio = 1
-                else:
-                    ratio = n1 / n0 * classifier_kwargs["class_weight"][0] / classifier_kwargs["class_weight"][1]
+                ratio = n1 / n0
 
                 self._get_alphas(X_eval, T_eval, ratio, calibrator=calibrator, crop=crop)
 
@@ -461,9 +398,6 @@ class ThetaC:
                     T_train,
                     w_train=w_train,
                     regressor=regressor,
-                    regressor_args=regressor_args,
-                    regressor_kwargs=regressor_kwargs,
-                    regressor_fit_kwargs=regressor_fit_kwargs,
                 )
 
                 ind = T_eval == self.C_simpl[0][0]  # Select sample C_1 \in {0,1}
@@ -480,24 +414,13 @@ class ThetaC:
                     X_eval,
                     w_train=w_train,
                     classifier=classifier,
-                    classifier_args=classifier_args,
-                    classifier_kwargs=classifier_kwargs,
-                    classifier_fit_kwargs=classifier_fit_kwargs,
                     calibrator=calibrator,
                     X_calib=X_calib,
                     T_calib=T_calib,
                     w_calib=w_calib,
-                    calibrator_args=calibrator_args,
-                    calibrator_kwargs=calibrator_kwargs,
-                    calibrator_fit_kwargs=calibrator_fit_kwargs,
                 )
 
-                if "class_weight" not in classifier_kwargs:
-                    ratio = n1 / n0
-                elif classifier_kwargs["class_weight"] == "balanced":
-                    ratio = 1
-                else:
-                    ratio = n1 / n0 * classifier_kwargs["class_weight"][1] / classifier_kwargs["class_weight"][0]
+                ratio = n1 / n0
 
                 self._get_alphas(X_eval, T_eval, ratio, calibrator=calibrator, crop=crop)
 
@@ -554,21 +477,12 @@ class ThetaC:
         w_eval=None,
         w_train=None,
         method="MR",  # One of 'regression', 're-weighting', 'MR',
-        regressor=LinearRegression,
-        regressor_args=(),
-        regressor_kwargs=None,
-        regressor_fit_kwargs=None,
-        classifier=LogisticRegression,
-        classifier_args=(),
-        classifier_kwargs=None,
-        classifier_fit_kwargs=None,
-        calibrator=None,
+        regressor: PredictionModel = create_linear_regressor,
+        classifier: PredictionModel = create_logistic_regression_classifier,
+        calibrator: Optional[PredictionModel] = None,
         X_calib=None,
         T_calib=None,
         w_calib=None,
-        calibrator_args=(),
-        calibrator_kwargs=None,
-        calibrator_fit_kwargs=None,
         all_indep=False,
         crop=1e-3,
     ):
@@ -589,25 +503,17 @@ class ThetaC:
         method = One of 'regression', 're-weighting', 'MR'. By default, 'MR'.
 
         regressor = the regression estimator: a class supporting .fit and .predict methods.
-        regressor_args = a tuple of positional args for regressor.__init__.
-        regressor_kwargs = a dictionary of keyword args for regressor.__init__.
-        regressor_fit_kwargs = a dictionary of keyword args for regressor.fit.
 
         classifier = the classification estimator: a class supporting .fit and .predict_proba methods.
-        classifier_args = a tuple of positional args for classifier.__init__.
-        classifier_kwargs = a dictionary of keyword args for classifier.__init__.
-        classifier_fit_kwargs = a dictionary of keyword args for classifier.fit.
 
         calibrator = Optional, a method for probability calibration on a calibration set.
                      This could be a regressor (e.g. sklearn.isotonic.IsotonicRegression) or
                      a classifier (e.g. sklearn.LogisticRegression).
                      No need to do this if classifier is a sklearn.calibration.CalibratedClassifierCV learner.
+
         X_calib = (n_calib, K) np.array with the X data (explanatory variables) for the calibration set.
         T_calib = (n_calib,) np.array with the T data (sample indicator) for the calibration set.
         w_train = optional (n_calib,) np.array with sample weights for the calibration set.
-        calibrator_args = a tuple of positional args for calibrator.__init__.
-        calibrator_kwargs = a dictionary of keyword args for calibrator.__init__.
-        calibrator_fit_kwargs = a dictionary of keyword args for calibrator.fit.
 
         all_indep = boolean, True if all explanatory variables are independent (used for self._simplify_C).
         crop = float, all predicted probabilities from the classifier will be cropped below at this lower bound,
@@ -617,13 +523,6 @@ class ThetaC:
         theta_hat = the point estimate, np.mean(theta_scores) for the scores computed by self.est_scores.
         std_err = the standard error for theta_hat, sem(theta_scores) for the scores computed by self.est_scores.
         """
-
-        regressor_kwargs = {} if regressor_kwargs is None else regressor_kwargs
-        regressor_fit_kwargs = {} if regressor_fit_kwargs is None else regressor_fit_kwargs
-        classifier_kwargs = {} if classifier_kwargs is None else classifier_kwargs
-        classifier_fit_kwargs = {} if classifier_fit_kwargs is None else classifier_fit_kwargs
-        calibrator_args = {} if calibrator_args is None else calibrator_args
-        calibrator_fit_kwargs = {} if calibrator_fit_kwargs is None else calibrator_fit_kwargs
 
         theta_scores = self.est_scores(
             X_eval,
@@ -636,20 +535,11 @@ class ThetaC:
             w_train=w_train,
             method=method,  # One of 'regression', 're-weighting', 'MR',
             regressor=regressor,
-            regressor_args=regressor_args,
-            regressor_kwargs=regressor_kwargs,
-            regressor_fit_kwargs=regressor_fit_kwargs,
             classifier=classifier,
-            classifier_args=classifier_args,
-            classifier_kwargs=classifier_kwargs,
-            classifier_fit_kwargs=classifier_fit_kwargs,
             calibrator=calibrator,
             X_calib=X_calib,
             T_calib=T_calib,
             w_calib=w_calib,
-            calibrator_args=calibrator_args,
-            calibrator_kwargs=calibrator_kwargs,
-            calibrator_fit_kwargs=calibrator_fit_kwargs,
             all_indep=all_indep,
             crop=crop,
         )
@@ -675,18 +565,9 @@ def distribution_change_robust(
     calib_size=0.0,
     split_random_state=0,
     method="MR",  # One of 'regression', 're-weighting', 'MR',
-    regressor=LinearRegression,
-    regressor_args=(),
-    regressor_kwargs=None,
-    regressor_fit_kwargs=None,
-    classifier=LogisticRegression,
-    classifier_args=(),
-    classifier_kwargs=None,
-    classifier_fit_kwargs=None,
-    calibrator=None,
-    calibrator_args=(),
-    calibrator_kwargs=None,
-    calibrator_fit_kwargs=None,
+    regressor: PredictionModel = create_linear_regressor,
+    classifier: PredictionModel = create_logistic_regression_classifier,
+    calibrator: Optional[PredictionModel] = None,
     all_indep=False,
     crop=1e-3,
     shapley_config: Optional[ShapleyConfig] = None,
@@ -756,39 +637,45 @@ def distribution_change_robust(
     y = np.concatenate((y0, y1))
     T = np.concatenate((np.zeros(n0), np.ones(n1)))
 
-    if not xfit:
-        if sample_weight is None:
-            X_train, X_eval, y_train, y_eval, T_train, T_eval = train_test_split(
-                X, y, T, train_size=train_size, stratify=T, random_state=split_random_state
-            )
-            X_calib, T_calib = None, None
+    if xfit:  # Cross-fitting to learn nuisance parameters (recommended for small/medium samples)
+        kf = StratifiedKFold(n_splits=xfit_folds, shuffle=True, random_state=split_random_state)
+        splits = kf.split(X, T)
+    else:  # Simple train-eval sample splitting (recommended for large samples)
+        kf = StratifiedKFold(n_splits=int(1.0 / (1.0 - train_size)), shuffle=True, random_state=split_random_state)
+        splits = [next(kf.split(X, T))]
+        xfit_folds = 1
 
-            if calibrator is not None:
-                if calib_size == 0.0:
-                    raise ValueError(
-                        "For calibration, calib_size should be either positive and smaller than the number of samples or a float in the (0, 1) range."
-                    )
+    attributions = np.zeros(len(sorted_var_names))
 
+    for train_index, test_index in splits:
+        X_train, X_eval, y_train, y_eval, T_train, T_eval = (
+            X[train_index],
+            X[test_index],
+            y[train_index],
+            y[test_index],
+            T[train_index],
+            T[test_index],
+        )
+        w = (
+            np.concatenate((old_data[sample_weight].values.flatten(), new_data[sample_weight].values.flatten()))
+            if sample_weight is not None
+            else None
+        )
+        w_train, w_eval = (w[train_index], w[test_index]) if sample_weight is not None else (None, None)
+
+        X_calib, T_calib, w_calib = None, None, None
+
+        if calibrator is not None:
+            if calib_size == 0.0:
+                raise ValueError(
+                    "For calibration, calib_size should be either positive and smaller than the number of samples or a float in the (0, 1) range."
+                )
+
+            if sample_weight is None:
                 X_calib, X_train, _, y_train, T_calib, T_train = train_test_split(
                     X_train, y_train, T_train, train_size=calib_size, stratify=T_train, random_state=split_random_state
                 )
-
-            w_eval, w_train, w_calib = None, None, None
-
-        else:
-            w = np.concatenate((old_data[sample_weight].values.flatten(), new_data[sample_weight].values.flatten()))
-
-            X_train, X_eval, y_train, y_eval, T_train, T_eval, w_train, w_eval = train_test_split(
-                X, y, T, w, train_size=train_size, stratify=T, random_state=split_random_state
-            )
-            X_calib, T_calib, w_calib = None, None, None
-
-            if calibrator is not None:
-                if calib_size == 0.0:
-                    raise ValueError(
-                        "For calibration, calib_size should be either positive and smaller than the number of samples or a float in the (0, 1) range."
-                    )
-
+            else:
                 X_calib, X_train, _, y_train, T_calib, T_train, w_calib, w_train = train_test_split(
                     X_train,
                     y_train,
@@ -800,7 +687,7 @@ def distribution_change_robust(
                 )
 
         def set_func(C):
-            return ThetaC(C, warn_th=0.0).est_theta(
+            return ThetaC(C).est_theta(
                 X_eval,
                 y_eval,
                 T_eval,
@@ -811,105 +698,15 @@ def distribution_change_robust(
                 w_train=w_train,
                 method=method,  # One of 'regression', 're-weighting', 'MR',
                 regressor=regressor,
-                regressor_args=regressor_args,
-                regressor_kwargs=regressor_kwargs,
-                regressor_fit_kwargs=regressor_fit_kwargs,
                 classifier=classifier,
-                classifier_args=classifier_args,
-                classifier_kwargs=classifier_kwargs,
-                classifier_fit_kwargs=classifier_fit_kwargs,
                 calibrator=calibrator,
                 X_calib=X_calib,
                 T_calib=T_calib,
                 w_calib=w_calib,
-                calibrator_args=calibrator_args,
-                calibrator_kwargs=calibrator_kwargs,
-                calibrator_fit_kwargs=calibrator_fit_kwargs,
                 all_indep=all_indep,
                 crop=crop,
             )[0]
 
-        attributions = estimate_shapley_values(set_func, len(sorted_var_names), shapley_config)
-
-    if xfit:
-
-        kf = KFold(n_splits=xfit_folds, shuffle=True, random_state=split_random_state)
-        attributions = np.zeros(len(sorted_var_names))
-
-        for train_index, test_index in kf.split(X):
-            X_train, X_eval, y_train, y_eval, T_train, T_eval = (
-                X[train_index],
-                X[test_index],
-                y[train_index],
-                y[test_index],
-                T[train_index],
-                T[test_index],
-            )
-            w = (
-                np.concatenate((old_data[sample_weight].values.flatten(), new_data[sample_weight].values.flatten()))
-                if sample_weight is not None
-                else None
-            )
-            w_train, w_eval = (w[train_index], w[test_index]) if sample_weight is not None else (None, None)
-
-            X_calib, T_calib, w_calib = None, None, None
-
-            if calibrator is not None:
-                if calib_size == 0.0:
-                    raise ValueError(
-                        "For calibration, calib_size should be either positive and smaller than the number of samples or a float in the (0, 1) range."
-                    )
-
-                if sample_weight is None:
-                    X_calib, X_train, _, y_train, T_calib, T_train = train_test_split(
-                        X_train,
-                        y_train,
-                        T_train,
-                        train_size=calib_size,
-                        stratify=T_train,
-                        random_state=split_random_state,
-                    )
-                else:
-                    X_calib, X_train, _, y_train, T_calib, T_train, w_calib, w_train = train_test_split(
-                        X_train,
-                        y_train,
-                        T_train,
-                        w_train,
-                        train_size=calib_size,
-                        stratify=T_train,
-                        random_state=split_random_state,
-                    )
-
-            def set_func(C):
-                return ThetaC(C, warn_th=0.0).est_theta(
-                    X_eval,
-                    y_eval,
-                    T_eval,
-                    X_train,
-                    y_train,
-                    T_train,
-                    w_eval=w_eval,
-                    w_train=w_train,
-                    method=method,  # One of 'regression', 're-weighting', 'MR',
-                    regressor=regressor,
-                    regressor_args=regressor_args,
-                    regressor_kwargs=regressor_kwargs,
-                    regressor_fit_kwargs=regressor_fit_kwargs,
-                    classifier=classifier,
-                    classifier_args=classifier_args,
-                    classifier_kwargs=classifier_kwargs,
-                    classifier_fit_kwargs=classifier_fit_kwargs,
-                    calibrator=calibrator,
-                    X_calib=X_calib,
-                    T_calib=T_calib,
-                    w_calib=w_calib,
-                    calibrator_args=calibrator_args,
-                    calibrator_kwargs=calibrator_kwargs,
-                    calibrator_fit_kwargs=calibrator_fit_kwargs,
-                    all_indep=all_indep,
-                    crop=crop,
-                )[0]
-
-            attributions += estimate_shapley_values(set_func, len(sorted_var_names), shapley_config) / xfit_folds
+        attributions += estimate_shapley_values(set_func, len(sorted_var_names), shapley_config) / xfit_folds
 
     return {x: attributions[i] for i, x in enumerate(sorted_var_names)}
