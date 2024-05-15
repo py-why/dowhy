@@ -3,16 +3,13 @@ import numpy as np
 import pandas as pd
 from flaky import flaky
 from pytest import approx
-from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
-from sklearn.linear_model import LogisticRegression
 
 from dowhy import gcm
-from dowhy.gcm.distribution_change_robust import distribution_change_robust
-from dowhy.gcm.shapley import *
+from dowhy.gcm.ml.classification import create_logistic_regression_classifier
+from dowhy.gcm.ml.regression import create_polynom_regressor
 
 
-def _gen_data(seed=0, N=1000):
-    np.random.seed(seed)
+def _gen_data(N=1000):
     X1_old = np.random.normal(1, 1, N)
     X2_old = 0.5 * X1_old + np.random.normal(0, 1, N)
     Y_old = X1_old + X2_old + 0.25 * X1_old**2 + 0.25 * X2_old**2 + np.random.normal(0, 1, N)
@@ -24,37 +21,20 @@ def _gen_data(seed=0, N=1000):
     return data_old, data_new
 
 
-def _true_theta(C):
-    mX0, mX0sq = (1, 2.21) if C[0] else (1, 2)
-    mX1, mX1sq = (0.2 * mX0, 0.2**2 * mX0sq + 1) if C[1] else (0.5 * mX0, 0.5**2 * mX0sq + 1)
-    mY = mX0 + mX1 + 0.25 * mX0sq - 0.25 * mX1sq if C[2] else mX0 + mX1 + 0.25 * mX0sq + 0.25 * mX1sq
-    return mY
-
-
-kwargs = {
-    "regressor": GradientBoostingRegressor,
-    "regressor_kwargs": {"random_state": 0},
-    "classifier": GradientBoostingClassifier,
-    "classifier_kwargs": {"random_state": 0},
-    "calibrator": LogisticRegression,
-    "calibrator_kwargs": {"penalty": None},
-    "calib_size": 0.2,
-    "xfit": True,
-    "xfit_folds": 10,
-}
-
-
 @flaky(max_runs=5)
 def test_given_two_data_sets_with_different_mechanisms_when_evaluate_distribution_change_then_returns_expected_result():
     data_old, data_new = _gen_data()
     causal_model = gcm.ProbabilisticCausalModel(nx.DiGraph([("X1", "X2"), ("X1", "Y"), ("X2", "Y")]))
-    gcm.auto.assign_causal_mechanisms(causal_model, data_old)
-    shap = distribution_change_robust(causal_model, data_old, data_new, "Y", **kwargs)
-
-    true_shap = estimate_shapley_values(
-        _true_theta, 3, ShapleyConfig(approximation_method=ShapleyApproximationMethods.EXACT)
+    shap = gcm.distribution_change_robust(
+        causal_model,
+        data_old,
+        data_new,
+        "Y",
+        regressor=create_polynom_regressor,
+        classifier=create_logistic_regression_classifier,
+        xfit_folds=10,
     )
 
-    assert shap["X1"] == approx(true_shap[0], abs=0.1)
-    assert shap["X2"] == approx(true_shap[1], abs=0.1)
-    assert shap["Y"] == approx(true_shap[2], abs=0.1)
+    assert shap["X1"] == approx(0.054, abs=0.1)
+    assert shap["X2"] == approx(-0.298, abs=0.1)
+    assert shap["Y"] == approx(-0.651, abs=0.1)

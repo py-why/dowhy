@@ -18,7 +18,7 @@ from sklearn.model_selection import StratifiedKFold, train_test_split
 from statsmodels.stats.weightstats import DescrStatsW
 
 from dowhy.gcm.causal_models import ProbabilisticCausalModel
-from dowhy.gcm.ml.classification import create_logistic_regression_classifier
+from dowhy.gcm.ml.classification import ClassificationModel, create_logistic_regression_classifier
 from dowhy.gcm.ml.prediction_model import PredictionModel
 from dowhy.gcm.ml.regression import create_linear_regressor
 from dowhy.gcm.shapley import ShapleyConfig, estimate_shapley_values
@@ -127,7 +127,7 @@ class ThetaC:
         T_train,
         X_eval,
         w_train=None,
-        classifier: PredictionModel = create_logistic_regression_classifier,
+        classifier: ClassificationModel = create_logistic_regression_classifier,
         calibrator: Optional[PredictionModel] = None,
         X_calib=None,
         T_calib=None,
@@ -144,7 +144,7 @@ class ThetaC:
                  Used only to give a warning about low overlap.
         w_train = optional (n_train,) np.array with sample weights for the training set.
 
-        classifier = the classification estimator: a class supporting .fit and .predict_proba methods.
+        classifier = the classification estimator: a class supporting .fit and .predict_probabilities methods.
 
         calibrator = Optional, a method for probability calibration on a calibration set.
                      This could be a regressor (e.g. sklearn.isotonic.IsotonicRegression) or
@@ -168,7 +168,7 @@ class ThetaC:
             # For the case where you want to calibrate on different data,
             # No need if classifier is CalibratedClassifierCv
             if calibrator is not None:
-                proba = self.cla_dict[k].predict_proba(X_calib[:, var])[:, [1]]
+                proba = self.cla_dict[k].predict_probabilities(X_calib[:, var])[:, [1]]
                 self.calib_dict[k] = calibrator()
                 if w_train is not None:
                     self.calib_dict[k].fit(proba, T_calib, sample_weight=w_calib)
@@ -176,7 +176,7 @@ class ThetaC:
                     self.calib_dict[k].fit(proba, T_calib)
 
         var = [a for b in self.C_simpl[:-1] for a in b[1]]  # Select right variables
-        p = self.cla_dict[self.K_simpl - 1].predict_proba(X_eval[:, var])[:, 1]
+        p = self.cla_dict[self.K_simpl - 1].predict_probabilities(X_eval[:, var])[:, 1]
 
         if np.min(p) < self.warn_th or np.max(p) > 1 - self.warn_th:
             warnings.warn(
@@ -214,12 +214,14 @@ class ThetaC:
             if k == 0:
                 var = self.C_simpl[0][1]  # Select right variables
                 p = np.minimum(
-                    np.maximum(self.cla_dict[0].predict_proba(X_eval[np.ix_(ind, var)])[:, 1], crop), 1 - crop
+                    np.maximum(self.cla_dict[0].predict_probabilities(X_eval[np.ix_(ind, var)])[:, 1], crop), 1 - crop
                 )
                 if calibrator is not None and is_regressor(calibrator):
                     p = np.minimum(np.maximum(self.calib_dict[0].predict(p[:, np.newaxis]), crop), 1 - crop)
                 elif calibrator is not None and is_classifier(calibrator):
-                    p = np.minimum(np.maximum(self.calib_dict[0].predict_proba(p[:, np.newaxis])[:, 1], crop), 1 - crop)
+                    p = np.minimum(
+                        np.maximum(self.calib_dict[0].predict_probabilities(p[:, np.newaxis])[:, 1], crop), 1 - crop
+                    )
                 w = (1.0 - p) / p * ratio if self.C_simpl[k + 1][0] else p / (1.0 - p) * 1 / ratio
 
             # For k > 0 get the conditional RN derivative dividing the RN derivative for \bar{X}_j
@@ -227,19 +229,22 @@ class ThetaC:
             else:
                 var_joint = [a for b in self.C_simpl[: (k + 1)] for a in b[1]]  # Variables up to k
                 p_joint = np.minimum(
-                    np.maximum(self.cla_dict[k].predict_proba(X_eval[np.ix_(ind, var_joint)])[:, 1], crop), 1 - crop
+                    np.maximum(self.cla_dict[k].predict_probabilities(X_eval[np.ix_(ind, var_joint)])[:, 1], crop),
+                    1 - crop,
                 )
                 if calibrator is not None and is_regressor(calibrator):
                     p_joint = np.minimum(np.maximum(self.calib_dict[k].predict(p_joint[:, np.newaxis]), crop), 1 - crop)
                 elif calibrator is not None and is_classifier(calibrator):
                     p_joint = np.minimum(
-                        np.maximum(self.calib_dict[k].predict_proba(p_joint[:, np.newaxis])[:, 1], crop), 1 - crop
+                        np.maximum(self.calib_dict[k].predict_probabilities(p_joint[:, np.newaxis])[:, 1], crop),
+                        1 - crop,
                     )
                 w_joint = (1 - p_joint) / p_joint if self.C_simpl[k + 1][0] else p_joint / (1 - p_joint)
 
                 var_cond = [a for b in self.C_simpl[:k] for a in b[1]]  # Variables up to k-1
                 p_cond = np.minimum(
-                    np.maximum(self.cla_dict[k - 1].predict_proba(X_eval[np.ix_(ind, var_cond)])[:, 1], crop), 1 - crop
+                    np.maximum(self.cla_dict[k - 1].predict_probabilities(X_eval[np.ix_(ind, var_cond)])[:, 1], crop),
+                    1 - crop,
                 )
                 if calibrator is not None and is_regressor(calibrator):
                     p_cond = np.minimum(
@@ -247,7 +252,8 @@ class ThetaC:
                     )
                 if calibrator is not None and is_classifier(calibrator):
                     p = np.minimum(
-                        np.maximum(self.calib_dict[k - 1].predict_proba(p_cond[:, np.newaxis])[:, 1], crop), 1 - crop
+                        np.maximum(self.calib_dict[k - 1].predict_probabilities(p_cond[:, np.newaxis])[:, 1], crop),
+                        1 - crop,
                     )
                 w_cond = p_cond / (1 - p_cond) if self.C_simpl[k + 1][0] else (1 - p_cond) / p_cond
 
@@ -270,7 +276,7 @@ class ThetaC:
         w_train=None,
         method="MR",
         regressor: PredictionModel = create_linear_regressor,
-        classifier: PredictionModel = create_logistic_regression_classifier,
+        classifier: ClassificationModel = create_logistic_regression_classifier,
         calibrator: Optional[PredictionModel] = None,
         X_calib=None,
         T_calib=None,
@@ -298,7 +304,7 @@ class ThetaC:
 
         regressor = the regression estimator: a class supporting .fit and .predict methods.
 
-        classifier = the classification estimator: a class supporting .fit and .predict_proba methods.
+        classifier = the classification estimator: a class supporting .fit and .predict_probabilities methods.
 
         calibrator = Optional, a method for probability calibration on a calibration set.
                      This could be a regressor (e.g. sklearn.isotonic.IsotonicRegression) or
@@ -403,9 +409,9 @@ class ThetaC:
                 ind = T_eval == self.C_simpl[0][0]  # Select sample C_1 \in {0,1}
                 var = self.C_simpl[0][1]  # Select right variables
                 if self.C_simpl[0][0] == 1:
-                    theta_scores_1 += self.reg_dict[0].predict(X_eval[np.ix_(ind, var)])
+                    theta_scores_1 += self.reg_dict[0].predict(X_eval[np.ix_(ind, var)]).flatten()
                 else:
-                    theta_scores_0 += self.reg_dict[0].predict(X_eval[np.ix_(ind, var)])
+                    theta_scores_0 += self.reg_dict[0].predict(X_eval[np.ix_(ind, var)]).flatten()
 
                 # Debiasing terms up to K-1:
                 self._train_cla(
@@ -431,24 +437,24 @@ class ThetaC:
                     if self.C_simpl[k + 1][0] == 1:
                         if k < self.K_simpl - 1:
                             theta_scores_1 += self.alpha_dict[k] * (
-                                self.reg_dict[k + 1].predict(X_eval[np.ix_(ind, var_next)])
-                                - self.reg_dict[k].predict(X_eval[np.ix_(ind, var)])
+                                self.reg_dict[k + 1].predict(X_eval[np.ix_(ind, var_next)]).flatten()
+                                - self.reg_dict[k].predict(X_eval[np.ix_(ind, var)]).flatten()
                             )
                         else:
                             theta_scores_1 += self.alpha_dict[k] * (
                                 self.h_fn(y_eval[ind])
-                                - self.reg_dict[self.K_simpl - 1].predict(X_eval[np.ix_(ind, var)])
+                                - self.reg_dict[self.K_simpl - 1].predict(X_eval[np.ix_(ind, var)]).flatten()
                             )
                     else:
                         if k < self.K_simpl - 1:
                             theta_scores_0 += self.alpha_dict[k] * (
-                                self.reg_dict[k + 1].predict(X_eval[np.ix_(ind, var_next)])
-                                - self.reg_dict[k].predict(X_eval[np.ix_(ind, var)])
+                                self.reg_dict[k + 1].predict(X_eval[np.ix_(ind, var_next)]).flatten()
+                                - self.reg_dict[k].predict(X_eval[np.ix_(ind, var)]).flatten()
                             )
                         else:
                             theta_scores_0 += self.alpha_dict[k] * (
                                 self.h_fn(y_eval[ind])
-                                - self.reg_dict[self.K_simpl - 1].predict(X_eval[np.ix_(ind, var)])
+                                - self.reg_dict[self.K_simpl - 1].predict(X_eval[np.ix_(ind, var)]).flatten()
                             )
 
                 theta_scores = np.concatenate((theta_scores_0 * n / n0, theta_scores_1 * n / n1))
@@ -478,7 +484,7 @@ class ThetaC:
         w_train=None,
         method="MR",  # One of 'regression', 're-weighting', 'MR',
         regressor: PredictionModel = create_linear_regressor,
-        classifier: PredictionModel = create_logistic_regression_classifier,
+        classifier: ClassificationModel = create_logistic_regression_classifier,
         calibrator: Optional[PredictionModel] = None,
         X_calib=None,
         T_calib=None,
@@ -504,7 +510,7 @@ class ThetaC:
 
         regressor = the regression estimator: a class supporting .fit and .predict methods.
 
-        classifier = the classification estimator: a class supporting .fit and .predict_proba methods.
+        classifier = the classification estimator: a class supporting .fit and .predict_probabilities methods.
 
         calibrator = Optional, a method for probability calibration on a calibration set.
                      This could be a regressor (e.g. sklearn.isotonic.IsotonicRegression) or
@@ -566,7 +572,7 @@ def distribution_change_robust(
     split_random_state=0,
     method="MR",  # One of 'regression', 're-weighting', 'MR',
     regressor: PredictionModel = create_linear_regressor,
-    classifier: PredictionModel = create_logistic_regression_classifier,
+    classifier: ClassificationModel = create_logistic_regression_classifier,
     calibrator: Optional[PredictionModel] = None,
     all_indep=False,
     crop=1e-3,
@@ -596,7 +602,7 @@ def distribution_change_robust(
     :param regressor_kwargs: a dictionary of keyword args for regressor.__init__.
     :param regressor_fit_kwargs: a dictionary of keyword args for regressor.fit.
 
-    :param classifier: the classification estimator: a class supporting .fit and .predict_proba methods.
+    :param classifier: the classification estimator: a class supporting .fit and .predict_probabilities methods.
     :param classifier_args: a tuple of positional args for classifier.__init__.
     :param classifier_kwargs: a dictionary of keyword args for classifier.__init__.
     :param classifier_fit_kwargs: a dictionary of keyword args for classifier.fit.
@@ -696,7 +702,7 @@ def distribution_change_robust(
                 T_train,
                 w_eval=w_eval,
                 w_train=w_train,
-                method=method,  # One of 'regression', 're-weighting', 'MR',
+                method=method,
                 regressor=regressor,
                 classifier=classifier,
                 calibrator=calibrator,
