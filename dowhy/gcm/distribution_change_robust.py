@@ -86,12 +86,7 @@ class ThetaC:
         y_train: np.ndarray,
         T_train: np.ndarray,
         w_train: Optional[np.ndarray] = None,
-        X_train: np.ndarray,
-        y_train: np.ndarray,
-        T_train: np.ndarray,
-        w_train: Optional[np.ndarray] = None,
         regressor: PredictionModel = create_linear_regressor,
-    ) -> None:
     ) -> None:
         """
         This function trains the nested regression estimators, that will be stored in self.reg_dict.
@@ -141,16 +136,8 @@ class ThetaC:
         T_train: np.ndarray,
         X_eval: np.ndarray,
         w_train: Optional[np.ndarray] = None,
-        X_train: np.ndarray,
-        T_train: np.ndarray,
-        X_eval: np.ndarray,
-        w_train: Optional[np.ndarray] = None,
         classifier: ClassificationModel = create_logistic_regression_classifier,
         calibrator: Optional[PredictionModel] = None,
-        X_calib: Optional[np.ndarray] = None,
-        T_calib: Optional[np.ndarray] = None,
-        w_calib: Optional[np.ndarray] = None,
-    ) -> None:
         X_calib: Optional[np.ndarray] = None,
         T_calib: Optional[np.ndarray] = None,
         w_calib: Optional[np.ndarray] = None,
@@ -315,24 +302,9 @@ class ThetaC:
         w_eval: Optional[np.ndarray] = None,
         w_train: Optional[np.ndarray] = None,
         method: Literal["regression", "re-weighting", "MR"] = "MR",
-        X_eval: np.ndarray,
-        y_eval: np.ndarray,
-        T_eval: np.ndarray,
-        X_train: np.ndarray,
-        y_train: np.ndarray,
-        T_train: np.ndarray,
-        w_eval: Optional[np.ndarray] = None,
-        w_train: Optional[np.ndarray] = None,
-        method: Literal["regression", "re-weighting", "MR"] = "MR",
         regressor: PredictionModel = create_linear_regressor,
         classifier: ClassificationModel = create_logistic_regression_classifier,
         calibrator: Optional[PredictionModel] = None,
-        X_calib: Optional[np.ndarray] = None,
-        T_calib: Optional[np.ndarray] = None,
-        w_calib: Optional[np.ndarray] = None,
-        all_indep: bool = False,
-        crop: float = 1e-3,
-    ) -> np.ndarray:
         X_calib: Optional[np.ndarray] = None,
         T_calib: Optional[np.ndarray] = None,
         w_calib: Optional[np.ndarray] = None,
@@ -550,24 +522,9 @@ class ThetaC:
         w_eval: Optional[np.ndarray] = None,
         w_train: Optional[np.ndarray] = None,
         method: Literal["regression", "re-weighting", "MR"] = "MR",
-        X_eval: np.ndarray,
-        y_eval: np.ndarray,
-        T_eval: np.ndarray,
-        X_train: np.ndarray,
-        y_train: np.ndarray,
-        T_train: np.ndarray,
-        w_eval: Optional[np.ndarray] = None,
-        w_train: Optional[np.ndarray] = None,
-        method: Literal["regression", "re-weighting", "MR"] = "MR",
         regressor: PredictionModel = create_linear_regressor,
         classifier: ClassificationModel = create_logistic_regression_classifier,
         calibrator: Optional[PredictionModel] = None,
-        X_calib: Optional[np.ndarray] = None,
-        T_calib: Optional[np.ndarray] = None,
-        w_calib: Optional[np.ndarray] = None,
-        all_indep: bool = False,
-        crop: float = 1e-3,
-    ) -> Tuple[float, float]:
         X_calib: Optional[np.ndarray] = None,
         T_calib: Optional[np.ndarray] = None,
         w_calib: Optional[np.ndarray] = None,
@@ -666,23 +623,12 @@ def distribution_change_robust(
     calib_size: float = 0.2,
     split_random_state: int = 0,
     method: Literal["regression", "re-weighting", "MR"] = "MR",
-    target_functional: str = "mean",
-    sample_weight: Optional[Any] = None,
-    xfit: bool = True,
-    xfit_folds: int = 5,
-    train_size: float = 0.5,
-    calib_size: float = 0.2,
-    split_random_state: int = 0,
-    method: Literal["regression", "re-weighting", "MR"] = "MR",
     regressor: PredictionModel = create_linear_regressor,
     classifier: ClassificationModel = create_logistic_regression_classifier,
     calibrator: Optional[PredictionModel] = None,
     all_indep: bool = False,
     crop: float = 1e-3,
-    all_indep: bool = False,
-    crop: float = 1e-3,
     shapley_config: Optional[ShapleyConfig] = None,
-) -> Dict[Any, float]:
 ) -> Dict[Any, float]:
     """
     This function computes the Shapley values for attribution of change in the mean or variance of target_node
@@ -860,7 +806,8 @@ def distribution_change_robust(
                         w_calib=w_calib,
                         all_indep=all_indep,
                         crop=crop,
-                    )[0] ** 2
+                    )[0]
+                    ** 2
                 )
 
         else:
