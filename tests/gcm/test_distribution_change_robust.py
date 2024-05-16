@@ -47,7 +47,7 @@ def test_given_two_data_sets_with_different_mechanisms_when_evaluate_distributio
         data_new,
         "Y",
         regressor=gcm.ml.regression.create_knn_regressor,
-        variance=True,
+        target_functional="variance",
         xfit_folds=10,
     )
 
