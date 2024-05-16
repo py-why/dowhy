@@ -349,13 +349,13 @@ class ThetaC:
                     theta_scores = np.concatenate(
                         (
                             np.zeros_like(y_eval[T_eval == 0]),
-                            self.reg_dict[0].predict(X_eval[np.ix_(ind, var)]) * n / n1,
+                            self.reg_dict[0].predict(X_eval[np.ix_(ind, var)]).flatten() * n / n1,
                         )
                     )
                 else:
                     theta_scores = np.concatenate(
                         (
-                            self.reg_dict[0].predict(X_eval[np.ix_(ind, var)]) * n / n0,
+                            self.reg_dict[0].predict(X_eval[np.ix_(ind, var)]).flatten() * n / n0,
                             np.zeros_like(y_eval[T_eval == 1]),
                         )
                     )
@@ -574,12 +574,13 @@ def distribution_change_robust(
     regressor: PredictionModel = create_linear_regressor,
     classifier: ClassificationModel = create_logistic_regression_classifier,
     calibrator: Optional[PredictionModel] = None,
+    variance=False,
     all_indep=False,
     crop=1e-3,
     shapley_config: Optional[ShapleyConfig] = None,
 ):
     """
-    This function computes the Shapley values for attribution of change in the mean of target_node
+    This function computes the Shapley values for attribution of change in the mean or variance of target_node
     to nodes upstream in the causal DAG, using the multiply-robust method from:
     Quintas-Martinez, V., Bahadori, M. T., Santiago, E., Mu, J., Janzing, D., and Heckerman, D.
     Multiply-Robust Causal Change Attribution (ICML 2024)
@@ -598,23 +599,13 @@ def distribution_change_robust(
 
     :param method: One of 'regression', 're-weighting', 'MR'. By default, 'MR'.
     :param regressor: the regression estimator: a class supporting .fit and .predict methods.
-    :param regressor_args: a tuple of positional args for regressor.__init__.
-    :param regressor_kwargs: a dictionary of keyword args for regressor.__init__.
-    :param regressor_fit_kwargs: a dictionary of keyword args for regressor.fit.
-
     :param classifier: the classification estimator: a class supporting .fit and .predict_probabilities methods.
-    :param classifier_args: a tuple of positional args for classifier.__init__.
-    :param classifier_kwargs: a dictionary of keyword args for classifier.__init__.
-    :param classifier_fit_kwargs: a dictionary of keyword args for classifier.fit.
-
     :param calibrator: Optional, a method for probability calibration on a calibration set.
                     This could be a regressor (e.g. sklearn.isotonic.IsotonicRegression) or
                     a classifier (e.g. sklearn.LogisticRegression).
                     No need to do this if classifier is a sklearn.calibration.CalibratedClassifierCV learner.
-    :param calibrator_args: a tuple of positional args for calibrator.__init__.
-    :param calibrator_kwargs: a dictionary of keyword args for calibrator.__init__.
-    :param calibrator_fit_kwargs: a dictionary of keyword args for calibrator.fit.
 
+    :param variance: boolean, if True, compute Shapley value attribution for the change in variance (rather than the change in mean).
     :param all_indep: boolean, True if all explanatory variables are independent (used to simplify estimating equation).
     :param crop: float, all predicted probabilities from the classifier will be cropped below at this lower bound,
             and above at 1-crop.
@@ -692,26 +683,73 @@ def distribution_change_robust(
                     random_state=split_random_state,
                 )
 
-        def set_func(C):
-            return ThetaC(C).est_theta(
-                X_eval,
-                y_eval,
-                T_eval,
-                X_train,
-                y_train,
-                T_train,
-                w_eval=w_eval,
-                w_train=w_train,
-                method=method,
-                regressor=regressor,
-                classifier=classifier,
-                calibrator=calibrator,
-                X_calib=X_calib,
-                T_calib=T_calib,
-                w_calib=w_calib,
-                all_indep=all_indep,
-                crop=crop,
-            )[0]
+        if variance:
+
+            def set_func(C):
+                return (
+                    ThetaC(C, h_fn=lambda y: np.square(y)).est_theta(
+                        X_eval,
+                        y_eval,
+                        T_eval,
+                        X_train,
+                        y_train,
+                        T_train,
+                        w_eval=w_eval,
+                        w_train=w_train,
+                        method=method,
+                        regressor=regressor,
+                        classifier=classifier,
+                        calibrator=calibrator,
+                        X_calib=X_calib,
+                        T_calib=T_calib,
+                        w_calib=w_calib,
+                        all_indep=all_indep,
+                        crop=crop,
+                    )[0]
+                    - ThetaC(C).est_theta(
+                        X_eval,
+                        y_eval,
+                        T_eval,
+                        X_train,
+                        y_train,
+                        T_train,
+                        w_eval=w_eval,
+                        w_train=w_train,
+                        method=method,
+                        regressor=regressor,
+                        classifier=classifier,
+                        calibrator=calibrator,
+                        X_calib=X_calib,
+                        T_calib=T_calib,
+                        w_calib=w_calib,
+                        all_indep=all_indep,
+                        crop=crop,
+                    )[0]
+                    ** 2
+                )
+
+        else:
+
+            def set_func(C):
+                return ThetaC(C).est_theta(
+                    X_eval,
+                    y_eval,
+                    T_eval,
+                    X_train,
+                    y_train,
+                    T_train,
+                    w_eval=w_eval,
+                    w_train=w_train,
+                    method=method,
+                    regressor=regressor,
+                    classifier=classifier,
+                    calibrator=calibrator,
+                    X_calib=X_calib,
+                    T_calib=T_calib,
+                    w_calib=w_calib,
+                    all_indep=all_indep,
+                    crop=crop,
+                )[0]
 
         attributions += estimate_shapley_values(set_func, len(sorted_var_names), shapley_config) / xfit_folds
 

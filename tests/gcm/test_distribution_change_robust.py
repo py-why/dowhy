@@ -5,11 +5,9 @@ from flaky import flaky
 from pytest import approx
 
 from dowhy import gcm
-from dowhy.gcm.ml.classification import create_logistic_regression_classifier
-from dowhy.gcm.ml.regression import create_polynom_regressor
 
 
-def _gen_data(N=1000):
+def _gen_data(N=10000):
     X1_old = np.random.normal(1, 1, N)
     X2_old = 0.5 * X1_old + np.random.normal(0, 1, N)
     Y_old = X1_old + X2_old + 0.25 * X1_old**2 + 0.25 * X2_old**2 + np.random.normal(0, 1, N)
@@ -22,7 +20,7 @@ def _gen_data(N=1000):
 
 
 @flaky(max_runs=5)
-def test_given_two_data_sets_with_different_mechanisms_when_evaluate_distribution_change_then_returns_expected_result():
+def test_given_two_data_sets_with_different_mechanisms_when_evaluate_distribution_change_then_returns_expected_result_mean():
     data_old, data_new = _gen_data()
     causal_model = gcm.ProbabilisticCausalModel(nx.DiGraph([("X1", "X2"), ("X1", "Y"), ("X2", "Y")]))
     shap = gcm.distribution_change_robust(
@@ -30,11 +28,29 @@ def test_given_two_data_sets_with_different_mechanisms_when_evaluate_distributio
         data_old,
         data_new,
         "Y",
-        regressor=create_polynom_regressor,
-        classifier=create_logistic_regression_classifier,
+        regressor=gcm.ml.regression.create_knn_regressor,
         xfit_folds=10,
     )
 
     assert shap["X1"] == approx(0.054, abs=0.1)
     assert shap["X2"] == approx(-0.298, abs=0.1)
     assert shap["Y"] == approx(-0.651, abs=0.1)
+
+
+@flaky(max_runs=5)
+def test_given_two_data_sets_with_different_mechanisms_when_evaluate_distribution_change_then_returns_expected_result_variance():
+    data_old, data_new = _gen_data()
+    causal_model = gcm.ProbabilisticCausalModel(nx.DiGraph([("X1", "X2"), ("X1", "Y"), ("X2", "Y")]))
+    shap = gcm.distribution_change_robust(
+        causal_model,
+        data_old,
+        data_new,
+        "Y",
+        regressor=gcm.ml.regression.create_knn_regressor,
+        variance=True,
+        xfit_folds=10,
+    )
+
+    assert shap["X1"] == approx(0.811, abs=0.2)
+    assert shap["X2"] == approx(-1.343, abs=0.2)
+    assert shap["Y"] == approx(-1.397, abs=0.2)
