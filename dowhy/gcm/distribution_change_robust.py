@@ -590,7 +590,6 @@ class ThetaC:
             w_eval=w_eval,
             w_train=w_train,
             method=method,
-            method=method,
             regressor=regressor,
             classifier=classifier,
             calibrator=calibrator,
