@@ -38,6 +38,7 @@ class ClassificationModel(PredictionModel):
     def classes(self) -> List[str]:
         raise NotImplementedError
 
+
 class SklearnClassificationModel(SklearnRegressionModel, ClassificationModel):
     def predict_probabilities(self, X: np.array) -> np.ndarray:
         return shape_into_2d(self._sklearn_mdl.predict_proba(auto_apply_encoders(X, self._encoders)))
@@ -49,6 +50,7 @@ class SklearnClassificationModel(SklearnRegressionModel, ClassificationModel):
     def clone(self):
         return SklearnClassificationModel(sklearn_mdl=sklearn.clone(self._sklearn_mdl))
 
+
 class SklearnClassificationModelWeighted(SklearnRegressionModelWeighted, ClassificationModel):
     def predict_probabilities(self, X: np.array) -> np.ndarray:
         return shape_into_2d(self._sklearn_mdl.predict_proba(auto_apply_encoders(X, self._encoders)))
@@ -59,6 +61,7 @@ class SklearnClassificationModelWeighted(SklearnRegressionModelWeighted, Classif
 
     def clone(self):
         return SklearnClassificationModel(sklearn_mdl=sklearn.clone(self._sklearn_mdl))
+
 
 def create_random_forest_classifier(**kwargs) -> SklearnClassificationModel:
     return SklearnClassificationModel(RandomForestClassifier(**kwargs))

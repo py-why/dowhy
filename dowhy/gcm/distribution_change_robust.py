@@ -8,7 +8,7 @@ https://arxiv.org/abs/2404.08839
 
 import warnings
 from itertools import groupby
-from typing import Any, Optional
+from typing import Any, Callable, Dict, Literal, Optional, Tuple
 
 import networkx as nx
 import numpy as np
@@ -28,11 +28,14 @@ from dowhy.graph import node_connected_subgraph_view
 class ThetaC:
     """Implements three estimators (regression, re-weighting, MR) for causal change attribution."""
 
-    def __init__(self, C, h_fn=lambda y: y, warn_th=1e-3):
+    def __init__(
+        self, C: np.ndarray, h_fn: Callable[[np.ndarray], np.ndarray] = lambda y: y, warn_th: float = 1e-3
+    ) -> None:
         """
         Inputs:
         C = the change vector (a K+1 list of 0s and 1s).
         h_fn = the functional of interest. By default, the mean of y.
+        warn_th = the threshold that generates warning about re-weighting
         """
 
         if any(x not in (0, 1) for x in C):
@@ -44,9 +47,9 @@ class ThetaC:
         self.cla_dict = {}  # A dictionary to store the trained classifiers
         self.calib_dict = {}  # A dictionary to store the trained calibrators
         self.alpha_dict = {}  # A dictionary to store the fitted weights alpha_k (Theorem 2.4)
-        self.warn_th = warn_th  # The threshold that generates warning about reweighting
+        self.warn_th = warn_th  # The threshold that generates warning about re-weighting
 
-    def _simplify_C(self, all_indep=False):
+    def _simplify_C(self, all_indep: bool = False) -> None:
         """
         This function applies some simplifications to the change vector C,
         discussed in Appendix C of the paper.
@@ -77,20 +80,20 @@ class ThetaC:
 
     def _train_reg(
         self,
-        X_train,
-        y_train,
-        T_train,
-        w_train=None,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        T_train: np.ndarray,
+        w_train: Optional[np.ndarray] = None,
         regressor: PredictionModel = create_linear_regressor,
-    ):
+    ) -> None:
         """
         This function trains the nested regression estimators, that will be stored in self.reg_dict.
 
         Inputs:
-        X_train = (n_train, K) np.array with the X data (explanatory variables) for the training set.
-        y_train = (n_train,) np.array with the Y data (outcome) for the training set.
-        T_train = (n_train,) np.array with the T data (sample indicator) for the training set.
-        w_train = optional (n_train,) np.array with sample weights for the train data.
+        X_train = (n_train, K) np.ndarray with the X data (explanatory variables) for the training set.
+        y_train = (n_train,) np.ndarray with the Y data (outcome) for the training set.
+        T_train = (n_train,) np.ndarray with the T data (sample indicator) for the training set.
+        w_train = optional (n_train,) np.ndarray with sample weights for the train data.
 
         regressor = the regression estimator: a class supporting .fit and .predict methods.
         """
@@ -123,26 +126,26 @@ class ThetaC:
 
     def _train_cla(
         self,
-        X_train,
-        T_train,
-        X_eval,
-        w_train=None,
+        X_train: np.ndarray,
+        T_train: np.ndarray,
+        X_eval: np.ndarray,
+        w_train: Optional[np.ndarray] = None,
         classifier: ClassificationModel = create_logistic_regression_classifier,
         calibrator: Optional[PredictionModel] = None,
-        X_calib=None,
-        T_calib=None,
-        w_calib=None,
-    ):
+        X_calib: Optional[np.ndarray] = None,
+        T_calib: Optional[np.ndarray] = None,
+        w_calib: Optional[np.ndarray] = None,
+    ) -> None:
         """
         This function trains the classification estimators for the weights, that will be stored in self.cla_dict.
         If calibrator is not None, it also calibrates the probabilities on a calibration set.
 
         Inputs:
-        X_train = (n_train, K) np.array with the X data (explanatory variables) for the training set.
-        T_train = (n_train,) np.array with the T data (sample indicator) for the training set.
-        X_eval = (n_eval, K) np.array with the X data (explanatory variables) for the evaluation set.
+        X_train = (n_train, K) np.ndarray with the X data (explanatory variables) for the training set.
+        T_train = (n_train,) np.ndarray with the T data (sample indicator) for the training set.
+        X_eval = (n_eval, K) np.ndarray with the X data (explanatory variables) for the evaluation set.
                  Used only to give a warning about low overlap.
-        w_train = optional (n_train,) np.array with sample weights for the training set.
+        w_train = optional (n_train,) np.ndarray with sample weights for the training set.
 
         classifier = the classification estimator: a class supporting .fit and .predict_probabilities methods.
 
@@ -151,9 +154,9 @@ class ThetaC:
                      a classifier (e.g. sklearn.LogisticRegression).
                      No need to do this if classifier is a sklearn.calibration.CalibratedClassifierCV learner.
 
-        X_calib = (n_calib, K) np.array with the X data (explanatory variables) for the calibration set.
-        T_calib = (n_calib,) np.array with the T data (sample indicator) for the calibration set.
-        w_calib = optional (n_calib,) np.array with sample weights for the calibration set.
+        X_calib = (n_calib, K) np.ndarray with the X data (explanatory variables) for the calibration set.
+        T_calib = (n_calib,) np.ndarray with the T data (sample indicator) for the calibration set.
+        w_calib = optional (n_calib,) np.ndarray with sample weights for the calibration set.
         """
 
         # Train classifiers that will go into alpha_k for k = 1, ..., K:
@@ -184,7 +187,14 @@ class ThetaC:
                 + "Consider increasing the regularization for the classificator or using method = 'regression'."
             )
 
-    def _get_alphas(self, X_eval, T_eval, ratio, calibrator=None, crop=1e-3):
+    def _get_alphas(
+        self,
+        X_eval: np.ndarray,
+        T_eval: np.ndarray,
+        ratio: float,
+        calibrator: Optional[PredictionModel] = None,
+        crop: float = 1e-3,
+    ) -> None:
         """
         This helper function uses the classifiers (and, if appropriate, the probability calibrators)
         to compute the weights alpha_k (defined in Theorem 2.4 of the paper),
@@ -192,9 +202,9 @@ class ThetaC:
 
         Inputs:
         k = int from 0 to K_simpl-1.
-        X_eval = (n_eval, K) np.array with the X data (explanatory variables) for the evaluation set.
-        T_eval = (n_eval,) np.array with the T data (sample indicator) for the evaluation set.
-        ratio = n1/n0, unless the classifier has been trained with class weights.
+        X_eval = (n_eval, K) np.ndarray with the X data (explanatory variables) for the evaluation set.
+        T_eval = (n_eval,) np.ndarray with the T data (sample indicator) for the evaluation set.
+        ratio = n1/n0 (unless the classifier has been trained with class weight, not supported yet).
         calibrator = Optional, a method for probability calibration on a calibration set.
                      This could be a regressor (e.g. sklearn.isotonic.IsotonicRegression) or
                      a classifier (e.g. sklearn.LogisticRegression).
@@ -204,7 +214,7 @@ class ThetaC:
                and above at 1-crop.
 
         Returns:
-        alpha_k = (n0,) or (n1,) np.array of alpha_k weights for sample C_{k+1} \in {0,1}
+        alpha_k = (n0,) or (n1,) np.ndarray of alpha_k weights for sample C_{k+1} \in {0,1}
         """
 
         for k in range(self.K_simpl):
@@ -266,24 +276,24 @@ class ThetaC:
 
     def est_scores(
         self,
-        X_eval,
-        y_eval,
-        T_eval,
-        X_train,
-        y_train,
-        T_train,
-        w_eval=None,
-        w_train=None,
-        method="MR",
+        X_eval: np.ndarray,
+        y_eval: np.ndarray,
+        T_eval: np.ndarray,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        T_train: np.ndarray,
+        w_eval: Optional[np.ndarray] = None,
+        w_train: Optional[np.ndarray] = None,
+        method: Literal["regression", "re-weighting", "MR"] = "MR",
         regressor: PredictionModel = create_linear_regressor,
         classifier: ClassificationModel = create_logistic_regression_classifier,
         calibrator: Optional[PredictionModel] = None,
-        X_calib=None,
-        T_calib=None,
-        w_calib=None,
-        all_indep=False,
-        crop=1e-3,
-    ):
+        X_calib: Optional[np.ndarray] = None,
+        T_calib: Optional[np.ndarray] = None,
+        w_calib: Optional[np.ndarray] = None,
+        all_indep: bool = False,
+        crop: float = 1e-3,
+    ) -> np.ndarray:
         """
         This function computes the scores that are averaged to get each theta_hat.
         These are psi_hat in the notation of Section 2.5 of the paper.
@@ -291,14 +301,14 @@ class ThetaC:
         rather than just theta_hat, to compute things like bootstrapped standard errors.
 
         Inputs:
-        X_eval = (n_eval, K) np.array with the X data (explanatory variables) for the evaluation set.
-        y_eval = (n_eval,) np.array with the Y data (outcome) for the evaluation set.
-        T_eval = (n_eval,) np.array with the T data (sample indicator) for the evaluation set.
-        X_train = (n_train, K) np.array with the X data (explanatory variables) for the training set.
-        y_train = (n_train,) np.array with the Y data (outcome) for the training set.
-        T_train = (n_train,) np.array with the T data (sample indicator) for the training set.
-        w_eval = optional (n_eval,) np.array with sample weights for the evaluation set.
-        w_train = optional (n_train,) np.array with sample weights for the training set.
+        X_eval = (n_eval, K) np.ndarray with the X data (explanatory variables) for the evaluation set.
+        y_eval = (n_eval,) np.ndarray with the Y data (outcome) for the evaluation set.
+        T_eval = (n_eval,) np.ndarray with the T data (sample indicator) for the evaluation set.
+        X_train = (n_train, K) np.ndarray with the X data (explanatory variables) for the training set.
+        y_train = (n_train,) np.ndarray with the Y data (outcome) for the training set.
+        T_train = (n_train,) np.ndarray with the T data (sample indicator) for the training set.
+        w_eval = optional (n_eval,) np.ndarray with sample weights for the evaluation set.
+        w_train = optional (n_train,) np.ndarray with sample weights for the training set.
 
         method = One of 'regression', 're-weighting', 'MR'. By default, 'MR'.
 
@@ -311,16 +321,16 @@ class ThetaC:
                      a classifier (e.g. sklearn.LogisticRegression).
                      No need to do this if classifier is a sklearn.calibration.CalibratedClassifierCV learner.
 
-        X_calib = (n_calib, K) np.array with the X data (explanatory variables) for the calibration set.
-        T_calib = (n_calib,) np.array with the T data (sample indicator) for the calibration set.
-        w_calib = optional (n_calib,) np.array with sample weights for the calibration set.
+        X_calib = (n_calib, K) np.ndarray with the X data (explanatory variables) for the calibration set.
+        T_calib = (n_calib,) np.ndarray with the T data (sample indicator) for the calibration set.
+        w_calib = optional (n_calib,) np.ndarray with sample weights for the calibration set.
 
         all_indep = boolean, True if all explanatory variables are independent (used for self._simplify_C).
         crop = float, all predicted probabilities from the classifier will be cropped below at this lower bound,
                and above at 1-crop.
 
         Returns:
-        theta_scores = (n_eval,) np.array of scores, such that theta_hat = np.mean(theta_scores).
+        theta_scores = (n_eval,) np.ndarray of scores, such that theta_hat = np.mean(theta_scores).
         """
 
         if w_eval is None:
@@ -474,37 +484,37 @@ class ThetaC:
 
     def est_theta(
         self,
-        X_eval,
-        y_eval,
-        T_eval,
-        X_train,
-        y_train,
-        T_train,
-        w_eval=None,
-        w_train=None,
-        method="MR",  # One of 'regression', 're-weighting', 'MR',
+        X_eval: np.ndarray,
+        y_eval: np.ndarray,
+        T_eval: np.ndarray,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        T_train: np.ndarray,
+        w_eval: Optional[np.ndarray] = None,
+        w_train: Optional[np.ndarray] = None,
+        method: Literal["regression", "re-weighting", "MR"] = "MR",
         regressor: PredictionModel = create_linear_regressor,
         classifier: ClassificationModel = create_logistic_regression_classifier,
         calibrator: Optional[PredictionModel] = None,
-        X_calib=None,
-        T_calib=None,
-        w_calib=None,
-        all_indep=False,
-        crop=1e-3,
-    ):
+        X_calib: Optional[np.ndarray] = None,
+        T_calib: Optional[np.ndarray] = None,
+        w_calib: Optional[np.ndarray] = None,
+        all_indep: bool = False,
+        crop: float = 1e-3,
+    ) -> Tuple[float, float]:
         """
         This function computes the scores that are averaged to get each theta_hat,
         and then returns (theta_hat, std_error)
 
         Inputs:
-        X_eval = (n_eval, K) np.array with the X data (explanatory variables) for the evaluation set.
-        y_eval = (n_eval,) np.array with the Y data (outcome) for the evaluation set.
-        T_eval = (n_eval,) np.array with the T data (sample indicator) for the evaluation set.
-        X_train = (n_train, K) np.array with the X data (explanatory variables) for the training set.
-        y_train = (n_train,) np.array with the Y data (outcome) for the training set.
-        T_train = (n_train,) np.array with the T data (sample indicator) for the training set.
-        w_eval = optional (n_eval,) np.array with sample weights for the evaluation set.
-        w_train = optional (n_train,) np.array with sample weights for the training set.
+        X_eval = (n_eval, K) np.ndarray with the X data (explanatory variables) for the evaluation set.
+        y_eval = (n_eval,) np.ndarray with the Y data (outcome) for the evaluation set.
+        T_eval = (n_eval,) np.ndarray with the T data (sample indicator) for the evaluation set.
+        X_train = (n_train, K) np.ndarray with the X data (explanatory variables) for the training set.
+        y_train = (n_train,) np.ndarray with the Y data (outcome) for the training set.
+        T_train = (n_train,) np.ndarray with the T data (sample indicator) for the training set.
+        w_eval = optional (n_eval,) np.ndarray with sample weights for the evaluation set.
+        w_train = optional (n_train,) np.ndarray with sample weights for the training set.
 
         method = One of 'regression', 're-weighting', 'MR'. By default, 'MR'.
 
@@ -517,9 +527,9 @@ class ThetaC:
                      a classifier (e.g. sklearn.LogisticRegression).
                      No need to do this if classifier is a sklearn.calibration.CalibratedClassifierCV learner.
 
-        X_calib = (n_calib, K) np.array with the X data (explanatory variables) for the calibration set.
-        T_calib = (n_calib,) np.array with the T data (sample indicator) for the calibration set.
-        w_train = optional (n_calib,) np.array with sample weights for the calibration set.
+        X_calib = (n_calib, K) np.ndarray with the X data (explanatory variables) for the calibration set.
+        T_calib = (n_calib,) np.ndarray with the T data (sample indicator) for the calibration set.
+        w_train = optional (n_calib,) np.ndarray with sample weights for the calibration set.
 
         all_indep = boolean, True if all explanatory variables are independent (used for self._simplify_C).
         crop = float, all predicted probabilities from the classifier will be cropped below at this lower bound,
@@ -539,7 +549,7 @@ class ThetaC:
             T_train,
             w_eval=w_eval,
             w_train=w_train,
-            method=method,  # One of 'regression', 're-weighting', 'MR',
+            method=method,
             regressor=regressor,
             classifier=classifier,
             calibrator=calibrator,
@@ -564,21 +574,21 @@ def distribution_change_robust(
     old_data: pd.DataFrame,
     new_data: pd.DataFrame,
     target_node: Any,
-    sample_weight=None,
-    xfit=True,
-    xfit_folds=5,
-    train_size=0.5,
-    calib_size=0.0,
-    split_random_state=0,
-    method="MR",  # One of 'regression', 're-weighting', 'MR',
+    target_functional: str = "mean",
+    sample_weight: Optional[Any] = None,
+    xfit: bool = True,
+    xfit_folds: int = 5,
+    train_size: float = 0.5,
+    calib_size: float = 0.2,
+    split_random_state: int = 0,
+    method: Literal["regression", "re-weighting", "MR"] = "MR",
     regressor: PredictionModel = create_linear_regressor,
     classifier: ClassificationModel = create_logistic_regression_classifier,
     calibrator: Optional[PredictionModel] = None,
-    variance=False,
-    all_indep=False,
-    crop=1e-3,
+    all_indep: bool = False,
+    crop: float = 1e-3,
     shapley_config: Optional[ShapleyConfig] = None,
-):
+) -> Dict[Any, float]:
     """
     This function computes the Shapley values for attribution of change in the mean or variance of target_node
     to nodes upstream in the causal DAG, using the multiply-robust method from:
@@ -589,7 +599,9 @@ def distribution_change_robust(
     :param old_data: Joint samples from the 'old' distribution.
     :param new_data: Joint samples from the 'new' distribution.
     :param target_node: Target node of interest for attributing the marginal distribution change.
-    :param sample_weight: Name of the sample weight variable, if using (optional).
+    :param target_functional: Target functional of interest, of which the change is attributed. For now, supported
+                              functionals are "mean" and "variance".
+    :param sample_weight: Sample weight variable, if using (optional).
 
     :param xfit: Whether to use cross-fitting (True) or sample splitting (False) to estimate the nuisance parameters.
     :param xfit_folds: Number of folds for cross-fitting if xfit = True.
@@ -604,8 +616,8 @@ def distribution_change_robust(
                     This could be a regressor (e.g. sklearn.isotonic.IsotonicRegression) or
                     a classifier (e.g. sklearn.LogisticRegression).
                     No need to do this if classifier is a sklearn.calibration.CalibratedClassifierCV learner.
-            
-    Note: Only the classes SklearnRegressionModelWeighted and SklearnClassificationModelWeighted 
+
+    Note: Only the classes SklearnRegressionModelWeighted and SklearnClassificationModelWeighted
           support sample weights for now.
 
     :param variance: boolean, if True, compute Shapley value attribution for the change in variance (rather than the change in mean).
@@ -686,9 +698,32 @@ def distribution_change_robust(
                     random_state=split_random_state,
                 )
 
-        if variance:
+        if target_functional == "mean":
 
-            def set_func(C):
+            def set_func(C: np.ndarray) -> float:
+                return ThetaC(C).est_theta(
+                    X_eval,
+                    y_eval,
+                    T_eval,
+                    X_train,
+                    y_train,
+                    T_train,
+                    w_eval=w_eval,
+                    w_train=w_train,
+                    method=method,
+                    regressor=regressor,
+                    classifier=classifier,
+                    calibrator=calibrator,
+                    X_calib=X_calib,
+                    T_calib=T_calib,
+                    w_calib=w_calib,
+                    all_indep=all_indep,
+                    crop=crop,
+                )[0]
+
+        elif target_functional == "variance":
+
+            def set_func(C: np.ndarray) -> float:
                 return (
                     ThetaC(C, h_fn=lambda y: np.square(y)).est_theta(
                         X_eval,
@@ -732,27 +767,7 @@ def distribution_change_robust(
                 )
 
         else:
-
-            def set_func(C):
-                return ThetaC(C).est_theta(
-                    X_eval,
-                    y_eval,
-                    T_eval,
-                    X_train,
-                    y_train,
-                    T_train,
-                    w_eval=w_eval,
-                    w_train=w_train,
-                    method=method,
-                    regressor=regressor,
-                    classifier=classifier,
-                    calibrator=calibrator,
-                    X_calib=X_calib,
-                    T_calib=T_calib,
-                    w_calib=w_calib,
-                    all_indep=all_indep,
-                    crop=crop,
-                )[0]
+            raise AttributeError(f'Target functional "{target_functional}" not implemented. Try "mean" or "variance".')
 
         attributions += estimate_shapley_values(set_func, len(sorted_var_names), shapley_config) / xfit_folds
 
