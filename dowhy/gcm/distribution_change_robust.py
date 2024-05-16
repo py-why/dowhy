@@ -598,12 +598,15 @@ def distribution_change_robust(
     :param split_random_state: Seed for sample splitting.
 
     :param method: One of 'regression', 're-weighting', 'MR'. By default, 'MR'.
-    :param regressor: the regression estimator: a class supporting .fit and .predict methods.
-    :param classifier: the classification estimator: a class supporting .fit and .predict_probabilities methods.
-    :param calibrator: Optional, a method for probability calibration on a calibration set.
+    :param regressor: the regression estimator: a ClassificationModel supporting .fit and .predict methods.
+    :param classifier: the classification estimator: a PredictionModel supporting .fit and .predict_probabilities methods.
+    :param calibrator: Optional, a PredictionModel for probability calibration on a calibration set.
                     This could be a regressor (e.g. sklearn.isotonic.IsotonicRegression) or
                     a classifier (e.g. sklearn.LogisticRegression).
                     No need to do this if classifier is a sklearn.calibration.CalibratedClassifierCV learner.
+            
+    Note: Only the classes SklearnRegressionModelWeighted and SklearnClassificationModelWeighted 
+          support sample weights for now.
 
     :param variance: boolean, if True, compute Shapley value attribution for the change in variance (rather than the change in mean).
     :param all_indep: boolean, True if all explanatory variables are independent (used to simplify estimating equation).
