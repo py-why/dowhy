@@ -58,6 +58,14 @@ class SklearnRegressionModel(PredictionModel):
         return str(self._sklearn_mdl)
 
 
+class SklearnRegressionModelWeighted(SklearnRegressionModel):
+    def fit(self, X: np.ndarray, Y: np.ndarray, sample_weight: np.ndarray = None) -> None:
+        self._encoders = auto_fit_encoders(X, Y)
+        X = auto_apply_encoders(X, self._encoders)
+
+        self._sklearn_mdl.fit(X=X, y=Y.squeeze(), sample_weight=sample_weight)
+
+
 class LinearRegressionWithFixedParameter(PredictionModel):
     def __init__(self, coefficients: np.ndarray, intercept: float):
         self.coefficients = coefficients

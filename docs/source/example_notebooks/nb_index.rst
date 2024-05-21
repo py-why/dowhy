@@ -141,6 +141,15 @@ Real world-inspired examples
 
 .. grid:: 2
 
+    .. grid-item-card:: :doc:`gcm_cps2015_dist_change_robust`
+
+        .. image:: ../_static/cps2015-shapley-values.png
+            :width: 200px
+            :align: center
+        +++
+        | **Level:** Advanced
+        | **Task:** Causal Change Attribution via GCM
+
     .. grid-item-card:: :doc:`gcm_icc`
 
         .. image:: ../_static/icc-example.jpg
@@ -149,6 +158,9 @@ Real world-inspired examples
         +++
         | **Level:** Advanced
         | **Task:** Intrinsic causal influence via GCM
+   
+
+.. grid:: 2
 
     .. grid-item-card:: :doc:`gcm_counterfactual_medical_dry_eyes`
 
@@ -158,8 +170,6 @@ Real world-inspired examples
         +++
         | **Level:** Advanced
         | **Task:** Counterfactuals via GCM
-
-.. grid:: 2
 
     .. grid-item-card:: :doc:`gcm_falsify_dag`
 
