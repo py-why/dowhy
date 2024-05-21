@@ -1,6 +1,6 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-34-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-35-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ## Contributors ✨
@@ -55,6 +55,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="14.28%"><a href="https://bhatt-priyadutt.github.io/priyadutt-portfolio/"><img src="https://avatars.githubusercontent.com/u/68959880?v=4?s=100" width="100px;" alt="Priyadutt"/><br /><sub><b>Priyadutt</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=bhatt-priyadutt" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/drawlinson"><img src="https://avatars.githubusercontent.com/u/1892448?v=4?s=100" width="100px;" alt="drawlinson"/><br /><sub><b>drawlinson</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=drawlinson" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/dw-610"><img src="https://avatars.githubusercontent.com/u/139509928?v=4?s=100" width="100px;" alt="Dylan W"/><br /><sub><b>Dylan W</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=dw-610" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/victor5as"><img src="https://avatars.githubusercontent.com/u/33633851?v=4?s=100" width="100px;" alt="Víctor Quintas-Martínez"/><br /><sub><b>Víctor Quintas-Martínez</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=victor5as" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
