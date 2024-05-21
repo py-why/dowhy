@@ -2204,19 +2204,28 @@
     </a>
    </li>
    <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#dowhy.gcm.stats.permute_features">
+    <a class="reference internal nav-link" href="#dowhy.gcm.stats.merge_p_values_average">
      <code class="docutils literal notranslate">
       <span class="pre">
-       permute_features()
+       merge_p_values_average()
       </span>
      </code>
     </a>
    </li>
    <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#dowhy.gcm.stats.quantile_based_fwer">
+    <a class="reference internal nav-link" href="#dowhy.gcm.stats.merge_p_values_quantile">
      <code class="docutils literal notranslate">
       <span class="pre">
-       quantile_based_fwer()
+       merge_p_values_quantile()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#dowhy.gcm.stats.permute_features">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       permute_features()
       </span>
      </code>
     </a>
@@ -5529,17 +5538,35 @@ predictions for x^i_s when randomizing the remaining features.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="dowhy.gcm.stats.permute_features">
-<span class="sig-prename descclassname"><span class="pre">dowhy.gcm.stats.</span></span><span class="sig-name descname"><span class="pre">permute_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_samples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features_to_permute</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">randomize_features_jointly</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/dowhy/gcm/stats.html#permute_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.gcm.stats.permute_features" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="dowhy.gcm.stats.merge_p_values_average">
+<span class="sig-prename descclassname"><span class="pre">dowhy.gcm.stats.</span></span><span class="sig-name descname"><span class="pre">merge_p_values_average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p_values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">randomization</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/dowhy/gcm/stats.html#merge_p_values_average"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.gcm.stats.merge_p_values_average" title="Permalink to this definition"></a></dt>
+<dd><p>A statistically sound method to merge multiple potentially dependent p-values into one. This is a statistically
+improved (i.e., more powerful) version of the “twice the average” rule, following Theorem 5.3
+(second equation, F_UA) in</p>
+<ol class="upperalpha simple" start="13">
+<li><p>Gasparini, R. Wang, and A. Ramdas, <em>Combining exchangeable p-values</em>, arXiv 2404.03484, 2024</p></li>
+</ol>
+<p>Note, if randomization is False, we have u = 1 here. Generally, randomization requires fewer assumptions but leads
+to non-deterministic behavior.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p_values</strong> – A list or array of p-values.</p></li>
+<li><p><strong>randomization</strong> – If True, u is taken uniformly randomly from [0, 1] (non-deterministic). If False, u is set</p></li>
+</ul>
+</dd>
+</dl>
+<p>to 1 (deterministic). Randomization is generally more powerful but provides non-deterministic results.
+:return: A single p-value based on the given p-values.</p>
+</dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="dowhy.gcm.stats.quantile_based_fwer">
-<span class="sig-prename descclassname"><span class="pre">dowhy.gcm.stats.</span></span><span class="sig-name descname"><span class="pre">quantile_based_fwer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p_values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_values_scaling</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quantile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/dowhy/gcm/stats.html#quantile_based_fwer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.gcm.stats.quantile_based_fwer" title="Permalink to this definition"></a></dt>
-<dd><p>Applies a quantile based family wise error rate (FWER) control to the given p-values. This is based on the
+<dt class="sig sig-object py" id="dowhy.gcm.stats.merge_p_values_quantile">
+<span class="sig-prename descclassname"><span class="pre">dowhy.gcm.stats.</span></span><span class="sig-name descname"><span class="pre">merge_p_values_quantile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p_values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_values_scaling</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quantile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/dowhy/gcm/stats.html#merge_p_values_quantile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.gcm.stats.merge_p_values_quantile" title="Permalink to this definition"></a></dt>
+<dd><p>Applies a quantile based approach to merge multiple potentially dependent p-values to one. This is based on the
 approach described in:</p>
-<p>Meinshausen, N., Meier, L. and Buehlmann, P. (2009).
-p-values for high-dimensional regression. J. Amer. Statist. Assoc.104 1671–1681</p>
+<p>Meinshausen, N., Meier, L. and Buehlmann, P., <em>p-values for high-dimensional regression</em>,
+J. Amer. Statist. Assoc.104 1671–1681, 2009</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -5554,6 +5581,11 @@ p_values / quantile.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dowhy.gcm.stats.permute_features">
+<span class="sig-prename descclassname"><span class="pre">dowhy.gcm.stats.</span></span><span class="sig-name descname"><span class="pre">permute_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_samples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features_to_permute</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">randomize_features_jointly</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/dowhy/gcm/stats.html#permute_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.gcm.stats.permute_features" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 </section>
 <section id="module-dowhy.gcm.stochastic_models">

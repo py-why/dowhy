@@ -637,6 +637,15 @@
       </a>
      </li>
      <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#dowhy.causal_estimator.CausalEstimator.reset_encoders">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         CausalEstimator.reset_encoders()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
       <a class="reference internal nav-link" href="#dowhy.causal_estimator.CausalEstimator.signif_results_tostr">
        <code class="docutils literal notranslate">
         <span class="pre">
@@ -2305,7 +2314,6 @@
 <li class="toctree-l4"><a class="reference internal" href="dowhy.causal_estimators.html#dowhy.causal_estimators.regression_estimator.RegressionEstimator.fit"><code class="docutils literal notranslate"><span class="pre">RegressionEstimator.fit()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="dowhy.causal_estimators.html#dowhy.causal_estimators.regression_estimator.RegressionEstimator.interventional_outcomes"><code class="docutils literal notranslate"><span class="pre">RegressionEstimator.interventional_outcomes()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="dowhy.causal_estimators.html#dowhy.causal_estimators.regression_estimator.RegressionEstimator.predict"><code class="docutils literal notranslate"><span class="pre">RegressionEstimator.predict()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="dowhy.causal_estimators.html#dowhy.causal_estimators.regression_estimator.RegressionEstimator.reset_encoders"><code class="docutils literal notranslate"><span class="pre">RegressionEstimator.reset_encoders()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -2557,6 +2565,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="dowhy.causal_refuters.html#dowhy.causal_refuters.add_unobserved_common_cause.include_simulated_confounder"><code class="docutils literal notranslate"><span class="pre">include_simulated_confounder()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dowhy.causal_refuters.html#dowhy.causal_refuters.add_unobserved_common_cause.preprocess_observed_common_causes"><code class="docutils literal notranslate"><span class="pre">preprocess_observed_common_causes()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="dowhy.causal_refuters.html#dowhy.causal_refuters.add_unobserved_common_cause.sensitivity_e_value"><code class="docutils literal notranslate"><span class="pre">sensitivity_e_value()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="dowhy.causal_refuters.html#dowhy.causal_refuters.add_unobserved_common_cause.sensitivity_linear_partial_r2"><code class="docutils literal notranslate"><span class="pre">sensitivity_linear_partial_r2()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="dowhy.causal_refuters.html#dowhy.causal_refuters.add_unobserved_common_cause.sensitivity_non_parametric_partial_r2"><code class="docutils literal notranslate"><span class="pre">sensitivity_non_parametric_partial_r2()</span></code></a></li>
@@ -3188,8 +3197,9 @@
 <li class="toctree-l2"><a class="reference internal" href="dowhy.gcm.html#module-dowhy.gcm.stats">dowhy.gcm.stats module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="dowhy.gcm.html#dowhy.gcm.stats.estimate_ftest_pvalue"><code class="docutils literal notranslate"><span class="pre">estimate_ftest_pvalue()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="dowhy.gcm.html#dowhy.gcm.stats.marginal_expectation"><code class="docutils literal notranslate"><span class="pre">marginal_expectation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dowhy.gcm.html#dowhy.gcm.stats.merge_p_values_average"><code class="docutils literal notranslate"><span class="pre">merge_p_values_average()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dowhy.gcm.html#dowhy.gcm.stats.merge_p_values_quantile"><code class="docutils literal notranslate"><span class="pre">merge_p_values_quantile()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="dowhy.gcm.html#dowhy.gcm.stats.permute_features"><code class="docutils literal notranslate"><span class="pre">permute_features()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="dowhy.gcm.html#dowhy.gcm.stats.quantile_based_fwer"><code class="docutils literal notranslate"><span class="pre">quantile_based_fwer()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="dowhy.gcm.html#module-dowhy.gcm.stochastic_models">dowhy.gcm.stochastic_models module</a><ul>
@@ -3763,6 +3773,17 @@ Returns True if parameters have changed and resampling should be done again.</p>
 <dd class="field-even"><p>A binary flag denoting whether the parameters are different.</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_estimator.CausalEstimator.reset_encoders">
+<span class="sig-name descname"><span class="pre">reset_encoders</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_estimator.html#CausalEstimator.reset_encoders"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_estimator.CausalEstimator.reset_encoders" title="Permalink to this definition"></a></dt>
+<dd><p>Removes any reference to data encoders, causing them to be re-created on next <cite>fit()</cite>.</p>
+<p>It’s important that data is consistently encoded otherwise models will produce inconsistent output.
+In particular, categorical variables are one-hot encoded; the mapping of original data values
+must be identical between model training/fitting and inference time.</p>
+<p>Encoders are reset when <cite>fit()</cite> is called again, as the data is assumed to have changed.</p>
+<p>A separate encoder is used for each subset of variables (treatment, common causes and effect modifiers).</p>
 </dd></dl>
 
 <dl class="py method">
