@@ -25,6 +25,8 @@ def merge_p_values_average(p_values: Union[np.ndarray, List[float]], randomizati
     """
     if len(p_values) == 0:
         raise ValueError("Given list of p-values is empty!")
+    if len(p_values) == 1:
+        return p_values[0]
 
     if np.all(np.isnan(p_values)):
         return float(np.nan)
