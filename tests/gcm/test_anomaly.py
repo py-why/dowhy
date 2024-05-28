@@ -284,7 +284,7 @@ def test_given_multivariate_inputs_when_estimate_anomaly_scores_then_does_not_ra
 
     fit(causal_model, data)
     scores = anomaly_scores(causal_model, data_anomaly)
-    assert scores["X1"][0] == approx(-np.log(EPS), abs=3)
+    assert scores["X1"][0] == approx(-np.log(1 / (data.shape[0] + 1)), abs=3)
 
 
 @flaky(max_runs=3)

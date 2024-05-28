@@ -65,11 +65,8 @@ def test_given_categorical_input_and_output_features_when_fit_classification_mod
     mdl = create_logistic_regression_classifier()
     mdl.fit(inputs, X2)
 
-    X2["True" == 1] = 1
-    X2["False" == 0] = 0
-
     assert mdl.predict_probabilities(np.array([[2, "1"]], dtype=object)) == approx(np.array([[0, 1]]), abs=0.01)
-    assert np.sum(np.argmax(mdl.predict_probabilities(inputs), axis=1) != X2) < 20
+    assert np.sum(mdl.predict(inputs).reshape(-1) != X2) < 20
 
     _, counts = np.unique(mdl.predict(inputs), return_counts=True)
     assert counts / 1000 == approx(np.array([0.5, 0.5]), abs=0.05)
