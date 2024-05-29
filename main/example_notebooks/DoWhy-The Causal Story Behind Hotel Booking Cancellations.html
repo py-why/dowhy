@@ -1533,7 +1533,7 @@ definite conclusion at this stage. Thus assigning rooms different to what a cust
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle 588.6398$</div></div>
+$\displaystyle 588.6943$</div></div>
 </div>
 <p>We now consider the scenario when there were no booking changes and recalculate the expected count.</p>
 <div class="nbinput docutils container">
@@ -1557,7 +1557,7 @@ $\displaystyle 588.6398$</div></div>
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle 572.7316$</div></div>
+$\displaystyle 572.6979$</div></div>
 </div>
 <p>In the 2nd case, we take the scenario when there were booking changes(&gt;0) and recalculate the expected count.</p>
 <div class="nbinput docutils container">
@@ -1581,7 +1581,7 @@ $\displaystyle 572.7316$</div></div>
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle 665.719$</div></div>
+$\displaystyle 665.8483$</div></div>
 </div>
 <p>There is definitely some change happening when the number of booking changes are non-zero. So it gives us a hint that <em>Booking Changes</em> may be affecting room cancellation.</p>
 <p>But is <em>Booking Changes</em> the only confounding variable? What if there were some unobserved confounders, regarding which we have no information(feature) present in our dataset. Would we still be able to make the same claims as before?</p>
@@ -1710,17 +1710,17 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
             d
-──────────────────────────(E[is_canceled|days_in_waiting_list,lead_time,total_
+──────────────────────────(E[is_canceled|guests,lead_time,total_of_special_req
 d[different_room_assigned]
 
 
-stay,hotel,required_car_parking_spaces,total_of_special_requests,guests,is_rep
+uests,days_in_waiting_list,required_car_parking_spaces,total_stay,is_repeated_
 
 
 
-eated_guest,booking_changes])
+guest,booking_changes,hotel])
 
-Estimand assumption 1, Unconfoundedness: If U→{different_room_assigned} and U→is_canceled then P(is_canceled|different_room_assigned,days_in_waiting_list,lead_time,total_stay,hotel,required_car_parking_spaces,total_of_special_requests,guests,is_repeated_guest,booking_changes,U) = P(is_canceled|different_room_assigned,days_in_waiting_list,lead_time,total_stay,hotel,required_car_parking_spaces,total_of_special_requests,guests,is_repeated_guest,booking_changes)
+Estimand assumption 1, Unconfoundedness: If U→{different_room_assigned} and U→is_canceled then P(is_canceled|different_room_assigned,guests,lead_time,total_of_special_requests,days_in_waiting_list,required_car_parking_spaces,total_stay,is_repeated_guest,booking_changes,hotel,U) = P(is_canceled|different_room_assigned,guests,lead_time,total_of_special_requests,days_in_waiting_list,required_car_parking_spaces,total_stay,is_repeated_guest,booking_changes,hotel)
 
 ### Estimand : 2
 Estimand name: iv
@@ -1771,20 +1771,20 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
             d
-──────────────────────────(E[is_canceled|days_in_waiting_list,lead_time,total_
+──────────────────────────(E[is_canceled|guests,lead_time,total_of_special_req
 d[different_room_assigned]
 
 
-stay,hotel,required_car_parking_spaces,total_of_special_requests,guests,is_rep
+uests,days_in_waiting_list,required_car_parking_spaces,total_stay,is_repeated_
 
 
 
-eated_guest,booking_changes])
+guest,booking_changes,hotel])
 
-Estimand assumption 1, Unconfoundedness: If U→{different_room_assigned} and U→is_canceled then P(is_canceled|different_room_assigned,days_in_waiting_list,lead_time,total_stay,hotel,required_car_parking_spaces,total_of_special_requests,guests,is_repeated_guest,booking_changes,U) = P(is_canceled|different_room_assigned,days_in_waiting_list,lead_time,total_stay,hotel,required_car_parking_spaces,total_of_special_requests,guests,is_repeated_guest,booking_changes)
+Estimand assumption 1, Unconfoundedness: If U→{different_room_assigned} and U→is_canceled then P(is_canceled|different_room_assigned,guests,lead_time,total_of_special_requests,days_in_waiting_list,required_car_parking_spaces,total_stay,is_repeated_guest,booking_changes,hotel,U) = P(is_canceled|different_room_assigned,guests,lead_time,total_of_special_requests,days_in_waiting_list,required_car_parking_spaces,total_stay,is_repeated_guest,booking_changes,hotel)
 
 ## Realized estimand
-b: is_canceled~different_room_assigned+days_in_waiting_list+lead_time+total_stay+hotel+required_car_parking_spaces+total_of_special_requests+guests+is_repeated_guest+booking_changes
+b: is_canceled~different_room_assigned+guests+lead_time+total_of_special_requests+days_in_waiting_list+required_car_parking_spaces+total_stay+is_repeated_guest+booking_changes+hotel
 Target units: ate
 
 ## Estimate
@@ -2029,6 +2029,8 @@ Please also refer to the documentation for alternative solver options:
   warnings.warn(
 /github/home/.cache/pypoetry/virtualenvs/dowhy-oN2hW5jr-py3.8/lib/python3.8/site-packages/sklearn/preprocessing/_encoders.py:868: FutureWarning: `sparse` was renamed to `sparse_output` in version 1.2 and will be removed in 1.4. `sparse_output` is ignored unless you leave `sparse` to its default value.
   warnings.warn(
+/github/home/.cache/pypoetry/virtualenvs/dowhy-oN2hW5jr-py3.8/lib/python3.8/site-packages/sklearn/preprocessing/_encoders.py:868: FutureWarning: `sparse` was renamed to `sparse_output` in version 1.2 and will be removed in 1.4. `sparse_output` is ignored unless you leave `sparse` to its default value.
+  warnings.warn(
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -2048,8 +2050,6 @@ p value:1.0
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/github/home/.cache/pypoetry/virtualenvs/dowhy-oN2hW5jr-py3.8/lib/python3.8/site-packages/sklearn/preprocessing/_encoders.py:868: FutureWarning: `sparse` was renamed to `sparse_output` in version 1.2 and will be removed in 1.4. `sparse_output` is ignored unless you leave `sparse` to its default value.
-  warnings.warn(
 /github/home/.cache/pypoetry/virtualenvs/dowhy-oN2hW5jr-py3.8/lib/python3.8/site-packages/sklearn/preprocessing/_encoders.py:868: FutureWarning: `sparse` was renamed to `sparse_output` in version 1.2 and will be removed in 1.4. `sparse_output` is ignored unless you leave `sparse` to its default value.
   warnings.warn(
 </pre></div></div>
@@ -2278,7 +2278,7 @@ p value:1.0
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
 Estimated effect:-0.2622285649999514
-New effect:0.05525200036242262
+New effect:0.05490869677331541
 p value:0.0
 
 </pre></div></div>
@@ -2509,8 +2509,6 @@ p value:0.0
   warnings.warn(
 /github/home/.cache/pypoetry/virtualenvs/dowhy-oN2hW5jr-py3.8/lib/python3.8/site-packages/sklearn/preprocessing/_encoders.py:868: FutureWarning: `sparse` was renamed to `sparse_output` in version 1.2 and will be removed in 1.4. `sparse_output` is ignored unless you leave `sparse` to its default value.
   warnings.warn(
-/github/home/.cache/pypoetry/virtualenvs/dowhy-oN2hW5jr-py3.8/lib/python3.8/site-packages/sklearn/preprocessing/_encoders.py:868: FutureWarning: `sparse` was renamed to `sparse_output` in version 1.2 and will be removed in 1.4. `sparse_output` is ignored unless you leave `sparse` to its default value.
-  warnings.warn(
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -2520,8 +2518,8 @@ p value:0.0
 <div class="highlight"><pre>
 Refute: Use a subset of data
 Estimated effect:-0.2622285649999514
-New effect:-0.2622537602257139
-p value:0.98
+New effect:-0.2620482100040449
+p value:0.8400000000000001
 
 </pre></div></div>
 </div>
@@ -2530,6 +2528,8 @@ p value:0.98
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
+/github/home/.cache/pypoetry/virtualenvs/dowhy-oN2hW5jr-py3.8/lib/python3.8/site-packages/sklearn/preprocessing/_encoders.py:868: FutureWarning: `sparse` was renamed to `sparse_output` in version 1.2 and will be removed in 1.4. `sparse_output` is ignored unless you leave `sparse` to its default value.
+  warnings.warn(
 /github/home/.cache/pypoetry/virtualenvs/dowhy-oN2hW5jr-py3.8/lib/python3.8/site-packages/sklearn/preprocessing/_encoders.py:868: FutureWarning: `sparse` was renamed to `sparse_output` in version 1.2 and will be removed in 1.4. `sparse_output` is ignored unless you leave `sparse` to its default value.
   warnings.warn(
 </pre></div></div>
