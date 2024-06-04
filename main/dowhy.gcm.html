@@ -596,6 +596,35 @@
     </ul>
    </li>
    <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#dowhy.gcm.anomaly_scorers.RankBasedAnomalyScorer">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       RankBasedAnomalyScorer
+      </span>
+     </code>
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#dowhy.gcm.anomaly_scorers.RankBasedAnomalyScorer.fit">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         RankBasedAnomalyScorer.fit()
+        </span>
+       </code>
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#dowhy.gcm.anomaly_scorers.RankBasedAnomalyScorer.score">
+       <code class="docutils literal notranslate">
+        <span class="pre">
+         RankBasedAnomalyScorer.score()
+        </span>
+       </code>
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#dowhy.gcm.anomaly_scorers.RescaledMedianCDFQuantileScorer">
      <code class="docutils literal notranslate">
       <span class="pre">
@@ -3092,6 +3121,7 @@ such as mean, variance, median etc. that are used for computing a score.</p>
 <dt>Given an anomalous observation x and samples from the distribution of X, this score represents:</dt><dd><p>score(x) = 1 - 2 * min[P(X &gt; x) + P(X = x) / 2, P(X &lt; x) + P(X = x) / 2]</p>
 </dd>
 </dl>
+<p>Here, the value x is considered as part of X for the computation.</p>
 <p>Comparing two NaN values are considered equal here.</p>
 <p>It scores the observation based on the quantile of x with respect to the distribution of X. Here, if the
 sample x lies in the tail of the distribution, we want to have a large score. Since we apriori don’t know
@@ -3104,14 +3134,18 @@ For example:</p>
 x = 2.5</p>
 </div></blockquote>
 <dl class="simple">
-<dt>Then, x falls in the right sided-quantile and only one sample in X is larger than x. Therefore, we get</dt><dd><p>p(X &gt;= x) = 1 / 7
-P(X &lt;= x) = 6 / 7</p>
-</dd>
-<dt>With the end score of:</dt><dd><p>1 - 2 * min[P(X &gt; x) + P(X = x) / 2, P(X &lt; x) + P(X = x) / 2] = 1 - 2 / 7 = 0.71</p>
+<dt>Then, x falls in the right sided-quantile and only one sample in X is larger than x. Therefore, we get</dt><dd><p>P(X &gt; x) = 1 / 8
+P(X &lt; x) = 6 / 8
+P(X = x) = 1 / 8</p>
 </dd>
 </dl>
-<p>Note: For equal samples, we contribute half of the count to the left and half of the count the right side.</p>
-<p>The higher the score, the less likely the sample comes from the distribution of X.</p>
+<p>We divide by 8 here, because we consider x itself.
+This gives us a score of:</p>
+<blockquote>
+<div><p>1 - 2 * min[P(X &gt; x) + P(X = x) / 2, P(X &lt; x) + P(X = x) / 2] = 1 - 3 / 8 = 0.625</p>
+</div></blockquote>
+<p>Note: For equal samples, we contribute half of the count to the left and half of the count the right side.
+Note: For a statistically more rigorous, but also more conservative version, see RankBasedAnomalyScorer.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="dowhy.gcm.anomaly_scorers.MedianCDFQuantileScorer.fit">
 <span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/dowhy/gcm/anomaly_scorers.html#MedianCDFQuantileScorer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.gcm.anomaly_scorers.MedianCDFQuantileScorer.fit" title="Permalink to this definition"></a></dt>
@@ -3159,6 +3193,58 @@ such as mean, variance, median etc. that are used for computing a score.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="dowhy.gcm.anomaly_scorers.MedianDeviationScorer.score">
 <span class="sig-name descname"><span class="pre">score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/dowhy/gcm/anomaly_scorers.html#MedianDeviationScorer.score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.gcm.anomaly_scorers.MedianDeviationScorer.score" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dowhy.gcm.anomaly_scorers.RankBasedAnomalyScorer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.gcm.anomaly_scorers.</span></span><span class="sig-name descname"><span class="pre">RankBasedAnomalyScorer</span></span><a class="reference internal" href="_modules/dowhy/gcm/anomaly_scorers.html#RankBasedAnomalyScorer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.gcm.anomaly_scorers.RankBasedAnomalyScorer" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dowhy.gcm.anomaly_scorer.AnomalyScorer" title="dowhy.gcm.anomaly_scorer.AnomalyScorer"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnomalyScorer</span></code></a></p>
+<p>Similar to the RescaledMedianCDFQuantileScorer, but this scorer is more directly based on ranks and the
+assumption of exchangeability.</p>
+<p>This scorer computes anomaly scores for test samples by evaluating their ranks within the training samples (and a
+given sample).  For each test sample, the scorer computes its rank from above (number of samples greater than or
+equal to it) and rank from below (number of samples less than or equal to it). It then calculates a p-value based
+on these ranks, under the assumption of exchangeability. The p-value then represents the probability of observing
+a rank as extreme as the observed rank or more extreme.</p>
+<p>Specifically, the p-value is computed as the minimum of:
+1. Twice the rank from above divided by the total number of samples.
+2. Twice the rank from below divided by the total number of samples.
+3. 1 (to ensure the p-value is at most 1).</p>
+<p>This method is non-parametric and makes no assumptions about the underlying distribution of the data.</p>
+<p>The anomaly score is then calculated as the negative log of this p-value (i.e. it is an information-theoretic
+(IT) score). Higher anomaly scores indicate a lower probability, consequently, a higher likelihood of being an
+anomaly.</p>
+<dl class="simple">
+<dt>For example:</dt><dd><p>X = [-3, -2, -1, 0, 1, 2, 3]
+x = 2.5</p>
+</dd>
+<dt>Then,</dt><dd><p>p(X &gt;= x) = 2 / 8
+P(X &lt;= x) = 7 / 8</p>
+</dd>
+</dl>
+<p>Note that we count the sample x itself as equal here in both cases.
+Which gives the p-value:</p>
+<blockquote>
+<div><p>-log(min[1, 2 * 7 / 8, 2 * 2 / 8]) = -log(4 / 8) = 0.69314718</p>
+</div></blockquote>
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.gcm.anomaly_scorers.RankBasedAnomalyScorer.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/dowhy/gcm/anomaly_scorers.html#RankBasedAnomalyScorer.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.gcm.anomaly_scorers.RankBasedAnomalyScorer.fit" title="Permalink to this definition"></a></dt>
+<dd><p>Fits the anomaly scorer to the given data. Depending on the definition of the scorer, this can imply
+different things, such as fitting a (parametric) distribution to the data or estimating certain properties
+such as mean, variance, median etc. that are used for computing a score.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>X</strong> – Samples from the underlying data distribution.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.gcm.anomaly_scorers.RankBasedAnomalyScorer.score">
+<span class="sig-name descname"><span class="pre">score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/dowhy/gcm/anomaly_scorers.html#RankBasedAnomalyScorer.score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.gcm.anomaly_scorers.RankBasedAnomalyScorer.score" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
