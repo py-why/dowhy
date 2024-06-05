@@ -783,7 +783,7 @@ def plot_local_insights(
 
 
 def _generate_table(
-    validation_repr, suggestion_repr, width=105, validation_name="Falsificaton Summary", suggestion_name="Suggestions"
+    validation_repr, suggestion_repr, width=105, validation_name="Falsification Summary", suggestion_name="Suggestions"
 ):
     # Create Validation header
     _repr = [
