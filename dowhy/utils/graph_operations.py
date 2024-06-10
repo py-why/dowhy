@@ -1,7 +1,6 @@
 import re
 from queue import LifoQueue
 
-import graphviz
 import networkx as nx
 import numpy as np
 from networkx.algorithms.dag import is_directed_acyclic_graph
@@ -38,6 +37,7 @@ def adjacency_matrix_to_graph(adjacency_matrix, labels=None):
     :param labels: List of labels.
     :returns: Graph in DOT format.
     """
+    import graphviz
 
     if adjacency_matrix.ndim != 2:
         raise ValueError("Adjacency matrix must have a dimension of 2.")
@@ -57,8 +57,10 @@ def adjacency_matrix_to_graph(adjacency_matrix, labels=None):
     for label in labels:
         d.node(label)
 
-    for from_, to, coef in zip(dirs[0], dirs[1], adjacency_matrix[idx]):
+    for to, from_, coef in zip(dirs[0], dirs[1], adjacency_matrix[idx]):
         d.edge(labels[from_], labels[to], label=str(coef))
+
+    return d
 
 
 def str_to_dot(string):
