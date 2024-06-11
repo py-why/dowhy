@@ -203,6 +203,12 @@ Examples on benchmark datasets
         | **Level:** Advanced
         | **Task:** Effect inference
 
+    .. grid-item-card:: :doc:`counterfactual_fairness_dowhy`
+
+        +++
+        | **Level:** Advanced
+        | **Task:** Fairness estimation
+
 .. grid:: 3
 
     .. grid-item-card:: :doc:`gcm_401k_analysis`
@@ -377,6 +383,7 @@ Miscellaneous
    gcm_401k_analysis
    prediction/dowhy_causal_prediction_demo
    lalonde_pandas_api
+   counterfactual_fairness_dowhy
 
 .. toctree::
    :maxdepth: 1
