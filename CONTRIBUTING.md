@@ -1,6 +1,6 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-36-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-37-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ## Contributors ✨
@@ -59,6 +59,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://www.linkedin.com/in/rahulbshrestha/"><img src="https://avatars.githubusercontent.com/u/22676591?v=4?s=100" width="100px;" alt="Rahul Shrestha"/><br /><sub><b>Rahul Shrestha</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=rahulbshrestha" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/yogabonito"><img src="https://avatars.githubusercontent.com/u/7026269?v=4?s=100" width="100px;" alt="yogabonito"/><br /><sub><b>yogabonito</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=yogabonito" title="Documentation">📖</a></td>
     </tr>
   </tbody>
 </table>
