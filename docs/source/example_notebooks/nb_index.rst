@@ -371,6 +371,7 @@ Miscellaneous
    gcm_icc
    gcm_counterfactual_medical_dry_eyes
    gcm_falsify_dag
+   counterfactual_fairness_dowhy
 
 .. toctree::
    :maxdepth: 1
