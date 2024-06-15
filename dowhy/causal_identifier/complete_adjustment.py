@@ -33,7 +33,7 @@ class CompleteAdjustment:
         return True
 
     def _is_amenable(self):
-        dp = self._graph.directed_paths(self._X, self._Y)
+        dp = self._graph.directed_paths(self._graph, self._X, self._Y)
         pdp = pywhy_graphs.possibly_directed_paths(self._graph, dp)
         ppdp = pywhy_graphs.proper_paths(self._graph, pdp)
         visible_edges = frozenset(pywhy_graphs.get_visible_edges(self._graph, self._X))
