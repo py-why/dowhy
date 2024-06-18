@@ -9,7 +9,13 @@ from dowhy.gcm.ml import (
     create_linear_regressor,
     create_logistic_regression_classifier,
 )
-from dowhy.gcm.stats import estimate_ftest_pvalue, marginal_expectation, merge_p_values_average, merge_p_values_quantile
+from dowhy.gcm.stats import (
+    estimate_ftest_pvalue,
+    marginal_expectation,
+    merge_p_values_average,
+    merge_p_values_fdr,
+    merge_p_values_quantile,
+)
 from dowhy.gcm.util.general import geometric_median
 
 
@@ -53,6 +59,15 @@ def test_given_p_values_with_scaling_when_merge_p_values_quantile_then_returns_s
     assert merge_p_values_quantile(p_values, p_values_scaling, quantile=0.5) == approx(0.15)
     assert merge_p_values_quantile(p_values, p_values_scaling, quantile=0.25) == approx(0.17)
     assert merge_p_values_quantile(p_values, p_values_scaling, quantile=0.75) == approx(0.193, abs=0.001)
+
+
+def test_given_p_values_when_merge_p_values_fdr_then_returns_expected_p_vlaue():
+    assert merge_p_values_fdr([0]) == 0
+    assert merge_p_values_fdr([1]) == 1
+    assert merge_p_values_fdr([0.3]) == 0.3
+    assert merge_p_values_fdr([0, 1]) == 0.0
+    assert merge_p_values_fdr([0.1, 0.2, 0.5]) == approx(0.3)
+    assert merge_p_values_fdr([0.1, np.nan, 0.2, 0.5, np.nan]) == approx(0.3)
 
 
 def test_given_invalid_inputs_when_merge_p_values_quantile_then_raises_error():
