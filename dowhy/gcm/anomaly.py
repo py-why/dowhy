@@ -94,7 +94,7 @@ def attribute_anomalies(
     anomaly_samples: pd.DataFrame,
     anomaly_scorer: Optional[AnomalyScorer] = None,
     attribute_mean_deviation: bool = False,
-    num_distribution_samples: int = 1500,
+    num_distribution_samples: int = 3000,
     shapley_config: Optional[ShapleyConfig] = None,
 ) -> Dict[Any, np.ndarray]:
     """Estimates the contributions of upstream nodes to the anomaly score of the target_node for each sample in
