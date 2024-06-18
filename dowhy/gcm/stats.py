@@ -3,6 +3,7 @@ from typing import Callable, List, Optional, Union
 import numpy as np
 from scipy import stats
 from sklearn.linear_model import LinearRegression
+from statsmodels.stats.multitest import multipletests
 
 from dowhy.gcm.constant import EPS
 from dowhy.gcm.util.general import shape_into_2d
@@ -83,6 +84,32 @@ def merge_p_values_quantile(
         return float(p_values[0])
     else:
         return float(min(1.0, np.quantile(p_values / quantile, quantile)))
+
+
+def merge_p_values_fdr(p_values: Union[np.ndarray, List[float]], fdr_method: str = "fdr_bh") -> float:
+    """Merges p-values to represent the global null hypothesis that all hypotheses represented by the p-values are true.
+
+    Here, we first adjust the given p-values based on the provided false discovery rate (FDR) control method, and then
+    return the minimum.
+
+    :param p_values: A list or array of p-values.
+    :param fdr_method: The false discovery rate control method. For various options, please refer to
+                       `this page <https://www.statsmodels.org/dev/generated/statsmodels.stats.multitest.multipletests.html>`_.
+    :return: The minimum p-value after adjusting based on the given FDR method.
+    """
+    if len(p_values) == 0:
+        raise ValueError("Given list of p-values is empty!")
+
+    p_values = np.array(p_values)
+
+    if np.all(np.isnan(p_values)):
+        return float(np.nan)
+
+    p_values = p_values[~np.isnan(p_values)]
+
+    # Note: The alpha level doesn't matter here.
+    multipletests_result = multipletests(p_values, 0.05, method=fdr_method)
+    return min(multipletests_result[1])
 
 
 def marginal_expectation(
