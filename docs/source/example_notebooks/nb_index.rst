@@ -180,6 +180,19 @@ Real world-inspired examples
         | **Level:** Advanced
         | **Task:** Falsifying Causal Graph
 
+.. grid:: 2
+
+    .. grid-item-card:: :doc:`counterfactual_fairness_dowhy`
+
+        .. image:: ../_static/counterfactual_fairness_dowhy.png
+            :height: 120px
+            :align: center
+        +++
+        | **Level:** Advanced
+        | **Task:** Fairness estimation via GCM
+
+
+
 Examples on benchmark datasets
 -------------------------------
 
