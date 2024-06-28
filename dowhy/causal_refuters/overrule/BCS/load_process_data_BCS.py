@@ -99,7 +99,7 @@ class FeatureBinarizer(TransformerMixin):
             # Categorical column
             elif (c in self.colCateg) or (data[c].dtype == "object"):
                 # OneHotEncoder object
-                enc[c] = OneHotEncoder(sparse=False, dtype=int, handle_unknown="ignore")
+                enc[c] = OneHotEncoder(sparse_output=False, dtype=int, handle_unknown="ignore")
                 # Fit to observed categories
                 enc[c].fit(data[[c]])
 
