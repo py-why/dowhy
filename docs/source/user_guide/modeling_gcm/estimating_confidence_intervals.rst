@@ -116,7 +116,7 @@ trained graph. To do this conveniently, the GCM package provides a function
 >>> data = pd.DataFrame(dict(X=X, Y=Y, Z=Z))
 >>>
 >>> causal_model = gcm.StructuralCausalModel(nx.DiGraph([('Z', 'Y'), ('Z', 'X'), ('X', 'Y')]))
->>> gcm.auto.assign_causal_mechanisms(causal_model, data_old)
+>>> gcm.auto.assign_causal_mechanisms(causal_model, data)
 
 we can now use ``fit_and_compute`` as follows:
 
