@@ -37,17 +37,29 @@ def adjacency_matrix_to_graph(adjacency_matrix, labels=None):
     :param labels: List of labels.
     :returns: Graph in DOT format.
     """
+    import graphviz
+
+    if adjacency_matrix.ndim != 2:
+        raise ValueError("Adjacency matrix must have a dimension of 2.")
+
+    if isinstance(adjacency_matrix, np.matrix):
+        adjacency_matrix = np.asarray(adjacency_matrix)
+
     # Only consider edges have absolute edge weight > 0.01
     idx = np.abs(adjacency_matrix) > 0.01
     dirs = np.where(idx)
-    import graphviz
 
     d = graphviz.Digraph(engine="dot")
-    names = labels if labels else [f"x{i}" for i in range(len(adjacency_matrix))]
-    for name in names:
-        d.node(name)
+
+    if labels is None:
+        labels = [f"x{i}" for i in range(len(adjacency_matrix))]
+
+    for label in labels:
+        d.node(label)
+
     for to, from_, coef in zip(dirs[0], dirs[1], adjacency_matrix[idx]):
-        d.edge(names[from_], names[to], label=str(coef))
+        d.edge(labels[from_], labels[to], label=str(coef))
+
     return d
 
 
