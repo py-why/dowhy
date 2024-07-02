@@ -55,7 +55,9 @@ def refute_estimate(
 
     results = []
     for refuter in refuters:
+        print("REFUTER: ", refuter)
         refute = refuter(**refuter_kwargs)
+        print("REFUTE: ", refute)
         if isinstance(refute, list):
             results.extend(refute)
         else:
