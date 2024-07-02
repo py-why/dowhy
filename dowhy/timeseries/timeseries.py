@@ -30,23 +30,35 @@ def create_graph_from_user():
     return graph
 
 def create_graph_from_csv(file_path):
+    """
+    Creates a directed graph from a CSV file.
+
+    The CSV file should have at least three columns: 'node1', 'node2', and 'time_lag'.
+    Each row represents an edge from 'node1' to 'node2' with a 'time_lag' attribute.
+
+    Parameters:
+    - file_path (str): The path to the CSV file.
+
+    Returns:
+    - nx.DiGraph: A directed graph created from the CSV file.
+
+    Example CSV content:
+    node1,node2,time_lag
+    A,B,5
+    B,C,2
+    A,C,7
+    """
     # Read the CSV file into a DataFrame
     df = pd.read_csv(file_path)
     
     # Initialize an empty directed graph
     graph = nx.DiGraph()
     
-    # Add edges with weights to the graph
+    # Add edges with time lag to the graph
     for index, row in df.iterrows():
         graph.add_edge(row['node1'], row['node2'], time_lag=row['time_lag'])
     
     return graph
-
-def pretty_print_graph(graph):
-    # Display the entered graph
-    print("\nGraph edges with time lags:")
-    for edge in graph.edges(data=True):
-        print(f"{edge[0]} -> {edge[1]} with time-lagged dependency {edge[2]['time_lag']}")
 
 def display_networkx_graph(graph):
     # Draw and display the graph
@@ -71,10 +83,8 @@ def shift_columns(df, parents):
         column=str(column)
         if shift > 0:
             new_df[column] = new_df[column].shift(shift, axis=0, fill_value=None)
-        # elif shift < 0:
-        #     new_df[column] = new_df[column].shift(shift, axis=0, fill_value=None)
-        #     new_df.drop(new_df.index[0:abs(shift)], axis=0, inplace=True)
-    return new_df
+    filled_df=new_df.fillna(0)
+    return filled_df
 
 def filter_columns(df, child_node, parent_nodes):
     columns_to_keep = [str(child_node)] + list(parent_nodes.keys())
