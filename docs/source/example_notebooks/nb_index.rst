@@ -180,6 +180,19 @@ Real world-inspired examples
         | **Level:** Advanced
         | **Task:** Falsifying Causal Graph
 
+.. grid:: 2
+
+    .. grid-item-card:: :doc:`counterfactual_fairness_dowhy`
+
+        .. image:: ../_static/counterfactual_fairness_dowhy.png
+            :height: 120px
+            :align: center
+        +++
+        | **Level:** Advanced
+        | **Task:** Fairness estimation via GCM
+
+
+
 Examples on benchmark datasets
 -------------------------------
 
@@ -202,6 +215,12 @@ Examples on benchmark datasets
         +++
         | **Level:** Advanced
         | **Task:** Effect inference
+
+    .. grid-item-card:: :doc:`counterfactual_fairness_dowhy`
+
+        +++
+        | **Level:** Advanced
+        | **Task:** Fairness estimation
 
 .. grid:: 3
 
@@ -365,6 +384,7 @@ Miscellaneous
    gcm_icc
    gcm_counterfactual_medical_dry_eyes
    gcm_falsify_dag
+   counterfactual_fairness_dowhy
 
 .. toctree::
    :maxdepth: 1
@@ -377,6 +397,7 @@ Miscellaneous
    gcm_401k_analysis
    prediction/dowhy_causal_prediction_demo
    lalonde_pandas_api
+   counterfactual_fairness_dowhy
 
 .. toctree::
    :maxdepth: 1
