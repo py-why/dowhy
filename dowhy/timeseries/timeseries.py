@@ -30,7 +30,7 @@ def shift_columns(df: pd.DataFrame, columns: List[str], lag: List[int]) -> pd.Da
     filled_df = new_df.fillna(0)
     return filled_df
 
-def filter_columns(df:pd.DataFrame, child_node, parent_nodes) -> pd.DataFrame:
+def _filter_columns(df:pd.DataFrame, child_node, parent_nodes) -> pd.DataFrame:
     columns_to_keep = [str(child_node)] + list(parent_nodes.keys())
     filtered_df = df[columns_to_keep]
     return filtered_df
