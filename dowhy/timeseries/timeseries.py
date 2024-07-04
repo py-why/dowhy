@@ -1,32 +1,33 @@
 import networkx as nx
 import pandas as pd
-import matplotlib.pyplot as plt
+from dowhy.gcm.util import plot
+from typing import List, Tuple
 
-def display_networkx_graph(graph):
+def display_networkx_graph(graph:nx.DiGraph):
     # Draw and display the graph
-    pos = nx.spring_layout(graph)
-    nx.draw(graph, pos, with_labels=True)
-    labels = nx.get_edge_attributes(graph, 'time_lag')
-    nx.draw_networkx_edge_labels(graph, pos, edge_labels=labels)
-    plt.show()
+    plot(graph)
 
-def find_lagged_parent_nodes(graph, node):
-    parent_nodes = {}
+def find_lagged_parent_nodes(graph:nx.DiGraph, node:str) -> Tuple[List[str], List[int]]:
+    parent_nodes = []
+    time_lags = []
     for n in graph.predecessors(node):
         edge_data = graph.get_edge_data(n, node)
         if 'time_lag' in edge_data:
-            parent_nodes[str(n)] = edge_data['time_lag']
-    return parent_nodes
+            parent_nodes.append(n)
+            time_lags.append(edge_data['time_lag'])
+    return parent_nodes, time_lags
 
 # once we have the parent dictionary then we can parse it and shift columns within the dataframe with the appropriate lag
-def shift_columns(df:pd.DataFrame, parents:dict) -> pd.DataFrame:
-    # rename parents to columns and allow lag parameter
+def shift_columns(df: pd.DataFrame, columns: List[str], lag: List[int]) -> pd.DataFrame:
+    if len(columns) != len(lag):
+        raise ValueError("The size of 'columns' and 'lag' lists must be the same.")
+    
     new_df = df.copy()
-    for column, shift in parents.items():
-        column=str(column)
+    for column, shift in zip(columns, lag):
         if shift > 0:
             new_df[column] = new_df[column].shift(shift, axis=0, fill_value=None)
-    filled_df=new_df.fillna(0)
+    
+    filled_df = new_df.fillna(0)
     return filled_df
 
 def filter_columns(df:pd.DataFrame, child_node, parent_nodes) -> pd.DataFrame:
