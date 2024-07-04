@@ -1,6 +1,6 @@
 import networkx as nx
 import pandas as pd
-from dowhy.gcm.util import plot
+from dowhy.utils.plotting import plot
 from typing import List, Tuple
 
 def display_networkx_graph(graph:nx.DiGraph):
