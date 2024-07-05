@@ -200,8 +200,16 @@ def _plot_as_pyplot_figure(pygraphviz_graph: Any, figure_size: Optional[Tuple[in
         if figure_size is not None:
             plt.rcParams["figure.figsize"] = org_fig_size
 
-def pretty_print_graph(graph):
-    # Display the entered graph
+def pretty_print_graph(graph: nx.DiGraph) -> None:
+    '''
+    Pretty print the graph edges with time lags
+
+    Args:
+        graph: networkx graph
+
+    Returns:
+        None
+    '''
     print("\nGraph edges with time lags:")
     for edge in graph.edges(data=True):
         print(f"{edge[0]} -> {edge[1]} with time-lagged dependency {edge[2]['time_lag']}")
