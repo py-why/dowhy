@@ -1,11 +1,6 @@
 import networkx as nx
 import pandas as pd
-from dowhy.utils.plotting import plot
 from typing import List, Tuple
-
-def display_networkx_graph(graph:nx.DiGraph):
-    # Draw and display the graph
-    plot(graph)
 
 def find_lagged_parent_nodes(graph:nx.DiGraph, node:str) -> Tuple[List[str], List[int]]:
     parent_nodes = []
