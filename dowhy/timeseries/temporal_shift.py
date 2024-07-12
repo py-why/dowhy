@@ -42,24 +42,24 @@ def shift_columns(df: pd.DataFrame, columns: List[str], lag: List[int]) -> pd.Da
     new_df = df.copy()
     for column, shift in zip(columns, lag):
         if shift > 0:
-            new_df[column] = new_df[column].shift(shift, axis=0, fill_value=None)
+            new_df[str(column)] = new_df[str(column)].shift(shift, axis=0, fill_value=None)
     
     filled_df = new_df.fillna(0)
     return filled_df
 
-def _filter_columns(df:pd.DataFrame, child_node:int, parent_nodes:dict) -> pd.DataFrame:
+def _filter_columns(df:pd.DataFrame, child_node:int, parent_nodes:List[int]) -> pd.DataFrame:
     '''
     Given a dataframe, a child node and a dictionary of parent nodes, this function filters the dataframe to keep only the columns of the child node and the parent nodes.
 
     Args:
     - df: the dataframe
     - child_node: the child node
-    - parent_nodes: a dictionary of parent nodes
+    - parent_nodes: a list of parent nodes
 
     Returns:
     - filtered_df: the dataframe with only the columns of the child node and the parent nodes
     '''
-
-    columns_to_keep = [str(child_node)] + list(parent_nodes.keys())
+    columns_to_keep = [str(node) for node in parent_nodes]
+    columns_to_keep += [str(child_node)] 
     filtered_df = df[columns_to_keep]
     return filtered_df
