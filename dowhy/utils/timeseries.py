@@ -9,13 +9,13 @@ def create_graph_from_user() -> nx.DiGraph:
     where 'node1' and 'node2' are the nodes connected by the edge, and 'time_lag' is a numerical
     value representing the weight of the edge. The user should enter 'done' to finish inputting edges.
 
-    Returns:
-    - nx.DiGraph: A directed graph created from the user's input.
+    :return: A directed graph created from the user's input.
+    :rtype: nx.DiGraph
 
     Example user input:
-    Enter an edge: A B 4
-    Enter an edge: B C 2
-    Enter an edge: done
+        Enter an edge: A B 4
+        Enter an edge: B C 2
+        Enter an edge: done
     """
     # Initialize an empty directed graph
     graph = nx.DiGraph()
@@ -50,17 +50,20 @@ def create_graph_from_csv(file_path:str) -> nx.DiGraph:
     The CSV file should have at least three columns: 'node1', 'node2', and 'time_lag'.
     Each row represents an edge from 'node1' to 'node2' with a 'time_lag' attribute.
 
-    Parameters:
-    - file_path (str): The path to the CSV file.
+    :param file_path: The path to the CSV file.
+    :type file_path: str
+    :return: A directed graph created from the CSV file.
+    :rtype: nx.DiGraph
 
-    Returns:
-    - nx.DiGraph: A directed graph created from the CSV file.
+    Example:
+        Example CSV content:
+        
+        .. code-block:: csv
 
-    Example CSV content:
-    node1,node2,time_lag
-    A,B,5
-    B,C,2
-    A,C,7
+            node1,node2,time_lag
+            A,B,5
+            B,C,2
+            A,C,7
     """
     # Read the CSV file into a DataFrame
     df = pd.read_csv(file_path)
