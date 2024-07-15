@@ -76,3 +76,20 @@ def create_graph_from_csv(file_path:str) -> nx.DiGraph:
         graph.add_edge(row['node1'], row['node2'], time_lag=row['time_lag'])
     
     return graph
+
+def create_graph_from_dot_format(file_path:str) -> nx.DiGraph:
+    """
+    Creates a directed graph from a DOT file.
+    
+    The DOT file should contain a graph in DOT format.
+    
+    :param file_path: The path to the DOT file.
+    :type file_path: str
+    :return: A directed graph created from the DOT file.
+    :rtype: nx.DiGraph
+    """
+
+    # Read the DOT file into a graph
+    graph = nx.drawing.nx_agraph.read_dot(file_path)
+    
+    return graph
