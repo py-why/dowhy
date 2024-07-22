@@ -73,6 +73,12 @@ def create_graph_from_csv(file_path:str) -> nx.DiGraph:
     
     # Add edges with time lag to the graph
     for index, row in df.iterrows():
+        # add validation for the time lag column to be a number
+        try:
+            row['time_lag'] = float(row['time_lag'])
+        except ValueError:
+            print("Invalid weight. Please enter a numerical value for the time_lag for the edge between {} and {}.".format(row['node1'], row['node2']))
+            return None
         graph.add_edge(row['node1'], row['node2'], time_lag=row['time_lag'])
     
     return graph
