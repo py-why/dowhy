@@ -83,19 +83,42 @@ def create_graph_from_csv(file_path:str) -> nx.DiGraph:
     
     return graph
 
-def create_graph_from_dot_format(file_path:str) -> nx.DiGraph:
+def create_graph_from_dot_format(file_path: str) -> nx.DiGraph:
     """
-    Creates a directed graph from a DOT file.
+    Creates a directed graph from a DOT file and ensures it is a DiGraph.
     
     The DOT file should contain a graph in DOT format.
     
     :param file_path: The path to the DOT file.
     :type file_path: str
-    :return: A directed graph created from the DOT file.
+    :return: A directed graph (DiGraph) created from the DOT file.
     :rtype: nx.DiGraph
     """
-
-    # Read the DOT file into a graph
-    graph = nx.drawing.nx_agraph.read_dot(file_path)
+    # Read the DOT file into a MultiDiGraph
+    multi_graph = nx.drawing.nx_agraph.read_dot(file_path)
     
+    # Initialize a new DiGraph
+    graph = nx.DiGraph()
+    
+    # Iterate over edges of the MultiDiGraph
+    for u, v, data in multi_graph.edges(data=True):
+        if 'label' in data:
+            try:
+                time_lag = float(data['label'])
+                
+                # Handle multiple edges between the same nodes
+                if graph.has_edge(u, v):
+                    existing_data = graph.get_edge_data(u, v)
+                    if 'time_lag' in existing_data:
+                        # Use maximum time_lag if multiple edges exist
+                        existing_data['time_lag'] = max(existing_data['time_lag'], time_lag)
+                    else:
+                        existing_data['time_lag'] = time_lag
+                else:
+                    graph.add_edge(u, v, time_lag=time_lag)
+                    
+            except ValueError:
+                print(f"Invalid weight for the edge between {u} and {v}.")
+                return None
+
     return graph
