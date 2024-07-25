@@ -122,3 +122,62 @@ def create_graph_from_dot_format(file_path: str) -> nx.DiGraph:
                 return None
 
     return graph
+
+import numpy as np
+import networkx as nx
+
+def create_graph_from_array(array: np.ndarray, var_names: list) -> nx.DiGraph:
+    """
+    Create a NetworkX directed graph from a numpy array with time lag information.
+    
+    The numpy array `array` has shape (n, n, tau) where:
+    - n is the number of variables
+    - tau is the number of time lags
+    
+    The list `var_names` contains the names of the variables.
+    
+    The resulting graph will be a directed graph with edge attributes indicating
+    the type of link based on the array values.
+    
+    :param array: A numpy array of shape (n, n, tau) representing the causal links.
+    :type array: np.ndarray
+    :param var_names: A list of variable names.
+    :type var_names: list
+    :return: A directed graph with edge attributes based on the array values.
+    :rtype: nx.DiGraph
+    """
+    n = array.shape[0]  # Number of variables
+    tau = array.shape[2]  # Number of time lags
+    
+    # Initialize a directed graph
+    graph = nx.DiGraph()
+    
+    # Add nodes with names
+    graph.add_nodes_from(var_names)
+    
+    # Iterate over all pairs of nodes
+    for i in range(n):
+        for j in range(n):
+            if i == j:
+                continue  # Skip self-loops
+            
+            # Check for contemporaneous links (tau = 0)
+            if array[i, j, 0] == '-->':
+                graph.add_edge(var_names[i], var_names[j], type='contemporaneous', direction='forward')
+            elif array[i, j, 0] == '<--':
+                graph.add_edge(var_names[j], var_names[i], type='contemporaneous', direction='backward')
+            elif array[i, j, 0] == 'o-o':
+                graph.add_edge(var_names[i], var_names[j], type='adjacency', style='circle')
+                graph.add_edge(var_names[j], var_names[i], type='adjacency', style='circle')
+            elif array[i, j, 0] == 'x-x':
+                graph.add_edge(var_names[i], var_names[j], type='conflicting', style='cross')
+                graph.add_edge(var_names[j], var_names[i], type='conflicting', style='cross')
+            
+            # Check for lagged links (tau > 0)
+            for t in range(1, tau):
+                if array[i, j, t] == '-->':
+                    graph.add_edge(var_names[i], var_names[j], time_lag=t)
+                elif array[j, i, t] == '-->':
+                    graph.add_edge(var_names[j], var_names[i], time_lag=t)
+
+    return graph
