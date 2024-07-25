@@ -22,10 +22,9 @@ def find_lagged_parent_nodes(graph:nx.DiGraph, node:str) -> Tuple[List[str], Lis
             time_lags.append(edge_data['time_lag'])
     return parent_nodes, time_lags
 
-# once we have the parent dictionary then we can parse it and shift columns within the dataframe with the appropriate lag
 def shift_columns(df: pd.DataFrame, columns: List[str], lag: List[int]) -> pd.DataFrame:
     """
-    Given a dataframe, a list of columns, and a list of time lags, this function shifts the columns in the dataframe by the corresponding time lags.
+    Given a dataframe, a list of columns, and a list of time lags, this function shifts the columns in the dataframe by the corresponding time lags, creating a new unique column for each shifted version.
 
     :param df: The dataframe to shift.
     :type df: pandas.DataFrame
@@ -40,27 +39,34 @@ def shift_columns(df: pd.DataFrame, columns: List[str], lag: List[int]) -> pd.Da
         raise ValueError("The size of 'columns' and 'lag' lists must be the same.")
     
     new_df = df.copy()
-    for column, shift in zip(columns, lag):
-        if shift > 0:
-            new_df[str(column)] = new_df[str(column)].shift(shift, axis=0, fill_value=None)
+    for column, max_lag in zip(columns, lag):
+        max_lag = int(max_lag)
+        for shift in range(1, max_lag + 1):
+            new_column_name = f"{column}_lag{shift}"
+            new_df[new_column_name] = new_df[column].shift(shift, axis=0, fill_value=0)
     
-    filled_df = new_df.fillna(0)
-    return filled_df
+    return new_df
 
-def _filter_columns(df:pd.DataFrame, child_node:int, parent_nodes:List[int]) -> pd.DataFrame:
+def _filter_columns(df: pd.DataFrame, child_node: int, parent_nodes: List[int]) -> pd.DataFrame:
     """
-    Given a dataframe, a target node and a list of action/parent nodes, this function filters the dataframe to keep only the columns of the target node and the action/parent nodes.
+    Given a dataframe, a target node, and a list of action/parent nodes, this function filters the dataframe to keep only the columns of the target node, the parent nodes, and their shifted versions.
 
     :param df: The dataframe to filter.
     :type df: pandas.DataFrame
     :param child_node: The child node.
-    :type child_node: str
+    :type child_node: int
     :param parent_nodes: A list of parent nodes.
     :type parent_nodes: list
-    :return: The dataframe with only the columns of the child node and the parent nodes.
+    :return: The dataframe with only the columns of the child node, parent nodes, and their shifted versions.
     :rtype: pandas.DataFrame
     """
-    columns_to_keep = [str(node) for node in parent_nodes]
-    columns_to_keep += [str(child_node)] 
+    columns_to_keep = [str(child_node)]
+    for node in parent_nodes:
+        columns_to_keep.append(str(node))
+        # Include all shifted versions of the parent node
+        shifted_columns = [col for col in df.columns if col.startswith(f"{node}_lag")]
+        columns_to_keep.extend(shifted_columns)
+    
+    # Filter the dataframe to keep only the relevant columns
     filtered_df = df[columns_to_keep]
     return filtered_df
