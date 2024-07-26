@@ -5,9 +5,6 @@ import numpy as np
 from io import StringIO
 from dowhy.utils.timeseries import create_graph_from_user, create_graph_from_csv, create_graph_from_dot_format, create_graph_from_array
 
-# Import the functions from your module
-# from your_module import create_graph_from_user, create_graph_from_csv, create_graph_from_dot_format, create_graph_from_array
-
 class TestGraphFunctions(unittest.TestCase):
 
     def test_create_graph_from_csv(self):
