@@ -22,7 +22,7 @@ def find_lagged_parent_nodes(graph:nx.DiGraph, node:str) -> Tuple[List[str], Lis
             time_lags.append(edge_data['time_lag'])
     return parent_nodes, time_lags
 
-def shift_columns_by_lag(df: pd.DataFrame, columns: List[str], lag: List[int], filter: bool, child_node: Optional[int] = None) -> pd.DataFrame:
+def shift_columns_by_lag(df: pd.DataFrame, columns: List[str], lag: List[int], filter: bool, child_node: Optional[str] = None) -> pd.DataFrame:
     """
     Given a dataframe, a list of columns, and a list of time lags, this function shifts the columns in the dataframe by the corresponding time lags, creating a new unique column for each shifted version.
     Optionally, it can filter the dataframe to keep only the columns of the child node, the parent nodes, and their shifted versions.
@@ -55,7 +55,7 @@ def shift_columns_by_lag(df: pd.DataFrame, columns: List[str], lag: List[int], f
     
     return new_df
 
-def _filter_columns(df: pd.DataFrame, child_node: int, parent_nodes: List[int]) -> pd.DataFrame:
+def _filter_columns(df: pd.DataFrame, child_node: str, parent_nodes: List[str]) -> pd.DataFrame:
     """
     Given a dataframe, a target node, and a list of action/parent nodes, this function filters the dataframe to keep only the columns of the child node, the parent nodes, and their shifted versions.
 
