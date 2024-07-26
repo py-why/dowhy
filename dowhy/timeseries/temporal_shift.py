@@ -1,6 +1,6 @@
 import networkx as nx
 import pandas as pd
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 def find_lagged_parent_nodes(graph:nx.DiGraph, node:str) -> Tuple[List[str], List[int]]:
     """
@@ -22,9 +22,10 @@ def find_lagged_parent_nodes(graph:nx.DiGraph, node:str) -> Tuple[List[str], Lis
             time_lags.append(edge_data['time_lag'])
     return parent_nodes, time_lags
 
-def shift_columns(df: pd.DataFrame, columns: List[str], lag: List[int]) -> pd.DataFrame:
+def shift_columns_by_lag(df: pd.DataFrame, columns: List[str], lag: List[int], filter: bool, child_node: Optional[int] = None) -> pd.DataFrame:
     """
     Given a dataframe, a list of columns, and a list of time lags, this function shifts the columns in the dataframe by the corresponding time lags, creating a new unique column for each shifted version.
+    Optionally, it can filter the dataframe to keep only the columns of the child node, the parent nodes, and their shifted versions.
 
     :param df: The dataframe to shift.
     :type df: pandas.DataFrame
@@ -32,7 +33,11 @@ def shift_columns(df: pd.DataFrame, columns: List[str], lag: List[int]) -> pd.Da
     :type columns: list
     :param lags: A list of time lags to shift the columns by.
     :type lags: list
-    :return: The dataframe with the columns shifted by the corresponding time lags.
+    :param filter: A boolean indicating whether to filter the dataframe to keep only relevant columns.
+    :type filter: bool
+    :param child_node: The child node to keep when filtering.
+    :type child_node: int, optional
+    :return: The dataframe with the columns shifted by the corresponding time lags and optionally filtered.
     :rtype: pandas.DataFrame
     """
     if len(columns) != len(lag):
@@ -45,11 +50,14 @@ def shift_columns(df: pd.DataFrame, columns: List[str], lag: List[int]) -> pd.Da
             new_column_name = f"{column}_lag{shift}"
             new_df[new_column_name] = new_df[column].shift(shift, axis=0, fill_value=0)
     
+    if filter and child_node is not None:
+        new_df = _filter_columns(new_df, child_node, columns)
+    
     return new_df
 
 def _filter_columns(df: pd.DataFrame, child_node: int, parent_nodes: List[int]) -> pd.DataFrame:
     """
-    Given a dataframe, a target node, and a list of action/parent nodes, this function filters the dataframe to keep only the columns of the target node, the parent nodes, and their shifted versions.
+    Given a dataframe, a target node, and a list of action/parent nodes, this function filters the dataframe to keep only the columns of the child node, the parent nodes, and their shifted versions.
 
     :param df: The dataframe to filter.
     :type df: pandas.DataFrame
