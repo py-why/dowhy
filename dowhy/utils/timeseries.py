@@ -1,3 +1,4 @@
+import numpy as np
 import networkx as nx
 import pandas as pd
 
@@ -123,8 +124,6 @@ def create_graph_from_dot_format(file_path: str) -> nx.DiGraph:
 
     return graph
 
-import numpy as np
-import networkx as nx
 
 def create_graph_from_array(array: np.ndarray, var_names: list) -> nx.DiGraph:
     """
