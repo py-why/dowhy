@@ -6,6 +6,8 @@ def create_graph_from_user() -> nx.DiGraph:
     """
     Creates a directed graph based on user input from the console.
 
+    The time_lag parameter of the networkx graph represents the maximal causal lag of an edge between any 2 nodes in the graph.
+
     The user is prompted to enter edges one by one in the format 'node1 node2 time_lag',
     where 'node1' and 'node2' are the nodes connected by the edge, and 'time_lag' is a numerical
     value representing the weight of the edge. The user should enter 'done' to finish inputting edges.
@@ -48,6 +50,8 @@ def create_graph_from_csv(file_path:str) -> nx.DiGraph:
     """
     Creates a directed graph from a CSV file.
 
+    The time_lag parameter of the networkx graph represents the maximal causal lag of an edge between any 2 nodes in the graph.
+
     The CSV file should have at least three columns: 'node1', 'node2', and 'time_lag'.
     Each row represents an edge from 'node1' to 'node2' with a 'time_lag' attribute.
 
@@ -87,6 +91,8 @@ def create_graph_from_csv(file_path:str) -> nx.DiGraph:
 def create_graph_from_dot_format(file_path: str) -> nx.DiGraph:
     """
     Creates a directed graph from a DOT file and ensures it is a DiGraph.
+
+    The time_lag parameter of the networkx graph represents the maximal causal lag of an edge between any 2 nodes in the graph.
     
     The DOT file should contain a graph in DOT format.
     
@@ -125,15 +131,11 @@ def create_graph_from_dot_format(file_path: str) -> nx.DiGraph:
     return graph
 
 
-def create_graph_from_array(array: np.ndarray, var_names: list) -> nx.DiGraph:
+def create_graph_from_networkx_array(array: np.ndarray, var_names: list) -> nx.DiGraph:
     """
     Create a NetworkX directed graph from a numpy array with time lag information.
     
-    The numpy array `array` has shape (n, n, tau) where:
-    - n is the number of variables
-    - tau is the number of time lags
-    
-    The list `var_names` contains the names of the variables.
+    The time_lag parameter of the networkx graph represents the maximal causal lag of an edge between any 2 nodes in the graph.
     
     The resulting graph will be a directed graph with edge attributes indicating
     the type of link based on the array values.
