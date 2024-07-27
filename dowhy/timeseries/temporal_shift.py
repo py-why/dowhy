@@ -2,7 +2,7 @@ import networkx as nx
 import pandas as pd
 from typing import List, Tuple, Optional
 
-def find_lagged_parent_nodes(graph:nx.DiGraph, node:str) -> Tuple[List[str], List[int]]:
+def find_lagged_parents(graph:nx.DiGraph, node:str) -> Tuple[List[str], List[int]]:
     """
     Given a graph and a node, this function returns the parent nodes of the node and the time lags associated with the edges between the parent nodes and the node.
 
