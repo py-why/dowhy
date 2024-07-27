@@ -51,30 +51,8 @@ def shift_columns_by_lag(df: pd.DataFrame, columns: List[str], lag: List[int], f
             new_df[new_column_name] = new_df[column].shift(shift, axis=0, fill_value=0)
     
     if filter and child_node is not None:
-        new_df = _filter_columns(new_df, child_node, columns)
+        relevant_columns = [child_node] + columns + [f"{col}_lag{shift}" for col in columns for shift in range(1, lag[columns.index(col)] + 1)]
+        relevant_columns = list(dict.fromkeys(relevant_columns))  # Ensure unique and maintain order
+        new_df = new_df[relevant_columns]
     
     return new_df
-
-def _filter_columns(df: pd.DataFrame, child_node: str, parent_nodes: List[str]) -> pd.DataFrame:
-    """
-    Given a dataframe, a target node, and a list of action/parent nodes, this function filters the dataframe to keep only the columns of the child node, the parent nodes, and their shifted versions.
-
-    :param df: The dataframe to filter.
-    :type df: pandas.DataFrame
-    :param child_node: The child node.
-    :type child_node: int
-    :param parent_nodes: A list of parent nodes.
-    :type parent_nodes: list
-    :return: The dataframe with only the columns of the child node, parent nodes, and their shifted versions.
-    :rtype: pandas.DataFrame
-    """
-    columns_to_keep = [str(child_node)]
-    for node in parent_nodes:
-        columns_to_keep.append(str(node))
-        # Include all shifted versions of the parent node
-        shifted_columns = [col for col in df.columns if col.startswith(f"{node}_lag")]
-        columns_to_keep.extend(shifted_columns)
-    
-    # Filter the dataframe to keep only the relevant columns
-    filtered_df = df[columns_to_keep]
-    return filtered_df
