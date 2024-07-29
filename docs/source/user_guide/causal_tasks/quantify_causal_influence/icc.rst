@@ -8,8 +8,8 @@ By quantifying intrinsic causal influence, we answer the question:
 
 Naturally, descendants will have a zero intrinsic causal influence on the target node. This method is based on the paper:
 
-    Dominik Janzing, Patrick Blöbaum, Lenon Minorics, Philipp Faller, Atalanti Mastakouri. `Quantifying intrinsic causal contributions via structure preserving interventions <https://arxiv.org/abs/2007.00714>`_
-    arXiv:2007.00714, 2021
+    Dominik Janzing, Patrick Blöbaum, Atalanti A Mastakouri, Philipp M Faller, Lenon Minorics, Kailash Budhathoki. `Quantifying intrinsic causal contributions via structure preserving interventions <https://proceedings.mlr.press/v238/janzing24a.html>`_
+    Proceedings of The 27th International Conference on Artificial Intelligence and Statistics, PMLR 238:2188-2196, 2024
 
 Let's consider an example from the paper to understand the type of influence being measured here. Imagine a schedule of
 three trains, ``Train A, Train B`` and ``Train C``, where the departure time of ``Train C`` depends on the arrival time of ``Train B``,

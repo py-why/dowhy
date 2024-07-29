@@ -17,8 +17,8 @@ Additionally, for explaining changes in the mean of the target variable (or othe
 DoWhy implements a multiply-robust causal change attribution method, which uses a combination of regression and re-weighting
 to make the final estimates less sensitive to estimation error. This method was presented in the following paper:
 
-    Quintas-Martinez, V., Bahadori, M. T., Santiago, E., Mu, J., Janzing, D., and Heckerman, D. `Multiply-Robust Causal Change Attribution <https://arxiv.org/abs/2404.08839>` 
-    Proceedings of the 41st International Conference on Machine Learning, Vienna, Austria. PMLR 235, 2024.
+    Victor Quintas-Martinez, Mohammad Taha Bahadori, Eduardo Santiago, Jeff Mu, David Heckerman. `Multiply-Robust Causal Change Attribution <http://proceedings.mlr.press/v130/budhathoki21a/budhathoki21a.pdf>`_
+    Proceedings of the 41st International Conference on Machine Learning, PMLR 235:41821--41840, 2024.
 
 How to use it
 ^^^^^^^^^^^^^^
