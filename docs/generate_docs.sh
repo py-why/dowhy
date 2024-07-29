@@ -59,3 +59,9 @@ echo "<html>
         <meta http-equiv="'"'"refresh"'"'" content="'"'"0; url=./${STABLE_VERSION}"'"'" />
     </head>
 </html>" > ${DOCS_ROOT}/index.html
+
+echo "Docsite ready, listing contents..."
+
+find ${DOCS_ROOT}
+
+echo "finished generate_contents.sh"
