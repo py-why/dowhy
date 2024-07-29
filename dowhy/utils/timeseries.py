@@ -1,6 +1,7 @@
-import numpy as np
 import networkx as nx
+import numpy as np
 import pandas as pd
+
 
 def create_graph_from_user() -> nx.DiGraph:
     """
@@ -22,11 +23,11 @@ def create_graph_from_user() -> nx.DiGraph:
     """
     # Initialize an empty directed graph
     graph = nx.DiGraph()
-    
+
     # Instructions for the user
     print("Enter the graph as a list of edges with time lags. Enter 'done' when you are finished.")
     print("Each edge should be entered in the format 'node1 node2 time_lag'. For example: 'A B 4'")
-    
+
     # Loop to receive user input
     while True:
         edge = input("Enter an edge: ")
@@ -43,10 +44,11 @@ def create_graph_from_user() -> nx.DiGraph:
             print("Invalid weight. Please enter a numerical value for the time_lag.")
             continue
         graph.add_edge(node1, node2, time_lag=time_lag)
-    
+
     return graph
 
-def create_graph_from_csv(file_path:str) -> nx.DiGraph:
+
+def create_graph_from_csv(file_path: str) -> nx.DiGraph:
     """
     Creates a directed graph from a CSV file.
 
@@ -62,7 +64,7 @@ def create_graph_from_csv(file_path:str) -> nx.DiGraph:
 
     Example:
         Example CSV content:
-        
+
         .. code-block:: csv
 
             node1,node2,time_lag
@@ -72,30 +74,35 @@ def create_graph_from_csv(file_path:str) -> nx.DiGraph:
     """
     # Read the CSV file into a DataFrame
     df = pd.read_csv(file_path)
-    
+
     # Initialize an empty directed graph
     graph = nx.DiGraph()
-    
+
     # Add edges with time lag to the graph
     for index, row in df.iterrows():
         # add validation for the time lag column to be a number
         try:
-            row['time_lag'] = float(row['time_lag'])
+            row["time_lag"] = float(row["time_lag"])
         except ValueError:
-            print("Invalid weight. Please enter a numerical value for the time_lag for the edge between {} and {}.".format(row['node1'], row['node2']))
+            print(
+                "Invalid weight. Please enter a numerical value for the time_lag for the edge between {} and {}.".format(
+                    row["node1"], row["node2"]
+                )
+            )
             return None
-        graph.add_edge(row['node1'], row['node2'], time_lag=row['time_lag'])
-    
+        graph.add_edge(row["node1"], row["node2"], time_lag=row["time_lag"])
+
     return graph
+
 
 def create_graph_from_dot_format(file_path: str) -> nx.DiGraph:
     """
     Creates a directed graph from a DOT file and ensures it is a DiGraph.
 
     The time_lag parameter of the networkx graph represents the maximal causal lag of an edge between any 2 nodes in the graph.
-    
+
     The DOT file should contain a graph in DOT format.
-    
+
     :param file_path: The path to the DOT file.
     :type file_path: str
     :return: A directed graph (DiGraph) created from the DOT file.
@@ -103,27 +110,27 @@ def create_graph_from_dot_format(file_path: str) -> nx.DiGraph:
     """
     # Read the DOT file into a MultiDiGraph
     multi_graph = nx.drawing.nx_agraph.read_dot(file_path)
-    
+
     # Initialize a new DiGraph
     graph = nx.DiGraph()
-    
+
     # Iterate over edges of the MultiDiGraph
     for u, v, data in multi_graph.edges(data=True):
-        if 'label' in data:
+        if "label" in data:
             try:
-                time_lag = float(data['label'])
-                
+                time_lag = float(data["label"])
+
                 # Handle multiple edges between the same nodes
                 if graph.has_edge(u, v):
                     existing_data = graph.get_edge_data(u, v)
-                    if 'time_lag' in existing_data:
+                    if "time_lag" in existing_data:
                         # Use maximum time_lag if multiple edges exist
-                        existing_data['time_lag'] = max(existing_data['time_lag'], time_lag)
+                        existing_data["time_lag"] = max(existing_data["time_lag"], time_lag)
                     else:
-                        existing_data['time_lag'] = time_lag
+                        existing_data["time_lag"] = time_lag
                 else:
                     graph.add_edge(u, v, time_lag=time_lag)
-                    
+
             except ValueError:
                 print(f"Invalid weight for the edge between {u} and {v}.")
                 return None
@@ -134,12 +141,12 @@ def create_graph_from_dot_format(file_path: str) -> nx.DiGraph:
 def create_graph_from_networkx_array(array: np.ndarray, var_names: list) -> nx.DiGraph:
     """
     Create a NetworkX directed graph from a numpy array with time lag information.
-    
+
     The time_lag parameter of the networkx graph represents the maximal causal lag of an edge between any 2 nodes in the graph.
-    
+
     The resulting graph will be a directed graph with edge attributes indicating
     the type of link based on the array values.
-    
+
     :param array: A numpy array of shape (n, n, tau) representing the causal links.
     :type array: np.ndarray
     :param var_names: A list of variable names.
@@ -149,36 +156,36 @@ def create_graph_from_networkx_array(array: np.ndarray, var_names: list) -> nx.D
     """
     n = array.shape[0]  # Number of variables
     tau = array.shape[2]  # Number of time lags
-    
+
     # Initialize a directed graph
     graph = nx.DiGraph()
-    
+
     # Add nodes with names
     graph.add_nodes_from(var_names)
-    
+
     # Iterate over all pairs of nodes
     for i in range(n):
         for j in range(n):
             if i == j:
                 continue  # Skip self-loops
-            
+
             # Check for contemporaneous links (tau = 0)
-            if array[i, j, 0] == '-->':
-                graph.add_edge(var_names[i], var_names[j], type='contemporaneous', direction='forward')
-            elif array[i, j, 0] == '<--':
-                graph.add_edge(var_names[j], var_names[i], type='contemporaneous', direction='backward')
-            elif array[i, j, 0] == 'o-o':
-                graph.add_edge(var_names[i], var_names[j], type='adjacency', style='circle')
-                graph.add_edge(var_names[j], var_names[i], type='adjacency', style='circle')
-            elif array[i, j, 0] == 'x-x':
-                graph.add_edge(var_names[i], var_names[j], type='conflicting', style='cross')
-                graph.add_edge(var_names[j], var_names[i], type='conflicting', style='cross')
-            
+            if array[i, j, 0] == "-->":
+                graph.add_edge(var_names[i], var_names[j], type="contemporaneous", direction="forward")
+            elif array[i, j, 0] == "<--":
+                graph.add_edge(var_names[j], var_names[i], type="contemporaneous", direction="backward")
+            elif array[i, j, 0] == "o-o":
+                graph.add_edge(var_names[i], var_names[j], type="adjacency", style="circle")
+                graph.add_edge(var_names[j], var_names[i], type="adjacency", style="circle")
+            elif array[i, j, 0] == "x-x":
+                graph.add_edge(var_names[i], var_names[j], type="conflicting", style="cross")
+                graph.add_edge(var_names[j], var_names[i], type="conflicting", style="cross")
+
             # Check for lagged links (tau > 0)
             for t in range(1, tau):
-                if array[i, j, t] == '-->':
+                if array[i, j, t] == "-->":
                     graph.add_edge(var_names[i], var_names[j], time_lag=t)
-                elif array[j, i, t] == '-->':
+                elif array[j, i, t] == "-->":
                     graph.add_edge(var_names[j], var_names[i], time_lag=t)
 
     return graph
