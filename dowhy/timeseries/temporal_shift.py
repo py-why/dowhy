@@ -59,7 +59,8 @@ def shift_columns_by_lag(
         relevant_columns = (
             [child_node]
             + columns
-            + [f"{col}_lag{shift}" for col in columns for shift in range(1, lag[columns.index(col)] + 1)]
+            + [f"{col}_lag{shift}" for col in columns for shift in range(1, int
+            (lag[columns.index(col)]) + 1)]
         )
         relevant_columns = list(dict.fromkeys(relevant_columns))  # Ensure unique and maintain order
         new_df = new_df[relevant_columns]
