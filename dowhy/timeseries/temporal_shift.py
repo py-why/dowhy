@@ -3,6 +3,7 @@ from typing import List, Optional, Tuple
 import networkx as nx
 import pandas as pd
 
+
 def find_ancestors(graph: nx.DiGraph, node: str) -> List[str]:
     """
     Given a graph and a node, this function returns the ancestor nodes of the node that are not parents.
@@ -19,6 +20,7 @@ def find_ancestors(graph: nx.DiGraph, node: str) -> List[str]:
         if n not in graph.predecessors(node):
             ancestors.append(n)
     return ancestors
+
 
 def find_lagged_parents(graph: nx.DiGraph, node: str) -> Tuple[List[str], List[int]]:
     """
@@ -42,7 +44,12 @@ def find_lagged_parents(graph: nx.DiGraph, node: str) -> Tuple[List[str], List[i
 
 
 def shift_columns_by_lag(
-    df: pd.DataFrame, columns: List[str], lag: List[int],  ancestors: List[str], filter: bool, child_node: Optional[str] = None
+    df: pd.DataFrame,
+    columns: List[str],
+    lag: List[int],
+    ancestors: List[str],
+    filter: bool,
+    child_node: Optional[str] = None,
 ) -> pd.DataFrame:
     """
     Given a dataframe, a list of columns, and a list of time lags, this function shifts the columns in the dataframe by the corresponding time lags, creating a new unique column for each shifted version.
@@ -77,12 +84,11 @@ def shift_columns_by_lag(
         relevant_columns = (
             [child_node]
             + columns
-            + [f"{col}_lag{shift}" for col in columns for shift in range(1, int
-            (lag[columns.index(col)]) + 1)]
+            + [f"{col}_lag{shift}" for col in columns for shift in range(1, int(lag[columns.index(col)]) + 1)]
         )
         relevant_columns = list(dict.fromkeys(relevant_columns))  # Ensure unique and maintain order
         new_df = new_df[relevant_columns]
-    
+
     for ancestor in ancestors:
         new_df[ancestor] = df[ancestor]
 
