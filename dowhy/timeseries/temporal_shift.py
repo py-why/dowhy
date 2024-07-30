@@ -3,6 +3,22 @@ from typing import List, Optional, Tuple
 import networkx as nx
 import pandas as pd
 
+def find_ancestors(graph: nx.DiGraph, node: str) -> List[str]:
+    """
+    Given a graph and a node, this function returns the ancestor nodes of the node that are not parents.
+
+    :param graph: The graph object.
+    :type graph: networkx.Graph
+    :param node: The node for which we want to find the ancestor nodes.
+    :type node: string
+    :return: A list of ancestor nodes of the node.
+    :rtype: list
+    """
+    ancestors = []
+    for n in nx.ancestors(graph, node):
+        if n not in graph.predecessors(node):
+            ancestors.append(n)
+    return ancestors
 
 def find_lagged_parents(graph: nx.DiGraph, node: str) -> Tuple[List[str], List[int]]:
     """
@@ -26,7 +42,7 @@ def find_lagged_parents(graph: nx.DiGraph, node: str) -> Tuple[List[str], List[i
 
 
 def shift_columns_by_lag(
-    df: pd.DataFrame, columns: List[str], lag: List[int], filter: bool, child_node: Optional[str] = None
+    df: pd.DataFrame, columns: List[str], lag: List[int],  ancestors: List[str], filter: bool, child_node: Optional[str] = None
 ) -> pd.DataFrame:
     """
     Given a dataframe, a list of columns, and a list of time lags, this function shifts the columns in the dataframe by the corresponding time lags, creating a new unique column for each shifted version.
@@ -36,8 +52,10 @@ def shift_columns_by_lag(
     :type df: pandas.DataFrame
     :param columns: A list of columns to shift.
     :type columns: list
-    :param lags: A list of time lags to shift the columns by.
-    :type lags: list
+    :param lag: A list of time lags to shift the columns by.
+    :type lag: list
+    :param ancestors: A list of ancestor nodes of the child node.
+    :type ancestors: list
     :param filter: A boolean indicating whether to filter the dataframe to keep only relevant columns.
     :type filter: bool
     :param child_node: The child node to keep when filtering.
@@ -64,5 +82,8 @@ def shift_columns_by_lag(
         )
         relevant_columns = list(dict.fromkeys(relevant_columns))  # Ensure unique and maintain order
         new_df = new_df[relevant_columns]
+    
+    for ancestor in ancestors:
+        new_df[ancestor] = df[ancestor]
 
     return new_df
