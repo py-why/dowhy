@@ -34,9 +34,22 @@ jobs:
         run: ./docs/generate_docs.sh
         env:
           DOCS_VERSION: ${{ env.release_tag }}
+
+      - name: Prune old doc versions
+        run: |
+            mkdir -p ./tmp
+            mv ./dowhy_docs/$VERSION ./tmp/$VERSION
+            rm -rf ./dowhy-docs/*
+            mv ./tmp/$VERSION ./dowhy-docs/$VERSION
+            echo "Assets ready, listing contents..."
+            find ./dowhy-docs
+        env:
+          VERSION: ${{ env.release_tag }}
           
       - name: Commit and push to gh-pages branch
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dowhy-docs
+          exclude_assets: '.github'
+          publish_dir: ./dowhy-docs/
+          keep_files: true
