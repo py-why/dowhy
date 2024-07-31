@@ -2,6 +2,46 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 
+import networkx as nx
+
+def unroll_graph(graph: nx.DiGraph) -> nx.DiGraph:
+    """
+    Unrolls a graph by creating a new node for every time lag to the original node and adding those edges to a new graph.
+
+    :param graph: The directed graph object.
+    :type graph: networkx.DiGraph
+    :return: An unrolled graph.
+    :rtype: networkx.DiGraph
+    """
+    unrolled_graph = nx.DiGraph()
+    node_mapping = {}  # Maps original node names to their unrolled counterparts
+    
+    for node in graph.nodes:
+        node_mapping[node] = set()  # Use a set to avoid duplicate entries
+
+    for node in graph.nodes:
+        for parent in graph.predecessors(node):
+            edge_data = graph.get_edge_data(parent, node)
+            if "time_lag" in edge_data:
+                time_lags = edge_data["time_lag"]
+                if not isinstance(time_lags, tuple):
+                    time_lags = (time_lags,)
+                
+                for lag in time_lags:
+                    new_node_name = f"{node}_0"
+                    if new_node_name not in node_mapping[node]:
+                        node_mapping[node].add(new_node_name)
+                        unrolled_graph.add_node(new_node_name)
+                    
+                    parent_unrolled_name = f"{parent}_{-lag}"
+                    if parent_unrolled_name not in node_mapping[parent]:
+                        node_mapping[parent].add(parent_unrolled_name)
+                        unrolled_graph.add_node(parent_unrolled_name)
+                    
+                    unrolled_graph.add_edge(parent_unrolled_name, new_node_name)
+
+    return unrolled_graph
+
 
 def create_graph_from_user() -> nx.DiGraph:
     """
