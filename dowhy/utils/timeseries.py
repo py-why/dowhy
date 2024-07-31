@@ -39,7 +39,7 @@ def create_graph_from_user() -> nx.DiGraph:
             continue
         node1, node2, time_lag = edge
         try:
-            time_lag = float(time_lag)
+            time_lag = int(time_lag)
         except ValueError:
             print("Invalid weight. Please enter a numerical value for the time_lag.")
             continue
@@ -80,9 +80,9 @@ def create_graph_from_csv(file_path: str) -> nx.DiGraph:
 
     # Add edges with time lag to the graph
     for index, row in df.iterrows():
-        # add validation for the time lag column to be a number
+        # Add validation for the time lag column to be a number
         try:
-            row["time_lag"] = float(row["time_lag"])
+            time_lag = int(row["time_lag"])
         except ValueError:
             print(
                 "Invalid weight. Please enter a numerical value for the time_lag for the edge between {} and {}.".format(
@@ -90,7 +90,18 @@ def create_graph_from_csv(file_path: str) -> nx.DiGraph:
                 )
             )
             return None
-        graph.add_edge(row["node1"], row["node2"], time_lag=row["time_lag"])
+
+        # Check if the edge already exists
+        if graph.has_edge(row["node1"], row["node2"]):
+            # If the edge exists, append the time_lag to the existing tuple
+            current_time_lag = graph[row["node1"]][row["node2"]]["time_lag"]
+            if isinstance(current_time_lag, tuple):
+                graph[row["node1"]][row["node2"]]["time_lag"] = current_time_lag + (time_lag,)
+            else:
+                graph[row["node1"]][row["node2"]]["time_lag"] = (current_time_lag, time_lag)
+        else:
+            # If the edge does not exist, create a new edge with a tuple containing the time_lag
+            graph.add_edge(row["node1"], row["node2"], time_lag=(time_lag,))
 
     return graph
 
@@ -118,7 +129,7 @@ def create_graph_from_dot_format(file_path: str) -> nx.DiGraph:
     for u, v, data in multi_graph.edges(data=True):
         if "label" in data:
             try:
-                time_lag = float(data["label"])
+                time_lag = int(data["label"])
 
                 # Handle multiple edges between the same nodes
                 if graph.has_edge(u, v):
@@ -175,9 +186,11 @@ def create_graph_from_networkx_array(array: np.ndarray, var_names: list) -> nx.D
             elif array[i, j, 0] == "<--":
                 graph.add_edge(var_names[j], var_names[i], type="contemporaneous", direction="backward")
             elif array[i, j, 0] == "o-o":
+                # raise error
                 graph.add_edge(var_names[i], var_names[j], type="adjacency", style="circle")
                 graph.add_edge(var_names[j], var_names[i], type="adjacency", style="circle")
             elif array[i, j, 0] == "x-x":
+                # raise dag error / not supported / conflicting
                 graph.add_edge(var_names[i], var_names[j], type="conflicting", style="cross")
                 graph.add_edge(var_names[j], var_names[i], type="conflicting", style="cross")
 
