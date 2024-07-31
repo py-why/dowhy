@@ -74,20 +74,90 @@ def reverse_bfs_with_accumulated_lags(graph: nx.DiGraph, start_node: str) -> nx.
                 if isinstance(parent_time_lag, tuple):
                     for lag in parent_time_lag:
                         total_lag = accumulated_time_lag + lag
-                        if not new_graph.has_edge(parent, start_node):
-                            new_graph.add_edge(parent, start_node, time_lag=(total_lag,))
+                        if not new_graph.has_edge(parent, current_node):
+                            new_graph.add_edge(parent, current_node, time_lag=(total_lag,))
                         else:
-                            existing_lags = new_graph[parent][start_node]["time_lag"]
-                            new_graph[parent][start_node]["time_lag"] = existing_lags + (total_lag,)
+                            existing_lags = new_graph[parent][current_node]["time_lag"]
+                            new_graph[parent][current_node]["time_lag"] = existing_lags + (total_lag,)
                         queue.append((parent, total_lag))
                 else:
                     total_lag = accumulated_time_lag + parent_time_lag
-                    if not new_graph.has_edge(parent, start_node):
-                        new_graph.add_edge(parent, start_node, time_lag=(total_lag,))
+                    if not new_graph.has_edge(parent, current_node):
+                        new_graph.add_edge(parent, current_node, time_lag=(total_lag,))
                     else:
-                        existing_lags = new_graph[parent][start_node]["time_lag"]
-                        new_graph[parent][start_node]["time_lag"] = existing_lags + (total_lag,)
+                        existing_lags = new_graph[parent][current_node]["time_lag"]
+                        new_graph[parent][current_node]["time_lag"] = existing_lags + (total_lag,)
                     queue.append((parent, total_lag))
+
+    return new_graph
+
+
+def reverse_bfs_with_accumulated_lags_unroll(graph: nx.DiGraph, start_node: str) -> nx.DiGraph:
+    """
+    Perform a reverse BFS starting from the node and proceed to parents level-wise,
+    adding edges from the ancestor to the current node with the accumulated time lag if it does not already exist.
+    Additionally, create lagged nodes for each time lag encountered.
+
+    :param graph: The directed graph object.
+    :type graph: networkx.DiGraph
+    :param start_node: The node from which to start the reverse BFS.
+    :type start_node: string
+    :return: A new graph with added edges based on accumulated time lags and lagged nodes.
+    :rtype: networkx.DiGraph
+    """
+    new_graph = nx.DiGraph()
+    queue = deque([start_node])
+    visited = set()
+    lagged_node_mapping = {}  # Maps original nodes to their corresponding lagged nodes
+
+    while queue:
+        current_node = queue.popleft()
+        
+        if current_node in visited:
+            continue
+
+        # visited.add(current_node)
+        
+        for parent in graph.predecessors(current_node):
+            edge_data = graph.get_edge_data(parent, current_node)
+            if "time_lag" in edge_data:
+                parent_time_lag = edge_data["time_lag"]
+                
+                # Ensure parent_time_lag is in tuple form
+                if not isinstance(parent_time_lag, tuple):
+                    parent_time_lag = (parent_time_lag,)
+                
+                for lag in parent_time_lag:
+                    # Find or create the lagged node for the current node
+                    if current_node in lagged_node_mapping:
+                        lagged_nodes = lagged_node_mapping[current_node]
+                    else:
+                        lagged_nodes = set()
+                        lagged_nodes.add(f"{current_node}_0")
+                        new_graph.add_node(f"{current_node}_0")
+                        lagged_node_mapping[current_node] = lagged_nodes
+                        
+                    # For each lagged node, create new time-lagged parent nodes and add edges
+                    new_lagged_nodes = set()
+                    for lagged_node in lagged_nodes:
+                        total_lag = - int(lagged_node.split('_')[-1]) + lag
+                        new_lagged_parent_node = f"{parent}_{-total_lag}"
+                        new_lagged_nodes.add(new_lagged_parent_node)
+
+                        if not new_graph.has_node(new_lagged_parent_node):
+                            new_graph.add_node(new_lagged_parent_node)
+
+                        new_graph.add_edge(new_lagged_parent_node, lagged_node)
+
+                        # Add the parent to the queue for further exploration
+                        queue.append(parent)
+                    
+                    # lagged_node_mapping[parent] = new_lagged_nodes
+                    # append the lagged nodes
+                    if parent in lagged_node_mapping:
+                        lagged_node_mapping[parent] = lagged_node_mapping[parent].union(new_lagged_nodes)
+                    else:
+                        lagged_node_mapping[parent] = new_lagged_nodes
 
     return new_graph
 

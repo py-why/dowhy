@@ -26,22 +26,31 @@ def unroll_graph(graph: nx.DiGraph) -> nx.DiGraph:
                 time_lags = edge_data["time_lag"]
                 if not isinstance(time_lags, tuple):
                     time_lags = (time_lags,)
-                
-                for lag in time_lags:
+
+                # Create a new node for the current child node if its mapping set is empty
+                if not node_mapping[node]:
                     new_node_name = f"{node}_0"
-                    if new_node_name not in node_mapping[node]:
-                        node_mapping[node].add(new_node_name)
-                        unrolled_graph.add_node(new_node_name)
-                    
+                    node_mapping[node].add(new_node_name)
+                    unrolled_graph.add_node(new_node_name)
+                else:
+                    # Use the existing child node for edge creation
+                    new_node_name = f"{node}_0"  # This will represent the current node's base name
+
+                # Add edges from parent to all existing time-lagged children
+                for lag in time_lags:
                     parent_unrolled_name = f"{parent}_{-lag}"
                     if parent_unrolled_name not in node_mapping[parent]:
                         node_mapping[parent].add(parent_unrolled_name)
                         unrolled_graph.add_node(parent_unrolled_name)
-                    
+
+                    # Add edge from the parent to the current child node
                     unrolled_graph.add_edge(parent_unrolled_name, new_node_name)
 
-    return unrolled_graph
+                # Add edges from parent to all existing time-lagged children of this node
+                for existing_child in node_mapping[node]:
+                    unrolled_graph.add_edge(parent_unrolled_name, existing_child)
 
+    return unrolled_graph
 
 def create_graph_from_user() -> nx.DiGraph:
     """
