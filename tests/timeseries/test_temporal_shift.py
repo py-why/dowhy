@@ -2,8 +2,9 @@ import unittest
 import pandas as pd
 import networkx as nx
 from typing import List, Optional
+from pandas.testing import assert_frame_equal
 
-from dowhy.timeseries.temporal_shift import add_lagged_edges
+from dowhy.timeseries.temporal_shift import add_lagged_edges, shift_columns_by_lag_using_unrolled_graph
 
 class TestAddLaggedEdges(unittest.TestCase):
 
@@ -66,6 +67,83 @@ class TestAddLaggedEdges(unittest.TestCase):
         self.assertIsInstance(new_graph, nx.DiGraph)
         self.assertEqual(len(new_graph.nodes()), 0)
         self.assertEqual(len(new_graph.edges()), 0)
+
+class TestShiftColumnsByLagUsingUnrolledGraph(unittest.TestCase):
+
+    def test_basic_functionality(self):
+        df = pd.DataFrame({
+            'A': [1, 2, 3, 4, 5],
+            'B': [5, 4, 3, 2, 1]
+        })
+
+        unrolled_graph = nx.DiGraph()
+        unrolled_graph.add_nodes_from(['A_0', 'A_-1', 'B_0', 'B_-2'])
+
+        expected_df = pd.DataFrame({
+            'A_0': [1, 2, 3, 4, 5],
+            'A_-1': [0, 1, 2, 3, 4],
+            'B_0': [5, 4, 3, 2, 1],
+            'B_-2': [0, 0, 5, 4, 3]
+        })
+
+        result_df = shift_columns_by_lag_using_unrolled_graph(df, unrolled_graph)
+        
+        assert_frame_equal(result_df, expected_df)
+
+    def test_complex_graph_structure(self):
+        df = pd.DataFrame({
+            'A': [1, 2, 3, 4, 5],
+            'B': [5, 4, 3, 2, 1],
+            'C': [1, 3, 5, 7, 9]
+        })
+
+        unrolled_graph = nx.DiGraph()
+        unrolled_graph.add_nodes_from(['A_0', 'A_-1', 'B_0', 'B_-2', 'C_-1', 'C_-3'])
+
+        expected_df = pd.DataFrame({
+            'A_0': [1, 2, 3, 4, 5],
+            'A_-1': [0, 1, 2, 3, 4],
+            'B_0': [5, 4, 3, 2, 1],
+            'B_-2': [0, 0, 5, 4, 3],
+            'C_-1': [0, 1, 3, 5, 7],
+            'C_-3': [0, 0, 0, 1, 3]
+        })
+
+        result_df = shift_columns_by_lag_using_unrolled_graph(df, unrolled_graph)
+        
+        assert_frame_equal(result_df, expected_df)
+
+    def test_invalid_node_format(self):
+        df = pd.DataFrame({
+            'A': [1, 2, 3, 4, 5],
+            'B': [5, 4, 3, 2, 1]
+        })
+
+        unrolled_graph = nx.DiGraph()
+        unrolled_graph.add_nodes_from(['A_0', 'B_invalid'])
+
+        expected_df = pd.DataFrame({
+            'A_0': [1, 2, 3, 4, 5]
+        })
+
+        result_df = shift_columns_by_lag_using_unrolled_graph(df, unrolled_graph)
+        
+        assert_frame_equal(result_df, expected_df)
+
+    def test_non_matching_columns(self):
+        df = pd.DataFrame({
+            'A': [1, 2, 3, 4, 5],
+            'B': [5, 4, 3, 2, 1]
+        })
+
+        unrolled_graph = nx.DiGraph()
+        unrolled_graph.add_nodes_from(['C_0', 'C_-1'])
+
+        expected_df = pd.DataFrame()
+
+        result_df = shift_columns_by_lag_using_unrolled_graph(df, unrolled_graph)
+        
+        assert_frame_equal(result_df, expected_df)
 
 if __name__ == '__main__':
     unittest.main()
