@@ -1,94 +1,71 @@
 import unittest
 import pandas as pd
+import networkx as nx
 from typing import List, Optional
 
-from dowhy.timeseries.temporal_shift import shift_columns_by_lag
+from dowhy.timeseries.temporal_shift import add_lagged_edges
 
-class TestShiftColumnsByLag(unittest.TestCase):
+class TestAddLaggedEdges(unittest.TestCase):
 
-    def test_shift_columns_by_lag_basic_shift(self):
-        df = pd.DataFrame({
-            'A': [1, 2, 3, 4, 5],
-            'B': [5, 4, 3, 2, 1]
-        })
-        columns = ['A', 'B']
-        lag = [2, 2]
-        result = shift_columns_by_lag(df, columns, lag, filter=False)
+    def test_basic_functionality(self):
+        graph = nx.DiGraph()
+        graph.add_edge("A", "B", time_lag=(1,))
+        graph.add_edge("B", "C", time_lag=(2,))
         
-        expected = pd.DataFrame({
-            'A': [1, 2, 3, 4, 5],
-            'B': [5, 4, 3, 2, 1],
-            'A_lag1': [0, 1, 2, 3, 4],
-            'A_lag2': [0, 0, 1, 2, 3],
-            'B_lag1': [0, 5, 4, 3, 2],
-            'B_lag2': [0, 0, 5, 4, 3]
-        })
+        new_graph = add_lagged_edges(graph, "C")
         
-        pd.testing.assert_frame_equal(result, expected)
+        self.assertIsInstance(new_graph, nx.DiGraph)
+        self.assertTrue(new_graph.has_node("C_0"))
+        self.assertTrue(new_graph.has_node("B_-2"))
+        self.assertTrue(new_graph.has_node("A_-3"))
+        self.assertTrue(new_graph.has_edge("B_-2", "C_0"))
+        self.assertTrue(new_graph.has_edge("A_-3", "B_-2"))
 
-    def test_shift_columns_by_lag_different_lags(self):
-        df = pd.DataFrame({
-            'A': [1, 2, 3, 4, 5],
-            'B': [5, 4, 3, 2, 1]
-        })
-        columns = ['A', 'B']
-        lag = [1, 3]
-        result = shift_columns_by_lag(df, columns, lag, filter=False)
+    def test_multiple_time_lags(self):
+        graph = nx.DiGraph()
+        graph.add_edge("A", "B", time_lag=(1, 2))
+        graph.add_edge("B", "C", time_lag=(1, 3))
         
-        expected = pd.DataFrame({
-            'A': [1, 2, 3, 4, 5],
-            'B': [5, 4, 3, 2, 1],
-            'A_lag1': [0, 1, 2, 3, 4],
-            'B_lag1': [0, 5, 4, 3, 2],
-            'B_lag2': [0, 0, 5, 4, 3],
-            'B_lag3': [0, 0, 0, 5, 4]
-        })
+        new_graph = add_lagged_edges(graph, "C")
         
-        pd.testing.assert_frame_equal(result, expected)
+        self.assertIsInstance(new_graph, nx.DiGraph)
+        self.assertTrue(new_graph.has_node("C_0"))
+        self.assertTrue(new_graph.has_node("B_-1"))
+        self.assertTrue(new_graph.has_node("B_-3"))
+        self.assertTrue(new_graph.has_node("A_-2"))
+        self.assertTrue(new_graph.has_node("A_-4"))
+        self.assertTrue(new_graph.has_edge("B_-1", "C_0"))
+        self.assertTrue(new_graph.has_edge("B_-3", "C_0"))
+        self.assertTrue(new_graph.has_edge("A_-2", "B_-1"))
+        self.assertTrue(new_graph.has_edge("A_-4", "B_-3"))
 
-    def test_shift_columns_by_lag_with_filter(self):
-        df = pd.DataFrame({
-            'A': [1, 2, 3, 4, 5],
-            'B': [5, 4, 3, 2, 1],
-            'C': [1, 1, 1, 1, 1]
-        })
-        columns = ['A', 'B']
-        lag = [1, 2]
-        result = shift_columns_by_lag(df, columns, lag, filter=True, child_node='C')
+    def test_complex_graph_structure(self):
+        graph = nx.DiGraph()
+        graph.add_edge("A", "B", time_lag=(1,))
+        graph.add_edge("B", "C", time_lag=(2,))
+        graph.add_edge("A", "C", time_lag=(3,))
         
-        expected = pd.DataFrame({
-            'C': [1, 1, 1, 1, 1],
-            'A': [1, 2, 3, 4, 5],
-            'B': [5, 4, 3, 2, 1],
-            'A_lag1': [0, 1, 2, 3, 4],
-            'B_lag1': [0, 5, 4, 3, 2],
-            'B_lag2': [0, 0, 5, 4, 3]
-        })
+        new_graph = add_lagged_edges(graph, "C")
         
-        pd.testing.assert_frame_equal(result, expected)
+        self.assertIsInstance(new_graph, nx.DiGraph)
+        self.assertTrue(new_graph.has_node("C_0"))
+        self.assertTrue(new_graph.has_node("B_-2"))
+        self.assertTrue(new_graph.has_node("A_-3"))
+        self.assertTrue(new_graph.has_edge("B_-2", "C_0"))
+        self.assertTrue(new_graph.has_edge("A_-3", "B_-2"))
+        self.assertTrue(new_graph.has_node("A_-3"))
+        self.assertTrue(new_graph.has_edge("A_-3", "C_0"))
 
-    def test_shift_columns_by_lag_empty_dataframe(self):
-        df = pd.DataFrame(columns=['A', 'B'])
-        columns = ['A', 'B']
-        lag = [2, 2]
-        result = shift_columns_by_lag(df, columns, lag, filter=False)
+    def test_no_time_lag(self):
+        graph = nx.DiGraph()
+        graph.add_edge("A", "B")
+        graph.add_edge("B", "C")
         
-        expected = pd.DataFrame(columns=['A', 'B', 'A_lag1', 'A_lag2', 'B_lag1', 'B_lag2'])
+        new_graph = add_lagged_edges(graph, "C")
         
-        pd.testing.assert_frame_equal(result, expected)
-
-    def test_shift_columns_by_lag_unequal_columns_and_lags(self):
-        df = pd.DataFrame({
-            'A': [1, 2, 3, 4, 5],
-            'B': [5, 4, 3, 2, 1]
-        })
-        columns = ['A', 'B']
-        lag = [1]
-        
-        with self.assertRaises(ValueError) as context:
-            shift_columns_by_lag(df, columns, lag, filter=False)
-        
-        self.assertTrue("The size of 'columns' and 'lag' lists must be the same." in str(context.exception))
+        self.assertIsInstance(new_graph, nx.DiGraph)
+        self.assertEqual(len(new_graph.nodes()), 0)
+        self.assertEqual(len(new_graph.edges()), 0)
 
 if __name__ == '__main__':
     unittest.main()
