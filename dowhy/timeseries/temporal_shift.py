@@ -1,5 +1,5 @@
-from typing import List, Optional, Tuple
 from collections import deque
+from typing import List, Optional, Tuple
 
 import networkx as nx
 import pandas as pd
@@ -24,16 +24,16 @@ def add_lagged_edges(graph: nx.DiGraph, start_node: str) -> nx.DiGraph:
 
     while queue:
         current_node = queue.popleft()
-        
+
         for parent in graph.predecessors(current_node):
             edge_data = graph.get_edge_data(parent, current_node)
             if "time_lag" in edge_data:
                 parent_time_lag = edge_data["time_lag"]
-                
+
                 # Ensure parent_time_lag is in tuple form
                 if not isinstance(parent_time_lag, tuple):
                     parent_time_lag = (parent_time_lag,)
-                
+
                 for lag in parent_time_lag:
                     # Find or create the lagged node for the current node
                     if current_node in lagged_node_mapping:
@@ -43,11 +43,11 @@ def add_lagged_edges(graph: nx.DiGraph, start_node: str) -> nx.DiGraph:
                         lagged_nodes.add(f"{current_node}_0")
                         new_graph.add_node(f"{current_node}_0")
                         lagged_node_mapping[current_node] = lagged_nodes
-                        
+
                     # For each lagged node, create new time-lagged parent nodes and add edges
                     new_lagged_nodes = set()
                     for lagged_node in lagged_nodes:
-                        total_lag = - int(lagged_node.split('_')[-1]) + lag
+                        total_lag = -int(lagged_node.split("_")[-1]) + lag
                         new_lagged_parent_node = f"{parent}_{-total_lag}"
                         new_lagged_nodes.add(new_lagged_parent_node)
 
@@ -58,7 +58,7 @@ def add_lagged_edges(graph: nx.DiGraph, start_node: str) -> nx.DiGraph:
 
                         # Add the parent to the queue for further exploration
                         queue.append(parent)
-                    
+
                     # append the lagged nodes
                     if parent in lagged_node_mapping:
                         lagged_node_mapping[parent] = lagged_node_mapping[parent].union(new_lagged_nodes)
@@ -68,10 +68,7 @@ def add_lagged_edges(graph: nx.DiGraph, start_node: str) -> nx.DiGraph:
     return new_graph
 
 
-def shift_columns_by_lag_using_unrolled_graph(
-    df: pd.DataFrame,
-    unrolled_graph: nx.DiGraph
-) -> pd.DataFrame:
+def shift_columns_by_lag_using_unrolled_graph(df: pd.DataFrame, unrolled_graph: nx.DiGraph) -> pd.DataFrame:
     """
     Given a dataframe and an unrolled graph, this function shifts the columns in the dataframe by the corresponding time lags mentioned in the node names of the unrolled graph,
     creating a new unique column for each shifted version.
@@ -85,8 +82,8 @@ def shift_columns_by_lag_using_unrolled_graph(
     """
     new_df = pd.DataFrame()
     for node in unrolled_graph.nodes:
-        if '_' in node:
-            base_node, lag_str = node.rsplit('_', 1)
+        if "_" in node:
+            base_node, lag_str = node.rsplit("_", 1)
             try:
                 lag = -int(lag_str)
                 if base_node in df.columns:
@@ -94,5 +91,5 @@ def shift_columns_by_lag_using_unrolled_graph(
                     new_df[new_column_name] = df[base_node].shift(lag, axis=0, fill_value=0)
             except ValueError:
                 print(f"Warning: Cannot extract lag from node name {node}. Expected format 'baseNode_lag'")
-    
+
     return new_df
