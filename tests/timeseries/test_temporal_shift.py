@@ -48,7 +48,6 @@ class TestAddLaggedEdges(unittest.TestCase):
         self.assertTrue(new_graph.has_edge("A_-4", "A_-3"))
         self.assertTrue(new_graph.has_edge("A_-3", "A_-2"))
 
-
     def test_complex_graph_structure(self):
         graph = nx.DiGraph()
         graph.add_edge("A", "B", time_lag=(1,))
