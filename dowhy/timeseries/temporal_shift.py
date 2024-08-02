@@ -65,6 +65,13 @@ def add_lagged_edges(graph: nx.DiGraph, start_node: str) -> nx.DiGraph:
                     else:
                         lagged_node_mapping[parent] = new_lagged_nodes
 
+        for original_node, lagged_nodes in lagged_node_mapping.items():
+            sorted_lagged_nodes = sorted(lagged_nodes, key=lambda x: int(x.split('_')[-1]))
+            for i in range(len(sorted_lagged_nodes) - 1):
+                lesser_lagged_node = sorted_lagged_nodes[i]
+                more_lagged_node = sorted_lagged_nodes[i + 1]
+                new_graph.add_edge(lesser_lagged_node, more_lagged_node)
+
     return new_graph
 
 
