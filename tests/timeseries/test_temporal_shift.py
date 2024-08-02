@@ -36,11 +36,18 @@ class TestAddLaggedEdges(unittest.TestCase):
         self.assertTrue(new_graph.has_node("B_-1"))
         self.assertTrue(new_graph.has_node("B_-3"))
         self.assertTrue(new_graph.has_node("A_-2"))
+        self.assertTrue(new_graph.has_node("A_-3"))
         self.assertTrue(new_graph.has_node("A_-4"))
+        self.assertTrue(new_graph.has_node("A_-5"))
         self.assertTrue(new_graph.has_edge("B_-1", "C_0"))
         self.assertTrue(new_graph.has_edge("B_-3", "C_0"))
         self.assertTrue(new_graph.has_edge("A_-2", "B_-1"))
         self.assertTrue(new_graph.has_edge("A_-4", "B_-3"))
+        self.assertTrue(new_graph.has_edge("B_-3", "B_-1"))
+        self.assertTrue(new_graph.has_edge("A_-5", "A_-4"))
+        self.assertTrue(new_graph.has_edge("A_-4", "A_-3"))
+        self.assertTrue(new_graph.has_edge("A_-3", "A_-2"))
+
 
     def test_complex_graph_structure(self):
         graph = nx.DiGraph()
@@ -56,7 +63,6 @@ class TestAddLaggedEdges(unittest.TestCase):
         self.assertTrue(new_graph.has_node("A_-3"))
         self.assertTrue(new_graph.has_edge("B_-2", "C_0"))
         self.assertTrue(new_graph.has_edge("A_-3", "B_-2"))
-        self.assertTrue(new_graph.has_node("A_-3"))
         self.assertTrue(new_graph.has_edge("A_-3", "C_0"))
 
     def test_no_time_lag(self):
