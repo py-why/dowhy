@@ -3,7 +3,6 @@ Note: The tests below are taken from the book 'Causal Inference and Discovery in
 by Aleksander Molak (https://github.com/AlxndrMlk). Other than the assert statements, all of the code below is taken from the book.
 """
 
-import econml
 import numpy as np
 import pandas as pd
 from pytest import mark
