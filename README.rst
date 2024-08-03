@@ -122,12 +122,18 @@ Optionally, if you wish to input graphs in the dot format, then install pydot (o
 For better-looking graphs, you can optionally install pygraphviz. To proceed,
 first install graphviz and then pygraphviz (on Ubuntu and Ubuntu WSL).
 
+.. note::
+    Installing pygraphviz can cause problems on some platforms.
+    One way that works for most Linux distributions is to
+    first install graphviz and then pygraphviz as shown below.
+    Otherwise, please consult the documentation of `pygraphviz <https://pygraphviz.github.io/documentation/stable/install.html>`_.
+
 .. code:: shell
 
     sudo apt install graphviz libgraphviz-dev graphviz-dev pkg-config
-    ## from https://github.com/pygraphviz/pygraphviz/issues/71
-    pip install pygraphviz --install-option="--include-path=/usr/include/graphviz" \
-    --install-option="--library-path=/usr/lib/graphviz/"
+    pip install --global-option=build_ext \
+    --global-option="-I/usr/local/include/graphviz/" \
+    --global-option="-L/usr/local/lib/graphviz" pygraphviz
 
 Example: Effect identification and estimation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -258,7 +264,7 @@ Citing this package
 If you find DoWhy useful for your work, please cite **both** of the following two references:
 
 - Amit Sharma, Emre Kiciman. DoWhy: An End-to-End Library for Causal Inference. 2020. https://arxiv.org/abs/2011.04216
-- Patrick Blöbaum, Peter Götz, Kailash Budhathoki, Atalanti A. Mastakouri, Dominik Janzing. DoWhy-GCM: An extension of DoWhy for causal inference in graphical causal models. 2022. https://arxiv.org/abs/2206.06821
+- Patrick Blöbaum, Peter Götz, Kailash Budhathoki, Atalanti A. Mastakouri, Dominik Janzing. DoWhy-GCM: An extension of DoWhy for causal inference in graphical causal models. 2024. MLOSS 25(147):1−7. https://jmlr.org/papers/v25/22-1258.html
 
 Bibtex::
 
@@ -269,13 +275,16 @@ Bibtex::
     year={2020}
   }
 
-  @article{dowhy_gcm,
-      author = {Bl{\"o}baum, Patrick and G{\"o}tz, Peter and Budhathoki, Kailash and Mastakouri, Atalanti A. and Janzing, Dominik},
-      title = {DoWhy-GCM: An extension of DoWhy for causal inference in graphical causal models},
-      journal={arXiv preprint arXiv:2206.06821},
-      year={2022}
+  @article{JMLR:v25:22-1258,
+  author  = {Patrick Bl{{\"o}}baum and Peter G{{\"o}}tz and Kailash Budhathoki and Atalanti A. Mastakouri and Dominik Janzing},
+  title   = {DoWhy-GCM: An Extension of DoWhy for Causal Inference in Graphical Causal Models},
+  journal = {Journal of Machine Learning Research},
+  year    = {2024},
+  volume  = {25},
+  number  = {147},
+  pages   = {1--7},
+  url     = {http://jmlr.org/papers/v25/22-1258.html}
   }
-
 
 Issues
 ~~~~~~

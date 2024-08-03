@@ -6,7 +6,6 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
-from numpy.matlib import repmat
 from scipy.stats import mode
 from sklearn.metrics import f1_score, mean_squared_error, r2_score
 from sklearn.model_selection import KFold
@@ -43,7 +42,7 @@ from dowhy.gcm.ml.classification import (
     create_polynom_logistic_regression_classifier,
 )
 from dowhy.gcm.ml.regression import create_ada_boost_regressor, create_extra_trees_regressor, create_polynom_regressor
-from dowhy.gcm.stats import merge_p_values_average
+from dowhy.gcm.stats import merge_p_values_fdr
 from dowhy.gcm.util.general import is_categorical, set_random_seed, shape_into_2d
 from dowhy.graph import get_ordered_predecessors, is_root_node
 
@@ -599,7 +598,7 @@ def _evaluate_invertibility_assumptions(
                         parent_samples[random_indices],
                     )
                 )
-            all_pnl_p_values[node] = merge_p_values_average(tmp_p_values)
+            all_pnl_p_values[node] = merge_p_values_fdr(tmp_p_values)
 
     if len(all_pnl_p_values) == 0:
         return all_pnl_p_values
@@ -730,7 +729,7 @@ def crps(
         all_classes = np.unique(Y)
 
         for x, y in zip(X, Y):
-            samples = conditional_sampling_method(repmat(x, num_conditional_samples, 1))
+            samples = conditional_sampling_method(np.tile(x, (num_conditional_samples, 1)))
 
             sample_categorical_crps = []
             for cat in all_classes:
@@ -749,7 +748,7 @@ def crps(
 
         for x, y in zip(X, Y):
             crps_values.append(
-                empirical_crps(conditional_sampling_method(repmat(x, num_conditional_samples, 1)) / std_Y, y / std_Y)
+                empirical_crps(conditional_sampling_method(np.tile(x, (num_conditional_samples, 1))) / std_Y, y / std_Y)
             )
 
     return float(np.mean(np.array(crps_values)))

@@ -24,7 +24,7 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 
-from dowhy.gcm.ml.regression import SklearnRegressionModel
+from dowhy.gcm.ml.regression import SklearnRegressionModel, SklearnRegressionModelWeighted
 from dowhy.gcm.util.general import auto_apply_encoders, shape_into_2d
 
 
@@ -40,6 +40,18 @@ class ClassificationModel(PredictionModel):
 
 
 class SklearnClassificationModel(SklearnRegressionModel, ClassificationModel):
+    def predict_probabilities(self, X: np.array) -> np.ndarray:
+        return shape_into_2d(self._sklearn_mdl.predict_proba(auto_apply_encoders(X, self._encoders)))
+
+    @property
+    def classes(self) -> List[str]:
+        return self._sklearn_mdl.classes_
+
+    def clone(self):
+        return SklearnClassificationModel(sklearn_mdl=sklearn.clone(self._sklearn_mdl))
+
+
+class SklearnClassificationModelWeighted(SklearnRegressionModelWeighted, ClassificationModel):
     def predict_probabilities(self, X: np.array) -> np.ndarray:
         return shape_into_2d(self._sklearn_mdl.predict_proba(auto_apply_encoders(X, self._encoders)))
 

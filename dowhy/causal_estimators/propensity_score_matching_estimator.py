@@ -1,5 +1,6 @@
 from typing import Any, List, Optional, Union
 
+import numpy as np
 import pandas as pd
 from sklearn.neighbors import NearestNeighbors
 
@@ -120,7 +121,7 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
 
         # TODO remove neighbors that are more than a given radius apart
 
-        # estimate ATT on treated by summing over difference between matched neighbors
+        # Estimating ATT on treated by summing over difference between matched neighbors
         control_neighbors = NearestNeighbors(n_neighbors=1, algorithm="ball_tree").fit(
             control[self.propensity_score_column].values.reshape(-1, 1)
         )
@@ -129,27 +130,28 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
         self.logger.debug(distances)
 
         att = 0
-        numtreatedunits = treated.shape[0]
-        for i in range(numtreatedunits):
-            treated_outcome = treated.iloc[i][self._target_estimand.outcome_variable[0]].item()
-            control_outcome = control.iloc[indices[i]][self._target_estimand.outcome_variable[0]].item()
-            att += treated_outcome - control_outcome
+        outcome_variable = self._target_estimand.outcome_variable[0]
+        treated_outcomes = treated[outcome_variable]
+        control_outcomes = list(control.iloc[indices.flatten()][outcome_variable])
 
-        att /= numtreatedunits
+        att = (treated_outcomes - control_outcomes).mean()
 
-        # Now computing ATC
+        # Estimating ATC
+
         treated_neighbors = NearestNeighbors(n_neighbors=1, algorithm="ball_tree").fit(
             treated[self.propensity_score_column].values.reshape(-1, 1)
         )
         distances, indices = treated_neighbors.kneighbors(control[self.propensity_score_column].values.reshape(-1, 1))
-        atc = 0
-        numcontrolunits = control.shape[0]
-        for i in range(numcontrolunits):
-            control_outcome = control.iloc[i][self._target_estimand.outcome_variable[0]].item()
-            treated_outcome = treated.iloc[indices[i]][self._target_estimand.outcome_variable[0]].item()
-            atc += treated_outcome - control_outcome
 
-        atc /= numcontrolunits
+        atc = 0
+        outcome_variable = self._target_estimand.outcome_variable[0]
+        control_outcomes = control[outcome_variable]
+        treated_outcomes = list(treated.iloc[indices.flatten()][outcome_variable])
+
+        atc = (treated_outcomes - control_outcomes).mean()
+
+        numtreatedunits = treated.shape[0]
+        numcontrolunits = control.shape[0]
 
         if target_units == "att":
             est = att

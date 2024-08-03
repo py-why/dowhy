@@ -1,7 +1,6 @@
 import numpy as np
 import pytest
 from flaky import flaky
-from numpy.matlib import repmat
 from pytest import approx
 
 from dowhy.gcm.ml import (
@@ -10,7 +9,13 @@ from dowhy.gcm.ml import (
     create_linear_regressor,
     create_logistic_regression_classifier,
 )
-from dowhy.gcm.stats import estimate_ftest_pvalue, marginal_expectation, merge_p_values_average, merge_p_values_quantile
+from dowhy.gcm.stats import (
+    estimate_ftest_pvalue,
+    marginal_expectation,
+    merge_p_values_average,
+    merge_p_values_fdr,
+    merge_p_values_quantile,
+)
 from dowhy.gcm.util.general import geometric_median
 
 
@@ -56,6 +61,15 @@ def test_given_p_values_with_scaling_when_merge_p_values_quantile_then_returns_s
     assert merge_p_values_quantile(p_values, p_values_scaling, quantile=0.75) == approx(0.193, abs=0.001)
 
 
+def test_given_p_values_when_merge_p_values_fdr_then_returns_expected_p_vlaue():
+    assert merge_p_values_fdr([0]) == 0
+    assert merge_p_values_fdr([1]) == 1
+    assert merge_p_values_fdr([0.3]) == 0.3
+    assert merge_p_values_fdr([0, 1]) == 0.0
+    assert merge_p_values_fdr([0.1, 0.2, 0.5]) == approx(0.3)
+    assert merge_p_values_fdr([0.1, np.nan, 0.2, 0.5, np.nan]) == approx(0.3)
+
+
 def test_given_invalid_inputs_when_merge_p_values_quantile_then_raises_error():
     with pytest.raises(ValueError):
         assert merge_p_values_quantile(np.array([0.1, 0.5, 1]), quantile=0)
@@ -73,6 +87,7 @@ def test_given_invalid_inputs_when_merge_p_values_quantile_then_raises_error():
 def test_when_merge_p_values_average_without_randomization_then_returns_expected_results():
     assert merge_p_values_average([0]) == 0
     assert merge_p_values_average([1]) == 1
+    assert merge_p_values_average([0.3]) == 0.3
     assert merge_p_values_average([0, 1]) == approx(1.0)
     assert merge_p_values_average([0, 0, 1]) == 0
     assert merge_p_values_average([0, 0.5, 0.5, np.nan, 1, np.nan]) == approx(1.0)
@@ -83,6 +98,7 @@ def test_when_merge_p_values_average_without_randomization_then_returns_expected
 def test_when_merge_p_values_average_with_randomization_then_returns_expected_results():
     assert merge_p_values_average([0], randomization=True) == 0
     assert merge_p_values_average([1], randomization=True) == 1
+    assert merge_p_values_average([0.3], randomization=True) == 0.3
     assert merge_p_values_average([0, 1], randomization=True) == approx(0.0, abs=0.01)
     assert merge_p_values_average([0, 0, 1], randomization=True) == approx(0.0, abs=0.01)
     assert merge_p_values_average([0, np.nan, 0, np.nan, 1, 1], randomization=True) == approx(0.0, abs=0.01)
@@ -431,7 +447,7 @@ def test_given_nonlinear_categorical_data_when_evaluate_marginal_expectation_the
 def test_given_different_batch_sizes_when_estimating_marginal_expectation_then_returns_correct_marginal_expectations():
     X = np.random.normal(0, 1, (34, 3))
     feature_samples = np.random.normal(0, 1, (123, 3))
-    expected_non_aggregated = np.array([repmat(X[i, :], feature_samples.shape[0], 1) for i in range(X.shape[0])])
+    expected_non_aggregated = np.array([np.tile(X[i, :], (feature_samples.shape[0], 1)) for i in range(X.shape[0])])
 
     def my_pred_func(X: np.ndarray) -> np.ndarray:
         return X.copy()

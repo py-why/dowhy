@@ -44,7 +44,7 @@ def one_hot_encode(data: pd.DataFrame, columns=None, drop_first: bool = False, e
         drop = None
         if drop_first:
             drop = "first"
-        encoder = OneHotEncoder(drop=drop, sparse=False)  # NB sparse renamed to sparse_output in sklearn 1.2+
+        encoder = OneHotEncoder(drop=drop, sparse_output=False)  # NB sparse renamed to sparse_output in sklearn 1.2+
 
         encoded_data = encoder.fit_transform(data_to_encode)
 

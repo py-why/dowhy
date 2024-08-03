@@ -141,6 +141,15 @@ Real world-inspired examples
 
 .. grid:: 2
 
+    .. grid-item-card:: :doc:`gcm_cps2015_dist_change_robust`
+
+        .. image:: ../_static/cps2015-shapley-values.png
+            :width: 200px
+            :align: center
+        +++
+        | **Level:** Advanced
+        | **Task:** Causal Change Attribution via GCM
+
     .. grid-item-card:: :doc:`gcm_icc`
 
         .. image:: ../_static/icc-example.jpg
@@ -149,6 +158,9 @@ Real world-inspired examples
         +++
         | **Level:** Advanced
         | **Task:** Intrinsic causal influence via GCM
+   
+
+.. grid:: 2
 
     .. grid-item-card:: :doc:`gcm_counterfactual_medical_dry_eyes`
 
@@ -159,8 +171,6 @@ Real world-inspired examples
         | **Level:** Advanced
         | **Task:** Counterfactuals via GCM
 
-.. grid:: 2
-
     .. grid-item-card:: :doc:`gcm_falsify_dag`
 
         .. image:: ../_static/gcm-falsify-example.png
@@ -169,6 +179,19 @@ Real world-inspired examples
         +++
         | **Level:** Advanced
         | **Task:** Falsifying Causal Graph
+
+.. grid:: 2
+
+    .. grid-item-card:: :doc:`counterfactual_fairness_dowhy`
+
+        .. image:: ../_static/counterfactual_fairness_dowhy.png
+            :height: 120px
+            :align: center
+        +++
+        | **Level:** Advanced
+        | **Task:** Fairness estimation via GCM
+
+
 
 Examples on benchmark datasets
 -------------------------------
@@ -192,6 +215,12 @@ Examples on benchmark datasets
         +++
         | **Level:** Advanced
         | **Task:** Effect inference
+
+    .. grid-item-card:: :doc:`counterfactual_fairness_dowhy`
+
+        +++
+        | **Level:** Advanced
+        | **Task:** Fairness estimation
 
 .. grid:: 3
 
@@ -355,6 +384,7 @@ Miscellaneous
    gcm_icc
    gcm_counterfactual_medical_dry_eyes
    gcm_falsify_dag
+   counterfactual_fairness_dowhy
 
 .. toctree::
    :maxdepth: 1
@@ -367,6 +397,7 @@ Miscellaneous
    gcm_401k_analysis
    prediction/dowhy_causal_prediction_demo
    lalonde_pandas_api
+   counterfactual_fairness_dowhy
 
 .. toctree::
    :maxdepth: 1

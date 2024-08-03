@@ -6,7 +6,6 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 import networkx as nx
 import numpy as np
 import pandas as pd
-from numpy.matlib import repmat
 from statsmodels.stats.multitest import multipletests
 from tqdm import tqdm
 
@@ -496,7 +495,7 @@ def _estimate_distribution_change_score(
     for joint_parent_sample in joint_parent_samples:
         old_result = result
 
-        samples = repmat(joint_parent_sample, num_joint_samples, 1)
+        samples = np.tile(joint_parent_sample, (num_joint_samples, 1))
         result += difference_estimation_func(
             causal_model_original.draw_samples(samples), causal_model_new.draw_samples(samples)
         )

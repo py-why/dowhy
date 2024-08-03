@@ -191,7 +191,7 @@ performance and whether our assumptions hold:
 
     ==== Evaluation of the Causal Graph Structure ====
     +-------------------------------------------------------------------------------------------------------+
-    |                                         Falsificaton Summary                                          |
+    |                                         Falsification Summary                                          |
     +-------------------------------------------------------------------------------------------------------+
     | The given DAG is not informative because 2 / 6 of the permutations lie in the Markov                  |
     | equivalence class of the given DAG (p-value: 0.33).                                                   |
