@@ -50,7 +50,7 @@ def _check_forbidden_set(G,X,Y,Z):
         return True
 
 def _proper_backdoor_graph(G,X,Y):
-    ppdp = pywhy_graphs.pproper_possibly_directed_path(G, X,Y)
+    ppdp = pywhy_graphs.proper_possibly_directed_path(G, X, Y)
     visible_edges = pywhy_graphs.get_visible_edges(G) # assuming all are directed edges
     x_vedges = []
     for elem in visible_edges:
