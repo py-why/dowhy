@@ -285,7 +285,6 @@ def has_directed_path(graph: nx.DiGraph, nodes1, nodes2):
         outcome_node_candidates.update(nx.descendants(graph, node))
     for node in nodes2:
         action_node_candidates.update(nx.ancestors(graph, node))
-    nx.has_path
     return set(nodes2).issubset(outcome_node_candidates) and set(nodes1).issubset(action_node_candidates)
 
 
