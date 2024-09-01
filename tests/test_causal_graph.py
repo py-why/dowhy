@@ -70,6 +70,12 @@ class TestCausalGraph(object):
         res2 = get_backdoor_paths(self.nx_graph, self.action_node, self.outcome_node)
         assert res1 == res2
 
+    def test_has_path(self):
+        assert has_directed_path(self.nx_graph, ["X0"], ["y"])
+        assert has_directed_path(self.nx_graph, ["X0", "X1", "X2"], ["y", "v0"])
+        assert not has_directed_path(self.nx_graph, ["X0", "X1", "X2"], ["y", "v0", "Z0"])
+
+
     def test_check_dseparation(self):
         res1 = self.graph_obj.check_dseparation(self.action_node, self.outcome_node, ["X1", "X2"])
         res2 = check_dseparation(self.nx_graph, self.action_node, self.outcome_node, ["X1", "X2"])
