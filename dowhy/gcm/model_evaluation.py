@@ -454,7 +454,7 @@ def _evaluate_model_performances(
                 )
 
                 conditional_expectations = _estimate_conditional_expectations(
-                    tmp_causal_mechanism, parent_data[test_indices], is_categorical, 50
+                    tmp_causal_mechanism, parent_data[test_indices], categorical, 50
                 )
                 if categorical:
                     metric_evaluations["F1"].append(
