@@ -123,4 +123,5 @@ class TestCausalGraph(object):
     def test_has_path(self):
         assert has_directed_path(self.nx_graph, ["X0"], ["y"])
         assert has_directed_path(self.nx_graph, ["X0", "X1", "X2"], ["y", "v0"])
+        assert not has_directed_path(self.nx_graph, [], ["y"])
         assert not has_directed_path(self.nx_graph, ["X0", "X1", "X2"], ["y", "v0", "Z0"])

@@ -277,8 +277,6 @@ def has_directed_path(graph: nx.DiGraph, nodes1, nodes2):
     path to one of the outcomes. And, every one of the outcomes has a direct path from
     at least one of the treatments.
     """
-    # dpaths = self.get_all_directed_paths(nodes1, nodes2)
-    # return len(dpaths) > 0
     outcome_node_candidates = set()
     action_node_candidates = set()
     for node in nodes1:

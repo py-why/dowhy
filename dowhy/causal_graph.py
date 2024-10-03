@@ -5,6 +5,7 @@ import re
 import networkx as nx
 
 from dowhy.gcm.causal_models import ProbabilisticCausalModel
+from dowhy.graph import has_directed_path
 from dowhy.utils.api import parse_state
 from dowhy.utils.graph_operations import daggity_to_dot
 from dowhy.utils.plotting import plot
@@ -449,11 +450,11 @@ class CausalGraph:
     def has_directed_path(self, nodes1, nodes2):
         """Checks if there is any directed path between two sets of nodes.
 
-        Currently only supports singleton sets.
+        Returns True if and only if every one of the treatments has at least one direct
+        path to one of the outcomes. And, every one of the outcomes has a direct path from
+        at least one of the treatments.
         """
-        # dpaths = self.get_all_directed_paths(nodes1, nodes2)
-        # return len(dpaths) > 0
-        return nx.has_path(self._graph, nodes1[0], nodes2[0])
+        return has_directed_path(self._graph, nodes1[0], nodes2[0])
 
     def get_adjacency_matrix(self, *args, **kwargs):
         """
