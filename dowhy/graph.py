@@ -270,7 +270,7 @@ def get_all_directed_paths(graph: nx.DiGraph, nodes1, nodes2):
     return [p for p in nx.all_simple_paths(graph, source=nodes1[0], target=nodes2[0])]
 
 
-def has_directed_path(graph: nx.DiGraph, nodes1, nodes2):
+def has_directed_path(graph: nx.DiGraph, action_nodes, outcome_nodes):
     """Checks if there is any directed path between two sets of nodes.
 
     Returns True if and only if every one of the treatments has at least one direct
@@ -279,11 +279,11 @@ def has_directed_path(graph: nx.DiGraph, nodes1, nodes2):
     """
     outcome_node_candidates = set()
     action_node_candidates = set()
-    for node in nodes1:
+    for node in action_nodes:
         outcome_node_candidates.update(nx.descendants(graph, node))
-    for node in nodes2:
+    for node in outcome_nodes:
         action_node_candidates.update(nx.ancestors(graph, node))
-    return set(nodes2).issubset(outcome_node_candidates) and set(nodes1).issubset(action_node_candidates)
+    return set(outcome_nodes).issubset(outcome_node_candidates) and set(action_nodes).issubset(action_node_candidates)
 
 
 def check_valid_mediation_set(graph: nx.DiGraph, nodes1, nodes2, candidate_nodes, mediation_paths=None):
