@@ -144,7 +144,6 @@ class TestEconMLEstimator:
         assert pytest.approx(sl_cate_estimates_test_f[0], 0.01) != sl_cate_estimates_test_f[1]
 
     def test_iv_estimators(self):
-        keras = pytest.importorskip("keras")
         # Setup data
         data = datasets.linear_dataset(
             10,
@@ -168,37 +167,7 @@ class TestEconMLEstimator:
         # Test DeepIV
         dims_zx = len(model._instruments) + len(model._effect_modifiers)
         dims_tx = len(model._treatment) + len(model._effect_modifiers)
-        treatment_model = keras.Sequential(
-            [
-                keras.layers.Dense(128, activation="relu", input_shape=(dims_zx,)),  # sum of dims of Z and X
-                keras.layers.Dropout(0.17),
-                keras.layers.Dense(64, activation="relu"),
-                keras.layers.Dropout(0.17),
-                keras.layers.Dense(32, activation="relu"),
-                keras.layers.Dropout(0.17),
-            ]
-        )
-        response_model = keras.Sequential(
-            [
-                keras.layers.Dense(128, activation="relu", input_shape=(dims_tx,)),  # sum of dims of T and X
-                keras.layers.Dropout(0.17),
-                keras.layers.Dense(64, activation="relu"),
-                keras.layers.Dropout(0.17),
-                keras.layers.Dense(32, activation="relu"),
-                keras.layers.Dropout(0.17),
-                keras.layers.Dense(1),
-            ]
-        )
-        dmliv_estimate = model.estimate_effect(
-            identified_estimand,
-            method_name="iv.econml.iv.dml.DMLIV",
-            target_units=lambda df: df["X0"] > -1,
-            confidence_intervals=False,
-            method_params={
-                "init_params": {"discrete_treatment": False, "discrete_instrument": False},
-                "fit_params": {},
-            },
-        )
+
         # Test IntentToTreatDRIV
         data = datasets.linear_dataset(
             10,

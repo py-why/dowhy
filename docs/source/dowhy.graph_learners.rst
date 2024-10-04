@@ -4,14 +4,6 @@ dowhy.graph\_learners package
 Submodules
 ----------
 
-dowhy.graph\_learners.cdt module
---------------------------------
-
-.. automodule:: dowhy.graph_learners.cdt
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 dowhy.graph\_learners.ges module
 --------------------------------
 

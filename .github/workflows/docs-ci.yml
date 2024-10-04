@@ -26,13 +26,10 @@ jobs:
           version: "14.0"
           directory: ${{ runner.temp }}/llvm
 
-      - name: Some cleanup for more disk space
-        run: |
-          rm -rf /usr/share/dotnet
-          rm -rf "$AGENT_TOOLSDIRECTORY"
-          apt-get autoremove -y
-          apt-get clean
-          df -h
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
 
       - name: Install Python Dependencies
         run: poetry install -E plotting -E pydot -E pygraphviz -E econml --with docs
