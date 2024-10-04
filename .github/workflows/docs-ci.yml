@@ -12,7 +12,7 @@ on:
 
 jobs:
   docs:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container:
       image: "ghcr.io/${{ github.repository_owner }}/dowhy-docs-generation:latest"
     steps:
@@ -20,18 +20,26 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install LLVM and Clang
-        uses: KyleMayes/install-llvm-action@v2.0.5
-        with:
-          version: "14.0"
-          directory: ${{ runner.temp }}/llvm
-
+      # Following https://github.com/marketplace/actions/free-disk-space-ubuntu
       - name: Some cleanup for more disk space
         run: |
-          rm -rf /usr/share/dotnet
-          rm -rf "$AGENT_TOOLSDIRECTORY"
-          apt-get autoremove -y
-          apt-get clean
+          df -h
+          rm -rf "$AGENT_TOOLSDIRECTORY" || true
+          rm -rf /usr/local/lib/android || true
+          rm -rf /opt/ghc || true
+          rm -rf /usr/local/.ghcup || true
+          swapoff -a || true
+          rm -f /mnt/swapfile || true
+          apt-get remove -y '^aspnetcore-.*' || true
+          apt-get remove -y '^dotnet-.*' --fix-missing || true
+          apt-get remove -y 'php.*' --fix-missing || true
+          apt-get remove -y '^mongodb-.*' --fix-missing || true
+          apt-get remove -y '^mysql-.*' --fix-missing || true
+          apt-get remove -y azure-cli google-chrome-stable firefox powershell mono-devel libgl1-mesa-dri --fix-missing || true
+          apt-get remove -y google-cloud-sdk --fix-missing || true
+          apt-get remove -y google-cloud-cli --fix-missing || true
+          apt-get autoremove -y || true
+          apt-get clean || true
           df -h
 
       - name: Install Python Dependencies
