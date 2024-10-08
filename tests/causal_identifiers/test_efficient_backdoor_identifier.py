@@ -104,7 +104,7 @@ def test_fail_multivar_outcome_efficient_backdoor_algorithms():
         ident_eff.identify_effect(
             build_graph_from_str(example["graph_str"]),
             observed_nodes=example["observed_node_names"],
-            action_nodes=["X"],
-            outcome_nodes=["Y", "R"],
+            action_nodes=["U"],
+            outcome_nodes=["Y", "F"],
             conditional_node_names=example["conditional_node_names"],
         )
