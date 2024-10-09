@@ -3203,6 +3203,7 @@
 <li class="toctree-l3"><a class="reference internal" href="dowhy.gcm.html#dowhy.gcm.stats.estimate_ftest_pvalue"><code class="docutils literal notranslate"><span class="pre">estimate_ftest_pvalue()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="dowhy.gcm.html#dowhy.gcm.stats.marginal_expectation"><code class="docutils literal notranslate"><span class="pre">marginal_expectation()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="dowhy.gcm.html#dowhy.gcm.stats.merge_p_values_average"><code class="docutils literal notranslate"><span class="pre">merge_p_values_average()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dowhy.gcm.html#dowhy.gcm.stats.merge_p_values_fdr"><code class="docutils literal notranslate"><span class="pre">merge_p_values_fdr()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="dowhy.gcm.html#dowhy.gcm.stats.merge_p_values_quantile"><code class="docutils literal notranslate"><span class="pre">merge_p_values_quantile()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="dowhy.gcm.html#dowhy.gcm.stats.permute_features"><code class="docutils literal notranslate"><span class="pre">permute_features()</span></code></a></li>
 </ul>
@@ -3422,6 +3423,7 @@
 <li class="toctree-l3"><a class="reference internal" href="dowhy.utils.html#dowhy.utils.plotting.bar_plot"><code class="docutils literal notranslate"><span class="pre">bar_plot()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="dowhy.utils.html#dowhy.utils.plotting.plot"><code class="docutils literal notranslate"><span class="pre">plot()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="dowhy.utils.html#dowhy.utils.plotting.plot_adjacency_matrix"><code class="docutils literal notranslate"><span class="pre">plot_adjacency_matrix()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="dowhy.utils.html#dowhy.utils.plotting.pretty_print_graph"><code class="docutils literal notranslate"><span class="pre">pretty_print_graph()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="dowhy.utils.html#module-dowhy.utils.propensity_score">dowhy.utils.propensity_score module</a><ul>
@@ -4029,9 +4031,11 @@ the second is the outcome, and the third is the candidate backdoor set</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="dowhy.causal_graph.CausalGraph.has_directed_path">
-<span class="sig-name descname"><span class="pre">has_directed_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nodes1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_graph.html#CausalGraph.has_directed_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_graph.CausalGraph.has_directed_path" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">has_directed_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action_nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcome_nodes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_graph.html#CausalGraph.has_directed_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_graph.CausalGraph.has_directed_path" title="Permalink to this definition"></a></dt>
 <dd><p>Checks if there is any directed path between two sets of nodes.</p>
-<p>Currently only supports singleton sets.</p>
+<p>Returns True if and only if every one of the treatments has at least one direct
+path to one of the outcomes. And, every one of the outcomes has a direct path from
+at least one of the treatments.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -5061,9 +5065,11 @@ might not be returned in a reliable order.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.graph.has_directed_path">
-<span class="sig-prename descclassname"><span class="pre">dowhy.graph.</span></span><span class="sig-name descname"><span class="pre">has_directed_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DiGraph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/graph.html#has_directed_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.graph.has_directed_path" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.graph.</span></span><span class="sig-name descname"><span class="pre">has_directed_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DiGraph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcome_nodes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/graph.html#has_directed_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.graph.has_directed_path" title="Permalink to this definition"></a></dt>
 <dd><p>Checks if there is any directed path between two sets of nodes.</p>
-<p>Currently only supports singleton sets.</p>
+<p>Returns True if and only if every one of the treatments has at least one direct
+path to one of the outcomes. And, every one of the outcomes has a direct path from
+at least one of the treatments.</p>
 </dd></dl>
 
 <dl class="py function">

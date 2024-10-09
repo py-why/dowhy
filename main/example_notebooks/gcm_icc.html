@@ -318,6 +318,11 @@
    Falsification of User-Given Directed Acyclic Graphs
   </a>
  </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="counterfactual_fairness_dowhy.html">
+   Counterfactual Fairness
+  </a>
+ </li>
 </ul>
 <p aria-level="2" class="caption" role="heading">
  <span class="caption-text">
@@ -353,6 +358,11 @@
  <li class="toctree-l1">
   <a class="reference internal" href="lalonde_pandas_api.html">
    Lalonde Pandas API Example
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="counterfactual_fairness_dowhy.html">
+   Counterfactual Fairness
   </a>
  </li>
 </ul>
@@ -756,7 +766,8 @@ div.rendered_html tbody tr:hover {
 </style>
 <section id="Estimating-intrinsic-causal-influences-in-real-world-examples">
 <h1>Estimating intrinsic causal influences in real-world examples<a class="headerlink" href="#Estimating-intrinsic-causal-influences-in-real-world-examples" title="Permalink to this heading"></a></h1>
-<p>This notebook demonstrates the usage of the intrinsic causal influence (ICC) method, a way to estimate causal influence in a system. A common question in many applications is: “What is the causal influence of node X on node Y?” Here, “causal influence” can be defined in various ways. One approach could be to measure the interventional influence, which asks, “How much does node Y change if I intervene on node X?” or, from a more feature relevance perspective, “How relevant is X in describing Y?”</p>
+<p>This notebook demonstrates the usage of the <a class="reference external" href="https://proceedings.mlr.press/v238/janzing24a.html">intrinsic causal influence (ICC) method</a>, a way to estimate causal influence in a system. A common question in many applications is: “What is the causal influence of node X on node Y?” Here, “causal influence” can be defined in various ways. One approach could be to measure the interventional influence, which asks, “How much does node Y change if I intervene on node X?” or, from a more feature
+relevance perspective, “How relevant is X in describing Y?”</p>
 <p>In the following we focus on a particular type of causal influence, which is based on decomposing the generating process into mechanisms in place at each node, formalized by the respective causal mechanism. Then, ICC quantifies for each node the amount of uncertainty of the target that can be traced back to the respective mechanism. Hence, nodes that are deterministically computed from their parents obtain zero contribution. This concept may initially seem complex, but it is based on a simple
 idea:</p>
 <p>Consider a chain of nodes: X -&gt; Y -&gt; Z. Y is more informative about Z than X, as Y directly determines Z and also incorporates all information from X. It is obvious that when intervening on either X or Y, Y has a more significant impact on Z. But, what if Y is just a rescaled copy of X, i.e., <span class="math notranslate nohighlight">\(Y = a \cdot X\)</span>? In this case, Y still has the largest interventional influence on Z, but it is not adding any new information on top of X. The ICC method, on the other hand, would attribute 0
@@ -817,7 +828,7 @@ explicitly model our causal relationships using functional causal models, as we 
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node mpg: 100%|██████████| 5/5 [00:00&lt;00:00, 23.79it/s]
+Fitting causal mechanism of node mpg: 100%|██████████| 5/5 [00:00&lt;00:00, 23.64it/s]
 </pre></div></div>
 </div>
 <p>Optionally, we can get some insights into the performance of the causal mechanisms by using the evaluation method:</p>
@@ -834,7 +845,7 @@ Fitting causal mechanism of node mpg: 100%|██████████| 5/5 [
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Evaluating causal mechanisms...: 100%|██████████| 5/5 [00:00&lt;00:00, 5505.78it/s]
+Evaluating causal mechanisms...: 100%|██████████| 5/5 [00:00&lt;00:00, 5410.61it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -860,36 +871,36 @@ We will mostly utilize the CRPS for comparing and interpreting the performance o
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
 --- Node displacement
-- The MSE is 1042.8758921470871.
-- The NMSE is 0.3098194035950775.
-- The R2 coefficient is 0.9036954890771274.
-- The normalized CRPS is 0.1716317401132422.
+- The MSE is 1037.6221304473588.
+- The NMSE is 0.3084430014425937.
+- The R2 coefficient is 0.9047797536349039.
+- The normalized CRPS is 0.17337377269980106.
 The estimated CRPS indicates a very good model performance.
 
 --- Node weight
-- The MSE is 83496.91570918533.
-- The NMSE is 0.3478993410114705.
-- The R2 coefficient is 0.8753539535395471.
-- The normalized CRPS is 0.19244922281982194.
+- The MSE is 80280.71518987342.
+- The NMSE is 0.33704894311913336.
+- The R2 coefficient is 0.8849486657880771.
+- The normalized CRPS is 0.18487494217279443.
 The estimated CRPS indicates a very good model performance.
 
 --- Node horsepower
-- The MSE is 213.04485556637457.
-- The NMSE is 0.3777955454466365.
-- The R2 coefficient is 0.8555445266227156.
-- The normalized CRPS is 0.20356503099777484.
+- The MSE is 208.87984420642647.
+- The NMSE is 0.3748130150260296.
+- The R2 coefficient is 0.8581557858750589.
+- The normalized CRPS is 0.2000118709180035.
 The estimated CRPS indicates a good model performance.
 
 --- Node mpg
-- The MSE is 15.533430744701349.
-- The NMSE is 0.506155240763899.
-- The R2 coefficient is 0.7401645553295587.
-- The normalized CRPS is 0.281000804128651.
+- The MSE is 15.751095203389088.
+- The NMSE is 0.5109902294971118.
+- The R2 coefficient is 0.7382388360327864.
+- The normalized CRPS is 0.27849022751756325.
 The estimated CRPS indicates a good model performance.
 
 ==== Evaluation of Generated Distribution ====
-The overall average KL divergence between the generated and observed distribution is 1.0287744297924932
-The estimated KL divergence indicates some mismatches between the distributions.
+The overall average KL divergence between the generated and observed distribution is 0.988182524773498
+The estimated KL divergence indicates a good representation of the data distribution, but might indicate some smaller mismatches between the distributions.
 
 ==== NOTE ====
 Always double check the made model assumptions with respect to the graph structure and choice of causal mechanisms.
@@ -928,7 +939,7 @@ All these evaluations give some insight into the goodness of the causal model, b
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Evaluate set function: 32it [01:58,  3.69s/it]
+Evaluating set functions...: 100%|██████████| 32/32 [00:14&lt;00:00,  2.17it/s]
 </pre></div></div>
 </div>
 <p>For a better interpretation of the results, we convert the variance attribution to percentages by normalizing it over the total sum.</p>
@@ -968,7 +979,7 @@ variance of mpg remains unexplained by all of the above factors, which may be pa
 <h2>Intrinsic influence on river flow<a class="headerlink" href="#Intrinsic-influence-on-river-flow" title="Permalink to this heading"></a></h2>
 <p>In the next example, we look at different recordings taken of the river flows (<span class="math notranslate nohighlight">\(m^3/s\)</span>) at a 15 minute frequency across 5 different measuring stations in England at Henthorn, New Jumbles Rock, Hodder Place, Whalley Weir and Samlesbury. Here, obtaining a better understanding of how the river flows behave can help to plan potential mitigation steps to avoid overflows. The data is taken from the <a class="reference external" href="https://environment.data.gov.uk/hydrology/explore">UK Department for Environment Food &amp; Rural Affairs
 website</a>. Here is a map of the rivers:</p>
-<p><img alt="68ff18e9c34c42c1aecc2c06425f63fc" class="no-scaled-link" src="../_images/river-map.jpg" style="width: 600px;" /></p>
+<p><img alt="5c9deb5562e144dc86ceb4a3a87edc96" class="no-scaled-link" src="../_images/river-map.jpg" style="width: 600px;" /></p>
 <p>New Jumbles Rock lies at a confluence point of the 3 rivers passing Henthorn, Hodder Place, and Whalley Weir and New Jumbles Rock flows into Samlesbury. The water passing a certain measuring station is certainly a mixture of some fraction of the amount observed at the next stations further upstream plus some amount contributed by streams and little rivers entering the river in between. This defines our causal graph as:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
@@ -991,7 +1002,7 @@ website</a>. Here is a map of the rivers:</p>
 </div>
 </div>
 <p>In this setting, we are interested in the causal influence of the upstream rivers on the Samlesbury river. Similar to the example before, we would expect these nodes to be heavily confounded by, e.g., the weather. That is, the true graph is more likely to be along the lines of:</p>
-<p><img alt="e90db1718cf045aa8b7cb158d114b343" class="no-scaled-link" src="../_images/river-confounded.png" style="width: 400px;" /></p>
+<p><img alt="5227cb6b3e614867b928db21c74a18f6" class="no-scaled-link" src="../_images/river-confounded.png" style="width: 400px;" /></p>
 <p>Nevertheless, we still expect the ICC algorithm to provide some insights into the contribution to the river flow of Samlesbury, even with the hidden confounder in place:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
@@ -1013,8 +1024,8 @@ website</a>. Here is a map of the rivers:</p>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node Samlesbury: 100%|██████████| 5/5 [00:00&lt;00:00, 185.77it/s]
-Evaluate set function: 32it [00:00, 61.91it/s]
+Fitting causal mechanism of node Samlesbury: 100%|██████████| 5/5 [00:00&lt;00:00, 313.70it/s]
+Evaluating set functions...: 100%|██████████| 32/32 [00:00&lt;00:00, 273.61it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
