@@ -232,7 +232,7 @@ class DiscreteAdditiveNoiseModel(AdditiveNoiseModel):
         Y = Y.astype(np.int32)
 
         self._prediction_model.fit(X=X, Y=Y)
-        self._noise_model.fit(self._rounded_prediction(X) - Y)
+        self._noise_model.fit(Y - self._rounded_prediction(X))
 
     def evaluate(self, parent_samples: np.ndarray, noise_samples: np.ndarray) -> np.ndarray:
         if not is_discrete(noise_samples):
