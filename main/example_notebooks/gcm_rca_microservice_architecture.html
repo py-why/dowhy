@@ -796,7 +796,7 @@ div.rendered_html tbody tr:hover {
 <section id="Finding-the-Root-Cause-of-Elevated-Latencies-in-a-Microservice-Architecture">
 <h1>Finding the Root Cause of Elevated Latencies in a Microservice Architecture<a class="headerlink" href="#Finding-the-Root-Cause-of-Elevated-Latencies-in-a-Microservice-Architecture" title="Permalink to this heading"></a></h1>
 <p>In this case study, we identify the root causes of “unexpected” observed latencies in cloud services that empower an online shop. We focus on the process of placing an order, which involves different services to make sure that the placed order is valid, the customer is authenticated, the shipping costs are calculated correctly, and the shipping process is initiated accordingly. The dependencies of the services is shown in the graph below.</p>
-<p><img alt="12de1c58e54b4f1db7166786a46105f4" class="no-scaled-link" src="../_images/microservice-architecture-dependencies.png" style="width: 800px;" /></p>
+<p><img alt="5bd5c7076ee646dd90bffbd593430fca" class="no-scaled-link" src="../_images/microservice-architecture-dependencies.png" style="width: 800px;" /></p>
 <p>This kind of dependency graph could be obtained from services like <a class="reference external" href="https://aws.amazon.com/xray/">Amazon X-Ray</a> or defined manually based on the trace structure of requests.</p>
 <p>We assume that the dependency graph above is correct and that we are able to measure the latency (in seconds) of each node for an order request. In case of <code class="docutils literal notranslate"><span class="pre">Website</span></code>, the latency would represent the time until a confirmation of the order is shown. For simplicity, let us assume that the services are synchronized, i.e., a service has to wait for downstream services in order to proceed. Further, we assume that two nodes are not impacted by unobserved factors (hidden confounders) at the same time
 (i.e., causal sufficiency). Seeing that, for instance, network traffic affects multiple services, this assumption might be typically violated in a real-world scenario. However, weak confounders can be neglected, while stronger ones (like network traffic) could falsely render multiple nodes as root causes. Generally, we can only identify causes that are part of the data.</p>
@@ -1029,9 +1029,9 @@ relations. We shall use this information shortly to assign generative causal mod
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node Order DB: 100%|██████████| 11/11 [00:00&lt;00:00, 78.06it/s]
-Evaluating causal mechanisms...: 100%|██████████| 11/11 [00:02&lt;00:00,  4.78it/s]
-Test permutations of given graph: 100%|██████████| 50/50 [01:13&lt;00:00,  1.47s/it]
+Fitting causal mechanism of node Order DB: 100%|██████████| 11/11 [00:00&lt;00:00, 65.23it/s]
+Evaluating causal mechanisms...: 100%|██████████| 11/11 [00:02&lt;00:00,  4.74it/s]
+Test permutations of given graph: 100%|██████████| 50/50 [01:13&lt;00:00,  1.46s/it]
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -1060,73 +1060,73 @@ NOTE: Every metric focuses on different aspects and they might not consistently 
 We will mostly utilize the CRPS for comparing and interpreting the performance of the mechanisms, since this captures the most important properties for the causal model.
 
 --- Node Customer DB
-- The KL divergence between generated and observed distribution is 0.05183195420924165.
+- The KL divergence between generated and observed distribution is 0.04925478390363215.
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
 --- Node Shipping Cost Service
-- The KL divergence between generated and observed distribution is 0.02015791678585828.
+- The KL divergence between generated and observed distribution is 0.027325142107091.
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
 --- Node Product DB
-- The KL divergence between generated and observed distribution is 0.046484116446223495.
+- The KL divergence between generated and observed distribution is 0.08169952206885196.
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
 --- Node Order DB
-- The KL divergence between generated and observed distribution is 0.027178029014127292.
+- The KL divergence between generated and observed distribution is 0.06315652105382359.
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
 --- Node Auth Service
-- The MSE is 0.01441002779753044.
-- The NMSE is 0.5464997592540335.
-- The R2 coefficient is 0.7013042999029825.
-- The normalized CRPS is 0.30351380505326275.
+- The MSE is 0.014414090754388986.
+- The NMSE is 0.5465791167423922.
+- The R2 coefficient is 0.7011863978028183.
+- The normalized CRPS is 0.3032733558309202.
 The estimated CRPS indicates a good model performance.
 
 --- Node Caching Service
-- The MSE is 0.023159219397747826.
-- The NMSE is 0.8429021589128052.
-- The R2 coefficient is 0.28935000995743254.
-- The normalized CRPS is 0.4631363815420121.
+- The MSE is 0.02313664512854801.
+- The NMSE is 0.8423352051079303.
+- The R2 coefficient is 0.29035724903133736.
+- The normalized CRPS is 0.46238649019809125.
 The estimated CRPS indicates only a fair model performance. Note, however, that a high CRPS could also result from a small signal to noise ratio.
 
 --- Node Order Service
-- The MSE is 0.014400659650081901.
-- The NMSE is 0.5488488153833527.
-- The R2 coefficient is 0.6987333802201706.
-- The normalized CRPS is 0.30366271248364807.
+- The MSE is 0.01440545693644521.
+- The NMSE is 0.5492413360499853.
+- The R2 coefficient is 0.6981791435398625.
+- The normalized CRPS is 0.30418034539283456.
 The estimated CRPS indicates a good model performance.
 
 --- Node Product Service
-- The MSE is 0.020434489623596924.
-- The NMSE is 0.6494604023213836.
-- The R2 coefficient is 0.5781383575212049.
-- The normalized CRPS is 0.36369425059971705.
+- The MSE is 0.020445783887596755.
+- The NMSE is 0.649768453136259.
+- The R2 coefficient is 0.5776458071886872.
+- The normalized CRPS is 0.3638720504245393.
 The estimated CRPS indicates only a fair model performance. Note, however, that a high CRPS could also result from a small signal to noise ratio.
 
 --- Node API
-- The MSE is 0.014493907166372074.
-- The NMSE is 0.20988636800487673.
-- The R2 coefficient is 0.9559237096793594.
-- The normalized CRPS is 0.11597328173172092.
+- The MSE is 0.014482766940041317.
+- The NMSE is 0.2097941094289864.
+- The R2 coefficient is 0.9559814418037125.
+- The normalized CRPS is 0.11591938111371483.
 The estimated CRPS indicates a very good model performance.
 
 --- Node www
-- The MSE is 0.01104145682019778.
-- The NMSE is 0.1376609387516436.
-- The R2 coefficient is 0.9810407723816622.
-- The normalized CRPS is 0.0779688997898076.
+- The MSE is 0.011041282523741402.
+- The NMSE is 0.13768370660811716.
+- The R2 coefficient is 0.9810259948099468.
+- The normalized CRPS is 0.07785418210597939.
 The estimated CRPS indicates a very good model performance.
 
 --- Node Website
-- The MSE is 0.02078577125796021.
-- The NMSE is 0.18506589124789494.
-- The R2 coefficient is 0.9657338170368339.
-- The normalized CRPS is 0.10215013662398109.
+- The MSE is 0.020776919798118847.
+- The NMSE is 0.18518804361766192.
+- The R2 coefficient is 0.9656975719809984.
+- The normalized CRPS is 0.10199718755615876.
 The estimated CRPS indicates a very good model performance.
 
 ==== Evaluation of Invertible Functional Causal Model Assumption ====
 
---- The model assumption for node www is not rejected with a p-value of 0.376473923141335 (after potential adjustment) and a significance level of 0.05.
+--- The model assumption for node www is not rejected with a p-value of 1.0 (after potential adjustment) and a significance level of 0.05.
 This implies that the model assumption might be valid.
 
 --- The model assumption for node Website is not rejected with a p-value of 1.0 (after potential adjustment) and a significance level of 0.05.
@@ -1135,7 +1135,7 @@ This implies that the model assumption might be valid.
 --- The model assumption for node Auth Service is not rejected with a p-value of 1.0 (after potential adjustment) and a significance level of 0.05.
 This implies that the model assumption might be valid.
 
---- The model assumption for node API is not rejected with a p-value of 1.0 (after potential adjustment) and a significance level of 0.05.
+--- The model assumption for node API is not rejected with a p-value of 0.32044401759228347 (after potential adjustment) and a significance level of 0.05.
 This implies that the model assumption might be valid.
 
 --- The model assumption for node Product Service is rejected with a p-value of 0.0 (after potential adjustment) and a significance level of 0.05.
@@ -1150,7 +1150,7 @@ This implies that the model assumption might not be valid. This is, the relation
 Note that these results are based on statistical independence tests, and the fact that the assumption was not rejected does not necessarily imply that it is correct. There is just no evidence against it.
 
 ==== Evaluation of Generated Distribution ====
-The overall average KL divergence between the generated and observed distribution is 0.09891182304087585
+The overall average KL divergence between the generated and observed distribution is 0.11161202840535155
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
 ==== Evaluation of the Causal Graph Structure ====
@@ -1159,7 +1159,7 @@ The estimated KL divergence indicates an overall very good representation of the
 +-------------------------------------------------------------------------------------------------------+
 | The given DAG is informative because 0 / 50 of the permutations lie in the Markov                     |
 | equivalence class of the given DAG (p-value: 0.00).                                                   |
-| The given DAG violates 8/63 LMCs and is better than 100.0% of the permuted DAGs (p-value: 0.00).      |
+| The given DAG violates 6/63 LMCs and is better than 100.0% of the permuted DAGs (p-value: 0.00).      |
 | Based on the provided significance level (0.2) and because the DAG is informative,                    |
 | we do not reject the DAG.                                                                             |
 +-------------------------------------------------------------------------------------------------------+
@@ -1481,7 +1481,7 @@ them in a bar plot.</p>
 <h2>Scenario 3: Simulating the intervention of shifting resources<a class="headerlink" href="#Scenario-3:-Simulating-the-intervention-of-shifting-resources" title="Permalink to this heading"></a></h2>
 <p>Next, let us imagine a scenario where permanent degradation has happened as in scenario 2 and we’ve successfully identified <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> as the root cause. Furthermore, we figured out that a recent deployment of the <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> contained a bug that is causing the overloaded hosts. A proper fix must be deployed, or the previous deployment must be rolled back. But, in the meantime, could we mitigate the situation by shifting over some resources from <code class="docutils literal notranslate"><span class="pre">Shipping</span> <span class="pre">Service</span></code> to
 <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code>? And would that help? Before doing it in reality, let us simulate it first and see whether it improves the situation.</p>
-<p><img alt="336d871f79344805ab0d89718fe16374" class="no-scaled-link" src="../_images/shifting-resources.png" style="width: 600px;" /></p>
+<p><img alt="5ca1341628334f7c9761069ada3964c1" class="no-scaled-link" src="../_images/shifting-resources.png" style="width: 600px;" /></p>
 <p>Let’s perform an intervention where we say we can reduce the average time of <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> by 1s. But at the same time we buy this speed-up by an average slow-down of 2s in <code class="docutils literal notranslate"><span class="pre">Shipping</span> <span class="pre">Cost</span> <span class="pre">Service</span></code>.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
