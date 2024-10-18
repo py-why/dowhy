@@ -5,7 +5,6 @@ from warnings import warn
 
 import numpy as np
 import pandas as pd
-from numpy.distutils.misc_util import is_sequence
 
 from dowhy.causal_estimator import CausalEstimate, CausalEstimator
 from dowhy.causal_identifier import IdentifiedEstimand
@@ -295,7 +294,6 @@ class Econml(CausalEstimator):
     def apply_multitreatment(self, df: pd.DataFrame, fun: Callable, *args, **kwargs):
         ests = []
         assert not isinstance(self._treatment_value, str)
-        assert is_sequence(self._treatment_value)
 
         if df is None:
             filtered_df = None

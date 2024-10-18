@@ -19,6 +19,7 @@ classifiers = [
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
 ]
 keywords = [
     'causality',
@@ -36,7 +37,9 @@ priority = "explicit"
 
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+# Cython<3 currently required due to build fails of certain dependencies like econml
+# see: https://github.com/py-why/EconML/blob/e0271fdde8d94a70a9f67a07e1d0a5a8e964d3f5/pyproject.toml#L94
+requires = ["poetry-core>=1.0.0", "cython<3"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry-dynamic-versioning]
@@ -53,25 +56,41 @@ files = ["dowhy/__init__.py"]
 # * numba (imported by econml) requires python <3.11
 #
 [tool.poetry.dependencies]
-python = ">=3.8,<3.12"
-cython = ">=0.29.32"
-scipy = ">=1.4.1"
+python = ">=3.8,<3.13"
+cython = "<3.0"
+scipy = [
+    {version = ">=1.7", python = "<3.9"},
+    {version = ">=1.10", python = ">=3.9"}
+]
 statsmodels = ">=0.13.5"
-numpy = ">=1.20"
-pandas = ">=1.4.3"
+numpy = [
+    {version = "<2.0", python = "<3.9"},
+    {version = ">1.0", python = ">=3.9"}
+]
+pandas = [
+    {version = "<2.0", python = "<3.9"},
+    {version = ">1.0", python = ">=3.9"}
+]
 networkx = ">=2.8.5"
 sympy = ">=1.10.1"
 scikit-learn = ">1.0"
 pydot = { version = "^1.4.2", optional = true }
 joblib = ">=1.1.0"
-pygraphviz = { version = "^1.9", optional = true }
-econml = { version = ">=0.14.1", optional = true }
+pygraphviz = { version = ">=1.9", optional = true }
+econml = ">=0.15.1"
 tqdm = ">=4.64.0"
 causal-learn = ">=0.1.3.0"
+numba = [
+    {version = "<0.59", python = "<3.9"},
+    {version = ">=0.59", python = ">=3.9"}
+]
 
 #Plotting Extra
 matplotlib = { version = ">=3.5.3", optional = true }
-cvxpy = "^1.2.2"
+cvxpy = [
+    {version = "<1.5.0", python = "<3.9"},
+    {version = ">=1.2.2", python = ">=3.9"}
+]
 
 [tool.poetry.extras]
 pygraphviz = ["pygraphviz"]
@@ -80,28 +99,31 @@ plotting = ["matplotlib"]
 econml = ["econml"]
 
 [tool.poetry.group.dev.dependencies]
-poethepoet = "^0.24.4"
-flake8 = "^5.0.4"
-black = { version = ">=22.6,<25.0", extras = ["jupyter"] }
-isort = "^5.10.1"
-pytest = "^7.1.2"
-pytest-cov = "^4.1.0"
-pytest-split = "^0.8.0"
-nbformat = "^5.4.0"
-jupyter = "^1.0.0"
-flaky = "^3.7.0"
-keras = "^2.9.0"
-xgboost = "^2.0.2"
-mypy = "^1.7.1"
+poethepoet = ">=0.24.4"
+flake8 = ">=5.0.4"
+black = { version = ">=22.6", extras = ["jupyter"] }
+isort = ">=5.10.1"
+pytest = ">=7.1.2"
+pytest-cov = ">=4.1.0"
+pytest-split = ">=0.8.0"
+nbformat = ">=5.4.0"
+jupyter = ">=1.0.0"
+flaky = ">=3.7.0"
+keras = ">=2.9.0"
+xgboost = ">=2.0.2"
+mypy = ">=1.7.1"
 torch = [
     {version = "<=1.99", python = ">=3.8,<3.11"},
-    {version = "^2.0", python = ">=3.11", source = "torch-cpu"}
+    {version = ">2.0", python = ">=3.11", source = "torch-cpu"}
 ]
 torchvision = [
     {version = ">=0.13.1", python = ">=3.8,<3.11"},
-    {version = ">=0.15.2", python=">=3.11"}
+    {version = ">=0.15.2", python=">=3.11", source = "torch-cpu"}
 ]
-pytorch-lightning = "<2.0"
+pytorch-lightning = [
+    {version = "<2.0", python = ">=3.8,<3.11"},
+    {version = ">=2.0", python=">=3.11"}
+]
 
 [tool.poetry.group.docs]
 optional = true
@@ -111,17 +133,16 @@ optional = true
 # Dependencies for Documentation Generation
 #
 
-sphinx_design = "^0.3.0"
-sphinx = "^5.3.0"
+sphinx_design = ">=0.3.0"
+sphinx = ">=5.3.0"
 sphinxcontrib-googleanalytics = { git = "https://github.com/sphinx-contrib/googleanalytics.git", branch = "master" }
-nbsphinx = "^0.8.9"
-sphinx-rtd-theme = "^1.0.0"
-pydata-sphinx-theme = "^0.9.0"
-ipykernel = "^6.15.1"
+nbsphinx = ">=0.8.9"
+sphinx-rtd-theme = ">=1.0.0"
+pydata-sphinx-theme = ">=0.9.0"
+ipykernel = ">=6.15.1"
 sphinx-copybutton = "0.5.0"
-seaborn = "^0.12.1"
-tensorflow = "^2.11.0"
-cdt ="^0.6.0"
+seaborn = ">=0.12.1"
+cdt =">=0.6.0"
 
 #
 # Versions defined for security reasons

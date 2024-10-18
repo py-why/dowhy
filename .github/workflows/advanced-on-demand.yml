@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.8, 3.9, "3.10", "3.11"]
+        python-version: [3.8, 3.9, "3.10", "3.11", "3.12"]
         poetry-version: [1.5.1]
         test-group: [1, 2, 3, 4]
 
@@ -53,6 +53,13 @@ jobs:
         uses: abatilo/actions-poetry@v3.0.0
         with:
           poetry-version: ${{ matrix.poetry-version }}
+
+      # At the moment needed to support scipy in Python 3.12
+      - name: Install LLVM and Clang
+        uses: KyleMayes/install-llvm-action@v2
+        with:
+          version: "14.0"
+          directory: ${{ runner.temp }}/llvm
 
       - name: Install graphviz
         run: |
