@@ -1,4 +1,4 @@
-|BuildStatus|_ |PyPiVersion|_ |PythonSupport|_ |Downloads|_ |discord|_
+|BuildStatus|_ |PyPiVersion|_ |PythonSupport|_ |Downloads|_ |discord|_ |gurubase|_
 
 .. |PyPiVersion| image:: https://img.shields.io/pypi/v/dowhy.svg
 .. _PyPiVersion: https://pypi.org/project/dowhy/
@@ -14,6 +14,9 @@
 
 .. |discord| image:: https://img.shields.io/discord/818456847551168542
 .. _discord: https://discord.gg/cSBGb3vsZb
+
+.. |gurubase| image:: https://img.shields.io/badge/Gurubase-Ask%20DoWhy%20Guru-006BFF
+.. _gurubase: https://gurubase.io/g/dowhy
 
 .. image:: dowhy-logo-large.png
   :width: 50%
