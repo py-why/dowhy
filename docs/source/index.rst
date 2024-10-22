@@ -9,10 +9,10 @@ DoWhy documentation
     getting_started/index
     User Guide <user_guide/index>
     Examples <example_notebooks/nb_index>
-    dowhy
-    Contributing <contributing>
-    code_repo
     cite
+    Contributing <contributing>
+    dowhy
+    code_repo
 
 **Date**: |today| **Version**: |version|
 
