@@ -42,7 +42,7 @@ def plot_causal_graph_networkx(
         if edge[0] == edge[1]:
             raise ValueError(
                 "Node %s has a self-cycle, i.e. a node pointing to itself. Plotting self-cycles is "
-                "currently only supported for plots using Graphviz! Consider installing the corresponding"
+                "currently only supported for plots using Graphviz! Consider installing the corresponding "
                 "requirements." % edge[0]
             )
 
