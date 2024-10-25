@@ -627,7 +627,7 @@ explicitly model our causal relationships using functional causal models, as we 
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node mpg: 100%|██████████| 5/5 [00:00&lt;00:00, 28.62it/s]
+Fitting causal mechanism of node mpg: 100%|██████████| 5/5 [00:00&lt;00:00, 28.99it/s]
 </pre></div></div>
 </div>
 <p>Optionally, we can get some insights into the performance of the causal mechanisms by using the evaluation method:</p>
@@ -644,7 +644,7 @@ Fitting causal mechanism of node mpg: 100%|██████████| 5/5 [
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Evaluating causal mechanisms...: 100%|██████████| 5/5 [00:00&lt;00:00, 429.87it/s]
+Evaluating causal mechanisms...: 100%|██████████| 5/5 [00:00&lt;00:00, 3254.93it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -670,35 +670,35 @@ We will mostly utilize the CRPS for comparing and interpreting the performance o
 The estimated KL divergence indicates a good representation of the data distribution, but might indicate some smaller mismatches between the distributions.
 
 --- Node displacement
-- The MSE is 1066.8802205998074.
-- The NMSE is 0.3150091474285043.
-- The R2 coefficient is 0.9002474266291071.
-- The normalized CRPS is 0.17522937047621454.
+- The MSE is 1060.1157400952736.
+- The NMSE is 0.31274920184264293.
+- The R2 coefficient is 0.9015843974287858.
+- The normalized CRPS is 0.17714313434646875.
 The estimated CRPS indicates a very good model performance.
 
 --- Node weight
-- The MSE is 79949.61282051282.
-- The NMSE is 0.3359350937278292.
-- The R2 coefficient is 0.8852962623585189.
-- The normalized CRPS is 0.18398226376156224.
+- The MSE is 77927.59152872444.
+- The NMSE is 0.3293392447432768.
+- The R2 coefficient is 0.8909086867528749.
+- The normalized CRPS is 0.18431008611167252.
 The estimated CRPS indicates a very good model performance.
 
 --- Node horsepower
-- The MSE is 209.29113924050634.
-- The NMSE is 0.38098501624901415.
-- The R2 coefficient is 0.8513378579863071.
-- The normalized CRPS is 0.20296699411876892.
+- The MSE is 207.14212917883805.
+- The NMSE is 0.37926574409578384.
+- The R2 coefficient is 0.8557617347249853.
+- The normalized CRPS is 0.20152482768695754.
 The estimated CRPS indicates a good model performance.
 
 --- Node mpg
-- The MSE is 15.699538297818407.
-- The NMSE is 0.5134945988653445.
-- The R2 coefficient is 0.7353328271586502.
-- The normalized CRPS is 0.2830433213216262.
+- The MSE is 15.620289636388742.
+- The NMSE is 0.5121045268547029.
+- The R2 coefficient is 0.7344865131314628.
+- The normalized CRPS is 0.2793091596647558.
 The estimated CRPS indicates a good model performance.
 
 ==== Evaluation of Generated Distribution ====
-The overall average KL divergence between the generated and observed distribution is 0.9578045815757854
+The overall average KL divergence between the generated and observed distribution is 0.9394536430054833
 The estimated KL divergence indicates a good representation of the data distribution, but might indicate some smaller mismatches between the distributions.
 
 ==== NOTE ====
@@ -738,7 +738,7 @@ All these evaluations give some insight into the goodness of the causal model, b
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Evaluating set functions...: 100%|██████████| 32/32 [00:14&lt;00:00,  2.13it/s]
+Evaluating set functions...: 100%|██████████| 32/32 [00:14&lt;00:00,  2.15it/s]
 </pre></div></div>
 </div>
 <p>For a better interpretation of the results, we convert the variance attribution to percentages by normalizing it over the total sum.</p>
@@ -778,7 +778,7 @@ variance of mpg remains unexplained by all of the above factors, which may be pa
 <h2>Intrinsic influence on river flow<a class="headerlink" href="#Intrinsic-influence-on-river-flow" title="Permalink to this heading">#</a></h2>
 <p>In the next example, we look at different recordings taken of the river flows (<span class="math notranslate nohighlight">\(m^3/s\)</span>) at a 15 minute frequency across 5 different measuring stations in England at Henthorn, New Jumbles Rock, Hodder Place, Whalley Weir and Samlesbury. Here, obtaining a better understanding of how the river flows behave can help to plan potential mitigation steps to avoid overflows. The data is taken from the <a class="reference external" href="https://environment.data.gov.uk/hydrology/explore">UK Department for Environment Food &amp; Rural Affairs
 website</a>. Here is a map of the rivers:</p>
-<p><img alt="542ac19c834d42ce861c676d4a9eb6c7" class="no-scaled-link" src="../_images/river-map.jpg" style="width: 600px;" /></p>
+<p><img alt="842918f6d15945c0817cad92cd096584" class="no-scaled-link" src="../_images/river-map.jpg" style="width: 600px;" /></p>
 <p>New Jumbles Rock lies at a confluence point of the 3 rivers passing Henthorn, Hodder Place, and Whalley Weir and New Jumbles Rock flows into Samlesbury. The water passing a certain measuring station is certainly a mixture of some fraction of the amount observed at the next stations further upstream plus some amount contributed by streams and little rivers entering the river in between. This defines our causal graph as:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
@@ -801,7 +801,7 @@ website</a>. Here is a map of the rivers:</p>
 </div>
 </div>
 <p>In this setting, we are interested in the causal influence of the upstream rivers on the Samlesbury river. Similar to the example before, we would expect these nodes to be heavily confounded by, e.g., the weather. That is, the true graph is more likely to be along the lines of:</p>
-<p><img alt="b1a414fd1b4e421a8f167f215a1ef5e7" class="no-scaled-link" src="../_images/river-confounded.png" style="width: 400px;" /></p>
+<p><img alt="074defe25ef94aefb5429ee009513a01" class="no-scaled-link" src="../_images/river-confounded.png" style="width: 400px;" /></p>
 <p>Nevertheless, we still expect the ICC algorithm to provide some insights into the contribution to the river flow of Samlesbury, even with the hidden confounder in place:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
@@ -823,8 +823,8 @@ website</a>. Here is a map of the rivers:</p>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node Samlesbury: 100%|██████████| 5/5 [00:00&lt;00:00, 369.38it/s]
-Evaluating set functions...: 100%|██████████| 32/32 [00:00&lt;00:00, 240.35it/s]
+Fitting causal mechanism of node Samlesbury: 100%|██████████| 5/5 [00:00&lt;00:00, 379.97it/s]
+Evaluating set functions...: 100%|██████████| 32/32 [00:00&lt;00:00, 247.72it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
