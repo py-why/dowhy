@@ -1,5 +1,6 @@
 """This module provides functionality to falsify a user-given DAG given observed data."""
 
+import math
 import warnings
 from dataclasses import dataclass, field
 from enum import Enum, auto
@@ -932,7 +933,7 @@ class _PermuteNodes:
         self.causal_graph = causal_graph
         self.exclude_original_order = exclude_original_order
         self.n_permutations = n_permutations
-        self.max_perms = np.math.factorial(self.causal_graph.number_of_nodes()) - int(self.exclude_original_order)
+        self.max_perms = math.factorial(self.causal_graph.number_of_nodes()) - int(self.exclude_original_order)
 
         if n_permutations == -1 or n_permutations > self.max_perms:
             self.it = self.iter_all_permutations()
