@@ -93,8 +93,6 @@ exclude_patterns = [
     "Thumbs.db",
     ".DS_Store",
     ".ipynb_checkpoints",
-    "example_notebooks/dowhy_ranking_methods.ipynb",
-    "example_notebooks/dowhy_twins_example.ipynb",
 ]
 
 # The name of the Pygments (syntax highlighting) style to use.
