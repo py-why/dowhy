@@ -426,3 +426,4 @@ Miscellaneous
    dowhy_multiple_treatments
    dowhy_efficient_backdoor_example
    identifying_effects_using_id_algorithm
+   dowhy_optimize_backdoor_example
