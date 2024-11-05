@@ -495,6 +495,9 @@
 
 
 
+<li class="toctree-l1"><a class="reference internal" href="dowhy_ranking_methods.html">Ranking of estimation methods for a given dataset</a></li>
+
+
 <li class="toctree-l1"><a class="reference internal" href="dowhy_demo_dummy_outcome_refuter.html">A Simple Example on Creating a Custom Refutation Using User-Defined Outcome Functions</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Miscellaneous</span></p>
@@ -506,6 +509,7 @@
 <li class="toctree-l1"><a class="reference internal" href="dowhy_multiple_treatments.html">Estimating effect of multiple treatments</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_efficient_backdoor_example.html">Finding optimal adjustment sets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="identifying_effects_using_id_algorithm.html">Identifying Effect using ID Algorithm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_optimize_backdoor_example.html">Example to demonstrate optimized backdoor variable search for Causal Identification</a></li>
 </ul>
 </div>
 </nav></div>
@@ -768,9 +772,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W2,W3,W4,W0,W1])
+─────(E[y|W0,W4,W1,W2,W3])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W3,W4,W0,W1,U) = P(y|v0,W2,W3,W4,W0,W1)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W4,W1,W2,W3,U) = P(y|v0,W0,W4,W1,W2,W3)
 
 ### Estimand : 2
 Estimand name: iv
@@ -817,16 +821,16 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W2,W3,W4,W0,W1])
+─────(E[y|W0,W4,W1,W2,W3])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W3,W4,W0,W1,U) = P(y|v0,W2,W3,W4,W0,W1)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W4,W1,W2,W3,U) = P(y|v0,W0,W4,W1,W2,W3)
 
 ## Realized estimand
-b: y~v0+W2+W3+W4+W0+W1
+b: y~v0+W0+W4+W1+W2+W3
 Target units: ate
 
 ## Estimate
-Mean value: 9.887772662159772
+Mean value: 9.986876930266268
 
 </pre></div></div>
 </div>
@@ -864,17 +868,17 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W2,W3,W4,W0,W1])
+─────(E[y|W0,W4,W1,W2,W3])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W3,W4,W0,W1,U) = P(y|v0,W2,W3,W4,W0,W1)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W4,W1,W2,W3,U) = P(y|v0,W0,W4,W1,W2,W3)
 
 ## Realized estimand
-b: y~v0+W2+W3+W4+W0+W1 |
+b: y~v0+W0+W4+W1+W2+W3 |
 Target units: ate
 
 ## Estimate
-Mean value: 9.90035784326376
-Effect estimates: [[9.90035784]]
+Mean value: 10.026755130064354
+Effect estimates: [[10.02675513]]
 
 </pre></div></div>
 </div>
@@ -898,9 +902,9 @@ estimate value of 0 when the action variable is replaced by a random variable, i
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:9.887772662159772
-New effect:-0.011267275910513677
-p value:0.98
+Estimated effect:9.986876930266268
+New effect:-0.016886433068492235
+p value:0.92
 
 </pre></div></div>
 </div>
@@ -952,11 +956,11 @@ than learning a new toolkit. The power of EconML is that you can now implement t
 <div class="output_area docutils container">
 <div class="highlight"><pre>
    Treatment    Outcome        w0         s        w1
-0  10.623826  14.609247 -2.110579  8.374562  0.358196
-1  15.328682  24.205353  3.075484  2.038482 -0.991496
-2  10.952437  18.787138  2.231680  4.329782 -0.477655
-3  16.912506  27.379356  3.378487  2.211639  0.794960
-4   6.211954  11.445097 -0.117434  5.029577 -1.267570
+0  10.488470  20.678179  2.188908  4.345768 -1.752013
+1  14.082643  27.467315 -2.835359  8.079185 -1.254351
+2   6.190018  11.690928 -0.078361  8.980313 -0.462106
+3   6.497280  12.730725  0.766801  1.201890 -0.570751
+4  16.427181  33.318672  3.308548  2.168464 -0.187991
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1012,9 +1016,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
      d
-────────────(E[Outcome|w1,w0])
+────────────(E[Outcome|w0,w1])
 d[Treatment]
-Estimand assumption 1, Unconfoundedness: If U→{Treatment} and U→Outcome then P(Outcome|Treatment,w1,w0,U) = P(Outcome|Treatment,w1,w0)
+Estimand assumption 1, Unconfoundedness: If U→{Treatment} and U→Outcome then P(Outcome|Treatment,w0,w1,U) = P(Outcome|Treatment,w0,w1)
 
 ### Estimand : 2
 Estimand name: iv
@@ -1058,18 +1062,18 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
      d
-────────────(E[Outcome|w1,w0])
+────────────(E[Outcome|w0,w1])
 d[Treatment]
-Estimand assumption 1, Unconfoundedness: If U→{Treatment} and U→Outcome then P(Outcome|Treatment,w1,w0,U) = P(Outcome|Treatment,w1,w0)
+Estimand assumption 1, Unconfoundedness: If U→{Treatment} and U→Outcome then P(Outcome|Treatment,w0,w1,U) = P(Outcome|Treatment,w0,w1)
 
 ## Realized estimand
-b: Outcome~Treatment+w1+w0
+b: Outcome~Treatment+w0+w1
 Target units: ate
 
 ## Estimate
-Mean value: 0.9975577118229912
+Mean value: 1.9992362839230056
 
-Causal Estimate is 0.9975577118229912
+Causal Estimate is 1.9992362839230056
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1116,17 +1120,17 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
      d
-────────────(E[Outcome|w1,w0])
+────────────(E[Outcome|w0,w1])
 d[Treatment]
-Estimand assumption 1, Unconfoundedness: If U→{Treatment} and U→Outcome then P(Outcome|Treatment,w1,w0,U) = P(Outcome|Treatment,w1,w0)
+Estimand assumption 1, Unconfoundedness: If U→{Treatment} and U→Outcome then P(Outcome|Treatment,w0,w1,U) = P(Outcome|Treatment,w0,w1)
 
 ## Realized estimand
-b: Outcome~Treatment+w1+w0 |
+b: Outcome~Treatment+w0+w1 |
 Target units: ate
 
 ## Estimate
-Mean value: 0.025063514339984373
-Effect estimates: [[0.02506351]]
+Mean value: 1.1185186542586543
+Effect estimates: [[1.11851865]]
 
 </pre></div></div>
 </div>
@@ -1149,9 +1153,9 @@ Effect estimates: [[0.02506351]]
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Add a random common cause
-Estimated effect:0.025063514339984373
-New effect:0.014301349538138464
-p value:0.62
+Estimated effect:1.1185186542586543
+New effect:1.0875317637955302
+p value:0.32
 
 </pre></div></div>
 </div>
@@ -1172,9 +1176,9 @@ p value:0.62
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:0.025063514339984373
-New effect:-0.00011957797514876038
-p value:0.28736192144283046
+Estimated effect:1.1185186542586543
+New effect:-1.5011351914967516e-05
+p value:0.487435620851147
 
 </pre></div></div>
 </div>

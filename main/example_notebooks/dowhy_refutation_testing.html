@@ -495,6 +495,9 @@
 
 
 
+<li class="toctree-l1"><a class="reference internal" href="dowhy_ranking_methods.html">Ranking of estimation methods for a given dataset</a></li>
+
+
 <li class="toctree-l1"><a class="reference internal" href="dowhy_demo_dummy_outcome_refuter.html">A Simple Example on Creating a Custom Refutation Using User-Defined Outcome Functions</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Miscellaneous</span></p>
@@ -506,6 +509,7 @@
 <li class="toctree-l1"><a class="reference internal" href="dowhy_multiple_treatments.html">Estimating effect of multiple treatments</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_efficient_backdoor_example.html">Finding optimal adjustment sets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="identifying_effects_using_id_algorithm.html">Identifying Effect using ID Algorithm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_optimize_backdoor_example.html">Example to demonstrate optimized backdoor variable search for Causal Identification</a></li>
 </ul>
 </div>
 </nav></div>
@@ -1049,13 +1053,13 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
      d                                                                         ↪
-────────────(E[y_factual|x17,x13,x14,x16,x19,x1,x22,x7,x5,x4,x15,x12,x25,x2,x1 ↪
+────────────(E[y_factual|x2,x10,x1,x8,x5,x17,x3,x25,x6,x13,x15,x21,x16,x20,x9, ↪
 d[treatment]                                                                   ↪
 
 ↪
-↪ 1,x6,x20,x21,x24,x3,x10,x9,x23,x18,x8])
+↪ x19,x14,x18,x7,x4,x23,x22,x24,x11,x12])
 ↪
-Estimand assumption 1, Unconfoundedness: If U→{treatment} and U→y_factual then P(y_factual|treatment,x17,x13,x14,x16,x19,x1,x22,x7,x5,x4,x15,x12,x25,x2,x11,x6,x20,x21,x24,x3,x10,x9,x23,x18,x8,U) = P(y_factual|treatment,x17,x13,x14,x16,x19,x1,x22,x7,x5,x4,x15,x12,x25,x2,x11,x6,x20,x21,x24,x3,x10,x9,x23,x18,x8)
+Estimand assumption 1, Unconfoundedness: If U→{treatment} and U→y_factual then P(y_factual|treatment,x2,x10,x1,x8,x5,x17,x3,x25,x6,x13,x15,x21,x16,x20,x9,x19,x14,x18,x7,x4,x23,x22,x24,x11,x12,U) = P(y_factual|treatment,x2,x10,x1,x8,x5,x17,x3,x25,x6,x13,x15,x21,x16,x20,x9,x19,x14,x18,x7,x4,x23,x22,x24,x11,x12)
 
 ### Estimand : 2
 Estimand name: iv
@@ -1091,9 +1095,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
    d
-────────(E[re78|hisp,nodegr,black,age,married,educ])
+────────(E[re78|nodegr,hisp,black,married,educ,age])
 d[treat]
-Estimand assumption 1, Unconfoundedness: If U→{treat} and U→re78 then P(re78|treat,hisp,nodegr,black,age,married,educ,U) = P(re78|treat,hisp,nodegr,black,age,married,educ)
+Estimand assumption 1, Unconfoundedness: If U→{treat} and U→re78 then P(re78|treat,nodegr,hisp,black,married,educ,age,U) = P(re78|treat,nodegr,hisp,black,married,educ,age)
 
 ### Estimand : 2
 Estimand name: iv
@@ -1129,7 +1133,7 @@ No such variable(s) found!
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-The Causal Estimate is 4.0287482183903025
+The Causal Estimate is 4.028748218390323
 </pre></div></div>
 </div>
 </section>
@@ -1153,7 +1157,7 @@ The Causal Estimate is 4.0287482183903025
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-The Causal Estimate is 1639.7968234421505
+The Causal Estimate is 1639.8518338203985
 </pre></div></div>
 </div>
 </section>
@@ -1184,8 +1188,8 @@ The Causal Estimate is 1639.7968234421505
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Add a random common cause
-Estimated effect:4.0287482183903025
-New effect:4.028748218390304
+Estimated effect:4.028748218390323
+New effect:4.028748218390322
 p value:1.0
 
 </pre></div></div>
@@ -1214,8 +1218,8 @@ p value:1.0
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:4.0287482183903025
-New effect:-0.4862386414069592
+Estimated effect:4.028748218390323
+New effect:-0.4769338765745793
 p value:0.04
 
 </pre></div></div>
@@ -1243,8 +1247,8 @@ p value:0.04
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a subset of data
-Estimated effect:4.0287482183903025
-New effect:4.02194969548939
+Estimated effect:4.028748218390323
+New effect:4.025527179344327
 p value:0.98
 
 </pre></div></div>
@@ -1275,8 +1279,8 @@ p value:0.98
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Add a random common cause
-Estimated effect:1639.7968234421505
-New effect:1639.7968234421503
+Estimated effect:1639.8518338203985
+New effect:1639.851833820398
 p value:1.0
 
 </pre></div></div>
@@ -1305,9 +1309,9 @@ p value:1.0
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:1639.7968234421505
-New effect:-163.5626599506286
-p value:0.78
+Estimated effect:1639.8518338203985
+New effect:4.083625129828997
+p value:0.9199999999999999
 
 </pre></div></div>
 </div>
@@ -1335,9 +1339,9 @@ p value:0.78
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a subset of data
-Estimated effect:1639.7968234421505
-New effect:1592.1275249598318
-p value:0.84
+Estimated effect:1639.8518338203985
+New effect:1585.8628727329494
+p value:0.94
 
 </pre></div></div>
 </div>
