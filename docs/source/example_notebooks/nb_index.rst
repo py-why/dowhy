@@ -75,6 +75,13 @@ Introductory examples
         | **Level:** Beginner
         | **Task:** All
 
+.. grid:: 2
+
+    .. grid-item-card:: :doc:`do_sampler_demo`
+
+        +++
+        | **Level:** Beginner
+        | **Task:** Interventions
 
 Real world-inspired examples
 ----------------------------
@@ -191,6 +198,15 @@ Real world-inspired examples
         | **Level:** Advanced
         | **Task:** Fairness estimation via GCM
 
+   .. grid-item-card:: :doc:`sales_attribution_intervention`
+
+        .. image:: ../_static/sales_attribution.png
+            :height: 120px
+            :align: center
+        +++
+        | **Level:** Advanced
+        | **Task:** Causal Inference
+
 
 
 Examples on benchmark datasets
@@ -216,12 +232,6 @@ Examples on benchmark datasets
         | **Level:** Advanced
         | **Task:** Effect inference
 
-    .. grid-item-card:: :doc:`counterfactual_fairness_dowhy`
-
-        +++
-        | **Level:** Advanced
-        | **Task:** Fairness estimation
-
 .. grid:: 3
 
     .. grid-item-card:: :doc:`gcm_401k_analysis`
@@ -241,6 +251,20 @@ Examples on benchmark datasets
         +++
         | **Level:** Advanced
         | **Task:** Do Sampler
+
+.. grid:: 3
+
+    .. grid-item-card:: :doc:`counterfactual_fairness_dowhy`
+
+        +++
+        | **Level:** Advanced
+        | **Task:** Fairness estimation
+
+    .. grid-item-card:: :doc:`dowhy_twins_example`
+
+        +++
+        | **Level:** Advanced
+        | **Task:** Effect inference
 
 
 Modeling and refuting causal assumptions
@@ -300,6 +324,12 @@ Modeling and refuting causal assumptions
         | **Level:** Advanced
         | **Task:** Effect inference
 
+    .. grid-item-card:: :doc:`dowhy_ranking_methods`
+
+        +++
+        | **Level:** Advanced
+        | **Task:** Effect inference
+
 Miscellaneous
 -------------
 
@@ -352,6 +382,11 @@ Miscellaneous
         | **Level:** Advanced
         | **Task:** Effect inference
 
+    .. grid-item-card:: :doc:`dowhy_optimize_backdoor_example`
+
+        +++
+        | **Level:** Advanced
+        | **Task:** Effect inference
 
 .. toctree::
    :maxdepth: 1
@@ -364,10 +399,8 @@ Miscellaneous
    dowhy_confounder_example
    dowhy-conditional-treatment-effects
    tutorial-causalinference-machinelearning-using-dowhy-econml
-   dowhy_functional_api
    dowhy_mediation_analysis
    dowhy_refuter_notebook
-   dowhy_causal_api
    do_sampler_demo
 
 .. toctree::
@@ -385,6 +418,7 @@ Miscellaneous
    gcm_counterfactual_medical_dry_eyes
    gcm_falsify_dag
    counterfactual_fairness_dowhy
+   sales_attribution_intervention
 
 .. toctree::
    :maxdepth: 1
@@ -398,6 +432,7 @@ Miscellaneous
    prediction/dowhy_causal_prediction_demo
    lalonde_pandas_api
    counterfactual_fairness_dowhy
+   dowhy_twins_example
 
 .. toctree::
    :maxdepth: 1
@@ -427,3 +462,5 @@ Miscellaneous
    dowhy_efficient_backdoor_example
    identifying_effects_using_id_algorithm
    dowhy_optimize_backdoor_example
+   dowhy_functional_api
+   dowhy_causal_api
