@@ -16,7 +16,7 @@ echo "Building docs for version ${CURRENT_VERSION} into ${OUTPUT_DIR}, stable ve
 # check for required tooling
 echo "Verifying Prerequisites"
 which npm
-which poetry
+which uv
 
 #
 # Cache existing docs
@@ -35,10 +35,10 @@ export TAGS
 if  [ $CI == "true" ]; then
     # Using parallelism is slower in GitHub actions
     echo "Executing sphinx-build (Single-Threaded)"
-    poetry run sphinx-build source ${OUTPUT_DIR}
+    uv run sphinx-build source ${OUTPUT_DIR}
 else
     echo "Executing sphinx-build (Parallel)"
-    poetry run sphinx-build -j auto source ${OUTPUT_DIR}
+    uv run sphinx-build -j auto source ${OUTPUT_DIR}
 fi
 
 #

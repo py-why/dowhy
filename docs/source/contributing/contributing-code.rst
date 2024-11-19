@@ -16,16 +16,15 @@ The following steps allow you to contribute code to DoWhy.
 
       git clone https://github.com/<YOUR_GITHUB_USERNAME>/dowhy
 
-#. Install DoWhy and its requirements. Poetry will create a virtual environment automatically,
+#. Install DoWhy and its requirements. uv will create a virtual environment automatically,
    but if preferred, it can be created in a different way.
-   By default, Poetry will install DoWhy in interactive mode.
+   By default, uv will install DoWhy in interactive mode.
    This way, you can immediately test your changes to the codebase.
 
    .. code:: shell
 
       cd dowhy
-      pip install --upgrade pip
-      poetry install -E "plotting"
+      uv sync --extra plotting
 
    .. note::
       Installing pygraphviz can cause problems on some platforms.
@@ -56,46 +55,46 @@ Pull request checklist
 
    .. code:: shell
 
-     poetry run poe lint
+     uv run poe lint
 
 #. Make sure the newly added code complies with the format requirements of `black <https://black.readthedocs.io/en/stable/>`_ and
    `isort <https://pycqa.github.io/isort/>`_.
 
    .. code:: shell
 
-     poetry run poe format_check
+     uv run poe format_check
 
    You can use following commands to fix formatting automatically
 
    .. code:: shell
 
-     poetry run poe format
+     uv run poe format
 
 #. Add tests for your new code and execute the unittests to make sure
    you did not introduce any breaking changes or bugs.
 
    .. code:: shell
 
-     poetry run poe test
+     uv run poe test
 
    Note that you can also execute those tasks together
 
    .. code:: shell
 
-     poetry run poe verify
+     uv run poe verify
 
    A full list of available tasks can be obtained using
 
    .. code:: shell
 
-     poetry run poe -h
+     uv run poe -h
 
    The full test suite of DoWhy takes quite long. To speed up development cycles,
    you can restrict the tests executed as in the following example.
 
    .. code:: shell
 
-     poetry run pytest -v tests/causal_refuters
+     uv run pytest -v tests/causal_refuters
 
 #. Once your code is finished and it passes all checks successfully,
    commit your changes. Make sure to add an informative commit message and to sign off your
@@ -133,10 +132,10 @@ Pull request checklist
 
       git rebase --signoff HEAD^^^
 
-#. (advanced) Poetry fixes its dependecies and their version with a poetry.lock file. Poetry's dependencies should be updated regularly by maintainers via
+#. (advanced) uv fixes its dependecies and their version with a uv.lock file. uv's dependencies should be updated regularly by maintainers via
 
    .. code:: shell
 
-     poetry update
+     uv sync
 
    For most PRs, this is unnecessary. If a PR necessitates a lockfile change, we request that you provide a justification as to why a dependency update was necessary.

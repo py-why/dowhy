@@ -25,20 +25,20 @@ jobs:
       with:
         python-version: '3.9'
     
-    - name: Install Poetry
-      uses: abatilo/actions-poetry@v3.0.1
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
       with:
-        poetry-version: '1.5.1'
+        uv-version: '0.5.2'
 
     - name: Install Poetry Dynamic Versioning Plugin
       run: pip install poetry-dynamic-versioning
 
     - name: Install dependencies
-      run: poetry install
+      run: uv sync
         
     - name: Build and publish
       run: |
         poetry-dynamic-versioning
-        poetry build
+        uv build
     - name: Publish package distributions to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1

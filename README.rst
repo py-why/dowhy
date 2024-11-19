@@ -73,7 +73,7 @@ For more details and how to use these methods in practice, checkout the document
 
 Quick Start
 ===========
-DoWhy support Python 3.8+. To install, you can use pip, poetry, or conda.
+DoWhy support Python 3.8+. To install, you can use pip, poetry, uv, or conda.
 
 **Latest Release**
 
@@ -88,6 +88,12 @@ Install the latest `release <https://pypi.org/project/dowhy/>`__ using poetry.
 .. code:: shell
 
    poetry add dowhy
+
+Install the latest `release <https://pypi.org/project/dowhy/>`__ using uv.
+
+.. code:: shell
+
+   uv add dowhy
 
 Install the latest `release <https://anaconda.org/conda-forge/dowhy>`__ using conda.
 
@@ -109,7 +115,7 @@ If you prefer to use the latest dev version, your dependency management tool wil
 **Requirements**
 
 DoWhy requires a few dependencies. 
-Details on specific versions can be found in `pyproject.toml <./pyproject.toml>`_, under the `tool.poetry.dependencies` section.
+Details on specific versions can be found in `pyproject.toml <./pyproject.toml>`_, under the `project.dependencies` section.
 
 If you face any problems, try installing dependencies manually.
 

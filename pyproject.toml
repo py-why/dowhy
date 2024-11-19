@@ -1,46 +1,52 @@
-[tool.poetry]
-name = "dowhy"
+[tool.uv]
+default-groups = ["dev", "docs"]
 
-#
-# 0.0.0 is standard placeholder for poetry-dynamic-versioning
-# any changes to this should not be checked in
-#
-version = "0.0.0"
-description = "DoWhy is a Python library for causal inference that supports explicit modeling and testing of causal assumptions"
-authors = ["PyWhy Community <amshar@microsoft.com>"]
-maintainers = []
-license = "MIT"
-documentation = "https://py-why.github.io/dowhy"
-repository = "https://github.com/py-why/dowhy"
-classifiers = [
-    'Development Status :: 4 - Beta',
-    'License :: OSI Approved :: MIT License',
-    'Programming Language :: Python :: 3.8',
-    'Programming Language :: Python :: 3.9',
-    'Programming Language :: Python :: 3.10',
-    'Programming Language :: Python :: 3.11',
-    'Programming Language :: Python :: 3.12',
+[dependency-groups]
+dev = [
+    "poethepoet>=0.24.4",
+    "flake8>=5.0.4",
+    "black[jupyter]>=22.6",
+    "isort>=5.10.1",
+    "pytest>=7.1.2",
+    "pytest-cov>=4.1.0",
+    "pytest-split>=0.8.0",
+    "nbformat>=5.4.0",
+    "jupyter>=1.0.0",
+    "flaky>=3.7.0",
+    "keras>=2.9.0",
+    "xgboost>=2.0.2",
+    "mypy>=1.7.1",
+    "torch<=1.99; python_version < \"3.11\" and python_version >= \"3.8\"",
+    "torch>2.0; python_version >= \"3.11\"",
+    "torchvision>=0.13.1; python_version < \"3.11\" and python_version >= \"3.8\"",
+    "torchvision>=0.15.2; python_version >= \"3.11\"",
+    "pytorch-lightning<2.0; python_version < \"3.11\" and python_version >= \"3.8\"",
+    "pytorch-lightning>=2.0; python_version >= \"3.11\"",
 ]
-keywords = [
-    'causality',
-    'machine-learning',
-    'causal-inference',
-    'statistics',
-    'graphical-model',
+docs = [
+    "sphinx-design>=0.3.0",
+    "sphinx>=5.3.0",
+    "sphinxcontrib-googleanalytics @ git+https://github.com/sphinx-contrib/googleanalytics.git@master",
+    "nbsphinx>=0.8.9",
+    "sphinx-rtd-theme>=1.0.0",
+    "pydata-sphinx-theme>=0.9.0",
+    "ipykernel>=6.15.1",
+    "sphinx-copybutton==0.5.0",
+    "seaborn>=0.12.1",
+    "cdt>=0.6.0",
+    "nbconvert==7.0.0rc3",
 ]
-include = ['docs', 'tests', 'CONTRIBUTING.md', 'LICENSE']
-readme = 'README.rst'
-[[tool.poetry.source]]
+
+[tool.pdm.build]
+includes = ["docs", "tests", "CONTRIBUTING.md", "LICENSE"]
+
+[[tool.pdm.source]]
 name = "torch-cpu"
 url = "https://download.pytorch.org/whl/cpu"
-priority = "explicit"
-
-
+verify_ssl = true
 [build-system]
-# Cython<3 currently required due to build fails of certain dependencies like econml
-# see: https://github.com/py-why/EconML/blob/e0271fdde8d94a70a9f67a07e1d0a5a8e964d3f5/pyproject.toml#L94
-requires = ["poetry-core>=1.0.0", "cython<3"]
-build-backend = "poetry.core.masonry.api"
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
 
 [tool.poetry-dynamic-versioning]
 enable = true
@@ -50,105 +56,6 @@ format = "{base}"
 
 [tool.poetry-dynamic-versioning.substitution]
 files = ["dowhy/__init__.py"]
-
-#
-# Dependency compatibility notes:
-# * numba (imported by econml) requires python <3.11
-#
-[tool.poetry.dependencies]
-python = ">=3.8,<3.13"
-cython = "<3.0"
-scipy = [
-    {version = ">=1.7", python = "<3.9"},
-    {version = ">=1.10", python = ">=3.9"}
-]
-statsmodels = ">=0.13.5"
-numpy = [
-    {version = "<2.0", python = "<3.9"},
-    {version = ">1.0", python = ">=3.9"}
-]
-pandas = [
-    {version = "<2.0", python = "<3.9"},
-    {version = ">1.0", python = ">=3.9"}
-]
-networkx = ">=2.8.5"
-sympy = ">=1.10.1"
-scikit-learn = ">1.0"
-pydot = { version = "^1.4.2", optional = true }
-joblib = ">=1.1.0"
-pygraphviz = { version = ">=1.9", optional = true }
-econml = ">=0.15.1"
-tqdm = ">=4.64.0"
-causal-learn = ">=0.1.3.0"
-numba = [
-    {version = "<0.59", python = "<3.9"},
-    {version = ">=0.59", python = ">=3.9"}
-]
-
-#Plotting Extra
-matplotlib = { version = ">=3.5.3", optional = true }
-cvxpy = [
-    {version = "<1.5.0", python = "<3.9"},
-    {version = ">=1.2.2", python = ">=3.9"}
-]
-
-[tool.poetry.extras]
-pygraphviz = ["pygraphviz"]
-pydot = ["pydot"]
-plotting = ["matplotlib"]
-econml = ["econml"]
-
-[tool.poetry.group.dev.dependencies]
-poethepoet = ">=0.24.4"
-flake8 = ">=5.0.4"
-black = { version = ">=22.6", extras = ["jupyter"] }
-isort = ">=5.10.1"
-pytest = ">=7.1.2"
-pytest-cov = ">=4.1.0"
-pytest-split = ">=0.8.0"
-nbformat = ">=5.4.0"
-jupyter = ">=1.0.0"
-flaky = ">=3.7.0"
-keras = ">=2.9.0"
-xgboost = ">=2.0.2"
-mypy = ">=1.7.1"
-torch = [
-    {version = "<=1.99", python = ">=3.8,<3.11"},
-    {version = ">2.0", python = ">=3.11", source = "torch-cpu"}
-]
-torchvision = [
-    {version = ">=0.13.1", python = ">=3.8,<3.11"},
-    {version = ">=0.15.2", python=">=3.11", source = "torch-cpu"}
-]
-pytorch-lightning = [
-    {version = "<2.0", python = ">=3.8,<3.11"},
-    {version = ">=2.0", python=">=3.11"}
-]
-
-[tool.poetry.group.docs]
-optional = true
-
-[tool.poetry.group.docs.dependencies]
-#
-# Dependencies for Documentation Generation
-#
-
-sphinx_design = ">=0.3.0"
-sphinx = ">=5.3.0"
-sphinxcontrib-googleanalytics = { git = "https://github.com/sphinx-contrib/googleanalytics.git", branch = "master" }
-nbsphinx = ">=0.8.9"
-sphinx-rtd-theme = ">=1.0.0"
-pydata-sphinx-theme = ">=0.9.0"
-ipykernel = ">=6.15.1"
-sphinx-copybutton = "0.5.0"
-seaborn = ">=0.12.1"
-cdt =">=0.6.0"
-
-#
-# Versions defined for security reasons
-#
-# https://github.com/py-why/dowhy/security/dependabot/1 - CVE-2022-34749
-nbconvert = { version = "7.0.0rc3", allow-prereleases = true }
 
 [tool.pytest.ini_options]
 markers = [
@@ -170,7 +77,7 @@ _isort_check = 'isort --check .'
 # testing tasks
 test = "pytest -v -m 'not advanced and not econml' --durations=0 --durations-min=60.0"
 test_no_notebooks= "pytest -v -m 'not advanced and not econml and not notebook' --durations=0 --durations-min=60.0"
-test_durations = "poetry run poe test --store-durations"
+test_durations = "uv run poe test --store-durations"
 test_econml = "pytest -v -m 'econml' --durations=0 --durations-min=60.0"
 test_advanced = "pytest -v"
 test_focused = "pytest -v -m 'focused'"
@@ -211,3 +118,67 @@ profile = 'black'
 multi_line_output = 3
 line_length = 120
 py_version = 38
+
+[project]
+authors = [
+    {name = "PyWhy Community", email = "amshar@microsoft.com"},
+]
+maintainers = []
+license = {text = "MIT"}
+requires-python = "<3.13,>=3.8"
+dependencies = [
+    "cython<3.0",
+    "scipy>=1.7; python_version < \"3.9\"",
+    "scipy>=1.10; python_version >= \"3.9\"",
+    "statsmodels>=0.13.5",
+    "numpy<2.0; python_version < \"3.9\"",
+    "numpy>1.0; python_version >= \"3.9\"",
+    "pandas<2.0; python_version < \"3.9\"",
+    "pandas>1.0; python_version >= \"3.9\"",
+    "networkx>=2.8.5",
+    "sympy>=1.10.1",
+    "scikit-learn>1.0",
+    "joblib>=1.1.0",
+    "econml>=0.15.1",
+    "tqdm>=4.64.0",
+    "causal-learn>=0.1.3.0",
+    "numba<0.59; python_version < \"3.9\"",
+    "numba>=0.59; python_version >= \"3.9\"",
+    "cvxpy<1.5.0; python_version < \"3.9\"",
+    "cvxpy>=1.2.2; python_version >= \"3.9\"",
+]
+name = "dowhy"
+version = "0.0.0"
+description = "DoWhy is a Python library for causal inference that supports explicit modeling and testing of causal assumptions"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+keywords = [
+    "causality",
+    "machine-learning",
+    "causal-inference",
+    "statistics",
+    "graphical-model",
+]
+readme = "README.rst"
+
+[project.urls]
+repository = "https://github.com/py-why/dowhy"
+documentation = "https://py-why.github.io/dowhy"
+
+[project.optional-dependencies]
+pydot = [
+    "pydot<2.0.0,>=1.4.2",
+]
+pygraphviz = [
+    "pygraphviz>=1.9",
+]
+plotting = [
+    "matplotlib>=3.5.3",
+]
