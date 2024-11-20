@@ -62,7 +62,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'example_notebooks/tutorial-causalinference-machinelearning-using-dowhy-econml';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Functional API Preview" href="dowhy_functional_api.html" />
+    <link rel="next" title="Mediation analysis with DoWhy: Direct and Indirect Effects" href="dowhy_mediation_analysis.html" />
     <link rel="prev" title="Conditional Average Treatment Effects (CATE) with DoWhy and EconML" href="dowhy-conditional-treatment-effects.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -436,11 +436,8 @@
 <li class="toctree-l1"><a class="reference internal" href="dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Tutorial on Causal Inference and its Connections to Machine Learning (Using DoWhy+EconML)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy_functional_api.html">Functional API Preview</a></li>
-
 <li class="toctree-l1"><a class="reference internal" href="dowhy_mediation_analysis.html">Mediation analysis with DoWhy: Direct and Indirect Effects</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_refuter_notebook.html">Iterating over multiple refutation tests</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="do_sampler_demo.html">Do-sampler Introduction</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Real world-inspired examples</span></p>
@@ -462,6 +459,7 @@
 
 
 
+<li class="toctree-l1"><a class="reference internal" href="sales_attribution_intervention.html">Causal attribution to sales growth and spend intervention</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples on benchmarks datasets</span></p>
 <ul class="nav bd-sidenav">
@@ -478,6 +476,7 @@
 
 
 
+<li class="toctree-l1"><a class="reference internal" href="dowhy_twins_example.html">DoWhy example on Twins dataset</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Modeling and refuting causal assumptions</span></p>
 <ul class="nav bd-sidenav">
@@ -510,6 +509,9 @@
 <li class="toctree-l1"><a class="reference internal" href="dowhy_efficient_backdoor_example.html">Finding optimal adjustment sets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="identifying_effects_using_id_algorithm.html">Identifying Effect using ID Algorithm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_optimize_backdoor_example.html">Example to demonstrate optimized backdoor variable search for Causal Identification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_functional_api.html">Functional API Preview</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
 </ul>
 </div>
 </nav></div>
@@ -772,9 +774,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W3,W0,W1,W2,W4])
+─────(E[y|W0,W3,W4,W1,W2])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W3,W0,W1,W2,W4,U) = P(y|v0,W3,W0,W1,W2,W4)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W4,W1,W2,U) = P(y|v0,W0,W3,W4,W1,W2)
 
 ### Estimand : 2
 Estimand name: iv
@@ -782,9 +784,9 @@ Estimand expression:
  ⎡                              -1⎤
  ⎢    d        ⎛    d          ⎞  ⎥
 E⎢─────────(y)⋅⎜─────────([v₀])⎟  ⎥
- ⎣d[Z₀  Z₁]    ⎝d[Z₀  Z₁]      ⎠  ⎦
-Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z0,Z1})
-Estimand assumption 2, Exclusion: If we remove {Z0,Z1}→{v0}, then ¬({Z0,Z1}→y)
+ ⎣d[Z₁  Z₀]    ⎝d[Z₁  Z₀]      ⎠  ⎦
+Estimand assumption 1, As-if-random: If U→→y then ¬(U →→{Z1,Z0})
+Estimand assumption 2, Exclusion: If we remove {Z1,Z0}→{v0}, then ¬({Z1,Z0}→y)
 
 ### Estimand : 3
 Estimand name: frontdoor
@@ -821,16 +823,16 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W3,W0,W1,W2,W4])
+─────(E[y|W0,W3,W4,W1,W2])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W3,W0,W1,W2,W4,U) = P(y|v0,W3,W0,W1,W2,W4)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W4,W1,W2,U) = P(y|v0,W0,W3,W4,W1,W2)
 
 ## Realized estimand
-b: y~v0+W3+W0+W1+W2+W4
+b: y~v0+W0+W3+W4+W1+W2
 Target units: ate
 
 ## Estimate
-Mean value: 10.027282720476723
+Mean value: 10.038559379961262
 
 </pre></div></div>
 </div>
@@ -868,17 +870,17 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W3,W0,W1,W2,W4])
+─────(E[y|W0,W3,W4,W1,W2])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W3,W0,W1,W2,W4,U) = P(y|v0,W3,W0,W1,W2,W4)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W4,W1,W2,U) = P(y|v0,W0,W3,W4,W1,W2)
 
 ## Realized estimand
-b: y~v0+W3+W0+W1+W2+W4 |
+b: y~v0+W0+W3+W4+W1+W2 |
 Target units: ate
 
 ## Estimate
-Mean value: 10.008025941987142
-Effect estimates: [[10.00802594]]
+Mean value: 9.97797196564577
+Effect estimates: [[9.97797197]]
 
 </pre></div></div>
 </div>
@@ -902,9 +904,9 @@ estimate value of 0 when the action variable is replaced by a random variable, i
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:10.027282720476723
-New effect:0.00014212242400226505
-p value:0.96
+Estimated effect:10.038559379961262
+New effect:-0.024146998564927524
+p value:0.88
 
 </pre></div></div>
 </div>
@@ -956,11 +958,11 @@ than learning a new toolkit. The power of EconML is that you can now implement t
 <div class="output_area docutils container">
 <div class="highlight"><pre>
    Treatment    Outcome        w0         s        w1
-0   8.559139  17.235748  1.860316  9.420809 -2.411030
-1  17.339671  34.355531 -3.393149  6.220993 -1.249875
-2  13.199500  26.686548 -2.770198  8.108964 -1.080458
-3  21.679442  43.004160  3.985115  3.122006 -1.135692
-4  18.750792  37.738190  3.529927  3.685619  0.888694
+0  21.100778  41.954045 -3.858002  6.623174 -0.313065
+1  26.802771  53.245963  4.553403  9.924620 -0.269744
+2  21.886103  42.230004  3.988801  2.894175 -2.097590
+3   6.871314  13.386933 -1.017406  8.727019 -0.851087
+4  15.505310  31.381150  3.057752  9.656643  0.460126
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1071,9 +1073,9 @@ b: Outcome~Treatment+w1+w0
 Target units: ate
 
 ## Estimate
-Mean value: 1.998796457204701
+Mean value: 1.9980968468031604
 
-Causal Estimate is 1.998796457204701
+Causal Estimate is 1.9980968468031604
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1129,8 +1131,8 @@ b: Outcome~Treatment+w1+w0 |
 Target units: ate
 
 ## Estimate
-Mean value: 1.0797251660959735
-Effect estimates: [[1.07972517]]
+Mean value: 0.9655656416361392
+Effect estimates: [[0.96556564]]
 
 </pre></div></div>
 </div>
@@ -1153,9 +1155,9 @@ Effect estimates: [[1.07972517]]
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Add a random common cause
-Estimated effect:1.0797251660959735
-New effect:1.1020182819526014
-p value:0.56
+Estimated effect:0.9655656416361392
+New effect:0.9658313695236983
+p value:0.94
 
 </pre></div></div>
 </div>
@@ -1176,9 +1178,9 @@ p value:0.56
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:1.0797251660959735
-New effect:-0.00014559285541382666
-p value:0.3708857729934696
+Estimated effect:0.9655656416361392
+New effect:7.234029482681811e-05
+p value:0.42611650134906154
 
 </pre></div></div>
 </div>
@@ -1263,11 +1265,11 @@ refutation methods that can check the robustness of the estimate.</p>
       </div>
     </a>
     <a class="right-next"
-       href="dowhy_functional_api.html"
+       href="dowhy_mediation_analysis.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Functional API Preview</p>
+        <p class="prev-next-title">Mediation analysis with DoWhy: Direct and Indirect Effects</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

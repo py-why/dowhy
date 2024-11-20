@@ -436,11 +436,8 @@
 <li class="toctree-l1"><a class="reference internal" href="dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial-causalinference-machinelearning-using-dowhy-econml.html">Tutorial on Causal Inference and its Connections to Machine Learning (Using DoWhy+EconML)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy_functional_api.html">Functional API Preview</a></li>
-
 <li class="toctree-l1"><a class="reference internal" href="dowhy_mediation_analysis.html">Mediation analysis with DoWhy: Direct and Indirect Effects</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_refuter_notebook.html">Iterating over multiple refutation tests</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="do_sampler_demo.html">Do-sampler Introduction</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Real world-inspired examples</span></p>
@@ -462,6 +459,7 @@
 
 
 
+<li class="toctree-l1"><a class="reference internal" href="sales_attribution_intervention.html">Causal attribution to sales growth and spend intervention</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples on benchmarks datasets</span></p>
 <ul class="nav bd-sidenav">
@@ -478,6 +476,7 @@
 
 
 
+<li class="toctree-l1"><a class="reference internal" href="dowhy_twins_example.html">DoWhy example on Twins dataset</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Modeling and refuting causal assumptions</span></p>
 <ul class="nav bd-sidenav">
@@ -510,6 +509,9 @@
 <li class="toctree-l1"><a class="reference internal" href="dowhy_efficient_backdoor_example.html">Finding optimal adjustment sets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="identifying_effects_using_id_algorithm.html">Identifying Effect using ID Algorithm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_optimize_backdoor_example.html">Example to demonstrate optimized backdoor variable search for Causal Identification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_functional_api.html">Functional API Preview</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
 </ul>
 </div>
 </nav></div>
@@ -570,7 +572,7 @@
   <section id="Finding-the-Root-Cause-of-Elevated-Latencies-in-a-Microservice-Architecture">
 <h1>Finding the Root Cause of Elevated Latencies in a Microservice Architecture<a class="headerlink" href="#Finding-the-Root-Cause-of-Elevated-Latencies-in-a-Microservice-Architecture" title="Permalink to this heading">#</a></h1>
 <p>In this case study, we identify the root causes of “unexpected” observed latencies in cloud services that empower an online shop. We focus on the process of placing an order, which involves different services to make sure that the placed order is valid, the customer is authenticated, the shipping costs are calculated correctly, and the shipping process is initiated accordingly. The dependencies of the services is shown in the graph below.</p>
-<p><img alt="04082422966541a7bb6537e07c15811e" class="no-scaled-link" src="../_images/microservice-architecture-dependencies.png" style="width: 800px;" /></p>
+<p><img alt="976c23bb92f94d2eaba81c44ebfe677d" class="no-scaled-link" src="../_images/microservice-architecture-dependencies.png" style="width: 800px;" /></p>
 <p>This kind of dependency graph could be obtained from services like <a class="reference external" href="https://aws.amazon.com/xray/">Amazon X-Ray</a> or defined manually based on the trace structure of requests.</p>
 <p>We assume that the dependency graph above is correct and that we are able to measure the latency (in seconds) of each node for an order request. In case of <code class="docutils literal notranslate"><span class="pre">Website</span></code>, the latency would represent the time until a confirmation of the order is shown. For simplicity, let us assume that the services are synchronized, i.e., a service has to wait for downstream services in order to proceed. Further, we assume that two nodes are not impacted by unobserved factors (hidden confounders) at the same time
 (i.e., causal sufficiency). Seeing that, for instance, network traffic affects multiple services, this assumption might be typically violated in a real-world scenario. However, weak confounders can be neglected, while stronger ones (like network traffic) could falsely render multiple nodes as root causes. Generally, we can only identify causes that are part of the data.</p>
@@ -803,9 +805,9 @@ relations. We shall use this information shortly to assign generative causal mod
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node Order DB: 100%|██████████| 11/11 [00:00&lt;00:00, 76.24it/s]
-Evaluating causal mechanisms...: 100%|██████████| 11/11 [00:02&lt;00:00,  4.71it/s]
-Test permutations of given graph: 100%|██████████| 50/50 [01:13&lt;00:00,  1.47s/it]
+Fitting causal mechanism of node Order DB: 100%|██████████| 11/11 [00:00&lt;00:00, 76.62it/s]
+Evaluating causal mechanisms...: 100%|██████████| 11/11 [00:02&lt;00:00,  4.54it/s]
+Test permutations of given graph: 100%|██████████| 50/50 [01:15&lt;00:00,  1.52s/it]
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -834,68 +836,68 @@ NOTE: Every metric focuses on different aspects and they might not consistently 
 We will mostly utilize the CRPS for comparing and interpreting the performance of the mechanisms, since this captures the most important properties for the causal model.
 
 --- Node Customer DB
-- The KL divergence between generated and observed distribution is 0.06667093134806816.
+- The KL divergence between generated and observed distribution is 0.02908021818108546.
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
 --- Node Shipping Cost Service
-- The KL divergence between generated and observed distribution is 0.015304426959102196.
+- The KL divergence between generated and observed distribution is 0.00231609592730218.
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
 --- Node Product DB
-- The KL divergence between generated and observed distribution is 0.07207564843179802.
+- The KL divergence between generated and observed distribution is 0.01830407608137697.
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
 --- Node Order DB
-- The KL divergence between generated and observed distribution is 0.07462515033340208.
+- The KL divergence between generated and observed distribution is 0.01897061666926969.
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
 --- Node Auth Service
-- The MSE is 0.014411710217456939.
-- The NMSE is 0.5470246493480487.
-- The R2 coefficient is 0.7004763835256762.
-- The normalized CRPS is 0.30352543091297896.
+- The MSE is 0.014411097648650761.
+- The NMSE is 0.5464550699453188.
+- The R2 coefficient is 0.7013216084190089.
+- The normalized CRPS is 0.30253592401049245.
 The estimated CRPS indicates a good model performance.
 
 --- Node Caching Service
-- The MSE is 0.023147748938163626.
-- The NMSE is 0.8429723494940091.
-- The R2 coefficient is 0.289294969798435.
-- The normalized CRPS is 0.4628290456976525.
+- The MSE is 0.02319287087911459.
+- The NMSE is 0.8448121180843138.
+- The R2 coefficient is 0.28576519953304946.
+- The normalized CRPS is 0.4631883635780619.
 The estimated CRPS indicates only a fair model performance. Note, however, that a high CRPS could also result from a small signal to noise ratio.
 
 --- Node Order Service
-- The MSE is 0.014401910583823332.
-- The NMSE is 0.5490581921453368.
-- The R2 coefficient is 0.6984212874417495.
-- The normalized CRPS is 0.30314917885267323.
+- The MSE is 0.014399737595912645.
+- The NMSE is 0.5487469350062127.
+- The R2 coefficient is 0.6987244775371177.
+- The normalized CRPS is 0.3037839109309631.
 The estimated CRPS indicates a good model performance.
 
 --- Node Product Service
-- The MSE is 0.020440507234962695.
-- The NMSE is 0.6493612365920377.
-- The R2 coefficient is 0.5781696861798705.
-- The normalized CRPS is 0.36421910619069725.
+- The MSE is 0.020425875608145905.
+- The NMSE is 0.6493511619586836.
+- The R2 coefficient is 0.5780867375870155.
+- The normalized CRPS is 0.36366814228322364.
 The estimated CRPS indicates only a fair model performance. Note, however, that a high CRPS could also result from a small signal to noise ratio.
 
 --- Node API
-- The MSE is 0.014494832690098334.
-- The NMSE is 0.20989996496357435.
-- The R2 coefficient is 0.9559265380971105.
-- The normalized CRPS is 0.11604412777596018.
+- The MSE is 0.014487408765288801.
+- The NMSE is 0.20982143559103358.
+- The R2 coefficient is 0.9559459512016308.
+- The normalized CRPS is 0.11568004958311155.
 The estimated CRPS indicates a very good model performance.
 
 --- Node www
-- The MSE is 0.011038854152542379.
-- The NMSE is 0.137646896851828.
-- The R2 coefficient is 0.9810364476306939.
-- The normalized CRPS is 0.07780694073446318.
+- The MSE is 0.011043713243100384.
+- The NMSE is 0.13765806710302797.
+- The R2 coefficient is 0.9810416798198387.
+- The normalized CRPS is 0.0778965161283941.
 The estimated CRPS indicates a very good model performance.
 
 --- Node Website
-- The MSE is 0.020775410216714297.
-- The NMSE is 0.18517515198102377.
-- The R2 coefficient is 0.9656761168947872.
-- The normalized CRPS is 0.10189178550552547.
+- The MSE is 0.020777874009648985.
+- The NMSE is 0.1852440581352131.
+- The R2 coefficient is 0.9656572555043379.
+- The normalized CRPS is 0.10217032095590421.
 The estimated CRPS indicates a very good model performance.
 
 ==== Evaluation of Invertible Functional Causal Model Assumption ====
@@ -903,8 +905,8 @@ The estimated CRPS indicates a very good model performance.
 --- The model assumption for node www is not rejected with a p-value of 1.0 (after potential adjustment) and a significance level of 0.05.
 This implies that the model assumption might be valid.
 
---- The model assumption for node Website is rejected with a p-value of 0.02007225778828392 (after potential adjustment) and a significance level of 0.05.
-This implies that the model assumption might not be valid. This is, the relationship cannot be represent with this type of mechanism or there is a hidden confounder between the node and its parents.
+--- The model assumption for node Website is not rejected with a p-value of 1.0 (after potential adjustment) and a significance level of 0.05.
+This implies that the model assumption might be valid.
 
 --- The model assumption for node Auth Service is not rejected with a p-value of 1.0 (after potential adjustment) and a significance level of 0.05.
 This implies that the model assumption might be valid.
@@ -924,7 +926,7 @@ This implies that the model assumption might not be valid. This is, the relation
 Note that these results are based on statistical independence tests, and the fact that the assumption was not rejected does not necessarily imply that it is correct. There is just no evidence against it.
 
 ==== Evaluation of Generated Distribution ====
-The overall average KL divergence between the generated and observed distribution is 0.10698308001933605
+The overall average KL divergence between the generated and observed distribution is 0.11391959635789396
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
 ==== Evaluation of the Causal Graph Structure ====
@@ -1255,7 +1257,7 @@ them in a bar plot.</p>
 <h2>Scenario 3: Simulating the intervention of shifting resources<a class="headerlink" href="#Scenario-3:-Simulating-the-intervention-of-shifting-resources" title="Permalink to this heading">#</a></h2>
 <p>Next, let us imagine a scenario where permanent degradation has happened as in scenario 2 and we’ve successfully identified <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> as the root cause. Furthermore, we figured out that a recent deployment of the <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> contained a bug that is causing the overloaded hosts. A proper fix must be deployed, or the previous deployment must be rolled back. But, in the meantime, could we mitigate the situation by shifting over some resources from <code class="docutils literal notranslate"><span class="pre">Shipping</span> <span class="pre">Service</span></code> to
 <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code>? And would that help? Before doing it in reality, let us simulate it first and see whether it improves the situation.</p>
-<p><img alt="21079bdb1a1a4d829218886a7d996629" class="no-scaled-link" src="../_images/shifting-resources.png" style="width: 600px;" /></p>
+<p><img alt="cd705ba071d9418f8eb9603b43e2e7c9" class="no-scaled-link" src="../_images/shifting-resources.png" style="width: 600px;" /></p>
 <p>Let’s perform an intervention where we say we can reduce the average time of <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> by 1s. But at the same time we buy this speed-up by an average slow-down of 2s in <code class="docutils literal notranslate"><span class="pre">Shipping</span> <span class="pre">Cost</span> <span class="pre">Service</span></code>.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:

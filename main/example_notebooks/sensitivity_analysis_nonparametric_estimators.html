@@ -436,11 +436,8 @@
 <li class="toctree-l1"><a class="reference internal" href="dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial-causalinference-machinelearning-using-dowhy-econml.html">Tutorial on Causal Inference and its Connections to Machine Learning (Using DoWhy+EconML)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy_functional_api.html">Functional API Preview</a></li>
-
 <li class="toctree-l1"><a class="reference internal" href="dowhy_mediation_analysis.html">Mediation analysis with DoWhy: Direct and Indirect Effects</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_refuter_notebook.html">Iterating over multiple refutation tests</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="do_sampler_demo.html">Do-sampler Introduction</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Real world-inspired examples</span></p>
@@ -462,6 +459,7 @@
 
 
 
+<li class="toctree-l1"><a class="reference internal" href="sales_attribution_intervention.html">Causal attribution to sales growth and spend intervention</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples on benchmarks datasets</span></p>
 <ul class="nav bd-sidenav">
@@ -478,6 +476,7 @@
 
 
 
+<li class="toctree-l1"><a class="reference internal" href="dowhy_twins_example.html">DoWhy example on Twins dataset</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Modeling and refuting causal assumptions</span></p>
 <ul class="current nav bd-sidenav">
@@ -510,6 +509,9 @@
 <li class="toctree-l1"><a class="reference internal" href="dowhy_efficient_backdoor_example.html">Finding optimal adjustment sets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="identifying_effects_using_id_algorithm.html">Identifying Effect using ID Algorithm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_optimize_backdoor_example.html">Example to demonstrate optimized backdoor variable search for Causal Identification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_functional_api.html">Functional API Preview</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
 </ul>
 </div>
 </nav></div>
@@ -931,9 +933,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W2,W5,W1,W3,W4,W6])
+─────(E[y|W5,W2,W3,W6,W4,W1])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W5,W1,W3,W4,W6,U) = P(y|v0,W2,W5,W1,W3,W4,W6)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W5,W2,W3,W6,W4,W1,U) = P(y|v0,W5,W2,W3,W6,W4,W1)
 
 ### Estimand : 2
 Estimand name: iv
@@ -988,17 +990,17 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W2,W5,W1,W3,W4,W6])
+─────(E[y|W5,W2,W3,W6,W4,W1])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W5,W1,W3,W4,W6,U) = P(y|v0,W2,W5,W1,W3,W4,W6)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W5,W2,W3,W6,W4,W1,U) = P(y|v0,W5,W2,W3,W6,W4,W1)
 
 ## Realized estimand
-b: y~v0+W2+W5+W1+W3+W4+W6 |
+b: y~v0+W5+W2+W3+W6+W4+W1 |
 Target units: ate
 
 ## Estimate
-Mean value: 11.739400039139541
-Effect estimates: [[11.73940004]]
+Mean value: 11.703311178932163
+Effect estimates: [[11.70331118]]
 
 </pre></div></div>
 </div>
@@ -1041,7 +1043,7 @@ Effect estimates: [[11.73940004]]
 <div class="highlight"><pre>
 Sensitivity Analysis to Unobserved Confounding using partial R^2 parameterization
 
-Original Effect Estimate : 11.739400039139541
+Original Effect Estimate : 11.703311178932163
 Robustness Value : 0.45
 
 Robustness Value (alpha=0.05) : 0.41000000000000003
@@ -1168,14 +1170,14 @@ effect without considering the significance level * <code class="docutils litera
   <tbody>
     <tr>
       <th>0</th>
-      <td>0.048733</td>
-      <td>0.053974</td>
-      <td>11.7394</td>
-      <td>1.048529</td>
-      <td>10.690871</td>
-      <td>12.787929</td>
-      <td>9.5402</td>
-      <td>13.91141</td>
+      <td>0.048777</td>
+      <td>0.051022</td>
+      <td>11.703311</td>
+      <td>1.017952</td>
+      <td>10.685359</td>
+      <td>12.721263</td>
+      <td>9.537565</td>
+      <td>13.842645</td>
     </tr>
   </tbody>
 </table>
@@ -1226,17 +1228,17 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W2,W5,W1,W3,W4,W6])
+─────(E[y|W5,W2,W3,W6,W4,W1])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W5,W1,W3,W4,W6,U) = P(y|v0,W2,W5,W1,W3,W4,W6)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W5,W2,W3,W6,W4,W1,U) = P(y|v0,W5,W2,W3,W6,W4,W1)
 
 ## Realized estimand
-b: y~v0+W2+W5+W1+W3+W4+W6 |
+b: y~v0+W5+W2+W3+W6+W4+W1 |
 Target units: ate
 
 ## Estimate
-Mean value: 11.833761336835659
-Effect estimates: [[11.83376134]]
+Mean value: 11.825573627739217
+Effect estimates: [[11.82557363]]
 
 </pre></div></div>
 </div>
@@ -1271,7 +1273,7 @@ Effect estimates: [[11.83376134]]
 <div class="highlight"><pre>
 Sensitivity Analysis to Unobserved Confounding using partial R^2 parameterization
 
-Original Effect Estimate : 11.833761336835659
+Original Effect Estimate : 11.825573627739217
 Robustness Value : 0.66
 
 Robustness Value (alpha=0.05) : 0.64

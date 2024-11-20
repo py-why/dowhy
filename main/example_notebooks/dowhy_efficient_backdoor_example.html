@@ -436,11 +436,8 @@
 <li class="toctree-l1"><a class="reference internal" href="dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial-causalinference-machinelearning-using-dowhy-econml.html">Tutorial on Causal Inference and its Connections to Machine Learning (Using DoWhy+EconML)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy_functional_api.html">Functional API Preview</a></li>
-
 <li class="toctree-l1"><a class="reference internal" href="dowhy_mediation_analysis.html">Mediation analysis with DoWhy: Direct and Indirect Effects</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_refuter_notebook.html">Iterating over multiple refutation tests</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="do_sampler_demo.html">Do-sampler Introduction</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Real world-inspired examples</span></p>
@@ -462,6 +459,7 @@
 
 
 
+<li class="toctree-l1"><a class="reference internal" href="sales_attribution_intervention.html">Causal attribution to sales growth and spend intervention</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples on benchmarks datasets</span></p>
 <ul class="nav bd-sidenav">
@@ -478,6 +476,7 @@
 
 
 
+<li class="toctree-l1"><a class="reference internal" href="dowhy_twins_example.html">DoWhy example on Twins dataset</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Modeling and refuting causal assumptions</span></p>
 <ul class="nav bd-sidenav">
@@ -510,6 +509,9 @@
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Finding optimal adjustment sets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="identifying_effects_using_id_algorithm.html">Identifying Effect using ID Algorithm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_optimize_backdoor_example.html">Example to demonstrate optimized backdoor variable search for Causal Identification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_functional_api.html">Functional API Preview</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
 </ul>
 </div>
 </nav></div>
@@ -710,13 +712,13 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
     d                                                                          ↪
-──────────(E[injury|tissue disorder,team motivation,previous injury,contact sp ↪
+──────────(E[injury|tissue disorder,neuromusc fatigue,team motivation,previous ↪
 d[warm-up]                                                                     ↪
 
 ↪
-↪ ort,neuromusc fatigue])
+↪  injury,contact sport])
 ↪
-Estimand assumption 1, Unconfoundedness: If U→{warm-up} and U→injury then P(injury|warm-up,tissue disorder,team motivation,previous injury,contact sport,neuromusc fatigue,U) = P(injury|warm-up,tissue disorder,team motivation,previous injury,contact sport,neuromusc fatigue)
+Estimand assumption 1, Unconfoundedness: If U→{warm-up} and U→injury then P(injury|warm-up,tissue disorder,neuromusc fatigue,team motivation,previous injury,contact sport,U) = P(injury|warm-up,tissue disorder,neuromusc fatigue,team motivation,previous injury,contact sport)
 
 ### Estimand : 2
 Estimand name: iv
@@ -761,13 +763,13 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
     d                                                                          ↪
-──────────(E[injury|tissue disorder,previous injury,team motivation,neuromusc  ↪
+──────────(E[injury|tissue disorder,previous injury,neuromusc fatigue,team mot ↪
 d[warm-up]                                                                     ↪
 
 ↪
-↪ fatigue])
+↪ ivation])
 ↪
-Estimand assumption 1, Unconfoundedness: If U→{warm-up} and U→injury then P(injury|warm-up,tissue disorder,previous injury,team motivation,neuromusc fatigue,U) = P(injury|warm-up,tissue disorder,previous injury,team motivation,neuromusc fatigue)
+Estimand assumption 1, Unconfoundedness: If U→{warm-up} and U→injury then P(injury|warm-up,tissue disorder,previous injury,neuromusc fatigue,team motivation,U) = P(injury|warm-up,tissue disorder,previous injury,neuromusc fatigue,team motivation)
 
 ### Estimand : 2
 Estimand name: iv
@@ -811,9 +813,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
     d
-──────────(E[injury|fitness,previous injury,team motivation])
+──────────(E[injury|previous injury,fitness,team motivation])
 d[warm-up]
-Estimand assumption 1, Unconfoundedness: If U→{warm-up} and U→injury then P(injury|warm-up,fitness,previous injury,team motivation,U) = P(injury|warm-up,fitness,previous injury,team motivation)
+Estimand assumption 1, Unconfoundedness: If U→{warm-up} and U→injury then P(injury|warm-up,previous injury,fitness,team motivation,U) = P(injury|warm-up,previous injury,fitness,team motivation)
 
 ### Estimand : 2
 Estimand name: iv
@@ -1117,9 +1119,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
  d
-────(E[Y|L,K])
+────(E[Y|K,L])
 d[X]
-Estimand assumption 1, Unconfoundedness: If U→{X} and U→Y then P(Y|X,L,K,U) = P(Y|X,L,K)
+Estimand assumption 1, Unconfoundedness: If U→{X} and U→Y then P(Y|X,K,L,U) = P(Y|X,K,L)
 
 ### Estimand : 2
 Estimand name: iv
@@ -1175,9 +1177,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
  d
-────(E[Y|T,R,L])
+────(E[Y|R,L,T])
 d[X]
-Estimand assumption 1, Unconfoundedness: If U→{X} and U→Y then P(Y|X,T,R,L,U) = P(Y|X,T,R,L)
+Estimand assumption 1, Unconfoundedness: If U→{X} and U→Y then P(Y|X,R,L,T,U) = P(Y|X,R,L,T)
 
 ### Estimand : 2
 Estimand name: iv

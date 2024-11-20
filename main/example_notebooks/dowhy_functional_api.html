@@ -62,8 +62,8 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'example_notebooks/dowhy_functional_api';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Mediation analysis with DoWhy: Direct and Indirect Effects" href="dowhy_mediation_analysis.html" />
-    <link rel="prev" title="Tutorial on Causal Inference and its Connections to Machine Learning (Using DoWhy+EconML)" href="tutorial-causalinference-machinelearning-using-dowhy-econml.html" />
+    <link rel="next" title="Demo for the DoWhy causal API" href="dowhy_causal_api.html" />
+    <link rel="prev" title="Example to demonstrate optimized backdoor variable search for Causal Identification" href="dowhy_optimize_backdoor_example.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -429,18 +429,15 @@
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Introductory examples</span></p>
-<ul class="current nav bd-sidenav">
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="dowhy_simple_example.html">Basic Example for Calculating the Causal Effect</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gcm_basic_example.html">Basic Example for Graphical Causal Models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gcm_draw_samples.html">Basic Example for generating samples from a GCM</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial-causalinference-machinelearning-using-dowhy-econml.html">Tutorial on Causal Inference and its Connections to Machine Learning (Using DoWhy+EconML)</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Functional API Preview</a></li>
-
 <li class="toctree-l1"><a class="reference internal" href="dowhy_mediation_analysis.html">Mediation analysis with DoWhy: Direct and Indirect Effects</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_refuter_notebook.html">Iterating over multiple refutation tests</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="do_sampler_demo.html">Do-sampler Introduction</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Real world-inspired examples</span></p>
@@ -462,6 +459,7 @@
 
 
 
+<li class="toctree-l1"><a class="reference internal" href="sales_attribution_intervention.html">Causal attribution to sales growth and spend intervention</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples on benchmarks datasets</span></p>
 <ul class="nav bd-sidenav">
@@ -478,6 +476,7 @@
 
 
 
+<li class="toctree-l1"><a class="reference internal" href="dowhy_twins_example.html">DoWhy example on Twins dataset</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Modeling and refuting causal assumptions</span></p>
 <ul class="nav bd-sidenav">
@@ -501,7 +500,7 @@
 <li class="toctree-l1"><a class="reference internal" href="dowhy_demo_dummy_outcome_refuter.html">A Simple Example on Creating a Custom Refutation Using User-Defined Outcome Functions</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Miscellaneous</span></p>
-<ul class="nav bd-sidenav">
+<ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy-simple-iv-example.html">Simple example on using Instrumental Variables method for estimation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_interpreter.html">DoWhy: Interpreters for Causal Estimators</a></li>
@@ -510,6 +509,9 @@
 <li class="toctree-l1"><a class="reference internal" href="dowhy_efficient_backdoor_example.html">Finding optimal adjustment sets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="identifying_effects_using_id_algorithm.html">Identifying Effect using ID Algorithm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_optimize_backdoor_example.html">Example to demonstrate optimized backdoor variable search for Causal Identification</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Functional API Preview</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
 </ul>
 </div>
 </nav></div>
@@ -728,9 +730,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W2,W1,W0])
+─────(E[y|W0,W2,W1])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W1,W0,U) = P(y|v0,W2,W1,W0)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W2,W1,U) = P(y|v0,W0,W2,W1)
 
 ### Estimand : 2
 Estimand name: iv
@@ -792,7 +794,7 @@ No such variable(s) found!
 Estimand type: EstimandType.NONPARAMETRIC_ATE
 
 ## Realized estimand
-b: y~v0+W2+W1+W0
+b: y~v0+W0+W2+W1
 Target units: ate
 
 ## Estimate
@@ -805,7 +807,7 @@ Mean value: 11.32687325588067
 Estimand type: EstimandType.NONPARAMETRIC_ATE
 
 ## Realized estimand
-b: y~v0+W2+W1+W0
+b: y~v0+W0+W2+W1
 Target units: ate
 
 ## Estimate
@@ -859,7 +861,7 @@ Mean value: 15.620265231373276
 Estimand type: EstimandType.NONPARAMETRIC_ATE
 
 ## Realized estimand
-b: y~v0+W2+W1+W0
+b: y~v0+W0+W2+W1
 Target units: ate
 
 ## Estimate
@@ -965,9 +967,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W2,W1,W0])
+─────(E[y|W0,W2,W1])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W1,W0,U) = P(y|v0,W2,W1,W0)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W2,W1,U) = P(y|v0,W0,W2,W1)
 
 ### Estimand : 2
 Estimand name: iv
@@ -1014,12 +1016,12 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W2,W1,W0])
+─────(E[y|W0,W2,W1])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W1,W0,U) = P(y|v0,W2,W1,W0)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W2,W1,U) = P(y|v0,W0,W2,W1)
 
 ## Realized estimand
-b: y~v0+W2+W1+W0
+b: y~v0+W0+W2+W1
 Target units: ate
 
 ## Estimate
@@ -1076,20 +1078,20 @@ p value:0.6399999999999999
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="tutorial-causalinference-machinelearning-using-dowhy-econml.html"
+       href="dowhy_optimize_backdoor_example.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Tutorial on Causal Inference and its Connections to Machine Learning (Using DoWhy+EconML)</p>
+        <p class="prev-next-title">Example to demonstrate optimized backdoor variable search for Causal Identification</p>
       </div>
     </a>
     <a class="right-next"
-       href="dowhy_mediation_analysis.html"
+       href="dowhy_causal_api.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Mediation analysis with DoWhy: Direct and Indirect Effects</p>
+        <p class="prev-next-title">Demo for the DoWhy causal API</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

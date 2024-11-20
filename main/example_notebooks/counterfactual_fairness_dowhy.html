@@ -62,7 +62,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'example_notebooks/counterfactual_fairness_dowhy';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="DoWhy example on ihdp (Infant Health and Development Program) dataset" href="dowhy_ihdp_data_example.html" />
+    <link rel="next" title="Causal attribution to sales growth and spend intervention" href="sales_attribution_intervention.html" />
     <link rel="prev" title="Falsification of User-Given Directed Acyclic Graphs" href="gcm_falsify_dag.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -436,11 +436,8 @@
 <li class="toctree-l1"><a class="reference internal" href="dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial-causalinference-machinelearning-using-dowhy-econml.html">Tutorial on Causal Inference and its Connections to Machine Learning (Using DoWhy+EconML)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy_functional_api.html">Functional API Preview</a></li>
-
 <li class="toctree-l1"><a class="reference internal" href="dowhy_mediation_analysis.html">Mediation analysis with DoWhy: Direct and Indirect Effects</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_refuter_notebook.html">Iterating over multiple refutation tests</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="do_sampler_demo.html">Do-sampler Introduction</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Real world-inspired examples</span></p>
@@ -462,6 +459,7 @@
 
 
 
+<li class="toctree-l1"><a class="reference internal" href="sales_attribution_intervention.html">Causal attribution to sales growth and spend intervention</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples on benchmarks datasets</span></p>
 <ul class="current nav bd-sidenav">
@@ -478,6 +476,7 @@
 
 
 
+<li class="toctree-l1"><a class="reference internal" href="dowhy_twins_example.html">DoWhy example on Twins dataset</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Modeling and refuting causal assumptions</span></p>
 <ul class="nav bd-sidenav">
@@ -510,6 +509,9 @@
 <li class="toctree-l1"><a class="reference internal" href="dowhy_efficient_backdoor_example.html">Finding optimal adjustment sets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="identifying_effects_using_id_algorithm.html">Identifying Effect using ID Algorithm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_optimize_backdoor_example.html">Example to demonstrate optimized backdoor variable search for Causal Identification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_functional_api.html">Functional API Preview</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
 </ul>
 </div>
 </nav></div>
@@ -878,42 +880,42 @@ average (GPA) - average grade in the first year (FYA).</p>
     <tr>
       <th>0</th>
       <td>0.0</td>
-      <td>0.0</td>
-      <td>3.2</td>
-      <td>39.0</td>
-      <td>0.49</td>
+      <td>1.0</td>
+      <td>3.3</td>
+      <td>44.0</td>
+      <td>1.02</td>
     </tr>
     <tr>
       <th>1</th>
       <td>0.0</td>
       <td>1.0</td>
-      <td>3.1</td>
-      <td>32.0</td>
-      <td>0.74</td>
+      <td>3.5</td>
+      <td>40.0</td>
+      <td>1.65</td>
     </tr>
     <tr>
       <th>2</th>
+      <td>1.0</td>
       <td>0.0</td>
-      <td>0.0</td>
-      <td>3.1</td>
-      <td>41.0</td>
-      <td>0.24</td>
+      <td>3.3</td>
+      <td>33.0</td>
+      <td>-0.82</td>
     </tr>
     <tr>
       <th>3</th>
       <td>0.0</td>
       <td>0.0</td>
-      <td>3.5</td>
-      <td>29.5</td>
-      <td>-0.45</td>
+      <td>3.3</td>
+      <td>44.0</td>
+      <td>0.67</td>
     </tr>
     <tr>
       <th>4</th>
       <td>0.0</td>
-      <td>0.0</td>
-      <td>2.9</td>
-      <td>34.5</td>
-      <td>0.26</td>
+      <td>1.0</td>
+      <td>3.5</td>
+      <td>34.0</td>
+      <td>-0.06</td>
     </tr>
   </tbody>
 </table>
@@ -1012,7 +1014,7 @@ average (GPA) - average grade in the first year (FYA).</p>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node Gender: 100%|██████████| 5/5 [00:00&lt;00:00, 301.80it/s]
+Fitting causal mechanism of node Gender: 100%|██████████| 5/5 [00:00&lt;00:00, 61.72it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1021,7 +1023,7 @@ Fitting causal mechanism of node Gender: 100%|██████████| 5/
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle -0.532047278791246$</div></div>
+$\displaystyle -0.543411083532102$</div></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">df_obs</span></code> contains the predicted values for each individual given the observed value of their protected attribute in the real world.</p>
 <div class="nbinput docutils container">
@@ -1067,47 +1069,47 @@ $\displaystyle -0.532047278791246$</div></div>
     <tr>
       <th>0</th>
       <td>0.0</td>
-      <td>0.0</td>
-      <td>3.2</td>
-      <td>39.0</td>
-      <td>0.49</td>
-      <td>0.219608</td>
+      <td>1.0</td>
+      <td>3.3</td>
+      <td>44.0</td>
+      <td>1.02</td>
+      <td>0.458166</td>
     </tr>
     <tr>
       <th>1</th>
       <td>0.0</td>
       <td>1.0</td>
-      <td>3.1</td>
-      <td>32.0</td>
-      <td>0.74</td>
-      <td>-0.117678</td>
+      <td>3.5</td>
+      <td>40.0</td>
+      <td>1.65</td>
+      <td>0.365002</td>
     </tr>
     <tr>
       <th>2</th>
+      <td>1.0</td>
       <td>0.0</td>
-      <td>0.0</td>
-      <td>3.1</td>
-      <td>41.0</td>
-      <td>0.24</td>
-      <td>0.275930</td>
+      <td>3.3</td>
+      <td>33.0</td>
+      <td>-0.82</td>
+      <td>0.018870</td>
     </tr>
     <tr>
       <th>3</th>
       <td>0.0</td>
       <td>0.0</td>
-      <td>3.5</td>
-      <td>29.5</td>
-      <td>-0.45</td>
-      <td>-0.102427</td>
+      <td>3.3</td>
+      <td>44.0</td>
+      <td>0.67</td>
+      <td>0.458166</td>
     </tr>
     <tr>
       <th>4</th>
       <td>0.0</td>
-      <td>0.0</td>
-      <td>2.9</td>
-      <td>34.5</td>
-      <td>0.26</td>
-      <td>-0.070636</td>
+      <td>1.0</td>
+      <td>3.5</td>
+      <td>34.0</td>
+      <td>-0.06</td>
+      <td>0.125385</td>
     </tr>
   </tbody>
 </table>
@@ -1157,47 +1159,47 @@ $\displaystyle -0.532047278791246$</div></div>
     <tr>
       <th>0</th>
       <td>1.0</td>
-      <td>0.0</td>
-      <td>2.824942</td>
-      <td>31.142413</td>
-      <td>-0.665532</td>
-      <td>0.140143</td>
+      <td>1.0</td>
+      <td>2.825078</td>
+      <td>36.05279</td>
+      <td>-0.023814</td>
+      <td>0.204812</td>
     </tr>
     <tr>
       <th>1</th>
       <td>1.0</td>
       <td>1.0</td>
-      <td>2.724942</td>
-      <td>24.142413</td>
-      <td>-0.238456</td>
-      <td>0.065063</td>
+      <td>3.025078</td>
+      <td>32.05279</td>
+      <td>0.570383</td>
+      <td>0.195878</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>1.0</td>
       <td>0.0</td>
-      <td>2.724942</td>
-      <td>33.142413</td>
-      <td>-0.866195</td>
-      <td>0.147521</td>
+      <td>0.0</td>
+      <td>3.702625</td>
+      <td>40.94721</td>
+      <td>0.603869</td>
+      <td>0.347047</td>
     </tr>
     <tr>
       <th>3</th>
       <td>1.0</td>
       <td>0.0</td>
-      <td>3.124942</td>
-      <td>21.642413</td>
-      <td>-1.765923</td>
-      <td>0.085944</td>
+      <td>2.897375</td>
+      <td>36.05279</td>
+      <td>-0.635660</td>
+      <td>0.213271</td>
     </tr>
     <tr>
       <th>4</th>
       <td>1.0</td>
-      <td>0.0</td>
-      <td>2.524942</td>
-      <td>26.642413</td>
-      <td>-0.784663</td>
-      <td>0.066075</td>
+      <td>1.0</td>
+      <td>3.025078</td>
+      <td>26.05279</td>
+      <td>-1.071574</td>
+      <td>0.147378</td>
     </tr>
   </tbody>
 </table>
@@ -1259,7 +1261,7 @@ $\displaystyle -0.532047278791246$</div></div>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node Gender: 100%|██████████| 5/5 [00:00&lt;00:00, 311.43it/s]
+Fitting causal mechanism of node Gender: 100%|██████████| 5/5 [00:00&lt;00:00, 308.89it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1268,7 +1270,7 @@ Fitting causal mechanism of node Gender: 100%|██████████| 5/
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle -0.502555044914101$</div></div>
+$\displaystyle -0.543139924436842$</div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
@@ -1352,7 +1354,7 @@ then that sample i will increase the loss by a proportionately lower amount (See
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node Gender: 100%|██████████| 5/5 [00:00&lt;00:00, 344.68it/s]
+Fitting causal mechanism of node Gender: 100%|██████████| 5/5 [00:00&lt;00:00, 82.00it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1361,7 +1363,7 @@ Fitting causal mechanism of node Gender: 100%|██████████| 5/
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle -3.33066907387547 \cdot 10^{-16}$</div></div>
+$\displaystyle 6.66133814775094 \cdot 10^{-16}$</div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
@@ -1415,11 +1417,11 @@ $\displaystyle -3.33066907387547 \cdot 10^{-16}$</div></div>
       </div>
     </a>
     <a class="right-next"
-       href="dowhy_ihdp_data_example.html"
+       href="sales_attribution_intervention.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">DoWhy example on ihdp (Infant Health and Development Program) dataset</p>
+        <p class="prev-next-title">Causal attribution to sales growth and spend intervention</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
