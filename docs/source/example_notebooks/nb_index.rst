@@ -198,7 +198,7 @@ Real world-inspired examples
         | **Level:** Advanced
         | **Task:** Fairness estimation via GCM
 
-   .. grid-item-card:: :doc:`sales_attribution_intervention`
+    .. grid-item-card:: :doc:`sales_attribution_intervention`
 
         .. image:: ../_static/sales_attribution.png
             :height: 120px
