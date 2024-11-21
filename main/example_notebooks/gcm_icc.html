@@ -594,6 +594,7 @@ explicitly model our causal relationships using functional causal models, as we 
 
 <span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">gcm</span>
 <span class="kn">from</span> <span class="nn">dowhy.utils.plotting</span> <span class="kn">import</span> <span class="n">plot</span><span class="p">,</span> <span class="n">bar_plot</span>
+<span class="n">gcm</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
 <span class="c1"># Load a modified version of the Auto MPG data: Quinlan,R.. (1993). Auto MPG. UCI Machine Learning Repository. https://doi.org/10.24432/C5859H.</span>
 <span class="n">auto_mpg_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;datasets/auto_mpg.csv&quot;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -633,7 +634,7 @@ explicitly model our causal relationships using functional causal models, as we 
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node mpg: 100%|██████████| 5/5 [00:00&lt;00:00, 29.94it/s]
+Fitting causal mechanism of node mpg: 100%|██████████| 5/5 [00:00&lt;00:00, 30.50it/s]
 </pre></div></div>
 </div>
 <p>Optionally, we can get some insights into the performance of the causal mechanisms by using the evaluation method:</p>
@@ -650,7 +651,7 @@ Fitting causal mechanism of node mpg: 100%|██████████| 5/5 [
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Evaluating causal mechanisms...: 100%|██████████| 5/5 [00:00&lt;00:00, 3808.16it/s]
+Evaluating causal mechanisms...: 100%|██████████| 5/5 [00:00&lt;00:00, 444.64it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -676,36 +677,36 @@ We will mostly utilize the CRPS for comparing and interpreting the performance o
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
 --- Node displacement
-- The MSE is 1057.6009030647385.
-- The NMSE is 0.31085244804019935.
-- The R2 coefficient is 0.9028857227922902.
-- The normalized CRPS is 0.17486428244525537.
+- The MSE is 1038.9343497781185.
+- The NMSE is 0.3099451012063349.
+- The R2 coefficient is 0.902742668556819.
+- The normalized CRPS is 0.1751548596208045.
 The estimated CRPS indicates a very good model performance.
 
 --- Node weight
-- The MSE is 77868.8970788705.
-- The NMSE is 0.3320247824311056.
-- The R2 coefficient is 0.8883884712052819.
-- The normalized CRPS is 0.18238075075988233.
+- The MSE is 77457.72022070756.
+- The NMSE is 0.32835606557278874.
+- The R2 coefficient is 0.8906984502441844.
+- The normalized CRPS is 0.18152066920237506.
 The estimated CRPS indicates a very good model performance.
 
 --- Node horsepower
-- The MSE is 212.4252839987017.
-- The NMSE is 0.38492985881203884.
-- The R2 coefficient is 0.8491260634457468.
-- The normalized CRPS is 0.20580052755014044.
+- The MSE is 219.4080817916261.
+- The NMSE is 0.3928982373568955.
+- The R2 coefficient is 0.8442300802658049.
+- The normalized CRPS is 0.20931589069850634.
 The estimated CRPS indicates a good model performance.
 
 --- Node mpg
-- The MSE is 15.58244795775521.
-- The NMSE is 0.5109817151792478.
-- The R2 coefficient is 0.7377548972126677.
-- The normalized CRPS is 0.2783156953832066.
+- The MSE is 15.77477783171984.
+- The NMSE is 0.525697653901878.
+- The R2 coefficient is 0.7214631910370037.
+- The normalized CRPS is 0.28731346321872775.
 The estimated CRPS indicates a good model performance.
 
 ==== Evaluation of Generated Distribution ====
-The overall average KL divergence between the generated and observed distribution is 0.9802296770241599
-The estimated KL divergence indicates a good representation of the data distribution, but might indicate some smaller mismatches between the distributions.
+The overall average KL divergence between the generated and observed distribution is 1.004787953076203
+The estimated KL divergence indicates some mismatches between the distributions.
 
 ==== NOTE ====
 Always double check the made model assumptions with respect to the graph structure and choice of causal mechanisms.
@@ -744,7 +745,7 @@ All these evaluations give some insight into the goodness of the causal model, b
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Evaluating set functions...: 100%|██████████| 32/32 [00:14&lt;00:00,  2.14it/s]
+Evaluating set functions...: 100%|██████████| 32/32 [00:14&lt;00:00,  2.19it/s]
 </pre></div></div>
 </div>
 <p>For a better interpretation of the results, we convert the variance attribution to percentages by normalizing it over the total sum.</p>
@@ -784,7 +785,7 @@ variance of mpg remains unexplained by all of the above factors, which may be pa
 <h2>Intrinsic influence on river flow<a class="headerlink" href="#Intrinsic-influence-on-river-flow" title="Permalink to this heading">#</a></h2>
 <p>In the next example, we look at different recordings taken of the river flows (<span class="math notranslate nohighlight">\(m^3/s\)</span>) at a 15 minute frequency across 5 different measuring stations in England at Henthorn, New Jumbles Rock, Hodder Place, Whalley Weir and Samlesbury. Here, obtaining a better understanding of how the river flows behave can help to plan potential mitigation steps to avoid overflows. The data is taken from the <a class="reference external" href="https://environment.data.gov.uk/hydrology/explore">UK Department for Environment Food &amp; Rural Affairs
 website</a>. Here is a map of the rivers:</p>
-<p><img alt="f1451bf3ef5a452c9b789e53607b8289" class="no-scaled-link" src="../_images/river-map.jpg" style="width: 600px;" /></p>
+<p><img alt="30d34848c07c4597a68865f8936b0106" class="no-scaled-link" src="../_images/river-map.jpg" style="width: 600px;" /></p>
 <p>New Jumbles Rock lies at a confluence point of the 3 rivers passing Henthorn, Hodder Place, and Whalley Weir and New Jumbles Rock flows into Samlesbury. The water passing a certain measuring station is certainly a mixture of some fraction of the amount observed at the next stations further upstream plus some amount contributed by streams and little rivers entering the river in between. This defines our causal graph as:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
@@ -807,7 +808,7 @@ website</a>. Here is a map of the rivers:</p>
 </div>
 </div>
 <p>In this setting, we are interested in the causal influence of the upstream rivers on the Samlesbury river. Similar to the example before, we would expect these nodes to be heavily confounded by, e.g., the weather. That is, the true graph is more likely to be along the lines of:</p>
-<p><img alt="48d2fe5c86a94dafa2207ed2b3ddb522" class="no-scaled-link" src="../_images/river-confounded.png" style="width: 400px;" /></p>
+<p><img alt="93641d319e204fa79c5bb6e3041753dc" class="no-scaled-link" src="../_images/river-confounded.png" style="width: 400px;" /></p>
 <p>Nevertheless, we still expect the ICC algorithm to provide some insights into the contribution to the river flow of Samlesbury, even with the hidden confounder in place:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
@@ -829,8 +830,8 @@ website</a>. Here is a map of the rivers:</p>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node Samlesbury: 100%|██████████| 5/5 [00:00&lt;00:00, 534.81it/s]
-Evaluating set functions...: 100%|██████████| 32/32 [00:00&lt;00:00, 272.88it/s]
+Fitting causal mechanism of node Samlesbury: 100%|██████████| 5/5 [00:00&lt;00:00, 473.48it/s]
+Evaluating set functions...: 100%|██████████| 32/32 [00:00&lt;00:00, 273.71it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">

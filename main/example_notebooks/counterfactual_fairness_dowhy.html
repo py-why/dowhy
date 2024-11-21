@@ -569,16 +569,7 @@
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># !pip install dowhy</span>
-<span class="c1"># !pip install scipy</span>
-</pre></div>
-</div>
-</div>
-<section id="Counterfactual-Fairness">
+  <section id="Counterfactual-Fairness">
 <h1>Counterfactual Fairness<a class="headerlink" href="#Counterfactual-Fairness" title="Permalink to this heading">#</a></h1>
 <p>This post introduces and replicates counterfactual fairness as proposed by Kusner et al. (2018) using DoWhy.</p>
 <p>Counterfactual fairness serves as an individual-level measure of causal fairness, capturing the notion that an estimator’s decision is deemed fair for an individual if it remains consistent both in (a) the actual world and (b) a counterfactual world where the individual is associated with a different demographic group.</p>
@@ -616,7 +607,7 @@ gender, etc.</p></li>
 </ul>
 <p>M is causal because given P(U), following a do intervention on a subset Z, we can derive the distribution over the remaining, non-intervened variables in V.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">warnings</span>
@@ -824,7 +815,7 @@ average (GPA) - average grade in the first year (FYA).</p>
 <p>It also includes protected attributes like: - Race - Sex</p>
 <p>For the purpose of this example, we will focus on the difference in outcomes only between the White and Black sub-groups and limit the dataset to a random sample of 5000 individuals:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;datasets/law_data.csv&quot;</span><span class="p">)</span>
@@ -847,7 +838,7 @@ average (GPA) - average grade in the first year (FYA).</p>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -880,42 +871,42 @@ average (GPA) - average grade in the first year (FYA).</p>
     <tr>
       <th>0</th>
       <td>0.0</td>
-      <td>1.0</td>
-      <td>3.3</td>
-      <td>44.0</td>
-      <td>1.02</td>
+      <td>0.0</td>
+      <td>3.2</td>
+      <td>36.0</td>
+      <td>-1.56</td>
     </tr>
     <tr>
       <th>1</th>
       <td>0.0</td>
-      <td>1.0</td>
-      <td>3.5</td>
-      <td>40.0</td>
-      <td>1.65</td>
+      <td>0.0</td>
+      <td>3.1</td>
+      <td>35.0</td>
+      <td>-0.25</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>1.0</td>
       <td>0.0</td>
-      <td>3.3</td>
-      <td>33.0</td>
-      <td>-0.82</td>
+      <td>0.0</td>
+      <td>3.1</td>
+      <td>42.0</td>
+      <td>0.16</td>
     </tr>
     <tr>
       <th>3</th>
       <td>0.0</td>
-      <td>0.0</td>
-      <td>3.3</td>
-      <td>44.0</td>
-      <td>0.67</td>
+      <td>1.0</td>
+      <td>2.2</td>
+      <td>34.0</td>
+      <td>0.26</td>
     </tr>
     <tr>
       <th>4</th>
       <td>0.0</td>
       <td>1.0</td>
-      <td>3.5</td>
-      <td>34.0</td>
-      <td>-0.06</td>
+      <td>3.4</td>
+      <td>31.5</td>
+      <td>-0.26</td>
     </tr>
   </tbody>
 </table>
@@ -958,7 +949,7 @@ average (GPA) - average grade in the first year (FYA).</p>
 </ul>
 <p>Given a dataset with protected / proxy attributes and a causal DAG , we can use the <code class="docutils literal notranslate"><span class="pre">analyse_counterfactual_fairness</span></code> function to measure counterfactual fairness at both the individual and aggregate level. In this example, we create the causal DAG based on the causal DAG provided in Kusner et al. (2018).</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dag</span> <span class="o">=</span> <span class="p">[</span>
@@ -976,7 +967,7 @@ average (GPA) - average grade in the first year (FYA).</p>
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">analyse_counterfactual_fairness</span></code> method also accepts as inputs: - the name of the target variable (<code class="docutils literal notranslate"><span class="pre">target</span></code> here avg_grade) - the input dataset (<code class="docutils literal notranslate"><span class="pre">df</span></code>) - an unfitted sklearn estimator (<code class="docutils literal notranslate"><span class="pre">estimator</span></code>; here LinearRegression)- - list of protected attributes (<code class="docutils literal notranslate"><span class="pre">protected_attrs</span></code>) - the list of input feature names (<code class="docutils literal notranslate"><span class="pre">X</span></code>) - a dictionary specifying the unique identifying label of the disadvantaged group for each protected group (<code class="docutils literal notranslate"><span class="pre">disadvantage_group</span></code>).</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">target</span> <span class="o">=</span> <span class="s2">&quot;avg_grade&quot;</span>
@@ -990,7 +981,7 @@ average (GPA) - average grade in the first year (FYA).</p>
 <h2>3.1 Univariate Analysis<a class="headerlink" href="#3.1-Univariate-Analysis" title="Permalink to this heading">#</a></h2>
 <p>Now, we are ready to call the method <code class="docutils literal notranslate"><span class="pre">analyse_counterfactual_fairness</span></code> to carry out counterfactual fairness analysis along the Race dimension:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
@@ -1014,20 +1005,20 @@ average (GPA) - average grade in the first year (FYA).</p>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node Gender: 100%|██████████| 5/5 [00:00&lt;00:00, 61.72it/s]
+Fitting causal mechanism of node Gender: 100%|██████████| 5/5 [00:00&lt;00:00, 279.51it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle -0.543411083532102$</div></div>
+$\displaystyle -0.551717279615264$</div></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">df_obs</span></code> contains the predicted values for each individual given the observed value of their protected attribute in the real world.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df_obs</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
@@ -1035,7 +1026,7 @@ $\displaystyle -0.543411083532102$</div></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1069,47 +1060,47 @@ $\displaystyle -0.543411083532102$</div></div>
     <tr>
       <th>0</th>
       <td>0.0</td>
-      <td>1.0</td>
-      <td>3.3</td>
-      <td>44.0</td>
-      <td>1.02</td>
-      <td>0.458166</td>
+      <td>0.0</td>
+      <td>3.2</td>
+      <td>36.0</td>
+      <td>-1.56</td>
+      <td>0.081291</td>
     </tr>
     <tr>
       <th>1</th>
       <td>0.0</td>
-      <td>1.0</td>
-      <td>3.5</td>
-      <td>40.0</td>
-      <td>1.65</td>
-      <td>0.365002</td>
+      <td>0.0</td>
+      <td>3.1</td>
+      <td>35.0</td>
+      <td>-0.25</td>
+      <td>0.009287</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>1.0</td>
       <td>0.0</td>
-      <td>3.3</td>
-      <td>33.0</td>
-      <td>-0.82</td>
-      <td>0.018870</td>
+      <td>0.0</td>
+      <td>3.1</td>
+      <td>42.0</td>
+      <td>0.16</td>
+      <td>0.312011</td>
     </tr>
     <tr>
       <th>3</th>
       <td>0.0</td>
-      <td>0.0</td>
-      <td>3.3</td>
-      <td>44.0</td>
-      <td>0.67</td>
-      <td>0.458166</td>
+      <td>1.0</td>
+      <td>2.2</td>
+      <td>34.0</td>
+      <td>0.26</td>
+      <td>-0.292779</td>
     </tr>
     <tr>
       <th>4</th>
       <td>0.0</td>
       <td>1.0</td>
-      <td>3.5</td>
-      <td>34.0</td>
-      <td>-0.06</td>
-      <td>0.125385</td>
+      <td>3.4</td>
+      <td>31.5</td>
+      <td>-0.26</td>
+      <td>-0.055802</td>
     </tr>
   </tbody>
 </table>
@@ -1117,7 +1108,7 @@ $\displaystyle -0.543411083532102$</div></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">df_cf</span></code> contains the predicted values for each individual given the counterfactual value of their protected attribute in the real world. Here, since the only variable we are intervening on is Race, we see that each individual’s Race has been changed from 0 to 1.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df_cf</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
@@ -1125,7 +1116,7 @@ $\displaystyle -0.543411083532102$</div></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1159,54 +1150,54 @@ $\displaystyle -0.543411083532102$</div></div>
     <tr>
       <th>0</th>
       <td>1.0</td>
-      <td>1.0</td>
-      <td>2.825078</td>
-      <td>36.05279</td>
-      <td>-0.023814</td>
-      <td>0.204812</td>
+      <td>0.0</td>
+      <td>2.840566</td>
+      <td>27.554975</td>
+      <td>-2.572403</td>
+      <td>0.102073</td>
     </tr>
     <tr>
       <th>1</th>
       <td>1.0</td>
-      <td>1.0</td>
-      <td>3.025078</td>
-      <td>32.05279</td>
-      <td>0.570383</td>
-      <td>0.195878</td>
+      <td>0.0</td>
+      <td>2.740566</td>
+      <td>26.554975</td>
+      <td>-1.229282</td>
+      <td>0.080310</td>
     </tr>
     <tr>
       <th>2</th>
+      <td>1.0</td>
       <td>0.0</td>
-      <td>0.0</td>
-      <td>3.702625</td>
-      <td>40.94721</td>
-      <td>0.603869</td>
-      <td>0.347047</td>
+      <td>2.740566</td>
+      <td>33.554975</td>
+      <td>-0.919710</td>
+      <td>0.144587</td>
     </tr>
     <tr>
       <th>3</th>
       <td>1.0</td>
-      <td>0.0</td>
-      <td>2.897375</td>
-      <td>36.05279</td>
-      <td>-0.635660</td>
-      <td>0.213271</td>
+      <td>1.0</td>
+      <td>1.840566</td>
+      <td>25.554975</td>
+      <td>-0.485717</td>
+      <td>-0.042102</td>
     </tr>
     <tr>
       <th>4</th>
       <td>1.0</td>
       <td>1.0</td>
-      <td>3.025078</td>
-      <td>26.05279</td>
-      <td>-1.071574</td>
-      <td>0.147378</td>
+      <td>3.040566</td>
+      <td>23.054975</td>
+      <td>-1.195134</td>
+      <td>0.085914</td>
     </tr>
   </tbody>
 </table>
 </div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_counterfactual_fairness</span><span class="p">(</span>
@@ -1226,7 +1217,7 @@ $\displaystyle -0.543411083532102$</div></div>
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_counterfactual_fairness_dowhy_17_0.png" src="../_images/example_notebooks_counterfactual_fairness_dowhy_17_0.png" />
+<img alt="../_images/example_notebooks_counterfactual_fairness_dowhy_16_0.png" src="../_images/example_notebooks_counterfactual_fairness_dowhy_16_0.png" />
 </div>
 </div>
 <p>Examining the results for the example at hand in Figure 1, we see that the observed and counterfactual distributions don’t overlap. We see that changing the race of the black subgroup to the white subgroup shifts the distribution of <span class="math notranslate nohighlight">\(\hat{Y}\)</span> to the right i.e. increases the avg_grade by ~0.50 on average. Thus, the fitted estimator can concluded to be not counterfactually fair.</p>
@@ -1235,7 +1226,7 @@ $\displaystyle -0.543411083532102$</div></div>
 <h2>3.2 Intersectional Analysis<a class="headerlink" href="#3.2-Intersectional-Analysis" title="Permalink to this heading">#</a></h2>
 <p>We can further extend the analysis intersectionally, by examining the implication of multipleprotected attriutes on counterfactual fairness together. Here, we use the two protected attributes available to us - <code class="docutils literal notranslate"><span class="pre">[&quot;Race&quot;,&quot;Gender&quot;]</span></code> - to carry out intersectional counterfactual fairness analysis to determine how counterfactually fair the estimator is for Black Females:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">disadvantage_group</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Race&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Gender&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
@@ -1261,19 +1252,19 @@ $\displaystyle -0.543411083532102$</div></div>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node Gender: 100%|██████████| 5/5 [00:00&lt;00:00, 308.89it/s]
+Fitting causal mechanism of node Gender: 100%|██████████| 5/5 [00:00&lt;00:00, 373.44it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle -0.543139924436842$</div></div>
+$\displaystyle -0.539086824709244$</div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_counterfactual_fairness</span><span class="p">(</span>
@@ -1293,7 +1284,7 @@ $\displaystyle -0.543139924436842$</div></div>
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_counterfactual_fairness_dowhy_20_0.png" src="../_images/example_notebooks_counterfactual_fairness_dowhy_20_0.png" />
+<img alt="../_images/example_notebooks_counterfactual_fairness_dowhy_19_0.png" src="../_images/example_notebooks_counterfactual_fairness_dowhy_19_0.png" />
 </div>
 </div>
 <p>Examining the results of the intersectional analysis in Figure 2, we see that the observed and counterfactual distributions don’t overlap at all. Changing the race and gender of the black females to the white males shifts the distribution of <span class="math notranslate nohighlight">\(\hat{Y}\)</span> for the black,female sub-group to the right i.e. increases the avg_grade by ~0.50 on average. Thus, the fitted estimator can concluded to be not counterfactually fair intersectionally.</p>
@@ -1328,7 +1319,7 @@ then that sample i will increase the loss by a proportionately lower amount (See
 <h1>Appendix : Fairness Through Unawareness (FTU) creates A Counterfactually Unfair Estimator<a class="headerlink" href="#Appendix-:-Fairness-Through-Unawareness-(FTU)-creates-A-Counterfactually-Unfair-Estimator" title="Permalink to this heading">#</a></h1>
 <p>To demonstrate that <strong>“Aware” linear regression is always counterfactually fair but FTU makes it counterfactually unfair</strong>, we build one “aware” linear regression and copare it with the “unaware” linear regression constructed Fig.1.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
@@ -1354,19 +1345,19 @@ then that sample i will increase the loss by a proportionately lower amount (See
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node Gender: 100%|██████████| 5/5 [00:00&lt;00:00, 82.00it/s]
+Fitting causal mechanism of node Gender: 100%|██████████| 5/5 [00:00&lt;00:00, 374.40it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle 6.66133814775094 \cdot 10^{-16}$</div></div>
+$\displaystyle -9.99200722162641 \cdot 10^{-16}$</div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_counterfactual_fairness</span><span class="p">(</span>
@@ -1386,7 +1377,7 @@ $\displaystyle 6.66133814775094 \cdot 10^{-16}$</div></div>
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_counterfactual_fairness_dowhy_24_0.png" src="../_images/example_notebooks_counterfactual_fairness_dowhy_24_0.png" />
+<img alt="../_images/example_notebooks_counterfactual_fairness_dowhy_23_0.png" src="../_images/example_notebooks_counterfactual_fairness_dowhy_23_0.png" />
 </div>
 </div>
 <p>Comparing Figure 1 and Figure 3, the comparitive plot of the observed counterfactual samples <code class="docutils literal notranslate"><span class="pre">df_obs</span></code> and perturbed counterfactual samples <code class="docutils literal notranslate"><span class="pre">df_cf</span></code>, shows that:</p>

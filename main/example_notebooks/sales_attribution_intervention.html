@@ -592,6 +592,7 @@ ecommerce platform took place, such as Black Friday or Cyber Monday * <strong>ot
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
 <span class="kn">from</span> <span class="nn">statsmodels.stats.multitest</span> <span class="kn">import</span> <span class="n">multipletests</span>
 
+<span class="n">gcm</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <span class="o">%</span><span class="k">matplotlib</span> inline
 </pre></div>
 </div>
@@ -604,7 +605,7 @@ ecommerce platform took place, such as Black Friday or Cyber Monday * <strong>ot
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;datasets/sale_attribution.csv&#39;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;datasets/sales_attribution.csv&#39;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -652,13 +653,13 @@ ecommerce platform took place, such as Black Friday or Cyber Monday * <strong>ot
       <td>2609.702789</td>
       <td>54954.823150</td>
       <td>26167.824599</td>
-      <td>75554.406731</td>
+      <td>76740.886670</td>
       <td>2023-01-01</td>
       <td>2023</td>
       <td>1</td>
       <td>1</td>
-      <td>0</td>
-      <td>0</td>
+      <td>No</td>
+      <td>No</td>
     </tr>
     <tr>
       <th>1</th>
@@ -666,13 +667,13 @@ ecommerce platform took place, such as Black Friday or Cyber Monday * <strong>ot
       <td>2568.540570</td>
       <td>44907.063324</td>
       <td>22340.009780</td>
-      <td>51372.313230</td>
+      <td>52480.718941</td>
       <td>2023-01-02</td>
       <td>2023</td>
       <td>1</td>
       <td>1</td>
-      <td>0</td>
-      <td>0</td>
+      <td>No</td>
+      <td>No</td>
     </tr>
     <tr>
       <th>2</th>
@@ -680,13 +681,13 @@ ecommerce platform took place, such as Black Friday or Cyber Monday * <strong>ot
       <td>2847.576700</td>
       <td>151643.912564</td>
       <td>68301.747813</td>
-      <td>626394.881214</td>
+      <td>628062.966309</td>
       <td>2023-01-03</td>
       <td>2023</td>
       <td>1</td>
       <td>1</td>
-      <td>0</td>
-      <td>0</td>
+      <td>No</td>
+      <td>No</td>
     </tr>
     <tr>
       <th>3</th>
@@ -694,13 +695,13 @@ ecommerce platform took place, such as Black Friday or Cyber Monday * <strong>ot
       <td>2788.515831</td>
       <td>121173.343955</td>
       <td>18906.050402</td>
-      <td>306000.226338</td>
+      <td>307547.583964</td>
       <td>2023-01-04</td>
       <td>2023</td>
       <td>1</td>
       <td>1</td>
-      <td>0</td>
-      <td>0</td>
+      <td>No</td>
+      <td>No</td>
     </tr>
     <tr>
       <th>4</th>
@@ -708,13 +709,13 @@ ecommerce platform took place, such as Black Friday or Cyber Monday * <strong>ot
       <td>2523.591011</td>
       <td>36234.267337</td>
       <td>18198.689563</td>
-      <td>34571.260496</td>
+      <td>35602.101926</td>
       <td>2023-01-05</td>
       <td>2023</td>
       <td>1</td>
       <td>1</td>
-      <td>0</td>
-      <td>0</td>
+      <td>No</td>
+      <td>No</td>
     </tr>
   </tbody>
 </table>
@@ -870,7 +871,7 @@ ecommerce platform took place, such as Black Friday or Cyber Monday * <strong>ot
 <div class="output_area docutils container">
 <div class="highlight"><pre>
       Metric     Δ mean   Δ median  Δ variance
-0       sale   8.309379  56.847777  -98.588326
+0       sale  11.274001  84.089817  -95.972002
 1        dpv   8.843596  12.453083  -95.913214
 2  dsp_spend   6.387894   3.718354  -66.203836
 3   sp_spend  10.335289  10.013358  312.605493
@@ -962,6 +963,9 @@ information in the presence of others. Thus, we can remove those edges of <span 
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">insignificant_parent</span> <span class="ow">in</span> <span class="n">test_causal_minimality</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">,</span> <span class="s1">&#39;sale&#39;</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
     <span class="n">causal_graph</span><span class="o">.</span><span class="n">remove_edge</span><span class="p">(</span><span class="n">insignificant_parent</span><span class="p">,</span> <span class="s1">&#39;sale&#39;</span><span class="p">)</span>
 
+<span class="k">for</span> <span class="n">insignificant_parent</span> <span class="ow">in</span> <span class="n">test_causal_minimality</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">,</span> <span class="s1">&#39;dpv&#39;</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+    <span class="n">causal_graph</span><span class="o">.</span><span class="n">remove_edge</span><span class="p">(</span><span class="n">insignificant_parent</span><span class="p">,</span> <span class="s1">&#39;dpv&#39;</span><span class="p">)</span>
+
 <span class="n">cols_to_remove</span><span class="o">=</span><span class="p">[]</span>
 <span class="n">cols_to_remove</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">node</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">causal_graph</span><span class="o">.</span><span class="n">nodes</span> <span class="k">if</span> <span class="n">causal_graph</span><span class="o">.</span><span class="n">in_degree</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="o">+</span> <span class="n">causal_graph</span><span class="o">.</span><span class="n">out_degree</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">])</span>
 </pre></div>
@@ -972,15 +976,17 @@ information in the presence of others. Thus, we can remove those edges of <span 
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Significant connection: [(&#39;discount&#39;, &#39;sale&#39;), (&#39;dpv&#39;, &#39;sale&#39;), (&#39;dsp_spend&#39;, &#39;sale&#39;), (&#39;sp_spend&#39;, &#39;sale&#39;)]
-Insignificant connection: [(&#39;other_shopping_event&#39;, &#39;sale&#39;), (&#39;special_shopping_event&#39;, &#39;sale&#39;)]
+Significant connection: [(&#39;discount&#39;, &#39;sale&#39;), (&#39;dpv&#39;, &#39;sale&#39;), (&#39;dsp_spend&#39;, &#39;sale&#39;), (&#39;sp_spend&#39;, &#39;sale&#39;), (&#39;special_shopping_event&#39;, &#39;sale&#39;)]
+Insignificant connection: [(&#39;other_shopping_event&#39;, &#39;sale&#39;)]
+Significant connection: [(&#39;dsp_spend&#39;, &#39;dpv&#39;), (&#39;sp_spend&#39;, &#39;dpv&#39;)]
+Insignificant connection: [(&#39;other_shopping_event&#39;, &#39;dpv&#39;), (&#39;special_shopping_event&#39;, &#39;dpv&#39;)]
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">causal_graph</span><span class="o">.</span><span class="n">remove_nodes_from</span><span class="p">(</span><span class="n">cols_to_remove</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">causal_graph</span><span class="o">.</span><span class="n">remove_nodes_from</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">cols_to_remove</span><span class="p">))</span>
 <span class="n">plot</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -992,12 +998,13 @@ Insignificant connection: [(&#39;other_shopping_event&#39;, &#39;sale&#39;), (&#
 <img alt="../_images/example_notebooks_sales_attribution_intervention_26_0.png" src="../_images/example_notebooks_sales_attribution_intervention_26_0.png" />
 </div>
 </div>
+<p>Interestingly, the ‘other_shopping_event’ variable has no significant impact on either ‘dpv’ or ‘sale’.</p>
 </section>
 </section>
 <section id="3.-Fit-causal-graph">
 <h2>3. Fit causal graph<a class="headerlink" href="#3.-Fit-causal-graph" title="Permalink to this heading">#</a></h2>
-<p>Next, we need to assign functional causal models (FCMs) to each node, which describe the data generation process from x to y with an error term. The auto assignment method compares different prediction models for each node and takes the one with the smallest error. The <code class="docutils literal notranslate"><span class="pre">quality</span></code> parameter controls the set of model types that are tested, where <code class="docutils literal notranslate"><span class="pre">BETTER</span></code> indicates some of the most common regression and classification models, such as trees, support vector regression etc. You can also use ‘Good’
-which fits fewer models to speed up, or ‘Best’ that is computationally heavy. After assigning the models, we can fit them to the data:</p>
+<p>Next, we need to assign functional causal models (FCMs) to each node, which describe the data generation process from x to y with an error term. The auto assignment method compares different prediction models for each node and takes the one with the smallest error. The <code class="docutils literal notranslate"><span class="pre">quality</span></code> parameter controls the set of model types that are tested, where <code class="docutils literal notranslate"><span class="pre">BETTER</span></code> indicates some of the most common regression and classification models, such as trees, support vector regression etc. You can also use
+<code class="docutils literal notranslate"><span class="pre">GOOD</span></code> which fits fewer models to speed up, or <code class="docutils literal notranslate"><span class="pre">BEST</span></code> that is computationally heavy (and requres AutoGluon to be installed). After assigning the models, we can fit them to the data:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
@@ -1036,7 +1043,7 @@ If non-root node and the data is categorical:
 A functional causal model based on a classifier, i.e., X_i = f(PA_i, N_i).
 Here, N_i follows a uniform distribution on [0, 1] and is used to randomly sample a class (category) using the conditional probability distribution produced by a classification model.Here, different model classes are evaluated using the (negative) F1 score and the best performing model class is selected.
 
-In total, 7 nodes were analyzed:
+In total, 6 nodes were analyzed:
 
 --- Node: dsp_spend
 Node dsp_spend is a root node. Therefore, assigning &#39;Empirical Distribution&#39; to the node representing the marginal distribution.
@@ -1047,43 +1054,38 @@ Node sp_spend is a root node. Therefore, assigning &#39;Empirical Distribution&#
 --- Node: special_shopping_event
 Node special_shopping_event is a root node. Therefore, assigning &#39;Empirical Distribution&#39; to the node representing the marginal distribution.
 
---- Node: other_shopping_event
-Node other_shopping_event is a root node. Therefore, assigning &#39;Empirical Distribution&#39; to the node representing the marginal distribution.
-
 --- Node: discount
 Node discount is a root node. Therefore, assigning &#39;Empirical Distribution&#39; to the node representing the marginal distribution.
 
 --- Node: dpv
 Node dpv is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using ExtraTreesRegressor&#39; to the node.
-This represents the causal relationship as dpv := f(dsp_spend,other_shopping_event,sp_spend,special_shopping_event) + N.
+This represents the causal relationship as dpv := f(dsp_spend,sp_spend) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
-ExtraTreesRegressor: 130443393.61336176
-RandomForestRegressor: 143051169.83711126
-HistGradientBoostingRegressor: 176829610.66151512
-AdaBoostRegressor: 217857117.17475528
-KNeighborsRegressor: 350869178.4998277
+ExtraTreesRegressor: 166470642.14064425
+RandomForestRegressor: 202413093.75654438
+HistGradientBoostingRegressor: 210199781.95027882
+AdaBoostRegressor: 277405500.13712883
+KNeighborsRegressor: 367859348.3758382
 Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 418113418.1489593
-RidgeCV: 539481324.8977517
-LinearRegression: 539481332.4193752
-LassoCV(max_iter=10000): 551300968.9697378
-SVR: 2906216668.198843
+                (&#39;linearregression&#39;, LinearRegression)]): 428084148.87153566
+LinearRegression: 548678262.1828389
+RidgeCV: 548678284.3329667
+LassoCV(max_iter=10000): 557118490.7847294
+SVR: 2900199761.6189833
 
 --- Node: sale
-Node sale is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using Pipeline&#39; to the node.
-This represents the causal relationship as sale := f(discount,dpv,dsp_spend,sp_spend) + N.
+Node sale is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using ExtraTreesRegressor&#39; to the node.
+This represents the causal relationship as sale := f(discount,dpv,dsp_spend,sp_spend,special_shopping_event) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
-Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 3627999868.811174
-ExtraTreesRegressor: 4386228796.210071
-RandomForestRegressor: 5573549214.493292
-KNeighborsRegressor: 5940586200.80355
-AdaBoostRegressor: 7688622747.406969
-HistGradientBoostingRegressor: 8742719053.515667
-LinearRegression: 16238712520.528875
-RidgeCV: 16239284129.61257
-LassoCV(max_iter=10000): 16583200125.492346
-SVR: 134266358033.79985
+ExtraTreesRegressor: 2332009300.2678514
+RandomForestRegressor: 5154831913.930094
+AdaBoostRegressor: 7802031657.73537
+LinearRegression: 20252807738.720932
+RidgeCV: 20398999697.143623
+KNeighborsRegressor: 25224016431.708626
+HistGradientBoostingRegressor: 29079555677.630787
+LassoCV(max_iter=10000): 32196615412.165276
+SVR: 134229564521.51865
 
 ===Note===
 Note, based on the selected auto assignment quality, the set of evaluated models changes.
@@ -1103,7 +1105,7 @@ For more insights toward the quality of the fitted graphical causal model, consi
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node discount: 100%|██████████| 7/7 [00:00&lt;00:00, 69.52it/s]
+Fitting causal mechanism of node discount: 100%|██████████| 6/6 [00:00&lt;00:00, 28.23it/s]
 </pre></div></div>
 </div>
 </section>
@@ -1114,7 +1116,7 @@ Fitting causal mechanism of node discount: 100%|██████████| 
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">calculate_difference_estimation</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">df_old</span><span class="p">,</span> <span class="n">df_new</span><span class="p">,</span> <span class="n">target_column</span><span class="p">,</span> <span class="n">difference_estimation_func</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">confidence_level</span><span class="o">=</span><span class="mf">0.90</span><span class="p">,</span> <span class="n">num_bootstrap_resamples</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">calculate_difference_estimation</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">df_old</span><span class="p">,</span> <span class="n">df_new</span><span class="p">,</span> <span class="n">target_column</span><span class="p">,</span> <span class="n">difference_estimation_func</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">confidence_level</span><span class="o">=</span><span class="mf">0.90</span><span class="p">,</span> <span class="n">num_bootstrap_resamples</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
 
     <span class="n">difference_contribs</span><span class="p">,</span> <span class="n">uncertainty_contribs</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">confidence_intervals</span><span class="p">(</span>
         <span class="k">lambda</span> <span class="p">:</span> <span class="n">gcm</span><span class="o">.</span><span class="n">distribution_change</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span>
@@ -1122,10 +1124,8 @@ Fitting causal mechanism of node discount: 100%|██████████| 
                                           <span class="n">df_new</span><span class="p">,</span>
                                           <span class="n">target_column</span><span class="p">,</span>
                                           <span class="n">num_samples</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span>
-                                          <span class="n">independence_test</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">gcm</span><span class="o">.</span><span class="n">kernel_based</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span> <span class="n">y</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)),</span>
-                                          <span class="n">conditional_independence_test</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">:</span> <span class="n">gcm</span><span class="o">.</span><span class="n">kernel_based</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span> <span class="n">y</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span> <span class="n">z</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)),</span>
                                           <span class="n">difference_estimation_func</span><span class="o">=</span><span class="n">difference_estimation_func</span><span class="p">,</span>
-                                          <span class="n">shapley_config</span><span class="o">=</span><span class="n">gcm</span><span class="o">.</span><span class="n">shapley</span><span class="o">.</span><span class="n">ShapleyConfig</span><span class="p">(</span><span class="n">approximation_method</span><span class="o">=</span><span class="n">gcm</span><span class="o">.</span><span class="n">shapley</span><span class="o">.</span><span class="n">ShapleyApproximationMethods</span><span class="o">.</span><span class="n">PERMUTATION</span><span class="p">,</span> <span class="n">num_permutations</span><span class="o">=</span><span class="mi">20</span><span class="p">)),</span>
+                                          <span class="n">shapley_config</span><span class="o">=</span><span class="n">gcm</span><span class="o">.</span><span class="n">shapley</span><span class="o">.</span><span class="n">ShapleyConfig</span><span class="p">(</span><span class="n">approximation_method</span><span class="o">=</span><span class="n">gcm</span><span class="o">.</span><span class="n">shapley</span><span class="o">.</span><span class="n">ShapleyApproximationMethods</span><span class="o">.</span><span class="n">PERMUTATION</span><span class="p">,</span> <span class="n">num_permutations</span><span class="o">=</span><span class="mi">50</span><span class="p">)),</span>
         <span class="n">confidence_level</span><span class="o">=</span><span class="n">confidence_level</span><span class="p">,</span>
         <span class="n">num_bootstrap_resamples</span><span class="o">=</span><span class="n">num_bootstrap_resamples</span>
     <span class="p">)</span>
@@ -1141,17 +1141,11 @@ Fitting causal mechanism of node discount: 100%|██████████| 
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Evaluating set functions...: 100%|██████████| 74/74 [00:01&lt;00:00, 53.06it/s]
-Evaluating set functions...: 100%|██████████| 72/72 [00:01&lt;00:00, 52.63it/s]
-Evaluating set functions...: 100%|██████████| 80/80 [00:01&lt;00:00, 52.96it/s]
-Evaluating set functions...: 100%|██████████| 71/71 [00:01&lt;00:00, 60.80it/s]
-Evaluating set functions...: 100%|██████████| 75/75 [00:01&lt;00:00, 56.23it/s]
-Evaluating set functions...: 100%|██████████| 72/72 [00:01&lt;00:00, 53.46it/s]
-Evaluating set functions...: 100%|██████████| 74/74 [00:01&lt;00:00, 52.53it/s]
-Evaluating set functions...: 100%|██████████| 75/75 [00:01&lt;00:00, 55.28it/s]
-Evaluating set functions...: 100%|██████████| 72/72 [00:01&lt;00:00, 52.07it/s]
-Evaluating set functions...: 100%|██████████| 82/82 [00:01&lt;00:00, 54.33it/s]
-Estimating bootstrap interval...: 100%|██████████| 10/10 [00:20&lt;00:00,  2.10s/it]
+Evaluating set functions...: 100%|██████████| 61/61 [00:01&lt;00:00, 32.66it/s]
+Evaluating set functions...: 100%|██████████| 61/61 [00:03&lt;00:00, 18.26it/s]
+Evaluating set functions...: 100%|██████████| 62/62 [00:01&lt;00:00, 34.45it/s]
+Evaluating set functions...: 100%|██████████| 62/62 [00:01&lt;00:00, 36.06it/s]
+Estimating bootstrap interval...: 100%|██████████| 4/4 [00:13&lt;00:00,  3.44s/it]
 </pre></div></div>
 </div>
 <p>Then we plot drivers’ contribution to KPI changes visually, followed by a tabular format.</p>
@@ -1167,9 +1161,11 @@ Estimating bootstrap interval...: 100%|██████████| 10/10 [00
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_sales_attribution_intervention_36_0.png" src="../_images/example_notebooks_sales_attribution_intervention_36_0.png" />
+<img alt="../_images/example_notebooks_sales_attribution_intervention_37_0.png" src="../_images/example_notebooks_sales_attribution_intervention_37_0.png" />
 </div>
 </div>
+<p>Here, we see that ‘sp_spend’ has the larges contribution to the change in the mean of ‘sale’, while the ‘discount’ and ‘special_shopping_event’ has little to none contribution. This aligns with the way how the data was generated.</p>
+<p>Taking a look at the tabular overview to look for significance based on the confidence intervals:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
@@ -1225,51 +1221,44 @@ Estimating bootstrap interval...: 100%|██████████| 10/10 [00
   <tbody>
     <tr>
       <th>discount</th>
-      <td>-7515.483351</td>
-      <td>-14952.843285</td>
-      <td>2959.258121</td>
+      <td>-1810.011296</td>
+      <td>-2351.954517</td>
+      <td>424.608728</td>
     </tr>
     <tr>
       <th>dpv</th>
-      <td>-78789.882711</td>
-      <td>-181402.022112</td>
-      <td>35395.733225</td>
+      <td>-17865.805004</td>
+      <td>-20495.635150</td>
+      <td>-16255.578160</td>
     </tr>
     <tr>
       <th>dsp_spend</th>
-      <td>-374259.767359</td>
-      <td>-450060.276189</td>
-      <td>-318537.802007</td>
-    </tr>
-    <tr>
-      <th>other_shopping_event</th>
-      <td>-1480.822131</td>
-      <td>-17105.694664</td>
-      <td>11476.614151</td>
+      <td>10219.005392</td>
+      <td>9890.028357</td>
+      <td>12702.789510</td>
     </tr>
     <tr>
       <th>sale</th>
-      <td>-1479.009984</td>
-      <td>-169585.387327</td>
-      <td>158094.310015</td>
+      <td>2230.337416</td>
+      <td>14.939261</td>
+      <td>13218.827985</td>
     </tr>
     <tr>
       <th>sp_spend</th>
-      <td>770267.215245</td>
-      <td>599265.758318</td>
-      <td>910409.063811</td>
+      <td>81392.392557</td>
+      <td>75001.284410</td>
+      <td>84178.124307</td>
     </tr>
     <tr>
       <th>special_shopping_event</th>
-      <td>9706.118395</td>
-      <td>-13134.161943</td>
-      <td>36857.601978</td>
+      <td>-1019.724448</td>
+      <td>-1713.046781</td>
+      <td>70.768253</td>
     </tr>
   </tbody>
 </table>
 </div></div>
 </div>
-<p>Here, we see that ‘sp_spend’ has the larges contrigution to the change in the mean of ‘sale’, while the ‘discount’, ‘other_shopping_event’ and ‘special_shopping_event’ has little to none contribution. This aligns with the way how the data was generated.</p>
 <p>Next, we remove all variables that have a 0 as part of their confidence interval or are negative, i.e., do not have a clear significant positive contribution:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
@@ -1333,10 +1322,22 @@ Estimating bootstrap interval...: 100%|██████████| 10/10 [00
   </thead>
   <tbody>
     <tr>
+      <th>dsp_spend</th>
+      <td>10219.005392</td>
+      <td>9890.028357</td>
+      <td>12702.789510</td>
+    </tr>
+    <tr>
+      <th>sale</th>
+      <td>2230.337416</td>
+      <td>14.939261</td>
+      <td>13218.827985</td>
+    </tr>
+    <tr>
       <th>sp_spend</th>
-      <td>770267.215245</td>
-      <td>599265.758318</td>
-      <td>910409.063811</td>
+      <td>81392.392557</td>
+      <td>75001.284410</td>
+      <td>84178.124307</td>
     </tr>
   </tbody>
 </table>
@@ -1346,12 +1347,12 @@ Estimating bootstrap interval...: 100%|██████████| 10/10 [00
 </section>
 <section id="5.-Optimal-intervention">
 <h2>5. Optimal intervention<a class="headerlink" href="#5.-Optimal-intervention" title="Permalink to this heading">#</a></h2>
-<p>Section 4 above helps us to understand drivers for past growth. Now, looking forward to business planning, we conduct interventions to understand incremental contributions to KPIs. Intuitively, the spend types resulting in higher returns should be doubled down on.</p>
+<p>Section 4 above helps us to understand drivers for past growth. Now, looking forward to business planning, we conduct interventions to understand incremental contributions to KPIs. Intuitively, the spend types resulting in higher returns should be doubled down on. Here, we explicitly remove ‘sale’, ‘dpv’ and ‘special_shopping_event’ as a possible intervention targets.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">intervention_influence</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">non_interveneable_nodes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">confidence_level</span><span class="o">=</span><span class="mf">0.90</span><span class="p">,</span> <span class="n">cap_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="n">prints</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">intervention_influence</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">non_interveneable_nodes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">confidence_level</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">prints</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">threshold_insignificant</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">):</span>
     <span class="n">progress_bar_was_on</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">show_progress_bars</span>
 
     <span class="k">if</span> <span class="n">progress_bar_was_on</span><span class="p">:</span>
@@ -1378,47 +1379,21 @@ Estimating bootstrap interval...: 100%|██████████| 10/10 [00
         <span class="n">interventions_alternative</span> <span class="o">=</span> <span class="p">{</span><span class="n">node</span><span class="p">:</span> <span class="n">intervention</span><span class="p">}</span>
         <span class="n">interventions_reference</span> <span class="o">=</span> <span class="p">{</span><span class="n">node</span><span class="p">:</span> <span class="n">non_intervention</span><span class="p">}</span>
 
-        <span class="c1"># Compute causal effects</span>
-        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">effect</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">confidence_intervals</span><span class="p">(</span>
-                <span class="n">gcm</span><span class="o">.</span><span class="n">fit_and_compute</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">average_causal_effect</span><span class="p">,</span>
-                                    <span class="n">causal_model</span><span class="p">,</span>
-                                    <span class="n">auto_assign_quality</span><span class="o">=</span><span class="n">gcm</span><span class="o">.</span><span class="n">auto</span><span class="o">.</span><span class="n">AssignmentQuality</span><span class="o">.</span><span class="n">GOOD</span><span class="p">,</span>
-                                    <span class="n">bootstrap_training_data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
-                                    <span class="n">target_node</span><span class="o">=</span><span class="n">target</span><span class="p">,</span>
-                                    <span class="n">interventions_alternative</span><span class="o">=</span><span class="n">interventions_alternative</span><span class="p">,</span>
-                                    <span class="n">interventions_reference</span><span class="o">=</span><span class="n">interventions_reference</span><span class="p">,</span>
-                                    <span class="n">observed_data</span><span class="o">=</span><span class="n">data</span><span class="p">),</span>
-                <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                <span class="n">num_bootstrap_resamples</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-                <span class="n">confidence_level</span><span class="o">=</span><span class="n">confidence_level</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">effect</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">confidence_intervals</span><span class="p">(</span>
-                <span class="n">partial</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">average_causal_effect</span><span class="p">,</span>
-                        <span class="n">causal_model</span><span class="o">=</span><span class="n">causal_model</span><span class="p">,</span>
-                        <span class="n">target_node</span><span class="o">=</span><span class="n">target</span><span class="p">,</span>
-                        <span class="n">interventions_alternative</span><span class="o">=</span><span class="n">interventions_alternative</span><span class="p">,</span>
-                        <span class="n">interventions_reference</span><span class="o">=</span><span class="n">interventions_reference</span><span class="p">,</span>
-                        <span class="n">observed_data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
-                        <span class="n">num_samples_to_draw</span><span class="o">=</span><span class="mi">10000</span><span class="p">),</span>
-                <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
-                <span class="n">num_bootstrap_resamples</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
-                <span class="n">confidence_level</span><span class="o">=</span><span class="n">confidence_level</span><span class="p">)</span>
-
+        <span class="n">effect</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">confidence_intervals</span><span class="p">(</span>
+            <span class="n">partial</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">average_causal_effect</span><span class="p">,</span>
+                    <span class="n">causal_model</span><span class="o">=</span><span class="n">causal_model</span><span class="p">,</span>
+                    <span class="n">target_node</span><span class="o">=</span><span class="n">target</span><span class="p">,</span>
+                    <span class="n">interventions_alternative</span><span class="o">=</span><span class="n">interventions_alternative</span><span class="p">,</span>
+                    <span class="n">interventions_reference</span><span class="o">=</span><span class="n">interventions_reference</span><span class="p">,</span>
+                    <span class="n">num_samples_to_draw</span><span class="o">=</span><span class="mi">10000</span><span class="p">),</span>
+            <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">num_bootstrap_resamples</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
+            <span class="n">confidence_level</span><span class="o">=</span><span class="n">confidence_level</span><span class="p">)</span>
 
         <span class="n">causal_effects</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="n">effect</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">causal_effects_confidence_interval</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="n">effect</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
 
-        <span class="c1"># Apply capping constraint</span>
-        <span class="k">if</span> <span class="n">cap_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">node</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;_spend&#39;</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">causal_effects</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">cap_value</span><span class="p">:</span>
-                <span class="n">causal_effects</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="n">cap_value</span>
-                <span class="n">capped_effects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">causal_effects</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">&lt;</span> <span class="o">-</span><span class="n">cap_value</span><span class="p">:</span>
-                <span class="n">causal_effects</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">cap_value</span>
-                <span class="n">capped_effects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
-
-        <span class="c1"># Apply non-negativity constraint</span>
+        <span class="c1"># Apply non-negativity constraint - Here, spend cannot be negative. However, small negative values can happen in the analysis due to misspecifications.</span>
         <span class="k">if</span>  <span class="n">node</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;_spend&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">causal_effects</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">causal_effects</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="n">causal_effects_confidence_interval</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span>
@@ -1426,10 +1401,11 @@ Estimating bootstrap interval...: 100%|██████████| 10/10 [00
     <span class="k">if</span> <span class="n">progress_bar_was_on</span><span class="p">:</span>
         <span class="n">gcm</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">enable_progress_bars</span><span class="p">()</span>
 
+    <span class="nb">print</span><span class="p">(</span><span class="n">causal_effects</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">prints</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">causal_effects</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">causal_effects</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">causal_effects</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;Increasing&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">step_size</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;Decreasing&#39;</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">node</span><span class="si">}</span><span class="s2"> by </span><span class="si">{</span><span class="n">step_size</span><span class="si">}</span><span class="s2"> has no effect on </span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">causal_effects</span><span class="p">[</span><span class="n">node</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">threshold_insignificant</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;Increasing&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">step_size</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;Decreasing&#39;</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">node</span><span class="si">}</span><span class="s2"> by </span><span class="si">{</span><span class="n">step_size</span><span class="si">}</span><span class="s2"> has no significant effect on </span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;Increasing&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">step_size</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;Decreasing&#39;</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">node</span><span class="si">}</span><span class="s2"> by </span><span class="si">{</span><span class="n">step_size</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">&#39;increases&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">causal_effects</span><span class="p">[</span><span class="n">node</span><span class="p">]</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;decreases&#39;</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2"> &quot;</span>
                         <span class="sa">f</span><span class="s2">&quot;by around </span><span class="si">{</span><span class="n">causal_effects</span><span class="p">[</span><span class="n">node</span><span class="p">]</span><span class="si">}</span><span class="s2"> with a confidence interval (</span><span class="si">{</span><span class="n">confidence_level</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="si">}</span><span class="s2">%) of </span><span class="si">{</span><span class="n">causal_effects_confidence_interval</span><span class="p">[</span><span class="n">node</span><span class="p">]</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
@@ -1452,7 +1428,7 @@ Estimating bootstrap interval...: 100%|██████████| 10/10 [00
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">interv_result</span> <span class="o">=</span> <span class="n">intervention_influence</span><span class="p">(</span><span class="n">causal_model</span><span class="o">=</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="s1">&#39;sale&#39;</span><span class="p">,</span> <span class="n">non_interveneable_nodes</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;dpv&#39;</span><span class="p">,</span> <span class="s1">&#39;sale&#39;</span><span class="p">],</span> <span class="n">confidence_level</span><span class="o">=</span><span class="mf">0.85</span><span class="p">,</span> <span class="n">cap_value</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">prints</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">interv_result</span> <span class="o">=</span> <span class="n">intervention_influence</span><span class="p">(</span><span class="n">causal_model</span><span class="o">=</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="s1">&#39;sale&#39;</span><span class="p">,</span> <span class="n">non_interveneable_nodes</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;dpv&#39;</span><span class="p">,</span> <span class="s1">&#39;sale&#39;</span><span class="p">,</span> <span class="s1">&#39;special_shopping_event&#39;</span><span class="p">],</span> <span class="n">prints</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">interv_result</span>
 </pre></div>
 </div>
@@ -1460,13 +1436,21 @@ Estimating bootstrap interval...: 100%|██████████| 10/10 [00
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/github/home/.cache/pypoetry/virtualenvs/dowhy-oN2hW5jr-py3.8/lib/python3.8/site-packages/joblib/externals/loky/process_executor.py:752: UserWarning: A worker stopped while some jobs were given to the executor. This can be caused by a too short worker timeout or by a memory leak.
+  warnings.warn(
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Increasing special_shopping_event by 1 increases sale by around 134.40983885613093 with a confidence interval (85.0%) of [-867.30116761  579.62296901].
-Increasing other_shopping_event by 1 increases sale by around 72.23299307618501 with a confidence interval (85.0%) of [-581.59285141 1063.75119356].
-Increasing dsp_spend by 1 increases sale by around 20 with a confidence interval (85.0%) of [-1015.54711436  1076.1571889 ].
-Increasing sp_spend by 1 increases sale by around 20 with a confidence interval (85.0%) of [-297.45200239  933.06298904].
-Increasing discount by 1 decreases sale by around -132.52580548184866 with a confidence interval (85.0%) of [-950.47129075  642.76403872].
+{&#39;dsp_spend&#39;: 17.24967418278742, &#39;sp_spend&#39;: 251.46429418905464, &#39;discount&#39;: -0.3838008170953823}
+Increasing sp_spend by 1 increases sale by around 251.46429418905464 with a confidence interval (95.0%) of [189.23222528 297.30733219].
+Increasing dsp_spend by 1 increases sale by around 17.24967418278742 with a confidence interval (95.0%) of [ 2.88751799 40.04585586].
+Increasing discount by 1 decreases sale by around -0.3838008170953823 with a confidence interval (95.0%) of [-1.04614227  1.0169307 ].
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1502,49 +1486,34 @@ Increasing discount by 1 decreases sale by around -132.52580548184866 with a con
     <tr>
       <th>dsp_spend</th>
       <td>dsp_spend</td>
-      <td>20.000000</td>
-      <td>-1015.547114</td>
-      <td>1076.157189</td>
+      <td>17.249674</td>
+      <td>2.887518</td>
+      <td>40.045856</td>
     </tr>
     <tr>
       <th>sp_spend</th>
       <td>sp_spend</td>
-      <td>20.000000</td>
-      <td>-297.452002</td>
-      <td>933.062989</td>
-    </tr>
-    <tr>
-      <th>special_shopping_event</th>
-      <td>special_shopping_event</td>
-      <td>134.409839</td>
-      <td>-867.301168</td>
-      <td>579.622969</td>
-    </tr>
-    <tr>
-      <th>other_shopping_event</th>
-      <td>other_shopping_event</td>
-      <td>72.232993</td>
-      <td>-581.592851</td>
-      <td>1063.751194</td>
+      <td>251.464294</td>
+      <td>189.232225</td>
+      <td>297.307332</td>
     </tr>
     <tr>
       <th>discount</th>
       <td>discount</td>
-      <td>-132.525805</td>
-      <td>-950.471291</td>
-      <td>642.764039</td>
+      <td>-0.383801</td>
+      <td>-1.046142</td>
+      <td>1.016931</td>
     </tr>
   </tbody>
 </table>
 </div></div>
 </div>
-<p>We similarly filter to positively significant interventions, i.e., the spending with statistically significant positive returns. Note that with capping, ‘causal effect’ may not fall between lower and upper CI. The interpretation is, for each dollar spent on one type of ad, we receive X amount in return, with X indicated in the ‘Causal Effect’ column.</p>
+<p>We similarly filter to positively significant interventions, i.e., the spending with statistically significant positive returns. The interpretation is, for each dollar spent on one type of ad, we receive X amount in return, with X indicated in the ‘Causal Effect’ column.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">interv_result_v2</span><span class="o">=</span> <span class="n">filter_significant_rows</span><span class="p">(</span><span class="n">interv_result</span><span class="p">,</span> <span class="s1">&#39;positive&#39;</span><span class="p">,</span> <span class="s1">&#39;Upper CI&#39;</span><span class="p">,</span> <span class="s1">&#39;Lower CI&#39;</span><span class="p">)</span>
-<span class="n">interv_result_v2</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">filter_significant_rows</span><span class="p">(</span><span class="n">interv_result</span><span class="p">,</span> <span class="s1">&#39;positive&#39;</span><span class="p">,</span> <span class="s1">&#39;Upper CI&#39;</span><span class="p">,</span> <span class="s1">&#39;Lower CI&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1578,10 +1547,25 @@ Increasing discount by 1 decreases sale by around -132.52580548184866 with a con
     </tr>
   </thead>
   <tbody>
+    <tr>
+      <th>dsp_spend</th>
+      <td>dsp_spend</td>
+      <td>17.249674</td>
+      <td>2.887518</td>
+      <td>40.045856</td>
+    </tr>
+    <tr>
+      <th>sp_spend</th>
+      <td>sp_spend</td>
+      <td>251.464294</td>
+      <td>189.232225</td>
+      <td>297.307332</td>
+    </tr>
   </tbody>
 </table>
 </div></div>
 </div>
+<p>This tells us that there is a clear benefit in doubling down on ‘sp_spend’ and ‘dsp_spend’. Note that the quantitative numbers here can be off due to model misspecifications, but they nevertheless provide some helpful insights.</p>
 </section>
 <section id="Summary">
 <h2>Summary<a class="headerlink" href="#Summary" title="Permalink to this heading">#</a></h2>
