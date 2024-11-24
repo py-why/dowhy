@@ -1,0 +1,1049 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B139P18WHM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-B139P18WHM');
+    </script>
+    
+    <title>Testing Assumptions in model with DoWhy: A simple example &#8212; DoWhy  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=949a1ff5" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
+  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
+
+    <script src="../_static/jquery.js?v=5d32c60e"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=b3ba4146"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=0c6e27e1"></script>
+    <script src="../_static/design-tabs.js?v=36754332"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'example_notebooks/graph_conditional_independence_refuter';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-light" alt="DoWhy  documentation - Home"/>
+    <script>document.write(`<img src="../_static/dowhy-logo-small.png" class="logo__image only-dark" alt="DoWhy  documentation - Home"/>`);</script>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting_started/index.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="nb_index.html">
+                        Examples
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../cite.html">
+                        Citing this package
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../contributing.html">
+                        Contributing
+                      </a>
+                    </li>
+                
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
+                        dowhy package
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
+                        Release notes
+                      </a>
+                    </li>
+                
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+        </div>
+      
+      
+        <div class="navbar-item"><div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        v0.12
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.9.1/index.html">v0.9.1</a></dd>
+            <dd><a href="/dowhy/v0.9/index.html">v0.9</a></dd>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.11.1/index.html">v0.11.1</a></dd>
+            <dd><a href="/dowhy/v0.11/index.html">v0.11</a></dd>
+            <dd><a href="/dowhy/v0.10.1/index.html">v0.10.1</a></dd>
+            <dd><a href="/dowhy/v0.10/index.html">v0.10</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item">
+<nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting_started/index.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../user_guide/index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="nb_index.html">
+                        Examples
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../cite.html">
+                        Citing this package
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../contributing.html">
+                        Contributing
+                      </a>
+                    </li>
+                
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links-2">
+                    More
+                </button>
+                <ul id="pst-nav-more-links-2" class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
+                        dowhy package
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
+                        Release notes
+                      </a>
+                    </li>
+                
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        v0.12
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.9.1/index.html">v0.9.1</a></dd>
+            <dd><a href="/dowhy/v0.9/index.html">v0.9</a></dd>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.11.1/index.html">v0.11.1</a></dd>
+            <dd><a href="/dowhy/v0.11/index.html">v0.11</a></dd>
+            <dd><a href="/dowhy/v0.10.1/index.html">v0.10.1</a></dd>
+            <dd><a href="/dowhy/v0.10/index.html">v0.10</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">Testing...</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="Testing-Assumptions-in-model-with-DoWhy:-A-simple-example">
+<h1>Testing Assumptions in model with DoWhy: A simple example<a class="headerlink" href="#Testing-Assumptions-in-model-with-DoWhy:-A-simple-example" title="Permalink to this heading">#</a></h1>
+<p>This is a quick introduction to how we can test if our assumed graph is correct and the assumptions match with the dataset. We do so by checking the conditional independences in the graph and see if they hold true for the data as well. Currently we are using partial correlation to test continuous data and conditional mutual information to test discrete data.</p>
+<p>First, let us load all required packages.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
+<span class="o">%</span><span class="k">autoreload</span> 2
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s2">&quot;../../../&quot;</span><span class="p">))</span>
+<span class="kn">import</span> <span class="nn">dowhy</span>
+<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
+<span class="kn">import</span> <span class="nn">dowhy.datasets</span>
+</pre></div>
+</div>
+</div>
+<section id="Step-1:-Load-dataset">
+<h2>Step 1: Load dataset<a class="headerlink" href="#Step-1:-Load-dataset" title="Permalink to this heading">#</a></h2>
+<p>The function <code class="docutils literal notranslate"><span class="pre">dataset_from_random_graph(num_vars,</span> <span class="pre">num_samples,</span> <span class="pre">prob_edge,</span> <span class="pre">random_seed,</span> <span class="pre">prob_type_data)</span></code> can be used to create a dataset from a randomly generated directed graph. The data can be mixture of discrete, binary and continuous variables. The parameters have the following significance - - num_vars : Number of variables in the dataset - num_samples: Number of samples in the dataset - prob_edge : Probability of an edge between two random nodes in a graph - random_seed: Seed for
+generating random graph - prob_type_of_data : 3-element tuple containing the probability of data being discrete, binary and continuous respectively.(Should add up to 1)</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">dataset_from_random_graph</span><span class="p">(</span><span class="n">num_vars</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+                                                <span class="n">num_samples</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">,</span>
+                                                <span class="n">prob_edge</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span>
+                                                <span class="n">random_seed</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+                                                <span class="n">prob_type_of_data</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.333</span><span class="p">,</span> <span class="mf">0.333</span><span class="p">,</span> <span class="mf">0.334</span><span class="p">))</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">]</span> <span class="c1">#Insert dataset here</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;discrete_columns&quot;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;continuous_columns&quot;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;binary_columns&quot;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;a&#39;, &#39;c&#39;, &#39;e&#39;, &#39;f&#39;, &#39;h&#39;] [&#39;b&#39;, &#39;d&#39;, &#39;g&#39;, &#39;i&#39;, &#39;j&#39;] [&#39;c&#39;, &#39;e&#39;]
+   a         b  c         d  e  f         g  h         i         j
+0 -1 -1.170054  1  0.996507  1  0 -0.218214 -1 -1.107993  0.699933
+1  0  0.527130  1  0.894435  1  1  1.485562  0 -1.450727 -1.055649
+2  0  0.436049  0 -0.151908  0  0  0.195296  0  2.280391  1.162284
+3  0  0.005213  1  0.347139  1  0 -0.727156 -1 -1.140999 -2.165819
+4  0  1.212397  0 -1.230150  0  1  0.582913  0 -1.377051 -2.359753
+</pre></div></div>
+</div>
+<p>Note that we are using a pandas dataframe to load the data. At present, DoWhy only supports pandas dataframe as input.</p>
+</section>
+<section id="Step-2:-Input-causal-graph">
+<h2>Step 2: Input causal graph<a class="headerlink" href="#Step-2:-Input-causal-graph" title="Permalink to this heading">#</a></h2>
+<p>We now input a causal graph. You can do that in the GML graph format (recommended), DOT format or the output from daggity - To create the causal graph for your dataset, you can use a tool like <a class="reference external" href="http://dagitty.net/dags.html#">DAGitty</a> that provides a GUI to construct the graph. You can export the graph string that it generates.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">graph_string</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;graph [</span>
+<span class="s2">  directed 1</span>
+<span class="s2">  node [</span>
+<span class="s2">    id 0</span>
+<span class="s2">    label &quot;a&quot;</span>
+<span class="s2">  ]</span>
+<span class="s2">  node [</span>
+<span class="s2">    id 1</span>
+<span class="s2">    label &quot;b&quot;</span>
+<span class="s2">  ]</span>
+<span class="s2">  node [</span>
+<span class="s2">    id 2</span>
+<span class="s2">    label &quot;c&quot;</span>
+<span class="s2">  ]</span>
+<span class="s2">  node [</span>
+<span class="s2">    id 3</span>
+<span class="s2">    label &quot;d&quot;</span>
+<span class="s2">  ]</span>
+<span class="s2">  node [</span>
+<span class="s2">    id 4</span>
+<span class="s2">    label &quot;e&quot;</span>
+<span class="s2">  ]</span>
+<span class="s2">  node [</span>
+<span class="s2">    id 5</span>
+<span class="s2">    label &quot;f&quot;</span>
+<span class="s2">  ]</span>
+<span class="s2">  node [</span>
+<span class="s2">    id 6</span>
+<span class="s2">    label &quot;g&quot;</span>
+<span class="s2">  ]</span>
+<span class="s2">  node [</span>
+<span class="s2">    id 7</span>
+<span class="s2">    label &quot;h&quot;</span>
+<span class="s2">  ]</span>
+<span class="s2">  node [</span>
+<span class="s2">    id 8</span>
+<span class="s2">    label &quot;i&quot;</span>
+<span class="s2">  ]</span>
+<span class="s2">  node [</span>
+<span class="s2">    id 9</span>
+<span class="s2">    label &quot;j&quot;</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 0</span>
+<span class="s2">    target 1</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 0</span>
+<span class="s2">    target 8</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 1</span>
+<span class="s2">    target 2</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 1</span>
+<span class="s2">    target 5</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 2</span>
+<span class="s2">    target 3</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 2</span>
+<span class="s2">    target 4</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 3</span>
+<span class="s2">    target 4</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 4</span>
+<span class="s2">    target 5</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 5</span>
+<span class="s2">    target 6</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 6</span>
+<span class="s2">    target 7</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 7</span>
+<span class="s2">    target 8</span>
+<span class="s2">  ]</span>
+<span class="s2">  edge [</span>
+<span class="s2">    source 8</span>
+<span class="s2">    target 9</span>
+<span class="s2">  ]</span>
+<span class="s2">]</span>
+
+<span class="s2">&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Step-3:-Create-Causal-Model">
+<h2>Step 3: Create Causal Model<a class="headerlink" href="#Step-3:-Create-Causal-Model" title="Permalink to this heading">#</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">=</span><span class="n">CausalModel</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">df</span><span class="p">,</span>
+        <span class="n">treatment</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">],</span>
+        <span class="n">outcome</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">],</span>
+        <span class="n">graph</span><span class="o">=</span><span class="n">graph_string</span>
+        <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_graph_conditional_independence_refuter_11_0.png" src="../_images/example_notebooks_graph_conditional_independence_refuter_11_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_graph_conditional_independence_refuter_12_0.png" src="../_images/example_notebooks_graph_conditional_independence_refuter_12_0.png" />
+</div>
+</div>
+</section>
+<section id="Step-4:-Testing-for-Conditional-Independence">
+<h2>Step 4: Testing for Conditional Independence<a class="headerlink" href="#Step-4:-Testing-for-Conditional-Independence" title="Permalink to this heading">#</a></h2>
+<p>We can check if the assumptions of the graph hold true for the data using <code class="docutils literal notranslate"><span class="pre">model.refute_graph(k,</span> <span class="pre">independence_test</span> <span class="pre">=</span> <span class="pre">{'test_for_continuous':</span> <span class="pre">'partial_correlation',</span> <span class="pre">'test_for_discrete'</span> <span class="pre">:</span> <span class="pre">'conditional_mutual_information'})</span></code> We are testing X ⫫ Y | Z where X and Y are singular sets and Z can have k number of variables. k value is 1 by default unless input. Currently we are using following settings - - “partial_correlation” for continuous data - “conditional_mutual_information” for discrete data -
+“conditional_mutua_information” when Z is discrete and either of X and Y is continuous - “partial_correlation” when Z is continuous/binary and X and Y are either continuous/binary - “conditional_mutual_information” when X and Y are discrete and Z has mixed data - other settings are currently not supported</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refuter_object</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_graph</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">independence_test</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;test_for_continuous&#39;</span><span class="p">:</span> <span class="s1">&#39;partial_correlation&#39;</span><span class="p">,</span> <span class="s1">&#39;test_for_discrete&#39;</span> <span class="p">:</span> <span class="s1">&#39;conditional_mutual_information&#39;</span><span class="p">})</span> <span class="c1">#Change k parameter to test conditional independence given different number of variables</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">refuter_object</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Method name for discrete data:conditional_mutual_information
+Method name for continuous data:partial_correlation
+Number of conditional independencies entailed by model:34
+Number of independences satisfied by data:25
+Test passed:True
+
+</pre></div></div>
+</div>
+<section id="Testing-for-a-set-of-edges">
+<h3>Testing for a set of edges<a class="headerlink" href="#Testing-for-a-set-of-edges" title="Permalink to this heading">#</a></h3>
+<p>We can also test a set of conditional independences whether they are true or not The input has to be in the form - [( x1, y1, (z1, z2)), ( x2, y2, (z3, z4)), ( x3, y3, (z5,)), ( x4, y4, ()) ] ##### The testing data can be a mix of discrete and continuous types as well (Here binary implies discrete only) -</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refuter_object</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_graph</span><span class="p">(</span><span class="n">independence_constraints</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;e&#39;</span> <span class="p">,</span> <span class="p">(</span><span class="s1">&#39;g&#39;</span><span class="p">,)),</span> <span class="c1"># c and e - binary, g - continuous</span>
+                                                                <span class="p">(</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="s1">&#39;h&#39;</span> <span class="p">,</span> <span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,)),</span> <span class="c1"># f and h - discrete, b - continuous</span>
+                                                                <span class="p">(</span><span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span> <span class="p">,</span> <span class="p">(</span><span class="s1">&#39;h&#39;</span><span class="p">,)),</span> <span class="c1"># e - binary, g - continuous, h - discrete</span>
+                                                                <span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span> <span class="p">,</span> <span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,)),</span> <span class="c1"># c and a - discrete, b - continuous</span>
+                                                                <span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span> <span class="p">,</span> <span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">,)),</span> <span class="c1"># d and i - continuous, c - binary</span>
+                                                                <span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;j&#39;</span> <span class="p">,</span> <span class="p">())</span>      <span class="c1"># a - discrete, j - continuous</span>
+                                                               <span class="p">],</span>
+                         <span class="n">independence_test</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;test_for_continuous&#39;</span><span class="p">:</span> <span class="s1">&#39;partial_correlation&#39;</span><span class="p">,</span> <span class="s1">&#39;test_for_discrete&#39;</span> <span class="p">:</span> <span class="s1">&#39;conditional_mutual_information&#39;</span><span class="p">}</span>
+                        <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">refuter_object</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Method name for discrete data:conditional_mutual_information
+Method name for continuous data:partial_correlation
+Number of conditional independencies entailed by model:6
+Number of independences satisfied by data:6
+Test passed:True
+
+</pre></div></div>
+</div>
+</section>
+</section>
+<section id="Testing-with-a-wrong-graph-input">
+<h2>Testing with a wrong graph input<a class="headerlink" href="#Testing-with-a-wrong-graph-input" title="Permalink to this heading">#</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">graph_string</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;graph [</span>
+<span class="s2">        directed 1</span>
+<span class="s2">        node [</span>
+<span class="s2">            id 0</span>
+<span class="s2">            label &quot;a&quot;</span>
+<span class="s2">        ]</span>
+<span class="s2">        node [</span>
+<span class="s2">            id 1</span>
+<span class="s2">            label &quot;b&quot;</span>
+<span class="s2">        ]</span>
+<span class="s2">        node [</span>
+<span class="s2">            id 2</span>
+<span class="s2">            label &quot;c&quot;</span>
+<span class="s2">        ]</span>
+<span class="s2">        node [</span>
+<span class="s2">            id 3</span>
+<span class="s2">            label &quot;d&quot;</span>
+<span class="s2">        ]</span>
+<span class="s2">        node [</span>
+<span class="s2">            id 4</span>
+<span class="s2">            label &quot;e&quot;</span>
+<span class="s2">        ]</span>
+<span class="s2">        node [</span>
+<span class="s2">            id 5</span>
+<span class="s2">            label &quot;f&quot;</span>
+<span class="s2">        ]</span>
+<span class="s2">        node [</span>
+<span class="s2">            id 6</span>
+<span class="s2">            label &quot;g&quot;</span>
+<span class="s2">        ]</span>
+<span class="s2">        node [</span>
+<span class="s2">            id 7</span>
+<span class="s2">            label &quot;h&quot;</span>
+<span class="s2">        ]</span>
+<span class="s2">        node [</span>
+<span class="s2">            id 8</span>
+<span class="s2">            label &quot;i&quot;</span>
+<span class="s2">        ]</span>
+<span class="s2">        node [</span>
+<span class="s2">            id 9</span>
+<span class="s2">            label &quot;j&quot;</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge [</span>
+<span class="s2">            source 0</span>
+<span class="s2">            target 1</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge [</span>
+<span class="s2">            source 0</span>
+<span class="s2">            target 2</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge [</span>
+<span class="s2">            source 0</span>
+<span class="s2">            target 3</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge [</span>
+<span class="s2">            source 1</span>
+<span class="s2">            target 4</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge [</span>
+<span class="s2">            source 1</span>
+<span class="s2">            target 5</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge [</span>
+<span class="s2">            source 2</span>
+<span class="s2">            target 3</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge [</span>
+<span class="s2">            source 4</span>
+<span class="s2">            target 2</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge [</span>
+<span class="s2">            source 4</span>
+<span class="s2">            target 5</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge [</span>
+<span class="s2">            source 4</span>
+<span class="s2">            target 6</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge [</span>
+<span class="s2">            source 4</span>
+<span class="s2">            target 7</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge [</span>
+<span class="s2">            source 8</span>
+<span class="s2">            target 6</span>
+<span class="s2">        ]</span>
+<span class="s2">        edge</span>
+<span class="s2">        [</span>
+<span class="s2">        source 9</span>
+<span class="s2">        target 0</span>
+<span class="s2">        ]</span>
+<span class="s2">        ]&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
+            <span class="n">treatment</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">],</span>
+            <span class="n">outcome</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">],</span>
+            <span class="n">graph</span><span class="o">=</span><span class="n">graph_string</span><span class="p">,</span>
+        <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_graph_conditional_independence_refuter_22_0.png" src="../_images/example_notebooks_graph_conditional_independence_refuter_22_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_graph_conditional_independence_refuter_23_0.png" src="../_images/example_notebooks_graph_conditional_independence_refuter_23_0.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refuter_object</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_graph</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>We can see that since we input the wrong graph, many conditional independences were not met</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">refuter_object</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Method name for discrete data:conditional_mutual_information
+Method name for continuous data:partial_correlation
+Number of conditional independencies entailed by model:359
+Number of independences satisfied by data:144
+Test passed:False
+
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Step-1:-Load-dataset">Step 1: Load dataset</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Step-2:-Input-causal-graph">Step 2: Input causal graph</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Step-3:-Create-Causal-Model">Step 3: Create Causal Model</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Step-4:-Testing-for-Conditional-Independence">Step 4: Testing for Conditional Independence</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Testing-for-a-set-of-edges">Testing for a set of edges</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Testing-with-a-wrong-graph-input">Testing with a wrong graph input</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/example_notebooks/graph_conditional_independence_refuter.ipynb.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2022, PyWhy contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.4.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,727 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "1c74ae7a-e77a-4b38-be41-7fb82e6930a5",
+   "metadata": {},
+   "source": [
+    "# Causal Attributions and Root-Cause Analysis in an Online Shop"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "52343f86-2a11-4785-ab98-e92687369566",
+   "metadata": {},
+   "source": [
+    "This notebook is an extended and updated version of the corresponding blog post: [Root Cause Analysis with DoWhy, an Open Source Python Library for Causal Machine Learning](https://aws.amazon.com/blogs/opensource/root-cause-analysis-with-dowhy-an-open-source-python-library-for-causal-machine-learning/)\n",
+    "\n",
+    "In this example, we look at an online store and analyze how different factors influence our profit. In particular, we want to analyze an unexpected drop in profit and identify the potential root cause of it. For this, we can make use of Graphical Causal Models (GCM)."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d1879d7f-73dc-4625-be07-b89abb4c5e46",
+   "metadata": {},
+   "source": [
+    "## The scenario"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "6abcab21-f78e-4129-b37f-611271e2860b",
+   "metadata": {},
+   "source": [
+    "Suppose we are selling a smartphone in an online shop with a retail price of $999. The overall profit from the product depends on several factors, such as the number of sold units, operational costs or ad spending. On the other hand, the number of sold units, for instance, depends on the number of visitors on the product page, the price itself and potential ongoing promotions. Suppose we observe a steady profit of our product over the year 2021, but suddenly, there is a significant drop in profit at the beginning of 2022. Why?\n",
+    "\n",
+    "In the following scenario, we will use DoWhy to get a better understanding of the causal impacts of factors influencing the profit and to identify the causes for the profit drop. To analyze our problem at hand, we first need to define our belief about the causal relationships. For this, we collect daily records of the different factors affecting profit. These factors are:\n",
+    "\n",
+    "- **Shopping Event?**: A binary value indicating whether a special shopping event took place, such as Black Friday or Cyber Monday sales.\n",
+    "- **Ad Spend**: Spending on ad campaigns.\n",
+    "- **Page Views**: Number of visits on the product detail page.\n",
+    "- **Unit Price**: Price of the device, which could vary due to temporary discounts.\n",
+    "- **Sold Units**: Number of sold phones.\n",
+    "- **Revenue**: Daily revenue.\n",
+    "- **Operational Cost**: Daily operational expenses which includes production costs, spending on ads, administrative expenses, etc.\n",
+    "- **Profit**: Daily profit.\n",
+    "\n",
+    "Looking at these attributes, we can use our domain knowledge to describe the cause-effect relationships in the form of a directed acyclic graph, which represents our causal graph in the following. The graph is shown here:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "3e2cc4f9-539c-415d-98a5-3a35ebe226a8",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from IPython.display import Image\n",
+    "Image('online-shop-graph.png') "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "83b77156-7395-4285-8d5d-6bb34cdcec76",
+   "metadata": {},
+   "source": [
+    "In this scenario we know the following:\n",
+    "\n",
+    "**Shopping Event?** impacts:  \n",
+    "→ Ad Spend: To promote the product on special shopping events, we require additional ad spending.  \n",
+    "→ Page Views: Shopping events typically attract a large number of visitors to an online retailer due to discounts and various offers.  \n",
+    "→ Unit Price: Typically, retailers offer some discount on the usual retail price on days with a shopping event.  \n",
+    "→ Sold Units: Shopping events often take place during annual celebrations like Christmas, Father’s day, etc, when people often buy more than usual.  \n",
+    "\n",
+    "**Ad Spend** impacts:  \n",
+    "→ Page Views: The more we spend on ads, the more likely people will visit the product page.  \n",
+    "→ Operational Cost: Ad spending is part of the operational cost.  \n",
+    "\n",
+    "**Page Views** impacts:  \n",
+    "→ Sold Units: The more people visiting the product page, the more likely the product is bought. This is quite obvious seeing that if no one would visit the page, there wouldn’t be any sale.  \n",
+    "\n",
+    "**Unit Price** impacts:  \n",
+    "→ Sold Units: The higher/lower the price, the less/more units are sold.  \n",
+    "→ Revenue: The daily revenue typically consist of the product of the number of sold units and unit price.  \n",
+    "\n",
+    "**Sold Units** impacts:  \n",
+    "→ Sold Units: Same argument as before, the number of sold units heavily influences the revenue.  \n",
+    "→ Operational Cost: There is a manufacturing cost for each unit we produce and sell. The more units we well the higher the revenue, but also the higher the manufacturing costs.  \n",
+    "\n",
+    "**Operational Cost** impacts:  \n",
+    "→ Profit: The profit is based on the generated revenue minus the operational cost.  \n",
+    "\n",
+    "**Revenue** impacts:  \n",
+    "→ Profit: Same reason as for the operational cost."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "ffcb5b7f-d5cb-4747-a558-125d889fdace",
+   "metadata": {},
+   "source": [
+    "## Step 1: Define causal model"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "7c67d73a-e834-4dcf-9c61-7190ae82ba6a",
+   "metadata": {},
+   "source": [
+    "Now, let us model these causal relationships. In the first step, we need to define a so-called structural causal model (SCM), which is a combination of the causal graph and the underlying generative models describing the data generation process.\n",
+    "\n",
+    "The causal graph can be defined via:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "49665408-6239-4d17-ab3f-fca7a8bfbbd3",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import networkx as nx\n",
+    "\n",
+    "causal_graph = nx.DiGraph([('Page Views', 'Sold Units'),\n",
+    "                           ('Revenue', 'Profit'),\n",
+    "                           ('Unit Price', 'Sold Units'),\n",
+    "                           ('Unit Price', 'Revenue'),\n",
+    "                           ('Shopping Event?', 'Page Views'),\n",
+    "                           ('Shopping Event?', 'Sold Units'),\n",
+    "                           ('Shopping Event?', 'Unit Price'),\n",
+    "                           ('Shopping Event?', 'Ad Spend'),\n",
+    "                           ('Ad Spend', 'Page Views'),\n",
+    "                           ('Ad Spend', 'Operational Cost'),\n",
+    "                           ('Sold Units', 'Revenue'),\n",
+    "                           ('Sold Units', 'Operational Cost'),\n",
+    "                           ('Operational Cost', 'Profit')])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "22030101-2a98-42a0-80bc-c2aa3c1dd41a",
+   "metadata": {},
+   "source": [
+    "To verify that we did not forget an edge, we can plot this graph:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "47243f27-c8ef-40e2-9d88-ac9418a96393",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from dowhy.utils import plot\n",
+    "\n",
+    "plot(causal_graph)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "564df483-0f6c-4dfc-9075-13a6a175ee64",
+   "metadata": {},
+   "source": [
+    "Next, we look at the data from 2021:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "9d4f5efd-5873-46ed-9c3a-d5b644380f84",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import pandas as pd\n",
+    "import numpy as np\n",
+    "\n",
+    "pd.options.display.float_format = '${:,.2f}'.format  # Format dollar columns\n",
+    "\n",
+    "data_2021 = pd.read_csv('2021 Data.csv', index_col='Date')\n",
+    "data_2021.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "7d00cb09-cc78-4a25-80c0-debca854beb9",
+   "metadata": {},
+   "source": [
+    "As we see, we have one sample for each day in 2021 with all the variables in the causal graph. Note that in the synthetic data we consider here, shopping events were also generated randomly.\n",
+    "\n",
+    "We defined the causal graph, but we still need to assign generative models to the nodes. We can either manually specify those models, and configure them if needed, or automatically infer “appropriate” models using heuristics from data. We will leverage the latter here:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "ffe4eb1d-3bf5-486b-947d-5d25115b5ab3",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from dowhy import gcm\n",
+    "gcm.util.general.set_random_seed(0)\n",
+    "\n",
+    "# Create the structural causal model object\n",
+    "scm = gcm.StructuralCausalModel(causal_graph)\n",
+    "\n",
+    "# Automatically assign generative models to each node based on the given data\n",
+    "auto_assignment_summary = gcm.auto.assign_causal_mechanisms(scm, data_2021)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f4715b95-cf69-4f08-8d46-fafcd8daf5e8",
+   "metadata": {},
+   "source": [
+    "Whenever available, we recommend assigning models based on prior knowledge as then models would closely mimic the physics of the domain, and not rely on nuances of the data. However, here we asked DoWhy to do this for us instead.\n",
+    "\n",
+    "After automatically assign the models, we can print a summary to obtain some insights into the selected models:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "941a24d8-cb6c-442e-81d9-0d64bb5ec933",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(auto_assignment_summary)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "107af355-2702-4ebc-aed7-620f40af1435",
+   "metadata": {},
+   "source": [
+    "As we see, while the auto assignment also considered non-linear models, a linear model is sufficient for most relationships, except for Revenue, which is the product of Sold Units and Unit Price."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "23d6cb3b-c87f-4167-b7d8-7cb3a5ea3695",
+   "metadata": {},
+   "source": [
+    "## Step 2: Fit causal models to data"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "26c28b4a-0bdc-4f69-92c1-d399fa9ad8af",
+   "metadata": {},
+   "source": [
+    "After assigning a model to each node, we need to learn the parameters of the model:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "2b032fa2-9348-418c-b62b-9ae77f49c342",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "gcm.fit(scm, data_2021)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "dbcd704e-c5a2-4e9a-977a-1642039de03a",
+   "metadata": {},
+   "source": [
+    "The fit method learns the parameters of the generative models in each node. Before we continue, let's have a quick look into the performance of the causal mechanisms and how well they capture the distribution:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "ab315928-4d60-4008-abb9-a9030e4cad44",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(gcm.evaluate_causal_model(scm, data_2021, compare_mechanism_baselines=True, evaluate_invertibility_assumptions=False, evaluate_causal_structure=False))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "b65c73b6-28af-4b57-b05f-c6c6245a714a",
+   "metadata": {},
+   "source": [
+    "The fitted causal mechanisms are fairly good representations of the data generation process, with some minor inaccuracies. However, this is to be expected given the small sample size and relatively small signal-to-noise ratio for many nodes. Most importantly, all the baseline mechanisms did not perform better, which is a good indicator that our model selection is appropriate. Based on the evaluation, we also do not reject the given causal graph."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a2e5acb0-f40e-4478-bee8-db3ff58bea21",
+   "metadata": {},
+   "source": [
+    "> The selection of baseline models can be configured as well. For more details, take a look at the corresponding evaluate_causal_model documentation."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "38f4f1b8-6b22-4fc7-b824-a9cc60d48acc",
+   "metadata": {},
+   "source": [
+    "## Step 3: Answer causal questions\n",
+    "### Generate new samples\n",
+    "\n",
+    "Since we learned about the data generation process, we can also generate new samples:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "74ed17eb-45ec-444d-9364-2aa850911a05",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "gcm.draw_samples(scm, num_samples=10)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "8dfc67f4-f89c-480d-8f6a-b0a74651ef3f",
+   "metadata": {},
+   "source": [
+    "We have drawn 10 samples from the joint distribution following the learned causal relationships."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "9a10e5ff-c5aa-4386-b462-bd696a1a54ed",
+   "metadata": {},
+   "source": [
+    "### What are the key factors influencing the variance in profit?"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "05da7b43-cf79-439a-b1df-dc1052b5f41b",
+   "metadata": {},
+   "source": [
+    "At this point, we want to understand which factors drive changes in the Profit. Let us first have a closer look at the Profit over time. For this, we plot the Profit over time for 2021, where the produced plot shows the Profit in dollars on the Y-axis and the time on the X-axis."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "efe77b22-e99c-43e9-876f-4f7198d5b112",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data_2021['Profit'].plot(ylabel='Profit in $', figsize=(15,5), rot=45)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "1a3abec8-5615-47cf-a68d-cb9332ad3570",
+   "metadata": {},
+   "source": [
+    "We see some significant spikes in the Profit across the year. We can further quantify this by looking at the standard deviation:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "b3ff0966-ddaf-4b19-b9ba-1fe854092f43",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data_2021['Profit'].std()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "991220b2-dc3e-4d80-b8cf-1d7e02c42bdc",
+   "metadata": {},
+   "source": [
+    "The estimated standard deviation of ~259247 dollars is quite significant. Looking at the causal graph, we see that Revenue and Operational Cost have a direct impact on the Profit, but which of them contribute the most to the variance? To find this out, we can make use of the direct arrow strength algorithm that quantifies the causal influence of a specific arrow in the graph:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "ecef5abd-f551-444b-8ec4-53e224f6d529",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "\n",
+    "# Note: The percentage conversion only makes sense for purely positive attributions.\n",
+    "def convert_to_percentage(value_dictionary):\n",
+    "    total_absolute_sum = np.sum([abs(v) for v in value_dictionary.values()])\n",
+    "    return {k: abs(v) / total_absolute_sum * 100 for k, v in value_dictionary.items()}\n",
+    "\n",
+    "\n",
+    "arrow_strengths = gcm.arrow_strength(scm, target_node='Profit')\n",
+    "\n",
+    "plot(causal_graph, \n",
+    "     causal_strengths=convert_to_percentage(arrow_strengths), \n",
+    "     figure_size=[15, 10])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "e430b106-f341-4cae-9e80-80d5b543f805",
+   "metadata": {},
+   "source": [
+    "In this causal graph, we see how much each node contributes to the variance in Profit. For simplicity, the contributions are converted to percentages. Since Profit itself is only the difference between Revenue and Operational Cost, we do not expect further factors influencing the variance. As we see, Revenue has more impact than Operational Cost. This makes sense seeing that Revenue typically varies more than Operational Cost due to the stronger dependency on the number of sold units. Note that the direct arrow strength method also supports the use of other kinds of measures, for instance, KL divergence. \n",
+    "\n",
+    "While the direct influences are helpful in understanding which direct parents influence the most on the variance in Profit, this mostly confirms our prior belief. The question of which factor is ultimately responsible for this high variance is, however, still unclear. For instance, Revenue itself is based on Sold Units and the Unit Price. Although we could recursively apply the direct arrow strength to all nodes, we would not get a correctly weighted insight into the influence of upstream nodes on the variance.\n",
+    "\n",
+    "What are the important causal factors contributing to the variance in Profit? To find this out, we can use the intrinsic causal contribution method that attributes the variance in Profit to the upstream nodes in the causal graph by only considering information that is newly added by a node and not just inherited from its parents. For instance, a node that is simply a rescaled version of its parent would not have any intrinsic contribution. See the corresponding [research paper](https://arxiv.org/abs/2007.00714) for more details.\n",
+    "\n",
+    "Let's apply the method to the data:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "43e49972-b137-4cae-9ee7-5c5879ff01ed",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "iccs = gcm.intrinsic_causal_influence(scm, target_node='Profit', num_samples_randomization=500)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "29424e87-5b18-49bc-9690-f09cd111bcd7",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from dowhy.utils import bar_plot\n",
+    "\n",
+    "bar_plot(convert_to_percentage(iccs), ylabel='Variance attribution in %')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "7b447b63-3bcc-4dae-80af-7f1c0daf1a1c",
+   "metadata": {},
+   "source": [
+    "The scores shown in this bar chart are percentages indicating how much variance each node is contributing to Profit — without inheriting the variance from its parents in the causal graph. As we see quite clearly, the Shopping Event has by far the biggest influence on the variance in our Profit. This makes sense, seeing that the sales are heavily impacted during promotion periods like Black Friday or Prime Day and, thus, impact the overall profit. Surprisingly, we also see that factors such as the number of sold units or number of page views have a rather small influence, i.e., the large variance in profit can be almost completely explained by the shopping events. Let’s check this visually by marking the days where we had a shopping event. To do so, we use the pandas plot function again, but additionally mark all points in the plot with a vertical red bar where a shopping event occured:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a3853007-fb0c-4a1d-bcca-f7bdd4dcef13",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import matplotlib.pyplot as plt\n",
+    "\n",
+    "data_2021['Profit'].plot(ylabel='Profit in $', figsize=(15,5), rot=45)\n",
+    "plt.vlines(np.arange(0, data_2021.shape[0])[data_2021['Shopping Event?']], data_2021['Profit'].min(), data_2021['Profit'].max(), linewidth=10, alpha=0.3, color='r')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "53c60147-b7a5-4759-b9a5-ab5dffccf4e2",
+   "metadata": {},
+   "source": [
+    "We clearly see that the shopping events coincide with the high peaks in profit. While we could have investigated this manually by looking at all kinds of different relationships or using domain knowledge, the tasks gets much more difficult as the complexity of the system increases. With a few lines of code, we obtained these insights from DoWhy."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "49d9e8a4-208a-490c-99d7-71faf9f53319",
+   "metadata": {},
+   "source": [
+    "### What are the key factors explaining the Profit drop on a particular day?"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "1c55bcca-6c74-4302-942d-41308b4d931c",
+   "metadata": {},
+   "source": [
+    "After a successful year in terms of profit, newer technologies come to the market and, thus, we want to keep the profit up and get rid of excess inventory by selling more devices. In order to increase the demand, we therefore lower the retail price by 10% at the beginning of 2022. Based on a prior analysis, we know that a decrease of 10% in the price would roughly increase the demand by 13.75%, a slight surplus. Following the price elasticity of demand model, we expect an increase of around 37.5% in number of Sold Units. Let us take a look if this is true by loading the data for the first day in 2022 and taking the fraction between the numbers of Sold Units from both years for that day:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "c9be4254-9ac2-4abc-a3f3-906925dac53d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "first_day_2022 = pd.read_csv('2022 First Day.csv', index_col='Date')\n",
+    "(first_day_2022['Sold Units'][0] / data_2021['Sold Units'][0] - 1) * 100"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "54b14bc7-6ca5-4492-896c-06f922d1198e",
+   "metadata": {},
+   "source": [
+    "Surprisingly, we only increased the number of sold units by ~19%. This will certainly impact the profit given that the revenue is much smaller than expected. Let us compare it with the previous year at the same time:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "16215ca0-00c9-411c-b293-675a4cb595c2",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "(1 - first_day_2022['Profit'][0] / data_2021['Profit'][0]) * 100"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d82b028a-604b-4f3a-8ef8-b438e5afd592",
+   "metadata": {},
+   "source": [
+    "Indeed, the profit dropped by ~8.5%. Why is this the case seeing that we would expect a much higher demand due to the decreased price? Let us investigate what is going on here.\n",
+    "\n",
+    "In order to figure out what contributed to the Profit drop, we can make use of DoWhy’s anomaly attribution feature. Here, we only need to specify the target node we are interested in (the Profit) and the anomaly sample we want to analyze (the first day of 2022). These results are then plotted in a bar chart indicating the attribution scores of each node for the given anomaly sample:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "00c6b5bf-e6b7-456f-84f6-91e2cbda62d6",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "attributions = gcm.attribute_anomalies(scm, target_node='Profit', anomaly_samples=first_day_2022)\n",
+    "\n",
+    "bar_plot({k: v[0] for k, v in attributions.items()}, ylabel='Anomaly attribution score')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c963e664-b0a8-4b3e-8e29-2226989da017",
+   "metadata": {},
+   "source": [
+    "A positive attribution score means that the corresponding node contributed to the observed anomaly, which is in our case the drop in Profit. A negative score of a node indicates that the observed value for the node is actually reducing the likelihood of the anomaly (e.g., a higher demand due to the decreased price should increase the profit). More details about the interpretation of the score can be found in the corresponding [reserach paper](https://proceedings.mlr.press/v162/budhathoki22a.html). Interestingly, the Page Views stand out as a factor explaining the Profit drop that day as indicated in the bar chart shown here.\n",
+    "\n",
+    "While this method gives us a point estimate of the attributions for the particular models and parameters we learned, we can also use DoWhy’s confidence interval feature, which incorporates uncertainties about the fitted model parameters and algorithmic approximations:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "e48b4b77-7ee6-4669-be82-05d0d15f4065",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "gcm.config.disable_progress_bars()  # We turn off the progress bars here to reduce the number of outputs.\n",
+    "\n",
+    "median_attributions, confidence_intervals, = gcm.confidence_intervals(\n",
+    "    gcm.fit_and_compute(gcm.attribute_anomalies,\n",
+    "                        scm,\n",
+    "                        bootstrap_training_data=data_2021,\n",
+    "                        target_node='Profit',\n",
+    "                        anomaly_samples=first_day_2022),\n",
+    "    num_bootstrap_resamples=10)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "4c7b083f-ef7f-47e0-b72f-2d0d1b9501e1",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "bar_plot(median_attributions, confidence_intervals, 'Anomaly attribution score')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "4708283b-07a1-4bc1-8956-e2f2089b5313",
+   "metadata": {},
+   "source": [
+    "Note, in this bar chart we see the median attributions over multiple runs on smaller data sets, where each run re-fits the models and re-evaluates the attributions. We get a similar picture as before, but the confidence interval of the attribution to Sold Units also contains zero, meaning its contribution is insignificant. But some important questions still remain: Was this only a coincidence and, if not, which part in our system has changed? To find this out, we need to collect some more data."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c2c82783-9a69-43c3-820c-048a6f5860bf",
+   "metadata": {},
+   "source": [
+    "> Note that the results differ depending on the selected data, since they are sample specific. On other days, other factors could be relevant. Furthermore, note that the analysis (including the confidence intervals) always relies on the modeling assumptions made. In other words, if the models change or have a poor fit, one would also expect different results."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a0836200-9c93-41ee-985c-0e48be6036a7",
+   "metadata": {},
+   "source": [
+    "### What caused the profit drop in Q1 2022?"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "3a33d9bf-d001-4aec-b84d-a2891fa2e7bb",
+   "metadata": {},
+   "source": [
+    "While the previous analysis is based on a single observation, let us see if this was just coincidence or if this is a persistent issue. When preparing the quarterly business report, we have some more data available from the first three months. We first check if the profit dropped on average in the first quarter of 2022 as compared to 2021. Similar as before, we can do this by taking the fraction between the average Profit of 2022 and 2021 for the first quarter:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "d70a7edb-9374-4fce-b8d3-e9ef9f53f328",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data_first_quarter_2021 = data_2021[data_2021.index <= '2021-03-31']\n",
+    "data_first_quarter_2022 = pd.read_csv(\"2022 First Quarter.csv\", index_col='Date')\n",
+    "\n",
+    "(1 - data_first_quarter_2022['Profit'].mean() / data_first_quarter_2021['Profit'].mean()) * 100"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d29fd8e5-bacc-4ade-b1bd-af5c351bc4a8",
+   "metadata": {},
+   "source": [
+    "Indeed, the profit drop is persistent in the first quarter of 2022. Now, what is the root cause of this? Let us apply the [distribution change method](https://proceedings.mlr.press/v130/budhathoki21a.html) to identify the part in the system that has changed:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "7f4a5065-e436-46cd-be5e-e6c1274fc3b7",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "median_attributions, confidence_intervals = gcm.confidence_intervals(\n",
+    "    lambda: gcm.distribution_change(scm,\n",
+    "                                    data_first_quarter_2021,\n",
+    "                                    data_first_quarter_2022,\n",
+    "                                    target_node='Profit',\n",
+    "                                    # Here, we are intersted in explaining the differences in the mean.\n",
+    "                                    difference_estimation_func=lambda x, y: np.mean(y) - np.mean(x)) \n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "fc2467b0-eb84-4f72-b895-954f5a8634e6",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "bar_plot(median_attributions, confidence_intervals, 'Profit change attribution in $')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "5849dc6d-107b-4236-a31d-f4ac6f1b060a",
+   "metadata": {},
+   "source": [
+    "In our case, the distribution change method explains the change in the mean of Profit, i.e., a negative value indicates that a node contributes to a decrease and a positive value to an increase of the mean. Using the bar chart, we get now a very clear picture that the change in Unit Price has actually a slightly positive contribution to the expected Profit due to the increase of Sold Units, but it seems that the issue is coming from the Page Views which has a negative value. While we already understood this as a main driver of the drop at the beginning of 2022, we have now isolated and confirmed that something changed for the Page Views as well. Let’s compare the average Page Views with the previous year."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "34b11c19-1256-4ae0-9067-2eb374ce5147",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "(1 - data_first_quarter_2022['Page Views'].mean() / data_first_quarter_2021['Page Views'].mean()) * 100"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "9aa5baf0-ffd2-4eb1-8c47-e05f00351edd",
+   "metadata": {},
+   "source": [
+    "Indeed, the number of Page Views dropped by ~14%. Since we eliminated all other potential factors, we can now dive deeper into the Page Views and see what is going on there. This is a hypothetical scenario, but we could imagine it could be due to a change in the search algorithm which ranks this product lower in the results and therefore drives fewer customers to the product page. Knowing this, we could now start mitigating the issue."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "fb9d91f2-ca4c-43cd-9499-245db5c9a577",
+   "metadata": {},
+   "source": [
+    "# Data generation process"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "9053f3c6-5629-47c1-95b6-c7a3f3349ae5",
+   "metadata": {},
+   "source": [
+    "While the exact same data cannot be reproduced, the following dataset generator should provide quite similar types of data and has various parameters to adjust:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "1c4785f9-5ec1-4340-8837-6d0cdaf4c406",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from dowhy.datasets import sales_dataset\n",
+    "\n",
+    "data_2021 = sales_dataset(start_date=\"2021-01-01\", end_date=\"2021-12-31\")\n",
+    "data_2022 = sales_dataset(start_date=\"2022-01-01\", end_date=\"2022-12-31\", change_of_price=0.9)"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.9.18"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

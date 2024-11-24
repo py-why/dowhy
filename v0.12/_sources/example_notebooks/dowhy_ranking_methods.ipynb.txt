@@ -1,0 +1,772 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Ranking of estimation methods for a given dataset "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We illustrate the comparison of various estimation methods for a given datasets by ranking them according to their performance against refutation tests accounting for both the observed unmodelled confounding error and unobserved confounding error. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Importing all the required libraries\n",
+    "import sys\n",
+    "import argparse\n",
+    "import xgboost\n",
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "import os\n",
+    "import pdb\n",
+    "import random\n",
+    "from xgboost import XGBRegressor\n",
+    "from sklearn.preprocessing import PolynomialFeatures\n",
+    "from sklearn.linear_model import LassoCV\n",
+    "from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier, GradientBoostingRegressor\n",
+    "from sklearn.linear_model import LogisticRegressionCV\n",
+    "from sklearn.metrics import mean_absolute_error\n",
+    "from dowhy import CausalModel\n",
+    "from datetime import datetime\n",
+    "from collections import namedtuple\n",
+    "\n",
+    "import statsmodels.api as sm\n",
+    "from sklearn import linear_model\n",
+    "\n",
+    "import dowhy\n",
+    "from dowhy.utils import dgp\n",
+    "from dowhy.utils.dgps.linear_dgp import LinearDataGeneratingProcess\n",
+    "from dowhy import CausalModel\n",
+    "from datetime import datetime\n",
+    "from collections import namedtuple\n",
+    "from dowhy.causal_refuters.add_unobserved_common_cause import AddUnobservedCommonCause\n",
+    "\n",
+    "import matplotlib.pyplot as plt\n",
+    "import matplotlib.lines as mlines\n",
+    "import matplotlib.transforms as mtransforms\n",
+    "\n",
+    "# Config dict to set the logging level\n",
+    "import logging.config\n",
+    "DEFAULT_LOGGING = {\n",
+    "    'version': 1,\n",
+    "    'disable_existing_loggers': False,\n",
+    "    'loggers': {\n",
+    "        '': {\n",
+    "            'level': 'WARN',\n",
+    "        },\n",
+    "    }\n",
+    "}\n",
+    "\n",
+    "logging.config.dictConfig(DEFAULT_LOGGING)\n",
+    "# Disabling warnings output\n",
+    "import warnings\n",
+    "from sklearn.exceptions import DataConversionWarning, ConvergenceWarning\n",
+    "warnings.filterwarnings(action='ignore', category=DataConversionWarning)\n",
+    "warnings.filterwarnings(action='ignore', category=ConvergenceWarning)\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def convert_singleton_to_float(arr):\n",
+    "    '''Helper function.'''\n",
+    "    array = []\n",
+    "\n",
+    "    if len(arr) == 1 and type(arr[0]) != np.ndarray:\n",
+    "        return arr[0]\n",
+    "\n",
+    "    for element in arr:\n",
+    "        while type(element) == np.ndarray or isinstance(element, list) :\n",
+    "            if len(element) > 1:\n",
+    "                raise ValueError(\"This script only accepts one value for the refute\")\n",
+    "            element = element[0]\n",
+    "        array.append(element)\n",
+    "\n",
+    "    return array"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def ensure_dir(file_path):\n",
+    "    directory = os.path.dirname(file_path)\n",
+    "    if not os.path.exists(directory):\n",
+    "        os.makedirs(directory)\n",
+    "\n",
+    "RESULTSFOLDER = \"results/\"\n",
+    "ensure_dir(RESULTSFOLDER)\n",
+    "# Create the estimator named tuple to wrap the name and properties\n",
+    "Estimator = namedtuple('Estimator', ['name','params'])\n",
+    "Refuter = namedtuple('Refuter', ['name','params'])\n",
+    "\n",
+    "class Experiment():\n",
+    "    '''\n",
+    "    Class to define the experiment setup to compare a list of estimators across a list of refuters for the given dataset. \n",
+    "    '''\n",
+    "    def __init__(self, **kwargs):\n",
+    "        self.experiment_name = kwargs['experiment_name']\n",
+    "        self.experiment_id = kwargs['experiment_id']\n",
+    "        self.num_experiments = kwargs['num_experiments']\n",
+    "        self.sample_sizes = kwargs['sample_sizes']\n",
+    "        self.dgps = kwargs['dgps']\n",
+    "        self.estimators = kwargs['estimators']\n",
+    "        self.refuters = kwargs['refuters']\n",
+    "        self.results = []\n",
+    "        self.simulate_unobserved_confounding = kwargs[\"simulate_unobserved_confounding\"]\n",
+    "\n",
+    "        # Handle input errors in sample_sizes\n",
+    "        if isinstance(self.sample_sizes, list) == False:\n",
+    "            if type(self.sample_sizes) != int:\n",
+    "                raise ValueError('The input to \"sample_sizes\" should be an int or a list')\n",
+    "            else:\n",
+    "                self.sample_sizes = [self.sample_sizes]\n",
+    "\n",
+    "        # Handle input errors in DGPs\n",
+    "        if isinstance(self.dgps, list) == False:\n",
+    "            if isinstance(self.dgps, DataGeneratingProcess) == False:\n",
+    "                raise ValueError('The input to \"dgps\" should be a list or a subclass of \"DataGeneratingProcess\"')\n",
+    "            else:\n",
+    "                self.dgps = [self.dgps]\n",
+    "\n",
+    "        # Handle inputs errors in estimators\n",
+    "        if isinstance(self.estimators, list) == False:\n",
+    "            if isinstance(self.estimators, Estimator) == False:\n",
+    "                raise ValueError('The input to \"estimators\" should be a list or an Estimator namedtuple')\n",
+    "            else:\n",
+    "                self.estimators = [self.estimators]\n",
+    "\n",
+    "        # Handle input errors in refuters\n",
+    "        if isinstance(self.refuters, list) == False:\n",
+    "            if isinstance(self.refuters, Refuter) == False:\n",
+    "                raise ValueError('The input to \"refuters\" should be a list of a Refuter namedtuple')\n",
+    "            else:\n",
+    "                self.refuters = [self.refuters]\n",
+    "\n",
+    "    def experiment(self):\n",
+    "        print(\"\\n\\nRunning Experiment:\",self.experiment_name + '_' + str(self.experiment_id) )\n",
+    "\n",
+    "        for exp in range(self.num_experiments):\n",
+    "            print(\"\\n\\nRunning Experiment Number:\",exp)\n",
+    "\n",
+    "            for sample_size in self.sample_sizes:\n",
+    "\n",
+    "                print(\"\\n\\nCurrent Sample Size:\",sample_size)\n",
+    "\n",
+    "                for dgp in self.dgps:\n",
+    "                    print(\"\\n\\nThe current DGP:\")\n",
+    "                    print(dgp)\n",
+    "                    estimates = []\n",
+    "                    estimate_values = []\n",
+    "                    estimated_effect = []\n",
+    "                    new_effect = []\n",
+    "                    p_value = []\n",
+    "                    data = dgp.generate_data(sample_size)\n",
+    "                    print(\"printing data shape\")\n",
+    "                    print(data.values.shape)\n",
+    "                    print(dgp.true_value)\n",
+    "                    print(\"check\")\n",
+    "                    if dgp.treatment_is_binary:\n",
+    "                        data[dgp.treatment] = data[dgp.treatment].astype(bool)\n",
+    "                    #k = len(dgp.confounder)-4\n",
+    "                    #confounder_list = random.sample(dgp.confounder, k)\n",
+    "                    confounder_list = ['w2','w3']\n",
+    "\n",
+    "                    \n",
+    "                    s = set(confounder_list)\n",
+    "                    unobserved_confounders = [x for x in dgp.confounder if x not in s]\n",
+    "                    df_unobserved_confounders = pd.DataFrame(data = data[[c for c in data.columns if c in unobserved_confounders]])\n",
+    "\n",
+    "                    df_unobserved_confounders.to_csv(\"results/unobserved_confounders.csv\")\n",
+    "                    print(\"printing length of confounder list:\", len(confounder_list))\n",
+    "                    print(\"printing confounder list:\", confounder_list)\n",
+    "\n",
+    "                    \n",
+    "\n",
+    "                    print(\"data columns\")\n",
+    "                    \n",
+    "                    print(\"data columns\", data.columns)\n",
+    "                    model = CausalModel(\n",
+    "                        data = data,\n",
+    "                        treatment = dgp.treatment,\n",
+    "                        outcome = dgp.outcome,\n",
+    "                        common_causes = confounder_list,\n",
+    "                        effect_modifiers = dgp.effect_modifier\n",
+    "                    )\n",
+    "                    model.view_model()\n",
+    "                    from IPython.display import Image, display\n",
+    "                    display(Image(filename=\"causal_model.png\"))\n",
+    "\n",
+    "                    identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)\n",
+    "                    \n",
+    "                    print(\"identified_estimand:\", identified_estimand)\n",
+    "                    #print(\"identified_estimand:\", identified_estimand)\n",
+    "                    print(\"\\n\\nRunning the estimators:\\n\")\n",
+    "                    for estimator in self.estimators:\n",
+    "                        print(\"The current estimator:\", estimator)\n",
+    "                        print(\"estimator.params\", estimator.params)\n",
+    "                        estimate = model.estimate_effect(\n",
+    "                            identified_estimand,\n",
+    "                            method_name = estimator.name,\n",
+    "                            method_params = estimator.params\n",
+    "                        )\n",
+    "                        print(\"printing estimate's type\")\n",
+    "                        print(type(estimate))\n",
+    "                        estimates.append(estimate)\n",
+    "                        estimate_values.append(estimate.value)\n",
+    "                    estimate_values = convert_singleton_to_float(estimate_values)\n",
+    "                    print(\"estimate_values\", estimate_values)\n",
+    "                    print(\"\\n\\nRunning the refuters:\\n\")\n",
+    "                    for refuter in self.refuters:\n",
+    "                        print(\"The current refuter:\", refuter)\n",
+    "                        \n",
+    "                        for estimate in estimates:\n",
+    "                            if self.simulate_unobserved_confounding == True:\n",
+    "                                print(\"********%%%%%%%%%$$$$$&&^**^^^^*^*^*\")\n",
+    "                                if refuter.name == 'dummy_outcome_refuter':\n",
+    "                                    add_unobserved_confounder = AddUnobservedCommonCause(data, identified_estimand, estimate)\n",
+    "                                    print(\"add_unobserved_confounder\", add_unobserved_confounder)\n",
+    "                                    unobserved_confounder_values = add_unobserved_confounder.include_simulated_confounder(convergence_threshold = 0.11, c_star_max = 1500)\n",
+    "                                    refuter.params['unobserved_confounder_values'] = unobserved_confounder_values\n",
+    "                                    print('refuter.params', refuter.params)\n",
+    "                            refute = model.refute_estimate(\n",
+    "                                identified_estimand,\n",
+    "                                estimate,\n",
+    "                                method_name = refuter.name,\n",
+    "                                **refuter.params,\n",
+    "    \n",
+    "                                \n",
+    "\n",
+    "                            )\n",
+    "                            print(\"printing refute's type\")\n",
+    "                            print(type(refute))\n",
+    "                            if(refuter.name == 'dummy_outcome_refuter'):\n",
+    "                                refute = refute[0]\n",
+    "                            if refute.refutation_result is not None:\n",
+    "                                p_value.append(refute.refutation_result['p_value'])\n",
+    "                            else:\n",
+    "                                p_value.append(None) \n",
+    "\n",
+    "                            estimated_effect.append(refute.estimated_effect)\n",
+    "                            #print(\"refute.estimate_effect()\", refute.estimate_effect())\n",
+    "                            new_effect.append(refute.new_effect)\n",
+    "\n",
+    "                    estimated_effect = convert_singleton_to_float(estimated_effect)\n",
+    "                    new_effect = convert_singleton_to_float(new_effect)\n",
+    "                    p_value = convert_singleton_to_float(p_value)\n",
+    "                    true_value = convert_singleton_to_float(dgp.true_value)\n",
+    "                    \n",
+    "                    print(\"estimated effect\", estimated_effect)\n",
+    "                    print(\"new_effect\", new_effect)\n",
+    "                    print(\"p_value\", p_value)\n",
+    "                    print(\"true value\", true_value)\n",
+    "                    self.results.append([exp, sample_size, dgp.NAME, *estimate_values, *estimated_effect, *new_effect, *p_value, true_value])\n",
+    "\n",
+    "\n",
+    "        print(\"\\n\\nCompleted all experiments. Saving the data...\")\n",
+    "\n",
+    "        COLUMNS = ['EXPERIMENT', 'SAMPLE_SIZE', 'DGP']\n",
+    "        RESULT_CATEGORIES = ['ESTIMATED_EFFECT', 'NEW_EFFECT', 'P_VALUE']\n",
+    "        estimator_names = [estimator.name for estimator in self.estimators]\n",
+    "        refuter_names = [refuter.name for refuter in self.refuters]\n",
+    "\n",
+    "        for estimator_name in estimator_names:\n",
+    "            COLUMNS += ['ORIGINAL_ESTIMATE'+ ':' + estimator_name]\n",
+    "\n",
+    "        for result_category in RESULT_CATEGORIES:\n",
+    "            for refuter_name in refuter_names:\n",
+    "                for estimator_name in estimator_names:\n",
+    "                    COLUMNS += [refuter_name + ':' + estimator_name + ':' + result_category]\n",
+    "\n",
+    "        COLUMNS += ['TRUE_VALUE']\n",
+    "\n",
+    "        csv_file = RESULTSFOLDER + self.experiment_name+ '_' + str(self.experiment_id) + '_' + str(datetime.utcnow().date()) + '_data.csv'\n",
+    "        onlyres_csv_file = RESULTSFOLDER + \"onlyres_\"+ self.experiment_name+ '_' + str(self.experiment_id) + '_' + str(datetime.utcnow()) + '_data.csv'\n",
+    "        self.results = pd.DataFrame(data=self.results,columns=COLUMNS)\n",
+    "        self.results.to_csv(csv_file.replace(\" \", \"\"), index=False)\n",
+    "\n",
+    "        print(\"Data has been saved in \",csv_file)\n",
+    "\n",
+    "        return csv_file"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#Defining the Data Generating Process \n",
+    "ldgp = LinearDataGeneratingProcess(treatment=['t1'], outcome=['y'], confounder=['w1','w2', 'w3','w4','w5','w6'], effect_modifier=['x1','x2'], seed=None, treatment_is_binary=True)\n",
+    "\n",
+    "#Defining the sample size \n",
+    "sample_size = 1000\n",
+    "\n",
+    "dgp_dict = {'ldgp':ldgp}\n",
+    "dgp_list = []\n",
+    "dgp_list.append( dgp_dict['ldgp'] )\n",
+    "\n",
+    "\n",
+    "# Create a namedtuple to store the name of the estimator and the parameters passed\n",
+    "estimator_list = [\"backdoor.linear_regression\",\n",
+    "                  #\"backdoor.propensity_score_stratification\",\n",
+    "                  \"backdoor.propensity_score_matching\",\n",
+    "                  \"backdoor.propensity_score_weighting\",\n",
+    "                  \"backdoor.econml.dml.DML\",\n",
+    "                  \"backdoor.econml.dr.LinearDRLearner\",\n",
+    "                  #\"backdoor.econml.metalearners.TLearner\",\n",
+    "                  #\"backdoor.econml.metalearners.XLearner\",\n",
+    "                  #\"backdoor.causalml.inference.meta.LRSRegressor\",\n",
+    "                  #\"backdoor.causalml.inference.meta.XGBTRegressor\",\n",
+    "                  #\"backdoor.causalml.inference.meta.MLPTRegressor\",\n",
+    "                  #\"backdoor.causalml.inference.meta.BaseXRegressor\"\n",
+    "                ]\n",
+    "method_params= [    None,\n",
+    "                    #None,\n",
+    "                    { \"init_params\":{} },\n",
+    "                    { \"init_params\":{} },\n",
+    "                    {\"init_params\":{'model_y':GradientBoostingRegressor(),\n",
+    "                                    'model_t': GradientBoostingRegressor(),\n",
+    "                                    \"model_final\":LassoCV(fit_intercept=False),\n",
+    "                                    'featurizer':PolynomialFeatures(degree=1, include_bias=True)},\n",
+    "                     \"fit_params\":{}},\n",
+    "                    {\"init_params\":{ 'model_propensity': LogisticRegressionCV(cv=3, solver='lbfgs', multi_class='auto'),\n",
+    "                        },\n",
+    "                    \"fit_params\":{}\n",
+    "                    },\n",
+    "                    '''{\"init_params\": {'models': GradientBoostingRegressor(n_estimators=100, max_depth=6, min_samples_leaf=int(sample_size/100))\n",
+    "                                    },\n",
+    "                    \"fit_params\":{}\n",
+    "                    },\n",
+    "                    {\"init_params\":{'models': GradientBoostingRegressor(n_estimators=100, max_depth=6, min_samples_leaf=int(sample_size/100)),\n",
+    "                        'propensity_model': RandomForestClassifier(n_estimators=100, max_depth=6,\n",
+    "                                                                              min_samples_leaf=int(sample_size/100))\n",
+    "                        },\n",
+    "                     \"fit_params\":{}\n",
+    "                    },\n",
+    "                    {\"init_params\":{},},\n",
+    "                    {\"init_params\":{\n",
+    "                        'learner':XGBRegressor()\n",
+    "                        }\n",
+    "                    }'''\n",
+    "                ]\n",
+    "estimator_tuples = []\n",
+    "refuter_tuples = []\n",
+    "\n",
+    "refuter_list = ['dummy_outcome_refuter']\n",
+    "refuter_params = [{'num_simulations':5,'transformation_list': [('random_forest',{'n_estimators':100, 'max_depth':6})], 'true_causal_effect':(lambda x:0.5)}]\n",
+    "\n",
+    "\n",
+    "# Iterate through the names and parameters to create a list of namedtuples\n",
+    "for name, param in zip(estimator_list,method_params):\n",
+    "    estimator_tuples.append(Estimator._make([name, param]))\n",
+    "    \n",
+    "for name, param in zip(refuter_list, refuter_params):\n",
+    "    refuter_tuples.append(Refuter._make([name, param]))\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def plot_MAEs(res):\n",
+    "    true_value_column = res.columns[-1]\n",
+    "    estimate_columns=res.columns[3:-1]\n",
+    "    #print(estimate_columns)\n",
+    "    #print(type(estimate_columns))\n",
+    "    estimate_columns.append(pd.Index(res[\"TRUE_VALUE\"]))\n",
+    "    #print(estimate_columns)\n",
+    "    fig, ax = plt.subplots()\n",
+    "    MAE ={}\n",
+    "    for colname in estimate_columns:\n",
+    "        if colname not in ('ORIGINAL_ESTIMATE:backdoor.propensity_score_weighting',):\n",
+    "                           #'ORIGINAL_ESTIMATE:backdoor.econml.metalearners.TLearner'):\n",
+    "            plt.plot(res[colname], res[\"TRUE_VALUE\"], marker='o', linestyle=\"None\", label=colname)\n",
+    "            \"Mean Absolute Error (MAE): {}\".format(mean_absolute_error(res[colname], res[\"TRUE_VALUE\"]))\n",
+    "            MAE[colname] = mean_absolute_error(res[colname], res[\"TRUE_VALUE\"])\n",
+    "    fig.suptitle('Calibration plot showing the accuracy of different causal estimators [P(T=1)=0.9]')\n",
+    "    ax.set_xlabel('Estimated effect')\n",
+    "    ax.set_ylabel('True causal effect')\n",
+    "    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.20),\n",
+    "              fancybox=True, shadow=True, ncol=2)\n",
+    "    plt.show()\n",
+    "    print(\"Printing MAE of various estimates: \")\n",
+    "    MAE_values = {k: v for k, v in sorted(MAE.items(), key=lambda item: item[1], reverse = True)}\n",
+    "    for k,v in MAE_values.items():\n",
+    "        print(k, v)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def plot_estimators_and_refuters(refuter, estimator):   \n",
+    "    x = list(res['EXPERIMENT'])\n",
+    "    y1 = list(res[refuter+':'+estimator+':ESTIMATED_EFFECT'])\n",
+    "    y2 = list(res[refuter+':'+estimator+':NEW_EFFECT'])\n",
+    "    #print(res['TRUE_VALUE'])\n",
+    "    y3 = list(res['TRUE_VALUE'])\n",
+    "    y4 = list(res[refuter+':'+estimator+':P_VALUE'])\n",
+    "    plt.scatter(x, y1, c =\"blue\", label = \"Estimated Effect\") \n",
+    "    plt.scatter(x, y2, c =\"red\", label = \"New Effect\")\n",
+    "    plt.scatter(x, y3, c =\"green\", label = \"True Value\")\n",
+    "    plt.scatter(x, y4, c =\"yellow\", label = \"P Value\")\n",
+    "    plt.xlabel(\"EXPERIMENT\") \n",
+    "    plt.ylabel(\"EFFECT\")\n",
+    "    legend = plt.legend(loc=4, fontsize='small', fancybox=True)\n",
+    "    plt.title(estimator) \n",
+    "    plt.show()\n",
+    "    plt.savefig(estimator+'.png')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def plot_deviations(estimator_list, deviation_list):\n",
+    "    plt.scatter(estimator_list, deviation_list)\n",
+    "    plt.xticks(estimator_list, estimator_list, rotation='vertical')\n",
+    "    plt.show()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Observed unmodelled confounding error"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "For each estimator, we use dummy outcome refuter to check the observed unmodelled confounding error for each estimator. That is, we run the refutation test for each estimator only on the observed confounders and analyse what amount of confounding error is present unmodelled amongst the observed variables."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "# Define the properties of the experiment\n",
+    "# The name of the experiment\n",
+    "# The experiment ID\n",
+    "# The number of experiments to be run with the SAME parameters\n",
+    "# The size of the samples to be run\n",
+    "# The list of DGPs to be run\n",
+    "# The list of estimators\n",
+    "observed_confounding_error = Experiment(\n",
+    "    experiment_name='Test',\n",
+    "    experiment_id='1',\n",
+    "    num_experiments=10, # 10\n",
+    "    sample_sizes=sample_size,\n",
+    "    dgps=dgp_list,\n",
+    "    estimators=estimator_tuples,\n",
+    "    refuters=refuter_tuples,\n",
+    "    simulate_unobserved_confounding = False \n",
+    ")\n",
+    "\n",
+    "# Run the experiment\n",
+    "res = pd.read_csv(observed_confounding_error.experiment())"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "#PLOT\n",
+    "#This plot shows the Mean Absolute Error of the Orginal Estimate from the true value and of the New Effect from \n",
+    "#the expected value for each estimator. \n",
+    "plot_MAEs(res)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Ranking based on Original Estimate"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The Original Estimate is calculated in the presence of the True Value (that is, the ground truth). However in many real life datasets, the ground truth may not be known. Hence, we want the ranking produced by our refutation tests to be in coherence with that obtained from the Original Estimates. According to the Original Estimate values, the ranking of the estimators should be as follows (the method with the least MAE should get the best rank):\n",
+    "1. DMLCateEstimator \n",
+    "2. LinearRegression \n",
+    "3. LinearDRLearner \n",
+    "4. Propensity Score Matching "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "estimator_list = [\"backdoor.linear_regression\",\n",
+    "                  #\"backdoor.propensity_score_stratification\",\n",
+    "                  \"backdoor.propensity_score_matching\",\n",
+    "                  \"backdoor.econml.dml.DML\",\n",
+    "                  \"backdoor.econml.dr.LinearDRLearner\",\n",
+    "                  #\"backdoor.econml.metalearners.TLearner\",\n",
+    "                  #\"backdoor.econml.metalearners.XLearner\",\n",
+    "                  #\"backdoor.causalml.inference.meta.LRSRegressor\",\n",
+    "                  #\"backdoor.causalml.inference.meta.XGBTRegressor\",\n",
+    "                  #\"backdoor.causalml.inference.meta.MLPTRegressor\",\n",
+    "                  #\"backdoor.causalml.inference.meta.BaseXRegressor\"\n",
+    "                ]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#This plot shows the deviation of the original estimate, the new effect and the estimated effect from the true value \n",
+    "refuter = 'dummy_outcome_refuter'\n",
+    "deviation_list = []\n",
+    "for estimator in estimator_list:\n",
+    "    plot_estimators_and_refuters(refuter, estimator)\n",
+    "    avg_deviation = ((res[refuter+':'+estimator+':NEW_EFFECT']).sum(axis=0))\n",
+    "    print(avg_deviation)\n",
+    "    deviation_list.append(avg_deviation)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "plot_deviations(estimator_list, deviation_list)\n",
+    "for i in range(len(estimator_list)):\n",
+    "    print(estimator_list[i] +\": \"+ str(deviation_list[i]))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "{k: v for k, v in sorted(zip(estimator_list, deviation_list), key=lambda item: item[1], reverse = True)}\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Ranking based on New Effect (Refutatation results) "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The ranking based on absolute value of deviations is :\n",
+    "1. Propensity Score Matching \n",
+    "2. Linear DR Learner \n",
+    "3. DML CATE Estimator \n",
+    "4. Linear Regression"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Clearly, the observed unmodelled confounding error is not able to match the ranking based on the Original Estimate. It is not even able to tell that the clear winner amongst the methods according to the true value is DML CATE Estimator "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Unobserved confounding error"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "For each estimator, we now simulate unobserved confounders and check its effect using dummy outcome refuter to check the unobserved confounding error for each estimator. That is, we run the refutation test for each estimator not only on the observed confounder, but also on an unobserved confounder that we simulate using the AddUnobservedCommonCause class and analyse whether there is a strong confounder that is unobserved (missing) and needs to be accounted for. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "unobserved_confounding_error = Experiment(\n",
+    "    experiment_name='Test',\n",
+    "    experiment_id='2',\n",
+    "    num_experiments=10, # 10\n",
+    "    sample_sizes=sample_size,\n",
+    "    dgps=dgp_list,\n",
+    "    estimators=estimator_tuples,\n",
+    "    refuters=refuter_tuples,\n",
+    "    simulate_unobserved_confounding = True\n",
+    ")\n",
+    "\n",
+    "# Run the experiment\n",
+    "res = pd.read_csv(unobserved_confounding_error.experiment())"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "##This plot shows the Mean Absolute Error of the Orginal Estimate from the true value and of the New Effect from \n",
+    "#the expected value for each estimator.\n",
+    "plot_MAEs(res)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Ranking based on Original Estimate"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The Original Estimate is calculated in the presence of the True Value (that is, the ground truth). However in many real life datasets, the ground truth may not be known. Hence, we want the ranking produced by our refutation tests to be in coherence with that obtained from the Original Estimates. According to the Original Estimate values, the ranking of the estimators should be as follows (the method with the least MAE should get the best rank):\n",
+    "1. DMLCateEstimator \n",
+    "2. Propensity Score Matching \n",
+    "3. LinearRegression \n",
+    "4. LinearDRLearner "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#This plot shows the deviation of the original estimate, the new effect and the estimated effect from the true value\n",
+    "refuter = 'dummy_outcome_refuter'\n",
+    "deviation_list = []\n",
+    "for estimator in estimator_list:\n",
+    "    plot_estimators_and_refuters(refuter, estimator)\n",
+    "    avg_deviation = ((res[refuter+':'+estimator+':NEW_EFFECT']).sum(axis=0))\n",
+    "    print(avg_deviation)\n",
+    "    deviation_list.append(avg_deviation)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "plot_deviations(estimator_list, deviation_list)\n",
+    "for i in range(len(estimator_list)):\n",
+    "    print(estimator_list[i] +\": \"+ str(deviation_list[i]))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "{k: v for k, v in sorted(zip(estimator_list, deviation_list), key=lambda item: item[1], reverse = True)}"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Ranking based on New Effect (Refutatation results) "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The ranking based on absolute value of deviations is :\n",
+    "1. DML\n",
+    "2. Linear DR Learner \n",
+    "3. Propensity Score Matching\n",
+    "4. Linear Regression"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### We can see that this ranking produces the same top-ranked estimator as the one based on Original Estimate. Thus ranking based on the unobserved confounding error solves the problem and gives us a close-to-correct ranking amongst methods."
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.12"
+  },
+  "toc": {
+   "base_numbering": 1,
+   "nav_menu": {},
+   "number_sections": false,
+   "sideBar": true,
+   "skip_h1_title": true,
+   "title_cell": "Table of Contents",
+   "title_sidebar": "Contents",
+   "toc_cell": false,
+   "toc_position": {},
+   "toc_section_display": true,
+   "toc_window_display": false
+  },
+  "nbsphinx": {
+   "execute": "never"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}

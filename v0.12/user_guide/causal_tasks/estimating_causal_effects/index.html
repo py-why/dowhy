@@ -1,0 +1,751 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B139P18WHM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-B139P18WHM');
+    </script>
+    
+    <title>Estimating Causal Effects &#8212; DoWhy  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=949a1ff5" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
+  <script src="../../../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
+
+    <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=b3ba4146"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=0c6e27e1"></script>
+    <script src="../../../_static/design-tabs.js?v=36754332"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user_guide/causal_tasks/estimating_causal_effects/index';</script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Identifying causal effect" href="identifying_causal_effect/index.html" />
+    <link rel="prev" title="Performing Causal Tasks" href="../index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/dowhy-logo-small.png" class="logo__image only-light" alt="DoWhy  documentation - Home"/>
+    <script>document.write(`<img src="../../../_static/dowhy-logo-small.png" class="logo__image only-dark" alt="DoWhy  documentation - Home"/>`);</script>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../../index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../example_notebooks/nb_index.html">
+                        Examples
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../cite.html">
+                        Citing this package
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../contributing.html">
+                        Contributing
+                      </a>
+                    </li>
+                
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link dropdown-item nav-internal" href="../../../dowhy.html">
+                        dowhy package
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link dropdown-item nav-internal" href="../../../code_repo.html">
+                        Release notes
+                      </a>
+                    </li>
+                
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+        </div>
+      
+      
+        <div class="navbar-item"><div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        v0.12
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.9.1/index.html">v0.9.1</a></dd>
+            <dd><a href="/dowhy/v0.9/index.html">v0.9</a></dd>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.11.1/index.html">v0.11.1</a></dd>
+            <dd><a href="/dowhy/v0.11/index.html">v0.11</a></dd>
+            <dd><a href="/dowhy/v0.10.1/index.html">v0.10.1</a></dd>
+            <dd><a href="/dowhy/v0.10/index.html">v0.10</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item">
+<nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../../index.html">
+                        User Guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../example_notebooks/nb_index.html">
+                        Examples
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../cite.html">
+                        Citing this package
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../contributing.html">
+                        Contributing
+                      </a>
+                    </li>
+                
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links-2">
+                    More
+                </button>
+                <ul id="pst-nav-more-links-2" class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link dropdown-item nav-internal" href="../../../dowhy.html">
+                        dowhy package
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link dropdown-item nav-internal" href="../../../code_repo.html">
+                        Release notes
+                      </a>
+                    </li>
+                
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        v0.12
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.9.1/index.html">v0.9.1</a></dd>
+            <dd><a href="/dowhy/v0.9/index.html">v0.9</a></dd>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.11.1/index.html">v0.11.1</a></dd>
+            <dd><a href="/dowhy/v0.11/index.html">v0.11</a></dd>
+            <dd><a href="/dowhy/v0.10.1/index.html">v0.10.1</a></dd>
+            <dd><a href="/dowhy/v0.10/index.html">v0.10</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../foreword.html">Foreword</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro.html">Introduction to DoWhy</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../modeling_causal_relations/index.html">Modeling Causal Relations</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modeling_causal_relations/specifying_causal_graph.html">Specifying a causal graph using domain knowledge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modeling_causal_relations/learning_causal_structure.html">Learning causal structure from data</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../modeling_causal_relations/refuting_causal_graph/index.html">Refuting a Causal Graph</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../modeling_causal_relations/refuting_causal_graph/independence_tests.html">Performing independence tests</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../modeling_causal_relations/refuting_causal_graph/refute_causal_structure.html">Graph refutations</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../modeling_gcm/index.html">Modeling Graphical Causal Models (GCMs)</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modeling_gcm/graphical_causal_model_types.html">Types of graphical causal models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modeling_gcm/draw_samples.html">Generate samples from a GCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modeling_gcm/model_evaluation.html">Evaluate a GCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modeling_gcm/customizing_model_assignment.html">Customizing Causal Mechanism Assignment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modeling_gcm/estimating_confidence_intervals.html">Estimating Confidence Intervals</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">Performing Causal Tasks</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2 current active has-children"><a class="current reference internal" href="#">Estimating Causal Effects</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="identifying_causal_effect/index.html">Identifying causal effect</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="identifying_causal_effect/backdoor.html">Backdoor criterion</a></li>
+<li class="toctree-l4"><a class="reference internal" href="identifying_causal_effect/frontdoor.html">Frontdoor criterion</a></li>
+<li class="toctree-l4"><a class="reference internal" href="identifying_causal_effect/instrumental_variable.html">Natural experiments and instrumental variables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="identifying_causal_effect/id_algorithm.html">ID algorithm for discovering new identification strategies</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="effect_estimation_with_backdoor/index.html">Estimating average causal effect using backdoor</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="effect_estimation_with_backdoor/regression_based_methods.html">Regression-based methods</a></li>
+<li class="toctree-l4"><a class="reference internal" href="effect_estimation_with_backdoor/distance_matching.html">Distance-based matching</a></li>
+<li class="toctree-l4"><a class="reference internal" href="effect_estimation_with_backdoor/propensity_based_methods.html">Propensity-based methods</a></li>
+<li class="toctree-l4"><a class="reference internal" href="effect_estimation_with_backdoor/do_sampler.html">Do-sampler</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="effect_estimation_with_natural_experiments/index.html">Estimating average causal effect with natural experiments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="conditional_effect_estimation/index.html">Estimating conditional average causal effect</a></li>
+<li class="toctree-l3"><a class="reference internal" href="effect_estimation_with_gcm.html">Estimating average causal effect using GCM</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../quantify_causal_influence/index.html">Quantify Causal Influence</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-8"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../quantify_causal_influence/mediation_analysis.html">Mediation Analysis: Estimating natural direct and indirect effects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../quantify_causal_influence/quantify_arrow_strength.html">Direct Effect: Quantifying Arrow Strength</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../quantify_causal_influence/icc.html">Quantifying Intrinsic Causal Influence</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../root_causing_and_explaining/index.html">Root-Cause Analysis and Explanation</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-9"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../root_causing_and_explaining/anomaly_attribution.html">Anomaly Attribution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../root_causing_and_explaining/distribution_change.html">Attributing Distributional Changes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../root_causing_and_explaining/feature_relevance.html">Feature Relevance</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../what_if/index.html">Asking and Answering What-If Questions</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-10"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../what_if/interventions.html">Simulating the Impact of Interventions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../what_if/counterfactuals.html">Computing Counterfactuals</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../causal_prediction/index.html">Predicting outcome for out-of-distribution inputs</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../refuting_causal_estimates/index.html">Refuting causal estimates</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-11"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../refuting_causal_estimates/refuting_effect_estimates/index.html">Refuting Effect Estimates</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-12"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../refuting_causal_estimates/refuting_effect_estimates/placebo_treatment.html">Placebo Treatment Refuter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../refuting_causal_estimates/refuting_effect_estimates/dummy_outcome.html">Dummy Outcome Refuter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../refuting_causal_estimates/refuting_effect_estimates/random_common_cause.html">Random Common Cause Refuter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../refuting_causal_estimates/refuting_effect_estimates/data_subsample.html">Data Subsample Refuter</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../refuting_causal_estimates/refuting_effect_estimates/sensitivity_analysis/index.html">Sensitivity Analysis</a><input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-13"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../refuting_causal_estimates/refuting_effect_estimates/sensitivity_analysis/simulation_based.html">Simulation-based sensitivity analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../refuting_causal_estimates/refuting_effect_estimates/sensitivity_analysis/linear_partialr2.html">Partial-R2 based sensitivity analysis for linear estimators</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../refuting_causal_estimates/refuting_effect_estimates/sensitivity_analysis/nonlinear_reisz.html">Reisz estimator-based sensitivity analysis for non-linear estimators</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cite.html">Citing this package</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">User Guide</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Performing Causal Tasks</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">Estimating...</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="estimating-causal-effects">
+<h1>Estimating Causal Effects<a class="headerlink" href="#estimating-causal-effects" title="Permalink to this heading">#</a></h1>
+<a class="reference internal image-reference" href="https://raw.githubusercontent.com/microsoft/dowhy/main/docs/images/dowhy-schematic.png"><img alt="Four steps of causal effect estimation in DoWhy" src="https://raw.githubusercontent.com/microsoft/dowhy/main/docs/images/dowhy-schematic.png" style="width: 100%;" /></a>
+<p>The causal effect of a variable $A$ on $Y$ is defined as the expected change in $Y$ due to a change in $A$. Using the do-calculus notation, the average causal effect can be written as, <span class="math notranslate nohighlight">\(E[Y|do(A)]\)</span>. Sometimes, we are interested in the causal effect only on a subpopulation or want to compare the causal effect across sub-populations. In that case, we can estimate the <em>conditional</em> average causal effect (CACE) given a set of covariates $X$, <span class="math notranslate nohighlight">\(E[Y|do(A), X]\)</span>.</p>
+<p>Estimating the causal effect requires four steps:</p>
+<ol class="arabic simple">
+<li><p>Model a causal inference problem using assumptions.</p></li>
+<li><p>Identify an expression for the causal effect under these assumptions (“causal estimand”).</p></li>
+<li><p>Estimate the expression using statistical methods such as matching or instrumental variables.</p></li>
+<li><p>Finally, verify the validity of the estimate using a variety of robustness checks.</p></li>
+</ol>
+<p>This workflow is captured by four key verbs in DoWhy:</p>
+<ul class="simple">
+<li><p>model (<em>CausalModel</em> or <em>graph</em>)</p></li>
+<li><p>identify (<em>identify_effect</em>)</p></li>
+<li><p>estimate (<em>estimate_effect</em>)</p></li>
+<li><p>refute (<em>refute_estimate</em>)</p></li>
+</ul>
+<p>Using these verbs, DoWhy implements a causal effect estimation API that supports a variety of methods. <em>model</em> encodes prior knowledge as a formal causal graph, <em>identify</em> uses graph-based methods to identify the causal effect, <em>estimate</em> uses statistical methods for estimating the identified estimand, and finally <em>refute</em> tries to refute the obtained estimate by testing robustness to assumptions. Therefore, after building the causal graph, the next step to estimate causal effect is to identify whether the effect can be estimated from available data. In other words,  before considering an estimation algorithm, it is important to determine an identification strategy. DoWhy supports the following identification algorithms:</p>
+<ul class="simple">
+<li><p>Backdoor</p></li>
+<li><p>Frontdoor</p></li>
+<li><p>Instrumental variable</p></li>
+<li><p>ID algorithm</p></li>
+</ul>
+<p>Once a causal effect is identified, we can choose an estimation method compatible with the identification strategy. For estimating the average causal effect, DoWhy supports the following methods.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>Methods based on matching confounders’ values:</dt><dd><ul>
+<li><p>Distance-based matching (<code class="xref py py-class docutils literal notranslate"><span class="pre">DistanceMatchingEstimator</span></code>)</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Methods based on estimating the treatment assignment</dt><dd><ul>
+<li><p>Propensity-based Stratification (<code class="xref py py-class docutils literal notranslate"><span class="pre">PropensityScoreStratificationEstimator</span></code>)</p></li>
+<li><p>Propensity Score Matching (<code class="xref py py-class docutils literal notranslate"><span class="pre">PropensityScoreMatchingEstimator</span></code>)</p></li>
+<li><p>Inverse Propensity Weighting (<code class="xref py py-class docutils literal notranslate"><span class="pre">PropensityScoreWeightingEstimator</span></code>)</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Methods based on estimating the outcome model</dt><dd><ul>
+<li><p>Linear Regression (<code class="xref py py-class docutils literal notranslate"><span class="pre">LinearRegressionEstimator</span></code>)</p></li>
+<li><p>Generalized Linear Models, including logistic regression (<code class="xref py py-class docutils literal notranslate"><span class="pre">GeneralizedLinearModelEstimator</span></code>)</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Methods based on the instrumental variable equation</dt><dd><ul>
+<li><p>Binary Instrument/Wald Estimator (<code class="xref py py-class docutils literal notranslate"><span class="pre">InstrumentalVariableEstimator</span></code>)</p></li>
+<li><p>Regression discontinuity(<code class="xref py py-class docutils literal notranslate"><span class="pre">RegressionDiscontinuityEstimator</span></code>)</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Methods for front-door criterion and mediation analysis</dt><dd><ul>
+<li><p>Two-stage linear regression (<code class="xref py py-class docutils literal notranslate"><span class="pre">TwoStageRegressionEstimator</span></code>)</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p>For estimating the conditional average causal effect, DoWhy supports calling EconML methods. For more details on EconML, check out their <a class="reference external" href="https://econml.azurewebsites.net/">documentation</a>.  If the data-generating process for the outcome Y can be approximated as a linear function, you may also use the linear regression method for CACE estimation.</p>
+<p>For related notebooks, see <a class="reference internal" href="../../../example_notebooks/nb_index.html"><span class="doc">Example notebooks</span></a></p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="identifying_causal_effect/index.html">Identifying causal effect</a></li>
+<li class="toctree-l1"><a class="reference internal" href="effect_estimation_with_backdoor/index.html">Estimating average causal effect using backdoor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="effect_estimation_with_natural_experiments/index.html">Estimating average causal effect with natural experiments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="conditional_effect_estimation/index.html">Estimating conditional average causal effect</a></li>
+<li class="toctree-l1"><a class="reference internal" href="effect_estimation_with_gcm.html">Estimating average causal effect using GCM</a></li>
+</ul>
+</div>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Performing Causal Tasks</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="identifying_causal_effect/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Identifying causal effect</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../../../_sources/user_guide/causal_tasks/estimating_causal_effects/index.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2022, PyWhy contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.4.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

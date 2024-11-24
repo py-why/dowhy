@@ -1,0 +1,611 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Tutorial on Causal Inference and its Connections to Machine Learning (Using DoWhy+EconML)\n",
+    "This tutorial presents a walk-through on using DoWhy+EconML libraries for causal inference. Along the way, we'll highlight the connections to machine learning---how machine learning helps in building causal effect estimators, and how causal reasoning can be help build more robust machine learning models. \n",
+    "\n",
+    "Examples of data science questions that are fundamentally causal inference questions: \n",
+    "* **A/B experiments**: If I change the algorithm, will it lead to a higher success rate?\n",
+    "* **Policy decisions**: If we adopt this treatment/policy, will it lead to a healthier patient/more revenue/etc.?\n",
+    "* **Policy evaluation**: Knowing what I know now, did my policy help or hurt?\n",
+    "* **Credit attribution**: Are people buying because of the recommendation algorithm? Would they have bought anyway?\n",
+    "\n",
+    "In this tutorial, you will:\n",
+    "* Learn how causal reasoning is necessary for decision-making, and the difference between a prediction and decision-making task.\n",
+    "<br>\n",
+    "\n",
+    "* Get hands-on with estimating causal effects using the four steps of causal inference: **model, identify, estimate and refute**.\n",
+    "<br>\n",
+    "\n",
+    "* See how DoWhy+EconML can help you estimate causal effects with **4 lines of code**, using the latest methods from statistics and machine learning to estimate the causal effect and evaluate its robustness to modeling assumptions.\n",
+    "<br>\n",
+    "\n",
+    "* Work through **real-world case-studies** with Jupyter notebooks on applying causal reasoning in different scenarios including estimating impact of a customer loyalty program on future transactions, predicting which users will be positively impacted by an intervention (such as an ad), pricing products, and attributing which factors contribute most to an outcome.\n",
+    "<br>\n",
+    "\n",
+    "* Learn about the connections between causal inference and the challenges of modern machine learning models."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "toc": true
+   },
+   "source": [
+    "<h1>Table of Contents<span class=\"tocSkip\"></span></h1>\n",
+    "<div class=\"toc\"><ul class=\"toc-item\"><li><span><a href=\"#Why-causal-inference?\" data-toc-modified-id=\"Why-causal-inference?-1\"><span class=\"toc-item-num\">1&nbsp;&nbsp;</span>Why causal inference?</a></span><ul class=\"toc-item\"><li><span><a href=\"#Defining-a-causal-effect\" data-toc-modified-id=\"Defining-a-causal-effect-1.1\"><span class=\"toc-item-num\">1.1&nbsp;&nbsp;</span>Defining a causal effect</a></span></li><li><span><a href=\"#The-difference-between-prediction-and-causal-inference\" data-toc-modified-id=\"The-difference-between-prediction-and-causal-inference-1.2\"><span class=\"toc-item-num\">1.2&nbsp;&nbsp;</span>The difference between prediction and causal inference</a></span></li><li><span><a href=\"#Two-fundamental-challenges-for-causal-inference\" data-toc-modified-id=\"Two-fundamental-challenges-for-causal-inference-1.3\"><span class=\"toc-item-num\">1.3&nbsp;&nbsp;</span>Two fundamental challenges for causal inference</a></span></li></ul></li><li><span><a href=\"#The-four-steps-of-causal-inference\" data-toc-modified-id=\"The-four-steps-of-causal-inference-2\"><span class=\"toc-item-num\">2&nbsp;&nbsp;</span>The four steps of causal inference</a></span><ul class=\"toc-item\"><li><span><a href=\"#The-DoWhy+EconML-solution\" data-toc-modified-id=\"The-DoWhy+EconML-solution-2.1\"><span class=\"toc-item-num\">2.1&nbsp;&nbsp;</span>The DoWhy+EconML solution</a></span></li><li><span><a href=\"#A-mystery-dataset:-Can-you-find-out-if-if-there-is-a-causal-effect?\" data-toc-modified-id=\"A-mystery-dataset:-Can-you-find-out-if-if-there-is-a-causal-effect?-2.2\"><span class=\"toc-item-num\">2.2&nbsp;&nbsp;</span>A mystery dataset: Can you find out if if there is a causal effect?</a></span><ul class=\"toc-item\"><li><span><a href=\"#Model-assumptions-about-the-data-generating-process-using-a-causal-graph\" data-toc-modified-id=\"Model-assumptions-about-the-data-generating-process-using-a-causal-graph-2.2.1\"><span class=\"toc-item-num\">2.2.1&nbsp;&nbsp;</span>Model assumptions about the data-generating process using a causal graph</a></span></li><li><span><a href=\"#Identify-the-correct-estimand-for-the-target-quantity-based-on-the-causal-model\" data-toc-modified-id=\"Identify-the-correct-estimand-for-the-target-quantity-based-on-the-causal-model-2.2.2\"><span class=\"toc-item-num\">2.2.2&nbsp;&nbsp;</span>Identify the correct estimand for the target quantity based on the causal model</a></span></li><li><span><a href=\"#Estimate-the-target-estimand\" data-toc-modified-id=\"Estimate-the-target-estimand-2.2.3\"><span class=\"toc-item-num\">2.2.3&nbsp;&nbsp;</span>Estimate the target estimand</a></span></li><li><span><a href=\"#Check-robustness-of-the-estimate-using-refutation-tests\" data-toc-modified-id=\"Check-robustness-of-the-estimate-using-refutation-tests-2.2.4\"><span class=\"toc-item-num\">2.2.4&nbsp;&nbsp;</span>Check robustness of the estimate using refutation tests</a></span></li></ul></li></ul></li><li><span><a href=\"#Case-studies-using-DoWhy+EconML\" data-toc-modified-id=\"Case-studies-using-DoWhy+EconML-3\"><span class=\"toc-item-num\">3&nbsp;&nbsp;</span>Case-studies using DoWhy+EconML</a></span><ul class=\"toc-item\"><li><span><a href=\"#Estimating-the-impact-of-a-customer-loyalty-program\" data-toc-modified-id=\"Estimating-the-impact-of-a-customer-loyalty-program-3.1\"><span class=\"toc-item-num\">3.1&nbsp;&nbsp;</span>Estimating the impact of a customer loyalty program</a></span></li><li><span><a href=\"#Recommendation-A/B-testing-at-an-online-company\" data-toc-modified-id=\"Recommendation-A/B-testing-at-an-online-company-3.2\"><span class=\"toc-item-num\">3.2&nbsp;&nbsp;</span>Recommendation A/B testing at an online company</a></span></li><li><span><a href=\"#User-segmentation-for-targeting-interventions\" data-toc-modified-id=\"User-segmentation-for-targeting-interventions-3.3\"><span class=\"toc-item-num\">3.3&nbsp;&nbsp;</span>User segmentation for targeting interventions</a></span></li><li><span><a href=\"#Multi-investment-attribution-at-a-software-company\" data-toc-modified-id=\"Multi-investment-attribution-at-a-software-company-3.4\"><span class=\"toc-item-num\">3.4&nbsp;&nbsp;</span>Multi-investment attribution at a software company</a></span></li></ul></li><li><span><a href=\"#Connections-to-fundamental-machine-learning-challenges\" data-toc-modified-id=\"Connections-to-fundamental-machine-learning-challenges-4\"><span class=\"toc-item-num\">4&nbsp;&nbsp;</span>Connections to fundamental machine learning challenges</a></span></li><li><span><a href=\"#Further-resources\" data-toc-modified-id=\"Further-resources-5\"><span class=\"toc-item-num\">5&nbsp;&nbsp;</span>Further resources</a></span><ul class=\"toc-item\"><li><span><a href=\"#DoWhy+EconML-libraries\" data-toc-modified-id=\"DoWhy+EconML-libraries-5.1\"><span class=\"toc-item-num\">5.1&nbsp;&nbsp;</span>DoWhy+EconML libraries</a></span></li><li><span><a href=\"#Video-Lecture-on-causal-inference-and-its-connections-to-machine-learning\" data-toc-modified-id=\"Video-Lecture-on-causal-inference-and-its-connections-to-machine-learning-5.2\"><span class=\"toc-item-num\">5.2&nbsp;&nbsp;</span>Video Lecture on causal inference and its connections to machine learning</a></span></li><li><span><a href=\"#Detailed-KDD-Tutorial-on-Causal-Inference\" data-toc-modified-id=\"Detailed-KDD-Tutorial-on-Causal-Inference-5.3\"><span class=\"toc-item-num\">5.3&nbsp;&nbsp;</span>Detailed KDD Tutorial on Causal Inference</a></span></li><li><span><a href=\"#Book-chapters-on-causality-and-machine-learning\" data-toc-modified-id=\"Book-chapters-on-causality-and-machine-learning-5.4\"><span class=\"toc-item-num\">5.4&nbsp;&nbsp;</span>Book chapters on causality and machine learning</a></span></li><li><span><a href=\"#Causality-and-Machine-Learning-group-at-Microsoft\" data-toc-modified-id=\"Causality-and-Machine-Learning-group-at-Microsoft-5.5\"><span class=\"toc-item-num\">5.5&nbsp;&nbsp;</span>Causality and Machine Learning group at Microsoft</a></span></li></ul></li></ul></div>"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Why causal inference?\n",
+    "Many key data science tasks are about decision-making. Data scientists are regularly called upon to support decision-makers at all levels, helping them make the best use of data in support of achieving desired outcomes. For example,  an executive making investment and resourcing decisions, a marketer determining discounting policies, a product team prioritizing which features to ship, or a doctor deciding which treatment to administer to a patient.  \n",
+    "\n",
+    "Each of these decision-makers is asking a what-if question.  Data-driven answers to such questions require understanding the *causes* of an event and how to take action to improve future outcomes.\n",
+    "\n",
+    "### Defining a causal effect \n",
+    "Suppose that we want to find the causal effect of taking an action A on the outcome Y. To define the causal effect, consider two worlds: \n",
+    "1. World 1 (Real World): Where the action A was taken and Y observed\n",
+    "2. World 2 (*Counterfactual* World): Where the action A was not taken (but everything else is the same) \n",
+    "\n",
+    "Causal effect is the difference between Y values attained in the real world versus the counterfactual world. \n",
+    "$${E}[Y_{real, A=1}] - E[Y_{counterfactual, A=0}]$$\n",
+    "\n",
+    "![Real and Counterfactual Worlds](images/real_vs_counterfactual_world.png)\n",
+    "\n",
+    "In other words, A causes Y iff changing A leads to a change in Y,\n",
+    "*keeping everything else constant*. Changing A while keeping everything else constant is called an **intervention**, and represented by a special notation, $do(A)$. \n",
+    "\n",
+    "Formally, causal effect is the magnitude by which Y is changed by a unit *interventional* change in A:\n",
+    "$$E[Y│do(A=1)]−E[Y|do(A=0)]$$\n",
+    "\n",
+    "To estimate the effect, the *gold standard* is to conduct a randomized experiment where a randomized subset of units is acted upon ($A=1$) and the other subset is not ($A=0$). These subsets approximate the disjoint real and counterfactual worlds and randomization ensures that there is not systematic difference between the two subsets (*\"keeping everything else constant\"*). \n",
+    "\n",
+    "However, it is not always feasible to a run a randomized experiment. To answer causal questions, we often need to rely on observational or logged data. Such observed data is biased by correlations and unobserved confounding and thus there are systematic differences in which units were acted upon and which units were not. For example, a new marketing campaign may be deployed during the holiday season, a new feature may only have been applied to high-activity users, or the older patients may have been more likely to receive the new drug, and so on. The goal of causal inference methods is to remove such correlations and confounding from the data and estimate the *true* effect of an action, as given by the equation above. \n",
+    "\n",
+    "\n",
+    "### The difference between prediction and causal inference\n",
+    "\n",
+    "<table><tr>\n",
+    "<td> <img src=\"images/supervised_ml_schematic.png\" alt=\"Drawing\" style=\"width: 400px;\"/> </td>\n",
+    "<td> <img src=\"images/causalinference_schematic.png\" alt=\"Drawing\" style=\"width: 400px;\"/> </td>\n",
+    "</tr></table>\n",
+    "\n",
+    "### Two fundamental challenges for causal inference\n",
+    "We never observe the counterfactual world\n",
+    "\n",
+    "* Cannot directly calculate the causal effect\n",
+    "* Must estimate the counterfactuals \n",
+    "* Challenges in validation\n",
+    "\n",
+    "Multiple causal mechanisms can be fit to a single data distribution\n",
+    "* Data alone is not enough for causal inference\n",
+    "* Need domain knowledge and assumptions\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## The four steps of causal inference\n",
+    "\n",
+    "Since there is no ground-truth test dataset available that an estimate can be compared to, causal inference requires a series of principled steps to achieve a good estimator. \n",
+    "\n",
+    "Let us illustrate the four steps through a sample dataset. This tutorial requires you to download two libraries: DoWhy and EconML. Both can be installed by the following command: `pip install dowhy econml`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Required libraries\n",
+    "import dowhy\n",
+    "from dowhy import CausalModel\n",
+    "import dowhy.datasets\n",
+    "\n",
+    "# Avoiding unnecessary log messges and warnings\n",
+    "import logging\n",
+    "logging.getLogger(\"dowhy\").setLevel(logging.WARNING)\n",
+    "import warnings\n",
+    "from sklearn.exceptions import DataConversionWarning\n",
+    "warnings.filterwarnings(action='ignore', category=DataConversionWarning)\n",
+    "\n",
+    "# Load some sample data\n",
+    "data = dowhy.datasets.linear_dataset(\n",
+    "    beta=10,\n",
+    "    num_common_causes=5,\n",
+    "    num_instruments=2,\n",
+    "    num_samples=10000,\n",
+    "    treatment_is_binary=True,\n",
+    "    stddev_treatment_noise=10)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "**I. Modeling**\n",
+    "\n",
+    "The first step is to encode our domain knowledge into a causal model, often represented as a graph. The final outcome of a causal inference analysis depends largely on the input assumptions, so this step is quite important. To estimate the causal effect, most common problems involve specifying two types of variables: \n",
+    "\n",
+    "1. **Confounders (common_causes)**: These are variables that cause both the action and the outcome. As a result, any observed correlation between the action and the outcome may simply be due to the confounder variables, and not due to any causal relationship from the action to the outcome. \n",
+    "\n",
+    "2. **Instrumental Variables (instruments)**: These are special variables that cause the action, but do not directly affect the outcome. In addition, they are not affected by any variable that affects the outcome. Instrumental variables can help reduce bias, if used in the correct way. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# I. Create a causal model from the data and domain knowledge.\n",
+    "model = CausalModel(\n",
+    "    data=data[\"df\"],\n",
+    "    treatment=data[\"treatment_name\"],\n",
+    "    outcome=data[\"outcome_name\"],\n",
+    "    common_causes=data[\"common_causes_names\"],\n",
+    "    instruments=data[\"instrument_names\"])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "To visualize the graph, we can write,"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "model.view_model(layout=\"dot\")\n",
+    "from IPython.display import Image, display\n",
+    "display(Image(filename=\"causal_model.png\"))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "In general, you can specify a causal graph that describes the mechanisms of the data-generating process for a given dataset. Each arrow in the graph denotes a causal mechanism: \"A->B\" implies that the variable A causes variable B.\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# I. Create a causal model from the data and given graph.\n",
+    "model = CausalModel(\n",
+    "    data=data[\"df\"],\n",
+    "    treatment=data[\"treatment_name\"][0],\n",
+    "    outcome=data[\"outcome_name\"][0],\n",
+    "    graph=data[\"gml_graph\"])\n",
+    "model.view_model(layout=\"dot\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "**II. Identification**\n",
+    "\n",
+    "Both ways of providing domain knowledge (either through named variable sets of confounders and instrumental variables, or through a causal graph) correspond to an underlying causal graph. Given a causal graph and a target quantity (e.g., effect of A on B), the process of identifcation is to check whether the target quantity can be estimated given the observed variables. Importantly, identification only considers the names of variables that are available in the observed data; it does not need access to the data itself. Related to the two kinds of variables above, there are two main identification methods for causal inference. \n",
+    "\n",
+    "1. **Backdoor criterion** (or more generally, adjustment sets): If all common causes of the action A and the outcome Y are observed, then the backdoor criterion implies that the causal effect can be identified by conditioning on all the common causes. This is a simplified definition (refer to Chapter 3 of the CausalML book for a formal definition).\n",
+    "$$ E[Y│do(A=a)] = E_W E[Y|A=a, W=w]$$\n",
+    "       \n",
+    "where $W$ refers to the set of common causes (confounders) of $A$ and $Y$. \n",
+    "\n",
+    "2. **Instrumental variable (IV) identification**: If there is an instrumental variable available, then we can estimate effect even when any (or none) of the common causes of action and outcome are unobserved. The IV identification utilizes the fact that the instrument only affects the action directly, so the effect of the instrument on the outcome can be broken up into two sequential parts: the effect of the instrument on the action and the effect of the action on the treatment. It then relies on estimating the effect of the instrument on the action and the outcome to estimate the effect of the action on the outcome. For a binary instrument, the effect estimate is given by,\n",
+    "    \n",
+    " $$ E[Y│do(A=1)] -E[Y│do(A=0)]  =\\frac{E[Y│Z=1]- E[Y│Z=0]}{E[A│Z=1]- E[A│Z=0]} $$"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# II. Identify causal effect and return target estimands\n",
+    "identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)\n",
+    "print(identified_estimand)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "**III. Estimation**\n",
+    "\n",
+    "As the name suggests, the estimation step involves building a statistical estimator that can compute the target estimand identified in the previous step. Many estimators have been proposed for causal inference. DoWhy implements a few of the standard estimators while EconML implements a powerful set of estimators that use machine learning.   \n",
+    "\n",
+    "We show an example of using Propensity Score Stratification using DoWhy, and a machine learning-based method called Double-ML using EconML."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# III. Estimate the target estimand using a statistical method.\n",
+    "propensity_strat_estimate = model.estimate_effect(identified_estimand,\n",
+    "                                 method_name=\"backdoor.dowhy.propensity_score_stratification\")\n",
+    "\n",
+    "print(propensity_strat_estimate)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import econml\n",
+    "from sklearn.preprocessing import PolynomialFeatures\n",
+    "from sklearn.linear_model import LassoCV\n",
+    "from sklearn.ensemble import GradientBoostingRegressor\n",
+    "dml_estimate = model.estimate_effect(identified_estimand, \n",
+    "                                    method_name=\"backdoor.econml.dml.DML\",\n",
+    "                                    method_params={\n",
+    "                                        'init_params': {'model_y':GradientBoostingRegressor(),\n",
+    "                                                        'model_t': GradientBoostingRegressor(),\n",
+    "                                                        'model_final':LassoCV(fit_intercept=False), },\n",
+    "                                        'fit_params': {}\n",
+    "                                     })\n",
+    "print(dml_estimate)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "**IV. Refutation**\n",
+    "\n",
+    "Finally, checking robustness of the estimate is probably the most important step of a causal analysis. We obtained an estimate using Steps 1-3, but each step may have made certain assumptions that may not be true. Absent of a proper validation \"test\" set, this step relies on *refutation* tests that seek to refute the correctness of an obtained estimate using properties of a good estimator. For example, a refutation test (`placebo_treatment_refuter`) checks whether the estimator returns an estimate value of 0 when the action variable is replaced by a random variable, independent of all other variables.   "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# IV. Refute the obtained estimate using multiple robustness checks.\n",
+    "refute_results = model.refute_estimate(identified_estimand, propensity_strat_estimate,\n",
+    "                                       method_name=\"placebo_treatment_refuter\")\n",
+    "print(refute_results)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### The DoWhy+EconML solution\n",
+    "We will use the DoWhy+EconML libraries for causal inference. DoWhy provides a general API for the four steps and EconML provides advanced estimators for the Estimation step.  \n",
+    "\n",
+    "DoWhy allows you to visualize, formalize, and test the assumptions they are making, so that you can better understand the analysis and avoid reaching incorrect conclusions. It does so by focusing on assumptions explicitly and introducing automated checks on validity of assumptions to the extent possible. As you will see, the power of DoWhy is that it provides a formal causal framework to encode domain knowledge and it can run automated robustness checks to validate the causal estimate from any estimator method.\n",
+    "\n",
+    "Additionally, as data becomes high-dimensional, we need specialized methods that can handle known confounding. Here we use EconML that implements many of the state-of-the-art causal estimation approaches.  This package has a common API for all the techniques, and each technique is implemented as a sequence of machine learning tasks allowing for the use of any existing machine learning software to solve these subtasks, allowing you to plug-in the ML models that you are already familiar with rather than learning a new toolkit.  The power of EconML is that you can now implement the state-of-the-art in causal inference just as easily as you can run a linear regression or a random forest.\n",
+    "\n",
+    "Together, DoWhy+EconML make answering what if questions a whole lot easier by providing a state-of-the-art, end-to-end framework for causal inference, including the latest causal estimation and automated robustness procedures. \n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### A mystery dataset: Can you find out if if there is a causal effect?\n",
+    "To walk-through the four steps, let us consider the **Mystery Dataset** problem. Suppose you are given some data with treatment and outcome. Can you determine whether the treatment causes the outcome, or the correlation is purely due to another common cause?"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "import matplotlib.pyplot as plt\n",
+    "import math\n",
+    "import dowhy.datasets, dowhy.plotter"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Below we create a dataset where the true causal effect is decided by random variable. It can be either 0 or 1. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "rvar = 1 if np.random.uniform() > 0.2 else 0\n",
+    "is_linear = False # A non-linear dataset. Change to True to see results for a linear dataset.\n",
+    "data_dict = dowhy.datasets.xy_dataset(10000, effect=rvar, \n",
+    "                                      num_common_causes=2, \n",
+    "                                      is_linear=is_linear, \n",
+    "                                      sd_error=0.2) \n",
+    "df = data_dict['df']                                                                                 \n",
+    "print(df.head())    \n",
+    "dowhy.plotter.plot_treatment_outcome(df[data_dict[\"treatment_name\"]], df[data_dict[\"outcome_name\"]],\n",
+    "                             df[data_dict[\"time_val\"]]) "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "\n",
+    "#### Model assumptions about the data-generating process using a causal graph "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "model= CausalModel(                                                                                                                      \n",
+    "        data=df,                                                                                                                         \n",
+    "        treatment=data_dict[\"treatment_name\"],                                                                                           \n",
+    "        outcome=data_dict[\"outcome_name\"],                                                                                               \n",
+    "        common_causes=data_dict[\"common_causes_names\"],                                                                                  \n",
+    "        instruments=data_dict[\"instrument_names\"])                                                                                       \n",
+    "model.view_model(layout=\"dot\")  "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### Identify the correct estimand for the target quantity based on the causal model "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)\n",
+    "print(identified_estimand)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Since this is observed data, the warning asks you if there are any unobserved confounders that are missing in this dataset. If there are, then ignoring them will lead to an incorrect estimate. \n",
+    "If you want to disable the warning, you can use `proceed_when_unidentifiable=True` as an additional parameter to `identify_effect`."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### Estimate the target estimand"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "estimate = model.estimate_effect(identified_estimand,\n",
+    "        method_name=\"backdoor.linear_regression\")\n",
+    "print(estimate)\n",
+    "print(\"Causal Estimate is \" + str(estimate.value))\n",
+    "\n",
+    "# Plot Slope of line between action and outcome = causal effect                                                                                                 \n",
+    "dowhy.plotter.plot_causal_effect(estimate, df[data_dict[\"treatment_name\"]], df[data_dict[\"outcome_name\"]])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "As you can see, for a non-linear data-generating process, the linear regression model is unable to distinguish the causal effect from the observed correlation. \n",
+    "\n",
+    "If the DGP was linear, however, then simple linear regression would have worked. To see that, try setting `is_linear=True` in cell **10** above.\n",
+    "\n",
+    "To model non-linear data (and data with high-dimensional confounders), we need more advanced methods. Below is an example using the double machine learning estimator from EconML. This estimator uses machine learning-based methods like gradient boosting trees to learn the relationship between the outcome and confounders, and the treatment and confounders, and then finally compares the residual variation between the outcome and treatment."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from sklearn.preprocessing import PolynomialFeatures\n",
+    "from sklearn.linear_model import LassoCV\n",
+    "from sklearn.ensemble import GradientBoostingRegressor\n",
+    "dml_estimate = model.estimate_effect(identified_estimand, method_name=\"backdoor.econml.dml.DML\",\n",
+    "                                     control_value = 0,\n",
+    "                                     treatment_value = 1,\n",
+    "                                 confidence_intervals=False,\n",
+    "                                method_params={\"init_params\":{'model_y':GradientBoostingRegressor(),\n",
+    "                                                              'model_t': GradientBoostingRegressor(),\n",
+    "                                                              \"model_final\":LassoCV(fit_intercept=False), \n",
+    "                                                              'featurizer':PolynomialFeatures(degree=2, include_bias=True)},\n",
+    "                                               \"fit_params\":{}})\n",
+    "print(dml_estimate)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "As you can see, the DML method obtains a better estimate, that is closer to the true causal effect of 1. "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### Check robustness of the estimate using refutation tests"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "res_random=model.refute_estimate(identified_estimand, dml_estimate, method_name=\"random_common_cause\")\n",
+    "print(res_random)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "res_placebo=model.refute_estimate(identified_estimand, dml_estimate,\n",
+    "        method_name=\"placebo_treatment_refuter\", placebo_type=\"permute\",\n",
+    "        num_simulations=20)\n",
+    "print(res_placebo)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Case-studies using DoWhy+EconML\n",
+    "In practice, as the data becomes high-dimensional, simple estimators will not estimate the correct causal effect. More advanced supervised machine learning models also do not work and often are worse than simple regression, because they include additional regularization techniques that help in minimizing predictive error, but can have unwanted effects on estimating the causal effect. Therefore, we need methods targeted to estimate the causal effect. At the same time, we also need suitable refutation methods that can check the robustness of the estimate. \n",
+    "\n",
+    "\n",
+    "Here is an example of using DoWhy+EconML for a high-dimensional dataset.\n",
+    "\n",
+    "\n",
+    "More details are in this [notebook](https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy-conditional-treatment-effects.ipynb). \n",
+    "\n",
+    "\n",
+    "Below we provide links to case studies that illustrate the use of DoWhy+EconML.\n",
+    "\n",
+    "### Estimating the impact of a customer loyalty program\n",
+    "[Link to full notebook](https://github.com/microsoft/dowhy/blob/main/docs/source/example_notebooks/dowhy_example_effect_of_memberrewards_program.ipynb)\n",
+    "\n",
+    "\n",
+    "###\tRecommendation A/B testing at an online company\n",
+    "[Link to full notebook](https://github.com/microsoft/EconML/blob/main/notebooks/CustomerScenarios/Case%20Study%20-%20Recommendation%20AB%20Testing%20at%20An%20Online%20Travel%20Company%20-%20EconML%20%2B%20DoWhy.ipynb)\n",
+    "\n",
+    "###\tUser segmentation for targeting interventions\n",
+    "[Link to full notebook](https://github.com/microsoft/EconML/blob/main/notebooks/CustomerScenarios/Case%20Study%20-%20Customer%20Segmentation%20at%20An%20Online%20Media%20Company%20-%20EconML%20%2B%20DoWhy.ipynb)\n",
+    "\n",
+    "### Multi-investment attribution at a software company\n",
+    "[Link to full notebook](https://github.com/microsoft/EconML/blob/main/notebooks/CustomerScenarios/Case%20Study%20-%20Multi-investment%20Attribution%20at%20A%20Software%20Company%20-%20EconML%20%2B%20DoWhy.ipynb)\n",
+    "\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Connections to fundamental machine learning challenges\n",
+    "Causality is connected to many fundamental challenges in building machine learning models, including out-of-distribution generalization, fairness, explanability and privacy. \n",
+    "\n",
+    "![ML challenges](images/causality_ml_example_challenges.png)\n",
+    "\n",
+    "How causality can help in solving many of the challenges above is an active area of research. "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Further resources\n",
+    "\n",
+    "### DoWhy+EconML libraries\n",
+    "DoWhy code: https://github.com/microsoft/dowhy\n",
+    "\n",
+    "DoWhy notebooks: https://github.com/microsoft/dowhy/tree/main/docs/source/example_notebooks\n",
+    "\n",
+    "EconML code: https://github.com/microsoft/econml\n",
+    "\n",
+    "EconML notebooks: https://github.com/microsoft/EconML/tree/main/notebooks\n",
+    "\n",
+    "### Video Lecture on causal inference and its connections to machine learning\n",
+    "Microsoft Research Webinar: https://note.microsoft.com/MSR-Webinar-DoWhy-Library-Registration-On-Demand.html\n",
+    "\n",
+    "\n",
+    "### Detailed KDD Tutorial on Causal Inference\n",
+    "https://causalinference.gitlab.io/kdd-tutorial/\n",
+    "\n",
+    "### Book chapters on causality and machine learning\n",
+    "http://causalinference.gitlab.io/\n",
+    "\n",
+    "### Causality and Machine Learning group at Microsoft\n",
+    "https://www.microsoft.com/en-us/research/group/causal-inference/\n"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.10"
+  },
+  "toc": {
+   "base_numbering": 1,
+   "nav_menu": {},
+   "number_sections": true,
+   "sideBar": true,
+   "skip_h1_title": true,
+   "title_cell": "Table of Contents",
+   "title_sidebar": "Contents",
+   "toc_cell": true,
+   "toc_position": {
+    "height": "calc(100% - 180px)",
+    "left": "10px",
+    "top": "150px",
+    "width": "165px"
+   },
+   "toc_section_display": true,
+   "toc_window_display": true
+  },
+  "vscode": {
+   "interpreter": {
+    "hash": "aee8b7b246df8f9039afb4144a1f6fd8d2ca17a180786b69acc140d282b71a49"
+   }
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}

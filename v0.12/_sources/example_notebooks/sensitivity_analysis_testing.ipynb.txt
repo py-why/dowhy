@@ -1,0 +1,495 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Sensitivity Analysis for Regression Models\n",
+    "Sensitivity analysis helps us examine how sensitive a result is against the possibility of unobserved confounding. Two methods are implemented:\n",
+    "1. [Cinelli & Hazlett's robustness value](https://carloscinelli.com/files/Cinelli%20and%20Hazlett%20(2020)%20-%20Making%20Sense%20of%20Sensitivity.pdf) \n",
+    "    - This method only supports linear regression estimator. <br>\n",
+    "    - The partial R^2 of treatment with outcome shows how strongly confounders explaining all the residual outcome variation would have to be associated with the treatment to eliminate the estimated effect.<br>\n",
+    "    - The robustness value measures the minimum strength of association unobserved confounding should have with both treatment and outcome in order to change the conclusions.<br>\n",
+    "    - Robustness value close to 1 means the treatment effect can handle strong confounders explaining almost all residual variation of the treatment and the outcome.<br>\n",
+    "    - Robustness value close to 0 means that even very weak confounders can also change the results.<br>\n",
+    "    - Benchmarking examines the sensitivity of causal inferences to plausible strengths of the omitted confounders.<br>\n",
+    "    - This method is based on https://carloscinelli.com/files/Cinelli%20and%20Hazlett%20(2020)%20-%20Making%20Sense%20of%20Sensitivity.pdf \n",
+    "2. [Ding & VanderWeele's E-Value](https://dash.harvard.edu/bitstream/handle/1/36874927/EValue_FinalSubmission.pdf)\n",
+    "    - This method supports linear and logistic regression. \n",
+    "    - The E-value is the minimum strength of association on the risk ratio scale that an unmeasured confounder would need to have with both the treatment and the outcome, conditional on the measured covariates, to fully explain away a specific treatment-outcome association.\n",
+    "    - The minimum E-value is 1, which means that no unmeasured confounding is needed to explain away the observed association (i.e. the confidence interval crosses the null).\n",
+    "    - Higher E-values mean that stronger unmeasured confounding is needed to explain away the observed association. There is no maximum E-value. \n",
+    "    - [McGowan & Greevy Jr's](https://arxiv.org/abs/2011.07030) benchmarks the E-value against the measured confounders. "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Step 1: Load required packages"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import os, sys\n",
+    "sys.path.append(os.path.abspath(\"../../../\"))\n",
+    "import dowhy\n",
+    "from dowhy import CausalModel\n",
+    "import pandas as pd\n",
+    "import numpy as np\n",
+    "import dowhy.datasets \n",
+    "\n",
+    "# Config dict to set the logging level\n",
+    "import logging.config\n",
+    "DEFAULT_LOGGING = {\n",
+    "    'version': 1,\n",
+    "    'disable_existing_loggers': False,\n",
+    "    'loggers': {\n",
+    "        '': {\n",
+    "            'level': 'ERROR',\n",
+    "        },\n",
+    "    }\n",
+    "}\n",
+    "\n",
+    "logging.config.dictConfig(DEFAULT_LOGGING)\n",
+    "# Disabling warnings output\n",
+    "import warnings\n",
+    "from sklearn.exceptions import DataConversionWarning\n",
+    "#warnings.filterwarnings(action='ignore', category=DataConversionWarning)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Step 2: Load the dataset \n",
+    "We create a dataset with linear relationships between common causes and treatment, and common causes and outcome. Beta is the true causal effect."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "np.random.seed(100) \n",
+    "data = dowhy.datasets.linear_dataset( beta = 10,\n",
+    "                                      num_common_causes = 7,\n",
+    "                                      num_samples = 500,\n",
+    "                                      num_treatments = 1,\n",
+    "                                     stddev_treatment_noise =10,\n",
+    "                                     stddev_outcome_noise = 5\n",
+    "                                    )"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "model = CausalModel(\n",
+    "            data=data[\"df\"],\n",
+    "            treatment=data[\"treatment_name\"],\n",
+    "            outcome=data[\"outcome_name\"],\n",
+    "            graph=data[\"gml_graph\"],\n",
+    "            test_significance=None,\n",
+    "        )\n",
+    "model.view_model()\n",
+    "from IPython.display import Image, display\n",
+    "display(Image(filename=\"causal_model.png\"))\n",
+    "data['df'].head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Step 3: Create Causal Model\n",
+    "Remove one of the common causes to simulate unobserved confounding"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data[\"df\"] = data[\"df\"].drop(\"W4\", axis = 1)\n",
+    "graph_str = 'graph[directed 1node[ id \"y\" label \"y\"]node[ id \"W0\" label \"W0\"] node[ id \"W1\" label \"W1\"] node[ id \"W2\" label \"W2\"] node[ id \"W3\" label \"W3\"]  node[ id \"W5\" label \"W5\"] node[ id \"W6\" label \"W6\"]node[ id \"v0\" label \"v0\"]edge[source \"v0\" target \"y\"]edge[ source \"W0\" target \"v0\"] edge[ source \"W1\" target \"v0\"] edge[ source \"W2\" target \"v0\"] edge[ source \"W3\" target \"v0\"] edge[ source \"W5\" target \"v0\"] edge[ source \"W6\" target \"v0\"]edge[ source \"W0\" target \"y\"] edge[ source \"W1\" target \"y\"] edge[ source \"W2\" target \"y\"] edge[ source \"W3\" target \"y\"] edge[ source \"W5\" target \"y\"] edge[ source \"W6\" target \"y\"]]'\n",
+    "model = CausalModel(\n",
+    "            data=data[\"df\"],\n",
+    "            treatment=data[\"treatment_name\"],\n",
+    "            outcome=data[\"outcome_name\"],\n",
+    "            graph=graph_str,\n",
+    "            test_significance=None,\n",
+    "        )\n",
+    "model.view_model()\n",
+    "from IPython.display import Image, display\n",
+    "display(Image(filename=\"causal_model.png\"))\n",
+    "data['df'].head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Step 4: Identification"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)\n",
+    "print(identified_estimand)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Step 5: Estimation\n",
+    "Currently only Linear Regression estimator is supported for Linear Sensitivity Analysis"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "estimate = model.estimate_effect(identified_estimand,method_name=\"backdoor.linear_regression\")\n",
+    "print(estimate)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Step 6a: Refutation and Sensitivity Analysis - Method 1\n",
+    "<b>identified_estimand</b>: An instance of the identifiedEstimand class that provides the information with respect to which causal pathways are employed when the treatment effects the outcome<br>\n",
+    "<b>estimate</b>: An instance of CausalEstimate class. The estimate obtained from the estimator for the original data.<br>\n",
+    "<b>method_name</b>: Refutation method name <br>\n",
+    "<b>simulation_method</b>: \"linear-partial-R2\" for Linear Sensitivity Analysis<br>\n",
+    "<b>benchmark_common_causes</b>: Name of the covariates used to bound the strengths of unobserved confounder<br>\n",
+    "<b>percent_change_estimate</b>: It is the percentage of reduction of treatment estimate that could alter the results (default = 1) if percent_change_estimate = 1, the robustness value describes the strength of association of confounders with treatment and outcome in order to reduce the estimate by 100% i.e bring it down to 0. <br>\n",
+    "<b>confounder_increases_estimate</b>: confounder_increases_estimate = True implies that confounder increases the absolute value of estimate and vice versa. Default is confounder_increases_estimate = False i.e. the considered confounders pull estimate towards zero<br>\n",
+    "<b>effect_fraction_on_treatment</b>: Strength of association between unobserved confounder and treatment compared to benchmark covariate<br>\n",
+    "<b>effect_fraction_on_outcome</b>: Strength of association between unobserved confounder and outcome compared to benchmark covariate<br>\n",
+    "<b>null_hypothesis_effect</b>: assumed effect under the null hypothesis (default = 0) <br>\n",
+    "<b>plot_estimate</b>: Generate contour plot for estimate while performing sensitivity analysis. (default = True). \n",
+    "                              To override the setting, set plot_estimate = False."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "scrolled": false
+   },
+   "outputs": [],
+   "source": [
+    "refute = model.refute_estimate(identified_estimand, estimate ,\n",
+    "                               method_name = \"add_unobserved_common_cause\",\n",
+    "                               simulation_method = \"linear-partial-R2\", \n",
+    "                               benchmark_common_causes = [\"W3\"],\n",
+    "                               effect_fraction_on_treatment = [ 1,2,3]\n",
+    "                              )"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The x axis shows hypothetical partial R2 values of unobserved confounder(s) with the treatment. The y axis shows hypothetical partial R2 of unobserved confounder(s) with the outcome.<br>\n",
+    "The contour levels represent adjusted t-values or estimates for unobserved confounders with hypothetical partialR2 values when these would be included in full regression model. <br>\n",
+    "The red line is the critical threshold: confounders with such strength or stronger are sufficient to invalidate the research conclusions."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "refute.stats"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "refute.benchmarking_results"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "##### Parameter List for plot function\n",
+    "<b>plot_type</b>: \"estimate\" or \"t-value\" <br>\n",
+    "<b>critical_value</b>: special reference value of the estimate or t-value that will be highlighted in the plot<br>\n",
+    "<b>x_limit</b>: plot's maximum x_axis value (default = 0.8) <br>\n",
+    "<b>y_limit</b>: plot's minimum y_axis value (default = 0.8) <br>\n",
+    "<b>num_points_per_contour</b>: number of points to calculate and plot each contour line (default = 200) <br>\n",
+    "<b>plot_size</b>: tuple denoting the size of the plot (default = (7,7))<br>\n",
+    "<b>contours_color</b>: color of contour line (default = blue)<br>\n",
+    "                               String or array. If array, lines will be plotted with the specific color in ascending order.<br>\n",
+    "    <b>critical_contour_color</b>: color of threshold line (default = red)<br>\n",
+    "    <b>label_fontsize</b>: fontsize for labelling contours (default = 9)<br>\n",
+    "    <b>contour_linewidths</b>: linewidths for contours (default = 0.75)<br>\n",
+    "    <b>contour_linestyles</b>: linestyles for contours (default = \"solid\")\n",
+    "                                   See : https://matplotlib.org/3.5.0/gallery/lines_bars_and_markers/linestyles.html<br>\n",
+    "    <b>contours_label_color</b>: color of contour line label (default = black)<br>\n",
+    "    <b>critical_label_color</b>: color of threshold line label (default = red)<br>\n",
+    "    <b>unadjusted_estimate_marker</b>: marker type for unadjusted estimate in the plot (default = 'D')\n",
+    "                                           See: https://matplotlib.org/stable/api/markers_api.html <br><b>unadjusted_estimate_color</b>: marker color for unadjusted estimate in the plot (default = \"black\")<br>\n",
+    "    <b>adjusted_estimate_marker</b>: marker type for bias adjusted estimates in the plot (default = '^')<br><b>adjusted_estimate_color</b>: marker color for bias adjusted estimates in the plot (default = \"red\")<br>\n",
+    "    <b>legend_position</b>:tuple denoting the position of the legend (default = (1.6, 0.6))<br>"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "refute.plot(plot_type = 't-value')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The t statistic is the coefficient divided by its standard error. The higher the t-value, the greater the evidence to reject the null hypothesis. <br>\n",
+    "According to the above plot,at 5% significance level, the null hypothesis of zero effect would be rejected given the above confounders. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "print(refute)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Step 6b: Refutation and Sensitivity Analysis - Method 2\n",
+    "<b>simulated_method_name</b>: \"e-value\" for E-value\n",
+    "\n",
+    "#### Parameter List for plot function\n",
+    "- <b>num_points_per_contour</b>: number of points to calculate and plot for each contour (Default = 200)\n",
+    "- <b>plot_size</b>: size of the plot (Default = (6.4,4.8))\n",
+    "- <b>contour_colors</b>: colors for point estimate and confidence limit contour (Default = [\"blue\", \"red])\n",
+    "- <b>xy_limit</b>: plot's maximum x and y value. Default is 2 x E-value. (Default = None)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "refute = model.refute_estimate(identified_estimand, estimate ,\n",
+    "                               method_name = \"add_unobserved_common_cause\",\n",
+    "                               simulation_method = \"e-value\", \n",
+    "                              )"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "- The x axis shows hypothetical values of the risk ratio of an unmeasured confounder at different levels of the treatment. The y axis shows hypothetical values of the risk ratio of the outcome at different levels of the confounder.\n",
+    "- Points lying on or above the blue contour represent combinations of these risk ratios that would tip (i.e. explain away) the point estimate. \n",
+    "- Points lying on or above the red contour represent combinations of these risk ratios that would tip (i.e. explain away) the confidence interval.\n",
+    "- The green points are Observed Covariate E-values. These measure how much the limiting bound of the confidence interval changes on the E-value scale after a specific covariate is dropped and the estimator is re-fit. The covariate that corresponds to the largest Observed Covariate E-value is labeled. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "refute.stats"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "refute.benchmarking_results"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(refute)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### Sensitivity Analysis for dataset with no confounders\n",
+    "We now run the sensitivity analysis for the same dataset but without dropping any variable. <br>\n",
+    "We get a robustness value goes from 0.55 to 0.95 which means that treatment effect can handle strong confounders explaining  almost all residual variation of the treatment and the outcome. <br>"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "np.random.seed(100) \n",
+    "data = dowhy.datasets.linear_dataset( beta = 10,\n",
+    "                                      num_common_causes = 7,\n",
+    "                                      num_samples = 500,\n",
+    "                                      num_treatments = 1,\n",
+    "                                     stddev_treatment_noise=10,\n",
+    "                                     stddev_outcome_noise = 1\n",
+    "                                    )"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "model = CausalModel(\n",
+    "            data=data[\"df\"],\n",
+    "            treatment=data[\"treatment_name\"],\n",
+    "            outcome=data[\"outcome_name\"],\n",
+    "            graph=data[\"gml_graph\"],\n",
+    "            test_significance=None,\n",
+    "        )\n",
+    "model.view_model()\n",
+    "from IPython.display import Image, display\n",
+    "display(Image(filename=\"causal_model.png\"))\n",
+    "data['df'].head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)\n",
+    "print(identified_estimand)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "estimate = model.estimate_effect(identified_estimand,method_name=\"backdoor.linear_regression\")\n",
+    "print(estimate)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "refute = model.refute_estimate(identified_estimand, estimate ,\n",
+    "                               method_name = \"add_unobserved_common_cause\",\n",
+    "                               simulation_method = \"linear-partial-R2\", \n",
+    "                               benchmark_common_causes = [\"W3\"],\n",
+    "                               effect_fraction_on_treatment = [ 1,2,3])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "refute.plot(plot_type = 't-value')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "print(refute)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "refute.stats"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "refute.benchmarking_results"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3.8.9 ('dowhy-env': venv)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.9"
+  },
+  "vscode": {
+   "interpreter": {
+    "hash": "4902c7bf37d98018d588ce85c746f810217ea48599e6a770c07c835ac8096f29"
+   }
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}
