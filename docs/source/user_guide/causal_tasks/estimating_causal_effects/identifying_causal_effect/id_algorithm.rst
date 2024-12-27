@@ -5,7 +5,7 @@ ID algorithm (Shpitser & Pearl 2006) is an advanced algorithm for identification
 
 
 >>> # model is an instance of CausalModel
->>> identified_estimand = model.identify_effect(method="id-algorithm")
+>>> identified_estimand = model.identify_effect(method_name="id-algorithm")
 >>> print(identified_estimand)
 
 Alternatively, you can use the functional API. 
