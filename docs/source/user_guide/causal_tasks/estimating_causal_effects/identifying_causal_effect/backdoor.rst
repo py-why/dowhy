@@ -16,7 +16,7 @@ The above code uses a default backdoor adjustment. There are four basic kinds of
 
 To use a specific kind of backdoor adjustment, we can use the `method` argument.
 
->>> identified_estimand = model.identify_effect(method="maximal-adjustment")
+>>> identified_estimand = model.identify_effect(method_name="maximal-adjustment")
 
 Note that the `identify_effect` method is a convenience method that also searches for other kinds of identification. The following is an equivalent call using the functional API. 
 
