@@ -394,9 +394,21 @@ TEST_GRAPH_SOLUTIONS_COMPLETE_ADJUSTMENT = {
     "shpitser_simple_non_backdoor_adjustment_set": dict(
         graph_str="digraph{Z;X;Y; X->Z;X->Y}",
         observed_variables=["Z", "X", "Y"],
+        action_nodes=["X"],
+        outcome_nodes=["Y"],
         minimal_adjustment_sets=[{}],
         exhaustive_adjustment_sets=[{"Z"}, {}],
-    )
+    ),
+    # Example is selected from van der Zander et al. "Constructing Separators and Adjustment Sets in Ancestral
+    # Graphs", figure 2.
+    "van_der_zander_minimal_non_backdoor_adjustment_set": dict(
+        graph_str="digraph{Z1;Z2;X1;X2;Y1;Y2; X1->Y1;X1->Z1;Z1->Z2;Z2->X2;Y2->Z2}",
+        observed_variables=["Z1", "Z2", "X1", "X2", "Y1", "Y2"],
+        action_nodes=["X1", "X2"],
+        outcome_nodes=["Y1", "Y2"],
+        minimal_adjustment_sets=[{"Z1", "Z2"}],
+        exhaustive_adjustment_sets=["Z1", "Z2"],
+    ),
 }
 
 

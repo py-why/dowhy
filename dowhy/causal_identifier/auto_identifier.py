@@ -909,7 +909,7 @@ def identify_complete_adjustment_set(
             return []
         return [AdjustmentSet(AdjustmentSet.GENERAL, adjustment_set)]
 
-    return [AdjustmentSet(AdjustmentSet.GENERAL, [])]
+    raise ValueError("Exhaustive identification of general adjustment sets is not yet supported.")
 
 
 def identify_mediation(graph: nx.DiGraph, action_nodes: List[str], outcome_nodes: List[str]):

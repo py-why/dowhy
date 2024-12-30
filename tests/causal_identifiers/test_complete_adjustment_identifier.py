@@ -8,26 +8,6 @@ from .base import IdentificationTestGeneralCovariateAdjustmentGraphSolution, exa
 
 
 class TestGeneralAdjustmentIdentification(object):
-    def test_identify_exhaustive_adjustment(
-        self, example_complete_adjustment_graph_solution: IdentificationTestGeneralCovariateAdjustmentGraphSolution
-    ):
-        graph = example_complete_adjustment_graph_solution.graph
-        expected_sets = example_complete_adjustment_graph_solution.exhaustive_adjustment_sets
-        adjustment_set_results = identify_complete_adjustment_set(
-            graph,
-            action_nodes=["X"],
-            outcome_nodes=["Y"],
-            observed_nodes=example_complete_adjustment_graph_solution.observed_nodes,
-            covariate_adjustment=CovariateAdjustment.COVARIATE_ADJUSTMENT_EXHAUSTIVE,
-        )
-        adjustment_sets = [
-            set(adjustment_set.get_variables())
-            for adjustment_set in adjustment_set_results
-            if len(adjustment_set.get_variables()) > 0
-        ]
-
-        assert all((len(s) == 0 and len(adjustment_sets) == 0) or set(s) in adjustment_sets for s in expected_sets)
-
     def test_identify_minimal_adjustment(
         self, example_complete_adjustment_graph_solution: IdentificationTestGeneralCovariateAdjustmentGraphSolution
     ):
@@ -35,8 +15,8 @@ class TestGeneralAdjustmentIdentification(object):
         expected_set = example_complete_adjustment_graph_solution.minimal_adjustment_sets[0]
         adjustment_set_results = identify_complete_adjustment_set(
             graph,
-            action_nodes=["X"],
-            outcome_nodes=["Y"],
+            action_nodes=example_complete_adjustment_graph_solution.action_nodes,
+            outcome_nodes=example_complete_adjustment_graph_solution.outcome_nodes,
             observed_nodes=example_complete_adjustment_graph_solution.observed_nodes,
             covariate_adjustment=CovariateAdjustment.COVARIATE_ADJUSTMENT_DEFAULT,
         )

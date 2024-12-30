@@ -52,12 +52,14 @@ class IdentificationTestGeneralCovariateAdjustmentGraphSolution(object):
         self,
         graph_str,
         observed_variables,
+        action_nodes,
+        outcome_nodes,
         minimal_adjustment_sets,
         exhaustive_adjustment_sets,
     ):
         self.graph = build_graph_from_str(graph_str)
-        self.action_nodes = ["X"]
-        self.outcome_nodes = ["Y"]
+        self.action_nodes = action_nodes
+        self.outcome_nodes = outcome_nodes
         self.observed_nodes = observed_variables
         self.minimal_adjustment_sets = minimal_adjustment_sets
         self.exhaustive_adjustment_sets = exhaustive_adjustment_sets
