@@ -23,9 +23,9 @@ class TestBackdoorIdentification(object):
             include_unobserved=False,
         )
         backdoor_sets = [
-            set(backdoor_result_dict["backdoor_set"])
-            for backdoor_result_dict in backdoor_results
-            if len(backdoor_result_dict["backdoor_set"]) > 0
+            set(backdoor_result.get_variables())
+            for backdoor_result in backdoor_results
+            if len(backdoor_result.get_variables()) > 0
         ]
 
         assert (len(backdoor_sets) == 0 and len(biased_sets) == 0) or all(  # No biased sets exist and that's expected.
@@ -50,9 +50,9 @@ class TestBackdoorIdentification(object):
             include_unobserved=False,
         )
         backdoor_sets = [
-            set(backdoor_result_dict["backdoor_set"])
-            for backdoor_result_dict in backdoor_results
-            if len(backdoor_result_dict["backdoor_set"]) > 0
+            set(backdoor_result.get_variables())
+            for backdoor_result in backdoor_results
+            if len(backdoor_result.get_variables()) > 0
         ]
 
         assert all(
@@ -73,7 +73,7 @@ class TestBackdoorIdentification(object):
             outcome_nodes=["Y"],
             include_unobserved=False,
         )
-        backdoor_sets = [set(backdoor_result_dict["backdoor_set"]) for backdoor_result_dict in backdoor_results]
+        backdoor_sets = [set(backdoor_result.get_variables()) for backdoor_result in backdoor_results]
 
         assert (
             (len(backdoor_sets) == 0) and (len(expected_sets) == 0)
@@ -97,7 +97,7 @@ class TestBackdoorIdentification(object):
             include_unobserved=False,
         )
 
-        backdoor_sets = [set(backdoor_result_dict["backdoor_set"]) for backdoor_result_dict in backdoor_results]
+        backdoor_sets = [set(backdoor_result.get_variables()) for backdoor_result in backdoor_results]
         assert (
             (len(backdoor_sets) == 0) and (len(expected_sets) == 0)
         ) or all(  # No adjustments exist and that's expected.
@@ -120,7 +120,7 @@ class TestBackdoorIdentification(object):
             direct_effect=True,
         )
 
-        backdoor_sets = [set(backdoor_result_dict["backdoor_set"]) for backdoor_result_dict in backdoor_results]
+        backdoor_sets = [set(backdoor_result.get_variables()) for backdoor_result in backdoor_results]
         assert (
             (len(backdoor_sets) == 0) and (len(expected_sets) == 0)
         ) or all(  # No adjustments exist and that's expected.

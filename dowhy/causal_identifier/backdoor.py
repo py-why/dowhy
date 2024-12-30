@@ -1,5 +1,6 @@
 import networkx as nx
 
+from dowhy.causal_identifier.adjustment_set import AdjustmentSet
 from dowhy.utils.graph_operations import adjacency_matrix_to_adjacency_list
 
 
@@ -113,11 +114,13 @@ class Backdoor:
                 self._path_search(adjlist, node1, node2, path_dict)
                 if len(path_dict) != 0:
                     obj = HittingSetAlgorithm(path_dict[(node1, node2)].get_condition_vars(), self._colliders)
-
-                    backdoor_set = {}
-                    backdoor_set["backdoor_set"] = tuple(obj.find_set())
-                    backdoor_set["num_paths_blocked_by_observed_nodes"] = obj.num_sets()
-                    backdoor_sets.append(backdoor_set)
+                    backdoor_sets.append(
+                        AdjustmentSet(
+                            _type=AdjustmentSet.BACKDOOR,
+                            variables=tuple(obj.find_set()),
+                            num_paths_blocked_by_observed_nodes=obj.num_sets()
+                        )
+                    )
 
         return backdoor_sets
 

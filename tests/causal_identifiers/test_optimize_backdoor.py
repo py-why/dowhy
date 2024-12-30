@@ -27,7 +27,7 @@ class TestOptimizeBackdoorIdentifier(object):
         print(backdoor_sets)
         # Check if backdoor sets are valid i.e. if they block all paths between the treatment and the outcome
         backdoor_paths = causal_model._graph.get_backdoor_paths(treatment_name, outcome_name)
-        check_set = set(backdoor_sets[0]["backdoor_set"])
+        check_set = set(backdoor_sets[0].get_variables())
         check = causal_model._graph.check_valid_backdoor_set(
             treatment_name, outcome_name, check_set, backdoor_paths=backdoor_paths, dseparation_algo="naive"
         )
@@ -76,7 +76,7 @@ class TestOptimizeBackdoorIdentifier(object):
 
         # Check if backdoor sets are valid i.e. if they block all paths between the treatment and the outcome
         backdoor_paths = causal_model._graph.get_backdoor_paths(treatment_name, outcome_name)
-        check_set = set(backdoor_sets[0]["backdoor_set"])
+        check_set = set(backdoor_sets[0].get_variables())
         check = causal_model._graph.check_valid_backdoor_set(
             treatment_name, outcome_name, check_set, backdoor_paths=backdoor_paths
         )
@@ -104,7 +104,7 @@ class TestOptimizeBackdoorIdentifier(object):
 
         # Check if backdoor sets are valid i.e. if they block all paths between the treatment and the outcome
         backdoor_paths = causal_model._graph.get_backdoor_paths(treatment_name, outcome_name)
-        check_set = set(backdoor_sets[0]["backdoor_set"])
+        check_set = set(backdoor_sets[0].get_variables())
         check = causal_model._graph.check_valid_backdoor_set(
             treatment_name, outcome_name, check_set, backdoor_paths=backdoor_paths
         )
@@ -132,7 +132,7 @@ class TestOptimizeBackdoorIdentifier(object):
 
         # Check if backdoor sets are valid i.e. if they block all paths between the treatment and the outcome
         backdoor_paths = causal_model._graph.get_backdoor_paths(treatment_name, outcome_name)
-        check_set = set(backdoor_sets[0]["backdoor_set"])
+        check_set = set(backdoor_sets[0].get_variables())
         check = causal_model._graph.check_valid_backdoor_set(
             treatment_name, outcome_name, check_set, backdoor_paths=backdoor_paths
         )
@@ -160,7 +160,7 @@ class TestOptimizeBackdoorIdentifier(object):
 
         # Check if backdoor sets are valid i.e. if they block all paths between the treatment and the outcome
         backdoor_paths = causal_model._graph.get_backdoor_paths(treatment_name, outcome_name)
-        check_set = set(backdoor_sets[0]["backdoor_set"])
+        check_set = set(backdoor_sets[0].get_variables())
         check = causal_model._graph.check_valid_backdoor_set(
             treatment_name, outcome_name, check_set, backdoor_paths=backdoor_paths
         )

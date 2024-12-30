@@ -17,6 +17,7 @@ class IdentifiedEstimand:
         estimand_type=None,
         estimands=None,
         backdoor_variables=None,
+        general_adjustment_variables=None,
         instrumental_variables=None,
         frontdoor_variables=None,
         mediator_variables=None,
@@ -25,6 +26,7 @@ class IdentifiedEstimand:
         default_backdoor_id=None,
         identifier_method=None,
         no_directed_path=False,
+        default_adjustment_set_id=None
     ):
         self.identifier = identifier
         self.treatment_variable = parse_state(treatment_variable)
@@ -40,6 +42,8 @@ class IdentifiedEstimand:
         self.default_backdoor_id = default_backdoor_id
         self.identifier_method = identifier_method
         self.no_directed_path = no_directed_path
+        self.general_adjustment_variables = general_adjustment_variables
+        self.default_adjustment_set_id = default_adjustment_set_id
 
     def set_identifier_method(self, identifier_name: str):
         self.identifier_method = identifier_name
@@ -77,6 +81,13 @@ class IdentifiedEstimand:
     def get_instrumental_variables(self):
         """Return a list containing the instrumental variables (if present)"""
         return self.instrumental_variables
+
+    def get_general_adjustment_variables(self, key: Optional[str] = None):
+        """Return a list containing general adjustment variables."""
+        if key is None:
+            return self.general_adjustment_variables[self.default_adjustment_set_id]
+        else:
+            return self.general_adjustment_variables[key]
 
     def __deepcopy__(self, memo):
         return IdentifiedEstimand(

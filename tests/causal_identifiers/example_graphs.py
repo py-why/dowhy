@@ -388,6 +388,17 @@ TEST_GRAPH_SOLUTIONS = {
     ),
 }
 
+TEST_GRAPH_SOLUTIONS_COMPLETE_ADJUSTMENT = {
+    # Example is selected from Shpitser et al. "On the Validity of Covariate Adjustment for Estimating Causal
+    # Effects", figure 1(b).
+    "shpitser_simple_non_backdoor_adjustment_set": dict(
+        graph_str="digraph{Z;X;Y; X->Z;X->Y}",
+        observed_variables=["Z", "X", "Y"],
+        minimal_adjustment_sets=[{}],
+        exhaustive_adjustment_sets=[{"Z"}, {}],
+    )
+}
+
 
 TEST_FRONTDOOR_GRAPH_SOLUTIONS = {
     "valid_singleton": dict(
