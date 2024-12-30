@@ -91,14 +91,13 @@ class AutoIdentifier:
         backdoor_adjustment: BackdoorAdjustment = BackdoorAdjustment.BACKDOOR_DEFAULT,
         optimize_backdoor: bool = False,
         costs: Optional[List] = None,
+        # By default, we will just compute a minimal adjustment set
         covariate_adjustment: CovariateAdjustment = CovariateAdjustment.COVARIATE_ADJUSTMENT_DEFAULT,
     ):
         self.estimand_type = estimand_type
         self.backdoor_adjustment = backdoor_adjustment
         self.optimize_backdoor = optimize_backdoor
         self.costs = costs
-        # By default, we will just compute a minimal adjustment set (since it can be
-        # quite lengthy to compute an exhaustive set)
         self.covariate_adjustment = covariate_adjustment
         self.logger = logging.getLogger(__name__)
 
@@ -895,10 +894,10 @@ def identify_complete_adjustment_set(
         # In default case, we don't find all exhaustive adjustment sets
         adjustment_set = nx.algorithms.find_minimal_d_separator(
             graph_pbd,
-            action_nodes,
-            outcome_nodes,
+            set(action_nodes),
+            set(outcome_nodes),
             # Require the adjustment set to consist only of observed nodes
-            restricted=((set(graph.nodes) - set(pcp_nodes)) & set(observed_nodes))
+            restricted=((set(graph_pbd.nodes) - set(pcp_nodes)) & set(observed_nodes))
         )
         if adjustment_set is None:
             logger.info("No adjustment sets found.")
