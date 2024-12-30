@@ -24,14 +24,15 @@ class IdentifiedEstimand:
         mediation_first_stage_confounders=None,
         mediation_second_stage_confounders=None,
         default_backdoor_id=None,
+        default_adjustment_set_id=None,
         identifier_method=None,
         no_directed_path=False,
-        default_adjustment_set_id=None,
     ):
         self.identifier = identifier
         self.treatment_variable = parse_state(treatment_variable)
         self.outcome_variable = parse_state(outcome_variable)
         self.backdoor_variables = backdoor_variables
+        self.general_adjustment_variables = general_adjustment_variables
         self.instrumental_variables = parse_state(instrumental_variables)
         self.frontdoor_variables = parse_state(frontdoor_variables)
         self.mediator_variables = parse_state(mediator_variables)
@@ -40,10 +41,9 @@ class IdentifiedEstimand:
         self.estimand_type = estimand_type
         self.estimands = estimands
         self.default_backdoor_id = default_backdoor_id
+        self.default_adjustment_set_id = default_adjustment_set_id
         self.identifier_method = identifier_method
         self.no_directed_path = no_directed_path
-        self.general_adjustment_variables = general_adjustment_variables
-        self.default_adjustment_set_id = default_adjustment_set_id
 
     def set_identifier_method(self, identifier_name: str):
         self.identifier_method = identifier_name

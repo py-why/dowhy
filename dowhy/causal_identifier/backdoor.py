@@ -116,8 +116,8 @@ class Backdoor:
                     obj = HittingSetAlgorithm(path_dict[(node1, node2)].get_condition_vars(), self._colliders)
                     backdoor_sets.append(
                         AdjustmentSet(
-                            _type=AdjustmentSet.BACKDOOR,
-                            variables=tuple(obj.find_set()),
+                            adjustment_type=AdjustmentSet.BACKDOOR,
+                            adjustment_variables=tuple(obj.find_set()),
                             num_paths_blocked_by_observed_nodes=obj.num_sets(),
                         )
                     )

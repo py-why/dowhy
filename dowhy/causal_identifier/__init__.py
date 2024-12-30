@@ -1,8 +1,8 @@
 from dowhy.causal_identifier.auto_identifier import (
     AutoIdentifier,
     BackdoorAdjustment,
-    CovariateAdjustment,
     EstimandType,
+    GeneralizedAdjustment,
     construct_adjustment_estimand,
     construct_frontdoor_estimand,
     construct_iv_estimand,
@@ -17,7 +17,7 @@ __all__ = [
     "identify_effect_auto",
     "identify_effect_id",
     "BackdoorAdjustment",
-    "CovariateAdjustment",
+    "GeneralizedAdjustment",
     "EstimandType",
     "IdentifiedEstimand",
     "IDIdentifier",

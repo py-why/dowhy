@@ -396,8 +396,8 @@ TEST_GRAPH_SOLUTIONS_COMPLETE_ADJUSTMENT = {
         observed_variables=["Z", "X", "Y"],
         action_nodes=["X"],
         outcome_nodes=["Y"],
-        minimal_adjustment_sets=[{}],
-        exhaustive_adjustment_sets=[{"Z"}, {}],
+        minimal_adjustment_sets=[set()],
+        exhaustive_adjustment_sets=[{"Z"}, set()],
     ),
     # Example is selected from van der Zander et al. "Constructing Separators and Adjustment Sets in Ancestral
     # Graphs", figure 2.

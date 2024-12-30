@@ -203,12 +203,12 @@ def get_descendants(graph: nx.DiGraph, nodes):
 
 
 def get_proper_causal_path_nodes(graph: nx.DiGraph, action_nodes, outcome_nodes):
-    # Process is described in Van Der Zander et al. "Constructing Separators and
+    # Process is described in van der Zander et al. "Constructing Separators and
     # Adjustment Sets in Ancestral Graphs", Section 4.1.
 
-    # We cannot user do_surgery() since we require deep copies of the given graph.
+    # We cannot use do_surgery() since we require deep copies of the given graph.
 
-    # 1) Create modified graphs removing inbound and outbound arrows from the action nodes, respectively.
+    # 1) Create a pair of modified graphs by removing inbound and outbound arrows from the action nodes, respectively.
     graph_post_interv = copy.deepcopy(graph)  # remove incoming arrows to our action nodes
     edges_to_remove = [(u, v) for u, v in graph_post_interv.in_edges(action_nodes)]
     graph_post_interv.remove_edges_from(edges_to_remove)
@@ -224,7 +224,7 @@ def get_proper_causal_path_nodes(graph: nx.DiGraph, action_nodes, outcome_nodes)
 
 
 def get_proper_backdoor_graph(graph: nx.DiGraph, action_nodes, outcome_nodes):
-    # Process is described in Van Der Zander et al. "Constructing Separators and
+    # Process is described in van der Zander et al. "Constructing Separators and
     # Adjustment Sets in Ancestral Graphs", Section 4.1.
 
     # First we can just call get_proper_causal_path_nodes, then
