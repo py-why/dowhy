@@ -2,7 +2,11 @@ import pytest
 
 from dowhy.graph import build_graph_from_str
 
-from .example_graphs import TEST_FRONTDOOR_GRAPH_SOLUTIONS, TEST_GRAPH_SOLUTIONS, TEST_GRAPH_SOLUTIONS_COMPLETE_ADJUSTMENT
+from .example_graphs import (
+    TEST_FRONTDOOR_GRAPH_SOLUTIONS,
+    TEST_GRAPH_SOLUTIONS,
+    TEST_GRAPH_SOLUTIONS_COMPLETE_ADJUSTMENT,
+)
 
 
 class IdentificationTestGraphSolution(object):
@@ -68,7 +72,9 @@ def example_graph_solution(request):
 def example_frontdoor_graph_solution(request):
     return IdentificationTestFrontdoorGraphSolution(**TEST_FRONTDOOR_GRAPH_SOLUTIONS[request.param])
 
+
 @pytest.fixture(params=TEST_GRAPH_SOLUTIONS_COMPLETE_ADJUSTMENT.keys())
 def example_complete_adjustment_graph_solution(request):
-    return IdentificationTestGeneralCovariateAdjustmentGraphSolution(**TEST_GRAPH_SOLUTIONS_COMPLETE_ADJUSTMENT[request.param])
-
+    return IdentificationTestGeneralCovariateAdjustmentGraphSolution(
+        **TEST_GRAPH_SOLUTIONS_COMPLETE_ADJUSTMENT[request.param]
+    )

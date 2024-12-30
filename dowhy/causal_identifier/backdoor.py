@@ -118,7 +118,7 @@ class Backdoor:
                         AdjustmentSet(
                             _type=AdjustmentSet.BACKDOOR,
                             variables=tuple(obj.find_set()),
-                            num_paths_blocked_by_observed_nodes=obj.num_sets()
+                            num_paths_blocked_by_observed_nodes=obj.num_sets(),
                         )
                     )
 

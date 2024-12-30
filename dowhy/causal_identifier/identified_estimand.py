@@ -26,7 +26,7 @@ class IdentifiedEstimand:
         default_backdoor_id=None,
         identifier_method=None,
         no_directed_path=False,
-        default_adjustment_set_id=None
+        default_adjustment_set_id=None,
     ):
         self.identifier = identifier
         self.treatment_variable = parse_state(treatment_variable)

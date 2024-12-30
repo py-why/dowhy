@@ -1,8 +1,8 @@
+import copy
 import itertools
 import logging
 from enum import Enum
 from typing import Dict, List, Optional, Union
-import copy
 
 import networkx as nx
 import sympy as sp
@@ -21,9 +21,9 @@ from dowhy.graph import (
     get_backdoor_paths,
     get_descendants,
     get_instruments,
-    has_directed_path,
+    get_proper_backdoor_graph,
     get_proper_causal_path_nodes,
-    get_proper_backdoor_graph
+    has_directed_path,
 )
 from dowhy.utils.api import parse_state
 
@@ -51,10 +51,12 @@ class BackdoorAdjustment(Enum):
     BACKDOOR_MIN_EFFICIENT = "efficient-minimal-adjustment"
     BACKDOOR_MINCOST_EFFICIENT = "efficient-mincost-adjustment"
 
+
 class CovariateAdjustment(Enum):
     # Covariate adjustment method names
     COVARIATE_ADJUSTMENT_DEFAULT = "default"
     COVARIATE_ADJUSTMENT_EXHAUSTIVE = "exhaustive-search"
+
 
 MAX_BACKDOOR_ITERATIONS = 100000
 
@@ -119,7 +121,7 @@ class AutoIdentifier:
             self.backdoor_adjustment,
             self.optimize_backdoor,
             self.costs,
-            self.covariate_adjustment
+            self.covariate_adjustment,
         )
 
         estimand.identifier = self
@@ -158,7 +160,7 @@ def identify_effect_auto(
     backdoor_adjustment: BackdoorAdjustment = BackdoorAdjustment.BACKDOOR_DEFAULT,
     optimize_backdoor: bool = False,
     costs: Optional[List] = None,
-    covariate_adjustment: CovariateAdjustment = CovariateAdjustment.COVARIATE_ADJUSTMENT_DEFAULT
+    covariate_adjustment: CovariateAdjustment = CovariateAdjustment.COVARIATE_ADJUSTMENT_DEFAULT,
 ) -> IdentifiedEstimand:
     """Main method that returns an identified estimand (if one exists).
 
@@ -198,7 +200,7 @@ def identify_effect_auto(
             estimand_type,
             costs,
             conditional_node_names,
-            covariate_adjustment
+            covariate_adjustment,
         )
     elif estimand_type == EstimandType.NONPARAMETRIC_NDE:
         return identify_nde_effect(
@@ -233,7 +235,7 @@ def identify_ate_effect(
     estimand_type: EstimandType,
     costs: List,
     conditional_node_names: List[str] = None,
-    covariate_adjustment: CovariateAdjustment = CovariateAdjustment.COVARIATE_ADJUSTMENT_DEFAULT
+    covariate_adjustment: CovariateAdjustment = CovariateAdjustment.COVARIATE_ADJUSTMENT_DEFAULT,
 ):
     estimands_dict = {}
     mediation_first_stage_confounders = None
@@ -308,7 +310,9 @@ def identify_ate_effect(
     ### 4. GENERAL ADJUSTMENT IDENTIFICATION
     # This generalizes the backdoor criterion, identifying other valid covariate adjustment sets that might not
     # satisfy the backdoor criterion.
-    adjustment_sets = identify_complete_adjustment_set(graph, action_nodes, outcome_nodes, observed_nodes, covariate_adjustment)
+    adjustment_sets = identify_complete_adjustment_set(
+        graph, action_nodes, outcome_nodes, observed_nodes, covariate_adjustment
+    )
     logger.info("Number of general adjustment sets found: " + str(len(adjustment_sets)))
     estimands_dict, adjusment_variables_dict = build_adjustment_set_estimands_dict(
         action_nodes, outcome_nodes, observed_nodes, adjustment_sets, estimands_dict
@@ -762,7 +766,8 @@ def get_default_adjustment_set_id(
     # Default set contains minimum possible number of instrumental variables, to prevent lowering variance in the treatment variable.
     instrument_names = set(get_instruments(graph, action_nodes, outcome_nodes))
     iv_count_dict = {
-        key: len(set(adjustment_set).intersection(instrument_names)) for key, adjustment_set in adjustment_sets_dict.items()
+        key: len(set(adjustment_set).intersection(instrument_names))
+        for key, adjustment_set in adjustment_sets_dict.items()
     }
     min_iv_count = min(iv_count_dict.values())
     min_iv_keys = {key for key, iv_count in iv_count_dict.items() if iv_count == min_iv_count}
@@ -783,7 +788,7 @@ def build_adjustment_set_estimands_dict(
     outcome_names: List[str],
     observed_nodes: List[str],
     adjustment_sets: List[AdjustmentSet],
-    estimands_dict: Dict
+    estimands_dict: Dict,
 ):
     """Build the final dict for adjustment sets by filtering unobserved variables if needed."""
     adjustment_variables_dict = {}
@@ -884,7 +889,7 @@ def identify_complete_adjustment_set(
     action_nodes: List[str],
     outcome_nodes: List[str],
     observed_nodes: List[str],
-    covariate_adjustment: CovariateAdjustment = CovariateAdjustment.COVARIATE_ADJUSTMENT_DEFAULT
+    covariate_adjustment: CovariateAdjustment = CovariateAdjustment.COVARIATE_ADJUSTMENT_DEFAULT,
 ) -> List[AdjustmentSet]:
 
     graph_pbd = get_proper_backdoor_graph(graph, action_nodes, outcome_nodes)
@@ -897,7 +902,7 @@ def identify_complete_adjustment_set(
             set(action_nodes),
             set(outcome_nodes),
             # Require the adjustment set to consist only of observed nodes
-            restricted=((set(graph_pbd.nodes) - set(pcp_nodes)) & set(observed_nodes))
+            restricted=((set(graph_pbd.nodes) - set(pcp_nodes)) & set(observed_nodes)),
         )
         if adjustment_set is None:
             logger.info("No adjustment sets found.")

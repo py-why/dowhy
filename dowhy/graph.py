@@ -1,11 +1,11 @@
 """This module defines the fundamental interfaces and functions related to causal graphs."""
 
+import copy
 import itertools
 import logging
 import re
 from abc import abstractmethod
 from typing import Any, List, Protocol
-import copy
 
 import networkx as nx
 from networkx.algorithms.dag import has_cycle
@@ -232,7 +232,6 @@ def get_proper_backdoor_graph(graph: nx.DiGraph, action_nodes, outcome_nodes):
         [(u, v) for u in action_nodes for v in get_proper_causal_path_nodes(graph, action_nodes, outcome_nodes)]
     )
     return graph_pbd
-
 
 
 def check_dseparation(graph: nx.DiGraph, nodes1, nodes2, nodes3, new_graph=None, dseparation_algo="default"):
