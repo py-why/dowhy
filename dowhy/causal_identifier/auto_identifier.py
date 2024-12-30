@@ -2,6 +2,7 @@ import itertools
 import logging
 from enum import Enum
 from typing import Dict, List, Optional, Union
+import copy
 
 import networkx as nx
 import sympy as sp
@@ -21,6 +22,8 @@ from dowhy.graph import (
     get_descendants,
     get_instruments,
     has_directed_path,
+    get_proper_causal_path_nodes,
+    get_proper_backdoor_graph
 )
 from dowhy.utils.api import parse_state
 
@@ -884,7 +887,24 @@ def identify_complete_adjustment_set(
     observed_nodes: List[str],
     covariate_adjustment: CovariateAdjustment = CovariateAdjustment.COVARIATE_ADJUSTMENT_DEFAULT
 ) -> List[AdjustmentSet]:
-    # TODO: Implement this. Must return a list of AdjustmentSet objects.
+
+    graph_pbd = get_proper_backdoor_graph(graph, action_nodes, outcome_nodes)
+    pcp_nodes = get_proper_causal_path_nodes(graph, action_nodes, outcome_nodes)
+
+    if covariate_adjustment == CovariateAdjustment.COVARIATE_ADJUSTMENT_DEFAULT:
+        # In default case, we don't find all exhaustive adjustment sets
+        adjustment_set = nx.algorithms.find_minimal_d_separator(
+            graph_pbd,
+            action_nodes,
+            outcome_nodes,
+            # Require the adjustment set to consist only of observed nodes
+            restricted=((set(graph.nodes) - set(pcp_nodes)) & set(observed_nodes))
+        )
+        if adjustment_set is None:
+            logger.info("No adjustment sets found.")
+            return []
+        return [AdjustmentSet(AdjustmentSet.GENERAL, adjustment_set)]
+
     return [AdjustmentSet(AdjustmentSet.GENERAL, [])]
 
 

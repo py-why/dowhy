@@ -23,5 +23,5 @@ class AdjustmentSet:
         return self.variables
 
     def get_num_paths_blocked_by_observed_nodes(self):
-        """Return the number of paths blocked by the observed nodes (optional)"""
+        """Return the number of paths blocked by observed nodes (optional)"""
         return self.num_paths_blocked_by_observed_nodes
