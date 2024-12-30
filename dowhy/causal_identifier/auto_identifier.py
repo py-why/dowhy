@@ -1,5 +1,6 @@
 import itertools
 import logging
+import sys
 from enum import Enum
 from typing import Dict, List, Optional, Union
 
@@ -309,21 +310,30 @@ def identify_ate_effect(
 
     ### 4. GENERAL ADJUSTMENT IDENTIFICATION
     # This generalizes the backdoor criterion, identifying other valid covariate adjustment sets that might not
-    # satisfy the backdoor criterion.
-    adjustment_sets = identify_generalized_adjustment_set(
-        graph, action_nodes, outcome_nodes, observed_nodes, generalized_adjustment
-    )
-    logger.info("Number of general adjustment sets found: " + str(len(adjustment_sets)))
-    estimands_dict, adjusment_variables_dict = build_adjustment_set_estimands_dict(
-        action_nodes, outcome_nodes, observed_nodes, adjustment_sets, estimands_dict
-    )
-    default_adjustment_id = get_default_adjustment_set_id(graph, action_nodes, outcome_nodes, adjusment_variables_dict)
-    if len(adjusment_variables_dict) > 0:
-        estimands_dict["general_adjustment"] = estimands_dict.get(str(default_adjustment_id), None)
-        adjusment_variables_dict["general_adjustment"] = adjusment_variables_dict.get(str(default_adjustment_id), None)
+    # satisfy the backdoor criterion. This capability requires python >=3.10
+    adjustment_variables_dict = default_adjustment_id = None
+    if sys.version_info >= (3, 10):
+        adjustment_sets = identify_generalized_adjustment_set(
+            graph, action_nodes, outcome_nodes, observed_nodes, generalized_adjustment
+        )
+        logger.info("Number of general adjustment sets found: " + str(len(adjustment_sets)))
+        estimands_dict, adjustment_variables_dict = build_adjustment_set_estimands_dict(
+            action_nodes, outcome_nodes, observed_nodes, adjustment_sets, estimands_dict
+        )
+        default_adjustment_id = get_default_adjustment_set_id(
+            graph, action_nodes, outcome_nodes, adjustment_variables_dict
+        )
+        if len(adjustment_variables_dict) > 0:
+            estimands_dict["general_adjustment"] = estimands_dict.get(str(default_adjustment_id), None)
+            adjustment_variables_dict["general_adjustment"] = adjustment_variables_dict.get(
+                str(default_adjustment_id), None
+            )
+        else:
+            estimands_dict["general_adjustment"] = None
     else:
-        estimands_dict["general_adjustment"] = None
-
+        logger.warning(
+            f"Generalized covariate adjustment identification is not supported for the detected Python version: {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}."
+        )
     # Finally returning the estimand object
     estimand = IdentifiedEstimand(
         None,
@@ -332,12 +342,13 @@ def identify_ate_effect(
         estimand_type=estimand_type,
         estimands=estimands_dict,
         backdoor_variables=backdoor_variables_dict,
-        general_adjustment_variables=adjusment_variables_dict,
+        general_adjustment_variables=adjustment_variables_dict,
         instrumental_variables=instrument_names,
         frontdoor_variables=frontdoor_variables_names,
         mediation_first_stage_confounders=mediation_first_stage_confounders,
         mediation_second_stage_confounders=mediation_second_stage_confounders,
         default_backdoor_id=default_backdoor_id,
+        default_adjustment_set_id=default_adjustment_id,
     )
     return estimand
 
