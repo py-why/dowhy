@@ -821,7 +821,7 @@ def build_adjustment_set_estimands_dict(
         )
         logger.debug("Identified expression = " + str(adjustment_estimand_expr))
         estimands_dict[adjSet.get_adjustment_type() + str(i + 1)] = adjustment_estimand_expr
-        adjustment_variables_dict[adjSet.get_adjustment_type() + str(i + 1)] = adjSet.get_adjustment_variables()
+        adjustment_variables_dict[adjSet.get_adjustment_type() + str(i + 1)] = list(adjSet.get_adjustment_variables())
     return estimands_dict, adjustment_variables_dict
 
 
