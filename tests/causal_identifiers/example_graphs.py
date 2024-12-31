@@ -407,7 +407,17 @@ TEST_GRAPH_SOLUTIONS_COMPLETE_ADJUSTMENT = {
         action_nodes=["X1", "X2"],
         outcome_nodes=["Y1", "Y2"],
         minimal_adjustment_sets=[{"Z1", "Z2"}],
-        exhaustive_adjustment_sets=["Z1", "Z2"],
+        exhaustive_adjustment_sets=[{"Z1", "Z2"}],
+    ),
+    # Example is selected from Perković et al. "Complete Graphical Characterization and Construction of
+    # Adjustment Sets in Markov Equivalence Classes of Ancestral Graphs", Example 9 (in Section 5).
+    "perkovic_example_9_non_backdoor_adjustment_set": dict(
+        graph_str="digraph{V1;V2;V3;X1;X2;Y; X1->Y;V1->X1;V2->X1;V3->V2;V3->Y;X2->V1;X2->Y}",
+        observed_variables=["V1", "V2", "V3", "X1", "X2", "Y"],
+        action_nodes=["X1", "X2"],
+        outcome_nodes=["Y"],
+        minimal_adjustment_sets=[{"V2"}, {"V3"}],
+        exhaustive_adjustment_sets=[{"V2"}, {"V3"}, {"V2", "V3"}, {"V1", "V3"}, {"V1", "V2"}, {"V1", "V2", "V3"}],
     ),
 }
 
