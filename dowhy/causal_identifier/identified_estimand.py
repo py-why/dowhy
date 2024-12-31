@@ -97,10 +97,12 @@ class IdentifiedEstimand:
             estimand_type=copy.deepcopy(self.estimand_type),
             estimands=copy.deepcopy(self.estimands),
             backdoor_variables=copy.deepcopy(self.backdoor_variables),
+            general_adjustment_variables=copy.deepcopy(self.general_adjustment_variables),
             instrumental_variables=copy.deepcopy(self.instrumental_variables),
             frontdoor_variables=copy.deepcopy(self.frontdoor_variables),
             mediator_variables=copy.deepcopy(self.mediator_variables),
             default_backdoor_id=copy.deepcopy(self.default_backdoor_id),
+            default_adjustment_set_id=copy.deepcopy(self.default_adjustment_set_id),
             identifier_method=copy.deepcopy(self.identifier_method),
         )
 
