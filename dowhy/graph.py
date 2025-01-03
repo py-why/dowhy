@@ -129,7 +129,6 @@ def do_surgery(
 
     node_names = parse_state(node_names)
     new_graph = graph.copy()
-    # new_graph = copy.deepcopy(graph)
     for node_name in node_names:
         if remove_outgoing_edges:
             if remove_only_direct_edges_to_target:
