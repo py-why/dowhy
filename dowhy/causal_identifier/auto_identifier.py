@@ -81,7 +81,7 @@ DEFAULT_BACKDOOR_METHOD = BackdoorAdjustment.BACKDOOR_DEFAULT
 class AutoIdentifier:
     """Class that implements different identification methods.
 
-    Currently supports backdoor and instrumental variable identification methods. The identification is based on the causal graph provided.
+    Currently supports backdoor, general adjustment, and instrumental variable identification methods. The identification is based on the causal graph provided.
 
     This class is for backwards compatibility with CausalModel
     Will be deprecated in the future in favor of function call auto_identify_effect()
@@ -174,6 +174,9 @@ def identify_effect_auto(
     are assumed to be equal to one for all variables in the graph.
     :param conditional_node_names: variables that are used to determine treatment. If none are
     provided, it is assumed that the intervention is static.
+    :param generalized_adjustment: specify whether to return a single minimal adjustment set which
+    matches the general adjustment criterion ("default"), or two exhaustively compute all such adjustment sets ("exhaustive-search"). For now
+    only minimal adjustment sets are supported.
     :returns:  target estimand, an instance of the IdentifiedEstimand class
     """
 
@@ -844,7 +847,10 @@ def identify_frontdoor(
         raise ValueError(f"d-separation algorithm {dseparation_algo} is not supported")
 
     eligible_variables = (
-        get_descendants(graph, action_nodes) - set(outcome_nodes) - set(get_descendants(graph, outcome_nodes))
+        get_descendants(graph, action_nodes)
+        - set(action_nodes)
+        - set(outcome_nodes)
+        - set(get_descendants(graph, outcome_nodes))
     )
     eligible_variables = eligible_variables.intersection(set(observed_nodes))
     set_sizes = range(1, len(eligible_variables) + 1, 1)
@@ -914,6 +920,7 @@ def identify_generalized_adjustment_set(
 
     graph_pbd = get_proper_backdoor_graph(graph, action_nodes, outcome_nodes)
     pcp_nodes = get_proper_causal_path_nodes(graph, action_nodes, outcome_nodes)
+    dpcp_nodes = get_descendants(graph, pcp_nodes).union(pcp_nodes)
 
     if generalized_adjustment == GeneralizedAdjustment.GENERALIZED_ADJUSTMENT_DEFAULT:
         # In default case, we don't exhaustively find all adjustment sets
@@ -922,7 +929,7 @@ def identify_generalized_adjustment_set(
             set(action_nodes),
             set(outcome_nodes),
             # Require the adjustment set to consist only of observed nodes
-            restricted=((set(graph_pbd.nodes) - set(pcp_nodes)) & set(observed_nodes)),
+            restricted=((set(graph_pbd.nodes) - set(dpcp_nodes)) & set(observed_nodes)),
         )
         if adjustment_set is None:
             logger.info("No adjustment sets found.")

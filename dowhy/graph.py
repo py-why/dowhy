@@ -129,6 +129,7 @@ def do_surgery(
 
     node_names = parse_state(node_names)
     new_graph = graph.copy()
+    # new_graph = copy.deepcopy(graph)
     for node_name in node_names:
         if remove_outgoing_edges:
             if remove_only_direct_edges_to_target:
@@ -203,10 +204,15 @@ def get_descendants(graph: nx.DiGraph, nodes):
 
 
 def get_proper_causal_path_nodes(graph: nx.DiGraph, action_nodes, outcome_nodes):
-    # Process is described in van der Zander et al. "Constructing Separators and
-    # Adjustment Sets in Ancestral Graphs", Section 4.1.
+    """Method to get the proper causal path nodes, as described in van der Zander et al. "Constructing Separators and
+    Adjustment Sets in Ancestral Graphs", Section 4.1. We cannot use do_surgery() since we require deep copies of the given graph.
 
-    # We cannot use do_surgery() since we require deep copies of the given graph.
+    :param graph: the causal graph in question
+    :param action_nodes: the action nodes
+    :param outcome_nodes: the outcome nodes
+
+    :returns: the set of nodes that lie on proper causal paths from X to Y
+    """
 
     # 1) Create a pair of modified graphs by removing inbound and outbound arrows from the action nodes, respectively.
     graph_post_interv = copy.deepcopy(graph)  # remove incoming arrows to our action nodes
@@ -224,8 +230,15 @@ def get_proper_causal_path_nodes(graph: nx.DiGraph, action_nodes, outcome_nodes)
 
 
 def get_proper_backdoor_graph(graph: nx.DiGraph, action_nodes, outcome_nodes):
-    # Process is described in van der Zander et al. "Constructing Separators and
-    # Adjustment Sets in Ancestral Graphs", Section 4.1.
+    """Method to get the proper backdoor graph from a causal graph, as described in van der Zander et al. "Constructing Separators and
+    Adjustment Sets in Ancestral Graphs", Section 4.1. We cannot use do_surgery() since we require deep copies of the given graph.
+
+    :param graph: the causal graph in question
+    :param action_nodes: the action nodes
+    :param outcome_nodes: the outcome nodes
+
+    :returns: a new graph which is the proper backdoor graph of the original
+    """
 
     # First we can just call get_proper_causal_path_nodes, then
     # we remove edges from the action_nodes to the proper causal path nodes.

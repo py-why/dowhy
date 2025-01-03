@@ -2,9 +2,8 @@ import sys
 
 import pytest
 
-from dowhy.causal_identifier import AutoIdentifier, GeneralizedAdjustment
+from dowhy.causal_identifier import GeneralizedAdjustment
 from dowhy.causal_identifier.auto_identifier import identify_generalized_adjustment_set
-from dowhy.causal_identifier.identify_effect import EstimandType
 
 from .base import IdentificationTestGeneralCovariateAdjustmentGraphSolution, example_complete_adjustment_graph_solution
 

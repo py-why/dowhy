@@ -20,8 +20,8 @@ class TestFrontdoorIdentification(object):
         frontdoor_set = identify_frontdoor(
             graph,
             observed_nodes=example_frontdoor_graph_solution.observed_nodes,
-            action_nodes=["X"],
-            outcome_nodes=["Y"],
+            action_nodes=example_frontdoor_graph_solution.action_nodes,
+            outcome_nodes=example_frontdoor_graph_solution.outcome_nodes,
         )
 
         assert (
@@ -40,7 +40,12 @@ class TestFrontdoorIdentification(object):
         # Building the causal model
         num_samples = 10
         df = pd.DataFrame(np.random.random((num_samples, len(observed_nodes))), columns=observed_nodes)
-        model = CausalModel(data=df, treatment="X", outcome="Y", graph=graph)
+        model = CausalModel(
+            data=df,
+            treatment=example_frontdoor_graph_solution.action_nodes,
+            outcome=example_frontdoor_graph_solution.outcome_nodes,
+            graph=graph,
+        )
         estimand = model.identify_effect()
         frontdoor_set = estimand.frontdoor_variables
         assert (

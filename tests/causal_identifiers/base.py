@@ -38,10 +38,16 @@ class IdentificationTestFrontdoorGraphSolution(object):
         observed_variables,
         valid_frontdoor_sets,
         invalid_frontdoor_sets,
+        action_nodes=None,
+        outcome_nodes=None,
     ):
+        if outcome_nodes is None:
+            outcome_nodes = ["Y"]
+        if action_nodes is None:
+            action_nodes = ["X"]
         self.graph = build_graph_from_str(graph_str)
-        self.action_nodes = ["X"]
-        self.outcome_nodes = ["Y"]
+        self.action_nodes = action_nodes
+        self.outcome_nodes = outcome_nodes
         self.observed_nodes = observed_variables
         self.valid_frontdoor_sets = valid_frontdoor_sets
         self.invalid_frontdoor_sets = invalid_frontdoor_sets
@@ -55,7 +61,7 @@ class IdentificationTestGeneralCovariateAdjustmentGraphSolution(object):
         action_nodes,
         outcome_nodes,
         minimal_adjustment_sets,
-        exhaustive_adjustment_sets,
+        exhaustive_adjustment_sets=None,
     ):
         self.graph = build_graph_from_str(graph_str)
         self.action_nodes = action_nodes

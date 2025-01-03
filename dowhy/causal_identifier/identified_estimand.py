@@ -125,6 +125,9 @@ class IdentifiedEstimand:
                 # Just show the default backdoor set
                 if k.startswith("backdoor") and k != "backdoor":
                     continue
+            # Just show the default generalized adjustment set
+            if k.startswith("general") and k != "general_adjustment":
+                continue
             if only_target_estimand and k != self.identifier_method:
                 continue
             s += "\n### Estimand : {0}\n".format(i)
