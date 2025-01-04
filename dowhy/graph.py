@@ -1,5 +1,6 @@
 """This module defines the fundamental interfaces and functions related to causal graphs."""
 
+import copy
 import itertools
 import logging
 import re
@@ -187,11 +188,64 @@ def is_blocked(graph: nx.DiGraph, path, conditioned_nodes):
         return False
 
 
+def get_ancestors(graph: nx.DiGraph, nodes):
+    ancestors = set()
+    for node_name in nodes:
+        ancestors = ancestors.union(set(nx.ancestors(graph, node_name)))
+    return ancestors
+
+
 def get_descendants(graph: nx.DiGraph, nodes):
     descendants = set()
     for node_name in nodes:
         descendants = descendants.union(set(nx.descendants(graph, node_name)))
     return descendants
+
+
+def get_proper_causal_path_nodes(graph: nx.DiGraph, action_nodes, outcome_nodes):
+    """Method to get the proper causal path nodes, as described in van der Zander et al. "Constructing Separators and
+    Adjustment Sets in Ancestral Graphs", Section 4.1. We cannot use do_surgery() since we require deep copies of the given graph.
+
+    :param graph: the causal graph in question
+    :param action_nodes: the action nodes
+    :param outcome_nodes: the outcome nodes
+
+    :returns: the set of nodes that lie on proper causal paths from X to Y
+    """
+
+    # 1) Create a pair of modified graphs by removing inbound and outbound arrows from the action nodes, respectively.
+    graph_post_interv = copy.deepcopy(graph)  # remove incoming arrows to our action nodes
+    edges_to_remove = [(u, v) for u, v in graph_post_interv.in_edges(action_nodes)]
+    graph_post_interv.remove_edges_from(edges_to_remove)
+    graph_with_action_nodes_as_sinks = copy.deepcopy(graph)  # remove outbound arrows from our action nodes
+    edges_to_remove = [(u, v) for u, v in graph_with_action_nodes_as_sinks.out_edges(action_nodes)]
+    graph_with_action_nodes_as_sinks.remove_edges_from(edges_to_remove)
+
+    # 2) Use the modified graphs to identify the nodes which lie on proper causal paths from the
+    # action nodes to the outcome nodes.
+    de_x = get_descendants(graph_post_interv, action_nodes).union(action_nodes)
+    an_y = get_ancestors(graph_with_action_nodes_as_sinks, outcome_nodes).union(outcome_nodes)
+    return (set(de_x) - set(action_nodes)) & an_y
+
+
+def get_proper_backdoor_graph(graph: nx.DiGraph, action_nodes, outcome_nodes):
+    """Method to get the proper backdoor graph from a causal graph, as described in van der Zander et al. "Constructing Separators and
+    Adjustment Sets in Ancestral Graphs", Section 4.1. We cannot use do_surgery() since we require deep copies of the given graph.
+
+    :param graph: the causal graph in question
+    :param action_nodes: the action nodes
+    :param outcome_nodes: the outcome nodes
+
+    :returns: a new graph which is the proper backdoor graph of the original
+    """
+
+    # First we can just call get_proper_causal_path_nodes, then
+    # we remove edges from the action_nodes to the proper causal path nodes.
+    graph_pbd = copy.deepcopy(graph)
+    graph_pbd.remove_edges_from(
+        [(u, v) for u in action_nodes for v in get_proper_causal_path_nodes(graph, action_nodes, outcome_nodes)]
+    )
+    return graph_pbd
 
 
 def check_dseparation(graph: nx.DiGraph, nodes1, nodes2, nodes3, new_graph=None, dseparation_algo="default"):
