@@ -107,10 +107,10 @@ def refute_random_common_cause(
     """
     logger.info("Refutation over {} simulated datasets, each with a random common cause added".format(num_simulations))
 
-    new_backdoor_variables = target_estimand.get_backdoor_variables() + ["w_random"]
+    new_adjustment_variables = target_estimand.get_adjustment_set() + ["w_random"]
     identified_estimand = copy.deepcopy(target_estimand)
     # Adding a new backdoor variable to the identified estimand
-    identified_estimand.set_backdoor_variables(new_backdoor_variables)
+    identified_estimand.set_adjustment_set(new_adjustment_variables)
 
     if isinstance(random_state, int):
         random_state = np.random.RandomState(seed=random_state)

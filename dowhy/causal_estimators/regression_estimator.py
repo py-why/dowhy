@@ -87,8 +87,8 @@ class RegressionEstimator(CausalEstimator):
         self.reset_encoders()  # Forget any existing encoders
         self._set_effect_modifiers(data, effect_modifier_names)
 
-        self.logger.debug("Back-door variables used:" + ",".join(self._target_estimand.get_backdoor_variables()))
-        self._observed_common_causes_names = self._target_estimand.get_backdoor_variables()
+        self.logger.debug("Adjustment set variables used:" + ",".join(self._target_estimand.get_adjustment_set()))
+        self._observed_common_causes_names = self._target_estimand.get_adjustment_set()
         if len(self._observed_common_causes_names) > 0:
             self._observed_common_causes = data[self._observed_common_causes_names]
             self._observed_common_causes = self._encode(self._observed_common_causes, "observed_common_causes")

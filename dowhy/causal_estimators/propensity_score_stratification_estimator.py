@@ -264,6 +264,6 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
     def construct_symbolic_estimator(self, estimand):
         expr = "b: " + ",".join(estimand.outcome_variable) + "~"
         # TODO -- fix: we are actually conditioning on positive treatment (d=1)
-        var_list = estimand.treatment_variable + estimand.get_backdoor_variables()
+        var_list = estimand.treatment_variable + estimand.get_adjustment_set()
         expr += "+".join(var_list)
         return expr

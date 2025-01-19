@@ -222,7 +222,7 @@ def preprocess_observed_common_causes(
     """
 
     # 1. Categorical encoding of relevant variables
-    observed_common_causes_names = target_estimand.get_backdoor_variables()
+    observed_common_causes_names = target_estimand.get_adjustment_set()
     if len(observed_common_causes_names) > 0:
         # The encoded data is only used to calculate a parameter, so the encoder can be discarded.
         observed_common_causes = data[observed_common_causes_names]

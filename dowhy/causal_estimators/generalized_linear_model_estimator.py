@@ -127,7 +127,7 @@ class GeneralizedLinearModelEstimator(RegressionEstimator):
 
     def construct_symbolic_estimator(self, estimand):
         expr = "b: " + ",".join(estimand.outcome_variable) + "~" + "Sigmoid("
-        var_list = estimand.treatment_variable + estimand.get_backdoor_variables()
+        var_list = estimand.treatment_variable + estimand.get_adjustment_set()
         expr += "+".join(var_list)
         if self._effect_modifier_names:
             interaction_terms = [

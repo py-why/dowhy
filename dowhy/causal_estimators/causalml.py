@@ -118,10 +118,10 @@ class Causalml(CausalEstimator):
         self._set_effect_modifiers(data, effect_modifier_names)
 
         # Check the backdoor variables being used
-        self.logger.debug("Back-door variables used:" + ",".join(self._target_estimand.get_backdoor_variables()))
+        self.logger.debug("Adjustment set variables used:" + ",".join(self._target_estimand.get_adjustment_set()))
 
         # Add the observed confounders and one hot encode the categorical variables
-        self._observed_common_causes_names = self._target_estimand.get_backdoor_variables()
+        self._observed_common_causes_names = self._target_estimand.get_adjustment_set()
         if self._observed_common_causes_names:
             # Get the data of the unobserved confounders
             self._observed_common_causes = data[self._observed_common_causes_names]
@@ -220,6 +220,6 @@ class Causalml(CausalEstimator):
         expr = "b: " + ",".join(estimand.outcome_variable) + "~"
         # TODO we are conditioning on a postive treatment
         # TODO create an expression corresponding to each estimator used
-        var_list = estimand.treatment_variable + estimand.get_backdoor_variables()
+        var_list = estimand.treatment_variable + estimand.get_adjustment_set()
         expr += "+".join(var_list)
         return expr

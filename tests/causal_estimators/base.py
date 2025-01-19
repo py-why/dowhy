@@ -1,4 +1,5 @@
 import itertools
+import pytest
 
 import numpy as np
 import pandas as pd
@@ -6,6 +7,7 @@ import pandas as pd
 import dowhy.datasets
 from dowhy import EstimandType, identify_effect_auto
 from dowhy.graph import build_graph_from_str
+from .example_graphs import TEST_GRAPHS
 
 
 class SimpleEstimator(object):
@@ -159,7 +161,7 @@ class SimpleEstimator(object):
             cfg["method_params"] = method_params
             self.average_treatment_effect_test(**cfg)
 
-    def custom_data_average_treatment_effect_test(self, data):
+    def custom_data_average_treatment_effect_test(self, data, method_params=None):
         target_estimand = identify_effect_auto(
             build_graph_from_str(data["gml_graph"]),
             observed_nodes=list(data["df"].columns),
@@ -167,9 +169,11 @@ class SimpleEstimator(object):
             outcome_nodes=data["outcome_name"],
             estimand_type=EstimandType.NONPARAMETRIC_ATE,
         )
+        target_estimand.set_identifier_method(self._identifier_method)
         estimator_ate = self._Estimator(
             identified_estimand=target_estimand,
             test_significance=None,
+            **method_params
         )
         estimator_ate.fit(data["df"])
         true_ate = data["ate"]
@@ -377,3 +381,24 @@ class SimpleEstimatorWithModelParams(object):
             assert error_3 > error_tolerance
         except NotImplementedError:
             pass  # Expected, for many Estimators
+
+
+class TestGraphObject(object):
+    def __init__(
+        self,
+        graph_str,
+        observed_variables,
+        action_nodes,
+        outcome_node,
+    ):
+        self.graph = build_graph_from_str(graph_str)
+        self.action_nodes = action_nodes
+        self.outcome_node = outcome_node
+        self.observed_nodes = observed_variables
+
+
+@pytest.fixture(params=TEST_GRAPHS.keys())
+def example_graph(request):
+    return TestGraphObject(
+        **TEST_GRAPHS[request.param]
+    )
