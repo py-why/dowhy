@@ -1,5 +1,3 @@
-
-
 TEST_GRAPHS = {
     # Example is selected from Perković et al. "Complete Graphical Characterization and Construction of
     # Adjustment Sets in Markov Equivalence Classes of Ancestral Graphs", Example 8 (in Section 5).

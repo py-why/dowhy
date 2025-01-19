@@ -1,10 +1,11 @@
 import statsmodels.api as sm
 from pytest import mark
 
+import dowhy.datasets
 from dowhy.causal_estimators.generalized_linear_model_estimator import GeneralizedLinearModelEstimator
 
 from .base import SimpleEstimator, TestGraphObject, example_graph
-import dowhy.datasets
+
 
 @mark.usefixtures("fixed_seed")
 class TestGeneralizedLinearModelEstimator(object):
@@ -66,7 +67,7 @@ class TestGeneralizedLinearModelEstimator(object):
                     True,
                 ],
                 "general_adjustment",
-            )
+            ),
         ],
     )
     def test_average_treatment_effect(
@@ -103,18 +104,16 @@ class TestGeneralizedLinearModelEstimator(object):
             },
         )
 
-    def test_general_adjustment_specific_graphs(
-            self, example_graph: TestGraphObject
-    ):
+    def test_general_adjustment_specific_graphs(self, example_graph: TestGraphObject):
         data = dowhy.datasets.linear_dataset_from_graph(
             example_graph.graph,
             example_graph.action_nodes,
             example_graph.outcome_node,
             treatments_are_binary=True,
             outcome_is_binary=False,
-            num_samples=50000
+            num_samples=50000,
         )
-        data['df'] = data['df'][example_graph.observed_nodes]
+        data["df"] = data["df"][example_graph.observed_nodes]
         estimator_tester = SimpleEstimator(0.1, GeneralizedLinearModelEstimator, identifier_method="general_adjustment")
         estimator_tester.custom_data_average_treatment_effect_test(
             data,

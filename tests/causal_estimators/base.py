@@ -1,12 +1,13 @@
 import itertools
-import pytest
 
 import numpy as np
 import pandas as pd
+import pytest
 
 import dowhy.datasets
 from dowhy import EstimandType, identify_effect_auto
 from dowhy.graph import build_graph_from_str
+
 from .example_graphs import TEST_GRAPHS
 
 
@@ -170,11 +171,7 @@ class SimpleEstimator(object):
             estimand_type=EstimandType.NONPARAMETRIC_ATE,
         )
         target_estimand.set_identifier_method(self._identifier_method)
-        estimator_ate = self._Estimator(
-            identified_estimand=target_estimand,
-            test_significance=None,
-            **method_params
-        )
+        estimator_ate = self._Estimator(identified_estimand=target_estimand, test_significance=None, **method_params)
         estimator_ate.fit(data["df"])
         true_ate = data["ate"]
         ate_estimate = estimator_ate.estimate_effect(data["df"])
@@ -399,6 +396,4 @@ class TestGraphObject(object):
 
 @pytest.fixture(params=TEST_GRAPHS.keys())
 def example_graph(request):
-    return TestGraphObject(
-        **TEST_GRAPHS[request.param]
-    )
+    return TestGraphObject(**TEST_GRAPHS[request.param])

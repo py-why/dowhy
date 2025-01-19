@@ -15,7 +15,6 @@ from sklearn.neural_network import MLPRegressor
 
 from dowhy.utils.graph_operations import add_edge, del_edge, get_random_node_pair, get_simple_ordered_tree
 
-
 DISCRETE = "discrete"
 BINARY = "binary"
 CONTINUOUS = "continuous"
@@ -628,7 +627,13 @@ def check_all_node_types_are_specified(graph, variable_type_dict):
 
 
 def linear_dataset_from_graph(
-    graph, treatments, outcome, treatments_are_binary = False, outcome_is_binary=False, variable_type_dict = None, num_samples=1000
+    graph,
+    treatments,
+    outcome,
+    treatments_are_binary=False,
+    outcome_is_binary=False,
+    variable_type_dict=None,
+    num_samples=1000,
 ):
     """
     This function generates a random dataset given a graph plus a specification for the datatype of
@@ -649,16 +654,14 @@ def linear_dataset_from_graph(
     if variable_type_dict:
         check_all_node_types_are_specified(graph, variable_type_dict)
     else:
-        variable_type_dict = {
-            node: CONTINUOUS for node in graph.nodes
-        }
+        variable_type_dict = {node: CONTINUOUS for node in graph.nodes}
     if treatments_are_binary:
         variable_type_dict.update({node: BINARY for node in treatments})
     if outcome_is_binary:
         variable_type_dict[outcome] = BINARY
     # Randomly assign edge weights
     for u, v in graph.edges():
-        graph[u][v]['weight'] = np.random.uniform(0, 1)
+        graph[u][v]["weight"] = np.random.uniform(0, 1)
 
     all_nodes = list(graph.nodes)
     all_nodes.sort()
@@ -701,14 +704,14 @@ def linear_dataset_from_graph(
                 graph.predecessors(node)
             )  # Getting all the parent nodes on which current "node" depends on
             if changed[node] == False and all(
-                    changed[x] == True for x in predecessors
+                changed[x] == True for x in predecessors
             ):  # Check if current "node" has not been processed yet and if all the parent nodes have been processed
                 successors = list(graph.successors(node))
                 successors.sort()
                 cs.extend(successors)  # Storing immediate children for next level data generation
 
                 X = df[predecessors].to_numpy()  # Using parent nodes data
-                c = np.array([graph[u][node]['weight'] for u in predecessors])
+                c = np.array([graph[u][node]["weight"] for u in predecessors])
                 t = np.random.normal(0, 1, num_samples) + X @ c  # Using Linear Regression to generate data
 
                 changed[node] = True
@@ -727,7 +730,6 @@ def linear_dataset_from_graph(
                     binary_cols.append(node)
         currset = cs
 
-
     # Compute ATE:
     ate = 0
     for treatment in treatments:
@@ -736,7 +738,7 @@ def linear_dataset_from_graph(
             if set(treatments).intersection(path[1:-1]):
                 continue
             for a, b in zip(path, path[1:]):
-                path_multiplier *= graph[a][b]['weight']
+                path_multiplier *= graph[a][b]["weight"]
             ate += path_multiplier
 
     gml_str = "\n".join(nx.generate_gml(graph))
@@ -749,7 +751,7 @@ def linear_dataset_from_graph(
         "continuous_columns": continuous_cols,
         "binary_columns": binary_cols,
         "ate_estimate": ate,
-        "ate": ate
+        "ate": ate,
     }
     return ret_dict
 
@@ -778,9 +780,7 @@ def dataset_from_random_graph(
     all_nodes = list(DAG.nodes)
     all_nodes.sort()
     num_nodes = len(all_nodes)
-    random_numbers_array = np.random.rand(
-        num_nodes
-    )
+    random_numbers_array = np.random.rand(num_nodes)
 
     # Get treatments and outcomes
     outcome = None
@@ -806,13 +806,7 @@ def dataset_from_random_graph(
         else:
             variable_type_dict[idx] = BINARY
 
-    return linear_dataset_from_graph(
-        DAG,
-        variable_type_dict,
-        treatments,
-        outcome,
-        num_samples=num_samples
-    )
+    return linear_dataset_from_graph(DAG, variable_type_dict, treatments, outcome, num_samples=num_samples)
 
 
 def partially_linear_dataset(
