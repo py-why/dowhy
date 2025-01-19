@@ -432,7 +432,7 @@ TEST_GRAPH_SOLUTIONS_COMPLETE_ADJUSTMENT = {
                 edge[source "L" target "V3"]
                 edge[source "L" target "V2"]]
                 """,
-        observed_variables=["V1", "V2", "V3", "V4", "V5" "X1", "X2", "Y"],
+        observed_variables=["V1", "V2", "V3", "V4", "V5", "X1", "X2", "Y"],
         action_nodes=["X1", "X2"],
         outcome_nodes=["Y"],
         minimal_adjustment_sets=[{"V1", "V2"}],
