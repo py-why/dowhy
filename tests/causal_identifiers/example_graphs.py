@@ -485,7 +485,7 @@ TEST_FRONTDOOR_GRAPH_SOLUTIONS = {
     ),
     # This example is reproduced from the generalized_adjustment examples, and is
     # added to test that the frontdoor criterion successfully filters out all the action
-    # nodes as ineligible variables for the
+    # nodes as ineligible variables.
     "perkovic_example_9_multiple_action_nodes_no_frontdoor": dict(
         graph_str="digraph{V1;V2;V3;X1;X2;Y; X1->Y;V1->X1;V2->X1;V3->V2;V3->Y;X2->V1;X2->Y}",
         observed_variables=["V1", "V2", "V3", "X1", "X2", "Y"],

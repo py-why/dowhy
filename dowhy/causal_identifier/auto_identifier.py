@@ -175,7 +175,7 @@ def identify_effect_auto(
     :param conditional_node_names: variables that are used to determine treatment. If none are
     provided, it is assumed that the intervention is static.
     :param generalized_adjustment: specify whether to return a single minimal adjustment set which
-    matches the general adjustment criterion ("default"), or two exhaustively compute all such adjustment sets ("exhaustive-search"). For now
+    matches the general adjustment criterion ("default"), or to exhaustively compute all such adjustment sets ("exhaustive-search"). For now
     only minimal adjustment sets are supported.
     :returns:  target estimand, an instance of the IdentifiedEstimand class
     """
@@ -937,8 +937,8 @@ def identify_generalized_adjustment_set(
         return [AdjustmentSet(AdjustmentSet.GENERAL, adjustment_set)]
     elif generalized_adjustment == GeneralizedAdjustment.GENERALIZED_ADJUSTMENT_EXHAUSTIVE:
         raise ValueError("Exhaustive identification of general adjustment sets is not yet supported.")
-
-    return []  # the method should never reach this case
+    else:
+        raise ValueError("Please provide a valid type of Generalized Adjustment")
 
 
 def identify_mediation(graph: nx.DiGraph, action_nodes: List[str], outcome_nodes: List[str]):
