@@ -162,7 +162,7 @@ class SimpleEstimator(object):
             cfg["method_params"] = method_params
             self.average_treatment_effect_test(**cfg)
 
-    def custom_data_average_treatment_effect_test(self, data, method_params=None):
+    def custom_data_average_treatment_effect_test(self, data, method_params={}):
         target_estimand = identify_effect_auto(
             build_graph_from_str(data["gml_graph"]),
             observed_nodes=list(data["df"].columns),
@@ -175,13 +175,13 @@ class SimpleEstimator(object):
         estimator_ate.fit(data["df"])
         true_ate = data["ate"]
         ate_estimate = estimator_ate.estimate_effect(data["df"])
-        error = ate_estimate.value - true_ate
+        error = abs(ate_estimate.value - true_ate)
         print(
             "Error in ATE estimate = {0} with tolerance {1}%. Estimated={2},True={3}".format(
                 error, self._error_tolerance * 100, ate_estimate.value, true_ate
             )
         )
-        res = True if (error < true_ate * self._error_tolerance) else False
+        res = True if (error < abs(true_ate) * self._error_tolerance) else False
         assert res
 
 

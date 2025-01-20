@@ -626,6 +626,20 @@ def check_all_node_types_are_specified(graph, variable_type_dict):
             raise ValueError(f"Graph node '{node}' is not present in variable_type_dict keys")
 
 
+def ate_from_direct_graph_weights(graph, treatments, outcome):
+    # Only valid if the treatments are the only non-continuous variables in the graph
+    ate = 0
+    for treatment in treatments:
+        for path in nx.all_simple_paths(graph, source=treatment, target=outcome):
+            path_multiplier = 1
+            if set(treatments).intersection(path[1:-1]):
+                continue
+            for a, b in zip(path, path[1:]):
+                path_multiplier *= graph[a][b]["weight"]
+            ate += path_multiplier
+    return ate
+
+
 def linear_dataset_from_graph(
     graph,
     treatments,
@@ -673,6 +687,7 @@ def linear_dataset_from_graph(
     for node in all_nodes:
         changed[node] = False
     df = pd.DataFrame()
+    # Creating datasets to store the intervention data, for estimating the true ATE
     currset = list()
     counter = 0
 
@@ -696,6 +711,9 @@ def linear_dataset_from_graph(
             currset.extend(successors)
             changed[node] = True
 
+    df_treated = df.copy(deep=True)
+    df_untreated = df.copy(deep=True)
+
     # "currset" variable currently has all the successors of the nodes which had no incoming edges
     while len(currset) > 0:
         cs = list()  # Variable to store immediate children of nodes present in "currset"
@@ -710,36 +728,46 @@ def linear_dataset_from_graph(
                 successors.sort()
                 cs.extend(successors)  # Storing immediate children for next level data generation
 
-                X = df[predecessors].to_numpy()  # Using parent nodes data
+                treatment_indices = [i for i, col in enumerate(predecessors) if col in treatments]
+                X_observed = df[predecessors].to_numpy()  # Using parent nodes data
+                X_treated = df_treated[predecessors].to_numpy()
+                X_treated[:, treatment_indices] = 1
+                X_untreated = df_untreated[predecessors].to_numpy()
+                X_untreated[:, treatment_indices] = 0
                 c = np.array([graph[u][node]["weight"] for u in predecessors])
-                t = np.random.normal(0, 1, num_samples) + X @ c  # Using Linear Regression to generate data
+                t_observed = np.random.normal(0, 1, num_samples) + X_observed @ c  # Using Linear Regression to generate data
+                t_treated = np.random.normal(0, 1, num_samples) + X_treated @ c  # Using Linear Regression to generate data
+                t_untreated = np.random.normal(0, 1, num_samples) + X_untreated @ c  # Using Linear Regression to generate data
 
                 changed[node] = True
                 dtype = variable_type_dict[node]
                 counter += 1
                 if dtype == DISCRETE:
-                    df[node] = convert_continuous_to_discrete(t)
+                    df[node] = convert_continuous_to_discrete(t_observed)
+                    df_treated[node] = convert_continuous_to_discrete(t_treated)
+                    df_untreated[node] = convert_continuous_to_discrete(t_untreated)
                     discrete_cols.append(node)
                 elif dtype == CONTINUOUS:
-                    df[node] = t
+                    df[node] = t_observed
+                    df_treated[node] = t_treated
+                    df_untreated[node] = t_untreated
                     continuous_cols.append(node)
                 else:
-                    nums = np.random.normal(0, 1, num_samples)
-                    df[node] = np.vectorize(convert_to_binary)(nums)
+                    # nums = np.random.normal(0, 1, num_samples)
+                    df[node] = np.vectorize(convert_to_binary)(t_observed)
+                    df_treated[node] = np.vectorize(convert_to_binary)(t_treated)
+                    df_untreated[node] = np.vectorize(convert_to_binary)(t_untreated)
                     discrete_cols.append(node)
                     binary_cols.append(node)
         currset = cs
 
     # Compute ATE:
-    ate = 0
-    for treatment in treatments:
-        for path in nx.all_simple_paths(graph, source=treatment, target=outcome):
-            path_multiplier = 1
-            if set(treatments).intersection(path[1:-1]):
-                continue
-            for a, b in zip(path, path[1:]):
-                path_multiplier *= graph[a][b]["weight"]
-            ate += path_multiplier
+    # If all non-treatment variables are continuous, then can be computed from the
+    # graph directly
+    if all(variable_type_dict[x] == CONTINUOUS for x in variable_type_dict.keys() if x not in treatments):
+        ate = ate_from_direct_graph_weights(graph, treatments, outcome)
+    else:
+        ate = np.mean(df_treated[outcome]) - np.mean(df_untreated[outcome])
 
     gml_str = "\n".join(nx.generate_gml(graph))
     ret_dict = {

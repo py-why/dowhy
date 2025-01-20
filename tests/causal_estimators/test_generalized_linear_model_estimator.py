@@ -104,13 +104,13 @@ class TestGeneralizedLinearModelEstimator(object):
             },
         )
 
-    def test_general_adjustment_specific_graphs(self, example_graph: TestGraphObject):
+    def test_general_adjustment_estimation_on_example_graphs(self, example_graph: TestGraphObject):
         data = dowhy.datasets.linear_dataset_from_graph(
             example_graph.graph,
             example_graph.action_nodes,
             example_graph.outcome_node,
             treatments_are_binary=True,
-            outcome_is_binary=False,
+            outcome_is_binary=True,
             num_samples=50000,
         )
         data["df"] = data["df"][example_graph.observed_nodes]
