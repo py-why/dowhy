@@ -1,5 +1,6 @@
 import itertools
 import logging
+import sys
 from enum import Enum
 from typing import Dict, List, Optional, Union
 
@@ -7,6 +8,7 @@ import networkx as nx
 import sympy as sp
 import sympy.stats as spstats
 
+from dowhy.causal_identifier.adjustment_set import AdjustmentSet
 from dowhy.causal_identifier.efficient_backdoor import EfficientBackdoor
 from dowhy.causal_identifier.identified_estimand import IdentifiedEstimand
 from dowhy.graph import (
@@ -19,6 +21,8 @@ from dowhy.graph import (
     get_backdoor_paths,
     get_descendants,
     get_instruments,
+    get_proper_backdoor_graph,
+    get_proper_causal_path_nodes,
     has_directed_path,
 )
 from dowhy.utils.api import parse_state
@@ -48,6 +52,13 @@ class BackdoorAdjustment(Enum):
     BACKDOOR_MINCOST_EFFICIENT = "efficient-mincost-adjustment"
 
 
+class GeneralizedAdjustment(Enum):
+    # Covariate adjustment method names
+    GENERALIZED_ADJUSTMENT_DEFAULT = "default"
+    # Not supported yet
+    GENERALIZED_ADJUSTMENT_EXHAUSTIVE = "exhaustive-search"
+
+
 MAX_BACKDOOR_ITERATIONS = 100000
 
 METHOD_NAMES = {
@@ -70,7 +81,7 @@ DEFAULT_BACKDOOR_METHOD = BackdoorAdjustment.BACKDOOR_DEFAULT
 class AutoIdentifier:
     """Class that implements different identification methods.
 
-    Currently supports backdoor and instrumental variable identification methods. The identification is based on the causal graph provided.
+    Currently supports backdoor, general adjustment, and instrumental variable identification methods. The identification is based on the causal graph provided.
 
     This class is for backwards compatibility with CausalModel
     Will be deprecated in the future in favor of function call auto_identify_effect()
@@ -83,11 +94,14 @@ class AutoIdentifier:
         backdoor_adjustment: BackdoorAdjustment = BackdoorAdjustment.BACKDOOR_DEFAULT,
         optimize_backdoor: bool = False,
         costs: Optional[List] = None,
+        # By default, we will just compute a minimal adjustment set
+        generalized_adjustment: GeneralizedAdjustment = GeneralizedAdjustment.GENERALIZED_ADJUSTMENT_DEFAULT,
     ):
         self.estimand_type = estimand_type
         self.backdoor_adjustment = backdoor_adjustment
         self.optimize_backdoor = optimize_backdoor
         self.costs = costs
+        self.generalized_adjustment = generalized_adjustment
         self.logger = logging.getLogger(__name__)
 
     def identify_effect(
@@ -108,6 +122,7 @@ class AutoIdentifier:
             self.backdoor_adjustment,
             self.optimize_backdoor,
             self.costs,
+            self.generalized_adjustment,
         )
 
         estimand.identifier = self
@@ -146,6 +161,7 @@ def identify_effect_auto(
     backdoor_adjustment: BackdoorAdjustment = BackdoorAdjustment.BACKDOOR_DEFAULT,
     optimize_backdoor: bool = False,
     costs: Optional[List] = None,
+    generalized_adjustment: GeneralizedAdjustment = GeneralizedAdjustment.GENERALIZED_ADJUSTMENT_DEFAULT,
 ) -> IdentifiedEstimand:
     """Main method that returns an identified estimand (if one exists).
 
@@ -158,6 +174,9 @@ def identify_effect_auto(
     are assumed to be equal to one for all variables in the graph.
     :param conditional_node_names: variables that are used to determine treatment. If none are
     provided, it is assumed that the intervention is static.
+    :param generalized_adjustment: specify whether to return a single minimal adjustment set which
+    matches the general adjustment criterion ("default"), or to exhaustively compute all such adjustment sets ("exhaustive-search"). For now
+    only minimal adjustment sets are supported.
     :returns:  target estimand, an instance of the IdentifiedEstimand class
     """
 
@@ -185,6 +204,7 @@ def identify_effect_auto(
             estimand_type,
             costs,
             conditional_node_names,
+            generalized_adjustment,
         )
     elif estimand_type == EstimandType.NONPARAMETRIC_NDE:
         return identify_nde_effect(
@@ -219,6 +239,7 @@ def identify_ate_effect(
     estimand_type: EstimandType,
     costs: List,
     conditional_node_names: List[str] = None,
+    generalized_adjustment: GeneralizedAdjustment = GeneralizedAdjustment.GENERALIZED_ADJUSTMENT_DEFAULT,
 ):
     estimands_dict = {}
     mediation_first_stage_confounders = None
@@ -244,11 +265,11 @@ def identify_ate_effect(
             costs,
             conditional_node_names=conditional_node_names,
         )
-    estimands_dict, backdoor_variables_dict = build_backdoor_estimands_dict(
+    estimands_dict, backdoor_variables_dict = build_adjustment_set_estimands_dict(
         action_nodes, outcome_nodes, observed_nodes, backdoor_sets, estimands_dict
     )
     # Setting default "backdoor" identification adjustment set
-    default_backdoor_id = get_default_backdoor_set_id(graph, action_nodes, outcome_nodes, backdoor_variables_dict)
+    default_backdoor_id = get_default_adjustment_set_id(graph, action_nodes, outcome_nodes, backdoor_variables_dict)
     if len(backdoor_variables_dict) > 0:
         estimands_dict["backdoor"] = estimands_dict.get(str(default_backdoor_id), None)
         backdoor_variables_dict["backdoor"] = backdoor_variables_dict.get(str(default_backdoor_id), None)
@@ -290,6 +311,32 @@ def identify_ate_effect(
     else:
         estimands_dict["frontdoor"] = None
 
+    ### 4. GENERAL ADJUSTMENT IDENTIFICATION
+    # This generalizes the backdoor criterion, identifying other valid covariate adjustment sets that might not
+    # satisfy the backdoor criterion. This capability requires python >=3.10
+    adjustment_variables_dict = default_adjustment_id = None
+    if sys.version_info >= (3, 10):
+        adjustment_sets = identify_generalized_adjustment_set(
+            graph, action_nodes, outcome_nodes, observed_nodes, generalized_adjustment
+        )
+        logger.info("Number of general adjustment sets found: " + str(len(adjustment_sets)))
+        estimands_dict, adjustment_variables_dict = build_adjustment_set_estimands_dict(
+            action_nodes, outcome_nodes, observed_nodes, adjustment_sets, estimands_dict
+        )
+        default_adjustment_id = get_default_adjustment_set_id(
+            graph, action_nodes, outcome_nodes, adjustment_variables_dict
+        )
+        if len(adjustment_variables_dict) > 0:
+            estimands_dict["general_adjustment"] = estimands_dict.get(str(default_adjustment_id), None)
+            adjustment_variables_dict["general_adjustment"] = adjustment_variables_dict.get(
+                str(default_adjustment_id), None
+            )
+        else:
+            estimands_dict["general_adjustment"] = None
+    else:
+        logger.warning(
+            f"Generalized covariate adjustment identification is not supported for the detected Python version: {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}."
+        )
     # Finally returning the estimand object
     estimand = IdentifiedEstimand(
         None,
@@ -298,11 +345,13 @@ def identify_ate_effect(
         estimand_type=estimand_type,
         estimands=estimands_dict,
         backdoor_variables=backdoor_variables_dict,
+        general_adjustment_variables=adjustment_variables_dict,
         instrumental_variables=instrument_names,
         frontdoor_variables=frontdoor_variables_names,
         mediation_first_stage_confounders=mediation_first_stage_confounders,
         mediation_second_stage_confounders=mediation_second_stage_confounders,
         default_backdoor_id=default_backdoor_id,
+        default_adjustment_set_id=default_adjustment_id,
     )
     return estimand
 
@@ -329,11 +378,11 @@ def identify_cde_effect(
     backdoor_sets = identify_backdoor(
         graph, action_nodes, outcome_nodes, observed_nodes, backdoor_adjustment, direct_effect=True
     )
-    estimands_dict, backdoor_variables_dict = build_backdoor_estimands_dict(
+    estimands_dict, backdoor_variables_dict = build_adjustment_set_estimands_dict(
         action_nodes, outcome_nodes, observed_nodes, backdoor_sets, estimands_dict
     )
     # Setting default "backdoor" identification adjustment set
-    default_backdoor_id = get_default_backdoor_set_id(graph, action_nodes, outcome_nodes, backdoor_variables_dict)
+    default_backdoor_id = get_default_adjustment_set_id(graph, action_nodes, outcome_nodes, backdoor_variables_dict)
     if len(backdoor_variables_dict) > 0:
         estimands_dict["backdoor"] = estimands_dict.get(str(default_backdoor_id), None)
         backdoor_variables_dict["backdoor"] = backdoor_variables_dict.get(str(default_backdoor_id), None)
@@ -369,11 +418,11 @@ def identify_nie_effect(
     ### 1. FIRST DOING BACKDOOR IDENTIFICATION
     # First, checking if there are any valid backdoor adjustment sets
     backdoor_sets = identify_backdoor(graph, action_nodes, outcome_nodes, observed_nodes, backdoor_adjustment)
-    estimands_dict, backdoor_variables_dict = build_backdoor_estimands_dict(
+    estimands_dict, backdoor_variables_dict = build_adjustment_set_estimands_dict(
         action_nodes, outcome_nodes, observed_nodes, backdoor_sets, estimands_dict
     )
     # Setting default "backdoor" identification adjustment set
-    default_backdoor_id = get_default_backdoor_set_id(graph, action_nodes, outcome_nodes, backdoor_variables_dict)
+    default_backdoor_id = get_default_adjustment_set_id(graph, action_nodes, outcome_nodes, backdoor_variables_dict)
     backdoor_variables_dict["backdoor"] = backdoor_variables_dict.get(str(default_backdoor_id), None)
 
     ### 2. SECOND, CHECKING FOR MEDIATORS
@@ -430,11 +479,11 @@ def identify_nde_effect(
     ### 1. FIRST DOING BACKDOOR IDENTIFICATION
     # First, checking if there are any valid backdoor adjustment sets
     backdoor_sets = identify_backdoor(graph, action_nodes, outcome_nodes, observed_nodes, backdoor_adjustment)
-    estimands_dict, backdoor_variables_dict = build_backdoor_estimands_dict(
+    estimands_dict, backdoor_variables_dict = build_adjustment_set_estimands_dict(
         action_nodes, outcome_nodes, observed_nodes, backdoor_sets, estimands_dict
     )
     # Setting default "backdoor" identification adjustment set
-    default_backdoor_id = get_default_backdoor_set_id(graph, action_nodes, outcome_nodes, backdoor_variables_dict)
+    default_backdoor_id = get_default_adjustment_set_id(graph, action_nodes, outcome_nodes, backdoor_variables_dict)
     backdoor_variables_dict["backdoor"] = backdoor_variables_dict.get(str(default_backdoor_id), None)
 
     ### 2. SECOND, CHECKING FOR MEDIATORS
@@ -488,7 +537,7 @@ def identify_backdoor(
     include_unobserved: bool = False,
     dseparation_algo: str = "default",
     direct_effect: bool = False,
-):
+) -> List[AdjustmentSet]:
     backdoor_sets = []
     backdoor_paths = None
     bdoor_graph = None
@@ -521,7 +570,7 @@ def identify_backdoor(
         dseparation_algo=dseparation_algo,
     )
     if check["is_dseparated"]:
-        backdoor_sets.append({"backdoor_set": empty_set})
+        backdoor_sets.append(AdjustmentSet(AdjustmentSet.BACKDOOR, empty_set))
         # If the method is `minimal-adjustment`, return the empty set right away.
         if backdoor_adjustment == BackdoorAdjustment.BACKDOOR_MIN:
             return backdoor_sets
@@ -644,13 +693,13 @@ def identify_efficient_backdoor(
     )
     if backdoor_adjustment == BackdoorAdjustment.BACKDOOR_EFFICIENT:
         backdoor_set = efficient_bd.optimal_adj_set()
-        backdoor_sets = [{"backdoor_set": tuple(backdoor_set)}]
+        backdoor_sets = [AdjustmentSet(AdjustmentSet.BACKDOOR, tuple(backdoor_set))]
     elif backdoor_adjustment == BackdoorAdjustment.BACKDOOR_MIN_EFFICIENT:
         backdoor_set = efficient_bd.optimal_minimal_adj_set()
-        backdoor_sets = [{"backdoor_set": tuple(backdoor_set)}]
+        backdoor_sets = [AdjustmentSet(AdjustmentSet.BACKDOOR, tuple(backdoor_set))]
     elif backdoor_adjustment == BackdoorAdjustment.BACKDOOR_MINCOST_EFFICIENT:
         backdoor_set = efficient_bd.optimal_mincost_adj_set()
-        backdoor_sets = [{"backdoor_set": tuple(backdoor_set)}]
+        backdoor_sets = [AdjustmentSet(AdjustmentSet.BACKDOOR, tuple(backdoor_set))]
     return backdoor_sets
 
 
@@ -691,7 +740,7 @@ def find_valid_adjustment_sets(
                 "Candidate backdoor set: {0}, is_dseparated: {1}".format(candidate_set, check["is_dseparated"])
             )
             if check["is_dseparated"]:
-                backdoor_sets.append({"backdoor_set": candidate_set})
+                backdoor_sets.append(AdjustmentSet(AdjustmentSet.BACKDOOR, candidate_set))
                 found_valid_adjustment_set = True
             num_iterations += 1
             if backdoor_adjustment == BackdoorAdjustment.BACKDOOR_EXHAUSTIVE and num_iterations > max_iterations:
@@ -721,59 +770,62 @@ def find_valid_adjustment_sets(
     return backdoor_sets, found_valid_adjustment_set
 
 
-def get_default_backdoor_set_id(
-    graph: nx.DiGraph, action_nodes: List[str], outcome_nodes: List[str], backdoor_sets_dict: Dict
+def get_default_adjustment_set_id(
+    graph: nx.DiGraph, action_nodes: List[str], outcome_nodes: List[str], adjustment_sets_dict: Dict
 ):
-    # Adding a None estimand if no backdoor set found
-    if len(backdoor_sets_dict) == 0:
+    # Adding a None estimand if no adjustment set found
+    if len(adjustment_sets_dict) == 0:
         return None
 
     # Default set contains minimum possible number of instrumental variables, to prevent lowering variance in the treatment variable.
     instrument_names = set(get_instruments(graph, action_nodes, outcome_nodes))
     iv_count_dict = {
-        key: len(set(bdoor_set).intersection(instrument_names)) for key, bdoor_set in backdoor_sets_dict.items()
+        key: len(set(adjustment_set).intersection(instrument_names))
+        for key, adjustment_set in adjustment_sets_dict.items()
     }
     min_iv_count = min(iv_count_dict.values())
     min_iv_keys = {key for key, iv_count in iv_count_dict.items() if iv_count == min_iv_count}
-    min_iv_backdoor_sets_dict = {key: backdoor_sets_dict[key] for key in min_iv_keys}
+    min_iv_adjustment_sets_dict = {key: adjustment_sets_dict[key] for key in min_iv_keys}
 
     # Default set is the one with the least number of adjustment variables (optimizing for efficiency)
     min_set_length = 1000000
     default_key = None
-    for key, bdoor_set in min_iv_backdoor_sets_dict.items():
-        if len(bdoor_set) < min_set_length:
-            min_set_length = len(bdoor_set)
+    for key, adjustment_set in min_iv_adjustment_sets_dict.items():
+        if len(adjustment_set) < min_set_length:
+            min_set_length = len(adjustment_set)
             default_key = key
     return default_key
 
 
-def build_backdoor_estimands_dict(
+def build_adjustment_set_estimands_dict(
     treatment_names: List[str],
     outcome_names: List[str],
     observed_nodes: List[str],
-    backdoor_sets: List[str],
+    adjustment_sets: List[AdjustmentSet],
     estimands_dict: Dict,
 ):
-    """Build the final dict for backdoor sets by filtering unobserved variables if needed."""
-    backdoor_variables_dict = {}
+    """Build the final dict for adjustment sets by filtering unobserved variables if needed."""
+    adjustment_variables_dict = {}
     observed_nodes = set(observed_nodes)
-    is_identified = [set(bset["backdoor_set"]).issubset(observed_nodes) for bset in backdoor_sets]
+    is_identified = [set(aset.get_adjustment_variables()).issubset(observed_nodes) for aset in adjustment_sets]
 
     if any(is_identified):
         logger.info("Causal effect can be identified.")
-        backdoor_sets_arr = [
-            list(bset["backdoor_set"]) for bset in backdoor_sets if set(bset["backdoor_set"]).issubset(observed_nodes)
+        adjustment_sets_filtered = [
+            aset for aset in adjustment_sets if set(aset.get_adjustment_variables()).issubset(observed_nodes)
         ]
     else:  # there is unobserved confounding
-        logger.warning("Backdoor identification failed.")
-        backdoor_sets_arr = []
+        logger.warning("Adjustment set identification failed.")
+        adjustment_sets_filtered = []
 
-    for i in range(len(backdoor_sets_arr)):
-        backdoor_estimand_expr = construct_backdoor_estimand(treatment_names, outcome_names, backdoor_sets_arr[i])
-        logger.debug("Identified expression = " + str(backdoor_estimand_expr))
-        estimands_dict["backdoor" + str(i + 1)] = backdoor_estimand_expr
-        backdoor_variables_dict["backdoor" + str(i + 1)] = backdoor_sets_arr[i]
-    return estimands_dict, backdoor_variables_dict
+    for i, adjSet in enumerate(adjustment_sets_filtered):
+        adjustment_estimand_expr = construct_adjustment_estimand(
+            treatment_names, outcome_names, adjSet.get_adjustment_variables()
+        )
+        logger.debug("Identified expression = " + str(adjustment_estimand_expr))
+        estimands_dict[adjSet.get_adjustment_type() + str(i + 1)] = adjustment_estimand_expr
+        adjustment_variables_dict[adjSet.get_adjustment_type() + str(i + 1)] = list(adjSet.get_adjustment_variables())
+    return estimands_dict, adjustment_variables_dict
 
 
 def identify_frontdoor(
@@ -795,7 +847,10 @@ def identify_frontdoor(
         raise ValueError(f"d-separation algorithm {dseparation_algo} is not supported")
 
     eligible_variables = (
-        get_descendants(graph, action_nodes) - set(outcome_nodes) - set(get_descendants(graph, outcome_nodes))
+        get_descendants(graph, action_nodes)
+        - set(action_nodes)
+        - set(outcome_nodes)
+        - set(get_descendants(graph, outcome_nodes))
     )
     eligible_variables = eligible_variables.intersection(set(observed_nodes))
     set_sizes = range(1, len(eligible_variables) + 1, 1)
@@ -844,6 +899,48 @@ def identify_frontdoor(
     return parse_state(frontdoor_var)
 
 
+def identify_generalized_adjustment_set(
+    graph: nx.DiGraph,
+    action_nodes: List[str],
+    outcome_nodes: List[str],
+    observed_nodes: List[str],
+    generalized_adjustment: GeneralizedAdjustment = GeneralizedAdjustment.GENERALIZED_ADJUSTMENT_DEFAULT,
+) -> List[AdjustmentSet]:
+    """Find an adjustment set if one exists. This generalizes the backdoor criterion, using a complete criterion
+    which guarantees an adjustment set will be found if one exists.
+
+    Currently only supports returning a single minimal adjustment set.
+
+    References
+    ----------
+    [1] Benito van der Zander, Maciej Liśkiewicz, and Johannes Textor. "Constructing Separators and
+       Adjustment Sets in Ancestral Graphs." In Proceedings of UAI 2014, pages 907–916,
+       2014.
+    """
+
+    graph_pbd = get_proper_backdoor_graph(graph, action_nodes, outcome_nodes)
+    pcp_nodes = get_proper_causal_path_nodes(graph, action_nodes, outcome_nodes)
+    dpcp_nodes = get_descendants(graph, pcp_nodes).union(pcp_nodes)
+
+    if generalized_adjustment == GeneralizedAdjustment.GENERALIZED_ADJUSTMENT_DEFAULT:
+        # In default case, we don't exhaustively find all adjustment sets
+        adjustment_set = nx.algorithms.find_minimal_d_separator(
+            graph_pbd,
+            set(action_nodes),
+            set(outcome_nodes),
+            # Require the adjustment set to consist only of observed nodes
+            restricted=((set(graph_pbd.nodes) - set(dpcp_nodes)) & set(observed_nodes)),
+        )
+        if adjustment_set is None:
+            logger.info("No adjustment sets found.")
+            return []
+        return [AdjustmentSet(AdjustmentSet.GENERAL, adjustment_set)]
+    elif generalized_adjustment == GeneralizedAdjustment.GENERALIZED_ADJUSTMENT_EXHAUSTIVE:
+        raise ValueError("Exhaustive identification of general adjustment sets is not yet supported.")
+    else:
+        raise ValueError("Please provide a valid type of Generalized Adjustment")
+
+
 def identify_mediation(graph: nx.DiGraph, action_nodes: List[str], outcome_nodes: List[str]):
     """Find a valid mediator if it exists.
 
@@ -879,7 +976,7 @@ def identify_mediation_first_stage_confounders(
     # Create estimands dict as per the API for backdoor, but do not return it
     estimands_dict = {}
     backdoor_sets = identify_backdoor(graph, action_nodes, mediator_nodes, observed_nodes, backdoor_adjustment)
-    estimands_dict, backdoor_variables_dict = build_backdoor_estimands_dict(
+    estimands_dict, backdoor_variables_dict = build_adjustment_set_estimands_dict(
         action_nodes,
         mediator_nodes,
         observed_nodes,
@@ -887,7 +984,7 @@ def identify_mediation_first_stage_confounders(
         estimands_dict,
     )
     # Setting default "backdoor" identification adjustment set
-    default_backdoor_id = get_default_backdoor_set_id(graph, action_nodes, outcome_nodes, backdoor_variables_dict)
+    default_backdoor_id = get_default_adjustment_set_id(graph, action_nodes, outcome_nodes, backdoor_variables_dict)
     estimands_dict["backdoor"] = estimands_dict.get(str(default_backdoor_id), None)
     backdoor_variables_dict["backdoor"] = backdoor_variables_dict.get(str(default_backdoor_id), None)
     return backdoor_variables_dict
@@ -904,7 +1001,7 @@ def identify_mediation_second_stage_confounders(
     # Create estimands dict as per the API for backdoor, but do not return it
     estimands_dict = {}
     backdoor_sets = identify_backdoor(graph, mediator_nodes, outcome_nodes, observed_nodes, backdoor_adjustment)
-    estimands_dict, backdoor_variables_dict = build_backdoor_estimands_dict(
+    estimands_dict, backdoor_variables_dict = build_adjustment_set_estimands_dict(
         mediator_nodes,
         outcome_nodes,
         observed_nodes,
@@ -912,13 +1009,13 @@ def identify_mediation_second_stage_confounders(
         estimands_dict,
     )
     # Setting default "backdoor" identification adjustment set
-    default_backdoor_id = get_default_backdoor_set_id(graph, action_nodes, outcome_nodes, backdoor_variables_dict)
+    default_backdoor_id = get_default_adjustment_set_id(graph, action_nodes, outcome_nodes, backdoor_variables_dict)
     estimands_dict["backdoor"] = estimands_dict.get(str(default_backdoor_id), None)
     backdoor_variables_dict["backdoor"] = backdoor_variables_dict.get(str(default_backdoor_id), None)
     return backdoor_variables_dict
 
 
-def construct_backdoor_estimand(treatment_name: List[str], outcome_name: List[str], common_causes: List[str]):
+def construct_adjustment_estimand(treatment_name: List[str], outcome_name: List[str], common_causes: List[str]):
     # TODO: outputs string for now, but ideally should do symbolic
     # expressions Mon 19 Feb 2018 04:54:17 PM DST
     # TODO Better support for multivariate treatments

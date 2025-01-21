@@ -388,6 +388,67 @@ TEST_GRAPH_SOLUTIONS = {
     ),
 }
 
+TEST_GRAPH_SOLUTIONS_COMPLETE_ADJUSTMENT = {
+    # Example is selected from Shpitser et al. "On the Validity of Covariate Adjustment for Estimating Causal
+    # Effects", figure 1(b).
+    "shpitser_simple_non_backdoor_adjustment_set": dict(
+        graph_str="digraph{Z;X;Y; X->Z;X->Y}",
+        observed_variables=["Z", "X", "Y"],
+        action_nodes=["X"],
+        outcome_nodes=["Y"],
+        minimal_adjustment_sets=[set()],
+        exhaustive_adjustment_sets=[{"Z"}, set()],
+    ),
+    # Example is selected from van der Zander et al. "Constructing Separators and Adjustment Sets in Ancestral
+    # Graphs", figure 2.
+    "van_der_zander_minimal_non_backdoor_adjustment_set": dict(
+        graph_str="digraph{Z1;Z2;X1;X2;Y1;Y2; X1->Y1;X1->Z1;Z1->Z2;Z2->X2;Y2->Z2}",
+        observed_variables=["Z1", "Z2", "X1", "X2", "Y1", "Y2"],
+        action_nodes=["X1", "X2"],
+        outcome_nodes=["Y1", "Y2"],
+        minimal_adjustment_sets=[{"Z1", "Z2"}],
+        exhaustive_adjustment_sets=[{"Z1", "Z2"}],
+    ),
+    # Example is selected from Perković et al. "Complete Graphical Characterization and Construction of
+    # Adjustment Sets in Markov Equivalence Classes of Ancestral Graphs", Example 8 (in Section 5).
+    "perkovic_example_8": dict(
+        graph_str="""graph[directed 1 node[id "X1" label "X1"]
+                node[id "X2" label "X2"]
+                node[id "Y" label "Y"]
+                node[id "V1" label "V1"]
+                node[id "V2" label "V2"]
+                node[id "V3" label "V3"]
+                node[id "V4" label "V4"]
+                node[id "V5" label "V5"]
+                node[id "L" label "L"]
+                edge[source "V5" target "X1"]
+                edge[source "V4" target "X1"]
+                edge[source "X1" target "V1"]
+                edge[source "V1" target "V2"]
+                edge[source "V2" target "X2"]
+                edge[source "X2" target "Y"]
+                edge[source "X1" target "V3"]
+                edge[source "V3" target "Y"]
+                edge[source "L" target "V3"]
+                edge[source "L" target "V2"]]
+                """,
+        observed_variables=["V1", "V2", "V3", "V4", "V5", "X1", "X2", "Y"],
+        action_nodes=["X1", "X2"],
+        outcome_nodes=["Y"],
+        minimal_adjustment_sets=[{"V1", "V2"}],
+    ),
+    # Example is selected from Perković et al. "Complete Graphical Characterization and Construction of
+    # Adjustment Sets in Markov Equivalence Classes of Ancestral Graphs", Example 9 (in Section 5).
+    "perkovic_example_9": dict(
+        graph_str="digraph{V1;V2;V3;X1;X2;Y; X1->Y;V1->X1;V2->X1;V3->V2;V3->Y;X2->V1;X2->Y}",
+        observed_variables=["V1", "V2", "V3", "X1", "X2", "Y"],
+        action_nodes=["X1", "X2"],
+        outcome_nodes=["Y"],
+        minimal_adjustment_sets=[{"V2"}, {"V3"}],
+        exhaustive_adjustment_sets=[{"V2"}, {"V3"}, {"V2", "V3"}, {"V1", "V3"}, {"V1", "V2"}, {"V1", "V2", "V3"}],
+    ),
+}
+
 
 TEST_FRONTDOOR_GRAPH_SOLUTIONS = {
     "valid_singleton": dict(
@@ -421,5 +482,16 @@ TEST_FRONTDOOR_GRAPH_SOLUTIONS = {
         observed_variables=["X", "Y", "M1", "Z"],
         valid_frontdoor_sets=[],
         invalid_frontdoor_sets=[{"Z"}, {"M1"}, {"M2"}, {"M1", "M2"}],
+    ),
+    # This example is reproduced from the generalized_adjustment examples, and is
+    # added to test that the frontdoor criterion successfully filters out all the action
+    # nodes as ineligible variables.
+    "perkovic_example_9_multiple_action_nodes_no_frontdoor": dict(
+        graph_str="digraph{V1;V2;V3;X1;X2;Y; X1->Y;V1->X1;V2->X1;V3->V2;V3->Y;X2->V1;X2->Y}",
+        observed_variables=["V1", "V2", "V3", "X1", "X2", "Y"],
+        action_nodes=["X1", "X2"],
+        outcome_nodes=["Y"],
+        valid_frontdoor_sets=[],
+        invalid_frontdoor_sets=[{"V1"}, {"V2"}, {"V3"}],
     ),
 }
