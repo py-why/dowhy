@@ -89,21 +89,6 @@ class IdentifiedEstimand:
         else:
             return self.general_adjustment_variables[key]
 
-    def set_general_adjustment_variables(self, variables_arr: List, key: Optional[str] = None):
-        if key is None:
-            key = self.identifier_method
-        self.general_adjustment_variables[key] = variables_arr
-
-    def get_adjustment_set(self, key: Optional[str] = None):
-        if self.identifier_method == "general_adjustment":
-            return self.get_general_adjustment_variables(key)
-        return self.get_backdoor_variables(key)
-
-    def set_adjustment_set(self, variables_arr: List, key: Optional[str] = None):
-        if self.identifier_method == "general_adjustment":
-            return self.set_general_adjustment_variables(variables_arr, key)
-        return self.set_backdoor_variables(variables_arr, key)
-
     def __deepcopy__(self, memo):
         return IdentifiedEstimand(
             self.identifier,  # not deep copied
