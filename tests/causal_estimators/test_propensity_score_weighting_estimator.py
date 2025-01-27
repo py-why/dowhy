@@ -17,6 +17,7 @@ class TestPropensityScoreWeightingEstimator(object):
             "num_treatments",
             "treatment_is_binary",
             "outcome_is_binary",
+            "identifier_method",
         ],
         [
             (
@@ -36,6 +37,26 @@ class TestPropensityScoreWeightingEstimator(object):
                 [
                     False,
                 ],
+                "backdoor",
+            ),
+            (
+                0.4,
+                PropensityScoreWeightingEstimator,
+                [1, 2],
+                [0],
+                [
+                    0,
+                ],
+                [
+                    1,
+                ],
+                [
+                    True,
+                ],
+                [
+                    False,
+                ],
+                "general_adjustment",
             ),
         ],
     )
@@ -49,8 +70,9 @@ class TestPropensityScoreWeightingEstimator(object):
         num_treatments,
         treatment_is_binary,
         outcome_is_binary,
+        identifier_method,
     ):
-        estimator_tester = SimpleEstimator(error_tolerance, Estimator)
+        estimator_tester = SimpleEstimator(error_tolerance, Estimator, identifier_method=identifier_method)
         estimator_tester.average_treatment_effect_testsuite(
             num_common_causes=num_common_causes,
             num_instruments=num_instruments,
