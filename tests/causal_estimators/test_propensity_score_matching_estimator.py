@@ -17,7 +17,7 @@ class TestPropensityScoreMatchingEstimator(object):
             "num_treatments",
             "treatment_is_binary",
             "outcome_is_binary",
-            "identifier_method"
+            "identifier_method",
         ],
         [
             (
@@ -37,7 +37,7 @@ class TestPropensityScoreMatchingEstimator(object):
                 [
                     False,
                 ],
-                "backdoor"
+                "backdoor",
             ),
             (
                 0.3,
@@ -56,7 +56,7 @@ class TestPropensityScoreMatchingEstimator(object):
                 [
                     False,
                 ],
-                "general_adjustment"
+                "general_adjustment",
             ),
         ],
     )
@@ -70,7 +70,7 @@ class TestPropensityScoreMatchingEstimator(object):
         num_treatments,
         treatment_is_binary,
         outcome_is_binary,
-        identifier_method
+        identifier_method,
     ):
         estimator_tester = SimpleEstimator(error_tolerance, Estimator, identifier_method=identifier_method)
         estimator_tester.average_treatment_effect_testsuite(

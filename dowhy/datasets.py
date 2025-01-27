@@ -846,7 +846,9 @@ def dataset_from_random_graph(
         else:
             variable_type_dict[idx] = BINARY
 
-    return linear_dataset_from_graph(DAG, treatments, outcome, variable_type_dict=variable_type_dict, num_samples=num_samples)
+    return linear_dataset_from_graph(
+        DAG, treatments, outcome, variable_type_dict=variable_type_dict, num_samples=num_samples
+    )
 
 
 def partially_linear_dataset(
