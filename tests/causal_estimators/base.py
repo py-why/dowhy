@@ -1,4 +1,5 @@
 import itertools
+import sys
 
 import numpy as np
 import pandas as pd
@@ -35,6 +36,11 @@ class SimpleEstimator(object):
         test_significance=False,
         method_params=None,
     ):
+
+        # generalized adjustment identification requires python >=3.10
+        if sys.version_info < (3, 10) and self._identifier_method == "general_adjustment":
+            return
+
         if dataset == "linear":
             data = dowhy.datasets.linear_dataset(
                 beta=beta,
@@ -142,6 +148,11 @@ class SimpleEstimator(object):
         dataset="linear",
         method_params=None,
     ):
+
+        # generalized adjustment identification requires python >=3.10
+        if sys.version_info < (3, 10) and self._identifier_method == "general_adjustment":
+            return
+
         args_dict = {
             "num_common_causes": num_common_causes,
             "num_instruments": num_instruments,
@@ -170,6 +181,11 @@ class SimpleEstimator(object):
             outcome_nodes=data["outcome_name"],
             estimand_type=EstimandType.NONPARAMETRIC_ATE,
         )
+
+        # generalized adjustment identification requires python >=3.10
+        if sys.version_info < (3, 10) and self._identifier_method == "general_adjustment":
+            return
+
         target_estimand.set_identifier_method(self._identifier_method)
         estimator_ate = self._Estimator(identified_estimand=target_estimand, test_significance=None, **method_params)
         estimator_ate.fit(data["df"])

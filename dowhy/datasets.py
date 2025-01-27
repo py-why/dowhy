@@ -619,15 +619,20 @@ def generate_random_graph(n, max_iter=10):
     return g
 
 
+# Given a graph and a dictionary specifying the value type of the nodes in the graph
+# (e.g. 'continuous', 'discrete', or 'binary'), verify that the dictionary fully specifies
+# the value type for all notes in the graph.
 def check_all_node_types_are_specified(graph, variable_type_dict):
-    # make sure all node types are specified
     for node in list(graph.nodes):
         if node not in variable_type_dict.keys():
-            raise ValueError(f"Graph node '{node}' is not present in variable_type_dict keys")
+            raise ValueError(f"Graph node '{node}' is not present in variable_type_dict")
+        if variable_type_dict[node] not in [CONTINUOUS, DISCRETE, BINARY]:
+            raise ValueError(f"Graph node '{node}' does not have a valid value type in variable_type_dict")
 
 
-def ate_from_direct_graph_weights(graph, treatments, outcome):
-    # Only valid if the treatments are the only non-continuous variables in the graph
+# If the treatments are the only non-continuous variables in the graph, and the data is 'linear',
+# then the exact ATE can be computed based on the graph weights.
+def exact_ate_of_linear_graph(graph, treatments, outcome):
     ate = 0
     for treatment in treatments:
         for path in nx.all_simple_paths(graph, source=treatment, target=outcome):
@@ -635,6 +640,8 @@ def ate_from_direct_graph_weights(graph, treatments, outcome):
             if set(treatments).intersection(path[1:-1]):
                 continue
             for a, b in zip(path, path[1:]):
+                if graph[a][b]["weight"] is None:
+                    raise ValueError(f"Missing edge weight from '{a}' to '{b}'")
                 path_multiplier *= graph[a][b]["weight"]
             ate += path_multiplier
     return ate
@@ -659,12 +666,14 @@ def linear_dataset_from_graph(
     :param outcome: The outcome variable we are measuring the effect on
     :param treatments_are_binary: Indicates whether the treatment variables should be binary
     :param outcome_is_binary: Indicates whether the outcome variable should be binary
-    :param variable_type_dict : A dictionary giving the data-type of the variables in the graph.
-    Keys in the dictionary are nodes in the graph, and values must be in ["discrete", "binary", "continuous"]
+    :param variable_type_dict : An optional dictionary giving the data-type of all the variables in the graph.
+    Keys in the dictionary are nodes in the graph, and values must be in ["discrete", "binary", "continuous"].
+    Leave as None unless all nodes are specified; this argument is for the case where specifying the data type of the
+    treatments and outcome is not enough.
     :param num_samples: Number of samples in the dataset
     :returns ret_dict : dictionary with information like dataframe, outcome, treatment, graph string and continuous, discrete and binary columns
     """
-    # Finalize variable_type_dict
+    # Set variable_type_dict based on given method parameters
     if variable_type_dict:
         check_all_node_types_are_specified(graph, variable_type_dict)
     else:
@@ -677,96 +686,99 @@ def linear_dataset_from_graph(
     for u, v in graph.edges():
         graph[u][v]["weight"] = np.random.uniform(0, 1)
 
-    all_nodes = list(graph.nodes)
-    all_nodes.sort()
-    changed = dict()
-    discrete_cols = []
-    continuous_cols = []
-    binary_cols = []
+    # This method computes the df, with an option to intervene
+    def _compute_y(intervene=None):
+        all_nodes = list(graph.nodes)
+        all_nodes.sort()
+        changed = dict()
+        discrete_cols = []
+        continuous_cols = []
+        binary_cols = []
+        for node in all_nodes:
+            changed[node] = False
+        df = pd.DataFrame()
+        currset = list()
+        counter = 0
 
-    for node in all_nodes:
-        changed[node] = False
-    df = pd.DataFrame()
-    # Creating datasets to store the intervention data, for estimating the true ATE
-    currset = list()
-    counter = 0
+        # Generating data for nodes which have no incoming edges
+        for node in all_nodes:
+            # If intervening, set treatment nodes
+            if intervene == True and node in treatments:
+                df[node] = np.ones(num_samples)
+                continue
+            elif intervene == False and node in treatments:
+                df[node] = np.zeros(num_samples)
+                continue
 
-    # Generating data for nodes which have no incoming edges
-    for node in all_nodes:
-        if graph.in_degree(node) == 0:
-            dtype = variable_type_dict[node]
-            if dtype == DISCRETE:
-                df[node] = create_discrete_column(num_samples)  # Generating discrete data
-                discrete_cols.append(node)
-            elif dtype == CONTINUOUS:
-                df[node] = np.random.normal(0, 1, num_samples)  # Generating continuous data
-                continuous_cols.append(node)
-            else:
-                nums = np.random.normal(0, 1, num_samples)
-                df[node] = np.vectorize(convert_to_binary)(nums)  # Generating binary data
-                discrete_cols.append(node)
-                binary_cols.append(node)
-            successors = list(graph.successors(node))  # Storing immediate successors for next level data generation
-            successors.sort()
-            currset.extend(successors)
-            changed[node] = True
-
-    df_treated = df.copy(deep=True)
-    df_untreated = df.copy(deep=True)
-
-    # "currset" variable currently has all the successors of the nodes which had no incoming edges
-    while len(currset) > 0:
-        cs = list()  # Variable to store immediate children of nodes present in "currset"
-        for node in currset:
-            predecessors = list(
-                graph.predecessors(node)
-            )  # Getting all the parent nodes on which current "node" depends on
-            if changed[node] == False and all(
-                changed[x] == True for x in predecessors
-            ):  # Check if current "node" has not been processed yet and if all the parent nodes have been processed
-                successors = list(graph.successors(node))
-                successors.sort()
-                cs.extend(successors)  # Storing immediate children for next level data generation
-
-                treatment_indices = [i for i, col in enumerate(predecessors) if col in treatments]
-                X_observed = df[predecessors].to_numpy()  # Using parent nodes data
-                X_treated = df_treated[predecessors].to_numpy()
-                X_treated[:, treatment_indices] = 1
-                X_untreated = df_untreated[predecessors].to_numpy()
-                X_untreated[:, treatment_indices] = 0
-                c = np.array([graph[u][node]["weight"] for u in predecessors])
-                t_observed = np.random.normal(0, 1, num_samples) + X_observed @ c  # Using Linear Regression to generate data
-                t_treated = np.random.normal(0, 1, num_samples) + X_treated @ c  # Using Linear Regression to generate data
-                t_untreated = np.random.normal(0, 1, num_samples) + X_untreated @ c  # Using Linear Regression to generate data
-
-                changed[node] = True
+            # Otherwise, only set source nodes
+            if graph.in_degree(node) == 0:
                 dtype = variable_type_dict[node]
-                counter += 1
                 if dtype == DISCRETE:
-                    df[node] = convert_continuous_to_discrete(t_observed)
-                    df_treated[node] = convert_continuous_to_discrete(t_treated)
-                    df_untreated[node] = convert_continuous_to_discrete(t_untreated)
+                    df[node] = create_discrete_column(num_samples)  # Generating discrete data
                     discrete_cols.append(node)
                 elif dtype == CONTINUOUS:
-                    df[node] = t_observed
-                    df_treated[node] = t_treated
-                    df_untreated[node] = t_untreated
+                    df[node] = np.random.normal(0, 1, num_samples)  # Generating continuous data
                     continuous_cols.append(node)
                 else:
-                    # nums = np.random.normal(0, 1, num_samples)
-                    df[node] = np.vectorize(convert_to_binary)(t_observed)
-                    df_treated[node] = np.vectorize(convert_to_binary)(t_treated)
-                    df_untreated[node] = np.vectorize(convert_to_binary)(t_untreated)
+                    nums = np.random.normal(0, 1, num_samples)
+                    df[node] = np.vectorize(convert_to_binary)(nums)  # Generating binary data
                     discrete_cols.append(node)
                     binary_cols.append(node)
-        currset = cs
+                successors = list(graph.successors(node))  # Storing immediate successors for next level data generation
+                successors.sort()
+                currset.extend(successors)
+                changed[node] = True
+
+        # "currset" variable currently has all the successors of the nodes which had no incoming edges
+        while len(currset) > 0:
+            cs = list()  # Variable to store immediate children of nodes present in "currset"
+            for node in currset:
+                predecessors = list(
+                    graph.predecessors(node)
+                )  # Getting all the parent nodes on which current "node" depends on
+                if changed[node] == False and all(
+                    changed[x] == True for x in predecessors
+                ):  # Check if current "node" has not been processed yet and if all the parent nodes have been processed
+                    successors = list(graph.successors(node))
+                    successors.sort()
+                    cs.extend(successors)  # Storing immediate children for next level data generation
+                    changed[node] = True
+                    if intervene == True and node in treatments:
+                        continue
+                    elif intervene == False and node in treatments:
+                        continue
+                    X_observed = df[predecessors].to_numpy()  # Using parent nodes data
+                    c = np.array([graph[u][node]["weight"] for u in predecessors])
+                    t_observed = (
+                        np.random.normal(0, 1, num_samples) + X_observed @ c
+                    )  # Using Linear Regression to generate data
+                    dtype = variable_type_dict[node]
+                    counter += 1
+                    if dtype == DISCRETE:
+                        df[node] = convert_continuous_to_discrete(t_observed)
+                        discrete_cols.append(node)
+                    elif dtype == CONTINUOUS:
+                        df[node] = t_observed
+                        continuous_cols.append(node)
+                    else:
+                        # nums = np.random.normal(0, 1, num_samples)
+                        df[node] = np.vectorize(convert_to_binary)(t_observed)
+                        discrete_cols.append(node)
+                        binary_cols.append(node)
+            currset = cs
+
+        return df, continuous_cols, discrete_cols, binary_cols
+
+    df, continuous_cols, discrete_cols, binary_cols = _compute_y()
 
     # Compute ATE:
     # If all non-treatment variables are continuous, then can be computed from the
     # graph directly
     if all(variable_type_dict[x] == CONTINUOUS for x in variable_type_dict.keys() if x not in treatments):
-        ate = ate_from_direct_graph_weights(graph, treatments, outcome)
-    else:
+        ate = exact_ate_of_linear_graph(graph, treatments, outcome)
+    else:  # Compute empirical ATE estimate
+        df_treated, _, _, _ = _compute_y(intervene=True)
+        df_untreated, _, _, _ = _compute_y(intervene=False)
         ate = np.mean(df_treated[outcome]) - np.mean(df_untreated[outcome])
 
     gml_str = "\n".join(nx.generate_gml(graph))
