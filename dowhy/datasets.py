@@ -678,10 +678,10 @@ def linear_dataset_from_graph(
         check_all_node_types_are_specified(graph, variable_type_dict)
     else:
         variable_type_dict = {node: CONTINUOUS for node in graph.nodes}
-    if treatments_are_binary:
-        variable_type_dict.update({node: BINARY for node in treatments})
-    if outcome_is_binary:
-        variable_type_dict[outcome] = BINARY
+        if treatments_are_binary:
+            variable_type_dict.update({node: BINARY for node in treatments})
+        if outcome_is_binary:
+            variable_type_dict[outcome] = BINARY
     # Randomly assign edge weights
     for u, v in graph.edges():
         graph[u][v]["weight"] = np.random.uniform(0, 1)
@@ -846,7 +846,7 @@ def dataset_from_random_graph(
         else:
             variable_type_dict[idx] = BINARY
 
-    return linear_dataset_from_graph(DAG, variable_type_dict, treatments, outcome, num_samples=num_samples)
+    return linear_dataset_from_graph(DAG, treatments, outcome, variable_type_dict=variable_type_dict, num_samples=num_samples)
 
 
 def partially_linear_dataset(
