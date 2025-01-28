@@ -87,9 +87,9 @@ class DoSampler:
         self.dep_type = [self._variable_types[var] for var in self._outcome_names]
 
         self.indep_type = [
-            self._variable_types[var] for var in self._treatment_names + self._target_estimand.get_backdoor_variables()
+            self._variable_types[var] for var in self._treatment_names + self._target_estimand.get_adjustment_set()
         ]
-        self.density_types = [self._variable_types[var] for var in self._target_estimand.get_backdoor_variables()]
+        self.density_types = [self._variable_types[var] for var in self._target_estimand.get_adjustment_set()]
 
         self.outcome_lower_support = self._data[self._outcome_names].min().values
         self.outcome_upper_support = self._data[self._outcome_names].max().values
@@ -98,9 +98,9 @@ class DoSampler:
 
     def _sample_point(self, x_z):
         """
-        OVerride this if your sampling method only allows sampling a point at a time.
+        Override this if your sampling method only allows sampling a point at a time.
         :param : numpy.array: x_z is a numpy array containing the values of x and z in the order of the list given by
-        self._treatment_names + self._target_estimand.get_backdoor_variables()
+        self._treatment_names + self._target_estimand.get_adjustment_set()
         :return: numpy.array:  a sampled outcome point
         """
         raise NotImplementedError
@@ -132,7 +132,7 @@ class DoSampler:
 
     def point_sample(self):
         if self.num_cores == 1:
-            sampled_outcomes = self._df[self._treatment_names + self._target_estimand.get_backdoor_variables()].apply(
+            sampled_outcomes = self._df[self._treatment_names + self._target_estimand.get_adjustment_set()].apply(
                 self._sample_point, axis=1
             )
         else:
@@ -142,7 +142,7 @@ class DoSampler:
             sampled_outcomes = np.array(
                 p.map(
                     self.sampler.sample_point,
-                    self._df[self._treatment_names + self._target_estimand.get_backdoor_variables()].values,
+                    self._df[self._treatment_names + self._target_estimand.get_adjustment_set()].values,
                 )
             )
             sampled_outcomes = pd.DataFrame(sampled_outcomes, columns=self._outcome_names)
@@ -155,7 +155,7 @@ class DoSampler:
         :return:
         """
         sampled_outcomes = self.sampler.sample(
-            self._df[self._treatment_names + self._target_estimand.get_backdoor_variables()].values
+            self._df[self._treatment_names + self._target_estimand.get_adjustment_set()].values
         )
         sampled_outcomes = pd.DataFrame(sampled_outcomes, columns=self._outcome_names)
         self._df[self._outcome_names] = sampled_outcomes

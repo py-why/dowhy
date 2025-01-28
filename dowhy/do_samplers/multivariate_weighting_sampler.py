@@ -53,7 +53,7 @@ class MultivariateWeightingSampler(DoSampler):
     def disrupt_causes(self):
         self._df["state_propensity"] = state_propensity_score(
             self._data,
-            self._target_estimand.get_backdoor_variables(),
+            self._target_estimand.get_adjustment_set(),
             self._treatment_names,
             variable_types=self._variable_types,
         )
