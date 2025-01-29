@@ -23,7 +23,7 @@ class TestDataSubsetRefuter(object):
         [
             (0.05, "backdoor.propensity_score_matching", 1000),
             (0.05, "general_adjustment.propensity_score_matching", 1000),
-        ]
+        ],
     )
     def test_refutation_bootstrap_refuter_binary(self, error_tolerance, estimator_method, num_samples):
         refuter_tester = SimpleRefuter(error_tolerance, estimator_method, "bootstrap_refuter")
@@ -64,7 +64,7 @@ class TestDataSubsetRefuter(object):
         ["error_tolerance", "estimator_method", "num_common_causes", "required_variables", "num_samples"],
         [
             (0.1, "backdoor.propensity_score_matching", 5, 3, 5000),
-            (0.1, "general_adjustment.propensity_score_matching", 5, 3, 5000)
+            (0.1, "general_adjustment.propensity_score_matching", 5, 3, 5000),
         ],
     )
     def test_refutation_bootstrap_refuter_binary_integer_argument(
@@ -81,7 +81,7 @@ class TestDataSubsetRefuter(object):
         ["error_tolerance", "estimator_method", "num_common_causes", "required_variables", "num_samples"],
         [
             (0.1, "backdoor.propensity_score_matching", 5, ["W0", "W1"], 5000),
-            (0.1, "general_adjustment.propensity_score_matching", 5, ["W0", "W1"], 5000)
+            (0.1, "general_adjustment.propensity_score_matching", 5, ["W0", "W1"], 5000),
         ],
     )
     def test_refutation_bootstrap_refuter_binary_list_argument(
