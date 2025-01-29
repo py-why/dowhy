@@ -207,9 +207,9 @@ def preprocess_observed_common_causes(
     no_common_causes_error_message: str,
 ):
     """
-    Preprocesses backdoor variables (observed common causes) and returns the pre-processed matrix.
+    Preprocesses adjustment variables (observed common causes) and returns the pre-processed matrix.
 
-    At least one backdoor (common cause) variable is required. Raises an exception if none present.
+    At least one covariate (common cause) variable is required. Raises an exception if none present.
 
     Preprocessing has two steps:
     1. Categorical encoding.

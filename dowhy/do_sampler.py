@@ -66,6 +66,7 @@ class DoSampler:
         self._target_estimand = identify_effect_auto(
             graph, action_nodes, outcome_nodes, observed_nodes, estimand_type=estimand_type
         )
+        # TODO: Should this use the "general_adjustment" criterion instead?
         self._target_estimand.set_identifier_method("backdoor")
         self._treatment_names = parse_state(action_nodes)
         self._outcome_names = parse_state(outcome_nodes)

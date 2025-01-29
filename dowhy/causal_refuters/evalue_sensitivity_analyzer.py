@@ -255,9 +255,9 @@ class EValueSensitivityAnalyzer:
         for drop_var in covariates:
 
             # new estimator
-            new_backdoor_vars = [var for var in covariates if var != drop_var]
+            new_covariate_vars = [var for var in covariates if var != drop_var]
             new_estimand = copy.deepcopy(self.estimand)
-            new_estimand.set_backdoor_variables(new_backdoor_vars)
+            new_estimand.set_adjustment_set(new_covariate_vars)
             new_estimator = self.estimate.estimator.get_new_estimator_object(new_estimand)
             new_estimator.fit(
                 self.data,

@@ -539,6 +539,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
         "estimator_method",
         [
             ("backdoor.linear_regression"),
+            ("general_adjustment.linear_regression"),
         ],
     )
     @patch("matplotlib.pyplot.figure")
@@ -563,6 +564,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
         "estimator_method",
         [
             ("backdoor.generalized_linear_model"),
+            ("general_adjustment.generalized_linear_model"),
         ],
     )
     @patch("matplotlib.pyplot.figure")
