@@ -840,11 +840,11 @@ def dataset_from_random_graph(
     variable_type_dict = {}
     for idx, node in enumerate(all_nodes):
         if random_numbers_array[idx] <= prob_type_of_data[0]:
-            variable_type_dict[idx] = DISCRETE
+            variable_type_dict[node] = DISCRETE
         elif random_numbers_array[idx] <= prob_type_of_data[0] + prob_type_of_data[1]:
-            variable_type_dict[idx] = CONTINUOUS
+            variable_type_dict[node] = CONTINUOUS
         else:
-            variable_type_dict[idx] = BINARY
+            variable_type_dict[node] = BINARY
 
     return linear_dataset_from_graph(
         DAG, treatments, outcome, variable_type_dict=variable_type_dict, num_samples=num_samples
