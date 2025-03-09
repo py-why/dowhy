@@ -84,10 +84,8 @@ class IdentifiedEstimand:
 
     def get_general_adjustment_variables(self, key: Optional[str] = None):
         """Return a list containing general adjustment variables."""
-        if key is None:
-            return self.general_adjustment_variables.get(self.default_adjustment_set_id, None)
-        else:
-            return self.general_adjustment_variables.get(key, None)
+        gav = self.general_adjustment_variables or {}
+        return gav.get(self.default_adjustment_set_id if key is None else key, None)
 
     def set_general_adjustment_variables(self, variables_arr: List, key: Optional[str] = None):
         if key is None:
