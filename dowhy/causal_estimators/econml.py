@@ -120,7 +120,7 @@ class Econml(CausalEstimator):
         self._econml_fit_params = kwargs
         self._fit_params = kwargs
 
-        self._observed_common_causes_names = self._target_estimand.get_backdoor_variables().copy()
+        self._observed_common_causes_names = self._target_estimand.get_adjustment_set().copy()
 
         # Enforcing this ordering is necessary to feed through the propensity values from dataset
         self._observed_common_causes_names = [

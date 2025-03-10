@@ -13,8 +13,8 @@ class KernelDensitySampler(DoSampler):
         if (
             len(self._data) > 300
             or max(
-                len(self._treatment_names + self._target_estimand.get_backdoor_variables()),
-                len(self._outcome_names + self._target_estimand.get_backdoor_variables()),
+                len(self._treatment_names + self._target_estimand.get_adjustment_set()),
+                len(self._outcome_names + self._target_estimand.get_adjustment_set()),
             )
             >= 3
         ):
@@ -32,7 +32,7 @@ class KernelDensitySampler(DoSampler):
     def _fit_conditional(self):
         self.conditional_density = KDEMultivariateConditional(
             endog=self._data[self._outcome_names],
-            exog=self._data[self._treatment_names + self._target_estimand.get_backdoor_variables()],
+            exog=self._data[self._treatment_names + self._target_estimand.get_adjustment_set()],
             dep_type="".join(self.dep_type),
             indep_type="".join(self.indep_type),
             bw=self.bw,
@@ -51,7 +51,7 @@ class KernelDensitySampler(DoSampler):
             self.outcome_lower_support,
             self._outcome_names,
             self._treatment_names,
-            self._target_estimand.get_backdoor_variables(),
+            self._target_estimand.get_adjustment_set(),
             self._data,
             self.dep_type,
             self.indep_type,

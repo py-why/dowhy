@@ -130,9 +130,9 @@ class DistanceMatchingEstimator(CausalEstimator):
             self.logger.error(error_msg)
             raise Exception(error_msg)
 
-        self.logger.debug("Back-door variables used:" + ",".join(self._target_estimand.get_backdoor_variables()))
+        self.logger.debug("Adjustment set variables used:" + ",".join(self._target_estimand.get_adjustment_set()))
 
-        self._observed_common_causes_names = self._target_estimand.get_backdoor_variables()
+        self._observed_common_causes_names = self._target_estimand.get_adjustment_set()
         if self._observed_common_causes_names:
             if self.exact_match_cols is not None:
                 self._observed_common_causes_names = [
@@ -307,6 +307,6 @@ class DistanceMatchingEstimator(CausalEstimator):
 
     def construct_symbolic_estimator(self, estimand):
         expr = "b: " + ", ".join(estimand.outcome_variable) + "~"
-        var_list = estimand.treatment_variable + estimand.get_backdoor_variables()
+        var_list = estimand.treatment_variable + estimand.get_adjustment_set()
         expr += "+".join(var_list)
         return expr

@@ -55,7 +55,7 @@ class DummyOutcomeRefuter(CausalRefuter):
     then we can add an arbitrary function h(t) to the dummy outcome's
     generation process and then the causal effect becomes h(t=1)-h(t=0).
 
-    Note that this general procedure only works for the backdoor criterion.
+    Note that this general procedure only works for covariate adjustment.
 
     1. We find f(W) for a each value of treatment. That is, keeping the treatment
     constant, we fit a predictor to estimate the effect of confounders W on
@@ -108,7 +108,7 @@ class DummyOutcomeRefuter(CausalRefuter):
         * function argument: function ``pd.Dataframe -> np.ndarray``
 
         It takes in a function that takes the input data frame as the input and outputs the outcome
-        variable. This allows us to create an output varable that only depends on the covariates and does not depend
+        variable. This allows us to create an output variable that only depends on the covariates and does not depend
         on the treatment variable.
 
         * string argument
@@ -271,7 +271,7 @@ def refute_dummy_outcome(
     then we can add an arbitrary function h(t) to the dummy outcome's
     generation process and then the causal effect becomes h(t=1)-h(t=0).
 
-    Note that this general procedure only works for the backdoor criterion.
+    Note that this general procedure only works for covariate adjustment.
 
     1. We find f(W) for a each value of treatment. That is, keeping the treatment
     constant, we fit a predictor to estimate the effect of confounders W on
@@ -438,7 +438,7 @@ def refute_dummy_outcome(
     estimator_present = _has_estimator(transformation_list)
     chosen_variables = choose_variables(
         required_variables,
-        target_estimand.get_backdoor_variables()
+        target_estimand.get_adjustment_set()
         + target_estimand.instrumental_variables
         + estimate.estimator._effect_modifier_names,
     )

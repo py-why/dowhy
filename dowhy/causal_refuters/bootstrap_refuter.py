@@ -191,7 +191,7 @@ def refute_bootstrap(
 
     chosen_variables = choose_variables(
         required_variables,
-        target_estimand.get_backdoor_variables()
+        target_estimand.get_adjustment_set()
         + target_estimand.instrumental_variables
         + estimate.estimator._effect_modifier_names,
     )

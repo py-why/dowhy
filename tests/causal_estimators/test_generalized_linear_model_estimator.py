@@ -1,9 +1,10 @@
 import statsmodels.api as sm
 from pytest import mark
 
+import dowhy.datasets
 from dowhy.causal_estimators.generalized_linear_model_estimator import GeneralizedLinearModelEstimator
 
-from .base import SimpleEstimator
+from .base import SimpleEstimator, TestGraphObject, example_graph
 
 
 @mark.usefixtures("fixed_seed")
@@ -43,7 +44,30 @@ class TestGeneralizedLinearModelEstimator(object):
                     True,
                 ],
                 "backdoor",
-            )
+            ),
+            (
+                0.1,
+                GeneralizedLinearModelEstimator,
+                [
+                    0,
+                ],
+                [
+                    0,
+                ],
+                [
+                    0,
+                ],
+                [
+                    1,
+                ],
+                [
+                    False,
+                ],
+                [
+                    True,
+                ],
+                "general_adjustment",
+            ),
         ],
     )
     def test_average_treatment_effect(
@@ -72,6 +96,27 @@ class TestGeneralizedLinearModelEstimator(object):
             test_significance=[
                 True,
             ],
+            method_params={
+                "num_simulations": 10,
+                "num_null_simulations": 10,
+                "glm_family": sm.families.Binomial(),
+                "predict_score": True,
+            },
+        )
+
+    def test_general_adjustment_estimation_on_example_graphs(self, example_graph: TestGraphObject):
+        data = dowhy.datasets.linear_dataset_from_graph(
+            example_graph.graph,
+            example_graph.action_nodes,
+            example_graph.outcome_node,
+            treatments_are_binary=True,
+            outcome_is_binary=True,
+            num_samples=50000,
+        )
+        data["df"] = data["df"][example_graph.observed_nodes]
+        estimator_tester = SimpleEstimator(0.1, GeneralizedLinearModelEstimator, identifier_method="general_adjustment")
+        estimator_tester.custom_data_average_treatment_effect_test(
+            data,
             method_params={
                 "num_simulations": 10,
                 "num_null_simulations": 10,

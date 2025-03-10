@@ -207,9 +207,9 @@ def preprocess_observed_common_causes(
     no_common_causes_error_message: str,
 ):
     """
-    Preprocesses backdoor variables (observed common causes) and returns the pre-processed matrix.
+    Preprocesses adjustment variables (observed common causes) and returns the pre-processed matrix.
 
-    At least one backdoor (common cause) variable is required. Raises an exception if none present.
+    At least one covariate (common cause) variable is required. Raises an exception if none present.
 
     Preprocessing has two steps:
     1. Categorical encoding.
@@ -222,7 +222,7 @@ def preprocess_observed_common_causes(
     """
 
     # 1. Categorical encoding of relevant variables
-    observed_common_causes_names = target_estimand.get_backdoor_variables()
+    observed_common_causes_names = target_estimand.get_adjustment_set()
     if len(observed_common_causes_names) > 0:
         # The encoded data is only used to calculate a parameter, so the encoder can be discarded.
         observed_common_causes = data[observed_common_causes_names]

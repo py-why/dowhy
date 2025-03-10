@@ -251,13 +251,13 @@ class EValueSensitivityAnalyzer:
         new_lo = []
         new_hi = []
         observed_covariate_e_values = []
-        backdoor_vars = self.estimand.get_backdoor_variables()
-        for drop_var in backdoor_vars:
+        covariates = self.estimand.get_adjustment_set()
+        for drop_var in covariates:
 
             # new estimator
-            new_backdoor_vars = [var for var in backdoor_vars if var != drop_var]
+            new_covariate_vars = [var for var in covariates if var != drop_var]
             new_estimand = copy.deepcopy(self.estimand)
-            new_estimand.set_backdoor_variables(new_backdoor_vars)
+            new_estimand.set_adjustment_set(new_covariate_vars)
             new_estimator = self.estimate.estimator.get_new_estimator_object(new_estimand)
             new_estimator.fit(
                 self.data,
@@ -296,7 +296,7 @@ class EValueSensitivityAnalyzer:
 
         self.benchmarking_results = pd.DataFrame(
             {
-                "dropped_covariate": backdoor_vars,
+                "dropped_covariate": covariates,
                 "converted_est": new_ests,
                 "converted_lower_ci": new_lo,
                 "converted_upper_ci": new_hi,
