@@ -41,7 +41,7 @@ class AssessOverlap(CausalRefuter):
         """
         super().__init__(*args, **kwargs)
         # TODO: Check that the target estimand has backdoor variables?
-        # TODO: Add support for general adjustment criterion.
+        # TODO: Add support for the general adjustment criterion.
         self._backdoor_vars = self._target_estimand.get_backdoor_variables()
         self._cat_feats = kwargs.pop("cat_feats", [])
         self._support_config = kwargs.pop("support_config", None)
