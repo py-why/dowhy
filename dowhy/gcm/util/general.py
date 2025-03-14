@@ -2,6 +2,7 @@ import random
 from typing import Dict, Optional, Union
 
 import numpy as np
+import pandas as pd
 from scipy.optimize import minimize
 from sklearn.preprocessing import OneHotEncoder
 
@@ -160,17 +161,25 @@ def is_categorical(X: np.ndarray) -> bool:
     """
     X = shape_into_2d(X)
 
+    nan_mask = pd.isna(X).any(axis=1)
+
     status = True
     for column in range(X.shape[1]):
-        if (isinstance(X[0, column], int) or isinstance(X[0, column], float)) and np.isnan(X[0, column]):
-            raise ValueError(
-                "Input contains NaN values! This is currently not supported. " "Consider imputing missing values."
-            )
+        X = X[~nan_mask]
+
+        if X.shape[0] == 0:
+            return False
 
         status &= isinstance(X[0, column], str) or isinstance(X[0, column], bool) or isinstance(X[0, column], np.bool_)
 
         if not status:
             break
+
+    if status and nan_mask.any():
+        raise ValueError(
+            "The target variable appears to be categorical and has missing data. Currently, only missing "
+            "data for numerical variables is supported! Consider treating the missing category separately"
+        )
 
     return status
 
