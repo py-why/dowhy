@@ -677,10 +677,15 @@ def nmse(y_true: np.ndarray, y_pred: np.ndarray, squared: bool = False) -> float
     y_pred = y_pred.reshape(-1)
 
     y_std = np.std(y_true)
-    if y_std == 0:
-        return mean_squared_error(y_true, y_pred, squared=squared)
+    mse = mean_squared_error(y_true, y_pred)
 
-    return mean_squared_error(y_true, y_pred, squared=squared) / (np.var(y_true) if squared else y_std)
+    if not squared:
+        mse = np.sqrt(mse)
+
+    if y_std == 0:
+        return mse
+
+    return mse / (np.var(y_true) if squared else y_std)
 
 
 def crps(

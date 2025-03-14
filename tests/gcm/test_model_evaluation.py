@@ -4,6 +4,7 @@ import pandas as pd
 from _pytest.python_api import approx
 from flaky import flaky
 from scipy import stats
+from sklearn.metrics import mean_squared_error
 
 from dowhy.gcm import (
     AdditiveNoiseModel,
@@ -59,19 +60,19 @@ def test_given_bad_fit_when_estimate_nrmse_then_returns_high_value():
 
 def test_given_good_fit_but_noisy_data_when_estimate_nrmse_then_returns_expected_result():
     X = np.random.normal(0, 1, 2000)
-    Y = 2 * X + np.random.normal(0, 1, 2000)
+    Y = 2 * X + np.random.normal(0, 2, 2000)
 
     mdl = AdditiveNoiseModel(
         create_linear_regressor_with_given_parameters(np.array([2]), intercept=0),
-        noise_model=ScipyDistribution(stats.norm, loc=0, scale=1),
+        noise_model=ScipyDistribution(stats.norm, loc=0, scale=2),
     )
 
-    # The MSE should be 1 due to the variance of the noise. The RMSE is accordingly 1 / var(Y).
+    # The MSE should be 4 due to the variance of the noise. The RMSE is accordingly 2 / std(Y).
     assert nmse(Y, _estimate_conditional_expectations(mdl, X, False, 1), squared=True) == approx(
-        1 / np.var(Y), abs=0.05
+        4 / np.var(Y), abs=0.05
     )
     assert nmse(Y, _estimate_conditional_expectations(mdl, X, False, 1), squared=False) == approx(
-        1 / np.std(Y), abs=0.05
+        2 / np.std(Y), abs=0.05
     )
 
 
