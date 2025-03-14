@@ -81,6 +81,18 @@ _LIST_OF_POTENTIAL_REGRESSORS_BETTER = _LIST_OF_POTENTIAL_REGRESSORS_GOOD + [
     create_ada_boost_regressor,
 ]
 
+_LIST_OF_REGRESSOR_SUPPORTING_MISSING_DATA_GOOD = [create_hist_gradient_boost_regressor]
+_LIST_OF_REGRESSOR_SUPPORTING_MISSING_DATA_BETTER = _LIST_OF_REGRESSOR_SUPPORTING_MISSING_DATA_GOOD + [
+    create_random_forest_regressor,
+    create_extra_trees_regressor,
+]
+
+_LIST_OF_CLASSIFIER_SUPPORTING_MISSING_DATA_GOOD = [create_hist_gradient_boost_classifier]
+_LIST_OF_CLASSIFIER_SUPPORTING_MISSING_DATA_BETTER = _LIST_OF_CLASSIFIER_SUPPORTING_MISSING_DATA_GOOD + [
+    create_random_forest_classifier,
+    create_extra_trees_classifier,
+]
+
 
 class AssignmentQuality(Enum):
     GOOD = auto()
@@ -175,6 +187,7 @@ def assign_causal_mechanisms(
     based_on: pd.DataFrame,
     quality: AssignmentQuality = AssignmentQuality.GOOD,
     override_models: bool = False,
+    experimental_allow_nans: bool = False,
 ) -> AutoAssignmentSummary:
     """Automatically assigns appropriate causal mechanisms to nodes. If causal mechanisms are already assigned to nodes
     and override_models is set to False, this function only validates the assignments with respect to the graph
@@ -277,8 +290,17 @@ def assign_causal_mechanisms(
     :param override_models: If set to True, existing mechanism assignments are replaced with automatically selected
                             ones. If set to False, the assigned mechanisms are only validated with respect to the graph
                             structure.
+    :param experimental_allow_nans: If True, allows missing data for numerical variables. This is an experimental
+                                    feature. Not all GCM methods support missing data yet.
     :return: A summary object containing details about the model selection process.
     """
+    if not experimental_allow_nans and pd.isna(based_on).any().any():
+        raise ValueError(
+            "Data contains NaN! This is currently only supported when setting experimental_allow_nans to "
+            "True and only for missing data in numerical features. Note that not all GCM features "
+            "support missing data yet!"
+        )
+
     auto_assignment_summary = AutoAssignmentSummary()
 
     for node in nx.topological_sort(causal_model.graph):
@@ -379,6 +401,16 @@ def assign_causal_mechanism_node(
 def select_model(
     X: np.ndarray, Y: np.ndarray, model_selection_quality: AssignmentQuality
 ) -> Tuple[Union[PredictionModel, ClassificationModel], List[Tuple[Callable[[], PredictionModel], float, str]]]:
+    y_is_categorical = is_categorical(Y)
+
+    if not y_is_categorical:
+        y_nan_mask = pd.isna(Y.reshape(-1))
+
+        X = X[~y_nan_mask]
+        Y = Y[~y_nan_mask]
+
+    x_has_nans = pd.isna(X).any().any()
+
     if model_selection_quality == AssignmentQuality.BEST:
         try:
             from dowhy.gcm.ml.autogluon import AutoGluonClassifier, AutoGluonRegressor
@@ -393,22 +425,30 @@ def select_model(
                 "optional AutoGluon dependency."
             )
     elif model_selection_quality == AssignmentQuality.GOOD:
-        list_of_regressor = list(_LIST_OF_POTENTIAL_REGRESSORS_GOOD)
-        list_of_classifier = list(_LIST_OF_POTENTIAL_CLASSIFIERS_GOOD)
+        if x_has_nans:
+            list_of_regressor = list(_LIST_OF_REGRESSOR_SUPPORTING_MISSING_DATA_GOOD)
+            list_of_classifier = list(_LIST_OF_CLASSIFIER_SUPPORTING_MISSING_DATA_GOOD)
+        else:
+            list_of_regressor = list(_LIST_OF_POTENTIAL_REGRESSORS_GOOD)
+            list_of_classifier = list(_LIST_OF_POTENTIAL_CLASSIFIERS_GOOD)
         model_selection_splits = 5
     elif model_selection_quality == AssignmentQuality.BETTER:
-        list_of_regressor = list(_LIST_OF_POTENTIAL_REGRESSORS_BETTER)
-        list_of_classifier = list(_LIST_OF_POTENTIAL_CLASSIFIERS_BETTER)
+        if x_has_nans:
+            list_of_regressor = list(_LIST_OF_REGRESSOR_SUPPORTING_MISSING_DATA_BETTER)
+            list_of_classifier = list(_LIST_OF_CLASSIFIER_SUPPORTING_MISSING_DATA_BETTER)
+        else:
+            list_of_regressor = list(_LIST_OF_POTENTIAL_REGRESSORS_BETTER)
+            list_of_classifier = list(_LIST_OF_POTENTIAL_CLASSIFIERS_BETTER)
         model_selection_splits = 5
     else:
         raise ValueError("Invalid model selection quality.")
 
-    if auto_apply_encoders(X, auto_fit_encoders(X)).shape[1] <= 5:
+    if not x_has_nans and auto_apply_encoders(X, auto_fit_encoders(X)).shape[1] <= 5:
         # Avoid too many features
         list_of_regressor += [create_polynom_regressor]
         list_of_classifier += [partial(create_polynom_logistic_regression_classifier, max_iter=10000)]
 
-    if is_categorical(Y):
+    if y_is_categorical:
         best_model, model_performances = find_best_model(
             list_of_classifier, X, Y, model_selection_splits=model_selection_splits
         )

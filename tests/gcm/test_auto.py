@@ -10,12 +10,15 @@ from sklearn.linear_model import ElasticNetCV, LassoCV, LinearRegression, Logist
 from sklearn.naive_bayes import GaussianNB
 from sklearn.pipeline import Pipeline
 
+from dowhy import gcm
 from dowhy.gcm import (
     AdditiveNoiseModel,
     DiscreteAdditiveNoiseModel,
     EmpiricalDistribution,
+    InvertibleStructuralCausalModel,
     ProbabilisticCausalModel,
     StructuralCausalModel,
+    counterfactual_samples,
     draw_samples,
     fit,
 )
@@ -501,3 +504,101 @@ def test_given_imbalanced_classes_when_auto_assign_mechanism_then_handles_as_exp
     Y = np.append(Y, "RareClass")
 
     assign_causal_mechanisms(StructuralCausalModel(nx.DiGraph([("X", "Y")])), pd.DataFrame({"X": X, "Y": Y}))
+
+
+@flaky(max_runs=2)
+def test_given_missing_data_only_numerical_when_auto_assign_mechanism_with_experimental_feature_then_handles_as_expected():
+    X = np.random.normal(0, 5, 5000)
+    Y = 2 * X + 10 + np.random.normal(0, 0.05, 5000)
+    Z = X + Y + 20 + np.random.normal(0, 0.05, 5000)
+
+    data = pd.DataFrame({"X": X, "Y": Y, "Z": Z})
+
+    mask = np.random.random(data.shape) >= 0.25  # 25% missing data
+    mask[:, 1] = 1  # Ensure that the categorical feature is not missing as this is not supported yet.
+
+    data_with_nas = data.mask(~mask)
+    causal_model = InvertibleStructuralCausalModel(nx.DiGraph([("X", "Y"), ("Y", "Z"), ("X", "Z")]))
+
+    with pytest.raises(ValueError):
+        # Raise error when experimental flag is not turned on
+        assign_causal_mechanisms(causal_model, data_with_nas)
+
+    assign_causal_mechanisms(causal_model, data_with_nas, experimental_allow_nans=True)
+    fit(causal_model, data_with_nas)
+
+    drawn_samples = gcm.draw_samples(causal_model, 5000)
+
+    assert drawn_samples["X"].mean() == approx(0, abs=1)
+    assert drawn_samples["Y"].mean() == approx(10, abs=2)
+    assert drawn_samples["Z"].mean() == approx(30, abs=3)
+
+    interventional_drawn_samples = gcm.interventional_samples(
+        causal_model, {"X": lambda x: 10}, num_samples_to_draw=100
+    )
+    assert interventional_drawn_samples["X"].to_numpy() == approx(np.array([10] * 100))
+    assert interventional_drawn_samples["Y"].mean() == approx(30, abs=5)
+    assert interventional_drawn_samples["Z"].mean() == approx(60, abs=5)
+
+    counterfactual_computed_samples = counterfactual_samples(
+        causal_model, {"X": lambda x: 10}, noise_data=pd.DataFrame({"X": [10], "Y": [1], "Z": [10]})
+    )
+    assert counterfactual_computed_samples["X"][0] == 10
+    assert counterfactual_computed_samples["Y"][0] == approx(30, abs=5)
+    assert counterfactual_computed_samples["Z"][0] == approx(70, abs=5)
+
+    # Just check if it doesn't raise errors.
+    gcm.intrinsic_causal_influence(causal_model, "Z")
+    gcm.attribute_anomalies(causal_model, "Y", data_with_nas.iloc[:5])
+
+
+@flaky(max_runs=2)
+def test_given_missing_data_mixed_numerical_and_categorical_when_auto_assign_mechanism_with_experimental_feature_then_handles_as_expected():
+    X = np.random.normal(0, 5, 5000)
+    Y = []
+    Z = []
+
+    for x in X:
+        if x < 0:
+            Y.append("Class 0")
+        else:
+            Y.append("Class 1")
+
+    for i in range(X.shape[0]):
+        Z.append(X[i] + (-10 if Y[i] == "Class 0" else 10) + np.random.normal(0, 0.1))
+
+    data = pd.DataFrame({"X": X, "Y": Y, "Z": Z})
+
+    mask = np.random.random(data.shape) >= 0.25  # 25% missing data
+    mask[:, 1] = 1  # Ensure that the categorical feature is not missing as this is not supported yet.
+
+    data_with_nas = data.mask(~mask)
+    causal_model = InvertibleStructuralCausalModel(nx.DiGraph([("X", "Y"), ("Y", "Z"), ("X", "Z")]))
+
+    with pytest.raises(ValueError):
+        # Raise error when experimental flag is not turned on
+        assign_causal_mechanisms(causal_model, data_with_nas)
+
+    assign_causal_mechanisms(causal_model, data_with_nas, experimental_allow_nans=True)
+    fit(causal_model, data_with_nas)
+
+    drawn_samples = gcm.draw_samples(causal_model, 5000)
+
+    assert drawn_samples["X"].mean() == approx(0, abs=0.5)
+    assert np.sum(drawn_samples["Y"] == "Class 0") == approx(X.shape[0] // 2, abs=500)
+    assert drawn_samples["Z"].mean() == approx(0, abs=0.5)
+
+    interventional_drawn_samples = gcm.interventional_samples(causal_model, {"X": lambda x: 10}, num_samples_to_draw=10)
+    assert interventional_drawn_samples["X"].to_numpy() == approx(np.array([10] * 10))
+    assert np.sum(interventional_drawn_samples["Y"] == "Class 1") == approx(10, abs=3)
+    assert np.mean(interventional_drawn_samples["Z"].to_numpy()) == approx(20, abs=5)
+
+    counterfactual_computed_samples = counterfactual_samples(
+        causal_model, {"X": lambda x: 10}, noise_data=pd.DataFrame({"X": [10], "Y": [1], "Z": [10]})
+    )
+    assert counterfactual_computed_samples["X"][0] == 10
+    assert counterfactual_computed_samples["Y"][0] == "Class 1"
+    assert counterfactual_computed_samples["Z"][0] == approx(30, abs=5)
+
+    # Just check if it doesn't raise errors.
+    gcm.intrinsic_causal_influence(causal_model, "Z")
