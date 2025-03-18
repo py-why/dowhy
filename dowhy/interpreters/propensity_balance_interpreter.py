@@ -83,7 +83,10 @@ class PropensityBalanceInterpreter(VisualInterpreter):
 
         import matplotlib.pyplot as plt
 
-        plt.style.use("seaborn-white")
+        try:
+            plt.style.use("seaborn-white")  # For older matplotlib
+        except OSError:
+            plt.style.use("seaborn-v0_8-white")  # For matplotlib 3.6+
         fig, ax = plt.subplots(1, 1)
         for label, subdf in plot_df.groupby("common_cause_id"):
             subdf.plot(kind="line", x="sample", y="std_mean_diff", ax=ax, label=label)

@@ -1,4 +1,4 @@
-""" Regression based (conditional) independence test. Testing independence via regression, i.e. if a variable has
+"""Regression based (conditional) independence test. Testing independence via regression, i.e. if a variable has
 information about another variable, then they are dependent.
 """
 

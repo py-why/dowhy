@@ -1,13 +1,13 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
 
-""" 
-    The functions in this file are borrowed from DomainBed: https://github.com/facebookresearch/DomainBed
-        @inproceedings{gulrajani2021in,
-         title={In Search of Lost Domain Generalization},
-         author={Ishaan Gulrajani and David Lopez-Paz},
-         booktitle={International Conference on Learning Representations},
-         year={2021},
-        }
+"""
+The functions in this file are borrowed from DomainBed: https://github.com/facebookresearch/DomainBed
+    @inproceedings{gulrajani2021in,
+     title={In Search of Lost Domain Generalization},
+     author={Ishaan Gulrajani and David Lopez-Paz},
+     booktitle={International Conference on Learning Representations},
+     year={2021},
+    }
 """
 
 import torch

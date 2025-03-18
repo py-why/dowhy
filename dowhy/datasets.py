@@ -1,6 +1,4 @@
-"""Module for generating some sample datasets.
-
-"""
+"""Module for generating some sample datasets."""
 
 import math
 import string

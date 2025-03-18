@@ -1,5 +1,4 @@
-"""This module provides the APIs for attributing the change in the output value of a deterministic mechanism for a statistical unit.
-"""
+"""This module provides the APIs for attributing the change in the output value of a deterministic mechanism for a statistical unit."""
 
 from abc import abstractmethod
 from typing import List, Optional
