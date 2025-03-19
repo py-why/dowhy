@@ -1,13 +1,13 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
 
-""" 
-    The MNIST_MLP architecture is borrowed from OoD-Bench:
-        @inproceedings{ye2022ood,
-         title={OoD-Bench: Quantifying and Understanding Two Dimensions of Out-of-Distribution Generalization},
-         author={Ye, Nanyang and Li, Kaican and Bai, Haoyue and Yu, Runpeng and Hong, Lanqing and Zhou, Fengwei and Li, Zhenguo and Zhu, Jun},
-         booktitle={CVPR},
-         year={2022}
-        }
+"""
+The MNIST_MLP architecture is borrowed from OoD-Bench:
+    @inproceedings{ye2022ood,
+     title={OoD-Bench: Quantifying and Understanding Two Dimensions of Out-of-Distribution Generalization},
+     author={Ye, Nanyang and Li, Kaican and Bai, Haoyue and Yu, Runpeng and Hong, Lanqing and Zhou, Fengwei and Li, Zhenguo and Zhu, Jun},
+     booktitle={CVPR},
+     year={2022}
+    }
 """
 
 import torch

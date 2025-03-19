@@ -1,7 +1,6 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
 
-"""misc helper functions
-"""
+"""misc helper functions"""
 
 import hashlib
 from collections import Counter

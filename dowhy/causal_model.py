@@ -1,6 +1,4 @@
-""" Module containing the main model class for the dowhy package.
-
-"""
+"""Module containing the main model class for the dowhy package."""
 
 import logging
 import typing
