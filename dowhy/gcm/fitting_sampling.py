@@ -87,12 +87,14 @@ def fit_causal_model_of_target(
     """
     validate_causal_model_assignment(causal_model.graph, target_node)
 
+    y_nan_mask = pd.isna(training_data[target_node].to_numpy())
+
     if is_root_node(causal_model.graph, target_node):
-        causal_model.causal_mechanism(target_node).fit(X=training_data[target_node].to_numpy())
+        causal_model.causal_mechanism(target_node).fit(X=training_data[target_node].to_numpy()[~y_nan_mask])
     else:
         causal_model.causal_mechanism(target_node).fit(
-            X=training_data[get_ordered_predecessors(causal_model.graph, target_node)].to_numpy(),
-            Y=training_data[target_node].to_numpy(),
+            X=training_data[get_ordered_predecessors(causal_model.graph, target_node)].to_numpy()[~y_nan_mask],
+            Y=training_data[target_node].to_numpy()[~y_nan_mask],
         )
 
     # To be able to validate that the graph structure did not change between fitting and causal query, we store the
