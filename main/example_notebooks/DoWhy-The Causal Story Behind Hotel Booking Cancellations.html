@@ -37,7 +37,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=949a1ff5" />
     <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
     <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
@@ -583,11 +583,11 @@ cancellations.</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 
-<span class="kn">import</span> <span class="nn">dowhy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dowhy</span>
 </pre></div>
 </div>
 </div>
@@ -806,7 +806,12 @@ Index([&#39;hotel&#39;, &#39;is_canceled&#39;, &#39;lead_time&#39;, &#39;arrival
 </section>
 <section id="Feature-Engineering">
 <h2>Feature Engineering<a class="headerlink" href="#Feature-Engineering" title="Permalink to this heading">#</a></h2>
-<p>Lets create some new and meaningful features so as to reduce the dimensionality of the dataset. - <strong>Total Stay</strong> = stays_in_weekend_nights + stays_in_week_nights - <strong>Guests</strong> = adults + children + babies - <strong>Different_room_assigned</strong> = 1 if reserved_room_type &amp; assigned_room_type are different, 0 otherwise.</p>
+<p>Lets create some new and meaningful features so as to reduce the dimensionality of the dataset.</p>
+<ul class="simple">
+<li><p><strong>Total Stay</strong> = stays_in_weekend_nights + stays_in_week_nights</p></li>
+<li><p><strong>Guests</strong> = adults + children + babies</p></li>
+<li><p><strong>Different_room_assigned</strong> = 1 if reserved_room_type &amp; assigned_room_type are different, 0 otherwise.</p></li>
+</ul>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
@@ -1299,7 +1304,7 @@ definite conclusion at this stage. Thus assigning rooms different to what a cust
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle 588.6567$</div></div>
+$\displaystyle 588.7287$</div></div>
 </div>
 <p>We now consider the scenario when there were no booking changes and recalculate the expected count.</p>
 <div class="nbinput docutils container">
@@ -1323,7 +1328,7 @@ $\displaystyle 588.6567$</div></div>
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle 572.6919$</div></div>
+$\displaystyle 572.7397$</div></div>
 </div>
 <p>In the 2nd case, we take the scenario when there were booking changes(&gt;0) and recalculate the expected count.</p>
 <div class="nbinput docutils container">
@@ -1347,7 +1352,7 @@ $\displaystyle 572.6919$</div></div>
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle 665.9164$</div></div>
+$\displaystyle 666.0724$</div></div>
 </div>
 <p>There is definitely some change happening when the number of booking changes are non-zero. So it gives us a hint that <em>Booking Changes</em> may be affecting room cancellation.</p>
 <p>But is <em>Booking Changes</em> the only confounding variable? What if there were some unobserved confounders, regarding which we have no information(feature) present in our dataset. Would we still be able to make the same claims as before?</p>
@@ -1372,7 +1377,7 @@ $\displaystyle 665.9164$</div></div>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pygraphviz</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pygraphviz</span>
 <span class="n">causal_graph</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;digraph {</span>
 <span class="s2">different_room_assigned[label=&quot;Different Room Assigned&quot;];</span>
 <span class="s2">is_canceled[label=&quot;Booking Cancelled&quot;];</span>
@@ -1423,7 +1428,7 @@ as parameters in the function mentioned below.</p>
         <span class="n">treatment</span><span class="o">=</span><span class="s2">&quot;different_room_assigned&quot;</span><span class="p">,</span>
         <span class="n">outcome</span><span class="o">=</span><span class="s1">&#39;is_canceled&#39;</span><span class="p">)</span>
 <span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
-<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
 <span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
@@ -1433,7 +1438,7 @@ as parameters in the function mentioned below.</p>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/__w/dowhy/dowhy/dowhy/causal_model.py:583: UserWarning: 1 variables are assumed unobserved because they are not in the dataset. Configure the logging level to `logging.WARNING` or higher for additional details.
+/__w/dowhy/dowhy/dowhy/causal_model.py:581: UserWarning: 1 variables are assumed unobserved because they are not in the dataset. Configure the logging level to `logging.WARNING` or higher for additional details.
   warnings.warn(
 </pre></div></div>
 </div>
@@ -1476,17 +1481,17 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
             d                                                                  ↪
-──────────────────────────(E[is_canceled|guests,is_repeated_guest,days_in_wait ↪
+──────────────────────────(E[is_canceled|guests,lead_time,days_in_waiting_list ↪
 d[different_room_assigned]                                                     ↪
 
 ↪                                                                              ↪
-↪ ing_list,total_stay,required_car_parking_spaces,total_of_special_requests,le ↪
+↪ ,booking_changes,required_car_parking_spaces,hotel,is_repeated_guest,total_s ↪
 ↪                                                                              ↪
 
 ↪
-↪ ad_time,hotel,booking_changes])
+↪ tay,total_of_special_requests])
 ↪
-Estimand assumption 1, Unconfoundedness: If U→{different_room_assigned} and U→is_canceled then P(is_canceled|different_room_assigned,guests,is_repeated_guest,days_in_waiting_list,total_stay,required_car_parking_spaces,total_of_special_requests,lead_time,hotel,booking_changes,U) = P(is_canceled|different_room_assigned,guests,is_repeated_guest,days_in_waiting_list,total_stay,required_car_parking_spaces,total_of_special_requests,lead_time,hotel,booking_changes)
+Estimand assumption 1, Unconfoundedness: If U→{different_room_assigned} and U→is_canceled then P(is_canceled|different_room_assigned,guests,lead_time,days_in_waiting_list,booking_changes,required_car_parking_spaces,hotel,is_repeated_guest,total_stay,total_of_special_requests,U) = P(is_canceled|different_room_assigned,guests,lead_time,days_in_waiting_list,booking_changes,required_car_parking_spaces,hotel,is_repeated_guest,total_stay,total_of_special_requests)
 
 ### Estimand : 2
 Estimand name: iv
@@ -1528,20 +1533,20 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
             d                                                                  ↪
-──────────────────────────(E[is_canceled|guests,is_repeated_guest,days_in_wait ↪
+──────────────────────────(E[is_canceled|guests,lead_time,days_in_waiting_list ↪
 d[different_room_assigned]                                                     ↪
 
 ↪                                                                              ↪
-↪ ing_list,total_stay,required_car_parking_spaces,total_of_special_requests,le ↪
+↪ ,booking_changes,required_car_parking_spaces,hotel,is_repeated_guest,total_s ↪
 ↪                                                                              ↪
 
 ↪
-↪ ad_time,hotel,booking_changes])
+↪ tay,total_of_special_requests])
 ↪
-Estimand assumption 1, Unconfoundedness: If U→{different_room_assigned} and U→is_canceled then P(is_canceled|different_room_assigned,guests,is_repeated_guest,days_in_waiting_list,total_stay,required_car_parking_spaces,total_of_special_requests,lead_time,hotel,booking_changes,U) = P(is_canceled|different_room_assigned,guests,is_repeated_guest,days_in_waiting_list,total_stay,required_car_parking_spaces,total_of_special_requests,lead_time,hotel,booking_changes)
+Estimand assumption 1, Unconfoundedness: If U→{different_room_assigned} and U→is_canceled then P(is_canceled|different_room_assigned,guests,lead_time,days_in_waiting_list,booking_changes,required_car_parking_spaces,hotel,is_repeated_guest,total_stay,total_of_special_requests,U) = P(is_canceled|different_room_assigned,guests,lead_time,days_in_waiting_list,booking_changes,required_car_parking_spaces,hotel,is_repeated_guest,total_stay,total_of_special_requests)
 
 ## Realized estimand
-b: is_canceled~different_room_assigned+guests+is_repeated_guest+days_in_waiting_list+total_stay+required_car_parking_spaces+total_of_special_requests+lead_time+hotel+booking_changes
+b: is_canceled~different_room_assigned+guests+lead_time+days_in_waiting_list+booking_changes+required_car_parking_spaces+hotel+is_repeated_guest+total_stay+total_of_special_requests
 Target units: ate
 
 ## Estimate
@@ -1618,7 +1623,7 @@ p value:1.0
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
 Estimated effect:-0.2622285649999514
-New effect:0.054641912652137456
+New effect:0.05466551238643838
 p value:0.0
 
 </pre></div></div>
@@ -1644,8 +1649,8 @@ p value:0.0
 <div class="highlight"><pre>
 Refute: Use a subset of data
 Estimated effect:-0.2622285649999514
-New effect:-0.26219717135766085
-p value:0.96
+New effect:-0.2626143195262281
+p value:0.8
 
 </pre></div></div>
 </div>

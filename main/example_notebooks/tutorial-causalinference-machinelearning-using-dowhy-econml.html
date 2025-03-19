@@ -37,7 +37,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=949a1ff5" />
     <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
     <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
@@ -574,9 +574,16 @@
   <section id="Tutorial-on-Causal-Inference-and-its-Connections-to-Machine-Learning-(Using-DoWhy+EconML)">
 <h1>Tutorial on Causal Inference and its Connections to Machine Learning (Using DoWhy+EconML)<a class="headerlink" href="#Tutorial-on-Causal-Inference-and-its-Connections-to-Machine-Learning-(Using-DoWhy+EconML)" title="Permalink to this heading">#</a></h1>
 <p>This tutorial presents a walk-through on using DoWhy+EconML libraries for causal inference. Along the way, we’ll highlight the connections to machine learning—how machine learning helps in building causal effect estimators, and how causal reasoning can be help build more robust machine learning models.</p>
-<p>Examples of data science questions that are fundamentally causal inference questions: * <strong>A/B experiments</strong>: If I change the algorithm, will it lead to a higher success rate? * <strong>Policy decisions</strong>: If we adopt this treatment/policy, will it lead to a healthier patient/more revenue/etc.? * <strong>Policy evaluation</strong>: Knowing what I know now, did my policy help or hurt? * <strong>Credit attribution</strong>: Are people buying because of the recommendation algorithm? Would they have bought anyway?</p>
-<p>In this tutorial, you will: * Learn how causal reasoning is necessary for decision-making, and the difference between a prediction and decision-making task.</p>
+<p>Examples of data science questions that are fundamentally causal inference questions:</p>
 <ul class="simple">
+<li><p><strong>A/B experiments</strong>: If I change the algorithm, will it lead to a higher success rate?</p></li>
+<li><p><strong>Policy decisions</strong>: If we adopt this treatment/policy, will it lead to a healthier patient/more revenue/etc.?</p></li>
+<li><p><strong>Policy evaluation</strong>: Knowing what I know now, did my policy help or hurt?</p></li>
+<li><p><strong>Credit attribution</strong>: Are people buying because of the recommendation algorithm? Would they have bought anyway?</p></li>
+</ul>
+<p>In this tutorial, you will:</p>
+<ul class="simple">
+<li><p>Learn how causal reasoning is necessary for decision-making, and the difference between a prediction and decision-making task.</p></li>
 <li><p>Get hands-on with estimating causal effects using the four steps of causal inference: <strong>model, identify, estimate and refute</strong>.</p></li>
 <li><p>See how DoWhy+EconML can help you estimate causal effects with <strong>4 lines of code</strong>, using the latest methods from statistics and machine learning to estimate the causal effect and evaluate its robustness to modeling assumptions.</p></li>
 <li><p>Work through <strong>real-world case-studies</strong> with Jupyter notebooks on applying causal reasoning in different scenarios including estimating impact of a customer loyalty program on future transactions, predicting which users will be positively impacted by an intervention (such as an ad), pricing products, and attributing which factors contribute most to an outcome.</p></li>
@@ -612,7 +619,11 @@
 <p>Each of these decision-makers is asking a what-if question. Data-driven answers to such questions require understanding the <em>causes</em> of an event and how to take action to improve future outcomes.</p>
 <section id="Defining-a-causal-effect">
 <h3>Defining a causal effect<a class="headerlink" href="#Defining-a-causal-effect" title="Permalink to this heading">#</a></h3>
-<p>Suppose that we want to find the causal effect of taking an action A on the outcome Y. To define the causal effect, consider two worlds: 1. World 1 (Real World): Where the action A was taken and Y observed 2. World 2 (<em>Counterfactual</em> World): Where the action A was not taken (but everything else is the same)</p>
+<p>Suppose that we want to find the causal effect of taking an action A on the outcome Y. To define the causal effect, consider two worlds:</p>
+<ol class="arabic simple">
+<li><p>World 1 (Real World): Where the action A was taken and Y observed</p></li>
+<li><p>World 2 (<em>Counterfactual</em> World): Where the action A was not taken (but everything else is the same)</p></li>
+</ol>
 <p>Causal effect is the difference between Y values attained in the real world versus the counterfactual world.</p>
 <div class="math notranslate nohighlight">
 \[{E}[Y_{real, A=1}] - E[Y_{counterfactual, A=0}]\]</div>
@@ -638,7 +649,11 @@ been more likely to receive the new drug, and so on. The goal of causal inferenc
 <li><p>Must estimate the counterfactuals</p></li>
 <li><p>Challenges in validation</p></li>
 </ul>
-<p>Multiple causal mechanisms can be fit to a single data distribution * Data alone is not enough for causal inference * Need domain knowledge and assumptions</p>
+<p>Multiple causal mechanisms can be fit to a single data distribution</p>
+<ul class="simple">
+<li><p>Data alone is not enough for causal inference</p></li>
+<li><p>Need domain knowledge and assumptions</p></li>
+</ul>
 </section>
 </section>
 <section id="The-four-steps-of-causal-inference">
@@ -650,15 +665,15 @@ been more likely to receive the new drug, and so on. The goal of causal inferenc
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Required libraries</span>
-<span class="kn">import</span> <span class="nn">dowhy</span>
-<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
-<span class="kn">import</span> <span class="nn">dowhy.datasets</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dowhy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy</span><span class="w"> </span><span class="kn">import</span> <span class="n">CausalModel</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dowhy.datasets</span>
 
 <span class="c1"># Avoiding unnecessary log messges and warnings</span>
-<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;dowhy&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">sklearn.exceptions</span> <span class="kn">import</span> <span class="n">DataConversionWarning</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataConversionWarning</span>
 <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">DataConversionWarning</span><span class="p">)</span>
 
 <span class="c1"># Load some sample data</span>
@@ -698,7 +713,7 @@ been more likely to receive the new drug, and so on. The goal of causal inferenc
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">(</span><span class="n">layout</span><span class="o">=</span><span class="s2">&quot;dot&quot;</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
 <span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
@@ -776,9 +791,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W1,W3,W0,W2,W4])
+─────(E[y|W2,W4,W0,W1,W3])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W3,W0,W2,W4,U) = P(y|v0,W1,W3,W0,W2,W4)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W4,W0,W1,W3,U) = P(y|v0,W2,W4,W0,W1,W3)
 
 ### Estimand : 2
 Estimand name: iv
@@ -825,16 +840,16 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W1,W3,W0,W2,W4])
+─────(E[y|W2,W4,W0,W1,W3])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W3,W0,W2,W4,U) = P(y|v0,W1,W3,W0,W2,W4)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W4,W0,W1,W3,U) = P(y|v0,W2,W4,W0,W1,W3)
 
 ## Realized estimand
-b: y~v0+W1+W3+W0+W2+W4
+b: y~v0+W2+W4+W0+W1+W3
 Target units: ate
 
 ## Estimate
-Mean value: 10.06889667167899
+Mean value: 10.136035475903725
 
 </pre></div></div>
 </div>
@@ -842,10 +857,10 @@ Mean value: 10.06889667167899
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">econml</span>
-<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">PolynomialFeatures</span>
-<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LassoCV</span>
-<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">GradientBoostingRegressor</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">econml</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">PolynomialFeatures</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">LassoCV</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.ensemble</span><span class="w"> </span><span class="kn">import</span> <span class="n">GradientBoostingRegressor</span>
 <span class="n">dml_estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span>
                                     <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.econml.dml.DML&quot;</span><span class="p">,</span>
                                     <span class="n">method_params</span><span class="o">=</span><span class="p">{</span>
@@ -872,17 +887,17 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W1,W3,W0,W2,W4])
+─────(E[y|W2,W4,W0,W1,W3])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W3,W0,W2,W4,U) = P(y|v0,W1,W3,W0,W2,W4)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W4,W0,W1,W3,U) = P(y|v0,W2,W4,W0,W1,W3)
 
 ## Realized estimand
-b: y~v0+W1+W3+W0+W2+W4 |
+b: y~v0+W2+W4+W0+W1+W3 |
 Target units: ate
 
 ## Estimate
-Mean value: 9.961022805190058
-Effect estimates: [[9.96102281]]
+Mean value: 9.989903057574244
+Effect estimates: [[9.98990306]]
 
 </pre></div></div>
 </div>
@@ -906,9 +921,9 @@ estimate value of 0 when the action variable is replaced by a random variable, i
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:10.06889667167899
-New effect:0.0183034272800942
-p value:0.8999999999999999
+Estimated effect:10.136035475903725
+New effect:0.011250019592155446
+p value:0.96
 
 </pre></div></div>
 </div>
@@ -928,11 +943,11 @@ than learning a new toolkit. The power of EconML is that you can now implement t
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">math</span>
-<span class="kn">import</span> <span class="nn">dowhy.datasets</span><span class="o">,</span> <span class="nn">dowhy.plotter</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dowhy.datasets</span><span class="o">,</span><span class="w"> </span><span class="nn">dowhy.plotter</span>
 </pre></div>
 </div>
 </div>
@@ -960,11 +975,11 @@ than learning a new toolkit. The power of EconML is that you can now implement t
 <div class="output_area docutils container">
 <div class="highlight"><pre>
    Treatment    Outcome        w0         s        w1
-0  20.133374  39.954423  3.692466  2.445443  0.537692
-1  12.786613  25.558432  2.468916  1.762630  1.030696
-2  20.796660  41.779535  3.945250  2.766013 -0.675785
-3   8.308214  17.045908 -1.347208  0.687597  0.817635
-4  11.684699  23.486018  2.476279  4.234391 -0.591149
+0  16.841062  35.587100  3.264527  2.142403  4.357354
+1  10.525048  21.417234  2.128328  1.631909  0.775439
+2   9.875651  19.884724 -1.929752  8.438836 -0.231242
+3  15.824607  31.760481  3.127695  2.066027  0.862491
+4  18.102586  36.089070  3.425072  3.758240  0.041173
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1075,9 +1090,9 @@ b: Outcome~Treatment+w0+w1
 Target units: ate
 
 ## Estimate
-Mean value: 1.999164206881095
+Mean value: 1.999289833442157
 
-Causal Estimate is 1.999164206881095
+Causal Estimate is 1.999289833442157
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1094,9 +1109,9 @@ Causal Estimate is 1.999164206881095
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">PolynomialFeatures</span>
-<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LassoCV</span>
-<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">GradientBoostingRegressor</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">PolynomialFeatures</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">LassoCV</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.ensemble</span><span class="w"> </span><span class="kn">import</span> <span class="n">GradientBoostingRegressor</span>
 <span class="n">dml_estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.econml.dml.DML&quot;</span><span class="p">,</span>
                                      <span class="n">control_value</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                                      <span class="n">treatment_value</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
@@ -1133,8 +1148,8 @@ b: Outcome~Treatment+w0+w1 |
 Target units: ate
 
 ## Estimate
-Mean value: 1.180019959541842
-Effect estimates: [[1.18001996]]
+Mean value: 0.9416404958016628
+Effect estimates: [[0.9416405]]
 
 </pre></div></div>
 </div>
@@ -1157,9 +1172,9 @@ Effect estimates: [[1.18001996]]
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Add a random common cause
-Estimated effect:1.180019959541842
-New effect:1.179319931032028
-p value:1.0
+Estimated effect:0.9416404958016628
+New effect:0.9392374467809832
+p value:0.98
 
 </pre></div></div>
 </div>
@@ -1180,9 +1195,9 @@ p value:1.0
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:1.180019959541842
-New effect:-0.00018226966130323427
-p value:0.4029058316216174
+Estimated effect:0.9416404958016628
+New effect:-4.623063425050736e-05
+p value:0.4545482520612798
 
 </pre></div></div>
 </div>

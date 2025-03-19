@@ -37,7 +37,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=949a1ff5" />
     <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
     <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
@@ -489,20 +489,26 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">sys</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s2">&quot;../../../&quot;</span><span class="p">))</span>
-<span class="kn">import</span> <span class="nn">dowhy</span>
-<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
-<span class="kn">import</span> <span class="nn">dowhy.datasets</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dowhy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy</span><span class="w"> </span><span class="kn">import</span> <span class="n">CausalModel</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dowhy.datasets</span>
 </pre></div>
 </div>
 </div>
 <section id="Step-1:-Load-dataset">
 <h2>Step 1: Load dataset<a class="headerlink" href="#Step-1:-Load-dataset" title="Permalink to this heading">#</a></h2>
-<p>The function <code class="docutils literal notranslate"><span class="pre">dataset_from_random_graph(num_vars,</span> <span class="pre">num_samples,</span> <span class="pre">prob_edge,</span> <span class="pre">random_seed,</span> <span class="pre">prob_type_data)</span></code> can be used to create a dataset from a randomly generated directed graph. The data can be mixture of discrete, binary and continuous variables. The parameters have the following significance - - num_vars : Number of variables in the dataset - num_samples: Number of samples in the dataset - prob_edge : Probability of an edge between two random nodes in a graph - random_seed: Seed for
-generating random graph - prob_type_of_data : 3-element tuple containing the probability of data being discrete, binary and continuous respectively.(Should add up to 1)</p>
+<p>The function <code class="docutils literal notranslate"><span class="pre">dataset_from_random_graph(num_vars,</span> <span class="pre">num_samples,</span> <span class="pre">prob_edge,</span> <span class="pre">random_seed,</span> <span class="pre">prob_type_data)</span></code> can be used to create a dataset from a randomly generated directed graph. The data can be mixture of discrete, binary and continuous variables. The parameters have the following significance -</p>
+<ul class="simple">
+<li><p>num_vars : Number of variables in the dataset</p></li>
+<li><p>num_samples: Number of samples in the dataset</p></li>
+<li><p>prob_edge : Probability of an edge between two random nodes in a graph</p></li>
+<li><p>random_seed: Seed for generating random graph</p></li>
+<li><p>prob_type_of_data : 3-element tuple containing the probability of data being discrete, binary and continuous respectively.(Should add up to 1)</p></li>
+</ul>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
@@ -525,11 +531,11 @@ generating random graph - prob_type_of_data : 3-element tuple containing the pro
 <div class="highlight"><pre>
 [&#39;a&#39;, &#39;c&#39;, &#39;e&#39;, &#39;f&#39;, &#39;h&#39;] [&#39;b&#39;, &#39;d&#39;, &#39;g&#39;, &#39;i&#39;, &#39;j&#39;] [&#39;c&#39;, &#39;e&#39;]
    a         b  c         d  e  f         g  h         i         j
-0 -1 -1.170054  1  0.996507  1  0 -0.218214 -1 -1.107993  0.699933
-1  0  0.527130  1  0.894435  1  1  1.485562  0 -1.450727 -1.055649
-2  0  0.436049  0 -0.151908  0  0  0.195296  0  2.280391  1.162284
-3  0  0.005213  1  0.347139  1  0 -0.727156 -1 -1.140999 -2.165819
-4  0  1.212397  0 -1.230150  0  1  0.582913  0 -1.377051 -2.359753
+0  2  0.528781  0 -0.247537  0  0 -0.240173  1  2.673737  3.208463
+1 -1  0.327997  1 -1.088761  0  1  2.598638  1  0.281263 -1.190909
+2 -1 -0.315734  1  1.653006  1  1  2.551174  1  2.200325 -0.269049
+3  1  1.087194  1  0.964245  1  0 -1.146866  0  1.002969 -0.178558
+4 -1 -0.909252  0  1.884952  1  0  0.444123 -1  0.479197  0.458252
 </pre></div></div>
 </div>
 <p>Note that we are using a pandas dataframe to load the data. At present, DoWhy only supports pandas dataframe as input.</p>
@@ -672,7 +678,7 @@ generating random graph - prob_type_of_data : 3-element tuple containing the pro
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
 <span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
@@ -687,8 +693,15 @@ generating random graph - prob_type_of_data : 3-element tuple containing the pro
 </section>
 <section id="Step-4:-Testing-for-Conditional-Independence">
 <h2>Step 4: Testing for Conditional Independence<a class="headerlink" href="#Step-4:-Testing-for-Conditional-Independence" title="Permalink to this heading">#</a></h2>
-<p>We can check if the assumptions of the graph hold true for the data using <code class="docutils literal notranslate"><span class="pre">model.refute_graph(k,</span> <span class="pre">independence_test</span> <span class="pre">=</span> <span class="pre">{'test_for_continuous':</span> <span class="pre">'partial_correlation',</span> <span class="pre">'test_for_discrete'</span> <span class="pre">:</span> <span class="pre">'conditional_mutual_information'})</span></code> We are testing X ⫫ Y | Z where X and Y are singular sets and Z can have k number of variables. k value is 1 by default unless input. Currently we are using following settings - - “partial_correlation” for continuous data - “conditional_mutual_information” for discrete data -
-“conditional_mutua_information” when Z is discrete and either of X and Y is continuous - “partial_correlation” when Z is continuous/binary and X and Y are either continuous/binary - “conditional_mutual_information” when X and Y are discrete and Z has mixed data - other settings are currently not supported</p>
+<p>We can check if the assumptions of the graph hold true for the data using <code class="docutils literal notranslate"><span class="pre">model.refute_graph(k,</span> <span class="pre">independence_test</span> <span class="pre">=</span> <span class="pre">{'test_for_continuous':</span> <span class="pre">'partial_correlation',</span> <span class="pre">'test_for_discrete'</span> <span class="pre">:</span> <span class="pre">'conditional_mutual_information'})</span></code> We are testing X ⫫ Y | Z where X and Y are singular sets and Z can have k number of variables. k value is 1 by default unless input. Currently we are using following settings -</p>
+<ul class="simple">
+<li><p>“partial_correlation” for continuous data</p></li>
+<li><p>“conditional_mutual_information” for discrete data</p></li>
+<li><p>“conditional_mutua_information” when Z is discrete and either of X and Y is continuous</p></li>
+<li><p>“partial_correlation” when Z is continuous/binary and X and Y are either continuous/binary</p></li>
+<li><p>“conditional_mutual_information” when X and Y are discrete and Z has mixed data</p></li>
+<li><p>other settings are currently not supported</p></li>
+</ul>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
@@ -753,8 +766,8 @@ Test passed:True
 Method name for discrete data:conditional_mutual_information
 Method name for continuous data:partial_correlation
 Number of conditional independencies entailed by model:6
-Number of independences satisfied by data:6
-Test passed:True
+Number of independences satisfied by data:5
+Test passed:False
 
 </pre></div></div>
 </div>
@@ -893,7 +906,7 @@ Test passed:True
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
 <span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
@@ -930,7 +943,7 @@ Test passed:True
 Method name for discrete data:conditional_mutual_information
 Method name for continuous data:partial_correlation
 Number of conditional independencies entailed by model:359
-Number of independences satisfied by data:144
+Number of independences satisfied by data:129
 Test passed:False
 
 </pre></div></div>

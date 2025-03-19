@@ -37,7 +37,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=949a1ff5" />
     <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
     <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
@@ -575,12 +575,17 @@
 <h1>Assessing Support and Overlap with OverRule<a class="headerlink" href="#Assessing-Support-and-Overlap-with-OverRule" title="Permalink to this heading">#</a></h1>
 <section id="Motivation">
 <h2>Motivation<a class="headerlink" href="#Motivation" title="Permalink to this heading">#</a></h2>
-<p>When performing backdoor adjustment, even if we correctly specify the causal graph and observe all the relevant variables <span class="math notranslate nohighlight">\(X\)</span> for backdoor adjustment, we can only estimate causal effects for individuals with covariates <span class="math notranslate nohighlight">\(X\)</span> that satisfy two conditions: * Support: Simply put, we require that we observe similar individuals in our dataset. For discrete covariates <span class="math notranslate nohighlight">\(X\)</span>, this can be formalized as requiring that</p>
+<p>When performing backdoor adjustment, even if we correctly specify the causal graph and observe all the relevant variables <span class="math notranslate nohighlight">\(X\)</span> for backdoor adjustment, we can only estimate causal effects for individuals with covariates <span class="math notranslate nohighlight">\(X\)</span> that satisfy two conditions:</p>
+<ul>
+<li><p>Support: Simply put, we require that we observe similar individuals in our dataset. For discrete covariates <span class="math notranslate nohighlight">\(X\)</span>, this can be formalized as requiring that</p>
 <div class="math notranslate nohighlight">
 \[P(X) &gt; 0\]</div>
-<p>* Overlap: We require that there is some possibility of observing both the treatment and control for similar individuals. Formally, we require that</p>
+</li>
+<li><p>Overlap: We require that there is some possibility of observing both the treatment and control for similar individuals. Formally, we require that</p>
 <div class="math notranslate nohighlight">
 \[1 &gt; P(T = 1 \mid X) &gt; 0\]</div>
+</li>
+</ul>
 <p>OverRule [1] is a method for learning Boolean Rule Sets that characterize the set of individuals who satisfy both conditions, and is demonstrated in this notebook on some simple examples to build intuition.</p>
 </section>
 <section id="Acknowledgements">
@@ -606,18 +611,18 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
-<span class="kn">import</span> <span class="nn">dowhy.datasets</span>
-<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dowhy.datasets</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy</span><span class="w"> </span><span class="kn">import</span> <span class="n">CausalModel</span>
 <span class="c1"># Functional API</span>
-<span class="kn">from</span> <span class="nn">dowhy.causal_refuters.assess_overlap</span> <span class="kn">import</span> <span class="n">assess_support_and_overlap_overrule</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy.causal_refuters.assess_overlap</span><span class="w"> </span><span class="kn">import</span> <span class="n">assess_support_and_overlap_overrule</span>
 
 <span class="c1"># Data classes to configure ruleset optimization</span>
-<span class="kn">from</span> <span class="nn">dowhy.causal_refuters.assess_overlap_overrule</span> <span class="kn">import</span> <span class="n">SupportConfig</span><span class="p">,</span> <span class="n">OverlapConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy.causal_refuters.assess_overlap_overrule</span><span class="w"> </span><span class="kn">import</span> <span class="n">SupportConfig</span><span class="p">,</span> <span class="n">OverlapConfig</span>
 
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 </pre></div>
 </div>
 </div>
@@ -628,7 +633,11 @@
 <section id="Problem-Data">
 <h2>Problem Data<a class="headerlink" href="#Problem-Data" title="Permalink to this heading">#</a></h2>
 <p>Back to Table of Contents</p>
-<p>In this example, we have a pair of binary covariates <span class="math notranslate nohighlight">\(X_1, X_2\)</span>, with simple violations of the above conditions: * Support: There are no samples where <span class="math notranslate nohighlight">\(X_1 = X_2 = 1\)</span>, i.e., <span class="math notranslate nohighlight">\(P(X_1 = 1, X_2 = 1) = 0\)</span> * Overlap: Only individuals with <span class="math notranslate nohighlight">\(X_1 = 0, X_2 = 0\)</span> have a chance of recieving both treatment <span class="math notranslate nohighlight">\((T = 1)\)</span> and control <span class="math notranslate nohighlight">\((T = 0)\)</span></p>
+<p>In this example, we have a pair of binary covariates <span class="math notranslate nohighlight">\(X_1, X_2\)</span>, with simple violations of the above conditions:</p>
+<ul class="simple">
+<li><p>Support: There are no samples where <span class="math notranslate nohighlight">\(X_1 = X_2 = 1\)</span>, i.e., <span class="math notranslate nohighlight">\(P(X_1 = 1, X_2 = 1) = 0\)</span></p></li>
+<li><p>Overlap: Only individuals with <span class="math notranslate nohighlight">\(X_1 = 0, X_2 = 0\)</span> have a chance of recieving both treatment <span class="math notranslate nohighlight">\((T = 1)\)</span> and control <span class="math notranslate nohighlight">\((T = 0)\)</span></p></li>
+</ul>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
@@ -900,16 +909,23 @@ OVERLAP Rules: Found 1 rule(s), covering 50.0% of samples
              [Covers 50.0% of samples]
 </pre></div>
 </div>
-<p>For any sample, we can check if the sample is covered by the support by checking each rule (Rule 0 and Rule 1). The sample is in the support if ANY of these rules apply. Consider a point (X1 = 1, X2 = 1), which we know is not in the support of our original data. Since each binary input is treated as a boolean, we can check: * Rule 0: (not X1) –&gt; This rule is not satisfied by (X1 = 1, X2 = 1), because X1 = 1 is equivalent to X2 = True * Rule 1: (X1) AND (not X2) –&gt; This rule is not satisfied,
-because X2 = 1</p>
-<p>Similarly, we can check if a sample is covered by the overlap rules. Consider the point (X1 = 1, X2 = 0). This satisfies the support rules because it matches Rule 0. For the overlap rules, however, we can check: * Rule 0: (not X2) AND (not X1) –&gt; This rule is not satisfied, because X1 = 1.</p>
+<p>For any sample, we can check if the sample is covered by the support by checking each rule (Rule 0 and Rule 1). The sample is in the support if ANY of these rules apply. Consider a point (X1 = 1, X2 = 1), which we know is not in the support of our original data. Since each binary input is treated as a boolean, we can check:</p>
+<ul class="simple">
+<li><p>Rule 0: (not X1) –&gt; This rule is not satisfied by (X1 = 1, X2 = 1), because X1 = 1 is equivalent to X2 = True</p></li>
+<li><p>Rule 1: (X1) AND (not X2) –&gt; This rule is not satisfied, because X2 = 1</p></li>
+</ul>
+<p>Similarly, we can check if a sample is covered by the overlap rules. Consider the point (X1 = 1, X2 = 0). This satisfies the support rules because it matches Rule 0. For the overlap rules, however, we can check:</p>
+<ul class="simple">
+<li><p>Rule 0: (not X2) AND (not X1) –&gt; This rule is not satisfied, because X1 = 1.</p></li>
+</ul>
 <p><strong>Note</strong>: When we later filter samples based on the rules learned by OverRule, we will filter out any samples that do not match BOTH a support rule, and an overlap rule.</p>
 </section>
 <section id="Configuring-OverRule">
 <h2>Configuring OverRule<a class="headerlink" href="#Configuring-OverRule" title="Permalink to this heading">#</a></h2>
 <p>Back to Table of Contents</p>
-<p>OverRule can be configured by passing in the following arguments * <code class="docutils literal notranslate"><span class="pre">overlap_eps</span></code>: This should be a number <span class="math notranslate nohighlight">\(\epsilon\)</span> in (0, 0.5) which defines the overlap region as those points where <span class="math notranslate nohighlight">\(P(T = 1 \mid X)\)</span> is in <span class="math notranslate nohighlight">\((\epsilon, 1 - \epsilon)\)</span>.</p>
+<p>OverRule can be configured by passing in the following arguments</p>
 <ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">overlap_eps</span></code>: This should be a number <span class="math notranslate nohighlight">\(\epsilon\)</span> in (0, 0.5) which defines the overlap region as those points where <span class="math notranslate nohighlight">\(P(T = 1 \mid X)\)</span> is in <span class="math notranslate nohighlight">\((\epsilon, 1 - \epsilon)\)</span>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">cat_feats</span></code>: A list of any categorical features (automatically inferred if dtype is object).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">support_config</span></code>: A <code class="docutils literal notranslate"><span class="pre">SupportConfig</span></code> (see below), which controls optimization parameters</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">overlap_config</span></code>: An <code class="docutils literal notranslate"><span class="pre">OverlapConfig</span></code> (see below), which controls optimization parameters</p></li>
@@ -969,20 +985,32 @@ OverlapConfig(alpha=0.95, lambda0=0.001, lambda1=0.001, K=20, D=20, B=10, iterMa
 <section id="Illustration-on-Lalonde-and-PSID-datasets">
 <h1>Illustration on Lalonde and PSID datasets<a class="headerlink" href="#Illustration-on-Lalonde-and-PSID-datasets" title="Permalink to this heading">#</a></h1>
 <p>Back to Table of Contents</p>
-<p>In this section, we show how OverRule can be applied in the course of doing another causal analysis. Here, we demonstrate both * Using OverRule prior to conducting analysis * Filtering samples using the learned rules</p>
-<p>Incorporating OverRule into a causal inference workflow looks like * First, applying OverRule to learn rules, before any causal effect estimation is performed * Second, filtering samples according to the learned rules * Third, estimating causal effects on the filtered sample</p>
-<p>For this illustration, we use two datasets to construct a somewhat artificial causal inference task: * The original dataset from Lalonde (1986), which contains experimental samples, and which is loaded via <code class="docutils literal notranslate"><span class="pre">dowhy.datasets.lalonde_dataset()</span></code>. Because this is an <em>experimental</em> sample, we will see that <strong>overlap holds for all the samples in this sample.</strong> * An observational dataset consisting entirely of non-treated samples, the PSID dataset, which was analyzed in Smith &amp; Todd (2005) in
-conjunction with the original experimental dataset. This is loaded from <code class="docutils literal notranslate"><span class="pre">dowhy.datasets.psid_dataset()</span></code></p>
+<p>In this section, we show how OverRule can be applied in the course of doing another causal analysis. Here, we demonstrate both</p>
+<ul class="simple">
+<li><p>Using OverRule prior to conducting analysis</p></li>
+<li><p>Filtering samples using the learned rules</p></li>
+</ul>
+<p>Incorporating OverRule into a causal inference workflow looks like</p>
+<ul class="simple">
+<li><p>First, applying OverRule to learn rules, before any causal effect estimation is performed</p></li>
+<li><p>Second, filtering samples according to the learned rules</p></li>
+<li><p>Third, estimating causal effects on the filtered sample</p></li>
+</ul>
+<p>For this illustration, we use two datasets to construct a somewhat artificial causal inference task:</p>
+<ul class="simple">
+<li><p>The original dataset from Lalonde (1986), which contains experimental samples, and which is loaded via <code class="docutils literal notranslate"><span class="pre">dowhy.datasets.lalonde_dataset()</span></code>. Because this is an <em>experimental</em> sample, we will see that <strong>overlap holds for all the samples in this sample.</strong></p></li>
+<li><p>An observational dataset consisting entirely of non-treated samples, the PSID dataset, which was analyzed in Smith &amp; Todd (2005) in conjunction with the original experimental dataset. This is loaded from <code class="docutils literal notranslate"><span class="pre">dowhy.datasets.psid_dataset()</span></code></p></li>
+</ul>
 <p>By merging these datasets and then assessing overlap, we find that <strong>in the combined dataset, overlap only holds for ~30% of samples.</strong> Intuitively, many of the samples from the PSID are excluded, due to the restrictive inclusion criteria on the original experiment.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[48]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
-<span class="kn">import</span> <span class="nn">dowhy.datasets</span>
-<span class="kn">from</span> <span class="nn">dowhy.causal_refuters.assess_overlap</span> <span class="kn">import</span> <span class="n">assess_support_and_overlap_overrule</span>
-<span class="kn">from</span> <span class="nn">dowhy.causal_refuters.assess_overlap_overrule</span> <span class="kn">import</span> <span class="n">OverlapConfig</span><span class="p">,</span> <span class="n">SupportConfig</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dowhy.datasets</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy.causal_refuters.assess_overlap</span><span class="w"> </span><span class="kn">import</span> <span class="n">assess_support_and_overlap_overrule</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy.causal_refuters.assess_overlap_overrule</span><span class="w"> </span><span class="kn">import</span> <span class="n">OverlapConfig</span><span class="p">,</span> <span class="n">SupportConfig</span>
 
 <span class="c1"># Experimental sample from Lalonde</span>
 <span class="n">experiment_data</span> <span class="o">=</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">lalonde_dataset</span><span class="p">()</span>
@@ -1000,7 +1028,11 @@ conjunction with the original experimental dataset. This is loaded from <code cl
 </pre></div>
 </div>
 </div>
-<p>Before running any causal analysis, we first check for support and overlap. Note that the default setting for <code class="docutils literal notranslate"><span class="pre">alpha</span></code> is 0.98, which means that * The support rules will try to cover at least 98% (<code class="docutils literal notranslate"><span class="pre">alpha</span></code>) of the data with a minimum volume set * The overlap rules will try to cover at least 98% (<code class="docutils literal notranslate"><span class="pre">alpha</span></code>) of the samples which have propensity scores in <code class="docutils literal notranslate"><span class="pre">[overlap_eps,</span> <span class="pre">1-overlap_eps]</span></code></p>
+<p>Before running any causal analysis, we first check for support and overlap. Note that the default setting for <code class="docutils literal notranslate"><span class="pre">alpha</span></code> is 0.98, which means that</p>
+<ul class="simple">
+<li><p>The support rules will try to cover at least 98% (<code class="docutils literal notranslate"><span class="pre">alpha</span></code>) of the data with a minimum volume set</p></li>
+<li><p>The overlap rules will try to cover at least 98% (<code class="docutils literal notranslate"><span class="pre">alpha</span></code>) of the samples which have propensity scores in <code class="docutils literal notranslate"><span class="pre">[overlap_eps,</span> <span class="pre">1-overlap_eps]</span></code></p></li>
+</ul>
 <section id="Checking-for-Support/Overlap-in-the-Experimental-Sample">
 <h2>Checking for Support/Overlap in the Experimental Sample<a class="headerlink" href="#Checking-for-Support/Overlap-in-the-Experimental-Sample" title="Permalink to this heading">#</a></h2>
 <div class="nbinput docutils container">

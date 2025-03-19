@@ -37,7 +37,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=949a1ff5" />
     <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
     <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
@@ -573,27 +573,45 @@
                   
   <section id="Sensitivity-Analysis-for-Regression-Models">
 <h1>Sensitivity Analysis for Regression Models<a class="headerlink" href="#Sensitivity-Analysis-for-Regression-Models" title="Permalink to this heading">#</a></h1>
-<p>Sensitivity analysis helps us examine how sensitive a result is against the possibility of unobserved confounding. Two methods are implemented: 1. <a class="reference external" href="https://carloscinelli.com/files/Cinelli%20and%20Hazlett%20(2020)%20-%20Making%20Sense%20of%20Sensitivity.pdf">Cinelli &amp; Hazlett’s robustness value</a> - This method only supports linear regression estimator. - The partial R^2 of treatment with outcome shows how strongly confounders explaining all the residual outcome variation would have to be
-associated with the treatment to eliminate the estimated effect. - The robustness value measures the minimum strength of association unobserved confounding should have with both treatment and outcome in order to change the conclusions. - Robustness value close to 1 means the treatment effect can handle strong confounders explaining almost all residual variation of the treatment and the outcome. - Robustness value close to 0 means that even very weak confounders can also change the results. -
-Benchmarking examines the sensitivity of causal inferences to plausible strengths of the omitted confounders. - This method is based on <a class="reference external" href="https://carloscinelli.com/files/Cinelli%20and%20Hazlett%20(2020)%20-%20Making%20Sense%20of%20Sensitivity.pdf">https://carloscinelli.com/files/Cinelli%20and%20Hazlett%20(2020)%20-%20Making%20Sense%20of%20Sensitivity.pdf</a> 2. <a class="reference external" href="https://dash.harvard.edu/bitstream/handle/1/36874927/EValue_FinalSubmission.pdf">Ding &amp; VanderWeele’s E-Value</a> - This method supports linear and logistic regression. - The E-value is the minimum strength of association on the risk ratio scale that
-an unmeasured confounder would need to have with both the treatment and the outcome, conditional on the measured covariates, to fully explain away a specific treatment-outcome association. - The minimum E-value is 1, which means that no unmeasured confounding is needed to explain away the observed association (i.e. the confidence interval crosses the null). - Higher E-values mean that stronger unmeasured confounding is needed to explain away the observed association. There is no maximum E-value.
-- <a class="reference external" href="https://arxiv.org/abs/2011.07030">McGowan &amp; Greevy Jr’s</a> benchmarks the E-value against the measured confounders.</p>
+<p>Sensitivity analysis helps us examine how sensitive a result is against the possibility of unobserved confounding. Two methods are implemented:</p>
+<ol class="arabic simple">
+<li><p><a class="reference external" href="https://carloscinelli.com/files/Cinelli%20and%20Hazlett%20(2020)%20-%20Making%20Sense%20of%20Sensitivity.pdf">Cinelli &amp; Hazlett’s robustness value</a></p>
+<ul class="simple">
+<li><p>This method only supports linear regression estimator.</p></li>
+<li><p>The partial R^2 of treatment with outcome shows how strongly confounders explaining all the residual outcome variation would have to be associated with the treatment to eliminate the estimated effect.</p></li>
+<li><p>The robustness value measures the minimum strength of association unobserved confounding should have with both treatment and outcome in order to change the conclusions.</p></li>
+<li><p>Robustness value close to 1 means the treatment effect can handle strong confounders explaining almost all residual variation of the treatment and the outcome.</p></li>
+<li><p>Robustness value close to 0 means that even very weak confounders can also change the results.</p></li>
+<li><p>Benchmarking examines the sensitivity of causal inferences to plausible strengths of the omitted confounders.</p></li>
+<li><p>This method is based on <a class="reference external" href="https://carloscinelli.com/files/Cinelli%20and%20Hazlett%20(2020)%20-%20Making%20Sense%20of%20Sensitivity.pdf">https://carloscinelli.com/files/Cinelli%20and%20Hazlett%20(2020)%20-%20Making%20Sense%20of%20Sensitivity.pdf</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference external" href="https://dash.harvard.edu/bitstream/handle/1/36874927/EValue_FinalSubmission.pdf">Ding &amp; VanderWeele’s E-Value</a></p>
+<ul class="simple">
+<li><p>This method supports linear and logistic regression.</p></li>
+<li><p>The E-value is the minimum strength of association on the risk ratio scale that an unmeasured confounder would need to have with both the treatment and the outcome, conditional on the measured covariates, to fully explain away a specific treatment-outcome association.</p></li>
+<li><p>The minimum E-value is 1, which means that no unmeasured confounding is needed to explain away the observed association (i.e. the confidence interval crosses the null).</p></li>
+<li><p>Higher E-values mean that stronger unmeasured confounding is needed to explain away the observed association. There is no maximum E-value.</p></li>
+<li><p><a class="reference external" href="https://arxiv.org/abs/2011.07030">McGowan &amp; Greevy Jr’s</a> benchmarks the E-value against the measured confounders.</p></li>
+</ul>
+</li>
+</ol>
 <section id="Step-1:-Load-required-packages">
 <h2>Step 1: Load required packages<a class="headerlink" href="#Step-1:-Load-required-packages" title="Permalink to this heading">#</a></h2>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">sys</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s2">&quot;../../../&quot;</span><span class="p">))</span>
-<span class="kn">import</span> <span class="nn">dowhy</span>
-<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">dowhy.datasets</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dowhy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy</span><span class="w"> </span><span class="kn">import</span> <span class="n">CausalModel</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dowhy.datasets</span>
 
 <span class="c1"># Config dict to set the logging level</span>
-<span class="kn">import</span> <span class="nn">logging.config</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging.config</span>
 <span class="n">DEFAULT_LOGGING</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
     <span class="s1">&#39;disable_existing_loggers&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
@@ -606,8 +624,8 @@ an unmeasured confounder would need to have with both the treatment and the outc
 
 <span class="n">logging</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">dictConfig</span><span class="p">(</span><span class="n">DEFAULT_LOGGING</span><span class="p">)</span>
 <span class="c1"># Disabling warnings output</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">sklearn.exceptions</span> <span class="kn">import</span> <span class="n">DataConversionWarning</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataConversionWarning</span>
 <span class="c1">#warnings.filterwarnings(action=&#39;ignore&#39;, category=DataConversionWarning)</span>
 </pre></div>
 </div>
@@ -643,7 +661,7 @@ an unmeasured confounder would need to have with both the treatment and the outc
             <span class="n">test_significance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="p">)</span>
 <span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
-<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
 <span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
 <span class="n">data</span><span class="p">[</span><span class="s1">&#39;df&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
@@ -780,7 +798,7 @@ an unmeasured confounder would need to have with both the treatment and the outc
             <span class="n">test_significance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="p">)</span>
 <span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
-<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
 <span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
 <span class="n">data</span><span class="p">[</span><span class="s1">&#39;df&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
@@ -916,9 +934,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W0,W6,W3,W2,W1,W5])
+─────(E[y|W1,W6,W5,W0,W2,W3])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W6,W3,W2,W1,W5,U) = P(y|v0,W0,W6,W3,W2,W1,W5)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W6,W5,W0,W2,W3,U) = P(y|v0,W1,W6,W5,W0,W2,W3)
 
 ### Estimand : 2
 Estimand name: iv
@@ -957,16 +975,16 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W0,W6,W3,W2,W1,W5])
+─────(E[y|W1,W6,W5,W0,W2,W3])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W6,W3,W2,W1,W5,U) = P(y|v0,W0,W6,W3,W2,W1,W5)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W6,W5,W0,W2,W3,U) = P(y|v0,W1,W6,W5,W0,W2,W3)
 
 ## Realized estimand
-b: y~v0+W0+W6+W3+W2+W1+W5
+b: y~v0+W1+W6+W5+W0+W2+W3
 Target units: ate
 
 ## Estimate
-Mean value: 10.697677486880924
+Mean value: 10.697677486880917
 
 </pre></div></div>
 </div>
@@ -1012,14 +1030,14 @@ sensitivity analysis. (default = True). To override the setting, set plot_estima
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;estimate&#39;: 10.697677486880924,
- &#39;standard_error&#39;: 0.5938735661282947,
+{&#39;estimate&#39;: 10.697677486880917,
+ &#39;standard_error&#39;: 0.5938735661282949,
  &#39;degree of freedom&#39;: 492,
- &#39;t_statistic&#39;: 18.01339223872763,
- &#39;r2yt_w&#39;: 0.39741498372666834,
- &#39;partial_f2&#39;: 0.6595168698094569,
- &#39;robustness_value&#39;: 0.546744557218101,
- &#39;robustness_value_alpha&#39;: 0.5076289101030929}
+ &#39;t_statistic&#39;: 18.01339223872761,
+ &#39;r2yt_w&#39;: 0.3974149837266679,
+ &#39;partial_f2&#39;: 0.6595168698094557,
+ &#39;robustness_value&#39;: 0.5467445572181008,
+ &#39;robustness_value_alpha&#39;: 0.5076289101030924}
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -1135,15 +1153,15 @@ position of the legend (default = (1.6, 0.6))</p>
 Sensitivity Analysis to Unobserved Confounding using R^2 paramterization
 
 Unadjusted Estimates of Treatment [&#39;v0&#39;] :
-Coefficient Estimate : 10.697677486880924
+Coefficient Estimate : 10.697677486880917
 Degree of Freedom : 492
-Standard Error : 0.5938735661282947
-t-value : 18.01339223872763
-F^2 value : 0.6595168698094569
+Standard Error : 0.5938735661282949
+t-value : 18.01339223872761
+F^2 value : 0.6595168698094557
 
 Sensitivity Statistics :
-Partial R2 of treatment with outcome : 0.39741498372666834
-Robustness Value : 0.546744557218101
+Partial R2 of treatment with outcome : 0.3974149837266679
+Robustness Value : 0.5467445572181008
 
 Interpretation of results :
 Any confounder explaining less than 54.67% percent of the residual variance of both the treatment and the outcome would not be strong enough to explain away the observed effect i.e bring down the estimate to 0
@@ -1203,11 +1221,11 @@ If confounders explained 100% of the residual variance of the outcome, they woul
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;converted_estimate&#39;: 2.457447065735424,
- &#39;converted_lower_ci&#39;: 2.228856727004315,
- &#39;converted_upper_ci&#39;: 2.709481505797996,
- &#39;evalue_estimate&#39;: 4.349958364289866,
- &#39;evalue_lower_ci&#39;: 3.8838327336304146,
+{&#39;converted_estimate&#39;: 2.457447065735422,
+ &#39;converted_lower_ci&#39;: 2.2288567270043136,
+ &#39;converted_upper_ci&#39;: 2.7094815057979944,
+ &#39;evalue_estimate&#39;: 4.349958364289862,
+ &#39;evalue_lower_ci&#39;: 3.883832733630412,
  &#39;evalue_upper_ci&#39;: None}
 </pre></div></div>
 </div>
@@ -1318,15 +1336,15 @@ If confounders explained 100% of the residual variance of the outcome, they woul
 Sensitivity Analysis to Unobserved Confounding using the E-value
 
 Unadjusted Estimates of Treatment: v0
-Estimate (converted to risk ratio scale): 2.457447065735424
-Lower 95% CI (converted to risk ratio scale): 2.228856727004315
-Upper 95% CI (converted to risk ratio scale): 2.709481505797996
+Estimate (converted to risk ratio scale): 2.457447065735422
+Lower 95% CI (converted to risk ratio scale): 2.2288567270043136
+Upper 95% CI (converted to risk ratio scale): 2.7094815057979944
 
 Sensitivity Statistics:
-E-value for point estimate: 4.349958364289866
-E-value for lower 95% CI: 3.8838327336304146
+E-value for point estimate: 4.349958364289862
+E-value for lower 95% CI: 3.883832733630412
 E-value for upper 95% CI: None
-Largest Observed Covariate E-value: 1.6811401167656777 (W1)
+Largest Observed Covariate E-value: 1.6811401167656825 (W1)
 
 Interpretation of results:
 Unmeasured confounder(s) would have to be associated with a 4.35-fold increase in the risk of y, and must be 4.35 times more prevalent in v0, to explain away the observed point estimate.
@@ -1361,7 +1379,7 @@ Unmeasured confounder(s) would have to be associated with a 3.88-fold increase i
             <span class="n">test_significance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="p">)</span>
 <span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
-<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
 <span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
 <span class="n">data</span><span class="p">[</span><span class="s1">&#39;df&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
@@ -1500,9 +1518,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W0,W6,W2,W3,W1,W4,W5])
+─────(E[y|W1,W6,W5,W0,W2,W4,W3])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W6,W2,W3,W1,W4,W5,U) = P(y|v0,W0,W6,W2,W3,W1,W4,W5)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W6,W5,W0,W2,W4,W3,U) = P(y|v0,W1,W6,W5,W0,W2,W4,W3)
 
 ### Estimand : 2
 Estimand name: iv
@@ -1537,16 +1555,16 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W0,W6,W2,W3,W1,W4,W5])
+─────(E[y|W1,W6,W5,W0,W2,W4,W3])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W6,W2,W3,W1,W4,W5,U) = P(y|v0,W0,W6,W2,W3,W1,W4,W5)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W6,W5,W0,W2,W4,W3,U) = P(y|v0,W1,W6,W5,W0,W2,W4,W3)
 
 ## Realized estimand
-b: y~v0+W0+W6+W2+W3+W1+W4+W5
+b: y~v0+W1+W6+W5+W0+W2+W4+W3
 Target units: ate
 
 ## Estimate
-Mean value: 10.081924375588306
+Mean value: 10.081924375588297
 
 </pre></div></div>
 </div>
@@ -1611,14 +1629,14 @@ Mean value: 10.081924375588306
 Sensitivity Analysis to Unobserved Confounding using R^2 paramterization
 
 Unadjusted Estimates of Treatment [&#39;v0&#39;] :
-Coefficient Estimate : 10.081924375588306
+Coefficient Estimate : 10.081924375588297
 Degree of Freedom : 491
-Standard Error : 0.10446229543424757
-t-value : 96.51256784735544
-F^2 value : 18.970826379817492
+Standard Error : 0.10446229543424743
+t-value : 96.51256784735548
+F^2 value : 18.970826379817506
 
 Sensitivity Statistics :
-Partial R2 of treatment with outcome : 0.9499269594066172
+Partial R2 of treatment with outcome : 0.9499269594066173
 Robustness Value : 0.9522057801012398
 
 Interpretation of results :
@@ -1644,12 +1662,12 @@ If confounders explained 100% of the residual variance of the outcome, they woul
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;estimate&#39;: 10.081924375588306,
- &#39;standard_error&#39;: 0.10446229543424757,
+{&#39;estimate&#39;: 10.081924375588297,
+ &#39;standard_error&#39;: 0.10446229543424743,
  &#39;degree of freedom&#39;: 491,
- &#39;t_statistic&#39;: 96.51256784735544,
- &#39;r2yt_w&#39;: 0.9499269594066172,
- &#39;partial_f2&#39;: 18.970826379817492,
+ &#39;t_statistic&#39;: 96.51256784735548,
+ &#39;r2yt_w&#39;: 0.9499269594066173,
+ &#39;partial_f2&#39;: 18.970826379817506,
  &#39;robustness_value&#39;: 0.9522057801012398,
  &#39;robustness_value_alpha&#39;: 0.950386691319526}
 </pre></div></div>

@@ -37,7 +37,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=949a1ff5" />
     <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
     <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
@@ -482,7 +482,7 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
 <span class="c1"># Read and prepare data:</span>
 <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;./cps2015.csv&#39;</span><span class="p">)</span>
@@ -505,7 +505,7 @@
 <section id="Causal-Model">
 <h2>Causal Model<a class="headerlink" href="#Causal-Model" title="Permalink to this heading">#</a></h2>
 <p>To use our causal change attribution method, we need a causal model linking the outcome (wage) and explanatory variables. (In practice, the method only requires knowing a <em>causal ordering</em>.) We will work with the following DAG:</p>
-<p><img alt="bcccfbe25c2d472a99fb4330a053fb85" class="no-scaled-link" src="../_images/gender_gap_DAG.png" style="width: 250px;" /></p>
+<p><img alt="01e451159b124941a4f7d72319ba4bba" class="no-scaled-link" src="../_images/gender_gap_DAG.png" style="width: 250px;" /></p>
 <p>The DAG above implies the following causal Markov factorization of the distribution of the data:</p>
 <div class="math notranslate nohighlight">
 \[P(\mathtt{wage} \mid \mathtt{occup}, \mathtt{educ}) \times P(\mathtt{occup} \mid \mathtt{educ}) \times P(\mathtt{educ})\]</div>
@@ -515,8 +515,8 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
-<span class="kn">import</span> <span class="nn">dowhy.gcm</span> <span class="k">as</span> <span class="nn">gcm</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">networkx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nx</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dowhy.gcm</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gcm</span>
 
 <span class="n">dag</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">([(</span><span class="s1">&#39;education&#39;</span><span class="p">,</span> <span class="s1">&#39;occupation&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;occupation&#39;</span><span class="p">,</span> <span class="s1">&#39;wage&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;education&#39;</span><span class="p">,</span> <span class="s1">&#39;wage&#39;</span><span class="p">)])</span>
 <span class="n">causal_model</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">ProbabilisticCausalModel</span><span class="p">(</span><span class="n">dag</span><span class="p">)</span>
@@ -535,19 +535,19 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">HistGradientBoostingRegressor</span><span class="p">,</span> <span class="n">HistGradientBoostingClassifier</span>
-<span class="kn">from</span> <span class="nn">sklearn.isotonic</span> <span class="kn">import</span> <span class="n">IsotonicRegression</span>
-<span class="kn">from</span> <span class="nn">dowhy.gcm.ml.classification</span> <span class="kn">import</span> <span class="n">SklearnClassificationModelWeighted</span>
-<span class="kn">from</span> <span class="nn">dowhy.gcm.ml.regression</span> <span class="kn">import</span> <span class="n">SklearnRegressionModelWeighted</span>
-<span class="kn">from</span> <span class="nn">dowhy.gcm.util.general</span> <span class="kn">import</span> <span class="n">auto_apply_encoders</span><span class="p">,</span> <span class="n">auto_fit_encoders</span><span class="p">,</span> <span class="n">shape_into_2d</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.ensemble</span><span class="w"> </span><span class="kn">import</span> <span class="n">HistGradientBoostingRegressor</span><span class="p">,</span> <span class="n">HistGradientBoostingClassifier</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.isotonic</span><span class="w"> </span><span class="kn">import</span> <span class="n">IsotonicRegression</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy.gcm.ml.classification</span><span class="w"> </span><span class="kn">import</span> <span class="n">SklearnClassificationModelWeighted</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy.gcm.ml.regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">SklearnRegressionModelWeighted</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy.gcm.util.general</span><span class="w"> </span><span class="kn">import</span> <span class="n">auto_apply_encoders</span><span class="p">,</span> <span class="n">auto_fit_encoders</span><span class="p">,</span> <span class="n">shape_into_2d</span>
 
-<span class="k">def</span> <span class="nf">make_custom_regressor</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">make_custom_regressor</span><span class="p">():</span>
     <span class="k">return</span> <span class="n">SklearnRegressionModelWeighted</span><span class="p">(</span><span class="n">HistGradientBoostingRegressor</span><span class="p">(</span><span class="n">random_state</span> <span class="o">=</span> <span class="mi">0</span><span class="p">))</span>
 
-<span class="k">def</span> <span class="nf">make_custom_classifier</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">make_custom_classifier</span><span class="p">():</span>
     <span class="k">return</span> <span class="n">SklearnClassificationModelWeighted</span><span class="p">(</span><span class="n">HistGradientBoostingClassifier</span><span class="p">(</span><span class="n">random_state</span> <span class="o">=</span> <span class="mi">0</span><span class="p">))</span>
 
-<span class="k">def</span> <span class="nf">make_custom_calibrator</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">make_custom_calibrator</span><span class="p">():</span>
     <span class="k">return</span> <span class="n">SklearnRegressionModelWeighted</span><span class="p">(</span><span class="n">IsotonicRegression</span><span class="p">(</span><span class="n">out_of_bounds</span> <span class="o">=</span> <span class="s1">&#39;clip&#39;</span><span class="p">))</span>
 
 <span class="n">gcm</span><span class="o">.</span><span class="n">distribution_change_robust</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">data_old</span><span class="p">,</span> <span class="n">data_new</span><span class="p">,</span> <span class="s1">&#39;wage&#39;</span><span class="p">,</span> <span class="n">sample_weight</span> <span class="o">=</span> <span class="s1">&#39;weight&#39;</span><span class="p">,</span>
@@ -563,7 +563,7 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Evaluating set functions...: 100%|██████████| 8/8 [00:02&lt;00:00,  3.77it/s]
+Evaluating set functions...: 100%|██████████| 8/8 [00:02&lt;00:00,  3.47it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -586,7 +586,7 @@ Evaluating set functions...: 100%|██████████| 8/8 [00:02&lt;
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">StratifiedKFold</span><span class="p">,</span> <span class="n">train_test_split</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">StratifiedKFold</span><span class="p">,</span> <span class="n">train_test_split</span>
 
 <span class="c1"># Split data into train and test set:</span>
 <span class="n">X</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="s1">&#39;education&#39;</span><span class="p">,</span> <span class="s1">&#39;occupation&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span>
@@ -610,10 +610,10 @@ Evaluating set functions...: 100%|██████████| 8/8 [00:02&lt;
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">itertools</span>
-<span class="kn">from</span> <span class="nn">dowhy.gcm.distribution_change_robust</span> <span class="kn">import</span> <span class="n">ThetaC</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">comb</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy.gcm.distribution_change_robust</span><span class="w"> </span><span class="kn">import</span> <span class="n">ThetaC</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">math</span><span class="w"> </span><span class="kn">import</span> <span class="n">comb</span>
 
 <span class="c1"># All combinations of 0s and 1s, needed for Shapley Values:</span>
 <span class="n">all_combos</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">repeat</span><span class="o">=</span><span class="mi">3</span><span class="p">)]</span>
@@ -643,7 +643,7 @@ Evaluating set functions...: 100%|██████████| 8/8 [00:02&lt;
 <span class="c1"># This function combines the theta^c parameters to obtain Shapley values:</span>
 <span class="n">w_sort</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">w_eval</span><span class="p">[</span><span class="n">T_eval</span><span class="o">==</span><span class="mi">0</span><span class="p">],</span> <span class="n">w_eval</span><span class="p">[</span><span class="n">T_eval</span><span class="o">==</span><span class="mi">1</span><span class="p">]))</span> <span class="c1"># Order weights in same way as scores</span>
 
-<span class="k">def</span> <span class="nf">compute_attr_measure</span><span class="p">(</span><span class="n">res_dict</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_attr_measure</span><span class="p">(</span><span class="n">res_dict</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="c1"># Alternative to Shapley Value: along-a-causal-path (see paper)</span>
     <span class="k">if</span> <span class="n">path</span><span class="p">:</span>
         <span class="n">path</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
@@ -687,7 +687,7 @@ array([ 1.13215045, -2.07869794, -6.80952934])
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">w_sort</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">w_eval</span><span class="p">[</span><span class="n">T_eval</span><span class="o">==</span><span class="mi">0</span><span class="p">],</span> <span class="n">w_eval</span><span class="p">[</span><span class="n">T_eval</span><span class="o">==</span><span class="mi">1</span><span class="p">]))</span> <span class="c1"># Order weights in same way as scores</span>
 
-<span class="k">def</span> <span class="nf">mult_boot</span><span class="p">(</span><span class="n">res_dict</span><span class="p">,</span> <span class="n">Nsim</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">mult_boot</span><span class="p">(</span><span class="n">res_dict</span><span class="p">,</span> <span class="n">Nsim</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="n">thetas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">8</span><span class="p">,</span> <span class="n">Nsim</span><span class="p">))</span>
     <span class="n">attr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="n">Nsim</span><span class="p">))</span>
     <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Nsim</span><span class="p">):</span>
@@ -718,13 +718,13 @@ array([0.34144275, 0.35141792, 0.35805933])
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">norm</span>
-<span class="kn">from</span> <span class="nn">statsmodels.stats.weightstats</span> <span class="kn">import</span> <span class="n">DescrStatsW</span>
-<span class="kn">from</span> <span class="nn">matplotlib.patches</span> <span class="kn">import</span> <span class="n">Rectangle</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">norm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">statsmodels.stats.weightstats</span><span class="w"> </span><span class="kn">import</span> <span class="n">DescrStatsW</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.patches</span><span class="w"> </span><span class="kn">import</span> <span class="n">Rectangle</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 
 <span class="c1"># Significance stars:</span>
-<span class="k">def</span> <span class="nf">star</span><span class="p">(</span><span class="n">est</span><span class="p">,</span> <span class="n">se</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">star</span><span class="p">(</span><span class="n">est</span><span class="p">,</span> <span class="n">se</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">est</span><span class="o">/</span><span class="n">se</span><span class="p">)</span><span class="o">&lt;</span><span class="n">norm</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="mf">.95</span><span class="p">):</span> <span class="c1"># 10%</span>
         <span class="k">return</span> <span class="s1">&#39;&#39;</span>
     <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">est</span><span class="o">/</span><span class="n">se</span><span class="p">)</span><span class="o">&lt;</span><span class="n">norm</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="mf">.975</span><span class="p">):</span> <span class="c1"># 5%</span>
@@ -780,9 +780,16 @@ array([0.34144275, 0.35141792, 0.35805933])
 <h2>Interpretation<a class="headerlink" href="#Interpretation" title="Permalink to this heading">#</a></h2>
 <p>First, notice that the Shapley values for <span class="math notranslate nohighlight">\(P(\mathtt{educ})\)</span>, <span class="math notranslate nohighlight">\(P(\mathtt{occup} \mid \mathtt{educ})\)</span> and <span class="math notranslate nohighlight">\(P(\mathtt{wage} \mid \mathtt{occup}, \mathtt{educ})\)</span> add up to the total effect.</p>
 <p>Second, the Shapley value for <span class="math notranslate nohighlight">\(P(\mathtt{educ})\)</span> is positive and statistically significant. One way to interpret this measure is that, if men and women differed only in their <span class="math notranslate nohighlight">\(P(\mathtt{educ})\)</span> (but their other causal mechanisms were the same), women would earn \$1.13/hour more than men on average. Conversely, the Shapley value for <span class="math notranslate nohighlight">\(P(\mathtt{educ} \mid \mathtt{educ})\)</span> is negative, statistically significant and of larger magnitude as the first Shapley value, hence cancelling
-out with the effect of differences in education. These effects measure two things: 1. How different is a causal mechanism between males and females? 2. How important is a causal mechanism for the outcome?</p>
-<p>Third, most of the unconditional wage gap is attributed to the causal mechanism <span class="math notranslate nohighlight">\(P(\mathtt{wage} \mid \mathtt{occup}, \mathtt{educ})\)</span>. This can be interpreted in various ways: 1. <em>Unexplained variation</em>: There could be other relevant variables that we are not measuring, which are subsumed into <span class="math notranslate nohighlight">\(P(\mathtt{wage} \mid \mathtt{occup}, \mathtt{educ})\)</span>. For example, there could be differences in experience between men and women which are not measured in the CPS data. Notice that this does
-not bias our results for the other Shapley values, because experience is not a direct cause of education or occupation. 2. <em>Structural differences</em>: A different interpretation is that, for some reason (which may or may not be discrimination), women and men with the same observable characteristics are paid differently.</p>
+out with the effect of differences in education. These effects measure two things:</p>
+<ol class="arabic simple">
+<li><p>How different is a causal mechanism between males and females?</p></li>
+<li><p>How important is a causal mechanism for the outcome?</p></li>
+</ol>
+<p>Third, most of the unconditional wage gap is attributed to the causal mechanism <span class="math notranslate nohighlight">\(P(\mathtt{wage} \mid \mathtt{occup}, \mathtt{educ})\)</span>. This can be interpreted in various ways:</p>
+<ol class="arabic simple">
+<li><p><em>Unexplained variation</em>: There could be other relevant variables that we are not measuring, which are subsumed into <span class="math notranslate nohighlight">\(P(\mathtt{wage} \mid \mathtt{occup}, \mathtt{educ})\)</span>. For example, there could be differences in experience between men and women which are not measured in the CPS data. Notice that this does not bias our results for the other Shapley values, because experience is not a direct cause of education or occupation.</p></li>
+<li><p><em>Structural differences</em>: A different interpretation is that, for some reason (which may or may not be discrimination), women and men with the same observable characteristics are paid differently.</p></li>
+</ol>
 <p>Below we try to make sense of this with some plots. First, notice how women tend to have higher education levels than men. For comparison, a college graduate earns \$12.60/hour more on average than a high-school graduate.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:

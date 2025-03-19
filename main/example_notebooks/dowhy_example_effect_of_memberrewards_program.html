@@ -37,7 +37,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=949a1ff5" />
     <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
     <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
@@ -585,8 +585,8 @@
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Creating some simulated data for our example</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="n">num_users</span> <span class="o">=</span> <span class="mi">10000</span>
 <span class="n">num_months</span> <span class="o">=</span> <span class="mi">12</span>
 
@@ -746,7 +746,7 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">dowhy</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">dowhy</span>
 
 <span class="c1"># Setting the signup month (for ease of analysis)</span>
 <span class="n">i</span> <span class="o">=</span> <span class="mi">3</span>
@@ -789,7 +789,7 @@
                      <span class="n">treatment</span><span class="o">=</span><span class="s2">&quot;treatment&quot;</span><span class="p">,</span>
                      <span class="n">outcome</span><span class="o">=</span><span class="s2">&quot;post_spends&quot;</span><span class="p">)</span>
 <span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
-<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
 <span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
@@ -919,7 +919,11 @@ Mean value: 97.57746107152285
 </pre></div></div>
 </div>
 <p>The analysis tells us the Average Treatment Effect on the Treated (ATT). That is, the average effect on total spend for the customers that signed up for the Rewards Program in month <code class="docutils literal notranslate"><span class="pre">i=3</span></code> (compared to the case where they had not signed up). We can similarly calculate the effects for customers who signed up in any other month by changing the value of <code class="docutils literal notranslate"><span class="pre">i</span></code>(line 2 above) and then rerunning the analysis.</p>
-<p>Note that the estimation suffers from left and right-censoring. 1. <strong>Left-censoring</strong>: If a customer signs up in the first month, we do not have enough transaction history to match them to similar customers who did not sign up (and thus apply the backdoor identified estimand). 2. <strong>Right-censoring</strong>: If a customer signs up in the last month, we do not enough <em>future</em> (post-treatment) transactions to estimate the outcome after signup.</p>
+<p>Note that the estimation suffers from left and right-censoring.</p>
+<ol class="arabic simple">
+<li><p><strong>Left-censoring</strong>: If a customer signs up in the first month, we do not have enough transaction history to match them to similar customers who did not sign up (and thus apply the backdoor identified estimand).</p></li>
+<li><p><strong>Right-censoring</strong>: If a customer signs up in the last month, we do not enough <em>future</em> (post-treatment) transactions to estimate the outcome after signup.</p></li>
+</ol>
 <p>Thus, even if the effect of signup was the same across all months, the <em>estimated effects</em> may be different by month of signup, due to lack of data (and thus high variance in estimated pre-treatment or post-treatment transactions activity).</p>
 </section>
 <section id="IV.-Refuting-the-estimate">

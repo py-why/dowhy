@@ -37,7 +37,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=949a1ff5" />
     <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
     <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
@@ -577,14 +577,14 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
-<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">CausalModel</span>
-<span class="kn">import</span> <span class="nn">dowhy.datasets</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy</span><span class="w"> </span><span class="kn">import</span> <span class="n">CausalModel</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dowhy.datasets</span>
 
 <span class="c1"># Warnings and logging</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -612,12 +612,12 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-        FD0        W0        v0         y
-0 -1.105124  0.110744 -0.517873 -0.841830
-1  0.212723 -0.606509  0.069807 -0.180654
-2  0.186708 -0.185911 -0.019831  0.054425
-3 -3.122737 -2.279645 -2.788186 -3.789417
-4 -0.118646 -0.016112  0.497121 -0.093551
+         FD0        W0        v0           y
+0   6.541331  0.560931  2.576488   28.110422
+1  25.004841  1.895549  8.433885  106.412655
+2  20.810043  1.376181  7.172847   87.706093
+3  18.418889  0.989774  6.091380   76.629427
+4  14.960545  1.167445  5.868177   63.792309
 </pre></div></div>
 </div>
 </section>
@@ -634,7 +634,7 @@
                    <span class="n">missing_nodes_as_confounders</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
-<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
 <span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
@@ -725,12 +725,16 @@ Estimand assumption 3, Second-stage-unconfoundedness: If U→{FD0} and U→y the
 <p>Currently only two stage linear regression is supported for estimation. We plan to add a non-parametric Monte Carlo method soon as described in <a class="reference external" href="https://projecteuclid.org/euclid.ss/1280841733">Imai, Keele and Yamamoto (2010)</a>.</p>
 <section id="Natural-Indirect-Effect">
 <h3>Natural Indirect Effect<a class="headerlink" href="#Natural-Indirect-Effect" title="Permalink to this heading">#</a></h3>
-<p>The estimator converts the mediation effect estimation to a series of backdoor effect estimations. 1. The first-stage model estimates the effect from treatment (v0) to the mediator (FD0). 2. The second-stage model estimates the effect from mediator (FD0) to the outcome (Y).</p>
+<p>The estimator converts the mediation effect estimation to a series of backdoor effect estimations.</p>
+<ol class="arabic simple">
+<li><p>The first-stage model estimates the effect from treatment (v0) to the mediator (FD0).</p></li>
+<li><p>The second-stage model estimates the effect from mediator (FD0) to the outcome (Y).</p></li>
+</ol>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">dowhy.causal_estimators.linear_regression_estimator</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">dowhy.causal_estimators.linear_regression_estimator</span>
 <span class="n">causal_estimate_nie</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand_nie</span><span class="p">,</span>
                                         <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;mediation.two_stage_regression&quot;</span><span class="p">,</span>
                                        <span class="n">confidence_intervals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -769,7 +773,7 @@ Estimand assumption 3, Second-stage-unconfoundedness: If U→{FD0} and U→y the
 Target units: ate
 
 ## Estimate
-Mean value: 0.7372769151232416
+Mean value: 11.480530548904925
 
 </pre></div></div>
 </div>
@@ -787,7 +791,7 @@ Mean value: 0.7372769151232416
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-0.7372769151232416 0.732590018711172
+11.480530548904925 11.430059726918858
 </pre></div></div>
 </div>
 <p>The parameter is called <code class="docutils literal notranslate"><span class="pre">ate</span></code> because in the simulated dataset, the direct effect is set to be zero.</p>
@@ -837,7 +841,7 @@ Estimand assumption 3, Second-stage-unconfoundedness: If U→{FD0} and U→y the
 Target units: ate
 
 ## Estimate
-Mean value: 0.0001686870371385707
+Mean value: -1.4756864272769121e-05
 
 </pre></div></div>
 </div>

@@ -37,7 +37,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=949a1ff5" />
     <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
     <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
@@ -589,10 +589,10 @@ minimum cardinality.</p>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dowhy.causal_graph</span> <span class="kn">import</span> <span class="n">CausalGraph</span>
-<span class="kn">from</span> <span class="nn">dowhy.causal_identifier</span> <span class="kn">import</span> <span class="n">AutoIdentifier</span><span class="p">,</span> <span class="n">BackdoorAdjustment</span><span class="p">,</span> <span class="n">EstimandType</span>
-<span class="kn">from</span> <span class="nn">dowhy.graph</span> <span class="kn">import</span> <span class="n">build_graph_from_str</span>
-<span class="kn">from</span> <span class="nn">dowhy.utils.plotting</span> <span class="kn">import</span> <span class="n">plot</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dowhy.causal_graph</span><span class="w"> </span><span class="kn">import</span> <span class="n">CausalGraph</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy.causal_identifier</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoIdentifier</span><span class="p">,</span> <span class="n">BackdoorAdjustment</span><span class="p">,</span> <span class="n">EstimandType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy.graph</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_graph_from_str</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy.utils.plotting</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot</span>
 </pre></div>
 </div>
 </div>
@@ -714,13 +714,13 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
     d                                                                          ↪
-──────────(E[injury|neuromusc fatigue,contact sport,tissue disorder,previous i ↪
+──────────(E[injury|previous injury,tissue disorder,team motivation,contact sp ↪
 d[warm-up]                                                                     ↪
 
 ↪
-↪ njury,team motivation])
+↪ ort,neuromusc fatigue])
 ↪
-Estimand assumption 1, Unconfoundedness: If U→{warm-up} and U→injury then P(injury|warm-up,neuromusc fatigue,contact sport,tissue disorder,previous injury,team motivation,U) = P(injury|warm-up,neuromusc fatigue,contact sport,tissue disorder,previous injury,team motivation)
+Estimand assumption 1, Unconfoundedness: If U→{warm-up} and U→injury then P(injury|warm-up,previous injury,tissue disorder,team motivation,contact sport,neuromusc fatigue,U) = P(injury|warm-up,previous injury,tissue disorder,team motivation,contact sport,neuromusc fatigue)
 
 ### Estimand : 2
 Estimand name: iv
@@ -765,13 +765,13 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
     d                                                                          ↪
-──────────(E[injury|tissue disorder,neuromusc fatigue,previous injury,team mot ↪
+──────────(E[injury|previous injury,tissue disorder,team motivation,neuromusc  ↪
 d[warm-up]                                                                     ↪
 
 ↪
-↪ ivation])
+↪ fatigue])
 ↪
-Estimand assumption 1, Unconfoundedness: If U→{warm-up} and U→injury then P(injury|warm-up,tissue disorder,neuromusc fatigue,previous injury,team motivation,U) = P(injury|warm-up,tissue disorder,neuromusc fatigue,previous injury,team motivation)
+Estimand assumption 1, Unconfoundedness: If U→{warm-up} and U→injury then P(injury|warm-up,previous injury,tissue disorder,team motivation,neuromusc fatigue,U) = P(injury|warm-up,previous injury,tissue disorder,team motivation,neuromusc fatigue)
 
 ### Estimand : 2
 Estimand name: iv
@@ -815,9 +815,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
     d
-──────────(E[injury|fitness,previous injury,team motivation])
+──────────(E[injury|previous injury,team motivation,fitness])
 d[warm-up]
-Estimand assumption 1, Unconfoundedness: If U→{warm-up} and U→injury then P(injury|warm-up,fitness,previous injury,team motivation,U) = P(injury|warm-up,fitness,previous injury,team motivation)
+Estimand assumption 1, Unconfoundedness: If U→{warm-up} and U→injury then P(injury|warm-up,previous injury,team motivation,fitness,U) = P(injury|warm-up,previous injury,team motivation,fitness)
 
 ### Estimand : 2
 Estimand name: iv
@@ -1121,9 +1121,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
  d
-────(E[Y|L,K])
+────(E[Y|K,L])
 d[X]
-Estimand assumption 1, Unconfoundedness: If U→{X} and U→Y then P(Y|X,L,K,U) = P(Y|X,L,K)
+Estimand assumption 1, Unconfoundedness: If U→{X} and U→Y then P(Y|X,K,L,U) = P(Y|X,K,L)
 
 ### Estimand : 2
 Estimand name: iv
@@ -1179,9 +1179,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
  d
-────(E[Y|L,R,T])
+────(E[Y|T,R,L])
 d[X]
-Estimand assumption 1, Unconfoundedness: If U→{X} and U→Y then P(Y|X,L,R,T,U) = P(Y|X,L,R,T)
+Estimand assumption 1, Unconfoundedness: If U→{X} and U→Y then P(Y|X,T,R,L,U) = P(Y|X,T,R,L)
 
 ### Estimand : 2
 Estimand name: iv

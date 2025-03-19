@@ -37,7 +37,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=949a1ff5" />
     <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
     <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
@@ -577,22 +577,30 @@
 <h2>The Scenario<a class="headerlink" href="#The-Scenario" title="Permalink to this heading">#</a></h2>
 <p>Suppose we have an advertiser selling products online. To promote sales, they give out discounts through price promotions, and advertise online through both display ads and sponsored ads in search results pages. To prepare for an upcoming business review, the advertiser compares 2024 and 2023 data and observes steady KPI growth such as sales, and product page views. However, the analytics team wonders what factors drive that growth, is it advertising, price promotion, or simply organic growth
 due to shopper trends? Answers to this question are key to understanding past growth. Furthermore, this advertiser wants actionable suggestions for business planning, such as spending on areas with higher returns on investment to double down next. In the following scenario, we will use DoWhy two-fold: first to causally attribute KPI growth drivers properly, so the analytics team understands what fueled past growth in a data-driven way. Second, we conduct interventions based on causal impact
-estimates to derive incremental return on investment (iROI), so the advertiser can forecast future KPI growth with additional investment. These factors and KPIs are: * <strong>dsp_spend</strong>: Ad spend on Demand Side Platform (DSP) through display ads * <strong>sp_spend</strong>: Ad spend on search results pages to bump up product rankings for easy discovery * <strong>discount</strong>: Discounts given through price reductions * <strong>special_shopping_event</strong>: A binary variable indicating whether a shopping event hosted by the
-ecommerce platform took place, such as Black Friday or Cyber Monday * <strong>other_shopping_event</strong>: A binary variable indicating other shopping events off the ecommerce platform. It can be from the advertiser itself, or its advertising with other platforms. * <strong>dpv</strong>: Number of product detail page views * <strong>sale</strong>: Daily revenue on the focal ecommerce platform</p>
+estimates to derive incremental return on investment (iROI), so the advertiser can forecast future KPI growth with additional investment. These factors and KPIs are:</p>
+<ul class="simple">
+<li><p><strong>dsp_spend</strong>: Ad spend on Demand Side Platform (DSP) through display ads</p></li>
+<li><p><strong>sp_spend</strong>: Ad spend on search results pages to bump up product rankings for easy discovery</p></li>
+<li><p><strong>discount</strong>: Discounts given through price reductions</p></li>
+<li><p><strong>special_shopping_event</strong>: A binary variable indicating whether a shopping event hosted by the ecommerce platform took place, such as Black Friday or Cyber Monday</p></li>
+<li><p><strong>other_shopping_event</strong>: A binary variable indicating other shopping events off the ecommerce platform. It can be from the advertiser itself, or its advertising with other platforms.</p></li>
+<li><p><strong>dpv</strong>: Number of product detail page views</p></li>
+<li><p><strong>sale</strong>: Daily revenue on the focal ecommerce platform</p></li>
+</ul>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
-<span class="kn">from</span> <span class="nn">dowhy</span> <span class="kn">import</span> <span class="n">gcm</span>
-<span class="kn">from</span> <span class="nn">dowhy.utils.plotting</span> <span class="kn">import</span> <span class="n">plot</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">networkx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nx</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy</span><span class="w"> </span><span class="kn">import</span> <span class="n">gcm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy.utils.plotting</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot</span>
 
-<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
-<span class="kn">from</span> <span class="nn">statsmodels.stats.multitest</span> <span class="kn">import</span> <span class="n">multipletests</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">stats</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">statsmodels.stats.multitest</span><span class="w"> </span><span class="kn">import</span> <span class="n">multipletests</span>
 
 <span class="n">gcm</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <span class="o">%</span><span class="k">matplotlib</span> inline
@@ -728,7 +736,7 @@ ecommerce platform took place, such as Black Friday or Cyber Monday * <strong>ot
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">generate_new_old_dataframes</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">new_year</span><span class="p">,</span> <span class="n">new_quarters</span><span class="p">,</span> <span class="n">new_months</span><span class="p">,</span> <span class="n">old_year</span><span class="p">,</span> <span class="n">old_quarters</span><span class="p">,</span> <span class="n">old_months</span><span class="p">):</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">generate_new_old_dataframes</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">new_year</span><span class="p">,</span> <span class="n">new_quarters</span><span class="p">,</span> <span class="n">new_months</span><span class="p">,</span> <span class="n">old_year</span><span class="p">,</span> <span class="n">old_quarters</span><span class="p">,</span> <span class="n">old_months</span><span class="p">):</span>
     <span class="c1"># Filter new data based on year, quarters, and months</span>
     <span class="n">new_conditions</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;year&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">new_year</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;quarter&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">new_quarters</span><span class="p">))</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;month&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">new_months</span><span class="p">))</span>
     <span class="n">df_new</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">new_conditions</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -748,7 +756,7 @@ ecommerce platform took place, such as Black Friday or Cyber Monday * <strong>ot
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">plot_metric_distributions</span><span class="p">(</span><span class="n">df_new</span><span class="p">,</span> <span class="n">df_old</span><span class="p">,</span> <span class="n">metric_columns</span><span class="p">):</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">plot_metric_distributions</span><span class="p">(</span><span class="n">df_new</span><span class="p">,</span> <span class="n">df_old</span><span class="p">,</span> <span class="n">metric_columns</span><span class="p">):</span>
     <span class="k">for</span> <span class="n">metric_column</span> <span class="ow">in</span> <span class="n">metric_columns</span><span class="p">:</span>
         <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
 
@@ -811,7 +819,7 @@ ecommerce platform took place, such as Black Friday or Cyber Monday * <strong>ot
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">compare_metrics</span><span class="p">(</span><span class="n">df_new</span><span class="p">,</span> <span class="n">df_old</span><span class="p">,</span> <span class="n">metrics</span><span class="p">):</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">compare_metrics</span><span class="p">(</span><span class="n">df_new</span><span class="p">,</span> <span class="n">df_old</span><span class="p">,</span> <span class="n">metrics</span><span class="p">):</span>
     <span class="n">comparison_data</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
@@ -931,7 +939,7 @@ information in the presence of others. Thus, we can remove those edges of <span 
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_causal_minimality</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;kernel&#39;</span><span class="p">,</span> <span class="n">significance_level</span><span class="o">=</span><span class="mf">0.10</span><span class="p">,</span> <span class="n">fdr_control_method</span><span class="o">=</span><span class="s1">&#39;fdr_bh&#39;</span><span class="p">):</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_causal_minimality</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;kernel&#39;</span><span class="p">,</span> <span class="n">significance_level</span><span class="o">=</span><span class="mf">0.10</span><span class="p">,</span> <span class="n">fdr_control_method</span><span class="o">=</span><span class="s1">&#39;fdr_bh&#39;</span><span class="p">):</span>
     <span class="n">p_vals</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">all_parents</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">predecessors</span><span class="p">(</span><span class="n">target</span><span class="p">))</span>
     <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">all_parents</span><span class="p">:</span>
@@ -1107,7 +1115,7 @@ For more insights toward the quality of the fitted graphical causal model, consi
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node discount: 100%|██████████| 6/6 [00:00&lt;00:00, 28.23it/s]
+Fitting causal mechanism of node discount: 100%|██████████| 6/6 [00:00&lt;00:00, 27.84it/s]
 </pre></div></div>
 </div>
 </section>
@@ -1118,7 +1126,7 @@ Fitting causal mechanism of node discount: 100%|██████████| 
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">calculate_difference_estimation</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">df_old</span><span class="p">,</span> <span class="n">df_new</span><span class="p">,</span> <span class="n">target_column</span><span class="p">,</span> <span class="n">difference_estimation_func</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">confidence_level</span><span class="o">=</span><span class="mf">0.90</span><span class="p">,</span> <span class="n">num_bootstrap_resamples</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">calculate_difference_estimation</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">df_old</span><span class="p">,</span> <span class="n">df_new</span><span class="p">,</span> <span class="n">target_column</span><span class="p">,</span> <span class="n">difference_estimation_func</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">confidence_level</span><span class="o">=</span><span class="mf">0.90</span><span class="p">,</span> <span class="n">num_bootstrap_resamples</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
 
     <span class="n">difference_contribs</span><span class="p">,</span> <span class="n">uncertainty_contribs</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">confidence_intervals</span><span class="p">(</span>
         <span class="k">lambda</span> <span class="p">:</span> <span class="n">gcm</span><span class="o">.</span><span class="n">distribution_change</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span>
@@ -1143,11 +1151,11 @@ Fitting causal mechanism of node discount: 100%|██████████| 
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Evaluating set functions...: 100%|██████████| 61/61 [00:01&lt;00:00, 31.98it/s]
-Evaluating set functions...: 100%|██████████| 61/61 [00:03&lt;00:00, 18.11it/s]
-Evaluating set functions...: 100%|██████████| 62/62 [00:01&lt;00:00, 33.88it/s]
-Evaluating set functions...: 100%|██████████| 62/62 [00:01&lt;00:00, 35.11it/s]
-Estimating bootstrap interval...: 100%|██████████| 4/4 [00:13&lt;00:00,  3.46s/it]
+Evaluating set functions...: 100%|██████████| 61/61 [00:01&lt;00:00, 31.33it/s]
+Evaluating set functions...: 100%|██████████| 61/61 [00:01&lt;00:00, 32.21it/s]
+Evaluating set functions...: 100%|██████████| 62/62 [00:01&lt;00:00, 32.90it/s]
+Evaluating set functions...: 100%|██████████| 62/62 [00:01&lt;00:00, 32.30it/s]
+Estimating bootstrap interval...: 100%|██████████| 4/4 [00:13&lt;00:00,  3.26s/it]
 </pre></div></div>
 </div>
 <p>Then we plot drivers’ contribution to KPI changes visually, followed by a tabular format.</p>
@@ -1172,7 +1180,7 @@ Estimating bootstrap interval...: 100%|██████████| 4/4 [00:1
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">show_tabular</span><span class="p">(</span><span class="n">median_contribs</span><span class="p">,</span> <span class="n">uncertainty_contribs</span><span class="p">):</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">show_tabular</span><span class="p">(</span><span class="n">median_contribs</span><span class="p">,</span> <span class="n">uncertainty_contribs</span><span class="p">):</span>
     <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">node</span><span class="p">,</span> <span class="n">median_contrib</span> <span class="ow">in</span> <span class="n">median_contribs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="n">node</span><span class="p">,</span> <span class="n">median</span><span class="o">=</span><span class="n">median_contrib</span><span class="p">,</span> <span class="n">lb</span><span class="o">=</span><span class="n">uncertainty_contribs</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">ub</span><span class="o">=</span><span class="n">uncertainty_contribs</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="mi">1</span><span class="p">]))</span>
@@ -1266,7 +1274,7 @@ Estimating bootstrap interval...: 100%|██████████| 4/4 [00:1
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">filter_significant_rows</span><span class="p">(</span><span class="n">result_df</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">ub_col</span><span class="p">,</span> <span class="n">lb_col</span><span class="p">):</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">filter_significant_rows</span><span class="p">(</span><span class="n">result_df</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">ub_col</span><span class="p">,</span> <span class="n">lb_col</span><span class="p">):</span>
 
     <span class="k">if</span> <span class="n">direction</span> <span class="o">==</span> <span class="s1">&#39;positive&#39;</span><span class="p">:</span>
         <span class="n">significant_rows</span> <span class="o">=</span> <span class="n">result_df</span><span class="p">[(</span><span class="n">result_df</span><span class="p">[</span><span class="n">ub_col</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">result_df</span><span class="p">[</span><span class="n">lb_col</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)]</span>
@@ -1354,7 +1362,7 @@ Estimating bootstrap interval...: 100%|██████████| 4/4 [00:1
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">intervention_influence</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">non_interveneable_nodes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">confidence_level</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">prints</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">threshold_insignificant</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">):</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">intervention_influence</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">non_interveneable_nodes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">confidence_level</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">prints</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">threshold_insignificant</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">):</span>
     <span class="n">progress_bar_was_on</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">show_progress_bars</span>
 
     <span class="k">if</span> <span class="n">progress_bar_was_on</span><span class="p">:</span>
@@ -1372,10 +1380,10 @@ Estimating bootstrap interval...: 100%|██████████| 4/4 [00:1
             <span class="k">continue</span>
 
         <span class="c1"># Define interventions</span>
-        <span class="k">def</span> <span class="nf">intervention</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">intervention</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="n">step_size</span>
 
-        <span class="k">def</span> <span class="nf">non_intervention</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">non_intervention</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">x</span>
 
         <span class="n">interventions_alternative</span> <span class="o">=</span> <span class="p">{</span><span class="n">node</span><span class="p">:</span> <span class="n">intervention</span><span class="p">}</span>
