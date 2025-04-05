@@ -39,7 +39,7 @@ class GraphRefuter(CausalRefuter):
             self._refutation_passed = True
         elif len(self._false_implications) == 0:
             self._refutation_passed = True
-            self.logger.warn("Some tests could not be run : config not supported")
+            self.logger.warning("Some tests could not be run : config not supported")
         elif len(self._false_implications) > 0:
             self._refutation_passed = False
 

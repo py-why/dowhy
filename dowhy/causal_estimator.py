@@ -250,7 +250,7 @@ class CausalEstimator:
         # Making sure that effect_modifier_names is a list
         effect_modifier_names = parse_state(effect_modifier_names)
         if not all(em in self._effect_modifier_names for em in effect_modifier_names):
-            self.logger.warn(
+            self.logger.warning(
                 "At least one of the provided effect modifiers was not included while fitting the estimator. You may get incorrect results. To resolve, fit the estimator again by providing the updated effect modifiers in estimate_effect()."
             )
         # Making a copy since we are going to be changing effect modifier names

@@ -186,7 +186,7 @@ def identify_effect_auto(
 
     # First, check if there is a directed path from action to outcome
     if not has_directed_path(graph, action_nodes, outcome_nodes):
-        logger.warn("No directed path from treatment to outcome. Causal Effect is zero.")
+        logger.warning("No directed path from treatment to outcome. Causal Effect is zero.")
         return IdentifiedEstimand(
             None,
             treatment_variable=action_nodes,

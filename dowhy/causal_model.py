@@ -583,7 +583,7 @@ def _warn_if_unobserved_graph_variables(
             "unobserved because they are not in the dataset. "
             "Configure the logging level to `logging.WARNING` or higher for additional details."
         )
-        logger.warn(
+        logger.warning(
             "The graph defines %d variables. %d were found in the dataset "
             "and will be analyzed as observed variables. %d were not found "
             "in the dataset and will be analyzed as unobserved variables. "
@@ -609,7 +609,7 @@ def _warn_if_unused_data_variables(
     unused_data_variable_names = data_variable_names.difference(graph_variable_names)
 
     if unused_data_variable_names:
-        logger.warn(
+        logger.warning(
             "There are an additional %d variables in the dataset that are "
             "not in the graph. Variable names are: '%s'",
             len(unused_data_variable_names),
