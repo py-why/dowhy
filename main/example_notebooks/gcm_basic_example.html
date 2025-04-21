@@ -641,33 +641,33 @@
   <tbody>
     <tr>
       <th>0</th>
-      <td>0.252453</td>
-      <td>1.680195</td>
-      <td>5.725939</td>
+      <td>-1.364333</td>
+      <td>-2.238208</td>
+      <td>-7.161750</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>-1.281929</td>
-      <td>-3.393765</td>
-      <td>-10.403800</td>
+      <td>0.666839</td>
+      <td>1.888993</td>
+      <td>4.656129</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>0.407951</td>
-      <td>-0.108739</td>
-      <td>1.125560</td>
+      <td>-0.936401</td>
+      <td>-2.717528</td>
+      <td>-6.995819</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>-1.498171</td>
-      <td>-2.585042</td>
-      <td>-9.380562</td>
+      <td>-0.959880</td>
+      <td>-2.430376</td>
+      <td>-7.658672</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>0.832266</td>
-      <td>1.182306</td>
-      <td>2.897897</td>
+      <td>1.927707</td>
+      <td>4.689904</td>
+      <td>14.128376</td>
     </tr>
   </tbody>
 </table>
@@ -720,22 +720,22 @@ In total, 3 nodes were analyzed:
 Node X is a root node. Therefore, assigning &#39;Empirical Distribution&#39; to the node representing the marginal distribution.
 
 --- Node: Y
-Node Y is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using LinearRegression&#39; to the node.
+Node Y is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using Pipeline&#39; to the node.
 This represents the causal relationship as Y := f(X) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
-LinearRegression: 0.8707735341832773
 Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 0.8730215416485191
-HistGradientBoostingRegressor: 0.9506038610734592
+                (&#39;linearregression&#39;, LinearRegression)]): 0.9243692901186048
+LinearRegression: 0.9247757060254459
+HistGradientBoostingRegressor: 1.0128252772496567
 
 --- Node: Z
 Node Z is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using LinearRegression&#39; to the node.
 This represents the causal relationship as Z := f(Y) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
-LinearRegression: 1.0023867015514358
+LinearRegression: 1.0168089357492571
 Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 1.005072778832236
-HistGradientBoostingRegressor: 1.3427055580860534
+                (&#39;linearregression&#39;, LinearRegression)]): 1.0170822115996097
+HistGradientBoostingRegressor: 1.5534923259019635
 
 ===Note===
 Note, based on the selected auto assignment quality, the set of evaluated models changes.
@@ -772,7 +772,7 @@ For more insights toward the quality of the fitted graphical causal model, consi
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node Z: 100%|██████████| 3/3 [00:00&lt;00:00, 455.94it/s]
+Fitting causal mechanism of node Z: 100%|██████████| 3/3 [00:00&lt;00:00, 470.28it/s]
 </pre></div></div>
 </div>
 <p>Fitting means, we learn the generative models of the variables in the SCM according to the data.</p>
@@ -790,8 +790,8 @@ Fitting causal mechanism of node Z: 100%|██████████| 3/3 [00
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Evaluating causal mechanisms...: 100%|██████████| 3/3 [00:00&lt;00:00, 3400.79it/s]
-Test permutations of given graph: 100%|██████████| 6/6 [00:00&lt;00:00, 18.66it/s]
+Evaluating causal mechanisms...: 100%|██████████| 3/3 [00:00&lt;00:00, 3227.22it/s]
+Test permutations of given graph: 100%|██████████| 6/6 [00:00&lt;00:00, 18.72it/s]
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -820,21 +820,21 @@ NOTE: Every metric focuses on different aspects and they might not consistently 
 We will mostly utilize the CRPS for comparing and interpreting the performance of the mechanisms, since this captures the most important properties for the causal model.
 
 --- Node X
-- The KL divergence between generated and observed distribution is 0.09961077308738846.
+- The KL divergence between generated and observed distribution is 0.037691064252566235.
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
 --- Node Y
-- The MSE is 0.8730079238666809.
-- The NMSE is 0.42652194446025493.
-- The R2 coefficient is 0.8175759958839119.
-- The normalized CRPS is 0.24464172767168493.
+- The MSE is 0.9221778955923151.
+- The NMSE is 0.43253908572028593.
+- The R2 coefficient is 0.8110105763043455.
+- The normalized CRPS is 0.24694597943135319.
 The estimated CRPS indicates a good model performance.
 
 --- Node Z
-- The MSE is 0.999448624125213.
-- The NMSE is 0.1534438647627237.
-- The R2 coefficient is 0.9762705966126924.
-- The normalized CRPS is 0.08784185562099171.
+- The MSE is 1.015586003894145.
+- The NMSE is 0.149722912777013.
+- The R2 coefficient is 0.9773697308561704.
+- The normalized CRPS is 0.08541933549558725.
 The estimated CRPS indicates a very good model performance.
 
 ==== Evaluation of Invertible Functional Causal Model Assumption ====
@@ -848,7 +848,7 @@ This implies that the model assumption might be valid.
 Note that these results are based on statistical independence tests, and the fact that the assumption was not rejected does not necessarily imply that it is correct. There is just no evidence against it.
 
 ==== Evaluation of Generated Distribution ====
-The overall average KL divergence between the generated and observed distribution is 0.0
+The overall average KL divergence between the generated and observed distribution is 0.010383312519729244
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
 ==== Evaluation of the Causal Graph Structure ====
@@ -924,33 +924,33 @@ All these evaluations give some insight into the goodness of the causal model, b
   <tbody>
     <tr>
       <th>0</th>
-      <td>-0.356603</td>
+      <td>0.192981</td>
       <td>2.34</td>
-      <td>5.931583</td>
+      <td>8.223691</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>-0.626460</td>
+      <td>1.954717</td>
       <td>2.34</td>
-      <td>9.179500</td>
+      <td>6.770650</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>1.366802</td>
+      <td>-0.686175</td>
       <td>2.34</td>
-      <td>5.422937</td>
+      <td>8.517245</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>-0.013541</td>
+      <td>1.273909</td>
       <td>2.34</td>
-      <td>7.396583</td>
+      <td>8.023518</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>0.463452</td>
+      <td>-0.393378</td>
       <td>2.34</td>
-      <td>8.320588</td>
+      <td>3.540166</td>
     </tr>
   </tbody>
 </table>
