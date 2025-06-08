@@ -29,7 +29,6 @@ from dowhy.gcm.util import plot
 from dowhy.gcm.util.general import set_random_seed
 from dowhy.graph import DirectedGraph, get_ordered_predecessors
 
-
 VIOLATION_COLOR = "red"
 COLORS = list(mcolors.TABLEAU_COLORS.values())
 

@@ -3,6 +3,7 @@ import logging
 import re
 
 import networkx as nx
+
 # version compatibility for breaking change in networkx 3.5
 try:
     from networkx.algorithms.d_separation import is_d_separated as d_separated
