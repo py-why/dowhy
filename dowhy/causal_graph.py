@@ -3,6 +3,11 @@ import logging
 import re
 
 import networkx as nx
+# version compatibility for breaking change in networkx 3.5
+try:
+    from networkx.algorithms.d_separation import is_d_separated as d_separated
+except ImportError:
+    from networkx.algorithms.d_separation import d_separated
 
 from dowhy.gcm.causal_models import ProbabilisticCausalModel
 from dowhy.graph import has_directed_path
@@ -262,7 +267,7 @@ class CausalGraph:
         if dseparation_algo == "default":
             if new_graph is None:
                 new_graph = self._graph
-            dseparated = nx.algorithms.d_separated(new_graph, set(nodes1), set(nodes2), set(nodes3))
+            dseparated = d_separated(new_graph, set(nodes1), set(nodes2), set(nodes3))
         else:
             raise ValueError(f"{dseparation_algo} method for d-separation not supported.")
         return dseparated
@@ -278,7 +283,7 @@ class CausalGraph:
             if new_graph is None:
                 # Assume that nodes1 is the treatment
                 new_graph = self.do_surgery(nodes1, remove_outgoing_edges=True)
-            dseparated = nx.algorithms.d_separated(new_graph, set(nodes1), set(nodes2), set(nodes3))
+            dseparated = d_separated(new_graph, set(nodes1), set(nodes2), set(nodes3))
         elif dseparation_algo == "naive":
             # ignores new_graph parameter, always uses self._graph
             if backdoor_paths is None:
@@ -471,7 +476,7 @@ class CausalGraph:
         if dseparation_algo == "default":
             if new_graph is None:
                 new_graph = self._graph
-            dseparated = nx.algorithms.d_separated(new_graph, set(nodes1), set(nodes2), set(candidate_nodes))
+            dseparated = d_separated(new_graph, set(nodes1), set(nodes2), set(candidate_nodes))
         elif dseparation_algo == "naive":
             if frontdoor_paths is None:
                 frontdoor_paths = self.get_all_directed_paths(nodes1, nodes2)
