@@ -12,7 +12,7 @@ from networkx.algorithms.dag import has_cycle
 
 # version compatibility for breaking change in networkx 3.5
 try:
-    from networkx.algorithms.d_separation import is_d_separated as d_separated
+    from networkx.algorithms.d_separation import is_d_separator as d_separated
 except ImportError:
     from networkx.algorithms.d_separation import d_separated
 
