@@ -10,6 +10,12 @@ from typing import Any, List, Protocol
 import networkx as nx
 from networkx.algorithms.dag import has_cycle
 
+# version compatibility for breaking change in networkx 3.5
+try:
+    from networkx.algorithms.d_separation import is_d_separator as d_separated
+except ImportError:
+    from networkx.algorithms.d_separation import d_separated
+
 from dowhy.utils.api import parse_state
 from dowhy.utils.graph_operations import daggity_to_dot
 
@@ -97,7 +103,7 @@ def check_valid_backdoor_set(
             # Assume that nodes1 is the treatment
             new_graph = do_surgery(graph, nodes1, remove_outgoing_edges=True)
 
-        dseparated = nx.algorithms.d_separated(new_graph, set(nodes1), set(nodes2), set(nodes3))
+        dseparated = d_separated(new_graph, set(nodes1), set(nodes2), set(nodes3))
     elif dseparation_algo == "naive":
         # ignores new_graph parameter, always uses self._graph
         if backdoor_paths is None:
@@ -252,7 +258,7 @@ def check_dseparation(graph: nx.DiGraph, nodes1, nodes2, nodes3, new_graph=None,
     if dseparation_algo == "default":
         if new_graph is None:
             new_graph = graph
-        dseparated = nx.algorithms.d_separated(new_graph, set(nodes1), set(nodes2), set(nodes3))
+        dseparated = d_separated(new_graph, set(nodes1), set(nodes2), set(nodes3))
     else:
         raise ValueError(f"{dseparation_algo} method for d-separation not supported.")
     return dseparated
@@ -301,7 +307,7 @@ def check_valid_frontdoor_set(
     if dseparation_algo == "default":
         if new_graph is None:
             new_graph = graph
-        dseparated = nx.algorithms.d_separated(new_graph, set(nodes1), set(nodes2), set(candidate_nodes))
+        dseparated = d_separated(new_graph, set(nodes1), set(nodes2), set(candidate_nodes))
     elif dseparation_algo == "naive":
         if frontdoor_paths is None:
             frontdoor_paths = get_all_directed_paths(graph, nodes1, nodes2)
