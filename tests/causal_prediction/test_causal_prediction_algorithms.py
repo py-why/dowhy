@@ -1,6 +1,6 @@
 import pytest
-import torch
 import pytorch_lightning as pl
+import torch
 
 from dowhy.causal_prediction.algorithms.cacm import CACM
 from dowhy.causal_prediction.algorithms.erm import ERM
