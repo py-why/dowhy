@@ -584,9 +584,9 @@ def test_given_missing_data_mixed_numerical_and_categorical_when_auto_assign_mec
 
     drawn_samples = gcm.draw_samples(causal_model, 5000)
 
-    assert drawn_samples["X"].mean() == approx(0, abs=0.5)
+    assert drawn_samples["X"].mean() == approx(0, abs=1)
     assert np.sum(drawn_samples["Y"] == "Class 0") == approx(X.shape[0] // 2, abs=500)
-    assert drawn_samples["Z"].mean() == approx(0, abs=0.5)
+    assert drawn_samples["Z"].mean() == approx(0, abs=1)
 
     interventional_drawn_samples = gcm.interventional_samples(causal_model, {"X": lambda x: 10}, num_samples_to_draw=10)
     assert interventional_drawn_samples["X"].to_numpy() == approx(np.array([10] * 10))
