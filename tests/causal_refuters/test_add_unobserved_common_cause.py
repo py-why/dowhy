@@ -1,3 +1,4 @@
+import sys
 from unittest.mock import patch
 
 import numpy as np
@@ -544,6 +545,9 @@ class TestAddUnobservedCommonCauseRefuter(object):
     )
     @patch("matplotlib.pyplot.figure")
     def test_evalue_linear_regression(self, mock_fig, estimator_method):
+        # generalized adjustment identification requires python >=3.10
+        if estimator_method.startswith("general_adjustment") and sys.version_info < (3, 10):
+            return
         data = dowhy.datasets.linear_dataset(
             beta=10, num_common_causes=5, num_samples=1000, treatment_is_binary=True, stddev_outcome_noise=5
         )
@@ -569,6 +573,9 @@ class TestAddUnobservedCommonCauseRefuter(object):
     )
     @patch("matplotlib.pyplot.figure")
     def test_evalue_logistic_regression(self, mock_fig, estimator_method):
+        # generalized adjustment identification requires python >=3.10
+        if estimator_method.startswith("general_adjustment") and sys.version_info < (3, 10):
+            return
         data = dowhy.datasets.linear_dataset(
             beta=10,
             outcome_is_binary=True,
