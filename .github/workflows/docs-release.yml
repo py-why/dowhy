@@ -18,12 +18,20 @@ env:
 jobs:
   docs:
     runs-on: ubuntu-latest
-    container:
-      image: "python:3.8-slim"
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc g++ pkg-config libgraphviz-dev graphviz-dev graphviz nodejs npm pandoc
 
       - name: Install Poetry
         run: python3 -m pip install poetry
