@@ -1,0 +1,1894 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B139P18WHM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-B139P18WHM');
+    </script>
+    
+    <title>Sensitivity Analysis for Regression Models &#8212; DoWhy  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=949a1ff5" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/jquery.js?v=5d32c60e"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=0c6e27e1"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'example_notebooks/sensitivity_analysis_testing';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Sensitivity analysis for non-parametric causal estimators" href="sensitivity_analysis_nonparametric_estimators.html" />
+    <link rel="prev" title="Causal Discovery example" href="dowhy_causal_discovery_example.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="v0.13" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-light" alt="DoWhy  documentation - Home"/>
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-dark pst-js-only" alt="DoWhy  documentation - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="nb_index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing.html">
+    Contributing
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
+    dowhy package
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
+    Release notes
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item"><div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        v0.13
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.9.1/index.html">v0.9.1</a></dd>
+            <dd><a href="/dowhy/v0.9/index.html">v0.9</a></dd>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.12/index.html">v0.12</a></dd>
+            <dd><a href="/dowhy/v0.11.1/index.html">v0.11.1</a></dd>
+            <dd><a href="/dowhy/v0.11/index.html">v0.11</a></dd>
+            <dd><a href="/dowhy/v0.10.1/index.html">v0.10.1</a></dd>
+            <dd><a href="/dowhy/v0.10/index.html">v0.10</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="nb_index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../dowhy.html">
+    dowhy package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../code_repo.html">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        v0.13
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.9.1/index.html">v0.9.1</a></dd>
+            <dd><a href="/dowhy/v0.9/index.html">v0.9</a></dd>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.12/index.html">v0.12</a></dd>
+            <dd><a href="/dowhy/v0.11.1/index.html">v0.11.1</a></dd>
+            <dd><a href="/dowhy/v0.11/index.html">v0.11</a></dd>
+            <dd><a href="/dowhy/v0.10.1/index.html">v0.10.1</a></dd>
+            <dd><a href="/dowhy/v0.10/index.html">v0.10</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Introductory examples</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="dowhy_simple_example.html">Basic Example for Calculating the Causal Effect</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_basic_example.html">Basic Example for Graphical Causal Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_draw_samples.html">Basic Example for generating samples from a GCM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial-causalinference-machinelearning-using-dowhy-econml.html">Tutorial on Causal Inference and its Connections to Machine Learning (Using DoWhy+EconML)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_mediation_analysis.html">Mediation analysis with DoWhy: Direct and Indirect Effects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_refuter_notebook.html">Iterating over multiple refutation tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="do_sampler_demo.html">Do-sampler Introduction</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Real world-inspired examples</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="DoWhy-The%20Causal%20Story%20Behind%20Hotel%20Booking%20Cancellations.html">Exploring Causes of Hotel Booking Cancellations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_example_effect_of_memberrewards_program.html">Estimating the Effect of a Member Rewards Program</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_online_shop.html">Causal Attributions and Root-Cause Analysis in an Online Shop</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="gcm_rca_microservice_architecture.html">Finding the Root Cause of Elevated Latencies in a Microservice Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_401k_analysis.html">Impact of 401(k) eligibility on net financial assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_supply_chain_dist_change.html">Finding Root Causes of Changes in a Supply Chain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_icc.html">Estimating intrinsic causal influences in real-world examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_counterfactual_medical_dry_eyes.html">Counterfactual Analysis in a Medical Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_falsify_dag.html">Falsification of User-Given Directed Acyclic Graphs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="counterfactual_fairness_dowhy.html">Counterfactual Fairness</a></li>
+
+
+
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="sales_attribution_intervention.html">Causal attribution to sales growth and spend intervention</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples on benchmarks datasets</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="dowhy_ihdp_data_example.html">DoWhy example on ihdp (Infant Health and Development Program) dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_lalonde_example.html">DoWhy example on the Lalonde dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_refutation_testing.html">Applying refutation tests to the Lalonde and IHDP datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_401k_analysis.html">Impact of 401(k) eligibility on net financial assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prediction/dowhy_causal_prediction_demo.html">Demo for DoWhy Causal Prediction on MNIST</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lalonde_pandas_api.html">Lalonde Pandas API Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="counterfactual_fairness_dowhy.html">Counterfactual Fairness</a></li>
+
+
+
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="dowhy_twins_example.html">DoWhy example on Twins dataset</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Modeling and refuting causal assumptions</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="load_graph_example.html">Different ways to load an input graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_causal_discovery_example.html">Causal Discovery example</a></li>
+
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="gcm_falsify_dag.html">Falsification of User-Given Directed Acyclic Graphs</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Sensitivity Analysis for Regression Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sensitivity_analysis_nonparametric_estimators.html">Sensitivity analysis for non-parametric causal estimators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_refuter_notebook.html">Iterating over multiple refutation tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_refuter_assess_overlap.html">Assessing Support and Overlap with OverRule</a></li>
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="dowhy_ranking_methods.html">Ranking of estimation methods for a given dataset</a></li>
+
+
+<li class="toctree-l1"><a class="reference internal" href="dowhy_demo_dummy_outcome_refuter.html">A Simple Example on Creating a Custom Refutation Using User-Defined Outcome Functions</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Miscellaneous</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy-simple-iv-example.html">Simple example on using Instrumental Variables method for estimation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_interpreter.html">DoWhy: Interpreters for Causal Estimators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_mediation_analysis.html">Mediation analysis with DoWhy: Direct and Indirect Effects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_multiple_treatments.html">Estimating effect of multiple treatments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_efficient_backdoor_example.html">Finding optimal adjustment sets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="identifying_effects_using_id_algorithm.html">Identifying Effect using ID Algorithm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_optimize_backdoor_example.html">Example to demonstrate optimized backdoor variable search for Causal Identification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_functional_api.html">Functional API Preview</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="nb_index.html" class="nav-link">Example notebooks</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Sensitivity Analysis for Regression Models</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Sensitivity-Analysis-for-Regression-Models">
+<h1>Sensitivity Analysis for Regression Models<a class="headerlink" href="#Sensitivity-Analysis-for-Regression-Models" title="Link to this heading">#</a></h1>
+<p>Sensitivity analysis helps us examine how sensitive a result is against the possibility of unobserved confounding. Two methods are implemented:</p>
+<ol class="arabic simple">
+<li><p><a class="reference external" href="https://carloscinelli.com/files/Cinelli%20and%20Hazlett%20(2020)%20-%20Making%20Sense%20of%20Sensitivity.pdf">Cinelli &amp; Hazlett’s robustness value</a></p>
+<ul class="simple">
+<li><p>This method only supports linear regression estimator.</p></li>
+<li><p>The partial R^2 of treatment with outcome shows how strongly confounders explaining all the residual outcome variation would have to be associated with the treatment to eliminate the estimated effect.</p></li>
+<li><p>The robustness value measures the minimum strength of association unobserved confounding should have with both treatment and outcome in order to change the conclusions.</p></li>
+<li><p>Robustness value close to 1 means the treatment effect can handle strong confounders explaining almost all residual variation of the treatment and the outcome.</p></li>
+<li><p>Robustness value close to 0 means that even very weak confounders can also change the results.</p></li>
+<li><p>Benchmarking examines the sensitivity of causal inferences to plausible strengths of the omitted confounders.</p></li>
+<li><p>This method is based on <a class="reference external" href="https://carloscinelli.com/files/Cinelli%20and%20Hazlett%20(2020)%20-%20Making%20Sense%20of%20Sensitivity.pdf">https://carloscinelli.com/files/Cinelli%20and%20Hazlett%20(2020)%20-%20Making%20Sense%20of%20Sensitivity.pdf</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference external" href="https://dash.harvard.edu/bitstream/handle/1/36874927/EValue_FinalSubmission.pdf">Ding &amp; VanderWeele’s E-Value</a></p>
+<ul class="simple">
+<li><p>This method supports linear and logistic regression.</p></li>
+<li><p>The E-value is the minimum strength of association on the risk ratio scale that an unmeasured confounder would need to have with both the treatment and the outcome, conditional on the measured covariates, to fully explain away a specific treatment-outcome association.</p></li>
+<li><p>The minimum E-value is 1, which means that no unmeasured confounding is needed to explain away the observed association (i.e. the confidence interval crosses the null).</p></li>
+<li><p>Higher E-values mean that stronger unmeasured confounding is needed to explain away the observed association. There is no maximum E-value.</p></li>
+<li><p><a class="reference external" href="https://arxiv.org/abs/2011.07030">McGowan &amp; Greevy Jr’s</a> benchmarks the E-value against the measured confounders.</p></li>
+</ul>
+</li>
+</ol>
+<section id="Step-1:-Load-required-packages">
+<h2>Step 1: Load required packages<a class="headerlink" href="#Step-1:-Load-required-packages" title="Link to this heading">#</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s2">&quot;../../../&quot;</span><span class="p">))</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dowhy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy</span><span class="w"> </span><span class="kn">import</span> <span class="n">CausalModel</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dowhy.datasets</span>
+
+<span class="c1"># Config dict to set the logging level</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging.config</span>
+<span class="n">DEFAULT_LOGGING</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s1">&#39;disable_existing_loggers&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s1">&#39;loggers&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;ERROR&#39;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">logging</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">dictConfig</span><span class="p">(</span><span class="n">DEFAULT_LOGGING</span><span class="p">)</span>
+<span class="c1"># Disabling warnings output</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataConversionWarning</span>
+<span class="c1">#warnings.filterwarnings(action=&#39;ignore&#39;, category=DataConversionWarning)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Step-2:-Load-the-dataset">
+<h2>Step 2: Load the dataset<a class="headerlink" href="#Step-2:-Load-the-dataset" title="Link to this heading">#</a></h2>
+<p>We create a dataset with linear relationships between common causes and treatment, and common causes and outcome. Beta is the true causal effect.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">linear_dataset</span><span class="p">(</span> <span class="n">beta</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+                                      <span class="n">num_common_causes</span> <span class="o">=</span> <span class="mi">7</span><span class="p">,</span>
+                                      <span class="n">num_samples</span> <span class="o">=</span> <span class="mi">500</span><span class="p">,</span>
+                                      <span class="n">num_treatments</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                                     <span class="n">stddev_treatment_noise</span> <span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                                     <span class="n">stddev_outcome_noise</span> <span class="o">=</span> <span class="mi">5</span>
+                                    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">],</span>
+            <span class="n">treatment</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">],</span>
+            <span class="n">outcome</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">],</span>
+            <span class="n">graph</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;gml_graph&quot;</span><span class="p">],</span>
+            <span class="n">test_significance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
+<span class="n">data</span><span class="p">[</span><span class="s1">&#39;df&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_sensitivity_analysis_testing_5_0.png" src="../_images/example_notebooks_sensitivity_analysis_testing_5_0.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_sensitivity_analysis_testing_5_1.png" src="../_images/example_notebooks_sensitivity_analysis_testing_5_1.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>W0</th>
+      <th>W1</th>
+      <th>W2</th>
+      <th>W3</th>
+      <th>W4</th>
+      <th>W5</th>
+      <th>W6</th>
+      <th>v0</th>
+      <th>y</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>-0.145062</td>
+      <td>-0.235286</td>
+      <td>0.784843</td>
+      <td>0.869131</td>
+      <td>-1.567724</td>
+      <td>-1.290234</td>
+      <td>0.116096</td>
+      <td>True</td>
+      <td>1.386517</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>-0.228109</td>
+      <td>-0.020264</td>
+      <td>-0.589792</td>
+      <td>0.188139</td>
+      <td>-2.649265</td>
+      <td>-1.764439</td>
+      <td>-0.167236</td>
+      <td>False</td>
+      <td>-16.159402</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.868298</td>
+      <td>-1.097642</td>
+      <td>-0.109792</td>
+      <td>0.487635</td>
+      <td>-1.861375</td>
+      <td>-0.527930</td>
+      <td>-0.066542</td>
+      <td>False</td>
+      <td>-0.702560</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>-0.017115</td>
+      <td>1.123918</td>
+      <td>0.346060</td>
+      <td>1.845425</td>
+      <td>0.848049</td>
+      <td>0.778865</td>
+      <td>0.596496</td>
+      <td>True</td>
+      <td>27.714465</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>-0.757347</td>
+      <td>-1.426205</td>
+      <td>-0.457063</td>
+      <td>1.528053</td>
+      <td>-2.681410</td>
+      <td>0.394312</td>
+      <td>-0.687839</td>
+      <td>False</td>
+      <td>-20.082633</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</section>
+<section id="Step-3:-Create-Causal-Model">
+<h2>Step 3: Create Causal Model<a class="headerlink" href="#Step-3:-Create-Causal-Model" title="Link to this heading">#</a></h2>
+<p>Remove one of the common causes to simulate unobserved confounding</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;W4&quot;</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">graph_str</span> <span class="o">=</span> <span class="s1">&#39;graph[directed 1node[ id &quot;y&quot; label &quot;y&quot;]node[ id &quot;W0&quot; label &quot;W0&quot;] node[ id &quot;W1&quot; label &quot;W1&quot;] node[ id &quot;W2&quot; label &quot;W2&quot;] node[ id &quot;W3&quot; label &quot;W3&quot;]  node[ id &quot;W5&quot; label &quot;W5&quot;] node[ id &quot;W6&quot; label &quot;W6&quot;]node[ id &quot;v0&quot; label &quot;v0&quot;]edge[source &quot;v0&quot; target &quot;y&quot;]edge[ source &quot;W0&quot; target &quot;v0&quot;] edge[ source &quot;W1&quot; target &quot;v0&quot;] edge[ source &quot;W2&quot; target &quot;v0&quot;] edge[ source &quot;W3&quot; target &quot;v0&quot;] edge[ source &quot;W5&quot; target &quot;v0&quot;] edge[ source &quot;W6&quot; target &quot;v0&quot;]edge[ source &quot;W0&quot; target &quot;y&quot;] edge[ source &quot;W1&quot; target &quot;y&quot;] edge[ source &quot;W2&quot; target &quot;y&quot;] edge[ source &quot;W3&quot; target &quot;y&quot;] edge[ source &quot;W5&quot; target &quot;y&quot;] edge[ source &quot;W6&quot; target &quot;y&quot;]]&#39;</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">],</span>
+            <span class="n">treatment</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">],</span>
+            <span class="n">outcome</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">],</span>
+            <span class="n">graph</span><span class="o">=</span><span class="n">graph_str</span><span class="p">,</span>
+            <span class="n">test_significance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
+<span class="n">data</span><span class="p">[</span><span class="s1">&#39;df&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_sensitivity_analysis_testing_7_0.png" src="../_images/example_notebooks_sensitivity_analysis_testing_7_0.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_sensitivity_analysis_testing_7_1.png" src="../_images/example_notebooks_sensitivity_analysis_testing_7_1.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>W0</th>
+      <th>W1</th>
+      <th>W2</th>
+      <th>W3</th>
+      <th>W5</th>
+      <th>W6</th>
+      <th>v0</th>
+      <th>y</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>-0.145062</td>
+      <td>-0.235286</td>
+      <td>0.784843</td>
+      <td>0.869131</td>
+      <td>-1.290234</td>
+      <td>0.116096</td>
+      <td>True</td>
+      <td>1.386517</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>-0.228109</td>
+      <td>-0.020264</td>
+      <td>-0.589792</td>
+      <td>0.188139</td>
+      <td>-1.764439</td>
+      <td>-0.167236</td>
+      <td>False</td>
+      <td>-16.159402</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.868298</td>
+      <td>-1.097642</td>
+      <td>-0.109792</td>
+      <td>0.487635</td>
+      <td>-0.527930</td>
+      <td>-0.066542</td>
+      <td>False</td>
+      <td>-0.702560</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>-0.017115</td>
+      <td>1.123918</td>
+      <td>0.346060</td>
+      <td>1.845425</td>
+      <td>0.778865</td>
+      <td>0.596496</td>
+      <td>True</td>
+      <td>27.714465</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>-0.757347</td>
+      <td>-1.426205</td>
+      <td>-0.457063</td>
+      <td>1.528053</td>
+      <td>0.394312</td>
+      <td>-0.687839</td>
+      <td>False</td>
+      <td>-20.082633</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</section>
+<section id="Step-4:-Identification">
+<h2>Step 4: Identification<a class="headerlink" href="#Step-4:-Identification" title="Link to this heading">#</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Estimand type: EstimandType.NONPARAMETRIC_ATE
+
+### Estimand : 1
+Estimand name: backdoor
+Estimand expression:
+  d
+─────(E[y|W0,W6,W1,W3,W5,W2])
+d[v₀]
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W6,W1,W3,W5,W2,U) = P(y|v0,W0,W6,W1,W3,W5,W2)
+
+### Estimand : 2
+Estimand name: iv
+No such variable(s) found!
+
+### Estimand : 3
+Estimand name: frontdoor
+No such variable(s) found!
+
+</pre></div></div>
+</div>
+</section>
+<section id="Step-5:-Estimation">
+<h2>Step 5: Estimation<a class="headerlink" href="#Step-5:-Estimation" title="Link to this heading">#</a></h2>
+<p>Currently only Linear Regression estimator is supported for Linear Sensitivity Analysis</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span><span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.linear_regression&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">estimate</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+*** Causal Estimate ***
+
+## Identified estimand
+Estimand type: EstimandType.NONPARAMETRIC_ATE
+
+### Estimand : 1
+Estimand name: backdoor
+Estimand expression:
+  d
+─────(E[y|W0,W6,W1,W3,W5,W2])
+d[v₀]
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W6,W1,W3,W5,W2,U) = P(y|v0,W0,W6,W1,W3,W5,W2)
+
+## Realized estimand
+b: y~v0+W0+W6+W1+W3+W5+W2
+Target units: ate
+
+## Estimate
+Mean value: 10.697677486880917
+
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/runner/work/dowhy/dowhy/dowhy/causal_estimators/regression_estimator.py:131: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  intercept_parameter = self.model.params[0]
+</pre></div></div>
+</div>
+</section>
+<section id="Step-6a:-Refutation-and-Sensitivity-Analysis---Method-1">
+<h2>Step 6a: Refutation and Sensitivity Analysis - Method 1<a class="headerlink" href="#Step-6a:-Refutation-and-Sensitivity-Analysis---Method-1" title="Link to this heading">#</a></h2>
+<p>identified_estimand: An instance of the identifiedEstimand class that provides the information with respect to which causal pathways are employed when the treatment effects the outcome estimate: An instance of CausalEstimate class. The estimate obtained from the estimator for the original data. method_name: Refutation method name simulation_method: “linear-partial-R2” for Linear Sensitivity Analysis benchmark_common_causes: Name of the covariates used to bound the strengths of unobserved
+confounder percent_change_estimate: It is the percentage of reduction of treatment estimate that could alter the results (default = 1) if percent_change_estimate = 1, the robustness value describes the strength of association of confounders with treatment and outcome in order to reduce the estimate by 100% i.e bring it down to 0. confounder_increases_estimate: confounder_increases_estimate = True implies that confounder increases the absolute value of estimate and vice versa. Default is
+confounder_increases_estimate = False i.e. the considered confounders pull estimate towards zero effect_fraction_on_treatment: Strength of association between unobserved confounder and treatment compared to benchmark covariate effect_fraction_on_outcome: Strength of association between unobserved confounder and outcome compared to benchmark covariate null_hypothesis_effect: assumed effect under the null hypothesis (default = 0) plot_estimate: Generate contour plot for estimate while performing
+sensitivity analysis. (default = True). To override the setting, set plot_estimate = False.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">estimate</span> <span class="p">,</span>
+                               <span class="n">method_name</span> <span class="o">=</span> <span class="s2">&quot;add_unobserved_common_cause&quot;</span><span class="p">,</span>
+                               <span class="n">simulation_method</span> <span class="o">=</span> <span class="s2">&quot;linear-partial-R2&quot;</span><span class="p">,</span>
+                               <span class="n">benchmark_common_causes</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;W3&quot;</span><span class="p">],</span>
+                               <span class="n">effect_fraction_on_treatment</span> <span class="o">=</span> <span class="p">[</span> <span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>
+                              <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_sensitivity_analysis_testing_13_0.png" src="../_images/example_notebooks_sensitivity_analysis_testing_13_0.png" />
+</div>
+</div>
+<p>The x axis shows hypothetical partial R2 values of unobserved confounder(s) with the treatment. The y axis shows hypothetical partial R2 of unobserved confounder(s) with the outcome. The contour levels represent adjusted t-values or estimates for unobserved confounders with hypothetical partialR2 values when these would be included in full regression model. The red line is the critical threshold: confounders with such strength or stronger are sufficient to invalidate the research conclusions.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span><span class="o">.</span><span class="n">stats</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;estimate&#39;: 10.697677486880917,
+ &#39;standard_error&#39;: 0.5938735661282947,
+ &#39;degree of freedom&#39;: 492,
+ &#39;t_statistic&#39;: 18.01339223872762,
+ &#39;r2yt_w&#39;: 0.3974149837266681,
+ &#39;partial_f2&#39;: 0.6595168698094561,
+ &#39;robustness_value&#39;: 0.5467445572181009,
+ &#39;robustness_value_alpha&#39;: 0.5076289101030926}
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span><span class="o">.</span><span class="n">benchmarking_results</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>r2tu_w</th>
+      <th>r2yu_tw</th>
+      <th>bias_adjusted_estimate</th>
+      <th>bias_adjusted_se</th>
+      <th>bias_adjusted_t</th>
+      <th>bias_adjusted_lower_CI</th>
+      <th>bias_adjusted_upper_CI</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0.032677</td>
+      <td>0.230238</td>
+      <td>9.535964</td>
+      <td>0.530308</td>
+      <td>17.981928</td>
+      <td>8.494016</td>
+      <td>10.577912</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>0.065354</td>
+      <td>0.461490</td>
+      <td>8.331381</td>
+      <td>0.451241</td>
+      <td>18.463243</td>
+      <td>7.444783</td>
+      <td>9.217979</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.098031</td>
+      <td>0.693855</td>
+      <td>7.080284</td>
+      <td>0.346341</td>
+      <td>20.443123</td>
+      <td>6.399795</td>
+      <td>7.760773</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<section id="Parameter-List-for-plot-function">
+<h3>Parameter List for plot function<a class="headerlink" href="#Parameter-List-for-plot-function" title="Link to this heading">#</a></h3>
+<p>plot_type: “estimate” or “t-value” critical_value: special reference value of the estimate or t-value that will be highlighted in the plot x_limit: plot’s maximum x_axis value (default = 0.8) y_limit: plot’s minimum y_axis value (default = 0.8) num_points_per_contour: number of points to calculate and plot each contour line (default = 200) plot_size: tuple denoting the size of the plot (default = (7,7)) contours_color: color of contour line (default = blue) String or array. If array, lines will
+be plotted with the specific color in ascending order. critical_contour_color: color of threshold line (default = red) label_fontsize: fontsize for labelling contours (default = 9) contour_linewidths: linewidths for contours (default = 0.75) contour_linestyles: linestyles for contours (default = “solid”) See : <a class="reference external" href="https://matplotlib.org/3.5.0/gallery/lines_bars_and_markers/linestyles.html">https://matplotlib.org/3.5.0/gallery/lines_bars_and_markers/linestyles.html</a> contours_label_color: color of contour line label (default = black) critical_label_color: color of threshold
+line label (default = red) unadjusted_estimate_marker: marker type for unadjusted estimate in the plot (default = ‘D’) See: <a class="reference external" href="https://matplotlib.org/stable/api/markers_api.html">https://matplotlib.org/stable/api/markers_api.html</a> unadjusted_estimate_color: marker color for unadjusted estimate in the plot (default = “black”) adjusted_estimate_marker: marker type for bias adjusted estimates in the plot (default = ‘^’)adjusted_estimate_color: marker color for bias adjusted estimates in the plot (default = “red”) legend_position:tuple denoting the
+position of the legend (default = (1.6, 0.6))</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_type</span> <span class="o">=</span> <span class="s1">&#39;t-value&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_sensitivity_analysis_testing_18_0.png" src="../_images/example_notebooks_sensitivity_analysis_testing_18_0.png" />
+</div>
+</div>
+<p>The t statistic is the coefficient divided by its standard error. The higher the t-value, the greater the evidence to reject the null hypothesis. According to the above plot,at 5% significance level, the null hypothesis of zero effect would be rejected given the above confounders.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">refute</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Sensitivity Analysis to Unobserved Confounding using R^2 paramterization
+
+Unadjusted Estimates of Treatment [&#39;v0&#39;] :
+Coefficient Estimate : 10.697677486880917
+Degree of Freedom : 492
+Standard Error : 0.5938735661282947
+t-value : 18.01339223872762
+F^2 value : 0.6595168698094561
+
+Sensitivity Statistics :
+Partial R2 of treatment with outcome : 0.3974149837266681
+Robustness Value : 0.5467445572181009
+
+Interpretation of results :
+Any confounder explaining less than 54.67% percent of the residual variance of both the treatment and the outcome would not be strong enough to explain away the observed effect i.e bring down the estimate to 0
+
+For a significance level of 5.0%, any confounder explaining more than 50.76% percent of the residual variance of both the treatment and the outcome would be strong enough to make the estimated effect not &#39;statistically significant&#39;
+
+If confounders explained 100% of the residual variance of the outcome, they would need to explain at least 39.74% of the residual variance of the treatment to bring down the estimated effect to 0
+
+</pre></div></div>
+</div>
+</section>
+</section>
+<section id="Step-6b:-Refutation-and-Sensitivity-Analysis---Method-2">
+<h2>Step 6b: Refutation and Sensitivity Analysis - Method 2<a class="headerlink" href="#Step-6b:-Refutation-and-Sensitivity-Analysis---Method-2" title="Link to this heading">#</a></h2>
+<p>simulated_method_name: “e-value” for E-value</p>
+<ul class="simple">
+<li><p>num_points_per_contour: number of points to calculate and plot for each contour (Default = 200)</p></li>
+<li><p>plot_size: size of the plot (Default = (6.4,4.8))</p></li>
+<li><p>contour_colors: colors for point estimate and confidence limit contour (Default = [“blue”, “red])</p></li>
+<li><p>xy_limit: plot’s maximum x and y value. Default is 2 x E-value. (Default = None)</p></li>
+</ul>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">estimate</span> <span class="p">,</span>
+                               <span class="n">method_name</span> <span class="o">=</span> <span class="s2">&quot;add_unobserved_common_cause&quot;</span><span class="p">,</span>
+                               <span class="n">simulation_method</span> <span class="o">=</span> <span class="s2">&quot;e-value&quot;</span><span class="p">,</span>
+                              <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/runner/work/dowhy/dowhy/dowhy/causal_estimators/regression_estimator.py:131: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  intercept_parameter = self.model.params[0]
+/home/runner/work/dowhy/dowhy/dowhy/causal_estimators/regression_estimator.py:131: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  intercept_parameter = self.model.params[0]
+/home/runner/work/dowhy/dowhy/dowhy/causal_estimators/regression_estimator.py:131: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  intercept_parameter = self.model.params[0]
+/home/runner/work/dowhy/dowhy/dowhy/causal_estimators/regression_estimator.py:131: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  intercept_parameter = self.model.params[0]
+/home/runner/work/dowhy/dowhy/dowhy/causal_estimators/regression_estimator.py:131: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  intercept_parameter = self.model.params[0]
+/home/runner/work/dowhy/dowhy/dowhy/causal_estimators/regression_estimator.py:131: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  intercept_parameter = self.model.params[0]
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_sensitivity_analysis_testing_22_1.png" src="../_images/example_notebooks_sensitivity_analysis_testing_22_1.png" />
+</div>
+</div>
+<ul class="simple">
+<li><p>The x axis shows hypothetical values of the risk ratio of an unmeasured confounder at different levels of the treatment. The y axis shows hypothetical values of the risk ratio of the outcome at different levels of the confounder.</p></li>
+<li><p>Points lying on or above the blue contour represent combinations of these risk ratios that would tip (i.e. explain away) the point estimate.</p></li>
+<li><p>Points lying on or above the red contour represent combinations of these risk ratios that would tip (i.e. explain away) the confidence interval.</p></li>
+<li><p>The green points are Observed Covariate E-values. These measure how much the limiting bound of the confidence interval changes on the E-value scale after a specific covariate is dropped and the estimator is re-fit. The covariate that corresponds to the largest Observed Covariate E-value is labeled.</p></li>
+</ul>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span><span class="o">.</span><span class="n">stats</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;converted_estimate&#39;: 2.457447065735422,
+ &#39;converted_lower_ci&#39;: 2.2288567270043136,
+ &#39;converted_upper_ci&#39;: 2.7094815057979944,
+ &#39;evalue_estimate&#39;: 4.349958364289862,
+ &#39;evalue_lower_ci&#39;: 3.883832733630412,
+ &#39;evalue_upper_ci&#39;: None}
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span><span class="o">.</span><span class="n">benchmarking_results</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>converted_est</th>
+      <th>converted_lower_ci</th>
+      <th>converted_upper_ci</th>
+      <th>observed_covariate_e_value</th>
+    </tr>
+    <tr>
+      <th>dropped_covariate</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>W1</th>
+      <td>2.992523</td>
+      <td>2.666604</td>
+      <td>3.358276</td>
+      <td>1.681140</td>
+    </tr>
+    <tr>
+      <th>W6</th>
+      <td>2.687656</td>
+      <td>2.446341</td>
+      <td>2.952774</td>
+      <td>1.424835</td>
+    </tr>
+    <tr>
+      <th>W3</th>
+      <td>2.692807</td>
+      <td>2.422402</td>
+      <td>2.993396</td>
+      <td>1.394043</td>
+    </tr>
+    <tr>
+      <th>W0</th>
+      <td>2.599868</td>
+      <td>2.368550</td>
+      <td>2.853776</td>
+      <td>1.320751</td>
+    </tr>
+    <tr>
+      <th>W5</th>
+      <td>2.553701</td>
+      <td>2.315245</td>
+      <td>2.816716</td>
+      <td>1.239411</td>
+    </tr>
+    <tr>
+      <th>W2</th>
+      <td>2.473648</td>
+      <td>2.217699</td>
+      <td>2.759138</td>
+      <td>1.076142</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">refute</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Sensitivity Analysis to Unobserved Confounding using the E-value
+
+Unadjusted Estimates of Treatment: v0
+Estimate (converted to risk ratio scale): 2.457447065735422
+Lower 95% CI (converted to risk ratio scale): 2.2288567270043136
+Upper 95% CI (converted to risk ratio scale): 2.7094815057979944
+
+Sensitivity Statistics:
+E-value for point estimate: 4.349958364289862
+E-value for lower 95% CI: 3.883832733630412
+E-value for upper 95% CI: None
+Largest Observed Covariate E-value: 1.6811401167656777 (W1)
+
+Interpretation of results:
+Unmeasured confounder(s) would have to be associated with a 4.35-fold increase in the risk of y, and must be 4.35 times more prevalent in v0, to explain away the observed point estimate.
+Unmeasured confounder(s) would have to be associated with a 3.88-fold increase in the risk of y, and must be 3.88 times more prevalent in v0, to explain away the observed confidence interval.
+</pre></div></div>
+</div>
+<p>We now run the sensitivity analysis for the same dataset but without dropping any variable. We get a robustness value goes from 0.55 to 0.95 which means that treatment effect can handle strong confounders explaining almost all residual variation of the treatment and the outcome.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">dowhy</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">linear_dataset</span><span class="p">(</span> <span class="n">beta</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+                                      <span class="n">num_common_causes</span> <span class="o">=</span> <span class="mi">7</span><span class="p">,</span>
+                                      <span class="n">num_samples</span> <span class="o">=</span> <span class="mi">500</span><span class="p">,</span>
+                                      <span class="n">num_treatments</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                                     <span class="n">stddev_treatment_noise</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                                     <span class="n">stddev_outcome_noise</span> <span class="o">=</span> <span class="mi">1</span>
+                                    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">],</span>
+            <span class="n">treatment</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;treatment_name&quot;</span><span class="p">],</span>
+            <span class="n">outcome</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;outcome_name&quot;</span><span class="p">],</span>
+            <span class="n">graph</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;gml_graph&quot;</span><span class="p">],</span>
+            <span class="n">test_significance</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+<span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
+<span class="n">data</span><span class="p">[</span><span class="s1">&#39;df&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_sensitivity_analysis_testing_29_0.png" src="../_images/example_notebooks_sensitivity_analysis_testing_29_0.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_sensitivity_analysis_testing_29_1.png" src="../_images/example_notebooks_sensitivity_analysis_testing_29_1.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>W0</th>
+      <th>W1</th>
+      <th>W2</th>
+      <th>W3</th>
+      <th>W4</th>
+      <th>W5</th>
+      <th>W6</th>
+      <th>v0</th>
+      <th>y</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>-0.145062</td>
+      <td>-0.235286</td>
+      <td>0.784843</td>
+      <td>0.869131</td>
+      <td>-1.567724</td>
+      <td>-1.290234</td>
+      <td>0.116096</td>
+      <td>True</td>
+      <td>6.311809</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>-0.228109</td>
+      <td>-0.020264</td>
+      <td>-0.589792</td>
+      <td>0.188139</td>
+      <td>-2.649265</td>
+      <td>-1.764439</td>
+      <td>-0.167236</td>
+      <td>False</td>
+      <td>-12.274406</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.868298</td>
+      <td>-1.097642</td>
+      <td>-0.109792</td>
+      <td>0.487635</td>
+      <td>-1.861375</td>
+      <td>-0.527930</td>
+      <td>-0.066542</td>
+      <td>False</td>
+      <td>-6.487561</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>-0.017115</td>
+      <td>1.123918</td>
+      <td>0.346060</td>
+      <td>1.845425</td>
+      <td>0.848049</td>
+      <td>0.778865</td>
+      <td>0.596496</td>
+      <td>True</td>
+      <td>24.653183</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>-0.757347</td>
+      <td>-1.426205</td>
+      <td>-0.457063</td>
+      <td>1.528053</td>
+      <td>-2.681410</td>
+      <td>0.394312</td>
+      <td>-0.687839</td>
+      <td>False</td>
+      <td>-13.770396</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Estimand type: EstimandType.NONPARAMETRIC_ATE
+
+### Estimand : 1
+Estimand name: backdoor
+Estimand expression:
+  d
+─────(E[y|W0,W6,W4,W1,W3,W5,W2])
+d[v₀]
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W6,W4,W1,W3,W5,W2,U) = P(y|v0,W0,W6,W4,W1,W3,W5,W2)
+
+### Estimand : 2
+Estimand name: iv
+No such variable(s) found!
+
+### Estimand : 3
+Estimand name: frontdoor
+No such variable(s) found!
+
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span><span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;backdoor.linear_regression&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">estimate</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+*** Causal Estimate ***
+
+## Identified estimand
+Estimand type: EstimandType.NONPARAMETRIC_ATE
+
+### Estimand : 1
+Estimand name: backdoor
+Estimand expression:
+  d
+─────(E[y|W0,W6,W4,W1,W3,W5,W2])
+d[v₀]
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W6,W4,W1,W3,W5,W2,U) = P(y|v0,W0,W6,W4,W1,W3,W5,W2)
+
+## Realized estimand
+b: y~v0+W0+W6+W4+W1+W3+W5+W2
+Target units: ate
+
+## Estimate
+Mean value: 10.0819243755883
+
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/runner/work/dowhy/dowhy/dowhy/causal_estimators/regression_estimator.py:131: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  intercept_parameter = self.model.params[0]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span><span class="n">identified_estimand</span><span class="p">,</span> <span class="n">estimate</span> <span class="p">,</span>
+                               <span class="n">method_name</span> <span class="o">=</span> <span class="s2">&quot;add_unobserved_common_cause&quot;</span><span class="p">,</span>
+                               <span class="n">simulation_method</span> <span class="o">=</span> <span class="s2">&quot;linear-partial-R2&quot;</span><span class="p">,</span>
+                               <span class="n">benchmark_common_causes</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;W3&quot;</span><span class="p">],</span>
+                               <span class="n">effect_fraction_on_treatment</span> <span class="o">=</span> <span class="p">[</span> <span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/runner/work/dowhy/dowhy/dowhy/causal_refuters/linear_sensitivity_analyzer.py:199: RuntimeWarning: divide by zero encountered in divide
+  bias_adjusted_t = (bias_adjusted_estimate - self.null_hypothesis_effect) / bias_adjusted_se
+/home/runner/work/dowhy/dowhy/dowhy/causal_refuters/linear_sensitivity_analyzer.py:201: RuntimeWarning: invalid value encountered in divide
+  bias_adjusted_partial_r2 = bias_adjusted_t**2 / (
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_sensitivity_analysis_testing_32_1.png" src="../_images/example_notebooks_sensitivity_analysis_testing_32_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_type</span> <span class="o">=</span> <span class="s1">&#39;t-value&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_sensitivity_analysis_testing_33_0.png" src="../_images/example_notebooks_sensitivity_analysis_testing_33_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">refute</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Sensitivity Analysis to Unobserved Confounding using R^2 paramterization
+
+Unadjusted Estimates of Treatment [&#39;v0&#39;] :
+Coefficient Estimate : 10.0819243755883
+Degree of Freedom : 491
+Standard Error : 0.10446229543424748
+t-value : 96.51256784735546
+F^2 value : 18.970826379817495
+
+Sensitivity Statistics :
+Partial R2 of treatment with outcome : 0.9499269594066173
+Robustness Value : 0.9522057801012398
+
+Interpretation of results :
+Any confounder explaining less than 95.22% percent of the residual variance of both the treatment and the outcome would not be strong enough to explain away the observed effect i.e bring down the estimate to 0
+
+For a significance level of 5.0%, any confounder explaining more than 95.04% percent of the residual variance of both the treatment and the outcome would be strong enough to make the estimated effect not &#39;statistically significant&#39;
+
+If confounders explained 100% of the residual variance of the outcome, they would need to explain at least 94.99% of the residual variance of the treatment to bring down the estimated effect to 0
+
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span><span class="o">.</span><span class="n">stats</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;estimate&#39;: 10.0819243755883,
+ &#39;standard_error&#39;: 0.10446229543424748,
+ &#39;degree of freedom&#39;: 491,
+ &#39;t_statistic&#39;: 96.51256784735546,
+ &#39;r2yt_w&#39;: 0.9499269594066173,
+ &#39;partial_f2&#39;: 18.970826379817495,
+ &#39;robustness_value&#39;: 0.9522057801012398,
+ &#39;robustness_value_alpha&#39;: 0.950386691319526}
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">refute</span><span class="o">.</span><span class="n">benchmarking_results</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>r2tu_w</th>
+      <th>r2yu_tw</th>
+      <th>bias_adjusted_estimate</th>
+      <th>bias_adjusted_se</th>
+      <th>bias_adjusted_t</th>
+      <th>bias_adjusted_lower_CI</th>
+      <th>bias_adjusted_upper_CI</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0.031976</td>
+      <td>1.0</td>
+      <td>9.661229</td>
+      <td>0.0</td>
+      <td>inf</td>
+      <td>9.661229</td>
+      <td>9.661229</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>0.063952</td>
+      <td>1.0</td>
+      <td>9.476895</td>
+      <td>0.0</td>
+      <td>inf</td>
+      <td>9.476895</td>
+      <td>9.476895</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.095927</td>
+      <td>1.0</td>
+      <td>9.327927</td>
+      <td>0.0</td>
+      <td>inf</td>
+      <td>9.327927</td>
+      <td>9.327927</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="dowhy_causal_discovery_example.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Causal Discovery example</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="sensitivity_analysis_nonparametric_estimators.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Sensitivity analysis for non-parametric causal estimators</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Step-1:-Load-required-packages">Step 1: Load required packages</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Step-2:-Load-the-dataset">Step 2: Load the dataset</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Step-3:-Create-Causal-Model">Step 3: Create Causal Model</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Step-4:-Identification">Step 4: Identification</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Step-5:-Estimation">Step 5: Estimation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Step-6a:-Refutation-and-Sensitivity-Analysis---Method-1">Step 6a: Refutation and Sensitivity Analysis - Method 1</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Parameter-List-for-plot-function">Parameter List for plot function</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Step-6b:-Refutation-and-Sensitivity-Analysis---Method-2">Step 6b: Refutation and Sensitivity Analysis - Method 2</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/example_notebooks/sensitivity_analysis_testing.ipynb.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2022, PyWhy contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

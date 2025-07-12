@@ -1,0 +1,840 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B139P18WHM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-B139P18WHM');
+    </script>
+    
+    <title>Estimating Confidence Intervals &#8212; DoWhy  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=949a1ff5" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/jquery.js?v=5d32c60e"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=0c6e27e1"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user_guide/modeling_gcm/estimating_confidence_intervals';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Performing Causal Tasks" href="../causal_tasks/index.html" />
+    <link rel="prev" title="Customizing Causal Mechanism Assignment" href="customizing_model_assignment.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="v0.13" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/dowhy-logo-small.png" class="logo__image only-light" alt="DoWhy  documentation - Home"/>
+    <img src="../../_static/dowhy-logo-small.png" class="logo__image only-dark pst-js-only" alt="DoWhy  documentation - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../example_notebooks/nb_index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../contributing.html">
+    Contributing
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../dowhy.html">
+    dowhy package
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../code_repo.html">
+    Release notes
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item"><div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        v0.13
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.9.1/index.html">v0.9.1</a></dd>
+            <dd><a href="/dowhy/v0.9/index.html">v0.9</a></dd>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.12/index.html">v0.12</a></dd>
+            <dd><a href="/dowhy/v0.11.1/index.html">v0.11.1</a></dd>
+            <dd><a href="/dowhy/v0.11/index.html">v0.11</a></dd>
+            <dd><a href="/dowhy/v0.10.1/index.html">v0.10.1</a></dd>
+            <dd><a href="/dowhy/v0.10/index.html">v0.10</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../example_notebooks/nb_index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../contributing.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../dowhy.html">
+    dowhy package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../code_repo.html">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        v0.13
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.9.1/index.html">v0.9.1</a></dd>
+            <dd><a href="/dowhy/v0.9/index.html">v0.9</a></dd>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.12/index.html">v0.12</a></dd>
+            <dd><a href="/dowhy/v0.11.1/index.html">v0.11.1</a></dd>
+            <dd><a href="/dowhy/v0.11/index.html">v0.11</a></dd>
+            <dd><a href="/dowhy/v0.10.1/index.html">v0.10.1</a></dd>
+            <dd><a href="/dowhy/v0.10/index.html">v0.10</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../foreword.html">Foreword</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction to DoWhy</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../modeling_causal_relations/index.html">Modeling Causal Relations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modeling_causal_relations/specifying_causal_graph.html">Specifying a causal graph using domain knowledge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modeling_causal_relations/learning_causal_structure.html">Learning causal structure from data</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../modeling_causal_relations/refuting_causal_graph/index.html">Refuting a Causal Graph</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modeling_causal_relations/refuting_causal_graph/independence_tests.html">Performing independence tests</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modeling_causal_relations/refuting_causal_graph/refute_causal_structure.html">Graph refutations</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Modeling Graphical Causal Models (GCMs)</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="graphical_causal_model_types.html">Types of graphical causal models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="draw_samples.html">Generate samples from a GCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_evaluation.html">Evaluate a GCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="customizing_model_assignment.html">Customizing Causal Mechanism Assignment</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Estimating Confidence Intervals</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../causal_tasks/index.html">Performing Causal Tasks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../causal_tasks/estimating_causal_effects/index.html">Estimating Causal Effects</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../causal_tasks/estimating_causal_effects/identifying_causal_effect/index.html">Identifying causal effect</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../causal_tasks/estimating_causal_effects/identifying_causal_effect/backdoor.html">Backdoor criterion</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../causal_tasks/estimating_causal_effects/identifying_causal_effect/frontdoor.html">Frontdoor criterion</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../causal_tasks/estimating_causal_effects/identifying_causal_effect/instrumental_variable.html">Natural experiments and instrumental variables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../causal_tasks/estimating_causal_effects/identifying_causal_effect/id_algorithm.html">ID algorithm for discovering new identification strategies</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../causal_tasks/estimating_causal_effects/effect_estimation_with_backdoor/index.html">Estimating average causal effect using backdoor</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../causal_tasks/estimating_causal_effects/effect_estimation_with_backdoor/regression_based_methods.html">Regression-based methods</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../causal_tasks/estimating_causal_effects/effect_estimation_with_backdoor/distance_matching.html">Distance-based matching</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../causal_tasks/estimating_causal_effects/effect_estimation_with_backdoor/propensity_based_methods.html">Propensity-based methods</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../causal_tasks/estimating_causal_effects/effect_estimation_with_backdoor/do_sampler.html">Do-sampler</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="../causal_tasks/estimating_causal_effects/effect_estimation_with_natural_experiments/index.html">Estimating average causal effect with natural experiments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../causal_tasks/estimating_causal_effects/conditional_effect_estimation/index.html">Estimating conditional average causal effect</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../causal_tasks/estimating_causal_effects/effect_estimation_with_gcm.html">Estimating average causal effect using GCM</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../causal_tasks/quantify_causal_influence/index.html">Quantify Causal Influence</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../causal_tasks/quantify_causal_influence/mediation_analysis.html">Mediation Analysis: Estimating natural direct and indirect effects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../causal_tasks/quantify_causal_influence/quantify_arrow_strength.html">Direct Effect: Quantifying Arrow Strength</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../causal_tasks/quantify_causal_influence/icc.html">Quantifying Intrinsic Causal Influence</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../causal_tasks/root_causing_and_explaining/index.html">Root-Cause Analysis and Explanation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../causal_tasks/root_causing_and_explaining/anomaly_attribution.html">Anomaly Attribution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../causal_tasks/root_causing_and_explaining/distribution_change.html">Attributing Distributional Changes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../causal_tasks/root_causing_and_explaining/feature_relevance.html">Feature Relevance</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../causal_tasks/what_if/index.html">Asking and Answering What-If Questions</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../causal_tasks/what_if/interventions.html">Simulating the Impact of Interventions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../causal_tasks/what_if/counterfactuals.html">Computing Counterfactuals</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="../causal_tasks/causal_prediction/index.html">Predicting outcome for out-of-distribution inputs</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../refuting_causal_estimates/index.html">Refuting causal estimates</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/index.html">Refuting Effect Estimates</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/placebo_treatment.html">Placebo Treatment Refuter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/dummy_outcome.html">Dummy Outcome Refuter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/random_common_cause.html">Random Common Cause Refuter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/data_subsample.html">Data Subsample Refuter</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/sensitivity_analysis/index.html">Sensitivity Analysis</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/sensitivity_analysis/simulation_based.html">Simulation-based sensitivity analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/sensitivity_analysis/linear_partialr2.html">Partial-R2 based sensitivity analysis for linear estimators</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/sensitivity_analysis/nonlinear_reisz.html">Reisz estimator-based sensitivity analysis for non-linear estimators</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cite.html">Citing this package</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">User Guide</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Modeling Graphical Causal Models (GCMs)</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Estimating Confidence Intervals</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="estimating-confidence-intervals">
+<h1>Estimating Confidence Intervals<a class="headerlink" href="#estimating-confidence-intervals" title="Link to this heading">#</a></h1>
+<p>Our trained generative causal models and specific sample set might not accurately represent the
+ground truth and there are typically numerical approximations in our algorithms. When we answer a causal query
+without computing its confidence intervals, we essentially obtain point estimates. However, these are not very
+useful when assessing the confidence in our results. Confidence intervals assist us in quantifying the uncertainty
+in our results introduced by modeling inaccuracies and numerical approximations.</p>
+<p>We therefore recommend to use confidence intervals as a default for all causal queries. This avoids
+a false sense of confidence in a specific value that might be due to a skewed data set or models
+that are not fitted optimally.</p>
+<p>To compute confidence intervals, we use a method called <a class="reference external" href="https://en.wikipedia.org/wiki/Bootstrapping_(statistics)">bootstrapping</a> and it’s implemented in the
+function <a class="reference internal" href="../../dowhy.gcm.html#module-dowhy.gcm.confidence_intervals" title="dowhy.gcm.confidence_intervals"><code class="xref py py-func docutils literal notranslate"><span class="pre">dowhy.gcm.confidence_intervals()</span></code></a>.</p>
+<section id="how-to-use-it">
+<h2>How to use it<a class="headerlink" href="#how-to-use-it" title="Link to this heading">#</a></h2>
+<p>Let’s say we have a function that <a class="reference external" href="https://www.google.com/search?q=computing+pi+via+monte+carlo">computes Pi using the Monte Carlo method</a> with 1000 trials:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">compute_pi_monte_carlo</span><span class="p">():</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">trials</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">return</span> <span class="mi">4</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">trials</span><span class="p">,))</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span>
+<span class="gp">&gt;&gt;&gt; </span>              <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">trials</span><span class="p">,))</span><span class="o">**</span><span class="mi">2</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">trials</span>
+</pre></div>
+</div>
+<p>Executing this function will give us a result:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">compute_pi_monte_carlo</span><span class="p">()</span>
+<span class="go">3.188</span>
+</pre></div>
+</div>
+<p>This looks like a reasonable number, but we can’t tell how reliable that result is, given that it
+was computed using a stochastic method. Now, let’s use
+<a class="reference internal" href="../../dowhy.gcm.html#module-dowhy.gcm.confidence_intervals" title="dowhy.gcm.confidence_intervals"><code class="xref py py-func docutils literal notranslate"><span class="pre">dowhy.gcm.confidence_intervals()</span></code></a> to compute the confidence interval:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">dowhy</span><span class="w"> </span><span class="kn">import</span> <span class="n">gcm</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">median</span><span class="p">,</span> <span class="n">intervals</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">confidence_intervals</span><span class="p">(</span><span class="n">compute_pi_monte_carlo</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                                             <span class="n">num_bootstrap_resamples</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">median</span><span class="p">,</span> <span class="n">intervals</span>
+<span class="go">(array([3.136]), array([[3.0518, 3.224 ]]))</span>
+</pre></div>
+</div>
+<p>The first item in the result is the median of all results calculated. The second is the interval
+in which we are 95% confident that computed values will fall into. By increasing the number of
+<code class="docutils literal notranslate"><span class="pre">trials</span></code> we can improve the reliability of <code class="docutils literal notranslate"><span class="pre">compute_pi_monte_carlo</span></code> and hence, narrow the
+confidence interval. E.g. with <code class="docutils literal notranslate"><span class="pre">trials</span> <span class="pre">=</span> <span class="pre">10_000</span></code> we get an interval of [3.1132 , 3.16602], with
+<code class="docutils literal notranslate"><span class="pre">trials</span> <span class="pre">=</span> <span class="pre">100_000</span></code> we get [3.13256 , 3.150016].</p>
+</section>
+<section id="computing-confidence-intervals-for-causal-queries">
+<h2>Computing confidence intervals for causal queries<a class="headerlink" href="#computing-confidence-intervals-for-causal-queries" title="Link to this heading">#</a></h2>
+<p>With this understanding, we can now apply <code class="docutils literal notranslate"><span class="pre">confidence_intervals</span></code> to one of our causal queries,
+e.g. <code class="docutils literal notranslate"><span class="pre">distribution_change</span></code>. Let’s generate some data first:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">halfnorm</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">halfnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Y</span> <span class="o">=</span> <span class="n">halfnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data_old</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="o">=</span><span class="n">Z</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">halfnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Y</span> <span class="o">=</span> <span class="n">halfnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Z</span> <span class="o">=</span> <span class="n">X</span> <span class="o">+</span> <span class="n">Y</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data_new</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="o">=</span><span class="n">Z</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Here, the causal mechanism for Z changes between the old and new data. As always, next, we’ll model cause-effect
+relationships as an SCM and assign causal mechanisms:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">networkx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nx</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">StructuralCausalModel</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">([(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">)]))</span>  <span class="c1"># X -&gt; Z &lt;- Y</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gcm</span><span class="o">.</span><span class="n">auto</span><span class="o">.</span><span class="n">assign_causal_mechanisms</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">data_old</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>And now, instead of calling <code class="docutils literal notranslate"><span class="pre">distribution_change</span></code> directly we call it using
+<code class="docutils literal notranslate"><span class="pre">confidence_intervals</span></code>. However, since <code class="docutils literal notranslate"><span class="pre">confidence_intervals</span></code> takes a function that takes no
+parameters, we must first define a function without parameters:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">f</span><span class="p">():</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">return</span> <span class="n">gcm</span><span class="o">.</span><span class="n">distribution_change</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">data_old</span><span class="p">,</span> <span class="n">data_new</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>And now:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gcm</span><span class="o">.</span><span class="n">confidence_intervals</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+<span class="go">({&#39;X&#39;: 0.0005804787010800414, &#39;Y&#39;: 0.0030143299612704804, &#39;Z&#39;: 0.1724206687905231},</span>
+<span class="go">{&#39;X&#39;: array([-0.00427554,  0.00891714]),</span>
+<span class="go">&#39;Y&#39;: array([-0.00605089,  0.01782684]),</span>
+<span class="go">&#39;Z&#39;: array([0.15441771, 0.19062329])})</span>
+</pre></div>
+</div>
+<p>The result again contains a first item, which is the median values of the contribution scores. The
+second item contains the intervals of the contribution scores for each variable.</p>
+<p>To avoid defining a new function, we can also streamline that call by using a lambda:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gcm</span><span class="o">.</span><span class="n">confidence_intervals</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">gcm</span><span class="o">.</span><span class="n">distribution_change</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                                                         <span class="n">data_old</span><span class="p">,</span> <span class="n">data_new</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                                                         <span class="n">target_node</span><span class="o">=</span><span class="s1">&#39;Z&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+</section>
+<section id="conveniently-bootstrapping-graph-training-on-random-subsets-of-training-data">
+<h2>Conveniently bootstrapping graph training on random subsets of training data<a class="headerlink" href="#conveniently-bootstrapping-graph-training-on-random-subsets-of-training-data" title="Link to this heading">#</a></h2>
+<p>Many of the causal queries in the GCM package require a trained causal graph as a first argument. To
+compute confidence intervals for these methods, we need to explicitly re-train our causal graph
+multiple times with different random subsets of data and also run our causal query with each newly
+trained graph. To do this conveniently, the GCM package provides a function
+<code class="docutils literal notranslate"><span class="pre">fit_and_compute</span></code>. Assuming that we have <code class="docutils literal notranslate"><span class="pre">data</span></code> and a causal graph:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">Z</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Y</span> <span class="o">=</span> <span class="mi">3</span><span class="o">*</span><span class="n">X</span> <span class="o">+</span> <span class="mi">4</span><span class="o">*</span><span class="n">Z</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="o">=</span><span class="n">Z</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">StructuralCausalModel</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">([(</span><span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">)]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gcm</span><span class="o">.</span><span class="n">auto</span><span class="o">.</span><span class="n">assign_causal_mechanisms</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>we can now use <code class="docutils literal notranslate"><span class="pre">fit_and_compute</span></code> as follows:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">strength_median</span><span class="p">,</span> <span class="n">strength_intervals</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">confidence_intervals</span><span class="p">(</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">gcm</span><span class="o">.</span><span class="n">fit_and_compute</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">arrow_strength</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                        <span class="n">causal_model</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                        <span class="n">bootstrap_training_data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                        <span class="n">target_node</span><span class="o">=</span><span class="s1">&#39;Y&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">strength_median</span><span class="p">,</span> <span class="n">strength_intervals</span>
+<span class="go">({(&#39;X&#39;, &#39;Y&#39;): 45.90886398636573, (&#39;Z&#39;, &#39;Y&#39;): 15.47129383737619},</span>
+<span class="go">{(&#39;X&#39;, &#39;Y&#39;): array([42.88319632, 50.43890079]), (&#39;Z&#39;, &#39;Y&#39;): array([13.44202416, 17.74266107])})</span>
+</pre></div>
+</div>
+</section>
+<section id="runtime-cost-versus-confidence">
+<h2>Runtime cost versus confidence<a class="headerlink" href="#runtime-cost-versus-confidence" title="Link to this heading">#</a></h2>
+<p>In certain scenarios it is prohibitely expensive to re-train causal graphs multiple times. E.g. when
+using AutoGluon as prediction models for the additive noise model, a single <code class="docutils literal notranslate"><span class="pre">fit</span></code> execution can
+quickly go into hours. Bootstrapping with 20 resamples will then quickly go into days depending
+on how much we can parallelize.</p>
+<p>For that reason, sometimes the tradeoff is to only bootstrap on the causal query, not on the
+training. To make this analogous to the approach we used above, there is the function
+<code class="xref py py-func docutils literal notranslate"><span class="pre">bootstrap_sampling()</span></code>. This function assumes that the causal graph is already trained. Then
+it can be used as follows:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gcm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">strength_median</span><span class="p">,</span> <span class="n">strength_intervals</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">confidence_intervals</span><span class="p">(</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">gcm</span><span class="o">.</span><span class="n">bootstrap_sampling</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">arrow_strength</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                           <span class="n">causal_model</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>                           <span class="n">target_node</span><span class="o">=</span><span class="s1">&#39;Y&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">strength_median</span><span class="p">,</span> <span class="n">strength_intervals</span>
+<span class="go">({(&#39;X&#39;, &#39;Y&#39;): 46.07299374572871, (&#39;Z&#39;, &#39;Y&#39;): 15.358850280972195},</span>
+<span class="go">{(&#39;X&#39;, &#39;Y&#39;): array([44.95914495, 47.63918151]), (&#39;Z&#39;, &#39;Y&#39;): array([15.04323069, 15.72570547])})</span>
+</pre></div>
+</div>
+<p><code class="xref py py-func docutils literal notranslate"><span class="pre">dowhy.gcm.bootstrap_sampling()</span></code> accomplishes the same thing as the lambda we’ve seen earlier. However,
+using <code class="docutils literal notranslate"><span class="pre">bootstrap_sampling</span></code> is more expressive. We therefore recommend its use over a lambda for
+all causal queries that take a causal graph as the first argument.</p>
+</section>
+<section id="understanding-the-need-for-confidence-intervals">
+<h2>Understanding the need for confidence intervals<a class="headerlink" href="#understanding-the-need-for-confidence-intervals" title="Link to this heading">#</a></h2>
+<p>As explained in the beginnging, the models and specific sample set might not accurately represent
+the ground truth and there are typically numerical approximations in our algorithms. The error
+comes from three sources:</p>
+<ul class="simple">
+<li><p>Variance of the “optimal” parameters for a model, i.e. running <code class="docutils literal notranslate"><span class="pre">fit</span></code> twice with the
+same/slightly different data can yield two different models (becomes even worse when there is a
+stochastic element in the fit process of the prediction models as well). For instance, training an
+AutoGluon model twice on even exactly the same data would return two different models with
+slightly different performance.</p></li>
+<li><p>Approximations in our algorithms. For instance, when estimating distribution change with 6+
+upstream nodes, we will only approximate the Shapley values (the approximation has a stochastic
+factor). Therefore, running distribution change twice with exactly the same input and generated
+samples will return two different results.</p></li>
+<li><p>Even if we do not approximate the Shapley values, the algorithms are typically based on some
+specific samples from the generative models, i.e. variance can also come from the variance between
+two sets of drawn samples. Therefore, even if the algorithm itself is deterministic (e.g. evaluate
+all possible subsets for the Shapley values), we would use randomly generated samples which yields
+different results when calling an algorithm twice.</p></li>
+</ul>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="customizing_model_assignment.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Customizing Causal Mechanism Assignment</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../causal_tasks/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Performing Causal Tasks</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-use-it">How to use it</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#computing-confidence-intervals-for-causal-queries">Computing confidence intervals for causal queries</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#conveniently-bootstrapping-graph-training-on-random-subsets-of-training-data">Conveniently bootstrapping graph training on random subsets of training data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#runtime-cost-versus-confidence">Runtime cost versus confidence</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#understanding-the-need-for-confidence-intervals">Understanding the need for confidence intervals</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/user_guide/modeling_gcm/estimating_confidence_intervals.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2022, PyWhy contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

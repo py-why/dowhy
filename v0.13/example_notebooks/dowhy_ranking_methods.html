@@ -1,0 +1,1321 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B139P18WHM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-B139P18WHM');
+    </script>
+    
+    <title>Ranking of estimation methods for a given dataset &#8212; DoWhy  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=949a1ff5" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/jquery.js?v=5d32c60e"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=0c6e27e1"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'example_notebooks/dowhy_ranking_methods';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="A Simple Example on Creating a Custom Refutation Using User-Defined Outcome Functions" href="dowhy_demo_dummy_outcome_refuter.html" />
+    <link rel="prev" title="Assessing Support and Overlap with OverRule" href="dowhy_refuter_assess_overlap.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="v0.13" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-light" alt="DoWhy  documentation - Home"/>
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-dark pst-js-only" alt="DoWhy  documentation - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="nb_index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing.html">
+    Contributing
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
+    dowhy package
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
+    Release notes
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item"><div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        v0.13
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.9.1/index.html">v0.9.1</a></dd>
+            <dd><a href="/dowhy/v0.9/index.html">v0.9</a></dd>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.12/index.html">v0.12</a></dd>
+            <dd><a href="/dowhy/v0.11.1/index.html">v0.11.1</a></dd>
+            <dd><a href="/dowhy/v0.11/index.html">v0.11</a></dd>
+            <dd><a href="/dowhy/v0.10.1/index.html">v0.10.1</a></dd>
+            <dd><a href="/dowhy/v0.10/index.html">v0.10</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="nb_index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../dowhy.html">
+    dowhy package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../code_repo.html">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        v0.13
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.9.1/index.html">v0.9.1</a></dd>
+            <dd><a href="/dowhy/v0.9/index.html">v0.9</a></dd>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.12/index.html">v0.12</a></dd>
+            <dd><a href="/dowhy/v0.11.1/index.html">v0.11.1</a></dd>
+            <dd><a href="/dowhy/v0.11/index.html">v0.11</a></dd>
+            <dd><a href="/dowhy/v0.10.1/index.html">v0.10.1</a></dd>
+            <dd><a href="/dowhy/v0.10/index.html">v0.10</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Introductory examples</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="dowhy_simple_example.html">Basic Example for Calculating the Causal Effect</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_basic_example.html">Basic Example for Graphical Causal Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_draw_samples.html">Basic Example for generating samples from a GCM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial-causalinference-machinelearning-using-dowhy-econml.html">Tutorial on Causal Inference and its Connections to Machine Learning (Using DoWhy+EconML)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_mediation_analysis.html">Mediation analysis with DoWhy: Direct and Indirect Effects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_refuter_notebook.html">Iterating over multiple refutation tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="do_sampler_demo.html">Do-sampler Introduction</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Real world-inspired examples</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="DoWhy-The%20Causal%20Story%20Behind%20Hotel%20Booking%20Cancellations.html">Exploring Causes of Hotel Booking Cancellations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_example_effect_of_memberrewards_program.html">Estimating the Effect of a Member Rewards Program</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_online_shop.html">Causal Attributions and Root-Cause Analysis in an Online Shop</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="gcm_rca_microservice_architecture.html">Finding the Root Cause of Elevated Latencies in a Microservice Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_401k_analysis.html">Impact of 401(k) eligibility on net financial assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_supply_chain_dist_change.html">Finding Root Causes of Changes in a Supply Chain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_icc.html">Estimating intrinsic causal influences in real-world examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_counterfactual_medical_dry_eyes.html">Counterfactual Analysis in a Medical Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_falsify_dag.html">Falsification of User-Given Directed Acyclic Graphs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="counterfactual_fairness_dowhy.html">Counterfactual Fairness</a></li>
+
+
+
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="sales_attribution_intervention.html">Causal attribution to sales growth and spend intervention</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples on benchmarks datasets</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="dowhy_ihdp_data_example.html">DoWhy example on ihdp (Infant Health and Development Program) dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_lalonde_example.html">DoWhy example on the Lalonde dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_refutation_testing.html">Applying refutation tests to the Lalonde and IHDP datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_401k_analysis.html">Impact of 401(k) eligibility on net financial assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prediction/dowhy_causal_prediction_demo.html">Demo for DoWhy Causal Prediction on MNIST</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lalonde_pandas_api.html">Lalonde Pandas API Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="counterfactual_fairness_dowhy.html">Counterfactual Fairness</a></li>
+
+
+
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="dowhy_twins_example.html">DoWhy example on Twins dataset</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Modeling and refuting causal assumptions</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="load_graph_example.html">Different ways to load an input graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_causal_discovery_example.html">Causal Discovery example</a></li>
+
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="gcm_falsify_dag.html">Falsification of User-Given Directed Acyclic Graphs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sensitivity_analysis_testing.html">Sensitivity Analysis for Regression Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sensitivity_analysis_nonparametric_estimators.html">Sensitivity analysis for non-parametric causal estimators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_refuter_notebook.html">Iterating over multiple refutation tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_refuter_assess_overlap.html">Assessing Support and Overlap with OverRule</a></li>
+
+
+
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Ranking of estimation methods for a given dataset</a></li>
+
+
+<li class="toctree-l1"><a class="reference internal" href="dowhy_demo_dummy_outcome_refuter.html">A Simple Example on Creating a Custom Refutation Using User-Defined Outcome Functions</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Miscellaneous</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy-simple-iv-example.html">Simple example on using Instrumental Variables method for estimation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_interpreter.html">DoWhy: Interpreters for Causal Estimators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_mediation_analysis.html">Mediation analysis with DoWhy: Direct and Indirect Effects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_multiple_treatments.html">Estimating effect of multiple treatments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_efficient_backdoor_example.html">Finding optimal adjustment sets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="identifying_effects_using_id_algorithm.html">Identifying Effect using ID Algorithm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_optimize_backdoor_example.html">Example to demonstrate optimized backdoor variable search for Causal Identification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_functional_api.html">Functional API Preview</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="nb_index.html" class="nav-link">Example notebooks</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Ranking of estimation methods for a given dataset</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Ranking-of-estimation-methods-for-a-given-dataset">
+<h1>Ranking of estimation methods for a given dataset<a class="headerlink" href="#Ranking-of-estimation-methods-for-a-given-dataset" title="Link to this heading">#</a></h1>
+<p>We illustrate the comparison of various estimation methods for a given datasets by ranking them according to their performance against refutation tests accounting for both the observed unmodelled confounding error and unobserved confounding error.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Importing all the required libraries</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">argparse</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xgboost</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pdb</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">xgboost</span><span class="w"> </span><span class="kn">import</span> <span class="n">XGBRegressor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">PolynomialFeatures</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">LassoCV</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.ensemble</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomForestRegressor</span><span class="p">,</span> <span class="n">RandomForestClassifier</span><span class="p">,</span> <span class="n">GradientBoostingRegressor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">LogisticRegressionCV</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">mean_absolute_error</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy</span><span class="w"> </span><span class="kn">import</span> <span class="n">CausalModel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">namedtuple</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">statsmodels.api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn</span><span class="w"> </span><span class="kn">import</span> <span class="n">linear_model</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">dowhy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">dgp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy.utils.dgps.linear_dgp</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinearDataGeneratingProcess</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy</span><span class="w"> </span><span class="kn">import</span> <span class="n">CausalModel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">namedtuple</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy.causal_refuters.add_unobserved_common_cause</span><span class="w"> </span><span class="kn">import</span> <span class="n">AddUnobservedCommonCause</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.lines</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mlines</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.transforms</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mtransforms</span>
+
+<span class="c1"># Config dict to set the logging level</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging.config</span>
+<span class="n">DEFAULT_LOGGING</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s1">&#39;disable_existing_loggers&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s1">&#39;loggers&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;WARN&#39;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">logging</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">dictConfig</span><span class="p">(</span><span class="n">DEFAULT_LOGGING</span><span class="p">)</span>
+<span class="c1"># Disabling warnings output</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataConversionWarning</span><span class="p">,</span> <span class="n">ConvergenceWarning</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">DataConversionWarning</span><span class="p">)</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">ConvergenceWarning</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">convert_singleton_to_float</span><span class="p">(</span><span class="n">arr</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Helper function.&#39;&#39;&#39;</span>
+    <span class="n">array</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">arr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">arr</span><span class="p">:</span>
+        <span class="k">while</span> <span class="nb">type</span><span class="p">(</span><span class="n">element</span><span class="p">)</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">element</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;This script only accepts one value for the refute&quot;</span><span class="p">)</span>
+            <span class="n">element</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">array</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">ensure_dir</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+    <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+
+<span class="n">RESULTSFOLDER</span> <span class="o">=</span> <span class="s2">&quot;results/&quot;</span>
+<span class="n">ensure_dir</span><span class="p">(</span><span class="n">RESULTSFOLDER</span><span class="p">)</span>
+<span class="c1"># Create the estimator named tuple to wrap the name and properties</span>
+<span class="n">Estimator</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;Estimator&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="s1">&#39;params&#39;</span><span class="p">])</span>
+<span class="n">Refuter</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;Refuter&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="s1">&#39;params&#39;</span><span class="p">])</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Experiment</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Class to define the experiment setup to compare a list of estimators across a list of refuters for the given dataset.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;experiment_name&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experiment_id</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;experiment_id&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_experiments</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;num_experiments&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_sizes</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;sample_sizes&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dgps</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;dgps&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimators</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;estimators&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">refuters</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;refuters&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulate_unobserved_confounding</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;simulate_unobserved_confounding&quot;</span><span class="p">]</span>
+
+        <span class="c1"># Handle input errors in sample_sizes</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_sizes</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_sizes</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">int</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The input to &quot;sample_sizes&quot; should be an int or a list&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sample_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_sizes</span><span class="p">]</span>
+
+        <span class="c1"># Handle input errors in DGPs</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dgps</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dgps</span><span class="p">,</span> <span class="n">DataGeneratingProcess</span><span class="p">)</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The input to &quot;dgps&quot; should be a list or a subclass of &quot;DataGeneratingProcess&quot;&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dgps</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dgps</span><span class="p">]</span>
+
+        <span class="c1"># Handle inputs errors in estimators</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimators</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimators</span><span class="p">,</span> <span class="n">Estimator</span><span class="p">)</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The input to &quot;estimators&quot; should be a list or an Estimator namedtuple&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">estimators</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">estimators</span><span class="p">]</span>
+
+        <span class="c1"># Handle input errors in refuters</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refuters</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refuters</span><span class="p">,</span> <span class="n">Refuter</span><span class="p">)</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The input to &quot;refuters&quot; should be a list of a Refuter namedtuple&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">refuters</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">refuters</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">experiment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Running Experiment:&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_id</span><span class="p">)</span> <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_experiments</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Running Experiment Number:&quot;</span><span class="p">,</span><span class="n">exp</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">sample_size</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_sizes</span><span class="p">:</span>
+
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Current Sample Size:&quot;</span><span class="p">,</span><span class="n">sample_size</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">dgp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dgps</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">The current DGP:&quot;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">dgp</span><span class="p">)</span>
+                    <span class="n">estimates</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">estimate_values</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">estimated_effect</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">new_effect</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">p_value</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="n">dgp</span><span class="o">.</span><span class="n">generate_data</span><span class="p">(</span><span class="n">sample_size</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;printing data shape&quot;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">dgp</span><span class="o">.</span><span class="n">true_value</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;check&quot;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">dgp</span><span class="o">.</span><span class="n">treatment_is_binary</span><span class="p">:</span>
+                        <span class="n">data</span><span class="p">[</span><span class="n">dgp</span><span class="o">.</span><span class="n">treatment</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">dgp</span><span class="o">.</span><span class="n">treatment</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
+                    <span class="c1">#k = len(dgp.confounder)-4</span>
+                    <span class="c1">#confounder_list = random.sample(dgp.confounder, k)</span>
+                    <span class="n">confounder_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;w2&#39;</span><span class="p">,</span><span class="s1">&#39;w3&#39;</span><span class="p">]</span>
+
+
+                    <span class="n">s</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">confounder_list</span><span class="p">)</span>
+                    <span class="n">unobserved_confounders</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">dgp</span><span class="o">.</span><span class="n">confounder</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">s</span><span class="p">]</span>
+                    <span class="n">df_unobserved_confounders</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">unobserved_confounders</span><span class="p">]])</span>
+
+                    <span class="n">df_unobserved_confounders</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;results/unobserved_confounders.csv&quot;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;printing length of confounder list:&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">confounder_list</span><span class="p">))</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;printing confounder list:&quot;</span><span class="p">,</span> <span class="n">confounder_list</span><span class="p">)</span>
+
+
+
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;data columns&quot;</span><span class="p">)</span>
+
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;data columns&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+                    <span class="n">model</span> <span class="o">=</span> <span class="n">CausalModel</span><span class="p">(</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">,</span>
+                        <span class="n">treatment</span> <span class="o">=</span> <span class="n">dgp</span><span class="o">.</span><span class="n">treatment</span><span class="p">,</span>
+                        <span class="n">outcome</span> <span class="o">=</span> <span class="n">dgp</span><span class="o">.</span><span class="n">outcome</span><span class="p">,</span>
+                        <span class="n">common_causes</span> <span class="o">=</span> <span class="n">confounder_list</span><span class="p">,</span>
+                        <span class="n">effect_modifiers</span> <span class="o">=</span> <span class="n">dgp</span><span class="o">.</span><span class="n">effect_modifier</span>
+                    <span class="p">)</span>
+                    <span class="n">model</span><span class="o">.</span><span class="n">view_model</span><span class="p">()</span>
+                    <span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">display</span>
+                    <span class="n">display</span><span class="p">(</span><span class="n">Image</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;causal_model.png&quot;</span><span class="p">))</span>
+
+                    <span class="n">identified_estimand</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">identify_effect</span><span class="p">(</span><span class="n">proceed_when_unidentifiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;identified_estimand:&quot;</span><span class="p">,</span> <span class="n">identified_estimand</span><span class="p">)</span>
+                    <span class="c1">#print(&quot;identified_estimand:&quot;, identified_estimand)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Running the estimators:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">estimator</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimators</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The current estimator:&quot;</span><span class="p">,</span> <span class="n">estimator</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;estimator.params&quot;</span><span class="p">,</span> <span class="n">estimator</span><span class="o">.</span><span class="n">params</span><span class="p">)</span>
+                        <span class="n">estimate</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimate_effect</span><span class="p">(</span>
+                            <span class="n">identified_estimand</span><span class="p">,</span>
+                            <span class="n">method_name</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                            <span class="n">method_params</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">params</span>
+                        <span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;printing estimate&#39;s type&quot;</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">estimate</span><span class="p">))</span>
+                        <span class="n">estimates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">estimate</span><span class="p">)</span>
+                        <span class="n">estimate_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">estimate</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                    <span class="n">estimate_values</span> <span class="o">=</span> <span class="n">convert_singleton_to_float</span><span class="p">(</span><span class="n">estimate_values</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;estimate_values&quot;</span><span class="p">,</span> <span class="n">estimate_values</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Running the refuters:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">refuter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">refuters</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The current refuter:&quot;</span><span class="p">,</span> <span class="n">refuter</span><span class="p">)</span>
+
+                        <span class="k">for</span> <span class="n">estimate</span> <span class="ow">in</span> <span class="n">estimates</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulate_unobserved_confounding</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+                                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;********</span><span class="si">%%%%%%%%</span><span class="s2">%$$$$$&amp;&amp;^**^^^^*^*^*&quot;</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="n">refuter</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;dummy_outcome_refuter&#39;</span><span class="p">:</span>
+                                    <span class="n">add_unobserved_confounder</span> <span class="o">=</span> <span class="n">AddUnobservedCommonCause</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">identified_estimand</span><span class="p">,</span> <span class="n">estimate</span><span class="p">)</span>
+                                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;add_unobserved_confounder&quot;</span><span class="p">,</span> <span class="n">add_unobserved_confounder</span><span class="p">)</span>
+                                    <span class="n">unobserved_confounder_values</span> <span class="o">=</span> <span class="n">add_unobserved_confounder</span><span class="o">.</span><span class="n">include_simulated_confounder</span><span class="p">(</span><span class="n">convergence_threshold</span> <span class="o">=</span> <span class="mf">0.11</span><span class="p">,</span> <span class="n">c_star_max</span> <span class="o">=</span> <span class="mi">1500</span><span class="p">)</span>
+                                    <span class="n">refuter</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;unobserved_confounder_values&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">unobserved_confounder_values</span>
+                                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;refuter.params&#39;</span><span class="p">,</span> <span class="n">refuter</span><span class="o">.</span><span class="n">params</span><span class="p">)</span>
+                            <span class="n">refute</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">refute_estimate</span><span class="p">(</span>
+                                <span class="n">identified_estimand</span><span class="p">,</span>
+                                <span class="n">estimate</span><span class="p">,</span>
+                                <span class="n">method_name</span> <span class="o">=</span> <span class="n">refuter</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                <span class="o">**</span><span class="n">refuter</span><span class="o">.</span><span class="n">params</span><span class="p">,</span>
+
+
+
+                            <span class="p">)</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;printing refute&#39;s type&quot;</span><span class="p">)</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">refute</span><span class="p">))</span>
+                            <span class="k">if</span><span class="p">(</span><span class="n">refuter</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;dummy_outcome_refuter&#39;</span><span class="p">):</span>
+                                <span class="n">refute</span> <span class="o">=</span> <span class="n">refute</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                            <span class="k">if</span> <span class="n">refute</span><span class="o">.</span><span class="n">refutation_result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                                <span class="n">p_value</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">refute</span><span class="o">.</span><span class="n">refutation_result</span><span class="p">[</span><span class="s1">&#39;p_value&#39;</span><span class="p">])</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">p_value</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+                            <span class="n">estimated_effect</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">refute</span><span class="o">.</span><span class="n">estimated_effect</span><span class="p">)</span>
+                            <span class="c1">#print(&quot;refute.estimate_effect()&quot;, refute.estimate_effect())</span>
+                            <span class="n">new_effect</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">refute</span><span class="o">.</span><span class="n">new_effect</span><span class="p">)</span>
+
+                    <span class="n">estimated_effect</span> <span class="o">=</span> <span class="n">convert_singleton_to_float</span><span class="p">(</span><span class="n">estimated_effect</span><span class="p">)</span>
+                    <span class="n">new_effect</span> <span class="o">=</span> <span class="n">convert_singleton_to_float</span><span class="p">(</span><span class="n">new_effect</span><span class="p">)</span>
+                    <span class="n">p_value</span> <span class="o">=</span> <span class="n">convert_singleton_to_float</span><span class="p">(</span><span class="n">p_value</span><span class="p">)</span>
+                    <span class="n">true_value</span> <span class="o">=</span> <span class="n">convert_singleton_to_float</span><span class="p">(</span><span class="n">dgp</span><span class="o">.</span><span class="n">true_value</span><span class="p">)</span>
+
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;estimated effect&quot;</span><span class="p">,</span> <span class="n">estimated_effect</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;new_effect&quot;</span><span class="p">,</span> <span class="n">new_effect</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;p_value&quot;</span><span class="p">,</span> <span class="n">p_value</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;true value&quot;</span><span class="p">,</span> <span class="n">true_value</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">exp</span><span class="p">,</span> <span class="n">sample_size</span><span class="p">,</span> <span class="n">dgp</span><span class="o">.</span><span class="n">NAME</span><span class="p">,</span> <span class="o">*</span><span class="n">estimate_values</span><span class="p">,</span> <span class="o">*</span><span class="n">estimated_effect</span><span class="p">,</span> <span class="o">*</span><span class="n">new_effect</span><span class="p">,</span> <span class="o">*</span><span class="n">p_value</span><span class="p">,</span> <span class="n">true_value</span><span class="p">])</span>
+
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Completed all experiments. Saving the data...&quot;</span><span class="p">)</span>
+
+        <span class="n">COLUMNS</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;EXPERIMENT&#39;</span><span class="p">,</span> <span class="s1">&#39;SAMPLE_SIZE&#39;</span><span class="p">,</span> <span class="s1">&#39;DGP&#39;</span><span class="p">]</span>
+        <span class="n">RESULT_CATEGORIES</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ESTIMATED_EFFECT&#39;</span><span class="p">,</span> <span class="s1">&#39;NEW_EFFECT&#39;</span><span class="p">,</span> <span class="s1">&#39;P_VALUE&#39;</span><span class="p">]</span>
+        <span class="n">estimator_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">estimator</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">estimator</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimators</span><span class="p">]</span>
+        <span class="n">refuter_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">refuter</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">refuter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">refuters</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">estimator_name</span> <span class="ow">in</span> <span class="n">estimator_names</span><span class="p">:</span>
+            <span class="n">COLUMNS</span> <span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;ORIGINAL_ESTIMATE&#39;</span><span class="o">+</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span> <span class="n">estimator_name</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">result_category</span> <span class="ow">in</span> <span class="n">RESULT_CATEGORIES</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">refuter_name</span> <span class="ow">in</span> <span class="n">refuter_names</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">estimator_name</span> <span class="ow">in</span> <span class="n">estimator_names</span><span class="p">:</span>
+                    <span class="n">COLUMNS</span> <span class="o">+=</span> <span class="p">[</span><span class="n">refuter_name</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span> <span class="n">estimator_name</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span> <span class="n">result_category</span><span class="p">]</span>
+
+        <span class="n">COLUMNS</span> <span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;TRUE_VALUE&#39;</span><span class="p">]</span>
+
+        <span class="n">csv_file</span> <span class="o">=</span> <span class="n">RESULTSFOLDER</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span><span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_id</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span><span class="o">.</span><span class="n">date</span><span class="p">())</span> <span class="o">+</span> <span class="s1">&#39;_data.csv&#39;</span>
+        <span class="n">onlyres_csv_file</span> <span class="o">=</span> <span class="n">RESULTSFOLDER</span> <span class="o">+</span> <span class="s2">&quot;onlyres_&quot;</span><span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_name</span><span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_id</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">())</span> <span class="o">+</span> <span class="s1">&#39;_data.csv&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">,</span><span class="n">columns</span><span class="o">=</span><span class="n">COLUMNS</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">csv_file</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data has been saved in &quot;</span><span class="p">,</span><span class="n">csv_file</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">csv_file</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#Defining the Data Generating Process</span>
+<span class="n">ldgp</span> <span class="o">=</span> <span class="n">LinearDataGeneratingProcess</span><span class="p">(</span><span class="n">treatment</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;t1&#39;</span><span class="p">],</span> <span class="n">outcome</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">],</span> <span class="n">confounder</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;w1&#39;</span><span class="p">,</span><span class="s1">&#39;w2&#39;</span><span class="p">,</span> <span class="s1">&#39;w3&#39;</span><span class="p">,</span><span class="s1">&#39;w4&#39;</span><span class="p">,</span><span class="s1">&#39;w5&#39;</span><span class="p">,</span><span class="s1">&#39;w6&#39;</span><span class="p">],</span> <span class="n">effect_modifier</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;x1&#39;</span><span class="p">,</span><span class="s1">&#39;x2&#39;</span><span class="p">],</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">treatment_is_binary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1">#Defining the sample size</span>
+<span class="n">sample_size</span> <span class="o">=</span> <span class="mi">1000</span>
+
+<span class="n">dgp_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;ldgp&#39;</span><span class="p">:</span><span class="n">ldgp</span><span class="p">}</span>
+<span class="n">dgp_list</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">dgp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">dgp_dict</span><span class="p">[</span><span class="s1">&#39;ldgp&#39;</span><span class="p">]</span> <span class="p">)</span>
+
+
+<span class="c1"># Create a namedtuple to store the name of the estimator and the parameters passed</span>
+<span class="n">estimator_list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;backdoor.linear_regression&quot;</span><span class="p">,</span>
+                  <span class="c1">#&quot;backdoor.propensity_score_stratification&quot;,</span>
+                  <span class="s2">&quot;backdoor.propensity_score_matching&quot;</span><span class="p">,</span>
+                  <span class="s2">&quot;backdoor.propensity_score_weighting&quot;</span><span class="p">,</span>
+                  <span class="s2">&quot;backdoor.econml.dml.DML&quot;</span><span class="p">,</span>
+                  <span class="s2">&quot;backdoor.econml.dr.LinearDRLearner&quot;</span><span class="p">,</span>
+                  <span class="c1">#&quot;backdoor.econml.metalearners.TLearner&quot;,</span>
+                  <span class="c1">#&quot;backdoor.econml.metalearners.XLearner&quot;,</span>
+                  <span class="c1">#&quot;backdoor.causalml.inference.meta.LRSRegressor&quot;,</span>
+                  <span class="c1">#&quot;backdoor.causalml.inference.meta.XGBTRegressor&quot;,</span>
+                  <span class="c1">#&quot;backdoor.causalml.inference.meta.MLPTRegressor&quot;,</span>
+                  <span class="c1">#&quot;backdoor.causalml.inference.meta.BaseXRegressor&quot;</span>
+                <span class="p">]</span>
+<span class="n">method_params</span><span class="o">=</span> <span class="p">[</span>    <span class="kc">None</span><span class="p">,</span>
+                    <span class="c1">#None,</span>
+                    <span class="p">{</span> <span class="s2">&quot;init_params&quot;</span><span class="p">:{}</span> <span class="p">},</span>
+                    <span class="p">{</span> <span class="s2">&quot;init_params&quot;</span><span class="p">:{}</span> <span class="p">},</span>
+                    <span class="p">{</span><span class="s2">&quot;init_params&quot;</span><span class="p">:{</span><span class="s1">&#39;model_y&#39;</span><span class="p">:</span><span class="n">GradientBoostingRegressor</span><span class="p">(),</span>
+                                    <span class="s1">&#39;model_t&#39;</span><span class="p">:</span> <span class="n">GradientBoostingRegressor</span><span class="p">(),</span>
+                                    <span class="s2">&quot;model_final&quot;</span><span class="p">:</span><span class="n">LassoCV</span><span class="p">(</span><span class="n">fit_intercept</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+                                    <span class="s1">&#39;featurizer&#39;</span><span class="p">:</span><span class="n">PolynomialFeatures</span><span class="p">(</span><span class="n">degree</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">include_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">)},</span>
+                     <span class="s2">&quot;fit_params&quot;</span><span class="p">:{}},</span>
+                    <span class="p">{</span><span class="s2">&quot;init_params&quot;</span><span class="p">:{</span> <span class="s1">&#39;model_propensity&#39;</span><span class="p">:</span> <span class="n">LogisticRegressionCV</span><span class="p">(</span><span class="n">cv</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="s1">&#39;lbfgs&#39;</span><span class="p">,</span> <span class="n">multi_class</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">),</span>
+                        <span class="p">},</span>
+                    <span class="s2">&quot;fit_params&quot;</span><span class="p">:{}</span>
+                    <span class="p">},</span>
+<span class="w">                    </span><span class="sd">&#39;&#39;&#39;{&quot;init_params&quot;: {&#39;models&#39;: GradientBoostingRegressor(n_estimators=100, max_depth=6, min_samples_leaf=int(sample_size/100))</span>
+<span class="sd">                                    },</span>
+<span class="sd">                    &quot;fit_params&quot;:{}</span>
+<span class="sd">                    },</span>
+<span class="sd">                    {&quot;init_params&quot;:{&#39;models&#39;: GradientBoostingRegressor(n_estimators=100, max_depth=6, min_samples_leaf=int(sample_size/100)),</span>
+<span class="sd">                        &#39;propensity_model&#39;: RandomForestClassifier(n_estimators=100, max_depth=6,</span>
+<span class="sd">                                                                              min_samples_leaf=int(sample_size/100))</span>
+<span class="sd">                        },</span>
+<span class="sd">                     &quot;fit_params&quot;:{}</span>
+<span class="sd">                    },</span>
+<span class="sd">                    {&quot;init_params&quot;:{},},</span>
+<span class="sd">                    {&quot;init_params&quot;:{</span>
+<span class="sd">                        &#39;learner&#39;:XGBRegressor()</span>
+<span class="sd">                        }</span>
+<span class="sd">                    }&#39;&#39;&#39;</span>
+                <span class="p">]</span>
+<span class="n">estimator_tuples</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">refuter_tuples</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="n">refuter_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;dummy_outcome_refuter&#39;</span><span class="p">]</span>
+<span class="n">refuter_params</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">&#39;num_simulations&#39;</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span><span class="s1">&#39;transformation_list&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="s1">&#39;random_forest&#39;</span><span class="p">,{</span><span class="s1">&#39;n_estimators&#39;</span><span class="p">:</span><span class="mi">100</span><span class="p">,</span> <span class="s1">&#39;max_depth&#39;</span><span class="p">:</span><span class="mi">6</span><span class="p">})],</span> <span class="s1">&#39;true_causal_effect&#39;</span><span class="p">:(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="mf">0.5</span><span class="p">)}]</span>
+
+
+<span class="c1"># Iterate through the names and parameters to create a list of namedtuples</span>
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">estimator_list</span><span class="p">,</span><span class="n">method_params</span><span class="p">):</span>
+    <span class="n">estimator_tuples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Estimator</span><span class="o">.</span><span class="n">_make</span><span class="p">([</span><span class="n">name</span><span class="p">,</span> <span class="n">param</span><span class="p">]))</span>
+
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">refuter_list</span><span class="p">,</span> <span class="n">refuter_params</span><span class="p">):</span>
+    <span class="n">refuter_tuples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Refuter</span><span class="o">.</span><span class="n">_make</span><span class="p">([</span><span class="n">name</span><span class="p">,</span> <span class="n">param</span><span class="p">]))</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">plot_MAEs</span><span class="p">(</span><span class="n">res</span><span class="p">):</span>
+    <span class="n">true_value_column</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">estimate_columns</span><span class="o">=</span><span class="n">res</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="c1">#print(estimate_columns)</span>
+    <span class="c1">#print(type(estimate_columns))</span>
+    <span class="n">estimate_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s2">&quot;TRUE_VALUE&quot;</span><span class="p">]))</span>
+    <span class="c1">#print(estimate_columns)</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+    <span class="n">MAE</span> <span class="o">=</span><span class="p">{}</span>
+    <span class="k">for</span> <span class="n">colname</span> <span class="ow">in</span> <span class="n">estimate_columns</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">colname</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;ORIGINAL_ESTIMATE:backdoor.propensity_score_weighting&#39;</span><span class="p">,):</span>
+                           <span class="c1">#&#39;ORIGINAL_ESTIMATE:backdoor.econml.metalearners.TLearner&#39;):</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="n">colname</span><span class="p">],</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;TRUE_VALUE&quot;</span><span class="p">],</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">colname</span><span class="p">)</span>
+            <span class="s2">&quot;Mean Absolute Error (MAE): </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mean_absolute_error</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="n">colname</span><span class="p">],</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;TRUE_VALUE&quot;</span><span class="p">]))</span>
+            <span class="n">MAE</span><span class="p">[</span><span class="n">colname</span><span class="p">]</span> <span class="o">=</span> <span class="n">mean_absolute_error</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="n">colname</span><span class="p">],</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;TRUE_VALUE&quot;</span><span class="p">])</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s1">&#39;Calibration plot showing the accuracy of different causal estimators [P(T=1)=0.9]&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Estimated effect&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;True causal effect&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper center&#39;</span><span class="p">,</span> <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.20</span><span class="p">),</span>
+              <span class="n">fancybox</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Printing MAE of various estimates: &quot;</span><span class="p">)</span>
+    <span class="n">MAE_values</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">MAE</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)}</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">MAE_values</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">plot_estimators_and_refuters</span><span class="p">(</span><span class="n">refuter</span><span class="p">,</span> <span class="n">estimator</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;EXPERIMENT&#39;</span><span class="p">])</span>
+    <span class="n">y1</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="n">refuter</span><span class="o">+</span><span class="s1">&#39;:&#39;</span><span class="o">+</span><span class="n">estimator</span><span class="o">+</span><span class="s1">&#39;:ESTIMATED_EFFECT&#39;</span><span class="p">])</span>
+    <span class="n">y2</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="n">refuter</span><span class="o">+</span><span class="s1">&#39;:&#39;</span><span class="o">+</span><span class="n">estimator</span><span class="o">+</span><span class="s1">&#39;:NEW_EFFECT&#39;</span><span class="p">])</span>
+    <span class="c1">#print(res[&#39;TRUE_VALUE&#39;])</span>
+    <span class="n">y3</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;TRUE_VALUE&#39;</span><span class="p">])</span>
+    <span class="n">y4</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="n">refuter</span><span class="o">+</span><span class="s1">&#39;:&#39;</span><span class="o">+</span><span class="n">estimator</span><span class="o">+</span><span class="s1">&#39;:P_VALUE&#39;</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;Estimated Effect&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;New Effect&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y3</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span><span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;True Value&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y4</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span><span class="s2">&quot;yellow&quot;</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;P Value&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;EXPERIMENT&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;EFFECT&quot;</span><span class="p">)</span>
+    <span class="n">legend</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="s1">&#39;small&#39;</span><span class="p">,</span> <span class="n">fancybox</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">estimator</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">estimator</span><span class="o">+</span><span class="s1">&#39;.png&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">plot_deviations</span><span class="p">(</span><span class="n">estimator_list</span><span class="p">,</span> <span class="n">deviation_list</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">estimator_list</span><span class="p">,</span> <span class="n">deviation_list</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">estimator_list</span><span class="p">,</span> <span class="n">estimator_list</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="s1">&#39;vertical&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Observed-unmodelled-confounding-error">
+<h1>Observed unmodelled confounding error<a class="headerlink" href="#Observed-unmodelled-confounding-error" title="Link to this heading">#</a></h1>
+<p>For each estimator, we use dummy outcome refuter to check the observed unmodelled confounding error for each estimator. That is, we run the refutation test for each estimator only on the observed confounders and analyse what amount of confounding error is present unmodelled amongst the observed variables.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define the properties of the experiment</span>
+<span class="c1"># The name of the experiment</span>
+<span class="c1"># The experiment ID</span>
+<span class="c1"># The number of experiments to be run with the SAME parameters</span>
+<span class="c1"># The size of the samples to be run</span>
+<span class="c1"># The list of DGPs to be run</span>
+<span class="c1"># The list of estimators</span>
+<span class="n">observed_confounding_error</span> <span class="o">=</span> <span class="n">Experiment</span><span class="p">(</span>
+    <span class="n">experiment_name</span><span class="o">=</span><span class="s1">&#39;Test&#39;</span><span class="p">,</span>
+    <span class="n">experiment_id</span><span class="o">=</span><span class="s1">&#39;1&#39;</span><span class="p">,</span>
+    <span class="n">num_experiments</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="c1"># 10</span>
+    <span class="n">sample_sizes</span><span class="o">=</span><span class="n">sample_size</span><span class="p">,</span>
+    <span class="n">dgps</span><span class="o">=</span><span class="n">dgp_list</span><span class="p">,</span>
+    <span class="n">estimators</span><span class="o">=</span><span class="n">estimator_tuples</span><span class="p">,</span>
+    <span class="n">refuters</span><span class="o">=</span><span class="n">refuter_tuples</span><span class="p">,</span>
+    <span class="n">simulate_unobserved_confounding</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span>
+
+<span class="c1"># Run the experiment</span>
+<span class="n">res</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">observed_confounding_error</span><span class="o">.</span><span class="n">experiment</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#PLOT</span>
+<span class="c1">#This plot shows the Mean Absolute Error of the Orginal Estimate from the true value and of the New Effect from</span>
+<span class="c1">#the expected value for each estimator.</span>
+<span class="n">plot_MAEs</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<section id="Ranking-based-on-Original-Estimate">
+<h2>Ranking based on Original Estimate<a class="headerlink" href="#Ranking-based-on-Original-Estimate" title="Link to this heading">#</a></h2>
+<p>The Original Estimate is calculated in the presence of the True Value (that is, the ground truth). However in many real life datasets, the ground truth may not be known. Hence, we want the ranking produced by our refutation tests to be in coherence with that obtained from the Original Estimates. According to the Original Estimate values, the ranking of the estimators should be as follows (the method with the least MAE should get the best rank):</p>
+<ol class="arabic simple">
+<li><p>DMLCateEstimator</p></li>
+<li><p>LinearRegression</p></li>
+<li><p>LinearDRLearner</p></li>
+<li><p>Propensity Score Matching</p></li>
+</ol>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">estimator_list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;backdoor.linear_regression&quot;</span><span class="p">,</span>
+                  <span class="c1">#&quot;backdoor.propensity_score_stratification&quot;,</span>
+                  <span class="s2">&quot;backdoor.propensity_score_matching&quot;</span><span class="p">,</span>
+                  <span class="s2">&quot;backdoor.econml.dml.DML&quot;</span><span class="p">,</span>
+                  <span class="s2">&quot;backdoor.econml.dr.LinearDRLearner&quot;</span><span class="p">,</span>
+                  <span class="c1">#&quot;backdoor.econml.metalearners.TLearner&quot;,</span>
+                  <span class="c1">#&quot;backdoor.econml.metalearners.XLearner&quot;,</span>
+                  <span class="c1">#&quot;backdoor.causalml.inference.meta.LRSRegressor&quot;,</span>
+                  <span class="c1">#&quot;backdoor.causalml.inference.meta.XGBTRegressor&quot;,</span>
+                  <span class="c1">#&quot;backdoor.causalml.inference.meta.MLPTRegressor&quot;,</span>
+                  <span class="c1">#&quot;backdoor.causalml.inference.meta.BaseXRegressor&quot;</span>
+                <span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#This plot shows the deviation of the original estimate, the new effect and the estimated effect from the true value</span>
+<span class="n">refuter</span> <span class="o">=</span> <span class="s1">&#39;dummy_outcome_refuter&#39;</span>
+<span class="n">deviation_list</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">estimator</span> <span class="ow">in</span> <span class="n">estimator_list</span><span class="p">:</span>
+    <span class="n">plot_estimators_and_refuters</span><span class="p">(</span><span class="n">refuter</span><span class="p">,</span> <span class="n">estimator</span><span class="p">)</span>
+    <span class="n">avg_deviation</span> <span class="o">=</span> <span class="p">((</span><span class="n">res</span><span class="p">[</span><span class="n">refuter</span><span class="o">+</span><span class="s1">&#39;:&#39;</span><span class="o">+</span><span class="n">estimator</span><span class="o">+</span><span class="s1">&#39;:NEW_EFFECT&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">avg_deviation</span><span class="p">)</span>
+    <span class="n">deviation_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">avg_deviation</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_deviations</span><span class="p">(</span><span class="n">estimator_list</span><span class="p">,</span> <span class="n">deviation_list</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">estimator_list</span><span class="p">)):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">estimator_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span><span class="s2">&quot;: &quot;</span><span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">deviation_list</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">estimator_list</span><span class="p">,</span> <span class="n">deviation_list</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)}</span>
+<br/></pre></div>
+</div>
+</div>
+</section>
+<section id="Ranking-based-on-New-Effect-(Refutatation-results)">
+<h2>Ranking based on New Effect (Refutatation results)<a class="headerlink" href="#Ranking-based-on-New-Effect-(Refutatation-results)" title="Link to this heading">#</a></h2>
+<p>The ranking based on absolute value of deviations is :</p>
+<ol class="arabic simple">
+<li><p>Propensity Score Matching</p></li>
+<li><p>Linear DR Learner</p></li>
+<li><p>DML CATE Estimator</p></li>
+<li><p>Linear Regression</p></li>
+</ol>
+<p>Clearly, the observed unmodelled confounding error is not able to match the ranking based on the Original Estimate. It is not even able to tell that the clear winner amongst the methods according to the true value is DML CATE Estimator</p>
+</section>
+</section>
+<section id="Unobserved-confounding-error">
+<h1>Unobserved confounding error<a class="headerlink" href="#Unobserved-confounding-error" title="Link to this heading">#</a></h1>
+<p>For each estimator, we now simulate unobserved confounders and check its effect using dummy outcome refuter to check the unobserved confounding error for each estimator. That is, we run the refutation test for each estimator not only on the observed confounder, but also on an unobserved confounder that we simulate using the AddUnobservedCommonCause class and analyse whether there is a strong confounder that is unobserved (missing) and needs to be accounted for.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">unobserved_confounding_error</span> <span class="o">=</span> <span class="n">Experiment</span><span class="p">(</span>
+    <span class="n">experiment_name</span><span class="o">=</span><span class="s1">&#39;Test&#39;</span><span class="p">,</span>
+    <span class="n">experiment_id</span><span class="o">=</span><span class="s1">&#39;2&#39;</span><span class="p">,</span>
+    <span class="n">num_experiments</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="c1"># 10</span>
+    <span class="n">sample_sizes</span><span class="o">=</span><span class="n">sample_size</span><span class="p">,</span>
+    <span class="n">dgps</span><span class="o">=</span><span class="n">dgp_list</span><span class="p">,</span>
+    <span class="n">estimators</span><span class="o">=</span><span class="n">estimator_tuples</span><span class="p">,</span>
+    <span class="n">refuters</span><span class="o">=</span><span class="n">refuter_tuples</span><span class="p">,</span>
+    <span class="n">simulate_unobserved_confounding</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span>
+
+<span class="c1"># Run the experiment</span>
+<span class="n">res</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">unobserved_confounding_error</span><span class="o">.</span><span class="n">experiment</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">##This plot shows the Mean Absolute Error of the Orginal Estimate from the true value and of the New Effect from</span>
+<span class="c1">#the expected value for each estimator.</span>
+<span class="n">plot_MAEs</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<section id="id1">
+<h2>Ranking based on Original Estimate<a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
+<p>The Original Estimate is calculated in the presence of the True Value (that is, the ground truth). However in many real life datasets, the ground truth may not be known. Hence, we want the ranking produced by our refutation tests to be in coherence with that obtained from the Original Estimates. According to the Original Estimate values, the ranking of the estimators should be as follows (the method with the least MAE should get the best rank):</p>
+<ol class="arabic simple">
+<li><p>DMLCateEstimator</p></li>
+<li><p>Propensity Score Matching</p></li>
+<li><p>LinearRegression</p></li>
+<li><p>LinearDRLearner</p></li>
+</ol>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#This plot shows the deviation of the original estimate, the new effect and the estimated effect from the true value</span>
+<span class="n">refuter</span> <span class="o">=</span> <span class="s1">&#39;dummy_outcome_refuter&#39;</span>
+<span class="n">deviation_list</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">estimator</span> <span class="ow">in</span> <span class="n">estimator_list</span><span class="p">:</span>
+    <span class="n">plot_estimators_and_refuters</span><span class="p">(</span><span class="n">refuter</span><span class="p">,</span> <span class="n">estimator</span><span class="p">)</span>
+    <span class="n">avg_deviation</span> <span class="o">=</span> <span class="p">((</span><span class="n">res</span><span class="p">[</span><span class="n">refuter</span><span class="o">+</span><span class="s1">&#39;:&#39;</span><span class="o">+</span><span class="n">estimator</span><span class="o">+</span><span class="s1">&#39;:NEW_EFFECT&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">avg_deviation</span><span class="p">)</span>
+    <span class="n">deviation_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">avg_deviation</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_deviations</span><span class="p">(</span><span class="n">estimator_list</span><span class="p">,</span> <span class="n">deviation_list</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">estimator_list</span><span class="p">)):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">estimator_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span><span class="s2">&quot;: &quot;</span><span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">deviation_list</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">estimator_list</span><span class="p">,</span> <span class="n">deviation_list</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)}</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="id2">
+<h2>Ranking based on New Effect (Refutatation results)<a class="headerlink" href="#id2" title="Link to this heading">#</a></h2>
+<p>The ranking based on absolute value of deviations is :</p>
+<ol class="arabic simple">
+<li><p>DML</p></li>
+<li><p>Linear DR Learner</p></li>
+<li><p>Propensity Score Matching</p></li>
+<li><p>Linear Regression</p></li>
+</ol>
+<section id="We-can-see-that-this-ranking-produces-the-same-top-ranked-estimator-as-the-one-based-on-Original-Estimate.-Thus-ranking-based-on-the-unobserved-confounding-error-solves-the-problem-and-gives-us-a-close-to-correct-ranking-amongst-methods.">
+<h3>We can see that this ranking produces the same top-ranked estimator as the one based on Original Estimate. Thus ranking based on the unobserved confounding error solves the problem and gives us a close-to-correct ranking amongst methods.<a class="headerlink" href="#We-can-see-that-this-ranking-produces-the-same-top-ranked-estimator-as-the-one-based-on-Original-Estimate.-Thus-ranking-based-on-the-unobserved-confounding-error-solves-the-problem-and-gives-us-a-close-to-correct-ranking-amongst-methods." title="Link to this heading">#</a></h3>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="dowhy_refuter_assess_overlap.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Assessing Support and Overlap with OverRule</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="dowhy_demo_dummy_outcome_refuter.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">A Simple Example on Creating a Custom Refutation Using User-Defined Outcome Functions</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Ranking of estimation methods for a given dataset</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#Observed-unmodelled-confounding-error">Observed unmodelled confounding error</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Ranking-based-on-Original-Estimate">Ranking based on Original Estimate</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Ranking-based-on-New-Effect-(Refutatation-results)">Ranking based on New Effect (Refutatation results)</a></li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#Unobserved-confounding-error">Unobserved confounding error</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Ranking based on Original Estimate</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Ranking based on New Effect (Refutatation results)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#We-can-see-that-this-ranking-produces-the-same-top-ranked-estimator-as-the-one-based-on-Original-Estimate.-Thus-ranking-based-on-the-unobserved-confounding-error-solves-the-problem-and-gives-us-a-close-to-correct-ranking-amongst-methods.">We can see that this ranking produces the same top-ranked estimator as the one based on Original Estimate. Thus ranking based on the unobserved confounding error solves the problem and gives us a close-to-correct ranking amongst methods.</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/example_notebooks/dowhy_ranking_methods.ipynb.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2022, PyWhy contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

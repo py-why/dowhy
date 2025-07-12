@@ -1,0 +1,282 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Confounding Example: Finding causal effects from observed data\n",
+    "\n",
+    "Suppose you are given some data with treatment and outcome. Can you determine whether the treatment causes the outcome, or the correlation is purely due to another common cause?"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "import matplotlib.pyplot as plt\n",
+    "import math\n",
+    "import dowhy\n",
+    "from dowhy import CausalModel\n",
+    "import dowhy.datasets, dowhy.plotter\n",
+    "\n",
+    "# Config dict to set the logging level\n",
+    "import logging.config\n",
+    "DEFAULT_LOGGING = {\n",
+    "    'version': 1,\n",
+    "    'disable_existing_loggers': False,\n",
+    "    'loggers': {\n",
+    "        '': {\n",
+    "            'level': 'INFO',\n",
+    "        },\n",
+    "    }\n",
+    "}\n",
+    "\n",
+    "logging.config.dictConfig(DEFAULT_LOGGING)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Let's create a mystery dataset for which we need to determine whether there is a causal effect.\n",
+    "\n",
+    "Creating the dataset. It is generated from either one of two models:\n",
+    "* **Model 1**: Treatment does cause outcome. \n",
+    "* **Model 2**: Treatment does not cause outcome. All observed correlation is due to a common cause."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "rvar = 1 if np.random.uniform() >0.5 else 0\n",
+    "data_dict = dowhy.datasets.xy_dataset(10000, effect=rvar, \n",
+    "                                      num_common_causes=1, \n",
+    "                                      sd_error=0.2)                                               \n",
+    "df = data_dict['df']                                                                                 \n",
+    "print(df[[\"Treatment\", \"Outcome\", \"w0\"]].head())\n",
+    "                                                                                                                                                                                                         "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dowhy.plotter.plot_treatment_outcome(df[data_dict[\"treatment_name\"]], df[data_dict[\"outcome_name\"]],\n",
+    "                             df[data_dict[\"time_val\"]])                                                       "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Using DoWhy to resolve the mystery: *Does Treatment cause Outcome?*\n",
+    "### STEP 1: Model the problem as a causal graph\n",
+    "Initializing the causal model."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "model= CausalModel(                                                                                                                      \n",
+    "        data=df,                                                                                                                         \n",
+    "        treatment=data_dict[\"treatment_name\"],                                                                                           \n",
+    "        outcome=data_dict[\"outcome_name\"],                                                                                               \n",
+    "        common_causes=data_dict[\"common_causes_names\"],                                                                                  \n",
+    "        instruments=data_dict[\"instrument_names\"])                                                                                       \n",
+    "model.view_model(layout=\"dot\")                                                                                                                                                                                                                                             "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Showing the causal model stored in the local file \"causal_model.png\""
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from IPython.display import Image, display\n",
+    "display(Image(filename=\"causal_model.png\"))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### STEP 2: Identify causal effect using properties of the formal causal graph\n",
+    "Identify the causal effect using properties of the causal graph."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)\n",
+    "print(identified_estimand)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### STEP 3: Estimate the causal effect\n",
+    "\n",
+    "Once we have identified the estimand, we can use any statistical method to estimate the causal effect. \n",
+    "\n",
+    "Let's use Linear Regression for simplicity."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "estimate = model.estimate_effect(identified_estimand,\n",
+    "        method_name=\"backdoor.linear_regression\")\n",
+    "print(\"Causal Estimate is \" + str(estimate.value))\n",
+    "\n",
+    "# Plot Slope of line between treamtent and outcome =causal effect                                                                                                 \n",
+    "dowhy.plotter.plot_causal_effect(estimate, df[data_dict[\"treatment_name\"]], df[data_dict[\"outcome_name\"]])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Checking if the estimate is correct"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(\"DoWhy estimate is \" + str(estimate.value)) \n",
+    "print (\"Actual true causal effect was {0}\".format(rvar))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Step 4: Refuting the estimate\n",
+    "\n",
+    "We can also refute the estimate to check its robustness to assumptions (*aka* sensitivity analysis, but on steroids). "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Adding a random common cause variable"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "res_random=model.refute_estimate(identified_estimand, estimate, method_name=\"random_common_cause\")\n",
+    "print(res_random)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Replacing treatment with a random (placebo) variable"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "res_placebo=model.refute_estimate(identified_estimand, estimate,\n",
+    "        method_name=\"placebo_treatment_refuter\", placebo_type=\"permute\")\n",
+    "print(res_placebo)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Removing a random subset of the data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "res_subset=model.refute_estimate(identified_estimand, estimate,\n",
+    "        method_name=\"data_subset_refuter\", subset_fraction=0.9)\n",
+    "print(res_subset)\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "As you can see, our causal estimator is robust to simple refutations."
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.5"
+  },
+  "toc": {
+   "base_numbering": 1,
+   "nav_menu": {},
+   "number_sections": true,
+   "sideBar": true,
+   "skip_h1_title": false,
+   "title_cell": "Table of Contents",
+   "title_sidebar": "Contents",
+   "toc_cell": false,
+   "toc_position": {},
+   "toc_section_display": true,
+   "toc_window_display": false
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}

@@ -1,0 +1,488 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Applying refutation tests to the Lalonde and IHDP datasets"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Import the Dependencies"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import dowhy\n",
+    "from dowhy import CausalModel\n",
+    "import pandas as pd\n",
+    "import numpy as np\n",
+    "\n",
+    "# Config dict to set the logging level\n",
+    "import logging.config\n",
+    "DEFAULT_LOGGING = {\n",
+    "    'version': 1,\n",
+    "    'disable_existing_loggers': False,\n",
+    "    'loggers': {\n",
+    "        '': {\n",
+    "            'level': 'WARN',\n",
+    "        },\n",
+    "    }\n",
+    "}\n",
+    "\n",
+    "logging.config.dictConfig(DEFAULT_LOGGING)\n",
+    "# Disabling warnings output\n",
+    "import warnings\n",
+    "from sklearn.exceptions import DataConversionWarning\n",
+    "warnings.filterwarnings(action='ignore', category=DataConversionWarning)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Loading the Dataset"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Infant Health and Development Program Dataset (IHDP)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The measurements used are on the child—birth weight, head circumference, weeks bornpreterm, birth order, ﬁrst born, neonatal health index (see Scott and Bauer 1989), sex, twinstatus—as well as behaviors engaged in during the pregnancy—smoked cigarettes, drankalcohol, took drugs—and measurements on the mother at the time she gave birth—age,marital status, educational attainment (did not graduate from high school, graduated fromhigh school, attended some college but did not graduate, graduated from college), whethershe worked during pregnancy, whether she received prenatal care—and the site (8 total) inwhich the family resided at the start of the intervention. There are 6 continuous covariatesand 19 binary covariates.\n",
+    "\n",
+    "### Reference\n",
+    "Hill, J. L. (2011). Bayesian nonparametric modeling for causal inference. Journal of Computational and Graphical Statistics, 20(1), 217-240. https://doi.org/10.1198/jcgs.2010.08162"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data = pd.read_csv(\"https://raw.githubusercontent.com/AMLab-Amsterdam/CEVAE/master/datasets/IHDP/csv/ihdp_npci_1.csv\", header = None)\n",
+    "col =  [\"treatment\", \"y_factual\", \"y_cfactual\", \"mu0\", \"mu1\" ,]\n",
+    "for i in range(1,26):\n",
+    "    col.append(\"x\"+str(i))\n",
+    "data.columns = col\n",
+    "data = data.astype({\"treatment\":'bool'}, copy=False)\n",
+    "data.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Lalonde Dataset"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "A data frame with 445 observations on the following 12 variables.\n",
+    "\n",
+    "- age:\n",
+    "age in years.\n",
+    "- educ:\n",
+    "years of schooling.\n",
+    "- black:\n",
+    "indicator variable for blacks.\n",
+    "- hisp:\n",
+    "indicator variable for Hispanics.\n",
+    "- married:\n",
+    "indicator variable for martial status.\n",
+    "- nodegr:\n",
+    "indicator variable for high school diploma.\n",
+    "- re74:\n",
+    "real earnings in 1974.\n",
+    "- re75:\n",
+    "real earnings in 1975.\n",
+    "- re78:\n",
+    "real earnings in 1978.\n",
+    "- u74:\n",
+    "indicator variable for earnings in 1974 being zero.\n",
+    "- u75:\n",
+    "indicator variable for earnings in 1975 being zero.\n",
+    "- treat:\n",
+    "an indicator variable for treatment status.\n",
+    "\n",
+    "### References\n",
+    "Dehejia, Rajeev and Sadek Wahba. 1999.``Causal Effects in Non-Experimental Studies: Re-Evaluating the Evaluation of Training Programs.'' Journal of the American Statistical Association 94 (448): 1053-1062.\n",
+    "\n",
+    "LaLonde, Robert. 1986. ``Evaluating the Econometric Evaluations of Training Programs.'' American Economic Review 76:604-620."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import dowhy.datasets\n",
+    "\n",
+    "lalonde = dowhy.datasets.lalonde_dataset()\n",
+    "\n",
+    "lalonde.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Step 1: Building the model"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## IHDP"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Create a causal model from the data and given common causes\n",
+    "\n",
+    "common_causes = []\n",
+    "\n",
+    "for i in range(1, 26):\n",
+    "    common_causes += [\"x\"+str(i)]\n",
+    "\n",
+    "ihdp_model = CausalModel(\n",
+    "                data=data,\n",
+    "                treatment='treatment',\n",
+    "                outcome='y_factual',\n",
+    "                common_causes=common_causes\n",
+    "            )\n",
+    "ihdp_model.view_model(layout=\"dot\")\n",
+    "from IPython.display import Image, display\n",
+    "display(Image(filename=\"causal_model.png\"))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Lalonde"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "lalonde_model = CausalModel(\n",
+    "                data=lalonde,\n",
+    "                treatment='treat',\n",
+    "                outcome='re78',\n",
+    "                common_causes='nodegr+black+hisp+age+educ+married'.split('+')\n",
+    "            )\n",
+    "lalonde_model.view_model(layout=\"dot\")\n",
+    "from IPython.display import Image, display\n",
+    "display(Image(filename=\"causal_model.png\"))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Step 2: Identification"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## IHDP"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#Identify the causal effect for the ihdp dataset\n",
+    "ihdp_identified_estimand = ihdp_model.identify_effect(proceed_when_unidentifiable=True)\n",
+    "print(ihdp_identified_estimand)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Lalonde"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#Identify the causal effect for the lalonde dataset\n",
+    "lalonde_identified_estimand = lalonde_model.identify_effect(proceed_when_unidentifiable=True)\n",
+    "print(lalonde_identified_estimand)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Step 3: Estimation (using propensity score weighting)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## IHDP"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ihdp_estimate = ihdp_model.estimate_effect(\n",
+    "                    ihdp_identified_estimand,\n",
+    "                    method_name=\"backdoor.propensity_score_weighting\"\n",
+    "                )\n",
+    "\n",
+    "print(\"The Causal Estimate is \" + str(ihdp_estimate.value))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Lalonde"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "lalonde_estimate = lalonde_model.estimate_effect(\n",
+    "                        lalonde_identified_estimand,\n",
+    "                        method_name=\"backdoor.propensity_score_weighting\"\n",
+    "                    )\n",
+    "\n",
+    "print(\"The Causal Estimate is \" + str(lalonde_estimate.value))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Step 4:  Refutation"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## IHDP"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Add Random Common Cause"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ihdp_refute_random_common_cause = ihdp_model.refute_estimate(\n",
+    "                                        ihdp_identified_estimand,\n",
+    "                                        ihdp_estimate,\n",
+    "                                        method_name=\"random_common_cause\"\n",
+    "                                    )\n",
+    "\n",
+    "print(ihdp_refute_random_common_cause)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Replace Treatment with Placebo"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ihdp_refute_placebo_treatment = ihdp_model.refute_estimate(\n",
+    "                                    ihdp_identified_estimand,\n",
+    "                                    ihdp_estimate,\n",
+    "                                    method_name=\"placebo_treatment_refuter\",\n",
+    "                                    placebo_type=\"permute\"\n",
+    "                                )\n",
+    "\n",
+    "print(ihdp_refute_placebo_treatment)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Remove Random Subset of Data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ihdp_refute_random_subset = ihdp_model.refute_estimate(\n",
+    "                                    ihdp_identified_estimand,\n",
+    "                                    ihdp_estimate,\n",
+    "                                    method_name=\"data_subset_refuter\",\n",
+    "                                    subset_fraction=0.8\n",
+    "                            )\n",
+    "print(ihdp_refute_random_subset)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Lalonde"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Add Random Common Cause"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "lalonde_refute_random_common_cause = lalonde_model.refute_estimate(\n",
+    "                                            lalonde_identified_estimand,\n",
+    "                                            lalonde_estimate,\n",
+    "                                            method_name=\"random_common_cause\"\n",
+    "                                        )\n",
+    "\n",
+    "print(lalonde_refute_random_common_cause)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Replace Treatment with Placebo"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "lalonde_refute_placebo_treatment = lalonde_model.refute_estimate(\n",
+    "                                        lalonde_identified_estimand,\n",
+    "                                        lalonde_estimate,\n",
+    "                                        method_name=\"placebo_treatment_refuter\",\n",
+    "                                        placebo_type=\"permute\"\n",
+    "                                    )\n",
+    "\n",
+    "print(lalonde_refute_placebo_treatment)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Remove Random Subset of Data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "lalonde_refute_random_subset = lalonde_model.refute_estimate(\n",
+    "                                    lalonde_identified_estimand,\n",
+    "                                    lalonde_estimate,\n",
+    "                                    method_name=\"data_subset_refuter\",\n",
+    "                                    subset_fraction=0.9\n",
+    "                                )\n",
+    "\n",
+    "print(lalonde_refute_random_subset)"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.5"
+  },
+  "toc": {
+   "base_numbering": 1,
+   "nav_menu": {},
+   "number_sections": false,
+   "sideBar": true,
+   "skip_h1_title": true,
+   "title_cell": "Table of Contents",
+   "title_sidebar": "Contents",
+   "toc_cell": false,
+   "toc_position": {},
+   "toc_section_display": true,
+   "toc_window_display": false
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}

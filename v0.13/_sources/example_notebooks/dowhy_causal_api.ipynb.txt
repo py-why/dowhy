@@ -1,0 +1,196 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Demo for the DoWhy causal API\n",
+    "We show a simple example of adding a causal extension to any dataframe. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import dowhy.datasets\n",
+    "import dowhy.api\n",
+    "from dowhy.graph import build_graph_from_str\n",
+    "\n",
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "\n",
+    "from statsmodels.api import OLS"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data = dowhy.datasets.linear_dataset(beta=5,\n",
+    "        num_common_causes=1,\n",
+    "        num_instruments = 0,\n",
+    "        num_samples=1000,\n",
+    "        treatment_is_binary=True)\n",
+    "df = data['df']\n",
+    "df['y'] = df['y'] + np.random.normal(size=len(df)) # Adding noise to data. Without noise, the variance in Y|X, Z is zero, and mcmc fails.\n",
+    "nx_graph = build_graph_from_str(data[\"dot_graph\"])\n",
+    "\n",
+    "treatment= data[\"treatment_name\"][0]\n",
+    "outcome = data[\"outcome_name\"][0]\n",
+    "common_cause = data[\"common_causes_names\"][0]\n",
+    "df"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "# data['df'] is just a regular pandas.DataFrame\n",
+    "df.causal.do(x=treatment,\n",
+    "             variable_types={treatment: 'b', outcome: 'c', common_cause: 'c'},\n",
+    "             outcome=outcome,\n",
+    "             common_causes=[common_cause],\n",
+    "            ).groupby(treatment).mean().plot(y=outcome, kind='bar')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df.causal.do(x={treatment: 1}, \n",
+    "              variable_types={treatment:'b', outcome: 'c', common_cause: 'c'}, \n",
+    "              outcome=outcome,\n",
+    "              method='weighting', \n",
+    "              common_causes=[common_cause]\n",
+    "              ).groupby(treatment).mean().plot(y=outcome, kind='bar')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "cdf_1 = df.causal.do(x={treatment: 1}, \n",
+    "              variable_types={treatment: 'b', outcome: 'c', common_cause: 'c'}, \n",
+    "              outcome=outcome, \n",
+    "              graph=nx_graph\n",
+    "              )\n",
+    "\n",
+    "cdf_0 = df.causal.do(x={treatment: 0}, \n",
+    "              variable_types={treatment: 'b', outcome: 'c', common_cause: 'c'}, \n",
+    "              outcome=outcome, \n",
+    "              graph=nx_graph\n",
+    "              )\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "cdf_0"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "cdf_1"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Comparing the estimate to Linear Regression\n",
+    "First, estimating the effect using the causal data frame, and the 95% confidence interval."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "(cdf_1['y'] - cdf_0['y']).mean()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "1.96*(cdf_1['y'] - cdf_0['y']).std() / np.sqrt(len(df))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Comparing to the estimate from OLS."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "model = OLS(np.asarray(df[outcome]), np.asarray(df[[common_cause, treatment]], dtype=np.float64))\n",
+    "result = model.fit()\n",
+    "result.summary()"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.10"
+  },
+  "toc": {
+   "base_numbering": 1,
+   "nav_menu": {},
+   "number_sections": false,
+   "sideBar": true,
+   "skip_h1_title": true,
+   "title_cell": "Table of Contents",
+   "title_sidebar": "Contents",
+   "toc_cell": false,
+   "toc_position": {},
+   "toc_section_display": true,
+   "toc_window_display": false
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}

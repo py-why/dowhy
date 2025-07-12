@@ -1,0 +1,306 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Effect inference with timeseries data\n",
+    "\n",
+    "In this notebook, we will look at an example of causal effect inference from timeseries data. We will use DoWhy's functionality to add temporal dependencies to a causal graph and estimate causal effect based on the augmented graph.  "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import networkx as nx\n",
+    "import pandas as pd\n",
+    "from dowhy.utils.timeseries import create_graph_from_csv,create_graph_from_user\n",
+    "from dowhy.utils.plotting import plot, pretty_print_graph"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Loading timeseries data and causal graph"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dataset_path=\"../datasets/temporal_dataset.csv\"\n",
+    "\n",
+    "dataframe=pd.read_csv(dataset_path)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "In temporal causal inference, accurately estimating causal effects often requires accounting for time lags between nodes in a graph. For instance, if $node_1$ influences $node_2$ with a time lag of 5 timestamps, we represent this dependency as $node_1^{t-5}$ -> $node_2^{t}$.\n",
+    "\n",
+    "We can provide the causal graph as a networkx DAG or as a dot file. The edge attributes should mention the exact `time_lag` that is associated with each edge (if any)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from dowhy.utils.timeseries import create_graph_from_dot_format\n",
+    "\n",
+    "file_path = \"../datasets/temporal_graph.dot\"\n",
+    "\n",
+    "graph = create_graph_from_dot_format(file_path)\n",
+    "plot(graph)\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We can also create a csv file with the edges in the temporal graph. The columns in the csv are node1, node2, time_lag which represents an directed edge node1 -> node2 with the time lag of time_lag. Let us consider the following graph as the input:\n",
+    "\n",
+    "| node1  | node2  | time_lag |\n",
+    "|--------|--------|----------|\n",
+    "| V1     | V2     | 3        |\n",
+    "| V2     | V3     | 4        |\n",
+    "| V5     | V6     | 1        |\n",
+    "| V4     | V7     | 4        |\n",
+    "| V4     | V5     | 2        |\n",
+    "| V7     | V6     | 3        |\n",
+    "| V7     | V6     | 5        |"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Input a csv file with the edges in the graph with the columns: node_1,node_2,time_lag\n",
+    "file_path = \"../datasets/temporal_graph.csv\"\n",
+    "\n",
+    "# Create the graph from the CSV file\n",
+    "graph = create_graph_from_csv(file_path)\n",
+    "plot(graph)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Dataset Shifting and Filtering\n",
+    "\n",
+    "To prepare the dataset for temporal causal inference, we need to shift the columns by the given time lag.\n",
+    "\n",
+    "For example, in the causal graph above, $node_1^{t-5}$ -> $node_2^{t}$ with a lag of 5. When considering $node_2$ as the target node, the data for $node_1$ should be shifted down by 5 timestamps. This adjustment ensures that the edge $node_1$ -> $node_2$ accurately represents the lagged dependency. Shifting the data in this manner creates additional columns and allows downstream estimators to acccess the correct values in the same row of a dataframe. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from dowhy.timeseries.temporal_shift import shift_columns_by_lag_using_unrolled_graph, add_lagged_edges"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# the outcome node for which effect estimation has to be done, node:6\n",
+    "target_node = 'V6'\n",
+    "unrolled_graph = add_lagged_edges(graph, target_node)\n",
+    "plot(unrolled_graph)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "time_shifted_df = shift_columns_by_lag_using_unrolled_graph(dataframe, unrolled_graph)\n",
+    "time_shifted_df.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Causal Effect Estimation\n",
+    "\n",
+    "Once you have the new dataframe, causal effect estimation can be performed on the target node with respect to the action nodes."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "target_node = 'V6_0'\n",
+    "# include all the treatments\n",
+    "treatment_columns = list(time_shifted_df.columns)\n",
+    "treatment_columns.remove(target_node)\n",
+    "treatment_columns"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# perform causal effect estimation on this new dataset\n",
+    "import dowhy\n",
+    "from dowhy import CausalModel\n",
+    "\n",
+    "model = CausalModel(\n",
+    "    data=time_shifted_df,\n",
+    "    treatment='V5_-1',\n",
+    "    outcome=target_node,\n",
+    "    graph = unrolled_graph\n",
+    ")\n",
+    "\n",
+    "identified_estimand = model.identify_effect()\n",
+    "\n",
+    "estimate = model.estimate_effect(identified_estimand,\n",
+    "                                 method_name=\"backdoor.linear_regression\",\n",
+    "                                 test_significance=True)\n",
+    "\n",
+    "\n",
+    "print(estimate)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Importing temporal causal graph from Tigramite library\n",
+    "\n",
+    "Tigramite is a popular temporal causal discovery library. In this section, we highlight how the causal graph can be obtained by applying PCMCI+ algorithm from tigramite and imported into DoWhy."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "!pip install tigramite"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import tigramite\n",
+    "import tigramite.data_processing as pp\n",
+    "import matplotlib.pyplot as plt\n",
+    "import pandas as pd\n",
+    "\n",
+    "dataframe = dataframe.astype(float)\n",
+    "var_names = dataframe.columns\n",
+    "# convert the dataframe values to float\n",
+    "dataframe = pp.DataFrame(dataframe.values, var_names=var_names)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from tigramite import plotting as tp\n",
+    "tp.plot_timeseries(dataframe, figsize=(15, 5)); plt.show()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from tigramite.pcmci import PCMCI\n",
+    "from tigramite.independence_tests.parcorr import ParCorr\n",
+    "import numpy as np\n",
+    "parcorr = ParCorr(significance='analytic')\n",
+    "pcmci = PCMCI(\n",
+    "    dataframe=dataframe, \n",
+    "    cond_ind_test=parcorr,\n",
+    "    verbosity=1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "correlations = pcmci.run_bivci(tau_max=3, val_only=True)['val_matrix']\n",
+    "matrix_lags = np.argmax(np.abs(correlations), axis=2)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "tau_max = 3\n",
+    "pc_alpha = None\n",
+    "pcmci.verbosity = 2\n",
+    "\n",
+    "results = pcmci.run_pcmciplus(tau_min=0, tau_max=tau_max, pc_alpha=pc_alpha)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from dowhy.utils.timeseries import create_graph_from_networkx_array\n",
+    "\n",
+    "graph = create_graph_from_networkx_array(results['graph'], var_names)\n",
+    "\n",
+    "plot(graph)"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.10.14"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}
