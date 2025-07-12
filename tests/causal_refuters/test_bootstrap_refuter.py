@@ -1,3 +1,5 @@
+import sys
+
 from pytest import mark
 
 from .base import SimpleRefuter
@@ -26,6 +28,9 @@ class TestDataSubsetRefuter(object):
         ],
     )
     def test_refutation_bootstrap_refuter_binary(self, error_tolerance, estimator_method, num_samples):
+        # generalized adjustment identification requires python >=3.10
+        if estimator_method.startswith("general_adjustment") and sys.version_info < (3, 10):
+            return
         refuter_tester = SimpleRefuter(error_tolerance, estimator_method, "bootstrap_refuter")
         refuter_tester.binary_treatment_testsuite(tests_to_run="atleast-one-common-cause", num_samples=num_samples)
 
@@ -70,6 +75,9 @@ class TestDataSubsetRefuter(object):
     def test_refutation_bootstrap_refuter_binary_integer_argument(
         self, error_tolerance, estimator_method, num_common_causes, required_variables, num_samples
     ):
+        # generalized adjustment identification requires python >=3.10
+        if estimator_method.startswith("general_adjustment") and sys.version_info < (3, 10):
+            return
         refuter_tester = SimpleRefuter(
             error_tolerance, estimator_method, "bootstrap_refuter", required_variables=required_variables
         )
@@ -87,6 +95,9 @@ class TestDataSubsetRefuter(object):
     def test_refutation_bootstrap_refuter_binary_list_argument(
         self, error_tolerance, estimator_method, num_common_causes, required_variables, num_samples
     ):
+        # generalized adjustment identification requires python >=3.10
+        if estimator_method.startswith("general_adjustment") and sys.version_info < (3, 10):
+            return
         refuter_tester = SimpleRefuter(
             error_tolerance, estimator_method, "bootstrap_refuter", required_variables=required_variables
         )
@@ -118,6 +129,9 @@ class TestDataSubsetRefuter(object):
     def test_refutation_bootstrap_refuter_binary_list_negative_argument(
         self, error_tolerance, estimator_method, num_common_causes, required_variables, num_samples
     ):
+        # generalized adjustment identification requires python >=3.10
+        if estimator_method.startswith("general_adjustment") and sys.version_info < (3, 10):
+            return
         refuter_tester = SimpleRefuter(
             error_tolerance, estimator_method, "bootstrap_refuter", required_variables=required_variables
         )

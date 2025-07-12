@@ -1,6 +1,5 @@
 [tool.poetry]
 name = "dowhy"
-
 #
 # 0.0.0 is standard placeholder for poetry-dynamic-versioning
 # any changes to this should not be checked in
@@ -37,9 +36,7 @@ priority = "explicit"
 
 
 [build-system]
-# Cython<3 currently required due to build fails of certain dependencies like econml
-# see: https://github.com/py-why/EconML/blob/e0271fdde8d94a70a9f67a07e1d0a5a8e964d3f5/pyproject.toml#L94
-requires = ["poetry-core>=1.0.0", "cython<3"]
+requires = ["poetry-core>=1.0.0", "cython>=3"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry-dynamic-versioning]
@@ -57,23 +54,23 @@ files = ["dowhy/__init__.py"]
 #
 [tool.poetry.dependencies]
 python = ">=3.8,<3.13"
-cython = "<3.0"
+cython = ">=3.0"
 scipy = [
-    {version = ">=1.7", python = "<3.9"},
-    {version = ">=1.10", python = ">=3.9"}
+    { version = ">=1.7,<1.14", python = "<3.9" },
+    { version = "<=1.15.3", python = ">=3.9,<3.13" },
 ]
-statsmodels = ">=0.13.5"
+statsmodels = ">=0.14"
 numpy = [
-    {version = "<2.0", python = "<3.9"},
-    {version = ">1.0", python = ">=3.9"}
+    { version = "<2.0", python = "<3.9" },
+    { version = ">1.0", python = ">=3.9" }
 ]
 pandas = [
-    {version = "<2.0", python = "<3.9"},
-    {version = ">1.0", python = ">=3.9"}
+    { version = "<2.0", python = "<3.9" },
+    { version = ">1.0", python = ">=3.9" }
 ]
 networkx = [
-    {version = ">=3.3", python = ">=3.10"},
-    {version = ">=2.8.5", python = "<3.10"}
+    { version = ">=3.3", python = ">=3.10" },
+    { version = ">=2.8.5", python = "<3.10" }
 ]
 sympy = ">=1.10.1"
 scikit-learn = ">1.0"
@@ -84,8 +81,8 @@ econml = ">=0.15.1"
 tqdm = ">=4.64.0"
 causal-learn = ">=0.1.3.0"
 numba = [
-    {version = "<0.59", python = "<3.9"},
-    {version = ">=0.59", python = ">=3.9"}
+    { version = "<0.59", python = "<3.9" },
+    { version = ">=0.59", python = ">=3.9" }
 ]
 
 #Plotting Extra
@@ -115,8 +112,8 @@ mypy = ">=1.7.1"
 torch = "==2.4.1"
 torchvision = ">=0.13.1"
 pytorch-lightning = [
-    {version = "<2.0", python = ">=3.8,<3.11"},
-    {version = ">=2.0", python=">=3.11"}
+    { version = "<2.0", python = ">=3.8,<3.11" },
+    { version = ">=2.0", python = ">=3.11" }
 ]
 
 [tool.poetry.group.docs]
@@ -136,7 +133,7 @@ pydata-sphinx-theme = ">=0.9.0"
 ipykernel = ">=6.15.1"
 sphinx-copybutton = "0.5.0"
 seaborn = ">=0.12.1"
-cdt =">=0.6.0"
+cdt = ">=0.6.0"
 
 #
 # Versions defined for security reasons
@@ -163,7 +160,7 @@ _isort_check = 'isort --check .'
 
 # testing tasks
 test = "pytest -v -m 'not advanced and not econml' --durations=0 --durations-min=60.0"
-test_no_notebooks= "pytest -v -m 'not advanced and not econml and not notebook' --durations=0 --durations-min=60.0"
+test_no_notebooks = "pytest -v -m 'not advanced and not econml and not notebook' --durations=0 --durations-min=60.0"
 test_durations = "poetry run poe test --store-durations"
 test_econml = "pytest -v -m 'econml' --durations=0 --durations-min=60.0"
 test_advanced = "pytest -v"
@@ -187,7 +184,7 @@ ignore_fail = "return_non_zero"
 
 [tool.black]
 line-length = 120
-target-version = ['py38']
+target-version = ['py38', 'py39']
 include = '\.pyi?$'
 extend-exclude = '''
 (
