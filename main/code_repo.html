@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 
 
-<html lang="en" data-content_root="" >
+<html lang="en" data-content_root="./" >
 
   <head>
     <meta charset="utf-8" />
@@ -23,34 +23,37 @@
   
   <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
-    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-
-  
-  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=949a1ff5" />
-    <link rel="stylesheet" type="text/css" href="_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
   
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
-  <script src="_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="_static/jquery.js?v=5d32c60e"></script>
     <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=b3ba4146"></script>
-    <script src="_static/doctools.js?v=888ff710"></script>
-    <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="_static/copybutton.js?v=0c6e27e1"></script>
     <script src="_static/design-tabs.js?v=36754332"></script>
@@ -62,6 +65,7 @@
     <link rel="prev" title="dowhy.utils package" href="dowhy.utils.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="main" />
   </head>
   
   
@@ -69,32 +73,16 @@
 
   
   
-  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
   
   <div id="pst-scroll-pixel-helper"></div>
-
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
-    <i class="fa-solid fa-arrow-up"></i>
-    Back to top
-  </button>
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__primary"
-          id="__primary"/>
-  <label class="overlay overlay-primary" for="__primary"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__secondary"
-          id="__secondary"/>
-  <label class="overlay overlay-secondary" for="__secondary"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="search.html"
       method="get">
@@ -102,7 +90,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -110,20 +97,27 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
   
-    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <label class="sidebar-toggle primary-toggle" for="__primary">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
-  </label>
+  </button>
   
   
   <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
 
+  
+    
   
 
 <a class="navbar-brand logo" href="index.html">
@@ -138,7 +132,7 @@
     
     
     <img src="_static/dowhy-logo-small.png" class="logo__image only-light" alt="DoWhy  documentation - Home"/>
-    <script>document.write(`<img src="_static/dowhy-logo-small.png" class="logo__image only-dark" alt="DoWhy  documentation - Home"/>`);</script>
+    <img src="_static/dowhy-logo-small.png" class="logo__image only-dark pst-js-only" alt="DoWhy  documentation - Home"/>
   
   
 </a></div>
@@ -150,68 +144,64 @@
     <div class="me-auto navbar-header-items__center">
       
         <div class="navbar-item">
-<nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="getting_started/index.html">
-                        Getting Started
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="getting_started/index.html">
+    Getting Started
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="user_guide/index.html">
-                        User Guide
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="example_notebooks/nb_index.html">
-                        Examples
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="user_guide/index.html">
+    User Guide
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="cite.html">
-                        Citing this package
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="contributing.html">
-                        Contributing
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="example_notebooks/nb_index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="contributing.html">
+    Contributing
+  </a>
+</li>
+
             <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
                     More
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="dowhy.html">
-                        dowhy package
-                      </a>
-                    </li>
-                
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dowhy.html">
+    dowhy package
+  </a>
+</li>
 
-                    <li class="nav-item current active">
-                      <a class="nav-link dropdown-item nav-internal" href="#">
-                        Release notes
-                      </a>
-                    </li>
-                
+
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="#">
+    Release notes
+  </a>
+</li>
+
                 </ul>
             </li>
             
@@ -226,15 +216,11 @@
         <div class="navbar-item navbar-persistent--container">
           
 
- <script>
- document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
         </div>
       
       
@@ -277,31 +263,31 @@
   
     <div class="navbar-persistent--mobile">
 
- <script>
- document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
     </div>
   
 
   
-    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
       <span class="fa-solid fa-outdent"></span>
-    </label>
+    </button>
   
 </div>
 
-    </nav>
+    </header>
   
+
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
       
-      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -310,74 +296,63 @@
     
       <div class="sidebar-header-items__center">
         
-          <div class="navbar-item">
-<nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+          
+          
+            <div class="navbar-item">
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="getting_started/index.html">
-                        Getting Started
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="getting_started/index.html">
+    Getting Started
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="user_guide/index.html">
-                        User Guide
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="example_notebooks/nb_index.html">
-                        Examples
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="user_guide/index.html">
+    User Guide
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="cite.html">
-                        Citing this package
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="contributing.html">
-                        Contributing
-                      </a>
-                    </li>
-                
-            <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links-2">
-                    More
-                </button>
-                <ul id="pst-nav-more-links-2" class="dropdown-menu">
-                    
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="dowhy.html">
-                        dowhy package
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="example_notebooks/nb_index.html">
+    Examples
+  </a>
+</li>
 
-                    <li class="nav-item current active">
-                      <a class="nav-link dropdown-item nav-internal" href="#">
-                        Release notes
-                      </a>
-                    </li>
-                
-                </ul>
-            </li>
-            
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="contributing.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dowhy.html">
+    dowhy package
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#">
+    Release notes
+  </a>
+</li>
+
   </ul>
 </nav></div>
+          
         
       </div>
     
@@ -421,31 +396,43 @@
     
   </div>
   
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
       
-      <main id="main-content" class="bd-main">
+      <main id="main-content" class="bd-main" role="main">
         
         
           <div class="bd-content">
             <div class="bd-article-container">
               
-              <div class="bd-header-article">
+              <div class="bd-header-article d-print-none">
 <div class="header-article-items header-article__inner">
   
     <div class="header-article-items__start">
       
         <div class="header-article-item">
 
-
-
-<nav aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
@@ -453,7 +440,7 @@
         <i class="fa-solid fa-home"></i>
       </a>
     </li>
-    <li class="breadcrumb-item active" aria-current="page">Release notes</li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Release notes</span></li>
   </ul>
 </nav>
 </div>
@@ -468,14 +455,14 @@
               
                 
 <div id="searchbox"></div>
-                <article class="bd-article" role="main">
+                <article class="bd-article">
                   
   <section id="release-notes">
-<h1>Release notes<a class="headerlink" href="#release-notes" title="Permalink to this heading">#</a></h1>
+<h1>Release notes<a class="headerlink" href="#release-notes" title="Link to this heading">#</a></h1>
 <p>DoWhy is hosted on GitHub.</p>
 <p>You can browse the code in a html-friendly format <a class="reference external" href="https://github.com/Microsoft/dowhy">here</a>.</p>
 <section id="v0-9-new-functional-api-preview-faster-refutations-and-better-independence-tests-for-gcms">
-<h2>v0.9: New functional API (preview), faster refutations, and better independence tests for GCMs<a class="headerlink" href="#v0-9-new-functional-api-preview-faster-refutations-and-better-independence-tests-for-gcms" title="Permalink to this heading">#</a></h2>
+<h2>v0.9: New functional API (preview), faster refutations, and better independence tests for GCMs<a class="headerlink" href="#v0-9-new-functional-api-preview-faster-refutations-and-better-independence-tests-for-gcms" title="Link to this heading">#</a></h2>
 <p>December 5 2022</p>
 <ul class="simple">
 <li><p>Preview for the new functional API (see <a class="reference external" href="https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/dowhy_functional_api.ipynb">notebook</a>). The new API (in experimental stage) allows for a modular use of the different functionalities and includes separate fit and estimate methods for causal estimators. Please leave your feedback here. The old DoWhy API based on CausalModel should work as before.  (&#64;andresmor-ms)</p></li>
@@ -501,7 +488,7 @@
 </ul>
 </section>
 <section id="v0-8-gcm-support-and-partial-r2-based-sensitivity-analysis">
-<h2>v0.8: GCM support and partial R2-based sensitivity analysis<a class="headerlink" href="#v0-8-gcm-support-and-partial-r2-based-sensitivity-analysis" title="Permalink to this heading">#</a></h2>
+<h2>v0.8: GCM support and partial R2-based sensitivity analysis<a class="headerlink" href="#v0-8-gcm-support-and-partial-r2-based-sensitivity-analysis" title="Link to this heading">#</a></h2>
 <p>July 18 2022</p>
 <p>A big thanks to &#64;petergtz, &#64;kailashbuki, and &#64;bloebp for the GCM package and &#64;anusha0409 for an implementation of partial R2 sensitivity analysis for linear models.</p>
 <ul class="simple">
@@ -513,7 +500,7 @@
 <p><strong>Contributors</strong>: &#64;amit-sharma, &#64;anusha0409, &#64;bloebp, &#64;EgorKraevTransferwise, &#64;elikling, &#64;kailashbuki, &#64;itsoum, &#64;MichaelMarien, &#64;petergtz, &#64;ryanrussell</p>
 </section>
 <section id="v0-7-1-added-graph-refuter-support-for-dagitty-graphs-and-external-estimators">
-<h2>v0.7.1: Added Graph refuter. Support for dagitty graphs and external estimators<a class="headerlink" href="#v0-7-1-added-graph-refuter-support-for-dagitty-graphs-and-external-estimators" title="Permalink to this heading">#</a></h2>
+<h2>v0.7.1: Added Graph refuter. Support for dagitty graphs and external estimators<a class="headerlink" href="#v0-7-1-added-graph-refuter-support-for-dagitty-graphs-and-external-estimators" title="Link to this heading">#</a></h2>
 <ul class="simple">
 <li><p>Graph refuter with conditional independence tests to check whether data conforms to the assumed causal graph</p></li>
 <li><p>Better docs for estimators by adding the method-specific parameters directly in its own init method</p></li>
@@ -525,7 +512,7 @@
 <p>Thank you &#64;EgorKraevTransferwise, &#64;ae-foster, &#64;anusha0409 for your contributions!</p>
 </section>
 <section id="v0-7-better-refuters-for-unobserved-confounders-and-placebo-treatment">
-<h2>v0.7: Better Refuters for unobserved confounders and placebo treatment<a class="headerlink" href="#v0-7-better-refuters-for-unobserved-confounders-and-placebo-treatment" title="Permalink to this heading">#</a></h2>
+<h2>v0.7: Better Refuters for unobserved confounders and placebo treatment<a class="headerlink" href="#v0-7-better-refuters-for-unobserved-confounders-and-placebo-treatment" title="Link to this heading">#</a></h2>
 <ul class="simple">
 <li><p><strong>[Major]</strong> Faster backdoor identification with support for minimal adjustment, maximal adjustment
 or exhaustive search. More test coverage for identification.</p></li>
@@ -547,7 +534,7 @@ bootstrap method.</p></li>
 <p>Big thanks to &#64;AndrewC19, &#64;ha2trinh, &#64;siddhanthaldar, and &#64;vojavocni</p>
 </section>
 <section id="v0-6-better-refuters-for-unobserved-confounders-and-placebo-treatment">
-<h2>v0.6: Better Refuters for unobserved confounders and placebo treatment<a class="headerlink" href="#v0-6-better-refuters-for-unobserved-confounders-and-placebo-treatment" title="Permalink to this heading">#</a></h2>
+<h2>v0.6: Better Refuters for unobserved confounders and placebo treatment<a class="headerlink" href="#v0-6-better-refuters-for-unobserved-confounders-and-placebo-treatment" title="Link to this heading">#</a></h2>
 <ul class="simple">
 <li><p><strong>[Major]</strong> Placebo refuter also works for IV methods</p></li>
 <li><p><strong>[Major]</strong> Moved matplotlib to an optional dependency. Can be installed using <cite>pip install dowhy[plotting]</cite></p></li>
@@ -560,7 +547,7 @@ bootstrap method.</p></li>
 <p>A big thanks to &#64;arshiaarya, &#64;n8sty, &#64;moprescu and &#64;vojavocni</p>
 </section>
 <section id="v0-5-beta-enhanced-documentation-and-support-for-causal-mediation">
-<h2>v0.5-beta: Enhanced documentation and support for causal mediation<a class="headerlink" href="#v0-5-beta-enhanced-documentation-and-support-for-causal-mediation" title="Permalink to this heading">#</a></h2>
+<h2>v0.5-beta: Enhanced documentation and support for causal mediation<a class="headerlink" href="#v0-5-beta-enhanced-documentation-and-support-for-causal-mediation" title="Link to this heading">#</a></h2>
 <p><strong>Installation</strong></p>
 <ul class="simple">
 <li><p>DoWhy can be installed on Conda now!</p></li>
@@ -592,7 +579,7 @@ interpreter by &#64;ErikHambardzumyan visualizes how the distribution of confoun
 <p>A big thanks to &#64;Tanmay-Kulkarni101, &#64;ErikHambardzumyan, &#64;Sid-darthvader for their contributions.</p>
 </section>
 <section id="v0-4-beta-powerful-refutations-and-better-support-for-heterogeneous-treatment-effects">
-<h2>v0.4-beta: Powerful refutations and better support for heterogeneous treatment effects<a class="headerlink" href="#v0-4-beta-powerful-refutations-and-better-support-for-heterogeneous-treatment-effects" title="Permalink to this heading">#</a></h2>
+<h2>v0.4-beta: Powerful refutations and better support for heterogeneous treatment effects<a class="headerlink" href="#v0-4-beta-powerful-refutations-and-better-support-for-heterogeneous-treatment-effects" title="Link to this heading">#</a></h2>
 <ul class="simple">
 <li><dl class="simple">
 <dt>DummyOutcomeRefuter now includes machine learning functions to increase power of the refutation.</dt><dd><ul>
@@ -626,7 +613,7 @@ interpreter by &#64;ErikHambardzumyan visualizes how the distribution of confoun
 <p>Thanks to &#64;Tanmay-Kulkarni101 and &#64;Arshiaarya for their contributions!</p>
 </section>
 <section id="v0-2-alpha-cate-estimation-and-integration-with-econml">
-<h2>v0.2-alpha: CATE estimation and integration with EconML<a class="headerlink" href="#v0-2-alpha-cate-estimation-and-integration-with-econml" title="Permalink to this heading">#</a></h2>
+<h2>v0.2-alpha: CATE estimation and integration with EconML<a class="headerlink" href="#v0-2-alpha-cate-estimation-and-integration-with-econml" title="Link to this heading">#</a></h2>
 <p>This release includes many major updates:</p>
 <ul class="simple">
 <li><p>(BREAKING CHANGE) The CausalModel import is now simpler: “from dowhy import CausalModel”</p></li>
@@ -639,7 +626,7 @@ interpreter by &#64;ErikHambardzumyan visualizes how the distribution of confoun
 <p>Includes contributions from &#64;j-chou, &#64;ktmud, &#64;jrfiedler, &#64;shounak112358, &#64;Lnk2past. Thank you all!</p>
 </section>
 <section id="v0-1-1-alpha-first-release">
-<h2>v0.1.1-alpha: First release<a class="headerlink" href="#v0-1-1-alpha-first-release" title="Permalink to this heading">#</a></h2>
+<h2>v0.1.1-alpha: First release<a class="headerlink" href="#v0-1-1-alpha-first-release" title="Link to this heading">#</a></h2>
 <p>This is the first release of the library.</p>
 </section>
 </section>
@@ -651,7 +638,7 @@ interpreter by &#64;ErikHambardzumyan visualizes how the distribution of confoun
               
               
               
-                <footer class="prev-next-footer">
+                <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
     <a class="left-prev"
@@ -670,14 +657,17 @@ interpreter by &#64;ErikHambardzumyan visualizes how the distribution of confoun
             
             
               
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
 
   <div class="sidebar-secondary-item">
-
-  <div class="page-toc tocsection onthispage">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> On this page
   </div>
-  <nav class="bd-toc-nav page-toc">
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v0-9-new-functional-api-preview-faster-refutations-and-better-independence-tests-for-gcms">v0.9: New functional API (preview), faster refutations, and better independence tests for GCMs</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v0-8-gcm-support-and-partial-r2-based-sensitivity-analysis">v0.8: GCM support and partial R2-based sensitivity analysis</a></li>
@@ -692,13 +682,13 @@ interpreter by &#64;ErikHambardzumyan visualizes how the distribution of confoun
   </nav></div>
 
   <div class="sidebar-secondary-item">
-
-  <div class="tocsection sourcelink">
-    <a href="_sources/code_repo.rst.txt">
-      <i class="fa-solid fa-file-lines"></i> Show Source
-    </a>
-  </div>
-</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/code_repo.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
 
 </div></div>
               
@@ -713,8 +703,8 @@ interpreter by &#64;ErikHambardzumyan visualizes how the distribution of confoun
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
-<script src="_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -734,7 +724,7 @@ interpreter by &#64;ErikHambardzumyan visualizes how the distribution of confoun
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
     <br/>
   </p>
 </div>
@@ -747,7 +737,8 @@ interpreter by &#64;ErikHambardzumyan visualizes how the distribution of confoun
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.4.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 
 
-<html lang="en" data-content_root="" >
+<html lang="en" data-content_root="../" >
 
   <head>
     <meta charset="utf-8" />
@@ -23,35 +23,38 @@
   
   <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
-    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-
-  
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=949a1ff5" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
   
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
-  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../_static/jquery.js?v=5d32c60e"></script>
     <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=b3ba4146"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
-    <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=0c6e27e1"></script>
     <script src="../_static/design-tabs.js?v=36754332"></script>
@@ -66,6 +69,7 @@
     <link rel="prev" title="Impact of 401(k) eligibility on net financial assets" href="gcm_401k_analysis.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="main" />
   </head>
   
   
@@ -73,32 +77,16 @@
 
   
   
-  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
   
   <div id="pst-scroll-pixel-helper"></div>
-
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
-    <i class="fa-solid fa-arrow-up"></i>
-    Back to top
-  </button>
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__primary"
-          id="__primary"/>
-  <label class="overlay overlay-primary" for="__primary"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__secondary"
-          id="__secondary"/>
-  <label class="overlay overlay-secondary" for="__secondary"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="../search.html"
       method="get">
@@ -106,7 +94,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -114,20 +101,27 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
   
-    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <label class="sidebar-toggle primary-toggle" for="__primary">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
-  </label>
+  </button>
   
   
   <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
 
+  
+    
   
 
 <a class="navbar-brand logo" href="../index.html">
@@ -142,7 +136,7 @@
     
     
     <img src="../_static/dowhy-logo-small.png" class="logo__image only-light" alt="DoWhy  documentation - Home"/>
-    <script>document.write(`<img src="../_static/dowhy-logo-small.png" class="logo__image only-dark" alt="DoWhy  documentation - Home"/>`);</script>
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-dark pst-js-only" alt="DoWhy  documentation - Home"/>
   
   
 </a></div>
@@ -154,68 +148,64 @@
     <div class="me-auto navbar-header-items__center">
       
         <div class="navbar-item">
-<nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../getting_started/index.html">
-                        Getting Started
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../user_guide/index.html">
-                        User Guide
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="nb_index.html">
-                        Examples
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../cite.html">
-                        Citing this package
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../contributing.html">
-                        Contributing
-                      </a>
-                    </li>
-                
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="nb_index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing.html">
+    Contributing
+  </a>
+</li>
+
             <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
                     More
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
-                        dowhy package
-                      </a>
-                    </li>
-                
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
+    dowhy package
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
-                        Release notes
-                      </a>
-                    </li>
-                
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
+    Release notes
+  </a>
+</li>
+
                 </ul>
             </li>
             
@@ -230,15 +220,11 @@
         <div class="navbar-item navbar-persistent--container">
           
 
- <script>
- document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
         </div>
       
       
@@ -281,31 +267,31 @@
   
     <div class="navbar-persistent--mobile">
 
- <script>
- document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
     </div>
   
 
   
-    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
       <span class="fa-solid fa-outdent"></span>
-    </label>
+    </button>
   
 </div>
 
-    </nav>
+    </header>
   
+
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
       
-      <div class="bd-sidebar-primary bd-sidebar">
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -314,74 +300,63 @@
     
       <div class="sidebar-header-items__center">
         
-          <div class="navbar-item">
-<nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+          
+          
+            <div class="navbar-item">
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../getting_started/index.html">
-                        Getting Started
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../user_guide/index.html">
-                        User Guide
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="nb_index.html">
-                        Examples
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../cite.html">
-                        Citing this package
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../contributing.html">
-                        Contributing
-                      </a>
-                    </li>
-                
-            <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links-2">
-                    More
-                </button>
-                <ul id="pst-nav-more-links-2" class="dropdown-menu">
-                    
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
-                        dowhy package
-                      </a>
-                    </li>
-                
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="nb_index.html">
+    Examples
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
-                        Release notes
-                      </a>
-                    </li>
-                
-                </ul>
-            </li>
-            
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../dowhy.html">
+    dowhy package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../code_repo.html">
+    Release notes
+  </a>
+</li>
+
   </ul>
 </nav></div>
+          
         
       </div>
     
@@ -521,29 +496,32 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
       
-      <main id="main-content" class="bd-main">
+      <main id="main-content" class="bd-main" role="main">
         
         
           <div class="bd-content">
             <div class="bd-article-container">
               
-              <div class="bd-header-article">
+              <div class="bd-header-article d-print-none">
 <div class="header-article-items header-article__inner">
   
     <div class="header-article-items__start">
       
         <div class="header-article-item">
 
-
-
-<nav aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
@@ -554,7 +532,7 @@
     
     <li class="breadcrumb-item"><a href="nb_index.html" class="nav-link">Example notebooks</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">Finding...</li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Finding Root Causes of Changes in a Supply Chain</span></li>
   </ul>
 </nav>
 </div>
@@ -569,15 +547,15 @@
               
                 
 <div id="searchbox"></div>
-                <article class="bd-article" role="main">
+                <article class="bd-article">
                   
   <section id="Finding-Root-Causes-of-Changes-in-a-Supply-Chain">
-<h1>Finding Root Causes of Changes in a Supply Chain<a class="headerlink" href="#Finding-Root-Causes-of-Changes-in-a-Supply-Chain" title="Permalink to this heading">#</a></h1>
+<h1>Finding Root Causes of Changes in a Supply Chain<a class="headerlink" href="#Finding-Root-Causes-of-Changes-in-a-Supply-Chain" title="Link to this heading">#</a></h1>
 <p>In a supply chain, the number of units of each product in the inventory that is available for shipment is crucial to fulfill customers’ demand faster. For this reason, retailers continuously buy products anticipating customers’ demand in the future.</p>
 <p>Suppose that each week a retailer submits purchase orders (POs) to vendors taking into account future demands for products and capacity constraints to consider for demands. The vendors will then confirm whether they can fulfill some or all of the retailer’s purchase orders. Once confirmed by the vendors and agreed by the retailer, products are then sent to the retailer. All of the confirmed POs, however, may not arrive at once.</p>
-<p><img alt="c388a2b523e6472187a04365d8f31915" class="no-scaled-link" src="../_images/supply-chain.png" style="width: 800px;" /></p>
+<p><img alt="6119cff61bbc4fa79a229296aff1f718" class="no-scaled-link" src="../_images/supply-chain.png" style="width: 800px;" /></p>
 <section id="Week-over-week-changes">
-<h2>Week-over-week changes<a class="headerlink" href="#Week-over-week-changes" title="Permalink to this heading">#</a></h2>
+<h2>Week-over-week changes<a class="headerlink" href="#Week-over-week-changes" title="Link to this heading">#</a></h2>
 <p>For this case study, we consider synthetic data inspired from a real-world use case in supply chain. Let us look at data over two weeks, <em>w1</em> and <em>w2</em> in particular.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -779,9 +757,9 @@
 <p>The average value of <em>received</em> quantity has increased from week <em>w1</em> to week <em>w2</em>. Why?</p>
 </section>
 <section id="Why-did-the-average-value-of-received-quantity-change-week-over-week?">
-<h2>Why did the average value of <code class="docutils literal notranslate"><span class="pre">received</span></code> quantity change week-over-week?<a class="headerlink" href="#Why-did-the-average-value-of-received-quantity-change-week-over-week?" title="Permalink to this heading">#</a></h2>
+<h2>Why did the average value of <code class="docutils literal notranslate"><span class="pre">received</span></code> quantity change week-over-week?<a class="headerlink" href="#Why-did-the-average-value-of-received-quantity-change-week-over-week?" title="Link to this heading">#</a></h2>
 <section id="Ad-hoc-attribution-analysis">
-<h3>Ad-hoc attribution analysis<a class="headerlink" href="#Ad-hoc-attribution-analysis" title="Permalink to this heading">#</a></h3>
+<h3>Ad-hoc attribution analysis<a class="headerlink" href="#Ad-hoc-attribution-analysis" title="Link to this heading">#</a></h3>
 <p>To answer the question, one option is to look at the average value of other variables week-over-week, and see if there are any associations.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
@@ -802,11 +780,11 @@
 important factors. For a rather systematic answer, we turn to attribution analysis based on causality.</p>
 </section>
 <section id="Causal-Attribution-Analysis">
-<h3>Causal Attribution Analysis<a class="headerlink" href="#Causal-Attribution-Analysis" title="Permalink to this heading">#</a></h3>
+<h3>Causal Attribution Analysis<a class="headerlink" href="#Causal-Attribution-Analysis" title="Link to this heading">#</a></h3>
 <p>We consider the distribution-change-attribution method based on graphical causal models described in <a class="reference external" href="https://arxiv.org/abs/2102.13384">Budhathoki et al., 2021</a>, which is also implmented in DoWhy. In summary, given the underlying causal graph of variables, the attribution method attributes the change in the marginal distribution of a target variable (or its summary, such as its mean) to changes in data-generating processes (also called “causal mechanisms”) of variables upstream in the causal
 graph. A causal mechanism of a variable is the conditional distribution of the variable given its <em>direct causes</em>. We can also think of a causal mechanism as an algorithm (or a compute program) in the system that takes the values of direct causes as input and produces the value of the effect as an output. To use the attribution method, we first require the causal graph of the variables, namely <em>demand</em>, <em>constraint</em>, <em>submitted</em>, <em>confirmed</em> and <em>received</em>.</p>
 <section id="Graphical-causal-model">
-<h4>Graphical causal model<a class="headerlink" href="#Graphical-causal-model" title="Permalink to this heading">#</a></h4>
+<h4>Graphical causal model<a class="headerlink" href="#Graphical-causal-model" title="Link to this heading">#</a></h4>
 <p>We build the causal graph using domain knowledge. Based on the description of supply chain in the introduction, it is plausible to assume the following causal graph.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
@@ -960,7 +938,7 @@ For more insights toward the quality of the fitted graphical causal model, consi
 <p>Since we do not reject the DAG, we consider our causal graph structure to be confirmed.</p>
 </section>
 <section id="Attributing-change">
-<h4>Attributing change<a class="headerlink" href="#Attributing-change" title="Permalink to this heading">#</a></h4>
+<h4>Attributing change<a class="headerlink" href="#Attributing-change" title="Link to this heading">#</a></h4>
 <p>We can now attribute the week-over-week change in the average value of <em>received</em> quantity:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
@@ -1016,11 +994,11 @@ For more insights toward the quality of the fitted graphical causal model, consi
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Evaluating set functions...:   0%|          | 0/32 [00:00&lt;?, ?it/s]
-Evaluating set functions...: 100%|██████████| 32/32 [00:00&lt;00:00, 229.81it/s]/github/home/.cache/pypoetry/virtualenvs/dowhy-oN2hW5jr-py3.8/lib/python3.8/site-packages/joblib/externals/loky/process_executor.py:752: UserWarning: A worker stopped while some jobs were given to the executor. This can be caused by a too short worker timeout or by a memory leak.
-  warnings.warn(
-Evaluating set functions...: 100%|██████████| 32/32 [00:00&lt;00:00, 169.64it/s]
-Evaluating set functions...: 100%|██████████| 32/32 [00:00&lt;00:00, 284.51it/s]
+Evaluating set functions...: 100%|██████████| 32/32 [00:00&lt;00:00, 240.47it/s]
+Evaluating set functions...: 100%|██████████| 32/32 [00:00&lt;00:00, 263.09it/s]
+Evaluating set functions...: 100%|██████████| 32/32 [00:00&lt;00:00, 280.42it/s]
+Evaluating set functions...: 100%|██████████| 32/32 [00:00&lt;00:00, 247.41it/s]
+Evaluating set functions...: 100%|██████████| 32/32 [00:00&lt;00:00, 332.08it/s]
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -1044,7 +1022,7 @@ consistent with the <strong>ground truth</strong> (see Appendix).</p>
 </section>
 </section>
 <section id="Appendix:-Ground-Truth">
-<h2>Appendix: Ground Truth<a class="headerlink" href="#Appendix:-Ground-Truth" title="Permalink to this heading">#</a></h2>
+<h2>Appendix: Ground Truth<a class="headerlink" href="#Appendix:-Ground-Truth" title="Link to this heading">#</a></h2>
 <p>We generate synthetic data inspired from a real-world use case in Amazon’s supply chain. To this end, we assume a linear Additive Noise Model (ANM) as the underlying data-generating process at each node. That is, each node is a linear function of its direct causes and an additive unobserved noise term. For more technical details on ANMs, we refer the interested reader to Chapter 7.1.2 of <a class="reference external" href="https://library.oapen.org/bitstream/handle/20.500.12657/26040/11283.pdf?sequence=1&amp;isAllowed=y">Elements of Causal Inference
 book</a>. Using linear ANMs, we generate data (or draw i.i.d. samples) from the distribution of each variable. We use the Gamma distribution for noise terms mainly to mimic real-world setting, where the distribution of variables often show heavy-tail behaviour. Between two weeks, we only change the data-generating process (causal mechanism) of <em>demand</em> and <em>confirmed</em> respectively by changing the
 value of demand mean from <span class="math notranslate nohighlight">\(2\)</span> to <span class="math notranslate nohighlight">\(4\)</span>, and linear coefficient <span class="math notranslate nohighlight">\(\alpha\)</span> from <span class="math notranslate nohighlight">\(1\)</span> to <span class="math notranslate nohighlight">\(2\)</span>.</p>
@@ -1093,7 +1071,7 @@ value of demand mean from <span class="math notranslate nohighlight">\(2\)</span
               
               
               
-                <footer class="prev-next-footer">
+                <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
     <a class="left-prev"
@@ -1121,14 +1099,17 @@ value of demand mean from <span class="math notranslate nohighlight">\(2\)</span
             
             
               
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
 
   <div class="sidebar-secondary-item">
-
-  <div class="page-toc tocsection onthispage">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> On this page
   </div>
-  <nav class="bd-toc-nav page-toc">
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Week-over-week-changes">Week-over-week changes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Why-did-the-average-value-of-received-quantity-change-week-over-week?">Why did the average value of <code class="docutils literal notranslate"><span class="pre">received</span></code> quantity change week-over-week?</a><ul class="nav section-nav flex-column">
@@ -1145,13 +1126,13 @@ value of demand mean from <span class="math notranslate nohighlight">\(2\)</span
   </nav></div>
 
   <div class="sidebar-secondary-item">
-
-  <div class="tocsection sourcelink">
-    <a href="../_sources/example_notebooks/gcm_supply_chain_dist_change.ipynb.txt">
-      <i class="fa-solid fa-file-lines"></i> Show Source
-    </a>
-  </div>
-</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/example_notebooks/gcm_supply_chain_dist_change.ipynb.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
 
 </div></div>
               
@@ -1166,8 +1147,8 @@ value of demand mean from <span class="math notranslate nohighlight">\(2\)</span
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1187,7 +1168,7 @@ value of demand mean from <span class="math notranslate nohighlight">\(2\)</span
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
     <br/>
   </p>
 </div>
@@ -1200,7 +1181,8 @@ value of demand mean from <span class="math notranslate nohighlight">\(2\)</span
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.4.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

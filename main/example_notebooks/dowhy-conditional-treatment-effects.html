@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 
 
-<html lang="en" data-content_root="" >
+<html lang="en" data-content_root="../" >
 
   <head>
     <meta charset="utf-8" />
@@ -23,35 +23,38 @@
   
   <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
-    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-
-  
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=949a1ff5" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
   
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
-  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../_static/jquery.js?v=5d32c60e"></script>
     <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=b3ba4146"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
-    <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=0c6e27e1"></script>
     <script src="../_static/design-tabs.js?v=36754332"></script>
@@ -66,6 +69,7 @@
     <link rel="prev" title="Confounding Example: Finding causal effects from observed data" href="dowhy_confounder_example.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="main" />
   </head>
   
   
@@ -73,32 +77,16 @@
 
   
   
-  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
   
   <div id="pst-scroll-pixel-helper"></div>
-
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
-    <i class="fa-solid fa-arrow-up"></i>
-    Back to top
-  </button>
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__primary"
-          id="__primary"/>
-  <label class="overlay overlay-primary" for="__primary"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__secondary"
-          id="__secondary"/>
-  <label class="overlay overlay-secondary" for="__secondary"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="../search.html"
       method="get">
@@ -106,7 +94,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -114,20 +101,27 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
   
-    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <label class="sidebar-toggle primary-toggle" for="__primary">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
-  </label>
+  </button>
   
   
   <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
 
+  
+    
   
 
 <a class="navbar-brand logo" href="../index.html">
@@ -142,7 +136,7 @@
     
     
     <img src="../_static/dowhy-logo-small.png" class="logo__image only-light" alt="DoWhy  documentation - Home"/>
-    <script>document.write(`<img src="../_static/dowhy-logo-small.png" class="logo__image only-dark" alt="DoWhy  documentation - Home"/>`);</script>
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-dark pst-js-only" alt="DoWhy  documentation - Home"/>
   
   
 </a></div>
@@ -154,68 +148,64 @@
     <div class="me-auto navbar-header-items__center">
       
         <div class="navbar-item">
-<nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../getting_started/index.html">
-                        Getting Started
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../user_guide/index.html">
-                        User Guide
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="nb_index.html">
-                        Examples
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../cite.html">
-                        Citing this package
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../contributing.html">
-                        Contributing
-                      </a>
-                    </li>
-                
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="nb_index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing.html">
+    Contributing
+  </a>
+</li>
+
             <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
                     More
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
-                        dowhy package
-                      </a>
-                    </li>
-                
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
+    dowhy package
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
-                        Release notes
-                      </a>
-                    </li>
-                
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
+    Release notes
+  </a>
+</li>
+
                 </ul>
             </li>
             
@@ -230,15 +220,11 @@
         <div class="navbar-item navbar-persistent--container">
           
 
- <script>
- document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
         </div>
       
       
@@ -281,31 +267,31 @@
   
     <div class="navbar-persistent--mobile">
 
- <script>
- document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
     </div>
   
 
   
-    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
       <span class="fa-solid fa-outdent"></span>
-    </label>
+    </button>
   
 </div>
 
-    </nav>
+    </header>
   
+
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
       
-      <div class="bd-sidebar-primary bd-sidebar">
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -314,74 +300,63 @@
     
       <div class="sidebar-header-items__center">
         
-          <div class="navbar-item">
-<nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+          
+          
+            <div class="navbar-item">
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../getting_started/index.html">
-                        Getting Started
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../user_guide/index.html">
-                        User Guide
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="nb_index.html">
-                        Examples
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../cite.html">
-                        Citing this package
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../contributing.html">
-                        Contributing
-                      </a>
-                    </li>
-                
-            <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links-2">
-                    More
-                </button>
-                <ul id="pst-nav-more-links-2" class="dropdown-menu">
-                    
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
-                        dowhy package
-                      </a>
-                    </li>
-                
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="nb_index.html">
+    Examples
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
-                        Release notes
-                      </a>
-                    </li>
-                
-                </ul>
-            </li>
-            
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../dowhy.html">
+    dowhy package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../code_repo.html">
+    Release notes
+  </a>
+</li>
+
   </ul>
 </nav></div>
+          
         
       </div>
     
@@ -521,29 +496,32 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
       
-      <main id="main-content" class="bd-main">
+      <main id="main-content" class="bd-main" role="main">
         
         
           <div class="bd-content">
             <div class="bd-article-container">
               
-              <div class="bd-header-article">
+              <div class="bd-header-article d-print-none">
 <div class="header-article-items header-article__inner">
   
     <div class="header-article-items__start">
       
         <div class="header-article-item">
 
-
-
-<nav aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
@@ -554,7 +532,7 @@
     
     <li class="breadcrumb-item"><a href="nb_index.html" class="nav-link">Example notebooks</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">Conditional...</li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</span></li>
   </ul>
 </nav>
 </div>
@@ -569,10 +547,10 @@
               
                 
 <div id="searchbox"></div>
-                <article class="bd-article" role="main">
+                <article class="bd-article">
                   
   <section id="Conditional-Average-Treatment-Effects-(CATE)-with-DoWhy-and-EconML">
-<h1>Conditional Average Treatment Effects (CATE) with DoWhy and EconML<a class="headerlink" href="#Conditional-Average-Treatment-Effects-(CATE)-with-DoWhy-and-EconML" title="Permalink to this heading">#</a></h1>
+<h1>Conditional Average Treatment Effects (CATE) with DoWhy and EconML<a class="headerlink" href="#Conditional-Average-Treatment-Effects-(CATE)-with-DoWhy-and-EconML" title="Link to this heading">#</a></h1>
 <p>This is an experimental feature where we use <a class="reference external" href="https://github.com/microsoft/econml">EconML</a> methods from DoWhy. Using EconML allows CATE estimation using different methods.</p>
 <p>All four steps of causal inference in DoWhy remain the same: model, identify, estimate, and refute. The key difference is that we now call econml methods in the estimation step. There is also a simpler example using linear regression to understand the intuition behind CATE estimators.</p>
 <p>All datasets are generated using linear structural equations.</p>
@@ -628,19 +606,19 @@
 <div class="output_area docutils container">
 <div class="highlight"><pre>
          X0        X1   Z0        Z1        W0        W1 W2 W3         v0  \
-0 -0.115786  0.886347  0.0  0.273524  1.165535 -0.439911  3  2  18.697869
-1 -0.407948 -0.562698  1.0  0.707057 -0.843281 -0.472963  1  3  29.503430
-2  0.466475 -1.323343  0.0  0.415082 -0.496067  1.010772  1  3  19.885066
-3 -1.145593 -0.895917  0.0  0.546935  0.345397  1.469954  2  3  27.750126
-4  0.099621 -2.134127  0.0  0.734060 -0.753740  1.062521  2  3  22.753793
+0 -0.451830  0.179687  0.0  0.546530 -2.151223  0.181060  2  0   3.394776
+1 -1.959607 -0.889184  1.0  0.361793 -2.208619  1.377282  2  1  13.210871
+2 -0.822956  0.960251  0.0  0.965769 -0.727548  1.763237  1  3  15.041520
+3 -1.964120  0.090137  0.0  0.121000 -2.050925  1.301480  2  1  -0.048665
+4 -1.385050  0.830364  1.0  0.967800 -0.844159  2.943137  0  2  26.883269
 
             y
-0  233.263821
-1  235.113830
-2  189.040352
-3  156.430687
-4  158.983834
-True causal estimate is 6.814138302852309
+0   32.391154
+1  -58.142212
+2  171.781750
+3    6.603816
+4  204.526164
+True causal estimate is 5.273555141939299
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
@@ -718,7 +696,7 @@ No such variable(s) found!
 </pre></div></div>
 </div>
 <section id="Linear-Model">
-<h2>Linear Model<a class="headerlink" href="#Linear-Model" title="Permalink to this heading">#</a></h2>
+<h2>Linear Model<a class="headerlink" href="#Linear-Model" title="Link to this heading">#</a></h2>
 <p>First, let us build some intuition using a linear model for estimating CATE. The effect modifiers (that lead to a heterogeneous treatment effect) can be modeled as interaction terms with the treatment. Thus, their value modulates the effect of treatment.</p>
 <p>Below the estimated effect of changing treatment from 0 to 1.</p>
 <div class="nbinput docutils container">
@@ -756,40 +734,40 @@ b: y~v0+W0+W3+W2+W1+v0*X1+v0*X0
 Target units:
 
 ## Estimate
-Mean value: 6.814086652020999
+Mean value: 5.2735599700688205
 ### Conditional Estimates
 __categorical__X1  __categorical__X0
-(-4.638, -1.709]   (-4.064, -1.359]      0.019109
-                   (-1.359, -0.764]      2.618473
-                   (-0.764, -0.269]      4.158167
-                   (-0.269, 0.318]       5.813293
-                   (0.318, 3.098]        8.356599
-(-1.709, -1.116]   (-4.064, -1.359]      1.633835
-                   (-1.359, -0.764]      4.258786
-                   (-0.764, -0.269]      5.806603
-                   (-0.269, 0.318]       7.370769
-                   (0.318, 3.098]        9.986723
-(-1.116, -0.603]   (-4.064, -1.359]      2.637305
-                   (-1.359, -0.764]      5.212477
-                   (-0.764, -0.269]      6.806407
-                   (-0.269, 0.318]       8.416347
-                   (0.318, 3.098]       10.901608
-(-0.603, -0.0157]  (-4.064, -1.359]      3.720069
-                   (-1.359, -0.764]      6.258866
-                   (-0.764, -0.269]      7.811525
-                   (-0.269, 0.318]       9.378979
-                   (0.318, 3.098]       11.845948
-(-0.0157, 3.058]   (-4.064, -1.359]      5.244623
-                   (-1.359, -0.764]      7.897146
-                   (-0.764, -0.269]      9.502085
-                   (-0.269, 0.318]      11.032859
-                   (0.318, 3.098]       13.649525
+(-3.776, -0.98]    (-4.716, -1.612]     -9.598952
+                   (-1.612, -1.002]     -4.719143
+                   (-1.002, -0.496]     -1.914148
+                   (-0.496, 0.0443]      0.678122
+                   (0.0443, 2.855]       4.833204
+(-0.98, -0.401]    (-4.716, -1.612]     -4.892340
+                   (-1.612, -1.002]     -0.365606
+                   (-1.002, -0.496]      2.425995
+                   (-0.496, 0.0443]      5.226163
+                   (0.0443, 2.855]       9.477630
+(-0.401, 0.102]    (-4.716, -1.612]     -2.124824
+                   (-1.612, -1.002]      2.510357
+                   (-1.002, -0.496]      5.362468
+                   (-0.496, 0.0443]      8.017311
+                   (0.0443, 2.855]      12.417159
+(0.102, 0.709]     (-4.716, -1.612]      0.818423
+                   (-1.612, -1.002]      5.434792
+                   (-1.002, -0.496]      8.178828
+                   (-0.496, 0.0443]     10.821184
+                   (0.0443, 2.855]      15.474154
+(0.709, 3.415]     (-4.716, -1.612]      5.239656
+                   (-1.612, -1.002]     10.028699
+                   (-1.002, -0.496]     13.007203
+                   (-0.496, 0.0443]     15.612345
+                   (0.0443, 2.855]      19.907720
 dtype: float64
 </pre></div></div>
 </div>
 </section>
 <section id="EconML-methods">
-<h2>EconML methods<a class="headerlink" href="#EconML-methods" title="Permalink to this heading">#</a></h2>
+<h2>EconML methods<a class="headerlink" href="#EconML-methods" title="Link to this heading">#</a></h2>
 <p>We now move to the more advanced methods from the EconML package for estimating CATE.</p>
 <p>First, let us look at the double machine learning estimator. Method_name corresponds to the fully qualified name of the class that we want to use. For double ML, it is “econml.dml.DML”.</p>
 <p>Target units defines the units over which the causal estimate is to be computed. This can be a lambda function filter on the original dataframe, a new Pandas dataframe, or a string corresponding to the three main kinds of target units (“ate”, “att” and “atc”). Below we show an example of a lambda function.</p>
@@ -838,625 +816,379 @@ b: y~v0+W0+W3+W2+W1 | X1,X0
 Target units: Data subset defined by a function
 
 ## Estimate
-Mean value: 12.472487021578369
-Effect estimates: [[11.35798395]
- [11.58865153]
- [ 7.75460311]
- [13.17703408]
- [14.0514222 ]
- [11.7766626 ]
- [13.17411418]
- [17.59859641]
- [13.83721905]
- [13.1590478 ]
- [11.28217162]
- [16.70946538]
- [13.84749652]
- [12.42766319]
- [12.81772244]
- [13.34389905]
- [14.03186792]
- [15.95821096]
- [17.66247577]
- [ 8.26116023]
- [15.86897457]
- [11.2539094 ]
- [13.4085242 ]
- [11.85888082]
- [13.93268361]
- [13.21608264]
- [ 8.91604995]
- [11.35565883]
- [10.1611137 ]
- [13.72682134]
- [12.12176536]
- [12.9210354 ]
- [16.11564995]
- [15.27447881]
- [11.27307472]
- [ 8.57454762]
- [17.36681785]
- [ 9.73035995]
- [14.40726779]
- [11.61295746]
- [ 8.78010473]
- [16.01786611]
- [14.32978998]
- [10.41722424]
- [13.7269995 ]
- [13.83533464]
- [14.64730893]
- [12.765736  ]
- [12.65310253]
- [15.2324996 ]
- [12.13975461]
- [14.66648134]
- [16.79474572]
- [10.62191182]
- [12.01512595]
- [11.71353939]
- [12.06271663]
- [12.9347533 ]
- [16.25348528]
- [11.74727987]
- [11.97875228]
- [14.40486457]
- [13.71219883]
- [11.58299794]
- [10.46980689]
- [18.12019098]
- [ 8.98515503]
- [13.6811615 ]
- [11.28834213]
- [10.95506828]
- [ 7.15838246]
- [14.76120193]
- [14.67465725]
- [10.32193197]
- [14.14656714]
- [12.2086769 ]
- [16.99938909]
- [13.02337954]
- [10.46322095]
- [11.90219865]
- [ 9.61515521]
- [13.49426653]
- [14.02293151]
- [14.09864049]
- [12.50934635]
- [12.02483381]
- [17.45825986]
- [12.94400919]
- [15.51237215]
- [12.0310926 ]
- [ 9.53718238]
- [10.24969001]
- [14.50599093]
- [16.39470151]
- [10.40162412]
- [12.54549931]
- [14.26965823]
- [ 9.97567687]
- [10.14938567]
- [11.73771236]
- [12.92790186]
- [10.64258837]
- [10.55099643]
- [11.8795311 ]
- [13.04958863]
- [11.53669036]
- [13.70833124]
- [12.05177725]
- [12.8805055 ]
- [16.29613077]
- [11.63259347]
- [14.00349281]
- [11.17993669]
- [13.91331922]
- [ 8.45432195]
- [ 9.73619837]
- [14.6655922 ]
- [14.50108731]
- [ 9.98291944]
- [14.53381666]
- [10.72274175]
- [13.3098202 ]
- [13.26201797]
- [11.33999371]
- [12.23417639]
- [11.32423936]
- [13.78649197]
- [15.29834654]
- [15.70532866]
- [11.69969556]
- [12.06528335]
- [ 8.38172865]
- [11.71677798]
- [13.48537237]
- [11.49098463]
- [11.44119589]
- [13.43215161]
- [15.49439525]
- [15.3670375 ]
- [ 8.1346563 ]
- [12.38531289]
- [12.02175132]
- [13.3177345 ]
- [17.59313317]
- [10.30734363]
- [10.03448752]
- [11.14270733]
- [12.6029418 ]
- [11.40265009]
- [12.58659133]
- [11.71962156]
- [12.29520348]
- [10.24110884]
- [10.62692729]
- [11.29836379]
- [ 9.29842828]
- [11.76568188]
- [ 9.23465368]
- [13.43630685]
- [13.01349548]
- [ 9.45371514]
- [10.31983061]
- [10.60532877]
- [12.48273712]
- [14.99543212]
- [10.15105025]
- [14.26430135]
- [12.83215955]
- [ 9.69727111]
- [ 8.7182288 ]
- [17.11564988]
- [11.78953753]
- [12.82614313]
- [11.30293416]
- [13.17993594]
- [11.84284756]
- [19.41446003]
- [10.05937692]
- [12.37938877]
- [ 9.39219535]
- [15.08134922]
- [11.67764191]
- [12.27269167]
- [12.49856848]
- [12.33644499]
- [13.08423155]
- [11.98673912]
- [10.92291472]
- [ 8.39542398]
- [12.988847  ]
- [15.07774653]
- [14.69071945]
- [13.88546248]
- [12.97224122]
- [10.33700523]
- [12.6897166 ]
- [11.30312156]
- [13.20707576]
- [11.18832803]
- [14.587101  ]
- [13.56175888]
- [ 9.16776107]
- [10.36432181]
- [14.40173404]
- [12.5534983 ]
- [10.0833123 ]
- [10.34164406]
- [10.87447606]
- [11.55425629]
- [13.52599996]
- [10.47982406]
- [ 8.06784908]
- [16.26931738]
- [12.84225313]
- [12.61936906]
- [11.03653617]
- [12.50318148]
- [11.66713327]
- [15.33354822]
- [13.16097211]
- [ 9.59252567]
- [12.61615535]
- [15.91797184]
- [12.42037818]
- [14.60217394]
- [12.91348564]
- [ 9.49100739]
- [14.36589249]
- [13.08646754]
- [11.57845034]
- [15.23149915]
- [10.29331103]
- [12.7036345 ]
- [14.21478675]
- [12.16083127]
- [13.2247406 ]
- [10.0859488 ]
- [12.41008498]
- [11.17939516]
- [11.84974344]
- [13.29448633]
- [ 9.3093996 ]
- [13.54325333]
- [11.4405644 ]
- [ 8.61027547]
- [10.07428283]
- [ 9.33744552]
- [16.01718796]
- [12.23999224]
- [ 9.81859977]
- [ 9.75408744]
- [ 8.48962349]
- [11.80158599]
- [10.87373339]
- [10.42154848]
- [10.73003852]
- [10.90099622]
- [13.02271695]
- [ 9.33995029]
- [ 8.96846763]
- [17.31521733]
- [17.73837552]
- [16.4230501 ]
- [ 9.72663071]
- [13.22409048]
- [15.18962196]
- [13.29245995]
- [19.5478674 ]
- [14.66020785]
- [12.98419947]
- [10.77844062]
- [ 9.92635329]
- [13.44111322]
- [12.52900967]
- [11.43772945]
- [12.5685008 ]
- [11.32471511]
- [ 9.65531111]
- [13.07228454]
- [13.68071396]
- [11.72048256]
- [11.38471919]
- [12.18798543]
- [11.33404081]
- [11.09659357]
- [12.81809145]
- [11.37459905]
- [14.6645066 ]
- [12.41941564]
- [15.78689733]
- [11.83374175]
- [10.55621294]
- [11.34952643]
- [10.8695918 ]
- [13.89322055]
- [10.59591202]
- [ 7.52234883]
- [12.59330708]
- [12.45265276]
- [10.88816194]
- [12.4097188 ]
- [13.43776465]
- [10.96113179]
- [11.96065054]
- [13.4248156 ]
- [15.80047919]
- [10.75072911]
- [13.34061759]
- [13.2438937 ]
- [13.2249325 ]
- [12.75379278]
- [11.77209166]
- [12.09988754]
- [13.62899271]
- [11.99517934]
- [14.45837276]
- [14.45909836]
- [10.26388892]
- [14.14556564]
- [13.88977938]
- [14.02338544]
- [10.97813163]
- [12.35010419]
- [16.33057233]
- [14.08984837]
- [10.51448517]
- [12.26316333]
- [14.47082745]
- [10.98577978]
- [ 6.67371438]
- [13.40081908]
- [11.40781459]
- [12.72797448]
- [14.77556574]
- [12.14971526]
- [16.144473  ]
- [11.4615527 ]
- [ 8.37976414]
- [10.1552508 ]
- [ 9.73338733]
- [10.46847279]
- [12.2128042 ]
- [10.64599123]
- [13.32335831]
- [14.58697452]
- [ 9.09783576]
- [13.69176792]
- [11.50139254]
- [11.58912609]
- [13.03172457]
- [11.83696129]
- [13.02219282]
- [11.39120894]
- [13.43573758]
- [13.64370799]
- [12.1731246 ]
- [12.71187642]
- [ 9.73571628]
- [13.99572987]
- [ 9.41386474]
- [12.59773064]
- [16.52242779]
- [12.10587874]
- [13.24209312]
- [11.46035527]
- [12.78918345]
- [ 8.81600141]
- [11.56091331]
- [11.78184789]
- [ 9.05130613]
- [12.68159251]
- [13.19927662]
- [13.07285335]
- [12.66353695]
- [11.59567807]
- [ 9.95038228]
- [ 7.40757205]
- [16.08602948]
- [14.00339861]
- [ 8.38788335]
- [13.32625647]
- [14.32706661]
- [11.53922533]
- [14.75049543]
- [14.22724491]
- [11.15953985]
- [16.09385488]
- [12.24297344]
- [15.29708367]
- [12.89460319]
- [13.05485086]
- [15.12123158]
- [11.33400777]
- [13.29196925]
- [13.12900208]
- [10.80180919]
- [12.67023504]
- [ 9.70977891]
- [10.24177743]
- [13.14430928]
- [13.08598714]
- [13.55850306]
- [13.4603694 ]
- [ 8.73510766]
- [11.69954104]
- [15.14100666]
- [14.97475693]
- [ 6.15505161]
- [14.50012835]
- [13.03207494]
- [10.94150837]
- [12.42135446]
- [13.93102817]
- [10.36924733]
- [11.59322244]
- [ 9.68895099]
- [10.46170519]
- [13.41605207]
- [10.00031867]
- [16.89053713]
- [ 9.18879538]
- [ 8.68678247]
- [ 8.11103097]
- [13.35515237]
- [12.45741229]
- [ 7.51934319]
- [16.57078355]
- [ 8.92194132]
- [15.61644491]
- [15.42312489]
- [ 8.33480804]
- [17.13210062]
- [10.2086607 ]
- [10.18562278]
- [13.84445137]
- [10.06498112]
- [18.4792854 ]
- [10.82838425]
- [10.69989711]
- [14.74631402]
- [11.73715944]
- [16.51684208]
- [11.60562395]
- [12.78655502]
- [ 8.25146111]
- [14.56552389]
- [ 9.57188932]
- [10.00110601]
- [14.12553229]
- [12.53068878]
- [10.8467476 ]
- [ 9.35390372]
- [14.97277424]
- [12.11916054]
- [12.06199875]
- [13.79718085]
- [11.92739831]
- [14.48278178]
- [10.26433614]
- [12.5935735 ]
- [10.36597858]
- [14.57973291]
- [10.5305311 ]
- [15.54322589]
- [14.5481873 ]
- [11.11991227]
- [12.07324193]
- [13.86396043]
- [11.37602935]
- [11.63552273]
- [10.86410348]
- [10.36529484]
- [17.0145809 ]
- [13.30932753]
- [12.65149822]
- [13.11614007]
- [11.10095171]
- [13.2252962 ]
- [15.82982826]
- [10.73779509]
- [12.29855948]
- [12.91326677]
- [10.11150928]
- [12.7761893 ]
- [12.07700671]
- [10.50043534]
- [ 9.7901491 ]
- [15.02949002]
- [10.3988642 ]
- [12.20671689]
- [13.42895704]
- [ 9.08865687]
- [13.29486422]
- [11.72201849]
- [11.17709414]
- [11.19736712]
- [11.85489538]
- [14.19293672]
- [13.74070324]
- [14.80855651]
- [11.74674903]
- [ 9.67894802]
- [14.76951654]
- [17.57723677]
- [14.32787077]
- [16.64316035]
- [12.8959295 ]
- [11.76251865]
- [12.23735369]
- [13.21002388]
- [16.48775327]
- [14.98702671]
- [11.59929806]
- [12.1183481 ]
- [13.5877881 ]
- [19.53353334]
- [12.24243004]
- [11.14982862]
- [ 9.76337345]
- [10.11086264]
- [17.64049602]
- [14.37351533]
- [ 9.58105524]
- [14.9778052 ]
- [13.6915256 ]
- [12.26098806]
- [14.12546701]
- [10.51187339]
- [16.62466927]
- [10.39489009]
- [13.96101544]
- [13.78669005]
- [13.61774286]
- [16.67018447]
- [11.82638695]
- [14.13061914]
- [12.45098496]
- [ 9.32209949]
- [12.07003299]
- [ 9.21484527]
- [11.15345951]
- [10.39954201]
- [11.56158776]
- [ 9.10949119]
- [13.39754317]
- [ 9.27884052]
- [11.09110093]
- [ 8.09672282]
- [13.86746718]
- [13.81667017]
- [17.63845955]
- [11.50576309]
- [15.38387275]
- [15.17860268]
- [17.21649991]
- [13.84978285]
- [13.55121572]
- [13.04351024]
- [13.09133177]
- [11.80666685]
- [13.87143112]
- [12.37067454]
- [ 9.56008999]
- [ 8.39784319]
- [12.03473674]
- [13.4427704 ]
- [12.11185471]
- [12.18556516]
- [11.42988756]
- [15.03758794]
- [13.28226131]
- [14.30846686]
- [11.50912481]
- [14.93967449]
- [12.29163344]
- [17.22000715]
- [13.31977503]
- [10.67665021]
- [13.82049278]
- [11.29902304]
- [12.45281221]
- [14.54462389]
- [11.04200658]
- [19.94446549]
- [ 9.99664169]
- [14.23206333]
- [11.94576488]
- [12.63446418]
- [11.50363537]
- [16.69715312]
- [14.91931365]
- [14.57435549]
- [10.59322694]
- [11.66747336]
- [ 8.28055937]
- [13.7262211 ]
- [15.69644251]
- [14.06742425]
- [11.92534524]
- [12.95798147]
- [11.89062359]
- [ 9.93939961]
- [11.6298759 ]
- [11.68719205]
- [14.18827508]
- [12.36104594]
- [ 8.77166603]
- [12.5800281 ]
- [12.40328378]
- [11.71516304]
- [12.50577399]
- [ 8.66563211]
- [ 9.98891259]
- [18.33728048]
- [12.83848277]
- [13.40349971]
- [13.70537907]
- [11.35993917]]
+Mean value: 17.001015669368066
+Effect estimates: [[20.91718546]
+ [12.28481148]
+ [24.51116202]
+ [17.38202072]
+ [31.95668151]
+ [14.77236908]
+ [ 8.40254364]
+ [ 6.63606237]
+ [25.0960212 ]
+ [ 8.5792364 ]
+ [20.30478218]
+ [20.8685249 ]
+ [ 7.65836966]
+ [10.0981447 ]
+ [14.47338195]
+ [15.11417449]
+ [21.90404465]
+ [14.42162517]
+ [22.34513865]
+ [11.33154529]
+ [18.04682406]
+ [14.68302542]
+ [24.84114637]
+ [15.31022105]
+ [18.975606  ]
+ [21.31970964]
+ [28.35378482]
+ [10.13562871]
+ [12.85770768]
+ [ 9.22387197]
+ [15.98993572]
+ [20.63285417]
+ [ 5.50423944]
+ [ 7.37888215]
+ [18.54916429]
+ [19.34358315]
+ [14.18137691]
+ [12.35942397]
+ [18.75146151]
+ [12.70046791]
+ [19.05833858]
+ [19.25560658]
+ [25.99057218]
+ [19.09396967]
+ [24.82855596]
+ [15.29827407]
+ [13.7775982 ]
+ [ 4.51953445]
+ [27.24631774]
+ [21.79960538]
+ [18.64651966]
+ [26.9484999 ]
+ [18.10090167]
+ [20.66779624]
+ [15.53764944]
+ [20.28805598]
+ [15.42068325]
+ [14.49815184]
+ [16.35105272]
+ [16.10689548]
+ [19.2575562 ]
+ [18.66014537]
+ [23.03928687]
+ [19.89765387]
+ [21.71314944]
+ [11.53452389]
+ [22.20770019]
+ [15.29120796]
+ [16.79126247]
+ [14.75771531]
+ [21.36118348]
+ [ 6.82506004]
+ [16.90482784]
+ [19.56858146]
+ [15.1659349 ]
+ [13.77019674]
+ [20.54076105]
+ [12.26860907]
+ [21.75013942]
+ [ 8.28986015]
+ [10.58817703]
+ [23.55907806]
+ [15.40372994]
+ [23.91196644]
+ [16.75743137]
+ [ 9.08045135]
+ [18.44968787]
+ [13.71721188]
+ [15.11646244]
+ [13.55214764]
+ [ 7.75975178]
+ [23.46035376]
+ [18.72309448]
+ [18.8781204 ]
+ [ 1.52005814]
+ [19.45362756]
+ [11.72895763]
+ [10.22068166]
+ [21.05588414]
+ [23.07153041]
+ [ 8.93195444]
+ [ 8.62861888]
+ [17.36942456]
+ [21.04124259]
+ [16.499706  ]
+ [19.0510296 ]
+ [ 8.72950744]
+ [12.49687857]
+ [15.39686284]
+ [17.66724785]
+ [18.39948723]
+ [25.8801999 ]
+ [17.77003608]
+ [ 7.67874297]
+ [20.86578869]
+ [17.34151959]
+ [11.50774867]
+ [22.98251048]
+ [ 8.87483136]
+ [ 4.26281108]
+ [26.92722045]
+ [23.50162685]
+ [20.79426711]
+ [18.84656016]
+ [23.06716274]
+ [ 8.77028256]
+ [ 5.542923  ]
+ [30.57922486]
+ [13.32269646]
+ [23.66129811]
+ [22.07826872]
+ [ 7.65809707]
+ [18.34489371]
+ [16.66200007]
+ [27.33762634]
+ [11.57882475]
+ [16.1451061 ]
+ [24.86721172]
+ [20.52129737]
+ [23.66722754]
+ [15.53711992]
+ [13.38579943]
+ [12.63113566]
+ [18.7917932 ]
+ [17.93942059]
+ [24.79587777]
+ [19.5131698 ]
+ [ 8.4846005 ]
+ [16.71889164]
+ [13.52580319]
+ [ 9.21620706]
+ [16.68184876]
+ [16.39204719]
+ [30.08500985]
+ [16.26469632]
+ [18.51924193]
+ [15.35062194]
+ [15.28178607]
+ [13.56633189]
+ [24.28249186]
+ [20.3731451 ]
+ [17.33041189]
+ [20.66486864]
+ [21.13878758]
+ [14.16114578]
+ [18.15504356]
+ [ 9.3190769 ]
+ [ 8.63055465]
+ [19.83957574]
+ [23.95199322]
+ [19.34563274]
+ [21.94430295]
+ [17.71038112]
+ [14.96901363]
+ [10.47513564]
+ [16.74263357]
+ [15.68583936]
+ [15.37690373]
+ [16.84102188]
+ [30.97980168]
+ [17.20560644]
+ [17.09690981]
+ [13.0357291 ]
+ [19.08434273]
+ [17.4667098 ]
+ [26.99131078]
+ [ 6.39788585]
+ [12.76278271]
+ [18.43496557]
+ [16.61302025]
+ [22.20455392]
+ [22.72180003]
+ [25.42034257]
+ [14.48137498]
+ [22.61594621]
+ [12.12833769]
+ [15.21766468]
+ [13.23854045]
+ [17.01085759]
+ [18.8120462 ]
+ [19.79275079]
+ [17.03833328]
+ [16.01090451]
+ [25.70028962]
+ [16.77558627]
+ [16.59936681]
+ [19.78492751]
+ [17.94392559]
+ [22.164883  ]
+ [32.96882514]
+ [16.14925531]
+ [16.49641212]
+ [16.95001367]
+ [18.74659597]
+ [18.39167569]
+ [19.00250336]
+ [20.39900851]
+ [22.11225782]
+ [13.24885246]
+ [11.53263791]
+ [16.53128937]
+ [15.11468413]
+ [13.5436295 ]
+ [14.92033364]
+ [25.26795617]
+ [11.12293839]
+ [19.78070942]
+ [12.86123894]
+ [14.40900047]
+ [17.43268032]
+ [14.26942397]
+ [17.1813605 ]
+ [21.32173627]
+ [14.52082717]
+ [12.71915756]
+ [ 6.12539082]
+ [16.43439099]
+ [17.99119573]
+ [19.33071436]
+ [12.4508543 ]
+ [14.02876845]
+ [14.74474289]
+ [ 1.07465485]
+ [22.93230411]
+ [21.05456516]
+ [19.12191999]
+ [20.38491629]
+ [22.72286419]
+ [ 9.46963626]
+ [26.19559419]
+ [12.60260352]
+ [ 5.70406543]
+ [11.75338699]
+ [ 9.73544494]
+ [22.9840902 ]
+ [24.68693468]
+ [21.97613473]
+ [30.2713838 ]
+ [13.16895596]
+ [13.66593189]
+ [14.95447341]
+ [17.3805207 ]
+ [16.74836335]
+ [14.15601354]
+ [22.50340275]
+ [13.74876515]
+ [26.53347059]
+ [25.38591522]
+ [17.70643203]
+ [28.20094671]
+ [16.90106807]
+ [10.39127382]
+ [13.87744374]
+ [16.74746196]
+ [ 7.07381074]
+ [ 6.57927611]
+ [23.22955581]
+ [18.64021478]
+ [24.13631271]
+ [13.40559001]
+ [13.31011613]
+ [14.90428086]
+ [ 3.08396501]
+ [17.49276082]
+ [13.05226982]
+ [10.85610642]
+ [19.17841336]
+ [11.8028476 ]
+ [14.116407  ]
+ [17.61107723]
+ [20.91819544]
+ [15.91471253]
+ [19.13443552]
+ [14.30436058]
+ [13.67087983]
+ [18.58426878]
+ [19.1221338 ]
+ [15.51342499]
+ [26.00047448]
+ [14.52223385]
+ [16.81926622]
+ [11.63643154]
+ [16.32179093]
+ [21.22395907]
+ [12.89436755]
+ [24.37090283]
+ [13.21949925]
+ [27.98439469]
+ [25.86851888]
+ [21.44073513]
+ [14.23546223]
+ [13.31320687]
+ [21.93926066]
+ [21.99904043]
+ [22.42617723]
+ [15.99860281]
+ [ 9.01152331]
+ [21.49739721]
+ [ 9.57993259]
+ [ 8.88624624]
+ [20.42523182]
+ [13.72956833]
+ [ 9.36038435]
+ [11.65400557]
+ [26.19269856]
+ [15.76431099]
+ [21.7250317 ]
+ [15.57050088]
+ [16.06709432]
+ [12.16806669]
+ [22.82624742]
+ [16.46536611]
+ [17.49561375]
+ [22.58600447]
+ [19.73169877]
+ [18.64061179]
+ [16.32092087]
+ [19.56013309]
+ [18.58033439]
+ [20.42365285]
+ [18.3522004 ]
+ [20.7021146 ]
+ [24.26445869]
+ [21.15735767]
+ [23.63798909]
+ [20.36853537]
+ [15.59393361]
+ [13.12129026]
+ [15.60024417]
+ [18.82042742]
+ [ 8.92702119]
+ [14.2951246 ]
+ [15.85605435]
+ [19.62261858]
+ [15.51596763]
+ [ 5.27276691]
+ [15.10153038]
+ [15.62065869]
+ [10.72408998]
+ [21.29162477]
+ [19.64236837]
+ [26.89382631]
+ [ 8.13644306]
+ [18.51917713]
+ [21.67480757]
+ [17.86838454]
+ [21.78974023]
+ [18.19031513]
+ [ 6.52052568]
+ [ 6.77891901]
+ [14.67921889]
+ [11.04787631]]
 
 </pre></div></div>
 </div>
@@ -1473,7 +1205,7 @@ Effect estimates: [[11.35798395]
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-True causal estimate is 6.814138302852309
+True causal estimate is 5.273555141939299
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -1517,19 +1249,19 @@ b: y~v0+W0+W3+W2+W1 | X1,X0
 Target units:
 
 ## Estimate
-Mean value: 6.718976387968945
-Effect estimates: [[11.29879019]
- [ 7.63246516]
- [ 8.77470323]
+Mean value: 5.239625219120915
+Effect estimates: [[ 8.66483124]
+ [-5.17788915]
+ [10.96484029]
  ...
- [ 8.29831206]
- [ 7.30809026]
- [ 9.6767495 ]]
+ [ 2.60078426]
+ [ 6.91166284]
+ [ 6.55694708]]
 
 </pre></div></div>
 </div>
 <section id="CATE-Object-and-Confidence-Intervals">
-<h3>CATE Object and Confidence Intervals<a class="headerlink" href="#CATE-Object-and-Confidence-Intervals" title="Permalink to this heading">#</a></h3>
+<h3>CATE Object and Confidence Intervals<a class="headerlink" href="#CATE-Object-and-Confidence-Intervals" title="Link to this heading">#</a></h3>
 <p>EconML provides its own methods to compute confidence intervals. Using BootstrapInference in the example below.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
@@ -1578,25 +1310,25 @@ b: y~v0+W0+W3+W2+W1 | X1,X0
 Target units: ate
 
 ## Estimate
-Mean value: 6.734673668348556
-Effect estimates: [[11.30937603]
- [ 7.64735087]
- [ 8.79336509]
+Mean value: 5.199245429493962
+Effect estimates: [[ 8.57752564]
+ [-5.07961899]
+ [10.83637025]
  ...
- [ 8.31535902]
- [ 7.32189598]
- [ 9.68974865]]
-95.0% confidence interval: [[[11.27970413  7.63547486  8.7545313  ...  8.29952879  7.31352143
-    9.67211911]]
+ [ 2.60649845]
+ [ 6.82414048]
+ [ 6.48500905]]
+95.0% confidence interval: [[[ 8.56355557 -5.54437602 10.83740591 ...  2.42755102  6.67901345
+    6.41093661]]
 
- [[11.59111253  7.78279699  8.98433123 ...  8.4815012   7.44836272
-    9.90048576]]]
+ [[ 8.90069898 -5.01390469 11.29780633 ...  2.79891813  7.2064619
+    6.78423305]]]
 
 </pre></div></div>
 </div>
 </section>
 <section id="Can-provide-a-new-inputs-as-target-units-and-estimate-CATE-on-them.">
-<h3>Can provide a new inputs as target units and estimate CATE on them.<a class="headerlink" href="#Can-provide-a-new-inputs-as-target-units-and-estimate-CATE-on-them." title="Permalink to this heading">#</a></h3>
+<h3>Can provide a new inputs as target units and estimate CATE on them.<a class="headerlink" href="#Can-provide-a-new-inputs-as-target-units-and-estimate-CATE-on-them." title="Link to this heading">#</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
@@ -1623,21 +1355,21 @@ Effect estimates: [[11.30937603]
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[[11.9642651 ]
- [12.12723688]
- [12.09880049]
- [13.1884783 ]
- [12.62759431]
- [11.5579824 ]
- [13.85803999]
- [12.7464567 ]
- [10.79390616]
- [11.89480246]]
+[[17.50690555]
+ [15.28024884]
+ [12.24653506]
+ [17.39077657]
+ [16.74758989]
+ [17.41622368]
+ [18.04079145]
+ [17.79295663]
+ [13.21934756]
+ [11.0934559 ]]
 </pre></div></div>
 </div>
 </section>
 <section id="Can-also-retrieve-the-raw-EconML-estimator-object-for-any-further-operations">
-<h3>Can also retrieve the raw EconML estimator object for any further operations<a class="headerlink" href="#Can-also-retrieve-the-raw-EconML-estimator-object-for-any-further-operations" title="Permalink to this heading">#</a></h3>
+<h3>Can also retrieve the raw EconML estimator object for any further operations<a class="headerlink" href="#Can-also-retrieve-the-raw-EconML-estimator-object-for-any-further-operations" title="Link to this heading">#</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
@@ -1651,16 +1383,16 @@ Effect estimates: [[11.30937603]
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;econml.dml.dml.DML object at 0x7f03e296afd0&gt;
+&lt;econml.dml.dml.DML object at 0x7f46ac648a90&gt;
 </pre></div></div>
 </div>
 </section>
 </section>
 <section id="Works-with-any-EconML-method">
-<h2>Works with any EconML method<a class="headerlink" href="#Works-with-any-EconML-method" title="Permalink to this heading">#</a></h2>
+<h2>Works with any EconML method<a class="headerlink" href="#Works-with-any-EconML-method" title="Link to this heading">#</a></h2>
 <p>In addition to double machine learning, below we example analyses using orthogonal forests, DRLearner (bug to fix), and neural network-based instrumental variables.</p>
 <section id="Binary-treatment,-Binary-outcome">
-<h3>Binary treatment, Binary outcome<a class="headerlink" href="#Binary-treatment,-Binary-outcome" title="Permalink to this heading">#</a></h3>
+<h3>Binary treatment, Binary outcome<a class="headerlink" href="#Binary-treatment,-Binary-outcome" title="Link to this heading">#</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
@@ -1686,23 +1418,23 @@ Effect estimates: [[11.30937603]
 <div class="output_area docutils container">
 <div class="highlight"><pre>
             X0        X1   Z0        W0        W1        W2        W3  v0  y
-0    -0.274904  3.059553  0.0  0.484849  2.072388 -1.125590 -2.228188   0  0
-1     0.397075  0.361155  1.0  0.220431 -0.114853 -0.442494 -1.111725   1  1
-2    -1.177774 -0.396454  0.0  0.326009  0.227604  0.024575 -2.060106   0  0
-3    -0.215870 -0.086596  1.0 -0.158992  1.672587  0.450781  0.729116   1  1
-4     1.717884 -1.236285  1.0  1.588426  0.988368 -0.449457 -2.250651   1  1
+0    -1.406936 -0.087224  0.0  0.500904  1.425335  1.104075  1.322842   1  1
+1    -0.017952 -1.824466  1.0  2.705600  0.294640  1.438115 -1.592653   1  1
+2     0.951817 -0.208899  1.0  0.856183  0.126749 -0.174556 -0.106887   1  1
+3    -1.140815 -0.491540  1.0  2.091157  1.045928  0.783002 -0.780456   1  1
+4     0.277900 -2.069833  1.0 -0.219542  0.064665 -0.301540 -2.085349   1  1
 ...        ...       ...  ...       ...       ...       ...       ...  .. ..
-9995 -1.060382  0.516601  1.0  0.952794 -0.122010 -0.792453 -2.270641   0  0
-9996  0.243871  0.372210  0.0  0.106365  0.459577 -0.404531 -1.077417   0  0
-9997 -0.595850  1.715115  0.0  1.464994  0.920318 -0.892116 -1.556017   0  0
-9998 -2.245326  1.408546  1.0 -0.637026 -0.124252  0.257762  0.083195   1  1
-9999 -0.272595 -0.030628  1.0  1.149912  1.615597 -0.341732 -2.831388   1  1
+9995 -0.375684 -1.721908  1.0  0.652592 -0.105635  2.569997 -2.486745   1  1
+9996 -0.922972 -2.956110  1.0 -0.351928 -0.807390  1.269542 -1.233712   1  1
+9997  0.191706 -1.478390  1.0  1.698383 -1.004089  0.623310 -1.288325   1  1
+9998  0.100090 -1.521778  1.0  1.307292 -0.093719  0.102231 -1.024228   1  1
+9999  1.256238 -0.517961  1.0  0.204694 -0.674480 -0.516120 -1.228456   1  1
 
 [10000 rows x 9 columns]
 </pre></div></div>
 </div>
 <section id="Using-DRLearner-estimator">
-<h4>Using DRLearner estimator<a class="headerlink" href="#Using-DRLearner-estimator" title="Permalink to this heading">#</a></h4>
+<h4>Using DRLearner estimator<a class="headerlink" href="#Using-DRLearner-estimator" title="Link to this heading">#</a></h4>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
@@ -1745,22 +1477,22 @@ b: y~v0+W0+W3+W2+W1 | X1,X0
 Target units: ate
 
 ## Estimate
-Mean value: 0.5341623383787538
-Effect estimates: [[0.56470052]
- [0.5364521 ]
- [0.52372615]
+Mean value: 0.2917448658144686
+Effect estimates: [[0.30456816]
+ [0.28308548]
+ [0.28221273]
  ...
- [0.54884323]
- [0.54094153]
- [0.53026463]]
+ [0.28288082]
+ [0.28350883]
+ [0.27786244]]
 
-True causal estimate is 0.4485
+True causal estimate is 0.3056
 </pre></div></div>
 </div>
 </section>
 </section>
 <section id="Instrumental-Variable-Method">
-<h3>Instrumental Variable Method<a class="headerlink" href="#Instrumental-Variable-Method" title="Permalink to this heading">#</a></h3>
+<h3>Instrumental Variable Method<a class="headerlink" href="#Instrumental-Variable-Method" title="Link to this heading">#</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
@@ -1803,20 +1535,20 @@ b: y~v0+W0+W3+W2+W1 | X1,X0
 Target units: Data subset defined by a function
 
 ## Estimate
-Mean value: 8.253642788065598
-Effect estimates: [[11.53162306]
- [ 7.72784209]
- [ 8.6711528 ]
+Mean value: 8.696012974209406
+Effect estimates: [[ 8.66199423]
+ [10.92730598]
+ [20.81945524]
  ...
- [ 8.27961792]
- [ 7.46031948]
- [ 9.82462308]]
+ [ 5.80648532]
+ [17.01372355]
+ [ 2.6693732 ]]
 
 </pre></div></div>
 </div>
 </section>
 <section id="Metalearners">
-<h3>Metalearners<a class="headerlink" href="#Metalearners" title="Permalink to this heading">#</a></h3>
+<h3>Metalearners<a class="headerlink" href="#Metalearners" title="Link to this heading">#</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
@@ -1840,30 +1572,30 @@ Effect estimates: [[11.53162306]
 <div class="output_area docutils container">
 <div class="highlight"><pre>
             X0        X1        X2        X3        X4   Z0        Z1  \
-0    -1.932084  1.136512 -0.389367 -0.076252  0.759181  0.0  0.227064
-1    -0.777060  0.930151  0.247036  1.497312 -0.589523  0.0  0.988054
-2     0.298298  3.046355 -2.315320 -1.139840 -0.801745  0.0  0.462610
-3    -1.813180  0.643101 -1.868251 -0.361255  1.499118  1.0  0.026595
-4    -0.234770  0.921801 -0.613060  0.693038 -0.634193  0.0  0.100257
+0     0.052004  0.350924 -1.267767 -0.683107 -0.430210  1.0  0.476390
+1    -1.159957 -1.252552  0.435999  1.235113  0.055917  0.0  0.498572
+2     0.212601  0.989702  0.643112  0.606223 -2.249135  1.0  0.760110
+3     0.067774  1.448741 -1.952871  1.836794 -1.155158  0.0  0.832960
+4    -0.760826  0.003452  0.635078  1.343767 -0.329461  1.0  0.591561
 ...        ...       ...       ...       ...       ...  ...       ...
-9995 -0.846952  0.393042 -0.421911 -1.823197 -1.076180  0.0  0.922284
-9996 -0.139719  0.116947 -0.545799 -0.765484  0.387768  0.0  0.424084
-9997  0.791286 -0.437980 -1.458165 -1.089568 -0.424289  0.0  0.391986
-9998 -1.427741 -0.933949 -0.353541 -0.233056 -0.330201  0.0  0.231693
-9999 -1.444598 -0.641976 -0.135012  1.715607 -0.101838  0.0  0.946984
+9995 -0.229536 -0.983120 -1.109347  0.263950  0.018282  0.0  0.796821
+9996 -1.144328  0.280203 -0.498156 -0.872837  1.180510  0.0  0.248558
+9997 -1.532747  1.522907  0.518156  1.149206 -0.111260  1.0  0.045866
+9998 -0.872056  1.152407  1.033660 -0.165223 -2.202008  1.0  0.870893
+9999  0.274781 -0.948839  0.521873  1.217176 -1.503565  1.0  0.097505
 
-            W0        W1        W2        W3        W4  v0         y
-0     0.428325 -0.029410 -1.427274  0.089205  0.205915   1  5.826773
-1     0.408357  0.599696 -1.525233  0.299341 -1.338285   1  5.116411
-2     0.386342 -0.497189 -0.119797  0.371819 -0.435458   1  1.669797
-3    -1.236691 -0.833541 -0.369903  1.302128  1.790599   1  5.816574
-4     0.536352 -2.790315 -0.785533  1.614928 -0.896869   1  4.684101
-...        ...       ...       ...       ...       ...  ..       ...
-9995 -0.030341 -0.507823  0.237217  0.009697  0.031376   1  0.144866
-9996 -0.112841  0.055808 -0.849705 -0.681086 -2.115430   0 -9.429483
-9997  0.380298 -0.584118  0.086391 -0.689556 -1.527852   1 -4.457761
-9998  1.120929  0.074552 -1.111431 -1.217129  0.352709   1 -2.953001
-9999  0.446493 -0.322832  0.048454  0.505652 -0.482340   1  8.498693
+            W0        W1        W2        W3        W4  v0          y
+0     0.061777 -0.808708  0.428105 -0.323755 -0.387701   1  -2.561194
+1     0.969996 -1.180867 -0.640960 -1.136930  1.280212   1   5.586377
+2    -0.820473  2.190115 -0.025184  0.078888  0.732819   1  21.253406
+3     0.034285 -1.076172 -1.508810 -0.229120  1.292634   1   6.291083
+4    -2.683366 -1.188948  0.701760  0.120929 -0.642425   1   6.526223
+...        ...       ...       ...       ...       ...  ..        ...
+9995  0.546732  0.232986 -0.085856 -0.360131 -1.250027   1  -0.124244
+9996 -1.186961  0.342466  0.958741 -1.904570 -0.382120   1   0.988639
+9997 -0.882051 -1.307844  0.308730 -1.253052  1.970557   1  13.738607
+9998 -0.954851  0.319612 -1.704392  1.090772  0.158508   1   5.996489
+9999 -0.652512 -0.693602  0.443727  0.801617  1.069425   1  10.942329
 
 [10000 rows x 14 columns]
 </pre></div></div>
@@ -1900,31 +1632,31 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W0,W3,W2,W4,W1])
+─────(E[y|W0,W3,W4,W2,W1])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W2,W4,W1,U) = P(y|v0,W0,W3,W2,W4,W1)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W4,W2,W1,U) = P(y|v0,W0,W3,W4,W2,W1)
 
 ## Realized estimand
-b: y~v0+X1+X0+X4+X2+X3+W0+W3+W2+W4+W1
+b: y~v0+X1+X2+X3+X4+X0+W0+W3+W4+W2+W1
 Target units: ate
 
 ## Estimate
-Mean value: 8.906765511007583
-Effect estimates: [[12.9817867 ]
- [14.28140721]
- [ 2.69729158]
+Mean value: 9.397764388674995
+Effect estimates: [[ 0.58984909]
+ [11.73156367]
+ [18.48524816]
  ...
- [-0.77505617]
- [ 3.21768587]
- [ 9.43546237]]
+ [17.94996535]
+ [10.50907762]
+ [11.85259453]]
 
-True causal estimate is 5.6012223032416335
+True causal estimate is 7.215542290816122
 </pre></div></div>
 </div>
 </section>
 </section>
 <section id="Avoiding-retraining-the-estimator">
-<h2>Avoiding retraining the estimator<a class="headerlink" href="#Avoiding-retraining-the-estimator" title="Permalink to this heading">#</a></h2>
+<h2>Avoiding retraining the estimator<a class="headerlink" href="#Avoiding-retraining-the-estimator" title="Link to this heading">#</a></h2>
 <p>Once an estimator is fitted, it can be reused to estimate effect on different data points. In this case, you can pass <code class="docutils literal notranslate"><span class="pre">fit_estimator=False</span></code> to <code class="docutils literal notranslate"><span class="pre">estimate_effect</span></code>. This works for any EconML estimator. We show an example for the T-learner below.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
@@ -1956,30 +1688,30 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W0,W3,W2,W4,W1])
+─────(E[y|W0,W3,W4,W2,W1])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W2,W4,W1,U) = P(y|v0,W0,W3,W2,W4,W1)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W3,W4,W2,W1,U) = P(y|v0,W0,W3,W4,W2,W1)
 
 ## Realized estimand
-b: y~v0+X1+X0+X4+X2+X3+W0+W3+W2+W4+W1
+b: y~v0+X1+X2+X3+X4+X0+W0+W3+W4+W2+W1
 Target units: Data subset provided as a data frame
 
 ## Estimate
-Mean value: 5.2927826378920795
-Effect estimates: [[ 1.64637606]
- [12.93944506]
- [-0.77505617]
- [ 3.21768587]
- [ 9.43546237]]
+Mean value: 8.916809739236284
+Effect estimates: [[ 0.86303272]
+ [ 3.40937847]
+ [17.94996535]
+ [10.50907762]
+ [11.85259453]]
 
-True causal estimate is 5.6012223032416335
+True causal estimate is 7.215542290816122
 </pre></div></div>
 </div>
 </section>
 <section id="Refuting-the-estimate">
-<h2>Refuting the estimate<a class="headerlink" href="#Refuting-the-estimate" title="Permalink to this heading">#</a></h2>
+<h2>Refuting the estimate<a class="headerlink" href="#Refuting-the-estimate" title="Link to this heading">#</a></h2>
 <section id="Adding-a-random-common-cause-variable">
-<h3>Adding a random common cause variable<a class="headerlink" href="#Adding-a-random-common-cause-variable" title="Permalink to this heading">#</a></h3>
+<h3>Adding a random common cause variable<a class="headerlink" href="#Adding-a-random-common-cause-variable" title="Link to this heading">#</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
@@ -1995,15 +1727,15 @@ True causal estimate is 5.6012223032416335
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Add a random common cause
-Estimated effect:12.285756278272949
-New effect:12.313727563951174
-p value:0.6200000000000001
+Estimated effect:15.67348311328541
+New effect:15.556481426352912
+p value:0.24
 
 </pre></div></div>
 </div>
 </section>
 <section id="Adding-an-unobserved-common-cause-variable">
-<h3>Adding an unobserved common cause variable<a class="headerlink" href="#Adding-an-unobserved-common-cause-variable" title="Permalink to this heading">#</a></h3>
+<h3>Adding an unobserved common cause variable<a class="headerlink" href="#Adding-an-unobserved-common-cause-variable" title="Link to this heading">#</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
@@ -2021,14 +1753,14 @@ p value:0.6200000000000001
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Add an Unobserved Common Cause
-Estimated effect:12.285756278272949
-New effect:12.351316463365716
+Estimated effect:15.67348311328541
+New effect:15.568547207061801
 
 </pre></div></div>
 </div>
 </section>
 <section id="Replacing-treatment-with-a-random-(placebo)-variable">
-<h3>Replacing treatment with a random (placebo) variable<a class="headerlink" href="#Replacing-treatment-with-a-random-(placebo)-variable" title="Permalink to this heading">#</a></h3>
+<h3>Replacing treatment with a random (placebo) variable<a class="headerlink" href="#Replacing-treatment-with-a-random-(placebo)-variable" title="Link to this heading">#</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
@@ -2047,15 +1779,15 @@ New effect:12.351316463365716
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
-Estimated effect:12.285756278272949
-New effect:0.010059999131380318
-p value:0.3417021218970768
+Estimated effect:15.67348311328541
+New effect:-0.05535202782965196
+p value:0.3694789267775185
 
 </pre></div></div>
 </div>
 </section>
 <section id="Removing-a-random-subset-of-the-data">
-<h3>Removing a random subset of the data<a class="headerlink" href="#Removing-a-random-subset-of-the-data" title="Permalink to this heading">#</a></h3>
+<h3>Removing a random subset of the data<a class="headerlink" href="#Removing-a-random-subset-of-the-data" title="Link to this heading">#</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
@@ -2073,9 +1805,9 @@ p value:0.3417021218970768
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Refute: Use a subset of data
-Estimated effect:12.285756278272949
-New effect:12.31662689446168
-p value:0.29995390921191584
+Estimated effect:15.67348311328541
+New effect:15.472515157715103
+p value:0.008286323431740406
 
 </pre></div></div>
 </div>
@@ -2091,7 +1823,7 @@ p value:0.29995390921191584
               
               
               
-                <footer class="prev-next-footer">
+                <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
     <a class="left-prev"
@@ -2119,14 +1851,17 @@ p value:0.29995390921191584
             
             
               
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
 
   <div class="sidebar-secondary-item">
-
-  <div class="page-toc tocsection onthispage">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> On this page
   </div>
-  <nav class="bd-toc-nav page-toc">
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Linear-Model">Linear Model</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#EconML-methods">EconML methods</a><ul class="nav section-nav flex-column">
@@ -2156,13 +1891,13 @@ p value:0.29995390921191584
   </nav></div>
 
   <div class="sidebar-secondary-item">
-
-  <div class="tocsection sourcelink">
-    <a href="../_sources/example_notebooks/dowhy-conditional-treatment-effects.ipynb.txt">
-      <i class="fa-solid fa-file-lines"></i> Show Source
-    </a>
-  </div>
-</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/example_notebooks/dowhy-conditional-treatment-effects.ipynb.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
 
 </div></div>
               
@@ -2177,8 +1912,8 @@ p value:0.29995390921191584
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -2198,7 +1933,7 @@ p value:0.29995390921191584
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
     <br/>
   </p>
 </div>
@@ -2211,7 +1946,8 @@ p value:0.29995390921191584
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.4.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

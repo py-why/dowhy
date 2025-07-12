@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 
 
-<html lang="en" data-content_root="" >
+<html lang="en" data-content_root="../" >
 
   <head>
     <meta charset="utf-8" />
@@ -23,35 +23,38 @@
   
   <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
-    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-
-  
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=949a1ff5" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
   
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
-  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../_static/jquery.js?v=5d32c60e"></script>
     <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=b3ba4146"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
-    <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=0c6e27e1"></script>
     <script src="../_static/design-tabs.js?v=36754332"></script>
@@ -66,6 +69,7 @@
     <link rel="prev" title="Demo for DoWhy Causal Prediction on MNIST" href="prediction/dowhy_causal_prediction_demo.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="main" />
   </head>
   
   
@@ -73,32 +77,16 @@
 
   
   
-  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
   
   <div id="pst-scroll-pixel-helper"></div>
-
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
-    <i class="fa-solid fa-arrow-up"></i>
-    Back to top
-  </button>
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__primary"
-          id="__primary"/>
-  <label class="overlay overlay-primary" for="__primary"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__secondary"
-          id="__secondary"/>
-  <label class="overlay overlay-secondary" for="__secondary"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="../search.html"
       method="get">
@@ -106,7 +94,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -114,20 +101,27 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
   
-    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <label class="sidebar-toggle primary-toggle" for="__primary">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
-  </label>
+  </button>
   
   
   <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
 
+  
+    
   
 
 <a class="navbar-brand logo" href="../index.html">
@@ -142,7 +136,7 @@
     
     
     <img src="../_static/dowhy-logo-small.png" class="logo__image only-light" alt="DoWhy  documentation - Home"/>
-    <script>document.write(`<img src="../_static/dowhy-logo-small.png" class="logo__image only-dark" alt="DoWhy  documentation - Home"/>`);</script>
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-dark pst-js-only" alt="DoWhy  documentation - Home"/>
   
   
 </a></div>
@@ -154,68 +148,64 @@
     <div class="me-auto navbar-header-items__center">
       
         <div class="navbar-item">
-<nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../getting_started/index.html">
-                        Getting Started
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../user_guide/index.html">
-                        User Guide
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="nb_index.html">
-                        Examples
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../cite.html">
-                        Citing this package
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../contributing.html">
-                        Contributing
-                      </a>
-                    </li>
-                
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="nb_index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing.html">
+    Contributing
+  </a>
+</li>
+
             <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
                     More
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
-                        dowhy package
-                      </a>
-                    </li>
-                
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
+    dowhy package
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
-                        Release notes
-                      </a>
-                    </li>
-                
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
+    Release notes
+  </a>
+</li>
+
                 </ul>
             </li>
             
@@ -230,15 +220,11 @@
         <div class="navbar-item navbar-persistent--container">
           
 
- <script>
- document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
         </div>
       
       
@@ -281,31 +267,31 @@
   
     <div class="navbar-persistent--mobile">
 
- <script>
- document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
     </div>
   
 
   
-    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
       <span class="fa-solid fa-outdent"></span>
-    </label>
+    </button>
   
 </div>
 
-    </nav>
+    </header>
   
+
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
       
-      <div class="bd-sidebar-primary bd-sidebar">
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -314,74 +300,63 @@
     
       <div class="sidebar-header-items__center">
         
-          <div class="navbar-item">
-<nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+          
+          
+            <div class="navbar-item">
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../getting_started/index.html">
-                        Getting Started
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../user_guide/index.html">
-                        User Guide
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="nb_index.html">
-                        Examples
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../cite.html">
-                        Citing this package
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../contributing.html">
-                        Contributing
-                      </a>
-                    </li>
-                
-            <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links-2">
-                    More
-                </button>
-                <ul id="pst-nav-more-links-2" class="dropdown-menu">
-                    
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
-                        dowhy package
-                      </a>
-                    </li>
-                
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="nb_index.html">
+    Examples
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
-                        Release notes
-                      </a>
-                    </li>
-                
-                </ul>
-            </li>
-            
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../dowhy.html">
+    dowhy package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../code_repo.html">
+    Release notes
+  </a>
+</li>
+
   </ul>
 </nav></div>
+          
         
       </div>
     
@@ -521,29 +496,32 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
       
-      <main id="main-content" class="bd-main">
+      <main id="main-content" class="bd-main" role="main">
         
         
           <div class="bd-content">
             <div class="bd-article-container">
               
-              <div class="bd-header-article">
+              <div class="bd-header-article d-print-none">
 <div class="header-article-items header-article__inner">
   
     <div class="header-article-items__start">
       
         <div class="header-article-item">
 
-
-
-<nav aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
@@ -554,7 +532,7 @@
     
     <li class="breadcrumb-item"><a href="nb_index.html" class="nav-link">Example notebooks</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">Lalonde...</li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Lalonde Pandas API Example</span></li>
   </ul>
 </nav>
 </div>
@@ -569,10 +547,10 @@
               
                 
 <div id="searchbox"></div>
-                <article class="bd-article" role="main">
+                <article class="bd-article">
                   
   <section id="Lalonde-Pandas-API-Example">
-<h1>Lalonde Pandas API Example<a class="headerlink" href="#Lalonde-Pandas-API-Example" title="Permalink to this heading">#</a></h1>
+<h1>Lalonde Pandas API Example<a class="headerlink" href="#Lalonde-Pandas-API-Example" title="Link to this heading">#</a></h1>
 <p>by Adam Kelleher</p>
 <p>We’ll run through a quick example using the high-level Python API for the DoSampler. The DoSampler is different from most classic causal effect estimators. Instead of estimating statistics under interventions, it aims to provide the generality of Pearlian causal inference. In that context, the joint distribution of the variables under an intervention is the quantity of interest. It’s hard to represent a joint distribution nonparametrically, so instead we provide a sample from that distribution,
 which we call a “do” sample.</p>
@@ -587,7 +565,7 @@ which we call a “do” sample.</p>
 </div>
 </div>
 <section id="Getting-the-Data">
-<h2>Getting the Data<a class="headerlink" href="#Getting-the-Data" title="Permalink to this heading">#</a></h2>
+<h2>Getting the Data<a class="headerlink" href="#Getting-the-Data" title="Link to this heading">#</a></h2>
 <p>First, download the data from the LaLonde example.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
@@ -601,7 +579,7 @@ which we call a “do” sample.</p>
 </div>
 </section>
 <section id="The-causal-Namespace">
-<h2>The <code class="docutils literal notranslate"><span class="pre">causal</span></code> Namespace<a class="headerlink" href="#The-causal-Namespace" title="Permalink to this heading">#</a></h2>
+<h2>The <code class="docutils literal notranslate"><span class="pre">causal</span></code> Namespace<a class="headerlink" href="#The-causal-Namespace" title="Link to this heading">#</a></h2>
 <p>We’ve created a “namespace” for <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code>s containing causal inference methods. You can access it here with <code class="docutils literal notranslate"><span class="pre">lalonde.causal</span></code>, where <code class="docutils literal notranslate"><span class="pre">lalonde</span></code> is our <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code>, and <code class="docutils literal notranslate"><span class="pre">causal</span></code> contains all our new methods! These methods are magically loaded into your existing (and future) dataframes when you <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">dowhy.api</span></code>.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
@@ -614,7 +592,7 @@ which we call a “do” sample.</p>
 <p>Now that we have the <code class="docutils literal notranslate"><span class="pre">causal</span></code> namespace, lets give it a try!</p>
 </section>
 <section id="The-do-Operation">
-<h2>The <code class="docutils literal notranslate"><span class="pre">do</span></code> Operation<a class="headerlink" href="#The-do-Operation" title="Permalink to this heading">#</a></h2>
+<h2>The <code class="docutils literal notranslate"><span class="pre">do</span></code> Operation<a class="headerlink" href="#The-do-Operation" title="Link to this heading">#</a></h2>
 <p>The key feature here is the <code class="docutils literal notranslate"><span class="pre">do</span></code> method, which produces a new dataframe replacing the treatment variable with values specified, and the outcome with a sample from the interventional distribution of the outcome. If you don’t specify a value for the treatment, it leaves the treatment untouched:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
@@ -814,80 +792,80 @@ which we call a “do” sample.</p>
       <td>0.0</td>
       <td>1.0</td>
       <td>0.0</td>
-      <td>1896.023</td>
-      <td>5573.547</td>
+      <td>0.000</td>
+      <td>0.000</td>
       <td>1.0</td>
-      <td>0.0</td>
-      <td>0.640705</td>
-      <td>1.560780</td>
+      <td>1.0</td>
+      <td>0.640690</td>
+      <td>1.560818</td>
     </tr>
     <tr>
       <th>1</th>
       <td>True</td>
-      <td>17.0</td>
+      <td>28.0</td>
       <td>10.0</td>
       <td>1.0</td>
       <td>0.0</td>
       <td>0.0</td>
       <td>1.0</td>
       <td>0.0</td>
-      <td>0.000</td>
-      <td>0.000</td>
+      <td>2836.506</td>
+      <td>3196.571</td>
       <td>1.0</td>
-      <td>1.0</td>
-      <td>0.361685</td>
-      <td>2.764838</td>
+      <td>0.0</td>
+      <td>0.378883</td>
+      <td>2.639338</td>
     </tr>
     <tr>
       <th>2</th>
       <td>True</td>
-      <td>18.0</td>
-      <td>8.0</td>
+      <td>26.0</td>
+      <td>11.0</td>
+      <td>1.0</td>
       <td>0.0</td>
-      <td>1.0</td>
-      <td>1.0</td>
+      <td>0.0</td>
       <td>1.0</td>
       <td>0.0</td>
       <td>0.000</td>
-      <td>2787.960</td>
+      <td>17230.960</td>
       <td>1.0</td>
       <td>1.0</td>
-      <td>0.323638</td>
-      <td>3.089872</td>
+      <td>0.363955</td>
+      <td>2.747594</td>
     </tr>
     <tr>
       <th>3</th>
       <td>False</td>
-      <td>18.0</td>
+      <td>25.0</td>
       <td>9.0</td>
-      <td>1.0</td>
       <td>0.0</td>
+      <td>1.0</td>
       <td>0.0</td>
       <td>1.0</td>
       <td>0.0</td>
       <td>0.000</td>
-      <td>0.000</td>
+      <td>15791.130</td>
       <td>1.0</td>
       <td>1.0</td>
-      <td>0.624983</td>
-      <td>1.600044</td>
+      <td>0.721312</td>
+      <td>1.386363</td>
     </tr>
     <tr>
       <th>4</th>
       <td>True</td>
-      <td>26.0</td>
-      <td>10.0</td>
+      <td>19.0</td>
+      <td>11.0</td>
       <td>1.0</td>
       <td>0.0</td>
       <td>0.0</td>
       <td>1.0</td>
       <td>0.0</td>
       <td>0.000</td>
-      <td>9265.788</td>
+      <td>7458.105</td>
       <td>1.0</td>
       <td>1.0</td>
-      <td>0.375731</td>
-      <td>2.661482</td>
+      <td>0.353159</td>
+      <td>2.831586</td>
     </tr>
   </tbody>
 </table>
@@ -895,7 +873,7 @@ which we call a “do” sample.</p>
 </div>
 </section>
 <section id="Treatment-Effect-Estimation">
-<h2>Treatment Effect Estimation<a class="headerlink" href="#Treatment-Effect-Estimation" title="Permalink to this heading">#</a></h2>
+<h2>Treatment Effect Estimation<a class="headerlink" href="#Treatment-Effect-Estimation" title="Link to this heading">#</a></h2>
 <p>We could get a naive estimate before for a treatment effect by doing</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
@@ -928,7 +906,7 @@ $\displaystyle 1794.34240427027$</div></div>
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle 1473.47588961236$</div></div>
+$\displaystyle 2747.66239139381$</div></div>
 </div>
 <p>We could get some rough error bars on the outcome using the normal approximation for a 95% confidence interval, like</p>
 <div class="nbinput docutils container">
@@ -947,7 +925,7 @@ $\displaystyle 1473.47588961236$</div></div>
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle 1170.91652488979$</div></div>
+$\displaystyle 1700.96557357688$</div></div>
 </div>
 <p>but note that these DO NOT contain propensity score estimation error. For that, a bootstrapping procedure might be more appropriate.</p>
 <p>This is just one statistic we can compute from the interventional distribution of <code class="docutils literal notranslate"><span class="pre">'re78'</span></code>. We can get all of the interventional moments as well, including functions of <code class="docutils literal notranslate"><span class="pre">'re78'</span></code>. We can leverage the full power of pandas, like</p>
@@ -966,12 +944,12 @@ $\displaystyle 1170.91652488979$</div></div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 count      445.000000
-mean      5458.270995
-std       6449.126605
+mean      6244.279483
+std       9365.346866
 min          0.000000
 25%          0.000000
-50%       3880.833000
-75%       8546.715000
+50%       3786.628000
+75%       8993.865000
 max      60307.930000
 Name: re78, dtype: float64
 </pre></div></div>
@@ -1062,7 +1040,7 @@ Name: re78, dtype: float64
 </div>
 </section>
 <section id="Specifying-Interventions">
-<h2>Specifying Interventions<a class="headerlink" href="#Specifying-Interventions" title="Permalink to this heading">#</a></h2>
+<h2>Specifying Interventions<a class="headerlink" href="#Specifying-Interventions" title="Link to this heading">#</a></h2>
 <p>You can find the distribution of the outcome under an intervention to set the value of the treatment.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
@@ -1128,87 +1106,87 @@ Name: re78, dtype: float64
     <tr>
       <th>0</th>
       <td>True</td>
-      <td>42.0</td>
-      <td>14.0</td>
+      <td>17.0</td>
+      <td>10.0</td>
       <td>1.0</td>
       <td>0.0</td>
       <td>0.0</td>
-      <td>0.0</td>
+      <td>1.0</td>
       <td>0.000</td>
       <td>0.000</td>
-      <td>20505.9300</td>
+      <td>16218.040</td>
       <td>1.0</td>
       <td>1.0</td>
-      <td>0.541929</td>
-      <td>1.845261</td>
+      <td>0.361685</td>
+      <td>2.764838</td>
     </tr>
     <tr>
       <th>1</th>
       <td>True</td>
-      <td>20.0</td>
-      <td>9.0</td>
+      <td>31.0</td>
+      <td>4.0</td>
       <td>1.0</td>
       <td>0.0</td>
       <td>0.0</td>
       <td>1.0</td>
-      <td>6083.994</td>
-      <td>0.000</td>
-      <td>8881.6650</td>
+      <td>8517.589</td>
+      <td>4023.211</td>
+      <td>7382.549</td>
       <td>0.0</td>
-      <td>1.0</td>
-      <td>0.378166</td>
-      <td>2.644344</td>
+      <td>0.0</td>
+      <td>0.457364</td>
+      <td>2.186445</td>
     </tr>
     <tr>
       <th>2</th>
       <td>True</td>
-      <td>21.0</td>
-      <td>9.0</td>
+      <td>17.0</td>
+      <td>10.0</td>
       <td>1.0</td>
       <td>0.0</td>
       <td>0.0</td>
       <td>1.0</td>
-      <td>6416.470</td>
-      <td>5749.331</td>
-      <td>743.6666</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>0.379744</td>
-      <td>2.633355</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>0.361685</td>
+      <td>2.764838</td>
     </tr>
     <tr>
       <th>3</th>
       <td>True</td>
-      <td>20.0</td>
-      <td>11.0</td>
+      <td>21.0</td>
+      <td>12.0</td>
       <td>1.0</td>
       <td>0.0</td>
       <td>0.0</td>
+      <td>0.0</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>1254.582</td>
       <td>1.0</td>
-      <td>3637.498</td>
-      <td>1220.836</td>
-      <td>1085.4400</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>0.354677</td>
-      <td>2.819466</td>
+      <td>1.0</td>
+      <td>0.532036</td>
+      <td>1.879573</td>
     </tr>
     <tr>
       <th>4</th>
       <td>True</td>
-      <td>20.0</td>
-      <td>11.0</td>
+      <td>38.0</td>
+      <td>12.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>4941.849</td>
       <td>1.0</td>
-      <td>0.0</td>
-      <td>0.0</td>
       <td>1.0</td>
-      <td>3637.498</td>
-      <td>1220.836</td>
-      <td>1085.4400</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>0.354677</td>
-      <td>2.819466</td>
+      <td>0.600143</td>
+      <td>1.666268</td>
     </tr>
   </tbody>
 </table>
@@ -1287,7 +1265,7 @@ do(x, method=&#39;weighting&#39;, num_cores=1, variable_types={}, outcome=None, 
               
               
               
-                <footer class="prev-next-footer">
+                <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
     <a class="left-prev"
@@ -1315,14 +1293,17 @@ do(x, method=&#39;weighting&#39;, num_cores=1, variable_types={}, outcome=None, 
             
             
               
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
 
   <div class="sidebar-secondary-item">
-
-  <div class="page-toc tocsection onthispage">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> On this page
   </div>
-  <nav class="bd-toc-nav page-toc">
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Getting-the-Data">Getting the Data</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#The-causal-Namespace">The <code class="docutils literal notranslate"><span class="pre">causal</span></code> Namespace</a></li>
@@ -1333,13 +1314,13 @@ do(x, method=&#39;weighting&#39;, num_cores=1, variable_types={}, outcome=None, 
   </nav></div>
 
   <div class="sidebar-secondary-item">
-
-  <div class="tocsection sourcelink">
-    <a href="../_sources/example_notebooks/lalonde_pandas_api.ipynb.txt">
-      <i class="fa-solid fa-file-lines"></i> Show Source
-    </a>
-  </div>
-</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/example_notebooks/lalonde_pandas_api.ipynb.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
 
 </div></div>
               
@@ -1354,8 +1335,8 @@ do(x, method=&#39;weighting&#39;, num_cores=1, variable_types={}, outcome=None, 
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1375,7 +1356,7 @@ do(x, method=&#39;weighting&#39;, num_cores=1, variable_types={}, outcome=None, 
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
     <br/>
   </p>
 </div>
@@ -1388,7 +1369,8 @@ do(x, method=&#39;weighting&#39;, num_cores=1, variable_types={}, outcome=None, 
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.4.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

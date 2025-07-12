@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 
 
-<html lang="en" data-content_root="" >
+<html lang="en" data-content_root="../" >
 
   <head>
     <meta charset="utf-8" />
@@ -23,35 +23,38 @@
   
   <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
-    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-
-  
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=949a1ff5" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
   
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
-  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../_static/jquery.js?v=5d32c60e"></script>
     <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=b3ba4146"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
-    <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=0c6e27e1"></script>
     <script src="../_static/design-tabs.js?v=36754332"></script>
@@ -66,6 +69,7 @@
     <link rel="prev" title="Basic Example for Calculating the Causal Effect" href="dowhy_simple_example.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="main" />
   </head>
   
   
@@ -73,32 +77,16 @@
 
   
   
-  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
   
   <div id="pst-scroll-pixel-helper"></div>
-
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
-    <i class="fa-solid fa-arrow-up"></i>
-    Back to top
-  </button>
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__primary"
-          id="__primary"/>
-  <label class="overlay overlay-primary" for="__primary"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__secondary"
-          id="__secondary"/>
-  <label class="overlay overlay-secondary" for="__secondary"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="../search.html"
       method="get">
@@ -106,7 +94,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -114,20 +101,27 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
   
-    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <label class="sidebar-toggle primary-toggle" for="__primary">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
-  </label>
+  </button>
   
   
   <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
 
+  
+    
   
 
 <a class="navbar-brand logo" href="../index.html">
@@ -142,7 +136,7 @@
     
     
     <img src="../_static/dowhy-logo-small.png" class="logo__image only-light" alt="DoWhy  documentation - Home"/>
-    <script>document.write(`<img src="../_static/dowhy-logo-small.png" class="logo__image only-dark" alt="DoWhy  documentation - Home"/>`);</script>
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-dark pst-js-only" alt="DoWhy  documentation - Home"/>
   
   
 </a></div>
@@ -154,68 +148,64 @@
     <div class="me-auto navbar-header-items__center">
       
         <div class="navbar-item">
-<nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../getting_started/index.html">
-                        Getting Started
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../user_guide/index.html">
-                        User Guide
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="nb_index.html">
-                        Examples
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../cite.html">
-                        Citing this package
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../contributing.html">
-                        Contributing
-                      </a>
-                    </li>
-                
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="nb_index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing.html">
+    Contributing
+  </a>
+</li>
+
             <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
                     More
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
-                        dowhy package
-                      </a>
-                    </li>
-                
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
+    dowhy package
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
-                        Release notes
-                      </a>
-                    </li>
-                
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
+    Release notes
+  </a>
+</li>
+
                 </ul>
             </li>
             
@@ -230,15 +220,11 @@
         <div class="navbar-item navbar-persistent--container">
           
 
- <script>
- document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
         </div>
       
       
@@ -281,31 +267,31 @@
   
     <div class="navbar-persistent--mobile">
 
- <script>
- document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
     </div>
   
 
   
-    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
       <span class="fa-solid fa-outdent"></span>
-    </label>
+    </button>
   
 </div>
 
-    </nav>
+    </header>
   
+
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
       
-      <div class="bd-sidebar-primary bd-sidebar">
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -314,74 +300,63 @@
     
       <div class="sidebar-header-items__center">
         
-          <div class="navbar-item">
-<nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+          
+          
+            <div class="navbar-item">
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../getting_started/index.html">
-                        Getting Started
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../user_guide/index.html">
-                        User Guide
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="nb_index.html">
-                        Examples
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../cite.html">
-                        Citing this package
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../contributing.html">
-                        Contributing
-                      </a>
-                    </li>
-                
-            <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links-2">
-                    More
-                </button>
-                <ul id="pst-nav-more-links-2" class="dropdown-menu">
-                    
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
-                        dowhy package
-                      </a>
-                    </li>
-                
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="nb_index.html">
+    Examples
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
-                        Release notes
-                      </a>
-                    </li>
-                
-                </ul>
-            </li>
-            
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../dowhy.html">
+    dowhy package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../code_repo.html">
+    Release notes
+  </a>
+</li>
+
   </ul>
 </nav></div>
+          
         
       </div>
     
@@ -521,29 +496,32 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
       
-      <main id="main-content" class="bd-main">
+      <main id="main-content" class="bd-main" role="main">
         
         
           <div class="bd-content">
             <div class="bd-article-container">
               
-              <div class="bd-header-article">
+              <div class="bd-header-article d-print-none">
 <div class="header-article-items header-article__inner">
   
     <div class="header-article-items__start">
       
         <div class="header-article-item">
 
-
-
-<nav aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
@@ -554,7 +532,7 @@
     
     <li class="breadcrumb-item"><a href="nb_index.html" class="nav-link">Example notebooks</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">Basic...</li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Basic Example for Graphical Causal Models</span></li>
   </ul>
 </nav>
 </div>
@@ -569,12 +547,12 @@
               
                 
 <div id="searchbox"></div>
-                <article class="bd-article" role="main">
+                <article class="bd-article">
                   
   <section id="Basic-Example-for-Graphical-Causal-Models">
-<h1>Basic Example for Graphical Causal Models<a class="headerlink" href="#Basic-Example-for-Graphical-Causal-Models" title="Permalink to this heading">#</a></h1>
+<h1>Basic Example for Graphical Causal Models<a class="headerlink" href="#Basic-Example-for-Graphical-Causal-Models" title="Link to this heading">#</a></h1>
 <section id="Step-1:-Modeling-cause-effect-relationships-as-a-structural-causal-model-(SCM)">
-<h2>Step 1: Modeling cause-effect relationships as a structural causal model (SCM)<a class="headerlink" href="#Step-1:-Modeling-cause-effect-relationships-as-a-structural-causal-model-(SCM)" title="Permalink to this heading">#</a></h2>
+<h2>Step 1: Modeling cause-effect relationships as a structural causal model (SCM)<a class="headerlink" href="#Step-1:-Modeling-cause-effect-relationships-as-a-structural-causal-model-(SCM)" title="Link to this heading">#</a></h2>
 <p>The first step is to model the cause-effect relationships between variables relevant to our use case. We do that in form of a causal graph. A causal graph is a directed acyclic graph (DAG) where an edge X→Y implies that X causes Y. Statistically, a causal graph encodes the conditional independence relations between variables. Using the <a class="reference external" href="https://networkx.org/">NetworkX</a> library, we can create causal graphs. In the snippet below, we create a chain X→Y→Z:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -641,33 +619,33 @@
   <tbody>
     <tr>
       <th>0</th>
-      <td>-0.812606</td>
-      <td>-2.192239</td>
-      <td>-5.398988</td>
+      <td>0.409206</td>
+      <td>1.798900</td>
+      <td>5.548747</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>-0.750018</td>
-      <td>-2.554712</td>
-      <td>-8.294816</td>
+      <td>1.640677</td>
+      <td>2.678759</td>
+      <td>8.957676</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>0.898334</td>
-      <td>2.836830</td>
-      <td>7.960150</td>
+      <td>0.541013</td>
+      <td>-0.039373</td>
+      <td>2.050344</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>1.752801</td>
-      <td>3.034862</td>
-      <td>7.883919</td>
+      <td>-0.304573</td>
+      <td>-0.653298</td>
+      <td>-0.859125</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>0.841182</td>
-      <td>0.696234</td>
-      <td>1.452936</td>
+      <td>-1.457572</td>
+      <td>-4.158527</td>
+      <td>-10.827359</td>
     </tr>
   </tbody>
 </table>
@@ -723,19 +701,19 @@ Node X is a root node. Therefore, assigning &#39;Empirical Distribution&#39; to 
 Node Y is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using LinearRegression&#39; to the node.
 This represents the causal relationship as Y := f(X) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
-LinearRegression: 0.937376995337664
+LinearRegression: 1.0190610711074561
 Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 0.9386449399821963
-HistGradientBoostingRegressor: 1.0574942019478613
+                (&#39;linearregression&#39;, LinearRegression)]): 1.0192376831815206
+HistGradientBoostingRegressor: 1.1377935450397594
 
 --- Node: Z
-Node Z is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using Pipeline&#39; to the node.
+Node Z is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using LinearRegression&#39; to the node.
 This represents the causal relationship as Z := f(Y) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
+LinearRegression: 1.098697831641163
 Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 1.0819901313522031
-LinearRegression: 1.0840480918276874
-HistGradientBoostingRegressor: 1.5467437289747508
+                (&#39;linearregression&#39;, LinearRegression)]): 1.1055958472623169
+HistGradientBoostingRegressor: 1.6351041480394932
 
 ===Note===
 Note, based on the selected auto assignment quality, the set of evaluated models changes.
@@ -757,7 +735,7 @@ For more insights toward the quality of the fitted graphical causal model, consi
 <p>In the real world, the data comes as an opaque stream of values, where we typically don’t know how one variable influences another. The graphical causal models can help us to deconstruct these causal relationships again, even though we didn’t know them before.</p>
 </section>
 <section id="Step-2:-Fitting-the-SCM-to-the-data">
-<h2>Step 2: Fitting the SCM to the data<a class="headerlink" href="#Step-2:-Fitting-the-SCM-to-the-data" title="Permalink to this heading">#</a></h2>
+<h2>Step 2: Fitting the SCM to the data<a class="headerlink" href="#Step-2:-Fitting-the-SCM-to-the-data" title="Link to this heading">#</a></h2>
 <p>With the data at hand and the graph constructed earlier, we can now train the SCM using <code class="docutils literal notranslate"><span class="pre">fit</span></code>:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
@@ -772,7 +750,7 @@ For more insights toward the quality of the fitted graphical causal model, consi
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node Z: 100%|██████████| 3/3 [00:00&lt;00:00, 510.11it/s]
+Fitting causal mechanism of node Z: 100%|██████████| 3/3 [00:00&lt;00:00, 466.97it/s]
 </pre></div></div>
 </div>
 <p>Fitting means, we learn the generative models of the variables in the SCM according to the data.</p>
@@ -790,8 +768,8 @@ Fitting causal mechanism of node Z: 100%|██████████| 3/3 [00
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Evaluating causal mechanisms...: 100%|██████████| 3/3 [00:00&lt;00:00, 4416.61it/s]
-Test permutations of given graph: 100%|██████████| 6/6 [00:00&lt;00:00, 18.72it/s]
+Evaluating causal mechanisms...: 100%|██████████| 3/3 [00:00&lt;00:00, 3722.76it/s]
+Test permutations of given graph: 100%|██████████| 6/6 [00:00&lt;00:00, 18.64it/s]
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -820,21 +798,21 @@ NOTE: Every metric focuses on different aspects and they might not consistently 
 We will mostly utilize the CRPS for comparing and interpreting the performance of the mechanisms, since this captures the most important properties for the causal model.
 
 --- Node X
-- The KL divergence between generated and observed distribution is 0.10453038350553716.
+- The KL divergence between generated and observed distribution is 0.05992679896563795.
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
 --- Node Y
-- The MSE is 0.9392977253166682.
-- The NMSE is 0.4217632005854689.
-- The R2 coefficient is 0.8213745141735801.
-- The normalized CRPS is 0.24167379379641646.
+- The MSE is 1.0195769454074095.
+- The NMSE is 0.45334353193355365.
+- The R2 coefficient is 0.7942850331892781.
+- The normalized CRPS is 0.25824987201165384.
 The estimated CRPS indicates a good model performance.
 
 --- Node Z
-- The MSE is 1.0822803424729204.
-- The NMSE is 0.14843996202845616.
-- The R2 coefficient is 0.9778626719937519.
-- The normalized CRPS is 0.0843086944250139.
+- The MSE is 1.1031140833946584.
+- The NMSE is 0.15461892368786193.
+- The R2 coefficient is 0.9760528196895134.
+- The normalized CRPS is 0.0881372502403747.
 The estimated CRPS indicates a very good model performance.
 
 ==== Evaluation of Invertible Functional Causal Model Assumption ====
@@ -848,7 +826,7 @@ This implies that the model assumption might be valid.
 Note that these results are based on statistical independence tests, and the fact that the assumption was not rejected does not necessarily imply that it is correct. There is just no evidence against it.
 
 ==== Evaluation of Generated Distribution ====
-The overall average KL divergence between the generated and observed distribution is 0.0
+The overall average KL divergence between the generated and observed distribution is 0.011670157729673244
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
 ==== Evaluation of the Causal Graph Structure ====
@@ -879,7 +857,7 @@ All these evaluations give some insight into the goodness of the causal model, b
 </div></blockquote>
 </section>
 <section id="Step-3:-Answering-a-causal-query-based-on-the-SCM">
-<h2>Step 3: Answering a causal query based on the SCM<a class="headerlink" href="#Step-3:-Answering-a-causal-query-based-on-the-SCM" title="Permalink to this heading">#</a></h2>
+<h2>Step 3: Answering a causal query based on the SCM<a class="headerlink" href="#Step-3:-Answering-a-causal-query-based-on-the-SCM" title="Link to this heading">#</a></h2>
 <p>The last step, answering a causal question, is our actual goal. E.g. we could ask the question “What will happen to the variable Z if I intervene on Y?”.</p>
 <p>This can be done via the <code class="docutils literal notranslate"><span class="pre">interventional_samples</span></code> function. Here’s how:</p>
 <div class="nbinput docutils container">
@@ -924,33 +902,33 @@ All these evaluations give some insight into the goodness of the causal model, b
   <tbody>
     <tr>
       <th>0</th>
-      <td>-1.959448</td>
+      <td>2.194101</td>
       <td>2.34</td>
-      <td>7.028071</td>
+      <td>5.941695</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>3.010308</td>
+      <td>-0.347951</td>
       <td>2.34</td>
-      <td>6.099170</td>
+      <td>5.955464</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>-0.745334</td>
+      <td>0.917600</td>
       <td>2.34</td>
-      <td>6.630897</td>
+      <td>5.720083</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>1.609583</td>
+      <td>0.487557</td>
       <td>2.34</td>
-      <td>7.861151</td>
+      <td>7.681307</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>1.362622</td>
+      <td>-0.473753</td>
       <td>2.34</td>
-      <td>7.176913</td>
+      <td>10.447217</td>
     </tr>
   </tbody>
 </table>
@@ -970,7 +948,7 @@ All these evaluations give some insight into the goodness of the causal model, b
               
               
               
-                <footer class="prev-next-footer">
+                <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
     <a class="left-prev"
@@ -998,14 +976,17 @@ All these evaluations give some insight into the goodness of the causal model, b
             
             
               
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
 
   <div class="sidebar-secondary-item">
-
-  <div class="page-toc tocsection onthispage">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> On this page
   </div>
-  <nav class="bd-toc-nav page-toc">
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Step-1:-Modeling-cause-effect-relationships-as-a-structural-causal-model-(SCM)">Step 1: Modeling cause-effect relationships as a structural causal model (SCM)</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Step-2:-Fitting-the-SCM-to-the-data">Step 2: Fitting the SCM to the data</a></li>
@@ -1014,13 +995,13 @@ All these evaluations give some insight into the goodness of the causal model, b
   </nav></div>
 
   <div class="sidebar-secondary-item">
-
-  <div class="tocsection sourcelink">
-    <a href="../_sources/example_notebooks/gcm_basic_example.ipynb.txt">
-      <i class="fa-solid fa-file-lines"></i> Show Source
-    </a>
-  </div>
-</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/example_notebooks/gcm_basic_example.ipynb.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
 
 </div></div>
               
@@ -1035,8 +1016,8 @@ All these evaluations give some insight into the goodness of the causal model, b
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1056,7 +1037,7 @@ All these evaluations give some insight into the goodness of the causal model, b
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
     <br/>
   </p>
 </div>
@@ -1069,7 +1050,8 @@ All these evaluations give some insight into the goodness of the causal model, b
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.4.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 
 
-<html lang="en" data-content_root="" >
+<html lang="en" data-content_root="../" >
 
   <head>
     <meta charset="utf-8" />
@@ -23,35 +23,38 @@
   
   <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
-    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-
-  
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=949a1ff5" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
   
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
-  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../_static/jquery.js?v=5d32c60e"></script>
     <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=b3ba4146"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
-    <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=0c6e27e1"></script>
     <script src="../_static/design-tabs.js?v=36754332"></script>
@@ -66,6 +69,7 @@
     <link rel="prev" title="Simple example on using Instrumental Variables method for estimation" href="dowhy-simple-iv-example.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="main" />
   </head>
   
   
@@ -73,32 +77,16 @@
 
   
   
-  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
   
   <div id="pst-scroll-pixel-helper"></div>
-
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
-    <i class="fa-solid fa-arrow-up"></i>
-    Back to top
-  </button>
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__primary"
-          id="__primary"/>
-  <label class="overlay overlay-primary" for="__primary"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__secondary"
-          id="__secondary"/>
-  <label class="overlay overlay-secondary" for="__secondary"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="../search.html"
       method="get">
@@ -106,7 +94,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -114,20 +101,27 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
   
-    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <label class="sidebar-toggle primary-toggle" for="__primary">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
-  </label>
+  </button>
   
   
   <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
 
+  
+    
   
 
 <a class="navbar-brand logo" href="../index.html">
@@ -142,7 +136,7 @@
     
     
     <img src="../_static/dowhy-logo-small.png" class="logo__image only-light" alt="DoWhy  documentation - Home"/>
-    <script>document.write(`<img src="../_static/dowhy-logo-small.png" class="logo__image only-dark" alt="DoWhy  documentation - Home"/>`);</script>
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-dark pst-js-only" alt="DoWhy  documentation - Home"/>
   
   
 </a></div>
@@ -154,68 +148,64 @@
     <div class="me-auto navbar-header-items__center">
       
         <div class="navbar-item">
-<nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../getting_started/index.html">
-                        Getting Started
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../user_guide/index.html">
-                        User Guide
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="nb_index.html">
-                        Examples
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../cite.html">
-                        Citing this package
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../contributing.html">
-                        Contributing
-                      </a>
-                    </li>
-                
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="nb_index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing.html">
+    Contributing
+  </a>
+</li>
+
             <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
                     More
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
-                        dowhy package
-                      </a>
-                    </li>
-                
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
+    dowhy package
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
-                        Release notes
-                      </a>
-                    </li>
-                
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
+    Release notes
+  </a>
+</li>
+
                 </ul>
             </li>
             
@@ -230,15 +220,11 @@
         <div class="navbar-item navbar-persistent--container">
           
 
- <script>
- document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
         </div>
       
       
@@ -281,31 +267,31 @@
   
     <div class="navbar-persistent--mobile">
 
- <script>
- document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
     </div>
   
 
   
-    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
       <span class="fa-solid fa-outdent"></span>
-    </label>
+    </button>
   
 </div>
 
-    </nav>
+    </header>
   
+
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
       
-      <div class="bd-sidebar-primary bd-sidebar">
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -314,74 +300,63 @@
     
       <div class="sidebar-header-items__center">
         
-          <div class="navbar-item">
-<nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+          
+          
+            <div class="navbar-item">
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../getting_started/index.html">
-                        Getting Started
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../user_guide/index.html">
-                        User Guide
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="nb_index.html">
-                        Examples
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../cite.html">
-                        Citing this package
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../contributing.html">
-                        Contributing
-                      </a>
-                    </li>
-                
-            <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links-2">
-                    More
-                </button>
-                <ul id="pst-nav-more-links-2" class="dropdown-menu">
-                    
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
-                        dowhy package
-                      </a>
-                    </li>
-                
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="nb_index.html">
+    Examples
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
-                        Release notes
-                      </a>
-                    </li>
-                
-                </ul>
-            </li>
-            
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../dowhy.html">
+    dowhy package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../code_repo.html">
+    Release notes
+  </a>
+</li>
+
   </ul>
 </nav></div>
+          
         
       </div>
     
@@ -521,29 +496,32 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
       
-      <main id="main-content" class="bd-main">
+      <main id="main-content" class="bd-main" role="main">
         
         
           <div class="bd-content">
             <div class="bd-article-container">
               
-              <div class="bd-header-article">
+              <div class="bd-header-article d-print-none">
 <div class="header-article-items header-article__inner">
   
     <div class="header-article-items__start">
       
         <div class="header-article-item">
 
-
-
-<nav aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
@@ -554,7 +532,7 @@
     
     <li class="breadcrumb-item"><a href="nb_index.html" class="nav-link">Example notebooks</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">DoWhy:...</li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">DoWhy: Interpreters for Causal Estimators</span></li>
   </ul>
 </nav>
 </div>
@@ -569,10 +547,10 @@
               
                 
 <div id="searchbox"></div>
-                <article class="bd-article" role="main">
+                <article class="bd-article">
                   
   <section id="DoWhy:-Interpreters-for-Causal-Estimators">
-<h1>DoWhy: Interpreters for Causal Estimators<a class="headerlink" href="#DoWhy:-Interpreters-for-Causal-Estimators" title="Permalink to this heading">#</a></h1>
+<h1>DoWhy: Interpreters for Causal Estimators<a class="headerlink" href="#DoWhy:-Interpreters-for-Causal-Estimators" title="Link to this heading">#</a></h1>
 <p>This is a quick introduction to the use of interpreters in the DoWhy causal inference library. We will load in a sample dataset, use different methods for estimating the causal effect of a (pre-specified)treatment variable on a (pre-specified) outcome variable and demonstrate how to interpret the obtained results.</p>
 <p>First, let us add the required path for Python to find the DoWhy code and load all required packages</p>
 <div class="nbinput nblast docutils container">
@@ -623,7 +601,7 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-8203
+8150
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -663,63 +641,63 @@
   <tbody>
     <tr>
       <th>0</th>
-      <td>1.0</td>
-      <td>0.803681</td>
-      <td>0.904676</td>
-      <td>0.748970</td>
-      <td>-0.061733</td>
-      <td>0.982071</td>
-      <td>2</td>
+      <td>0.0</td>
+      <td>0.806052</td>
+      <td>-0.973667</td>
+      <td>0.551801</td>
+      <td>-2.250573</td>
+      <td>-1.416675</td>
+      <td>1</td>
       <td>True</td>
-      <td>2.822882</td>
+      <td>-1.149835</td>
     </tr>
     <tr>
       <th>1</th>
       <td>1.0</td>
-      <td>0.595853</td>
-      <td>-2.236700</td>
-      <td>-0.249905</td>
-      <td>0.557696</td>
-      <td>0.239798</td>
-      <td>2</td>
+      <td>0.951138</td>
+      <td>0.528899</td>
+      <td>-0.247080</td>
+      <td>-1.039145</td>
+      <td>-1.602184</td>
+      <td>0</td>
       <td>True</td>
-      <td>1.699865</td>
+      <td>-0.335557</td>
     </tr>
     <tr>
       <th>2</th>
       <td>1.0</td>
-      <td>0.312079</td>
-      <td>-0.632266</td>
-      <td>-1.357703</td>
-      <td>0.017140</td>
-      <td>1.876610</td>
-      <td>3</td>
+      <td>0.536925</td>
+      <td>0.000737</td>
+      <td>0.587963</td>
+      <td>-0.926245</td>
+      <td>1.557898</td>
+      <td>0</td>
       <td>True</td>
-      <td>2.467539</td>
+      <td>0.921484</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>0.0</td>
-      <td>0.965298</td>
-      <td>-0.479696</td>
-      <td>-0.818210</td>
-      <td>0.250621</td>
-      <td>-1.702304</td>
-      <td>1</td>
+      <td>1.0</td>
+      <td>0.672012</td>
+      <td>-1.087275</td>
+      <td>1.912746</td>
+      <td>0.011215</td>
+      <td>0.097072</td>
+      <td>3</td>
       <td>True</td>
-      <td>-0.029332</td>
+      <td>1.289339</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>1.0</td>
-      <td>0.673042</td>
-      <td>-1.126186</td>
-      <td>-0.956555</td>
-      <td>-0.424803</td>
-      <td>-0.614275</td>
-      <td>1</td>
-      <td>True</td>
-      <td>0.228534</td>
+      <td>0.0</td>
+      <td>0.549146</td>
+      <td>-2.598159</td>
+      <td>1.770060</td>
+      <td>-1.174604</td>
+      <td>0.844689</td>
+      <td>3</td>
+      <td>False</td>
+      <td>-0.377010</td>
     </tr>
     <tr>
       <th>...</th>
@@ -735,63 +713,63 @@
     </tr>
     <tr>
       <th>9995</th>
-      <td>0.0</td>
-      <td>0.320711</td>
-      <td>-2.504484</td>
-      <td>-0.558435</td>
-      <td>0.838669</td>
-      <td>-1.958887</td>
-      <td>1</td>
+      <td>1.0</td>
+      <td>0.736630</td>
+      <td>1.045958</td>
+      <td>0.437665</td>
+      <td>-1.792507</td>
+      <td>0.506313</td>
+      <td>0</td>
       <td>True</td>
-      <td>-0.071323</td>
+      <td>-0.042705</td>
     </tr>
     <tr>
       <th>9996</th>
-      <td>1.0</td>
-      <td>0.125466</td>
-      <td>-0.815709</td>
-      <td>-2.481470</td>
-      <td>1.261308</td>
-      <td>-0.418612</td>
-      <td>2</td>
-      <td>True</td>
-      <td>0.617863</td>
+      <td>0.0</td>
+      <td>0.102915</td>
+      <td>1.330860</td>
+      <td>0.511428</td>
+      <td>-1.122079</td>
+      <td>-0.585355</td>
+      <td>3</td>
+      <td>False</td>
+      <td>-0.635452</td>
     </tr>
     <tr>
       <th>9997</th>
       <td>0.0</td>
-      <td>0.118570</td>
-      <td>-0.238521</td>
-      <td>-1.252380</td>
-      <td>1.584661</td>
-      <td>-0.872997</td>
-      <td>2</td>
-      <td>False</td>
-      <td>0.190252</td>
+      <td>0.250064</td>
+      <td>1.153866</td>
+      <td>3.285056</td>
+      <td>-2.285185</td>
+      <td>1.283890</td>
+      <td>3</td>
+      <td>True</td>
+      <td>0.262322</td>
     </tr>
     <tr>
       <th>9998</th>
-      <td>0.0</td>
-      <td>0.724010</td>
-      <td>-1.941132</td>
-      <td>0.772816</td>
-      <td>0.700610</td>
-      <td>0.939476</td>
-      <td>3</td>
+      <td>1.0</td>
+      <td>0.386397</td>
+      <td>-0.875518</td>
+      <td>-0.204469</td>
+      <td>0.425281</td>
+      <td>0.474809</td>
+      <td>0</td>
       <td>True</td>
-      <td>3.117005</td>
+      <td>1.417979</td>
     </tr>
     <tr>
       <th>9999</th>
       <td>1.0</td>
-      <td>0.119051</td>
-      <td>-1.365248</td>
-      <td>-1.153350</td>
-      <td>0.553345</td>
-      <td>0.555534</td>
-      <td>1</td>
-      <td>False</td>
-      <td>0.163282</td>
+      <td>0.515779</td>
+      <td>-0.211764</td>
+      <td>1.344956</td>
+      <td>-0.059458</td>
+      <td>1.594488</td>
+      <td>3</td>
+      <td>True</td>
+      <td>1.883798</td>
     </tr>
   </tbody>
 </table>
@@ -800,7 +778,7 @@
 </div>
 <p>Note that we are using a pandas dataframe to load the data.</p>
 <section id="Identifying-the-causal-estimand">
-<h2>Identifying the causal estimand<a class="headerlink" href="#Identifying-the-causal-estimand" title="Permalink to this heading">#</a></h2>
+<h2>Identifying the causal estimand<a class="headerlink" href="#Identifying-the-causal-estimand" title="Link to this heading">#</a></h2>
 <p>We now input a causal graph in the GML graph format.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
@@ -869,9 +847,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W0,W4,W2,W1,W3])
+─────(E[y|W1,W3,W0,W2,W4])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W4,W2,W1,W3,U) = P(y|v0,W0,W4,W2,W1,W3)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W3,W0,W2,W4,U) = P(y|v0,W1,W3,W0,W2,W4)
 
 ### Estimand : 2
 Estimand name: iv
@@ -891,7 +869,7 @@ No such variable(s) found!
 </div>
 </section>
 <section id="Method-1:-Propensity-Score-Stratification">
-<h2>Method 1: Propensity Score Stratification<a class="headerlink" href="#Method-1:-Propensity-Score-Stratification" title="Permalink to this heading">#</a></h2>
+<h2>Method 1: Propensity Score Stratification<a class="headerlink" href="#Method-1:-Propensity-Score-Stratification" title="Link to this heading">#</a></h2>
 <p>We will be using propensity scores to stratify units in the data.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
@@ -919,22 +897,22 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W0,W4,W2,W1,W3])
+─────(E[y|W1,W3,W0,W2,W4])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W4,W2,W1,W3,U) = P(y|v0,W0,W4,W2,W1,W3)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W3,W0,W2,W4,U) = P(y|v0,W1,W3,W0,W2,W4)
 
 ## Realized estimand
-b: y~v0+W0+W4+W2+W1+W3
+b: y~v0+W1+W3+W0+W2+W4
 Target units: att
 
 ## Estimate
-Mean value: 1.006092407311818
+Mean value: 0.9987444341896519
 
-Causal Estimate is 1.006092407311818
+Causal Estimate is 0.9987444341896519
 </pre></div></div>
 </div>
 <section id="Textual-Interpreter">
-<h3>Textual Interpreter<a class="headerlink" href="#Textual-Interpreter" title="Permalink to this heading">#</a></h3>
+<h3>Textual Interpreter<a class="headerlink" href="#Textual-Interpreter" title="Link to this heading">#</a></h3>
 <p>The textual Interpreter describes (in words) the effect of unit change in the treatment variable on the outcome variable.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
@@ -950,12 +928,12 @@ Causal Estimate is 1.006092407311818
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Increasing the treatment variable(s) [v0] from 0 to 1 causes an increase of 1.006092407311818 in the expected value of the outcome [[&#39;y&#39;]], over the data distribution/population represented by the dataset.
+Increasing the treatment variable(s) [v0] from 0 to 1 causes an increase of 0.9987444341896519 in the expected value of the outcome [[&#39;y&#39;]], over the data distribution/population represented by the dataset.
 </pre></div></div>
 </div>
 </section>
 <section id="Visual-Interpreter">
-<h3>Visual Interpreter<a class="headerlink" href="#Visual-Interpreter" title="Permalink to this heading">#</a></h3>
+<h3>Visual Interpreter<a class="headerlink" href="#Visual-Interpreter" title="Link to this heading">#</a></h3>
 <p>The visual interpreter plots the change in the standardized mean difference (SMD) before and after Propensity Score based adjustment of the dataset. The formula for SMD is given below.</p>
 <p><span class="math notranslate nohighlight">\(SMD = \frac{\bar X_{1} - \bar X_{2}}{\sqrt{(S_{1}^{2} + S_{2}^{2})/2}}\)</span></p>
 <p>Here, <span class="math notranslate nohighlight">\(\bar X_{1}\)</span> and <span class="math notranslate nohighlight">\(\bar X_{2}\)</span> are the sample mean for the treated and control groups.</p>
@@ -968,18 +946,35 @@ Increasing the treatment variable(s) [v0] from 0 to 1 causes an increase of 1.00
 </pre></div>
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/runner/work/dowhy/dowhy/dowhy/interpreters/propensity_balance_interpreter.py:43: FutureWarning: The provided callable &lt;function mean at 0x7ff1ec2da310&gt; is currently using SeriesGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string &#34;mean&#34; instead.
+  mean_diff = df_long.groupby(self.estimate._treatment_name + [&#34;common_cause_id&#34;, &#34;strata&#34;]).agg(
+/home/runner/work/dowhy/dowhy/dowhy/interpreters/propensity_balance_interpreter.py:57: FutureWarning: The provided callable &lt;function std at 0x7ff1ec2da430&gt; is currently using SeriesGroupBy.std. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string &#34;std&#34; instead.
+  stddev_by_w_strata = df_long.groupby([&#34;common_cause_id&#34;, &#34;strata&#34;]).agg(stddev=(&#34;W&#34;, np.std)).reset_index()
+/home/runner/work/dowhy/dowhy/dowhy/interpreters/propensity_balance_interpreter.py:63: FutureWarning: The provided callable &lt;function sum at 0x7ff1ec2d63a0&gt; is currently using SeriesGroupBy.sum. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string &#34;sum&#34; instead.
+  mean_diff_strata.groupby(&#34;common_cause_id&#34;).agg(std_mean_diff=(&#34;scaled_mean&#34;, np.sum)).reset_index()
+/home/runner/work/dowhy/dowhy/dowhy/interpreters/propensity_balance_interpreter.py:67: FutureWarning: The provided callable &lt;function mean at 0x7ff1ec2da310&gt; is currently using SeriesGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string &#34;mean&#34; instead.
+  mean_diff_overall = df_long.groupby(self.estimate._treatment_name + [&#34;common_cause_id&#34;]).agg(
+/home/runner/work/dowhy/dowhy/dowhy/interpreters/propensity_balance_interpreter.py:74: FutureWarning: The provided callable &lt;function std at 0x7ff1ec2da430&gt; is currently using SeriesGroupBy.std. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string &#34;std&#34; instead.
+  stddev_overall = df_long.groupby([&#34;common_cause_id&#34;]).agg(stddev=(&#34;W&#34;, np.std)).reset_index()
+</pre></div></div>
+</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_dowhy_interpreter_18_0.png" src="../_images/example_notebooks_dowhy_interpreter_18_0.png" />
+<img alt="../_images/example_notebooks_dowhy_interpreter_18_1.png" src="../_images/example_notebooks_dowhy_interpreter_18_1.png" />
 </div>
 </div>
 <p>This plot shows how the SMD decreases from the unadjusted to the stratified units.</p>
 </section>
 </section>
 <section id="Method-2:-Propensity-Score-Matching">
-<h2>Method 2: Propensity Score Matching<a class="headerlink" href="#Method-2:-Propensity-Score-Matching" title="Permalink to this heading">#</a></h2>
+<h2>Method 2: Propensity Score Matching<a class="headerlink" href="#Method-2:-Propensity-Score-Matching" title="Link to this heading">#</a></h2>
 <p>We will be using propensity scores to match units in the data.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
@@ -1007,18 +1002,18 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W0,W4,W2,W1,W3])
+─────(E[y|W1,W3,W0,W2,W4])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W4,W2,W1,W3,U) = P(y|v0,W0,W4,W2,W1,W3)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W3,W0,W2,W4,U) = P(y|v0,W1,W3,W0,W2,W4)
 
 ## Realized estimand
-b: y~v0+W0+W4+W2+W1+W3
+b: y~v0+W1+W3+W0+W2+W4
 Target units: atc
 
 ## Estimate
-Mean value: 0.9992619408580464
+Mean value: 1.0074420946167904
 
-Causal Estimate is 0.9992619408580464
+Causal Estimate is 1.0074420946167904
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -1035,13 +1030,13 @@ Causal Estimate is 0.9992619408580464
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Increasing the treatment variable(s) [v0] from 0 to 1 causes an increase of 0.9992619408580464 in the expected value of the outcome [[&#39;y&#39;]], over the data distribution/population represented by the dataset.
+Increasing the treatment variable(s) [v0] from 0 to 1 causes an increase of 1.0074420946167904 in the expected value of the outcome [[&#39;y&#39;]], over the data distribution/population represented by the dataset.
 </pre></div></div>
 </div>
 <p>Cannot use propensity balance interpretor here since the interpreter method only supports propensity score stratification estimator.</p>
 </section>
 <section id="Method-3:-Weighting">
-<h2>Method 3: Weighting<a class="headerlink" href="#Method-3:-Weighting" title="Permalink to this heading">#</a></h2>
+<h2>Method 3: Weighting<a class="headerlink" href="#Method-3:-Weighting" title="Link to this heading">#</a></h2>
 <p>We will be using (inverse) propensity scores to assign weights to units in the data. DoWhy supports a few different weighting schemes:</p>
 <ol class="arabic simple">
 <li><p>Vanilla Inverse Propensity Score weighting (IPS) (weighting_scheme=”ips_weight”)</p></li>
@@ -1075,18 +1070,18 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W0,W4,W2,W1,W3])
+─────(E[y|W1,W3,W0,W2,W4])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W0,W4,W2,W1,W3,U) = P(y|v0,W0,W4,W2,W1,W3)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W3,W0,W2,W4,U) = P(y|v0,W1,W3,W0,W2,W4)
 
 ## Realized estimand
-b: y~v0+W0+W4+W2+W1+W3
+b: y~v0+W1+W3+W0+W2+W4
 Target units: ate
 
 ## Estimate
-Mean value: 1.0503112081914656
+Mean value: 1.1091063359838031
 
-Causal Estimate is 1.0503112081914656
+Causal Estimate is 1.1091063359838031
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -1103,7 +1098,7 @@ Causal Estimate is 1.0503112081914656
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Increasing the treatment variable(s) [v0] from 0 to 1 causes an increase of 1.0503112081914656 in the expected value of the outcome [[&#39;y&#39;]], over the data distribution/population represented by the dataset.
+Increasing the treatment variable(s) [v0] from 0 to 1 causes an increase of 1.1091063359838031 in the expected value of the outcome [[&#39;y&#39;]], over the data distribution/population represented by the dataset.
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -1114,11 +1109,24 @@ Increasing the treatment variable(s) [v0] from 0 to 1 causes an increase of 1.05
 </pre></div>
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/runner/work/dowhy/dowhy/dowhy/interpreters/confounder_distribution_interpreter.py:83: FutureWarning: The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
+  barplot_df_before = df.groupby([self.var_name, treated]).size().reset_index(name=&#34;count&#34;)
+/home/runner/work/dowhy/dowhy/dowhy/interpreters/confounder_distribution_interpreter.py:86: FutureWarning: The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
+  barplot_df_after = df.groupby([self.var_name, treated]).agg({&#34;weight&#34;: np.sum}).reset_index()
+/home/runner/work/dowhy/dowhy/dowhy/interpreters/confounder_distribution_interpreter.py:86: FutureWarning: The provided callable &lt;function sum at 0x7ff1ec2d63a0&gt; is currently using SeriesGroupBy.sum. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string &#34;sum&#34; instead.
+  barplot_df_after = df.groupby([self.var_name, treated]).agg({&#34;weight&#34;: np.sum}).reset_index()
+</pre></div></div>
+</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_dowhy_interpreter_27_0.png" src="../_images/example_notebooks_dowhy_interpreter_27_0.png" />
+<img alt="../_images/example_notebooks_dowhy_interpreter_27_1.png" src="../_images/example_notebooks_dowhy_interpreter_27_1.png" />
 </div>
 </div>
 <div class="nbinput nblast docutils container">
@@ -1139,7 +1147,7 @@ Increasing the treatment variable(s) [v0] from 0 to 1 causes an increase of 1.05
               
               
               
-                <footer class="prev-next-footer">
+                <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
     <a class="left-prev"
@@ -1167,14 +1175,17 @@ Increasing the treatment variable(s) [v0] from 0 to 1 causes an increase of 1.05
             
             
               
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
 
   <div class="sidebar-secondary-item">
-
-  <div class="page-toc tocsection onthispage">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> On this page
   </div>
-  <nav class="bd-toc-nav page-toc">
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Identifying-the-causal-estimand">Identifying the causal estimand</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Method-1:-Propensity-Score-Stratification">Method 1: Propensity Score Stratification</a><ul class="nav section-nav flex-column">
@@ -1188,13 +1199,13 @@ Increasing the treatment variable(s) [v0] from 0 to 1 causes an increase of 1.05
   </nav></div>
 
   <div class="sidebar-secondary-item">
-
-  <div class="tocsection sourcelink">
-    <a href="../_sources/example_notebooks/dowhy_interpreter.ipynb.txt">
-      <i class="fa-solid fa-file-lines"></i> Show Source
-    </a>
-  </div>
-</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/example_notebooks/dowhy_interpreter.ipynb.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
 
 </div></div>
               
@@ -1209,8 +1220,8 @@ Increasing the treatment variable(s) [v0] from 0 to 1 causes an increase of 1.05
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1230,7 +1241,7 @@ Increasing the treatment variable(s) [v0] from 0 to 1 causes an increase of 1.05
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
     <br/>
   </p>
 </div>
@@ -1243,7 +1254,8 @@ Increasing the treatment variable(s) [v0] from 0 to 1 causes an increase of 1.05
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.4.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

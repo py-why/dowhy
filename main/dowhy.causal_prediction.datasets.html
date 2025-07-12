@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 
 
-<html lang="en" data-content_root="" >
+<html lang="en" data-content_root="./" >
 
   <head>
     <meta charset="utf-8" />
@@ -23,34 +23,37 @@
   
   <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
-    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-
-  
-  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=949a1ff5" />
-    <link rel="stylesheet" type="text/css" href="_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
   
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
-  <script src="_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="_static/jquery.js?v=5d32c60e"></script>
     <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=b3ba4146"></script>
-    <script src="_static/doctools.js?v=888ff710"></script>
-    <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="_static/copybutton.js?v=0c6e27e1"></script>
     <script src="_static/design-tabs.js?v=36754332"></script>
@@ -63,6 +66,7 @@
     <link rel="prev" title="dowhy.causal_prediction.dataloaders package" href="dowhy.causal_prediction.dataloaders.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="main" />
   </head>
   
   
@@ -70,32 +74,16 @@
 
   
   
-  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
   
   <div id="pst-scroll-pixel-helper"></div>
-
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
-    <i class="fa-solid fa-arrow-up"></i>
-    Back to top
-  </button>
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__primary"
-          id="__primary"/>
-  <label class="overlay overlay-primary" for="__primary"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__secondary"
-          id="__secondary"/>
-  <label class="overlay overlay-secondary" for="__secondary"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="search.html"
       method="get">
@@ -103,7 +91,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -111,20 +98,27 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
   
-    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <label class="sidebar-toggle primary-toggle" for="__primary">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
-  </label>
+  </button>
   
   
   <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
 
+  
+    
   
 
 <a class="navbar-brand logo" href="index.html">
@@ -139,7 +133,7 @@
     
     
     <img src="_static/dowhy-logo-small.png" class="logo__image only-light" alt="DoWhy  documentation - Home"/>
-    <script>document.write(`<img src="_static/dowhy-logo-small.png" class="logo__image only-dark" alt="DoWhy  documentation - Home"/>`);</script>
+    <img src="_static/dowhy-logo-small.png" class="logo__image only-dark pst-js-only" alt="DoWhy  documentation - Home"/>
   
   
 </a></div>
@@ -151,68 +145,64 @@
     <div class="me-auto navbar-header-items__center">
       
         <div class="navbar-item">
-<nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="getting_started/index.html">
-                        Getting Started
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="getting_started/index.html">
+    Getting Started
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="user_guide/index.html">
-                        User Guide
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="example_notebooks/nb_index.html">
-                        Examples
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="user_guide/index.html">
+    User Guide
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="cite.html">
-                        Citing this package
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="contributing.html">
-                        Contributing
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="example_notebooks/nb_index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="contributing.html">
+    Contributing
+  </a>
+</li>
+
             <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
                     More
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
-                    <li class="nav-item current active">
-                      <a class="nav-link dropdown-item nav-internal" href="dowhy.html">
-                        dowhy package
-                      </a>
-                    </li>
-                
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="dowhy.html">
+    dowhy package
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="code_repo.html">
-                        Release notes
-                      </a>
-                    </li>
-                
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="code_repo.html">
+    Release notes
+  </a>
+</li>
+
                 </ul>
             </li>
             
@@ -227,15 +217,11 @@
         <div class="navbar-item navbar-persistent--container">
           
 
- <script>
- document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
         </div>
       
       
@@ -278,31 +264,31 @@
   
     <div class="navbar-persistent--mobile">
 
- <script>
- document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
     </div>
   
 
   
-    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
       <span class="fa-solid fa-outdent"></span>
-    </label>
+    </button>
   
 </div>
 
-    </nav>
+    </header>
   
+
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
       
-      <div class="bd-sidebar-primary bd-sidebar">
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -311,74 +297,63 @@
     
       <div class="sidebar-header-items__center">
         
-          <div class="navbar-item">
-<nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+          
+          
+            <div class="navbar-item">
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="getting_started/index.html">
-                        Getting Started
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="getting_started/index.html">
+    Getting Started
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="user_guide/index.html">
-                        User Guide
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="example_notebooks/nb_index.html">
-                        Examples
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="user_guide/index.html">
+    User Guide
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="cite.html">
-                        Citing this package
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="contributing.html">
-                        Contributing
-                      </a>
-                    </li>
-                
-            <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links-2">
-                    More
-                </button>
-                <ul id="pst-nav-more-links-2" class="dropdown-menu">
-                    
-                    <li class="nav-item current active">
-                      <a class="nav-link dropdown-item nav-internal" href="dowhy.html">
-                        dowhy package
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="example_notebooks/nb_index.html">
+    Examples
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="code_repo.html">
-                        Release notes
-                      </a>
-                    </li>
-                
-                </ul>
-            </li>
-            
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="contributing.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="dowhy.html">
+    dowhy package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="code_repo.html">
+    Release notes
+  </a>
+</li>
+
   </ul>
 </nav></div>
+          
         
       </div>
     
@@ -431,28 +406,28 @@
 <li class="toctree-l1"><a class="reference internal" href="dowhy.api.html">dowhy.api package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy.causal_estimators.html">dowhy.causal_estimators package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy.causal_identifier.html">dowhy.causal_identifier package</a></li>
-<li class="toctree-l1 current active has-children"><a class="reference internal" href="dowhy.causal_prediction.html">dowhy.causal_prediction package</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="dowhy.causal_prediction.html">dowhy.causal_prediction package</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="dowhy.causal_prediction.algorithms.html">dowhy.causal_prediction.algorithms package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dowhy.causal_prediction.dataloaders.html">dowhy.causal_prediction.dataloaders package</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">dowhy.causal_prediction.datasets package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dowhy.causal_prediction.models.html">dowhy.causal_prediction.models package</a></li>
 </ul>
-</li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="dowhy.causal_refuters.html">dowhy.causal_refuters package</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l2 has-children"><a class="reference internal" href="dowhy.causal_refuters.overrule.html">dowhy.causal_refuters.overrule package</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="dowhy.causal_refuters.html">dowhy.causal_refuters package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="dowhy.causal_refuters.overrule.html">dowhy.causal_refuters.overrule package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="dowhy.causal_refuters.overrule.BCS.html">dowhy.causal_refuters.overrule.BCS package</a></li>
 </ul>
-</li>
+</details></li>
 </ul>
-</li>
+</details></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy.data_transformers.html">dowhy.data_transformers package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy.do_samplers.html">dowhy.do_samplers package</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="dowhy.gcm.html">dowhy.gcm package</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="dowhy.gcm.html">dowhy.gcm package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="dowhy.gcm.independence_test.html">dowhy.gcm.independence_test package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dowhy.gcm.ml.html">dowhy.gcm.ml package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dowhy.gcm.util.html">dowhy.gcm.util package</a></li>
 </ul>
-</li>
+</details></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy.graph_learners.html">dowhy.graph_learners package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy.interpreters.html">dowhy.interpreters package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy.utils.html">dowhy.utils package</a></li>
@@ -463,29 +438,32 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
       
-      <main id="main-content" class="bd-main">
+      <main id="main-content" class="bd-main" role="main">
         
         
           <div class="bd-content">
             <div class="bd-article-container">
               
-              <div class="bd-header-article">
+              <div class="bd-header-article d-print-none">
 <div class="header-article-items header-article__inner">
   
     <div class="header-article-items__start">
       
         <div class="header-article-item">
 
-
-
-<nav aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
@@ -499,7 +477,7 @@
     
     <li class="breadcrumb-item"><a href="dowhy.causal_prediction.html" class="nav-link">dowhy.causal_prediction package</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">dowhy.causal...</li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">dowhy.causal_prediction.datasets package</span></li>
   </ul>
 </nav>
 </div>
@@ -514,15 +492,15 @@
               
                 
 <div id="searchbox"></div>
-                <article class="bd-article" role="main">
+                <article class="bd-article">
                   
   <section id="dowhy-causal-prediction-datasets-package">
-<h1>dowhy.causal_prediction.datasets package<a class="headerlink" href="#dowhy-causal-prediction-datasets-package" title="Permalink to this heading">#</a></h1>
+<h1>dowhy.causal_prediction.datasets package<a class="headerlink" href="#dowhy-causal-prediction-datasets-package" title="Link to this heading">#</a></h1>
 <section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading">#</a></h2>
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">#</a></h2>
 </section>
 <section id="module-dowhy.causal_prediction.datasets.base_dataset">
-<span id="dowhy-causal-prediction-datasets-base-dataset-module"></span><h2>dowhy.causal_prediction.datasets.base_dataset module<a class="headerlink" href="#module-dowhy.causal_prediction.datasets.base_dataset" title="Permalink to this heading">#</a></h2>
+<span id="dowhy-causal-prediction-datasets-base-dataset-module"></span><h2>dowhy.causal_prediction.datasets.base_dataset module<a class="headerlink" href="#module-dowhy.causal_prediction.datasets.base_dataset" title="Link to this heading">#</a></h2>
 <dl>
 <dt><cite>MultipleDomainDataset</cite> class in this file is borrowed from DomainBed: <a class="github reference external" href="https://github.com/facebookresearch/DomainBed">facebookresearch/DomainBed</a></dt><dd><dl class="simple">
 <dt>&#64;inproceedings{gulrajani2021in,</dt><dd><p>title={In Search of Lost Domain Generalization},
@@ -536,41 +514,41 @@ year={2021},</p>
 </dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="dowhy.causal_prediction.datasets.base_dataset.MultipleDomainDataset">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.causal_prediction.datasets.base_dataset.</span></span><span class="sig-name descname"><span class="pre">MultipleDomainDataset</span></span><a class="reference internal" href="_modules/dowhy/causal_prediction/datasets/base_dataset.html#MultipleDomainDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_prediction.datasets.base_dataset.MultipleDomainDataset" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.causal_prediction.datasets.base_dataset.</span></span><span class="sig-name descname"><span class="pre">MultipleDomainDataset</span></span><a class="reference internal" href="_modules/dowhy/causal_prediction/datasets/base_dataset.html#MultipleDomainDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_prediction.datasets.base_dataset.MultipleDomainDataset" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="dowhy.causal_prediction.datasets.base_dataset.MultipleDomainDataset.CHECKPOINT_FREQ">
-<span class="sig-name descname"><span class="pre">CHECKPOINT_FREQ</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">100</span></em><a class="headerlink" href="#dowhy.causal_prediction.datasets.base_dataset.MultipleDomainDataset.CHECKPOINT_FREQ" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CHECKPOINT_FREQ</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">100</span></em><a class="headerlink" href="#dowhy.causal_prediction.datasets.base_dataset.MultipleDomainDataset.CHECKPOINT_FREQ" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="dowhy.causal_prediction.datasets.base_dataset.MultipleDomainDataset.ENVIRONMENTS">
-<span class="sig-name descname"><span class="pre">ENVIRONMENTS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#dowhy.causal_prediction.datasets.base_dataset.MultipleDomainDataset.ENVIRONMENTS" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">ENVIRONMENTS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#dowhy.causal_prediction.datasets.base_dataset.MultipleDomainDataset.ENVIRONMENTS" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="dowhy.causal_prediction.datasets.base_dataset.MultipleDomainDataset.INPUT_SHAPE">
-<span class="sig-name descname"><span class="pre">INPUT_SHAPE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#dowhy.causal_prediction.datasets.base_dataset.MultipleDomainDataset.INPUT_SHAPE" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">INPUT_SHAPE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#dowhy.causal_prediction.datasets.base_dataset.MultipleDomainDataset.INPUT_SHAPE" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="dowhy.causal_prediction.datasets.base_dataset.MultipleDomainDataset.N_STEPS">
-<span class="sig-name descname"><span class="pre">N_STEPS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5001</span></em><a class="headerlink" href="#dowhy.causal_prediction.datasets.base_dataset.MultipleDomainDataset.N_STEPS" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">N_STEPS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5001</span></em><a class="headerlink" href="#dowhy.causal_prediction.datasets.base_dataset.MultipleDomainDataset.N_STEPS" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="dowhy.causal_prediction.datasets.base_dataset.MultipleDomainDataset.N_WORKERS">
-<span class="sig-name descname"><span class="pre">N_WORKERS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#dowhy.causal_prediction.datasets.base_dataset.MultipleDomainDataset.N_WORKERS" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">N_WORKERS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#dowhy.causal_prediction.datasets.base_dataset.MultipleDomainDataset.N_WORKERS" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 </section>
 <section id="module-dowhy.causal_prediction.datasets.mnist">
-<span id="dowhy-causal-prediction-datasets-mnist-module"></span><h2>dowhy.causal_prediction.datasets.mnist module<a class="headerlink" href="#module-dowhy.causal_prediction.datasets.mnist" title="Permalink to this heading">#</a></h2>
+<span id="dowhy-causal-prediction-datasets-mnist-module"></span><h2>dowhy.causal_prediction.datasets.mnist module<a class="headerlink" href="#module-dowhy.causal_prediction.datasets.mnist" title="Link to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="dowhy.causal_prediction.datasets.mnist.MNISTCausalAttribute">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.causal_prediction.datasets.mnist.</span></span><span class="sig-name descname"><span class="pre">MNISTCausalAttribute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">download</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_prediction/datasets/mnist.html#MNISTCausalAttribute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalAttribute" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.causal_prediction.datasets.mnist.</span></span><span class="sig-name descname"><span class="pre">MNISTCausalAttribute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">download</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_prediction/datasets/mnist.html#MNISTCausalAttribute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalAttribute" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#dowhy.causal_prediction.datasets.base_dataset.MultipleDomainDataset" title="dowhy.causal_prediction.datasets.base_dataset.MultipleDomainDataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipleDomainDataset</span></code></a></p>
 <p>Class for MNISTCausalAttribute dataset.</p>
 <dl class="field-list simple">
@@ -586,27 +564,27 @@ year={2021},</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="dowhy.causal_prediction.datasets.mnist.MNISTCausalAttribute.CHECKPOINT_FREQ">
-<span class="sig-name descname"><span class="pre">CHECKPOINT_FREQ</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">500</span></em><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalAttribute.CHECKPOINT_FREQ" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CHECKPOINT_FREQ</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">500</span></em><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalAttribute.CHECKPOINT_FREQ" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="dowhy.causal_prediction.datasets.mnist.MNISTCausalAttribute.ENVIRONMENTS">
-<span class="sig-name descname"><span class="pre">ENVIRONMENTS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['+90%',</span> <span class="pre">'+80%',</span> <span class="pre">'-90%',</span> <span class="pre">'-90%']</span></em><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalAttribute.ENVIRONMENTS" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">ENVIRONMENTS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['+90%',</span> <span class="pre">'+80%',</span> <span class="pre">'-90%',</span> <span class="pre">'-90%']</span></em><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalAttribute.ENVIRONMENTS" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="dowhy.causal_prediction.datasets.mnist.MNISTCausalAttribute.INPUT_SHAPE">
-<span class="sig-name descname"><span class="pre">INPUT_SHAPE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(2,</span> <span class="pre">14,</span> <span class="pre">14)</span></em><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalAttribute.INPUT_SHAPE" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">INPUT_SHAPE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(2,</span> <span class="pre">14,</span> <span class="pre">14)</span></em><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalAttribute.INPUT_SHAPE" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="dowhy.causal_prediction.datasets.mnist.MNISTCausalAttribute.N_STEPS">
-<span class="sig-name descname"><span class="pre">N_STEPS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5001</span></em><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalAttribute.N_STEPS" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">N_STEPS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5001</span></em><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalAttribute.N_STEPS" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="dowhy.causal_prediction.datasets.mnist.MNISTCausalAttribute.color_dataset">
-<span class="sig-name descname"><span class="pre">color_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">images</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">environment</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_prediction/datasets/mnist.html#MNISTCausalAttribute.color_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalAttribute.color_dataset" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">color_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">images</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">environment</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_prediction/datasets/mnist.html#MNISTCausalAttribute.color_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalAttribute.color_dataset" title="Link to this definition">#</a></dt>
 <dd><p>Transform MNIST dataset to introduce correlation between attribute (color) and label.
 There is a direct-causal relationship between label Y and color.</p>
 <dl class="field-list simple">
@@ -625,19 +603,19 @@ There is a direct-causal relationship between label Y and color.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="dowhy.causal_prediction.datasets.mnist.MNISTCausalAttribute.torch_bernoulli_">
-<span class="sig-name descname"><span class="pre">torch_bernoulli_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_prediction/datasets/mnist.html#MNISTCausalAttribute.torch_bernoulli_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalAttribute.torch_bernoulli_" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">torch_bernoulli_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_prediction/datasets/mnist.html#MNISTCausalAttribute.torch_bernoulli_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalAttribute.torch_bernoulli_" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="dowhy.causal_prediction.datasets.mnist.MNISTCausalAttribute.torch_xor_">
-<span class="sig-name descname"><span class="pre">torch_xor_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_prediction/datasets/mnist.html#MNISTCausalAttribute.torch_xor_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalAttribute.torch_xor_" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">torch_xor_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_prediction/datasets/mnist.html#MNISTCausalAttribute.torch_xor_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalAttribute.torch_xor_" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="dowhy.causal_prediction.datasets.mnist.MNISTCausalIndAttribute">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.causal_prediction.datasets.mnist.</span></span><span class="sig-name descname"><span class="pre">MNISTCausalIndAttribute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">download</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_prediction/datasets/mnist.html#MNISTCausalIndAttribute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalIndAttribute" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.causal_prediction.datasets.mnist.</span></span><span class="sig-name descname"><span class="pre">MNISTCausalIndAttribute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">download</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_prediction/datasets/mnist.html#MNISTCausalIndAttribute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalIndAttribute" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#dowhy.causal_prediction.datasets.base_dataset.MultipleDomainDataset" title="dowhy.causal_prediction.datasets.base_dataset.MultipleDomainDataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipleDomainDataset</span></code></a></p>
 <p>Class for MNISTIndAttribute dataset.</p>
 <dl class="field-list simple">
@@ -653,27 +631,27 @@ There is a direct-causal relationship between label Y and color.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="dowhy.causal_prediction.datasets.mnist.MNISTCausalIndAttribute.CHECKPOINT_FREQ">
-<span class="sig-name descname"><span class="pre">CHECKPOINT_FREQ</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">500</span></em><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalIndAttribute.CHECKPOINT_FREQ" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CHECKPOINT_FREQ</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">500</span></em><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalIndAttribute.CHECKPOINT_FREQ" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="dowhy.causal_prediction.datasets.mnist.MNISTCausalIndAttribute.ENVIRONMENTS">
-<span class="sig-name descname"><span class="pre">ENVIRONMENTS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['+90%,</span> <span class="pre">15',</span> <span class="pre">'+80%,</span> <span class="pre">16',</span> <span class="pre">'-90%,</span> <span class="pre">90',</span> <span class="pre">'-90%,</span> <span class="pre">90']</span></em><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalIndAttribute.ENVIRONMENTS" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">ENVIRONMENTS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['+90%,</span> <span class="pre">15',</span> <span class="pre">'+80%,</span> <span class="pre">16',</span> <span class="pre">'-90%,</span> <span class="pre">90',</span> <span class="pre">'-90%,</span> <span class="pre">90']</span></em><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalIndAttribute.ENVIRONMENTS" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="dowhy.causal_prediction.datasets.mnist.MNISTCausalIndAttribute.INPUT_SHAPE">
-<span class="sig-name descname"><span class="pre">INPUT_SHAPE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(2,</span> <span class="pre">14,</span> <span class="pre">14)</span></em><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalIndAttribute.INPUT_SHAPE" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">INPUT_SHAPE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(2,</span> <span class="pre">14,</span> <span class="pre">14)</span></em><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalIndAttribute.INPUT_SHAPE" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="dowhy.causal_prediction.datasets.mnist.MNISTCausalIndAttribute.N_STEPS">
-<span class="sig-name descname"><span class="pre">N_STEPS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5001</span></em><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalIndAttribute.N_STEPS" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">N_STEPS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5001</span></em><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalIndAttribute.N_STEPS" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="dowhy.causal_prediction.datasets.mnist.MNISTCausalIndAttribute.color_dataset">
-<span class="sig-name descname"><span class="pre">color_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">images</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">environment</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_prediction/datasets/mnist.html#MNISTCausalIndAttribute.color_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalIndAttribute.color_dataset" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">color_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">images</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">environment</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_prediction/datasets/mnist.html#MNISTCausalIndAttribute.color_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalIndAttribute.color_dataset" title="Link to this definition">#</a></dt>
 <dd><p>Transform MNIST dataset to introduce correlation between attribute (color) and label.
 There is a direct-causal relationship between label Y and color.</p>
 <dl class="field-list simple">
@@ -692,7 +670,7 @@ There is a direct-causal relationship between label Y and color.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="dowhy.causal_prediction.datasets.mnist.MNISTCausalIndAttribute.color_rot_dataset">
-<span class="sig-name descname"><span class="pre">color_rot_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">images</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">environment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">env_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_prediction/datasets/mnist.html#MNISTCausalIndAttribute.color_rot_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalIndAttribute.color_rot_dataset" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">color_rot_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">images</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">environment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">env_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_prediction/datasets/mnist.html#MNISTCausalIndAttribute.color_rot_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalIndAttribute.color_rot_dataset" title="Link to this definition">#</a></dt>
 <dd><p>Transform MNIST dataset by (i) applying rotation to images, then (ii) introducing correlation between attribute (color) and label.
 Attribute (rotation angle) is independent of label Y; there is a direct-causal relationship between label Y and color.</p>
 <dl class="field-list simple">
@@ -712,7 +690,7 @@ Attribute (rotation angle) is independent of label Y; there is a direct-causal r
 
 <dl class="py method">
 <dt class="sig sig-object py" id="dowhy.causal_prediction.datasets.mnist.MNISTCausalIndAttribute.rotate_dataset">
-<span class="sig-name descname"><span class="pre">rotate_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">images</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_prediction/datasets/mnist.html#MNISTCausalIndAttribute.rotate_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalIndAttribute.rotate_dataset" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">rotate_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">images</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_prediction/datasets/mnist.html#MNISTCausalIndAttribute.rotate_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalIndAttribute.rotate_dataset" title="Link to this definition">#</a></dt>
 <dd><p>Transform MNIST dataset by applying rotation to images.
 Attribute (rotation angle) is independent of label Y.</p>
 <dl class="field-list simple">
@@ -730,19 +708,19 @@ Attribute (rotation angle) is independent of label Y.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="dowhy.causal_prediction.datasets.mnist.MNISTCausalIndAttribute.torch_bernoulli_">
-<span class="sig-name descname"><span class="pre">torch_bernoulli_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_prediction/datasets/mnist.html#MNISTCausalIndAttribute.torch_bernoulli_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalIndAttribute.torch_bernoulli_" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">torch_bernoulli_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_prediction/datasets/mnist.html#MNISTCausalIndAttribute.torch_bernoulli_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalIndAttribute.torch_bernoulli_" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="dowhy.causal_prediction.datasets.mnist.MNISTCausalIndAttribute.torch_xor_">
-<span class="sig-name descname"><span class="pre">torch_xor_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_prediction/datasets/mnist.html#MNISTCausalIndAttribute.torch_xor_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalIndAttribute.torch_xor_" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">torch_xor_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_prediction/datasets/mnist.html#MNISTCausalIndAttribute.torch_xor_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTCausalIndAttribute.torch_xor_" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="dowhy.causal_prediction.datasets.mnist.MNISTIndAttribute">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.causal_prediction.datasets.mnist.</span></span><span class="sig-name descname"><span class="pre">MNISTIndAttribute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">download</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_prediction/datasets/mnist.html#MNISTIndAttribute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTIndAttribute" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.causal_prediction.datasets.mnist.</span></span><span class="sig-name descname"><span class="pre">MNISTIndAttribute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">download</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_prediction/datasets/mnist.html#MNISTIndAttribute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTIndAttribute" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#dowhy.causal_prediction.datasets.base_dataset.MultipleDomainDataset" title="dowhy.causal_prediction.datasets.base_dataset.MultipleDomainDataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultipleDomainDataset</span></code></a></p>
 <p>Class for MNISTIndAttribute dataset.</p>
 <dl class="field-list simple">
@@ -758,27 +736,27 @@ Attribute (rotation angle) is independent of label Y.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="dowhy.causal_prediction.datasets.mnist.MNISTIndAttribute.CHECKPOINT_FREQ">
-<span class="sig-name descname"><span class="pre">CHECKPOINT_FREQ</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">500</span></em><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTIndAttribute.CHECKPOINT_FREQ" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CHECKPOINT_FREQ</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">500</span></em><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTIndAttribute.CHECKPOINT_FREQ" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="dowhy.causal_prediction.datasets.mnist.MNISTIndAttribute.ENVIRONMENTS">
-<span class="sig-name descname"><span class="pre">ENVIRONMENTS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['15',</span> <span class="pre">'60',</span> <span class="pre">'90',</span> <span class="pre">'90']</span></em><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTIndAttribute.ENVIRONMENTS" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">ENVIRONMENTS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['15',</span> <span class="pre">'60',</span> <span class="pre">'90',</span> <span class="pre">'90']</span></em><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTIndAttribute.ENVIRONMENTS" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="dowhy.causal_prediction.datasets.mnist.MNISTIndAttribute.INPUT_SHAPE">
-<span class="sig-name descname"><span class="pre">INPUT_SHAPE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(1,</span> <span class="pre">14,</span> <span class="pre">14)</span></em><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTIndAttribute.INPUT_SHAPE" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">INPUT_SHAPE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(1,</span> <span class="pre">14,</span> <span class="pre">14)</span></em><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTIndAttribute.INPUT_SHAPE" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="dowhy.causal_prediction.datasets.mnist.MNISTIndAttribute.N_STEPS">
-<span class="sig-name descname"><span class="pre">N_STEPS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5001</span></em><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTIndAttribute.N_STEPS" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">N_STEPS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5001</span></em><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTIndAttribute.N_STEPS" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="dowhy.causal_prediction.datasets.mnist.MNISTIndAttribute.rotate_dataset">
-<span class="sig-name descname"><span class="pre">rotate_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">images</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">env_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_prediction/datasets/mnist.html#MNISTIndAttribute.rotate_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTIndAttribute.rotate_dataset" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">rotate_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">images</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">env_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_prediction/datasets/mnist.html#MNISTIndAttribute.rotate_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTIndAttribute.rotate_dataset" title="Link to this definition">#</a></dt>
 <dd><p>Transform MNIST dataset by applying rotation to images.
 Attribute (rotation angle) is independent of label Y.</p>
 <dl class="field-list simple">
@@ -797,19 +775,19 @@ Attribute (rotation angle) is independent of label Y.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="dowhy.causal_prediction.datasets.mnist.MNISTIndAttribute.torch_bernoulli_">
-<span class="sig-name descname"><span class="pre">torch_bernoulli_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_prediction/datasets/mnist.html#MNISTIndAttribute.torch_bernoulli_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTIndAttribute.torch_bernoulli_" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">torch_bernoulli_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_prediction/datasets/mnist.html#MNISTIndAttribute.torch_bernoulli_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTIndAttribute.torch_bernoulli_" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="dowhy.causal_prediction.datasets.mnist.MNISTIndAttribute.torch_xor_">
-<span class="sig-name descname"><span class="pre">torch_xor_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_prediction/datasets/mnist.html#MNISTIndAttribute.torch_xor_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTIndAttribute.torch_xor_" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">torch_xor_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_prediction/datasets/mnist.html#MNISTIndAttribute.torch_xor_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_prediction.datasets.mnist.MNISTIndAttribute.torch_xor_" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 </section>
 <section id="module-dowhy.causal_prediction.datasets">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-dowhy.causal_prediction.datasets" title="Permalink to this heading">#</a></h2>
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-dowhy.causal_prediction.datasets" title="Link to this heading">#</a></h2>
 </section>
 </section>
 
@@ -820,7 +798,7 @@ Attribute (rotation angle) is independent of label Y.</p>
               
               
               
-                <footer class="prev-next-footer">
+                <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
     <a class="left-prev"
@@ -848,14 +826,17 @@ Attribute (rotation angle) is independent of label Y.</p>
             
             
               
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
 
   <div class="sidebar-secondary-item">
-
-  <div class="page-toc tocsection onthispage">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> On this page
   </div>
-  <nav class="bd-toc-nav page-toc">
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#submodules">Submodules</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-dowhy.causal_prediction.datasets.base_dataset">dowhy.causal_prediction.datasets.base_dataset module</a><ul class="nav section-nav flex-column">
@@ -909,13 +890,13 @@ Attribute (rotation angle) is independent of label Y.</p>
   </nav></div>
 
   <div class="sidebar-secondary-item">
-
-  <div class="tocsection sourcelink">
-    <a href="_sources/dowhy.causal_prediction.datasets.rst.txt">
-      <i class="fa-solid fa-file-lines"></i> Show Source
-    </a>
-  </div>
-</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/dowhy.causal_prediction.datasets.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
 
 </div></div>
               
@@ -930,8 +911,8 @@ Attribute (rotation angle) is independent of label Y.</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
-<script src="_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -951,7 +932,7 @@ Attribute (rotation angle) is independent of label Y.</p>
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
     <br/>
   </p>
 </div>
@@ -964,7 +945,8 @@ Attribute (rotation angle) is independent of label Y.</p>
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.4.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

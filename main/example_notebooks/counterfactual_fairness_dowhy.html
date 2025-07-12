@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 
 
-<html lang="en" data-content_root="" >
+<html lang="en" data-content_root="../" >
 
   <head>
     <meta charset="utf-8" />
@@ -23,35 +23,38 @@
   
   <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
-    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-
-  
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=949a1ff5" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
   
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
-  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../_static/jquery.js?v=5d32c60e"></script>
     <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=b3ba4146"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
-    <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=0c6e27e1"></script>
     <script src="../_static/design-tabs.js?v=36754332"></script>
@@ -66,6 +69,7 @@
     <link rel="prev" title="Falsification of User-Given Directed Acyclic Graphs" href="gcm_falsify_dag.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="main" />
   </head>
   
   
@@ -73,32 +77,16 @@
 
   
   
-  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
   
   <div id="pst-scroll-pixel-helper"></div>
-
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
-    <i class="fa-solid fa-arrow-up"></i>
-    Back to top
-  </button>
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__primary"
-          id="__primary"/>
-  <label class="overlay overlay-primary" for="__primary"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__secondary"
-          id="__secondary"/>
-  <label class="overlay overlay-secondary" for="__secondary"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="../search.html"
       method="get">
@@ -106,7 +94,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -114,20 +101,27 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
   
-    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <label class="sidebar-toggle primary-toggle" for="__primary">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
-  </label>
+  </button>
   
   
   <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
 
+  
+    
   
 
 <a class="navbar-brand logo" href="../index.html">
@@ -142,7 +136,7 @@
     
     
     <img src="../_static/dowhy-logo-small.png" class="logo__image only-light" alt="DoWhy  documentation - Home"/>
-    <script>document.write(`<img src="../_static/dowhy-logo-small.png" class="logo__image only-dark" alt="DoWhy  documentation - Home"/>`);</script>
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-dark pst-js-only" alt="DoWhy  documentation - Home"/>
   
   
 </a></div>
@@ -154,68 +148,64 @@
     <div class="me-auto navbar-header-items__center">
       
         <div class="navbar-item">
-<nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../getting_started/index.html">
-                        Getting Started
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../user_guide/index.html">
-                        User Guide
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="nb_index.html">
-                        Examples
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../cite.html">
-                        Citing this package
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../contributing.html">
-                        Contributing
-                      </a>
-                    </li>
-                
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="nb_index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing.html">
+    Contributing
+  </a>
+</li>
+
             <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
                     More
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
-                        dowhy package
-                      </a>
-                    </li>
-                
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
+    dowhy package
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
-                        Release notes
-                      </a>
-                    </li>
-                
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
+    Release notes
+  </a>
+</li>
+
                 </ul>
             </li>
             
@@ -230,15 +220,11 @@
         <div class="navbar-item navbar-persistent--container">
           
 
- <script>
- document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
         </div>
       
       
@@ -281,31 +267,31 @@
   
     <div class="navbar-persistent--mobile">
 
- <script>
- document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
     </div>
   
 
   
-    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
       <span class="fa-solid fa-outdent"></span>
-    </label>
+    </button>
   
 </div>
 
-    </nav>
+    </header>
   
+
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
       
-      <div class="bd-sidebar-primary bd-sidebar">
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -314,74 +300,63 @@
     
       <div class="sidebar-header-items__center">
         
-          <div class="navbar-item">
-<nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+          
+          
+            <div class="navbar-item">
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../getting_started/index.html">
-                        Getting Started
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../user_guide/index.html">
-                        User Guide
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="nb_index.html">
-                        Examples
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../cite.html">
-                        Citing this package
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../contributing.html">
-                        Contributing
-                      </a>
-                    </li>
-                
-            <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links-2">
-                    More
-                </button>
-                <ul id="pst-nav-more-links-2" class="dropdown-menu">
-                    
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
-                        dowhy package
-                      </a>
-                    </li>
-                
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="nb_index.html">
+    Examples
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
-                        Release notes
-                      </a>
-                    </li>
-                
-                </ul>
-            </li>
-            
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../dowhy.html">
+    dowhy package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../code_repo.html">
+    Release notes
+  </a>
+</li>
+
   </ul>
 </nav></div>
+          
         
       </div>
     
@@ -521,29 +496,32 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
       
-      <main id="main-content" class="bd-main">
+      <main id="main-content" class="bd-main" role="main">
         
         
           <div class="bd-content">
             <div class="bd-article-container">
               
-              <div class="bd-header-article">
+              <div class="bd-header-article d-print-none">
 <div class="header-article-items header-article__inner">
   
     <div class="header-article-items__start">
       
         <div class="header-article-item">
 
-
-
-<nav aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
@@ -554,7 +532,7 @@
     
     <li class="breadcrumb-item"><a href="nb_index.html" class="nav-link">Example notebooks</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">Counterfactu...</li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Counterfactual Fairness</span></li>
   </ul>
 </nav>
 </div>
@@ -569,26 +547,26 @@
               
                 
 <div id="searchbox"></div>
-                <article class="bd-article" role="main">
+                <article class="bd-article">
                   
   <section id="Counterfactual-Fairness">
-<h1>Counterfactual Fairness<a class="headerlink" href="#Counterfactual-Fairness" title="Permalink to this heading">#</a></h1>
+<h1>Counterfactual Fairness<a class="headerlink" href="#Counterfactual-Fairness" title="Link to this heading">#</a></h1>
 <p>This post introduces and replicates counterfactual fairness as proposed by Kusner et al. (2018) using DoWhy.</p>
 <p>Counterfactual fairness serves as an individual-level measure of causal fairness, capturing the notion that an estimator’s decision is deemed fair for an individual if it remains consistent both in (a) the actual world and (b) a counterfactual world where the individual is associated with a different demographic group.</p>
 <section id="When-to-apply-counterfactual-fairness?">
-<h2>When to apply counterfactual fairness?<a class="headerlink" href="#When-to-apply-counterfactual-fairness?" title="Permalink to this heading">#</a></h2>
+<h2>When to apply counterfactual fairness?<a class="headerlink" href="#When-to-apply-counterfactual-fairness?" title="Link to this heading">#</a></h2>
 <ol class="arabic simple">
 <li><p>To assess whether a prediction is individually causally fair, i.e., if a prediction is fair for a given individual <code class="docutils literal notranslate"><span class="pre">i</span></code>.</p></li>
 </ol>
 </section>
 <section id="What-is-required-to-estimate-counterfactual-fairness?">
-<h2>What is required to estimate counterfactual fairness?<a class="headerlink" href="#What-is-required-to-estimate-counterfactual-fairness?" title="Permalink to this heading">#</a></h2>
+<h2>What is required to estimate counterfactual fairness?<a class="headerlink" href="#What-is-required-to-estimate-counterfactual-fairness?" title="Link to this heading">#</a></h2>
 <ol class="arabic simple">
 <li><p>Dataset with protected attributes or proxy variables.</p></li>
 <li><p>A Structural Causal Model (SCM) : discovered either using a SCM discovery algorithm or through expert driven caual DAG creation.</p></li>
 </ol>
 <section id="Notation">
-<h3>Notation<a class="headerlink" href="#Notation" title="Permalink to this heading">#</a></h3>
+<h3>Notation<a class="headerlink" href="#Notation" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>A: Set of protected attributes of an individual, representing variables that must not be subject to discrimination.</p></li>
 <li><p>a: Actual value taken by the protected attribute in the real world.</p></li>
@@ -811,7 +789,7 @@ gender, etc.</p></li>
 </section>
 </section>
 <section id="1.-Load-and-Clean-the-Dataset">
-<h1>1. Load and Clean the Dataset<a class="headerlink" href="#1.-Load-and-Clean-the-Dataset" title="Permalink to this heading">#</a></h1>
+<h1>1. Load and Clean the Dataset<a class="headerlink" href="#1.-Load-and-Clean-the-Dataset" title="Link to this heading">#</a></h1>
 <p>Kusner et al. (2018) use a survey, conducted by the Law School Admission Council, spanning 163 law schools in the United States, gathering data from 21,790 law students. The dataset used within this case study was originally collected for a study called <a class="reference external" href="https://eric.ed.gov/?id=ED469370">‘LSAC National Longitudinal Bar Passage Study. LSAC Research Report Series’</a> by Linda Wightman in 1998. The survey includes the following details:</p>
 <ul class="simple">
 <li><p>entrance exam scores (LSAT)</p></li>
@@ -880,43 +858,43 @@ gender, etc.</p></li>
   <tbody>
     <tr>
       <th>0</th>
-      <td>0.0</td>
+      <td>1.0</td>
       <td>0.0</td>
       <td>2.4</td>
-      <td>40.0</td>
-      <td>0.10</td>
+      <td>30.0</td>
+      <td>-0.45</td>
     </tr>
     <tr>
       <th>1</th>
       <td>0.0</td>
       <td>0.0</td>
-      <td>3.6</td>
-      <td>47.0</td>
-      <td>1.41</td>
+      <td>3.0</td>
+      <td>33.0</td>
+      <td>-0.17</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>0.0</td>
       <td>1.0</td>
-      <td>3.0</td>
-      <td>35.0</td>
-      <td>0.40</td>
+      <td>1.0</td>
+      <td>3.3</td>
+      <td>28.0</td>
+      <td>1.37</td>
     </tr>
     <tr>
       <th>3</th>
       <td>0.0</td>
-      <td>0.0</td>
-      <td>3.7</td>
-      <td>29.0</td>
-      <td>1.62</td>
+      <td>1.0</td>
+      <td>3.5</td>
+      <td>31.5</td>
+      <td>-0.17</td>
     </tr>
     <tr>
       <th>4</th>
       <td>0.0</td>
       <td>1.0</td>
-      <td>3.1</td>
-      <td>38.0</td>
-      <td>-1.69</td>
+      <td>3.3</td>
+      <td>36.5</td>
+      <td>0.91</td>
     </tr>
   </tbody>
 </table>
@@ -925,13 +903,13 @@ gender, etc.</p></li>
 <p>Given this data, a school may wish to predict if an applicant will have a high FYA. The school would also like to make sure these predictions are not biased by an individual’s race and sex. However, the LSAT, GPA, and FYA scores, may be biased due to social factors. So how can we determine the degree to which such a predictie model may be biased for a particular individual? Using Counterfactual Fairness.</p>
 </section>
 <section id="2.-A-Formal-Definition-of-Counterfactual-Fairness">
-<h1>2. A Formal Definition of Counterfactual Fairness<a class="headerlink" href="#2.-A-Formal-Definition-of-Counterfactual-Fairness" title="Permalink to this heading">#</a></h1>
+<h1>2. A Formal Definition of Counterfactual Fairness<a class="headerlink" href="#2.-A-Formal-Definition-of-Counterfactual-Fairness" title="Link to this heading">#</a></h1>
 <p>Counterfactual fairness requires that, for each person in the population, the predicted value remain the same even if that person had different protected attributes in a causal sense. More formally, <span class="math notranslate nohighlight">\(\hat{Y}\)</span> is counterfactually fair if under any context X = x and A = a:</p>
 <div class="math notranslate nohighlight">
 \[P(\hat{Y}_{a}(U) = y | X = x, A = a) = P(\hat{Y}_{a'}(U) = y | X = x, A = a)\]</div>
 <p>for all y and for any value a’ attainable by A. This concept is closely connected to actual causes or token causality. In essence, for fairness, A should not be a direct cause of <span class="math notranslate nohighlight">\(\hat{Y}\)</span> in any specific instance i.e. altering A while keeping non-causally dependent factors constant should not alter the distribution of <span class="math notranslate nohighlight">\(\hat{Y}\)</span>. For an individual i, the difference between Y generated from various counterfactual worlds can be understood as a measure of similarity.</p>
 <section id="2.1-Measuring-Counterfactual-Fairness">
-<h2>2.1 Measuring Counterfactual Fairness<a class="headerlink" href="#2.1-Measuring-Counterfactual-Fairness" title="Permalink to this heading">#</a></h2>
+<h2>2.1 Measuring Counterfactual Fairness<a class="headerlink" href="#2.1-Measuring-Counterfactual-Fairness" title="Link to this heading">#</a></h2>
 <p>In a SCM M, the state of any observable variable (Vi) is fully determined by the background variables (U) and structural equations (F). Thus, given a fully-specified set of equations, using an SCM we can construct counterfactuals. That is</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>&quot;we can compute what (the distribution of) any of the variables would have been had certain other variables been different, other things being equal. For instance, given the causal model we can ask “Would individual i have graduated (Y = 1) if they hadn’t had a job?”, even if they did not actually graduate in the dataset.&quot; - (Russell et. al. , 2017)
 </pre></div>
@@ -945,7 +923,7 @@ gender, etc.</p></li>
 </section>
 </section>
 <section id="3.-Measuring-Counterfactual-Fairness-using-DoWhy">
-<h1>3. Measuring Counterfactual Fairness using DoWhy<a class="headerlink" href="#3.-Measuring-Counterfactual-Fairness-using-DoWhy" title="Permalink to this heading">#</a></h1>
+<h1>3. Measuring Counterfactual Fairness using DoWhy<a class="headerlink" href="#3.-Measuring-Counterfactual-Fairness-using-DoWhy" title="Link to this heading">#</a></h1>
 <p>Algorithmically, to empirically test whether a model is counterfactually fair:</p>
 <ul class="simple">
 <li><p><strong>Step 1 - Define a causal model</strong> based on a causal DAG</p></li>
@@ -996,7 +974,7 @@ gender, etc.</p></li>
 </div>
 </div>
 <section id="3.1-Univariate-Analysis">
-<h2>3.1 Univariate Analysis<a class="headerlink" href="#3.1-Univariate-Analysis" title="Permalink to this heading">#</a></h2>
+<h2>3.1 Univariate Analysis<a class="headerlink" href="#3.1-Univariate-Analysis" title="Link to this heading">#</a></h2>
 <p>Now, we are ready to call the method <code class="docutils literal notranslate"><span class="pre">analyse_counterfactual_fairness</span></code> to carry out counterfactual fairness analysis along the Race dimension:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
@@ -1023,7 +1001,7 @@ gender, etc.</p></li>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node Gender: 100%|██████████| 5/5 [00:00&lt;00:00, 173.98it/s]
+Fitting causal mechanism of node Gender: 100%|██████████| 5/5 [00:00&lt;00:00, 40.30it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1032,7 +1010,7 @@ Fitting causal mechanism of node Gender: 100%|██████████| 5/
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle -0.517386913916873$</div></div>
+$\displaystyle -0.535714256683355$</div></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">df_obs</span></code> contains the predicted values for each individual given the observed value of their protected attribute in the real world.</p>
 <div class="nbinput docutils container">
@@ -1077,48 +1055,48 @@ $\displaystyle -0.517386913916873$</div></div>
   <tbody>
     <tr>
       <th>0</th>
-      <td>0.0</td>
+      <td>1.0</td>
       <td>0.0</td>
       <td>2.4</td>
-      <td>40.0</td>
-      <td>0.10</td>
-      <td>0.012953</td>
+      <td>30.0</td>
+      <td>-0.45</td>
+      <td>-0.387273</td>
     </tr>
     <tr>
       <th>1</th>
       <td>0.0</td>
       <td>0.0</td>
-      <td>3.6</td>
-      <td>47.0</td>
-      <td>1.41</td>
-      <td>0.651892</td>
+      <td>3.0</td>
+      <td>33.0</td>
+      <td>-0.17</td>
+      <td>-0.085672</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>0.0</td>
       <td>1.0</td>
-      <td>3.0</td>
-      <td>35.0</td>
-      <td>0.40</td>
-      <td>-0.011004</td>
+      <td>1.0</td>
+      <td>3.3</td>
+      <td>28.0</td>
+      <td>1.37</td>
+      <td>-0.220960</td>
     </tr>
     <tr>
       <th>3</th>
       <td>0.0</td>
-      <td>0.0</td>
-      <td>3.7</td>
-      <td>29.0</td>
-      <td>1.62</td>
-      <td>-0.045688</td>
+      <td>1.0</td>
+      <td>3.5</td>
+      <td>31.5</td>
+      <td>-0.17</td>
+      <td>-0.010392</td>
     </tr>
     <tr>
       <th>4</th>
       <td>0.0</td>
       <td>1.0</td>
-      <td>3.1</td>
-      <td>38.0</td>
-      <td>-1.69</td>
-      <td>0.139882</td>
+      <td>3.3</td>
+      <td>36.5</td>
+      <td>0.91</td>
+      <td>0.153156</td>
     </tr>
   </tbody>
 </table>
@@ -1167,48 +1145,48 @@ $\displaystyle -0.517386913916873$</div></div>
   <tbody>
     <tr>
       <th>0</th>
-      <td>1.0</td>
       <td>0.0</td>
-      <td>2.008756</td>
-      <td>31.865305</td>
-      <td>-0.860292</td>
-      <td>0.064404</td>
+      <td>0.0</td>
+      <td>2.780362</td>
+      <td>38.147825</td>
+      <td>0.506290</td>
+      <td>0.226574</td>
     </tr>
     <tr>
       <th>1</th>
       <td>1.0</td>
       <td>0.0</td>
-      <td>3.208756</td>
-      <td>38.865305</td>
-      <td>0.204212</td>
-      <td>0.249899</td>
+      <td>2.619638</td>
+      <td>24.852175</td>
+      <td>-1.051687</td>
+      <td>0.088125</td>
     </tr>
     <tr>
       <th>2</th>
+      <td>0.0</td>
       <td>1.0</td>
-      <td>1.0</td>
-      <td>2.608756</td>
-      <td>26.865305</td>
-      <td>-0.555210</td>
-      <td>0.084936</td>
+      <td>3.680362</td>
+      <td>36.147825</td>
+      <td>2.531452</td>
+      <td>0.288037</td>
     </tr>
     <tr>
       <th>3</th>
       <td>1.0</td>
-      <td>0.0</td>
-      <td>3.308756</td>
-      <td>20.865305</td>
-      <td>0.384219</td>
-      <td>0.107473</td>
+      <td>1.0</td>
+      <td>3.119638</td>
+      <td>23.352175</td>
+      <td>-1.137528</td>
+      <td>0.118640</td>
     </tr>
     <tr>
       <th>4</th>
       <td>1.0</td>
       <td>1.0</td>
-      <td>2.708756</td>
-      <td>29.865305</td>
-      <td>-2.664428</td>
-      <td>0.120926</td>
+      <td>2.919638</td>
+      <td>28.352175</td>
+      <td>-0.134444</td>
+      <td>0.147516</td>
     </tr>
   </tbody>
 </table>
@@ -1241,7 +1219,7 @@ $\displaystyle -0.517386913916873$</div></div>
 <p>Examining the results for the example at hand in Figure 1, we see that the observed and counterfactual distributions don’t overlap. We see that changing the race of the black subgroup to the white subgroup shifts the distribution of <span class="math notranslate nohighlight">\(\hat{Y}\)</span> to the right i.e. increases the avg_grade by ~0.50 on average. Thus, the fitted estimator can concluded to be not counterfactually fair.</p>
 </section>
 <section id="3.2-Intersectional-Analysis">
-<h2>3.2 Intersectional Analysis<a class="headerlink" href="#3.2-Intersectional-Analysis" title="Permalink to this heading">#</a></h2>
+<h2>3.2 Intersectional Analysis<a class="headerlink" href="#3.2-Intersectional-Analysis" title="Link to this heading">#</a></h2>
 <p>We can further extend the analysis intersectionally, by examining the implication of multipleprotected attriutes on counterfactual fairness together. Here, we use the two protected attributes available to us - <code class="docutils literal notranslate"><span class="pre">[&quot;Race&quot;,&quot;Gender&quot;]</span></code> - to carry out intersectional counterfactual fairness analysis to determine how counterfactually fair the estimator is for Black Females:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
@@ -1270,7 +1248,7 @@ $\displaystyle -0.517386913916873$</div></div>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node Gender: 100%|██████████| 5/5 [00:00&lt;00:00, 368.02it/s]
+Fitting causal mechanism of node Gender: 100%|██████████| 5/5 [00:00&lt;00:00, 111.31it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1279,7 +1257,7 @@ Fitting causal mechanism of node Gender: 100%|██████████| 5/
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle -0.506216837227572$</div></div>
+$\displaystyle -0.533609796817919$</div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
@@ -1308,7 +1286,7 @@ $\displaystyle -0.506216837227572$</div></div>
 <p>Examining the results of the intersectional analysis in Figure 2, we see that the observed and counterfactual distributions don’t overlap at all. Changing the race and gender of the black females to the white males shifts the distribution of <span class="math notranslate nohighlight">\(\hat{Y}\)</span> for the black,female sub-group to the right i.e. increases the avg_grade by ~0.50 on average. Thus, the fitted estimator can concluded to be not counterfactually fair intersectionally.</p>
 </section>
 <section id="3.3-Some-Additional-Uses-of-the-Counterfactuals-df_obs-,-df_cf-for-Fairness">
-<h2>3.3 Some Additional Uses of the Counterfactuals <code class="docutils literal notranslate"><span class="pre">df_obs</span></code> , <code class="docutils literal notranslate"><span class="pre">df_cf</span></code> for Fairness<a class="headerlink" href="#3.3-Some-Additional-Uses-of-the-Counterfactuals-df_obs-,-df_cf-for-Fairness" title="Permalink to this heading">#</a></h2>
+<h2>3.3 Some Additional Uses of the Counterfactuals <code class="docutils literal notranslate"><span class="pre">df_obs</span></code> , <code class="docutils literal notranslate"><span class="pre">df_cf</span></code> for Fairness<a class="headerlink" href="#3.3-Some-Additional-Uses-of-the-Counterfactuals-df_obs-,-df_cf-for-Fairness" title="Link to this heading">#</a></h2>
 <ul class="simple">
 <li><p>Counterfactual values of Y (constructed using a set of fair causal models) can be used as a fair target to train the model with, in the presence of historically biased labels Y.</p></li>
 <li><p>Train an estimator to be counterfactually fair by using an optimization routine that applies a penalty for a given individual i in proportion to the (average) difference in Y across counterfactual worlds for that individual i. For instance, if for an individual i the outcome Y is very different across counterfactual worlds, then that sample i will increase the loss by a proportionately higher amount. Conversely, if for an individual j the outcome Y is similar across counterfactual worlds,
@@ -1317,7 +1295,7 @@ then that sample i will increase the loss by a proportionately lower amount (See
 </section>
 </section>
 <section id="4.-Limitation-of-Counterfactual-Fairness">
-<h1>4. Limitation of Counterfactual Fairness<a class="headerlink" href="#4.-Limitation-of-Counterfactual-Fairness" title="Permalink to this heading">#</a></h1>
+<h1>4. Limitation of Counterfactual Fairness<a class="headerlink" href="#4.-Limitation-of-Counterfactual-Fairness" title="Link to this heading">#</a></h1>
 <p>There maybe disagreements about the “correct” causal model due to:</p>
 <ul class="simple">
 <li><p>Changing the structure of the DAG, e.g. adding an edge</p></li>
@@ -1327,14 +1305,14 @@ then that sample i will increase the loss by a proportionately lower amount (See
 <p>The literature suggests achieving counterfactual fairness under multiple competing casual models as a solution to the above. Russell et. al. , (2017) put forward one such solution called the “Multi-World Fairness Algorithm”.</p>
 </section>
 <section id="References">
-<h1>References<a class="headerlink" href="#References" title="Permalink to this heading">#</a></h1>
+<h1>References<a class="headerlink" href="#References" title="Link to this heading">#</a></h1>
 <ul class="simple">
 <li><p>Kusner, Matt et al. Counterfactual Fairness. 2018, <a class="reference external" href="https://arxiv.org/pdf/1703.06856.pdf">https://arxiv.org/pdf/1703.06856.pdf</a></p></li>
 <li><p>Russell, Chris et al. When Worlds Collide: Integrating Different Counterfactual Assumptions In Fairness. 2017, <a class="reference external" href="https://proceedings.neurips.cc/paper/2017/file/1271a7029c9df08643b631b02cf9e116-Paper.pdf">https://proceedings.neurips.cc/paper/2017/file/1271a7029c9df08643b631b02cf9e116-Paper.pdf</a></p></li>
 </ul>
 </section>
 <section id="Appendix-:-Fairness-Through-Unawareness-(FTU)-creates-A-Counterfactually-Unfair-Estimator">
-<h1>Appendix : Fairness Through Unawareness (FTU) creates A Counterfactually Unfair Estimator<a class="headerlink" href="#Appendix-:-Fairness-Through-Unawareness-(FTU)-creates-A-Counterfactually-Unfair-Estimator" title="Permalink to this heading">#</a></h1>
+<h1>Appendix : Fairness Through Unawareness (FTU) creates A Counterfactually Unfair Estimator<a class="headerlink" href="#Appendix-:-Fairness-Through-Unawareness-(FTU)-creates-A-Counterfactually-Unfair-Estimator" title="Link to this heading">#</a></h1>
 <p>To demonstrate that <strong>“Aware” linear regression is always counterfactually fair but FTU makes it counterfactually unfair</strong>, we build one “aware” linear regression and copare it with the “unaware” linear regression constructed Fig.1.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
@@ -1363,7 +1341,7 @@ then that sample i will increase the loss by a proportionately lower amount (See
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node Gender: 100%|██████████| 5/5 [00:00&lt;00:00, 363.76it/s]
+Fitting causal mechanism of node Gender: 100%|██████████| 5/5 [00:00&lt;00:00, 104.26it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1372,7 +1350,7 @@ Fitting causal mechanism of node Gender: 100%|██████████| 5/
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle 3.33066907387547 \cdot 10^{-16}$</div></div>
+$\displaystyle 5.55111512312578 \cdot 10^{-16}$</div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
@@ -1413,7 +1391,7 @@ $\displaystyle 3.33066907387547 \cdot 10^{-16}$</div></div>
               
               
               
-                <footer class="prev-next-footer">
+                <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
     <a class="left-prev"
@@ -1441,14 +1419,17 @@ $\displaystyle 3.33066907387547 \cdot 10^{-16}$</div></div>
             
             
               
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
 
   <div class="sidebar-secondary-item">
-
-  <div class="page-toc tocsection onthispage">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> On this page
   </div>
-  <nav class="bd-toc-nav page-toc">
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Counterfactual Fairness</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#When-to-apply-counterfactual-fairness?">When to apply counterfactual fairness?</a></li>
@@ -1477,13 +1458,13 @@ $\displaystyle 3.33066907387547 \cdot 10^{-16}$</div></div>
   </nav></div>
 
   <div class="sidebar-secondary-item">
-
-  <div class="tocsection sourcelink">
-    <a href="../_sources/example_notebooks/counterfactual_fairness_dowhy.ipynb.txt">
-      <i class="fa-solid fa-file-lines"></i> Show Source
-    </a>
-  </div>
-</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/example_notebooks/counterfactual_fairness_dowhy.ipynb.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
 
 </div></div>
               
@@ -1498,8 +1479,8 @@ $\displaystyle 3.33066907387547 \cdot 10^{-16}$</div></div>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1519,7 +1500,7 @@ $\displaystyle 3.33066907387547 \cdot 10^{-16}$</div></div>
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
     <br/>
   </p>
 </div>
@@ -1532,7 +1513,8 @@ $\displaystyle 3.33066907387547 \cdot 10^{-16}$</div></div>
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.4.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 
 
-<html lang="en" data-content_root="" >
+<html lang="en" data-content_root="../" >
 
   <head>
     <meta charset="utf-8" />
@@ -23,35 +23,38 @@
   
   <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
-    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-
-  
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=949a1ff5" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
   
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
-  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../_static/jquery.js?v=5d32c60e"></script>
     <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=b3ba4146"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
-    <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=0c6e27e1"></script>
     <script src="../_static/design-tabs.js?v=36754332"></script>
@@ -66,6 +69,7 @@
     <link rel="prev" title="Sensitivity Analysis for Regression Models" href="sensitivity_analysis_testing.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="main" />
   </head>
   
   
@@ -73,32 +77,16 @@
 
   
   
-  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
   
   <div id="pst-scroll-pixel-helper"></div>
-
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
-    <i class="fa-solid fa-arrow-up"></i>
-    Back to top
-  </button>
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__primary"
-          id="__primary"/>
-  <label class="overlay overlay-primary" for="__primary"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__secondary"
-          id="__secondary"/>
-  <label class="overlay overlay-secondary" for="__secondary"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="../search.html"
       method="get">
@@ -106,7 +94,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -114,20 +101,27 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
   
-    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <label class="sidebar-toggle primary-toggle" for="__primary">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
-  </label>
+  </button>
   
   
   <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
 
+  
+    
   
 
 <a class="navbar-brand logo" href="../index.html">
@@ -142,7 +136,7 @@
     
     
     <img src="../_static/dowhy-logo-small.png" class="logo__image only-light" alt="DoWhy  documentation - Home"/>
-    <script>document.write(`<img src="../_static/dowhy-logo-small.png" class="logo__image only-dark" alt="DoWhy  documentation - Home"/>`);</script>
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-dark pst-js-only" alt="DoWhy  documentation - Home"/>
   
   
 </a></div>
@@ -154,68 +148,64 @@
     <div class="me-auto navbar-header-items__center">
       
         <div class="navbar-item">
-<nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../getting_started/index.html">
-                        Getting Started
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../user_guide/index.html">
-                        User Guide
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="nb_index.html">
-                        Examples
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../cite.html">
-                        Citing this package
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../contributing.html">
-                        Contributing
-                      </a>
-                    </li>
-                
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="nb_index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing.html">
+    Contributing
+  </a>
+</li>
+
             <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
                     More
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
-                        dowhy package
-                      </a>
-                    </li>
-                
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
+    dowhy package
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
-                        Release notes
-                      </a>
-                    </li>
-                
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
+    Release notes
+  </a>
+</li>
+
                 </ul>
             </li>
             
@@ -230,15 +220,11 @@
         <div class="navbar-item navbar-persistent--container">
           
 
- <script>
- document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
         </div>
       
       
@@ -281,31 +267,31 @@
   
     <div class="navbar-persistent--mobile">
 
- <script>
- document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
     </div>
   
 
   
-    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
       <span class="fa-solid fa-outdent"></span>
-    </label>
+    </button>
   
 </div>
 
-    </nav>
+    </header>
   
+
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
       
-      <div class="bd-sidebar-primary bd-sidebar">
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -314,74 +300,63 @@
     
       <div class="sidebar-header-items__center">
         
-          <div class="navbar-item">
-<nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+          
+          
+            <div class="navbar-item">
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../getting_started/index.html">
-                        Getting Started
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../user_guide/index.html">
-                        User Guide
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="nb_index.html">
-                        Examples
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../cite.html">
-                        Citing this package
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../contributing.html">
-                        Contributing
-                      </a>
-                    </li>
-                
-            <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links-2">
-                    More
-                </button>
-                <ul id="pst-nav-more-links-2" class="dropdown-menu">
-                    
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
-                        dowhy package
-                      </a>
-                    </li>
-                
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="nb_index.html">
+    Examples
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
-                        Release notes
-                      </a>
-                    </li>
-                
-                </ul>
-            </li>
-            
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../dowhy.html">
+    dowhy package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../code_repo.html">
+    Release notes
+  </a>
+</li>
+
   </ul>
 </nav></div>
+          
         
       </div>
     
@@ -521,29 +496,32 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
       
-      <main id="main-content" class="bd-main">
+      <main id="main-content" class="bd-main" role="main">
         
         
           <div class="bd-content">
             <div class="bd-article-container">
               
-              <div class="bd-header-article">
+              <div class="bd-header-article d-print-none">
 <div class="header-article-items header-article__inner">
   
     <div class="header-article-items__start">
       
         <div class="header-article-item">
 
-
-
-<nav aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
@@ -554,7 +532,7 @@
     
     <li class="breadcrumb-item"><a href="nb_index.html" class="nav-link">Example notebooks</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">Sensitivity...</li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Sensitivity analysis for non-parametric causal estimators</span></li>
   </ul>
 </nav>
 </div>
@@ -569,16 +547,16 @@
               
                 
 <div id="searchbox"></div>
-                <article class="bd-article" role="main">
+                <article class="bd-article">
                   
   <section id="Sensitivity-analysis-for-non-parametric-causal-estimators">
-<h1>Sensitivity analysis for non-parametric causal estimators<a class="headerlink" href="#Sensitivity-analysis-for-non-parametric-causal-estimators" title="Permalink to this heading">#</a></h1>
+<h1>Sensitivity analysis for non-parametric causal estimators<a class="headerlink" href="#Sensitivity-analysis-for-non-parametric-causal-estimators" title="Link to this heading">#</a></h1>
 <p>Sensitivity analysis helps us study how robust an estimated effect is when the assumption of no unobserved confounding is violated. That is, how much bias does our estimate have due to omitting an (unobserved) confounder? Known as the <em>omitted variable bias (OVB)</em>, it gives us a measure of how the inclusion of an omitted common cause (confounder) would have changed the estimated effect.</p>
 <p>This notebook shows how to estimate the OVB for general, non-parametric causal estimators. For gaining intuition, we suggest going through an introductory notebook that describes how to estimate OVB for a a linear estimator: <a class="reference external" href="https://github.com/py-why/dowhy/blob/master/docs/source/example_notebooks/sensitivity_analysis_testing.ipynb">Sensitivity analysis for linear estimators</a>. To recap, in that notebook, we saw how the OVB depended on linear partial R^2 values and used this insight to
 compute the adjusted estimate values depending on the relative strength of the confounder with the outcome and treatment. We now generalize the technique using the non-parametric partial R^2 and Reisz representers.</p>
 <p>This notebook is based on <em>Chernozhukov et al., Long Story Short: Omitted Variable Bias in Causal Machine Learning. https://arxiv.org/abs/2112.13398</em>.</p>
 <section id="I.-Sensitivity-analysis-for-partially-linear-models">
-<h2>I. Sensitivity analysis for partially linear models<a class="headerlink" href="#I.-Sensitivity-analysis-for-partially-linear-models" title="Permalink to this heading">#</a></h2>
+<h2>I. Sensitivity analysis for partially linear models<a class="headerlink" href="#I.-Sensitivity-analysis-for-partially-linear-models" title="Link to this heading">#</a></h2>
 <p>We first analyze the sensitivity of a causal estimate when the true data-generating process (DGP) is known to be partially linear. That is, the outcome can be additively decomposed into a linear function of the treatment and a non-linear function of the confounders. We denote the treatment by <span class="math notranslate nohighlight">\(T\)</span>, outcome by <span class="math notranslate nohighlight">\(Y\)</span>, observed confounders by <span class="math notranslate nohighlight">\(W\)</span> and unobserved confounders by <span class="math notranslate nohighlight">\(U\)</span>.</p>
 <div class="math notranslate nohighlight">
 \[Y = g(T, W, U) + \epsilon = \theta T + h(W, U) + \epsilon\]</div>
@@ -602,7 +580,7 @@ explanatory power conditioned on some variables <span class="math notranslate no
 \[S^2 = \frac{E[(Y-g_s)^2]}{E[\alpha_s^2]}; \ \ C_Y^2 = \eta^2_{Y \sim U | T, W}, \ \ C_T^2 = \frac{\eta^2_{T\sim U | W}}{1 - \eta^2_{T\sim U | W}}\]</div>
 <p><span class="math notranslate nohighlight">\(S^2\)</span> can be estimated from data. The other two parameters need to be specified manually: they convey the strength of the unobserved confounder <span class="math notranslate nohighlight">\(U\)</span> on treatment and outcome. Below we show how to create a sensitivity contour plot by specifying a range of plausible values for <span class="math notranslate nohighlight">\(\eta^2_{Y \sim U | T, W}\)</span> and <span class="math notranslate nohighlight">\(\eta^2_{T\sim U | W}\)</span>. We also show how to benchmark and set these values as a fraction of the maximum partial R^2 due to any subset of the observed covariates.</p>
 <section id="Creating-a-dataset-with-unobserved-confounding">
-<h3>Creating a dataset with unobserved confounding<a class="headerlink" href="#Creating-a-dataset-with-unobserved-confounding" title="Permalink to this heading">#</a></h3>
+<h3>Creating a dataset with unobserved confounding<a class="headerlink" href="#Creating-a-dataset-with-unobserved-confounding" title="Link to this heading">#</a></h3>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -881,7 +859,7 @@ $\displaystyle 10.085246711267$</div></div>
 </div>
 </section>
 <section id="Obtaining-a-causal-estimate-using-Model,-Identify,-Estimate-steps">
-<h3>Obtaining a causal estimate using Model, Identify, Estimate steps<a class="headerlink" href="#Obtaining-a-causal-estimate-using-Model,-Identify,-Estimate-steps" title="Permalink to this heading">#</a></h3>
+<h3>Obtaining a causal estimate using Model, Identify, Estimate steps<a class="headerlink" href="#Obtaining-a-causal-estimate-using-Model,-Identify,-Estimate-steps" title="Link to this heading">#</a></h3>
 <p>Create a causal model with the “observed” data and causal graph.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
@@ -935,9 +913,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W1,W2,W5,W6,W3,W4])
+─────(E[y|W1,W4,W6,W2,W3,W5])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W2,W5,W6,W3,W4,U) = P(y|v0,W1,W2,W5,W6,W3,W4)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W4,W6,W2,W3,W5,U) = P(y|v0,W1,W4,W6,W2,W3,W5)
 
 ### Estimand : 2
 Estimand name: iv
@@ -992,23 +970,23 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W1,W2,W5,W6,W3,W4])
+─────(E[y|W1,W4,W6,W2,W3,W5])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W2,W5,W6,W3,W4,U) = P(y|v0,W1,W2,W5,W6,W3,W4)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W4,W6,W2,W3,W5,U) = P(y|v0,W1,W4,W6,W2,W3,W5)
 
 ## Realized estimand
-b: y~v0+W1+W2+W5+W6+W3+W4 |
+b: y~v0+W1+W4+W6+W2+W3+W5 |
 Target units: ate
 
 ## Estimate
-Mean value: 11.710606185945826
-Effect estimates: [[11.71060619]]
+Mean value: 11.684455560033097
+Effect estimates: [[11.68445556]]
 
 </pre></div></div>
 </div>
 </section>
 <section id="Sensitivity-Analysis-using-the-Refute-step">
-<h3>Sensitivity Analysis using the Refute step<a class="headerlink" href="#Sensitivity-Analysis-using-the-Refute-step" title="Permalink to this heading">#</a></h3>
+<h3>Sensitivity Analysis using the Refute step<a class="headerlink" href="#Sensitivity-Analysis-using-the-Refute-step" title="Link to this heading">#</a></h3>
 <p>After estimation , we need to check how robust our estimate is against the possibility of unobserved confounders. We perform sensitivity analysis for the LinearDML estimator assuming that its assumption on data-generating process holds: the true function for <span class="math notranslate nohighlight">\(Y\)</span> is partial linear. For computational efficiency, we set cache_values = True in <code class="docutils literal notranslate"><span class="pre">fit_params</span></code> to cache the results of first stage estimation.</p>
 <p>Parameters used:</p>
 <ul class="simple">
@@ -1045,13 +1023,13 @@ Effect estimates: [[11.71060619]]
 <div class="highlight"><pre>
 Sensitivity Analysis to Unobserved Confounding using partial R^2 parameterization
 
-Original Effect Estimate : 11.710606185945826
-Robustness Value : 0.45
+Original Effect Estimate : 11.684455560033097
+Robustness Value : 0.44
 
 Robustness Value (alpha=0.05) : 0.41000000000000003
 
 Interpretation of results :
-Any confounder explaining less than 45.0% percent of the residual variance of both the treatment and the outcome would not be strong enough to explain away the observed effect i.e bring down the estimate to 0
+Any confounder explaining less than 44.0% percent of the residual variance of both the treatment and the outcome would not be strong enough to explain away the observed effect i.e bring down the estimate to 0
 
 For a significance level of 5.0%, any confounder explaining more than 41.0% percent of the residual variance of both the treatment and the outcome would be strong enough to make the estimated effect not &#39;statistically significant&#39;
 
@@ -1074,7 +1052,7 @@ For a significance level of 5.0%, any confounder explaining more than 41.0% perc
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle 0.45$</div></div>
+$\displaystyle 0.44$</div></div>
 </div>
 <p>The robustness value measures the minimal equal strength of <span class="math notranslate nohighlight">\(\eta^2_{T\sim U | W}\)</span> and <span class="math notranslate nohighlight">\(\eta^2_{Y \sim U | T, W}\)</span> such the bound for the average treatment effect would include zero. It can be between 0 and 1. A robustness value of 0.45 implies that confounders with <span class="math notranslate nohighlight">\(\eta^2_{T\sim U | W}\)</span> and <span class="math notranslate nohighlight">\(\eta^2_{Y \sim U | T, W}\)</span> values less than 0.4 would not be sufficient enough to bring down the estimates to zero. In general, a low robustness value implies that the results can be
 changed even by the presence of weak confounders whereas a robustness value close to 1 means the treatment effect can handle even strong confounders that may explain all residual variation of the treatment and the outcome.</p>
@@ -1182,14 +1160,14 @@ changed even by the presence of weak confounders whereas a robustness value clos
   <tbody>
     <tr>
       <th>0</th>
-      <td>0.048552</td>
-      <td>0.054052</td>
-      <td>11.710606</td>
-      <td>1.045089</td>
-      <td>10.665517</td>
-      <td>12.755695</td>
-      <td>9.517298</td>
-      <td>13.876807</td>
+      <td>0.048446</td>
+      <td>0.053222</td>
+      <td>11.684456</td>
+      <td>1.035119</td>
+      <td>10.649336</td>
+      <td>12.719575</td>
+      <td>9.502575</td>
+      <td>13.839446</td>
     </tr>
   </tbody>
 </table>
@@ -1198,7 +1176,7 @@ changed even by the presence of weak confounders whereas a robustness value clos
 </section>
 </section>
 <section id="II.-Sensitivity-Analysis-for-general-non-parametric-models">
-<h2>II. Sensitivity Analysis for general non-parametric models<a class="headerlink" href="#II.-Sensitivity-Analysis-for-general-non-parametric-models" title="Permalink to this heading">#</a></h2>
+<h2>II. Sensitivity Analysis for general non-parametric models<a class="headerlink" href="#II.-Sensitivity-Analysis-for-general-non-parametric-models" title="Link to this heading">#</a></h2>
 <p>We now perform sensitivity analysis without making any assumption on the true data-generating process. The sensitivity still depends on the partial R2 of unobserved confounder with outcome, <span class="math notranslate nohighlight">\(\eta^2_{Y \sim U | T, W}\)</span>, and a similar parameter for the confounder-treatment relationship. However, the computation of bounds is more complicated and requires estimation of a special function known as reisz function. Refer to Chernozhukov et al. for details.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
@@ -1240,17 +1218,17 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W1,W2,W5,W6,W3,W4])
+─────(E[y|W1,W4,W6,W2,W3,W5])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W2,W5,W6,W3,W4,U) = P(y|v0,W1,W2,W5,W6,W3,W4)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W4,W6,W2,W3,W5,U) = P(y|v0,W1,W4,W6,W2,W3,W5)
 
 ## Realized estimand
-b: y~v0+W1+W2+W5+W6+W3+W4 |
+b: y~v0+W1+W4+W6+W2+W3+W5 |
 Target units: ate
 
 ## Estimate
-Mean value: 11.816617382311216
-Effect estimates: [[11.81661738]]
+Mean value: 11.819078254976413
+Effect estimates: [[11.81907825]]
 
 </pre></div></div>
 </div>
@@ -1274,8 +1252,16 @@ Effect estimates: [[11.81661738]]
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+invalid value encountered in cast
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
 <div class="output_area docutils container">
-<img alt="../_images/example_notebooks_sensitivity_analysis_nonparametric_estimators_31_0.png" src="../_images/example_notebooks_sensitivity_analysis_nonparametric_estimators_31_0.png" />
+<img alt="../_images/example_notebooks_sensitivity_analysis_nonparametric_estimators_31_1.png" src="../_images/example_notebooks_sensitivity_analysis_nonparametric_estimators_31_1.png" />
 </div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1285,7 +1271,7 @@ Effect estimates: [[11.81661738]]
 <div class="highlight"><pre>
 Sensitivity Analysis to Unobserved Confounding using partial R^2 parameterization
 
-Original Effect Estimate : 11.816617382311216
+Original Effect Estimate : 11.819078254976413
 Robustness Value : 0.66
 
 Robustness Value (alpha=0.05) : 0.64
@@ -1310,7 +1296,7 @@ For a significance level of 5.0%, any confounder explaining more than 64.0% perc
               
               
               
-                <footer class="prev-next-footer">
+                <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
     <a class="left-prev"
@@ -1338,14 +1324,17 @@ For a significance level of 5.0%, any confounder explaining more than 64.0% perc
             
             
               
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
 
   <div class="sidebar-secondary-item">
-
-  <div class="page-toc tocsection onthispage">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> On this page
   </div>
-  <nav class="bd-toc-nav page-toc">
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#I.-Sensitivity-analysis-for-partially-linear-models">I. Sensitivity analysis for partially linear models</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Creating-a-dataset-with-unobserved-confounding">Creating a dataset with unobserved confounding</a></li>
@@ -1358,13 +1347,13 @@ For a significance level of 5.0%, any confounder explaining more than 64.0% perc
   </nav></div>
 
   <div class="sidebar-secondary-item">
-
-  <div class="tocsection sourcelink">
-    <a href="../_sources/example_notebooks/sensitivity_analysis_nonparametric_estimators.ipynb.txt">
-      <i class="fa-solid fa-file-lines"></i> Show Source
-    </a>
-  </div>
-</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/example_notebooks/sensitivity_analysis_nonparametric_estimators.ipynb.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
 
 </div></div>
               
@@ -1379,8 +1368,8 @@ For a significance level of 5.0%, any confounder explaining more than 64.0% perc
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1400,7 +1389,7 @@ For a significance level of 5.0%, any confounder explaining more than 64.0% perc
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
     <br/>
   </p>
 </div>
@@ -1413,7 +1402,8 @@ For a significance level of 5.0%, any confounder explaining more than 64.0% perc
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.4.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

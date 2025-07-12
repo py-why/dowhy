@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 
 
-<html lang="en" data-content_root="" >
+<html lang="en" data-content_root="../../../" >
 
   <head>
     <meta charset="utf-8" />
@@ -23,34 +23,37 @@
   
   <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
-    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../../../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-
-  
-  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=949a1ff5" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
   
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
-  <script src="../../../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../../_static/jquery.js?v=5d32c60e"></script>
     <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=b3ba4146"></script>
-    <script src="../../../_static/doctools.js?v=888ff710"></script>
-    <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../../_static/copybutton.js?v=0c6e27e1"></script>
     <script src="../../../_static/design-tabs.js?v=36754332"></script>
@@ -61,6 +64,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="main" />
   </head>
   
   
@@ -68,32 +72,16 @@
 
   
   
-  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
   
   <div id="pst-scroll-pixel-helper"></div>
-
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
-    <i class="fa-solid fa-arrow-up"></i>
-    Back to top
-  </button>
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__primary"
-          id="__primary"/>
-  <label class="overlay overlay-primary" for="__primary"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__secondary"
-          id="__secondary"/>
-  <label class="overlay overlay-secondary" for="__secondary"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="../../../search.html"
       method="get">
@@ -101,7 +89,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -109,20 +96,27 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
   
-    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <label class="sidebar-toggle primary-toggle" for="__primary">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
-  </label>
+  </button>
   
   
   <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
 
+  
+    
   
 
 <a class="navbar-brand logo" href="../../../index.html">
@@ -137,7 +131,7 @@
     
     
     <img src="../../../_static/dowhy-logo-small.png" class="logo__image only-light" alt="DoWhy  documentation - Home"/>
-    <script>document.write(`<img src="../../../_static/dowhy-logo-small.png" class="logo__image only-dark" alt="DoWhy  documentation - Home"/>`);</script>
+    <img src="../../../_static/dowhy-logo-small.png" class="logo__image only-dark pst-js-only" alt="DoWhy  documentation - Home"/>
   
   
 </a></div>
@@ -149,68 +143,64 @@
     <div class="me-auto navbar-header-items__center">
       
         <div class="navbar-item">
-<nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../getting_started/index.html">
-                        Getting Started
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../index.html">
-                        User Guide
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../example_notebooks/nb_index.html">
-                        Examples
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../index.html">
+    User Guide
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../cite.html">
-                        Citing this package
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../contributing.html">
-                        Contributing
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../example_notebooks/nb_index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../contributing.html">
+    Contributing
+  </a>
+</li>
+
             <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
                     More
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../../../dowhy.html">
-                        dowhy package
-                      </a>
-                    </li>
-                
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../dowhy.html">
+    dowhy package
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../../../code_repo.html">
-                        Release notes
-                      </a>
-                    </li>
-                
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../code_repo.html">
+    Release notes
+  </a>
+</li>
+
                 </ul>
             </li>
             
@@ -225,15 +215,11 @@
         <div class="navbar-item navbar-persistent--container">
           
 
- <script>
- document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
         </div>
       
       
@@ -276,31 +262,33 @@
   
     <div class="navbar-persistent--mobile">
 
- <script>
- document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
     </div>
   
 
   
-    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
       <span class="fa-solid fa-outdent"></span>
-    </label>
+    </button>
   
 </div>
 
-    </nav>
+    </header>
   
+
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
       
-      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
         
 
   
@@ -309,74 +297,63 @@
     
       <div class="sidebar-header-items__center">
         
-          <div class="navbar-item">
-<nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+          
+          
+            <div class="navbar-item">
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../getting_started/index.html">
-                        Getting Started
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../index.html">
-                        User Guide
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../example_notebooks/nb_index.html">
-                        Examples
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../index.html">
+    User Guide
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../cite.html">
-                        Citing this package
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../../../contributing.html">
-                        Contributing
-                      </a>
-                    </li>
-                
-            <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links-2">
-                    More
-                </button>
-                <ul id="pst-nav-more-links-2" class="dropdown-menu">
-                    
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../../../dowhy.html">
-                        dowhy package
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../example_notebooks/nb_index.html">
+    Examples
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../../../code_repo.html">
-                        Release notes
-                      </a>
-                    </li>
-                
-                </ul>
-            </li>
-            
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../contributing.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../dowhy.html">
+    dowhy package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../code_repo.html">
+    Release notes
+  </a>
+</li>
+
   </ul>
 </nav></div>
+          
         
       </div>
     
@@ -422,29 +399,32 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
       
-      <main id="main-content" class="bd-main">
+      <main id="main-content" class="bd-main" role="main">
         
         
           <div class="bd-content">
             <div class="bd-article-container">
               
-              <div class="bd-header-article">
+              <div class="bd-header-article d-print-none">
 <div class="header-article-items header-article__inner">
   
     <div class="header-article-items__start">
       
         <div class="header-article-item">
 
-
-
-<nav aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
@@ -452,7 +432,7 @@
         <i class="fa-solid fa-home"></i>
       </a>
     </li>
-    <li class="breadcrumb-item active" aria-current="page">Effect...</li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Effect Estimation Using specific Effect Estimators (for ACE, mediation effect, …)</span></li>
   </ul>
 </nav>
 </div>
@@ -467,10 +447,10 @@
               
                 
 <div id="searchbox"></div>
-                <article class="bd-article" role="main">
+                <article class="bd-article">
                   
   <section id="effect-estimation-using-specific-effect-estimators-for-ace-mediation-effect">
-<h1>Effect Estimation Using specific Effect Estimators (for ACE, mediation effect, …)<a class="headerlink" href="#effect-estimation-using-specific-effect-estimators-for-ace-mediation-effect" title="Permalink to this heading">#</a></h1>
+<h1>Effect Estimation Using specific Effect Estimators (for ACE, mediation effect, …)<a class="headerlink" href="#effect-estimation-using-specific-effect-estimators-for-ace-mediation-effect" title="Link to this heading">#</a></h1>
 <img alt="https://raw.githubusercontent.com/py-why/dowhy/master/docs/images/dowhy-schematic.png" src="https://raw.githubusercontent.com/py-why/dowhy/master/docs/images/dowhy-schematic.png" />
 <p>For effect estimation, DoWhy provides a principled four-step interface for causal inference that focuses on
 explicitly modeling causal assumptions and validating them as much as possible. The key feature of DoWhy is its
@@ -479,7 +459,7 @@ inference more robust and accessible to non-experts. DoWhy supports estimation o
 backdoor, frontdoor, instrumental variable and other identification methods, and estimation of the conditional effect
 (CATE) through an integration with the EconML library.</p>
 <section id="generating-sample-data-and-the-causal-model">
-<h2>Generating sample data and the causal model<a class="headerlink" href="#generating-sample-data-and-the-causal-model" title="Permalink to this heading">#</a></h2>
+<h2>Generating sample data and the causal model<a class="headerlink" href="#generating-sample-data-and-the-causal-model" title="Link to this heading">#</a></h2>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">dowhy</span><span class="w"> </span><span class="kn">import</span> <span class="n">CausalModel</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">dowhy.datasets</span>
 <span class="gp">&gt;&gt;&gt;</span>
@@ -501,7 +481,7 @@ backdoor, frontdoor, instrumental variable and other identification methods, and
 </div>
 </section>
 <section id="identify-a-target-estimand-under-the-model">
-<h2>Identify a target estimand under the model<a class="headerlink" href="#identify-a-target-estimand-under-the-model" title="Permalink to this heading">#</a></h2>
+<h2>Identify a target estimand under the model<a class="headerlink" href="#identify-a-target-estimand-under-the-model" title="Link to this heading">#</a></h2>
 <p>Based on the causal graph, DoWhy finds all possible ways of identifying a desired causal effect based on
 the graphical model. It uses graph-based criteria and do-calculus to find
 potential ways find expressions that can identify the causal effect.</p>
@@ -509,7 +489,7 @@ potential ways find expressions that can identify the causal effect.</p>
 </pre></div>
 </div>
 <section id="supported-identification-criteria">
-<h3>Supported identification criteria<a class="headerlink" href="#supported-identification-criteria" title="Permalink to this heading">#</a></h3>
+<h3>Supported identification criteria<a class="headerlink" href="#supported-identification-criteria" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Back-door criterion</p></li>
 <li><p>Front-door criterion</p></li>
@@ -521,7 +501,7 @@ out the <a class="reference external" href="https://github.com/microsoft/dowhy/b
 </section>
 </section>
 <section id="estimate-causal-effect-based-on-the-identified-estimand">
-<h2>Estimate causal effect based on the identified estimand<a class="headerlink" href="#estimate-causal-effect-based-on-the-identified-estimand" title="Permalink to this heading">#</a></h2>
+<h2>Estimate causal effect based on the identified estimand<a class="headerlink" href="#estimate-causal-effect-based-on-the-identified-estimand" title="Link to this heading">#</a></h2>
 <p>DoWhy supports methods based on both back-door criterion and instrumental
 variables. It also provides a non-parametric confidence intervals and a permutation test for testing
 the statistical significance of obtained estimate.</p>
@@ -530,7 +510,7 @@ the statistical significance of obtained estimate.</p>
 </pre></div>
 </div>
 <section id="supported-estimation-methods">
-<h3>Supported estimation methods<a class="headerlink" href="#supported-estimation-methods" title="Permalink to this heading">#</a></h3>
+<h3>Supported estimation methods<a class="headerlink" href="#supported-estimation-methods" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><dl class="simple">
 <dt>Methods based on estimating the treatment assignment</dt><dd><ul>
@@ -570,7 +550,7 @@ the statistical significance of obtained estimate.</p>
 notebook.</p>
 </section>
 <section id="using-econml-and-causalml-estimation-methods-in-dowhy">
-<h3>Using EconML and CausalML estimation methods in DoWhy<a class="headerlink" href="#using-econml-and-causalml-estimation-methods-in-dowhy" title="Permalink to this heading">#</a></h3>
+<h3>Using EconML and CausalML estimation methods in DoWhy<a class="headerlink" href="#using-econml-and-causalml-estimation-methods-in-dowhy" title="Link to this heading">#</a></h3>
 <p>It is easy to call external estimation methods using DoWhy. Currently we
 support integrations with the <a class="reference external" href="https://github.com/microsoft/econml">EconML</a> and <a class="reference external" href="https://github.com/uber/causalml">CausalML</a> packages. Here’s an example
 of estimating conditional treatment effects using EconML’s double machine
@@ -596,7 +576,7 @@ learning estimator.</p>
 </section>
 </section>
 <section id="refute-the-obtained-estimate">
-<h2>Refute the obtained estimate<a class="headerlink" href="#refute-the-obtained-estimate" title="Permalink to this heading">#</a></h2>
+<h2>Refute the obtained estimate<a class="headerlink" href="#refute-the-obtained-estimate" title="Link to this heading">#</a></h2>
 <p>Having access to multiple refutation methods to validate an effect estimate from a
 causal estimator is
 a key benefit of using DoWhy.</p>
@@ -605,7 +585,7 @@ a key benefit of using DoWhy.</p>
 </pre></div>
 </div>
 <section id="supported-refutation-methods">
-<h3>Supported refutation methods<a class="headerlink" href="#supported-refutation-methods" title="Permalink to this heading">#</a></h3>
+<h3>Supported refutation methods<a class="headerlink" href="#supported-refutation-methods" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p><strong>Add Random Common Cause</strong>: Does the estimation method change its estimate after
 we add an independent random variable as a common cause to the dataset?
@@ -634,7 +614,7 @@ As a practical example, <a class="reference external" href="https://github.com/m
 </section>
 </section>
 <section id="comparison-to-other-packages">
-<h2>Comparison to other packages<a class="headerlink" href="#comparison-to-other-packages" title="Permalink to this heading">#</a></h2>
+<h2>Comparison to other packages<a class="headerlink" href="#comparison-to-other-packages" title="Link to this heading">#</a></h2>
 <p>DoWhy’s effect inference API captures all four steps of causal inference:</p>
 <ol class="arabic simple">
 <li><p>Model a causal inference problem using assumptions.</p></li>
@@ -655,7 +635,7 @@ graph-based methods to identify the causal effect, <em>estimate</em> uses
 statistical methods for estimating the identified estimand, and finally <em>refute</em>
 tries to refute the obtained estimate by testing robustness to assumptions.</p>
 <section id="key-difference-causal-assumptions-as-first-class-citizens">
-<h3>Key difference: Causal assumptions as first-class citizens<a class="headerlink" href="#key-difference-causal-assumptions-as-first-class-citizens" title="Permalink to this heading">#</a></h3>
+<h3>Key difference: Causal assumptions as first-class citizens<a class="headerlink" href="#key-difference-causal-assumptions-as-first-class-citizens" title="Link to this heading">#</a></h3>
 <p>Due to DoWhy’s focus on the full pipeline of causal analysis (not just a single
 step), there are three differences compared to available software for causal inference.</p>
 <dl>
@@ -694,7 +674,7 @@ implementations can be combined in any way.</p>
               
               
               
-                <footer class="prev-next-footer">
+                <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
 </div>
@@ -704,14 +684,17 @@ implementations can be combined in any way.</p>
             
             
               
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
 
   <div class="sidebar-secondary-item">
-
-  <div class="page-toc tocsection onthispage">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> On this page
   </div>
-  <nav class="bd-toc-nav page-toc">
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generating-sample-data-and-the-causal-model">Generating sample data and the causal model</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#identify-a-target-estimand-under-the-model">Identify a target estimand under the model</a><ul class="nav section-nav flex-column">
@@ -735,13 +718,13 @@ implementations can be combined in any way.</p>
   </nav></div>
 
   <div class="sidebar-secondary-item">
-
-  <div class="tocsection sourcelink">
-    <a href="../../../_sources/user_guide/causal_tasks/estimating_causal_effects/effect_estimation_with_estimators.rst.txt">
-      <i class="fa-solid fa-file-lines"></i> Show Source
-    </a>
-  </div>
-</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/user_guide/causal_tasks/estimating_causal_effects/effect_estimation_with_estimators.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
 
 </div></div>
               
@@ -756,8 +739,8 @@ implementations can be combined in any way.</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
-<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -777,7 +760,7 @@ implementations can be combined in any way.</p>
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
     <br/>
   </p>
 </div>
@@ -790,7 +773,8 @@ implementations can be combined in any way.</p>
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.4.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

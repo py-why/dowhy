@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 
 
-<html lang="en" data-content_root="" >
+<html lang="en" data-content_root="../" >
 
   <head>
     <meta charset="utf-8" />
@@ -23,35 +23,38 @@
   
   <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
-    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-
-  
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=949a1ff5" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
   
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
-  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../_static/jquery.js?v=5d32c60e"></script>
     <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=b3ba4146"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
-    <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=0c6e27e1"></script>
     <script src="../_static/design-tabs.js?v=36754332"></script>
@@ -66,6 +69,7 @@
     <link rel="prev" title="Counterfactual Fairness" href="counterfactual_fairness_dowhy.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="main" />
   </head>
   
   
@@ -73,32 +77,16 @@
 
   
   
-  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
   
   <div id="pst-scroll-pixel-helper"></div>
-
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
-    <i class="fa-solid fa-arrow-up"></i>
-    Back to top
-  </button>
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__primary"
-          id="__primary"/>
-  <label class="overlay overlay-primary" for="__primary"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__secondary"
-          id="__secondary"/>
-  <label class="overlay overlay-secondary" for="__secondary"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="../search.html"
       method="get">
@@ -106,7 +94,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -114,20 +101,27 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
   
-    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <label class="sidebar-toggle primary-toggle" for="__primary">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
-  </label>
+  </button>
   
   
   <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
 
+  
+    
   
 
 <a class="navbar-brand logo" href="../index.html">
@@ -142,7 +136,7 @@
     
     
     <img src="../_static/dowhy-logo-small.png" class="logo__image only-light" alt="DoWhy  documentation - Home"/>
-    <script>document.write(`<img src="../_static/dowhy-logo-small.png" class="logo__image only-dark" alt="DoWhy  documentation - Home"/>`);</script>
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-dark pst-js-only" alt="DoWhy  documentation - Home"/>
   
   
 </a></div>
@@ -154,68 +148,64 @@
     <div class="me-auto navbar-header-items__center">
       
         <div class="navbar-item">
-<nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../getting_started/index.html">
-                        Getting Started
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../user_guide/index.html">
-                        User Guide
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="nb_index.html">
-                        Examples
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../cite.html">
-                        Citing this package
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../contributing.html">
-                        Contributing
-                      </a>
-                    </li>
-                
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="nb_index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing.html">
+    Contributing
+  </a>
+</li>
+
             <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
                     More
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
-                        dowhy package
-                      </a>
-                    </li>
-                
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
+    dowhy package
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
-                        Release notes
-                      </a>
-                    </li>
-                
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
+    Release notes
+  </a>
+</li>
+
                 </ul>
             </li>
             
@@ -230,15 +220,11 @@
         <div class="navbar-item navbar-persistent--container">
           
 
- <script>
- document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
         </div>
       
       
@@ -281,31 +267,31 @@
   
     <div class="navbar-persistent--mobile">
 
- <script>
- document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
     </div>
   
 
   
-    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
       <span class="fa-solid fa-outdent"></span>
-    </label>
+    </button>
   
 </div>
 
-    </nav>
+    </header>
   
+
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
       
-      <div class="bd-sidebar-primary bd-sidebar">
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -314,74 +300,63 @@
     
       <div class="sidebar-header-items__center">
         
-          <div class="navbar-item">
-<nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+          
+          
+            <div class="navbar-item">
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../getting_started/index.html">
-                        Getting Started
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../user_guide/index.html">
-                        User Guide
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="nb_index.html">
-                        Examples
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../cite.html">
-                        Citing this package
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../contributing.html">
-                        Contributing
-                      </a>
-                    </li>
-                
-            <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links-2">
-                    More
-                </button>
-                <ul id="pst-nav-more-links-2" class="dropdown-menu">
-                    
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
-                        dowhy package
-                      </a>
-                    </li>
-                
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="nb_index.html">
+    Examples
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
-                        Release notes
-                      </a>
-                    </li>
-                
-                </ul>
-            </li>
-            
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../dowhy.html">
+    dowhy package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../code_repo.html">
+    Release notes
+  </a>
+</li>
+
   </ul>
 </nav></div>
+          
         
       </div>
     
@@ -521,29 +496,32 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
       
-      <main id="main-content" class="bd-main">
+      <main id="main-content" class="bd-main" role="main">
         
         
           <div class="bd-content">
             <div class="bd-article-container">
               
-              <div class="bd-header-article">
+              <div class="bd-header-article d-print-none">
 <div class="header-article-items header-article__inner">
   
     <div class="header-article-items__start">
       
         <div class="header-article-item">
 
-
-
-<nav aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
@@ -554,7 +532,7 @@
     
     <li class="breadcrumb-item"><a href="nb_index.html" class="nav-link">Example notebooks</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">Causal...</li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Causal attribution to sales growth and spend intervention</span></li>
   </ul>
 </nav>
 </div>
@@ -569,12 +547,12 @@
               
                 
 <div id="searchbox"></div>
-                <article class="bd-article" role="main">
+                <article class="bd-article">
                   
   <section id="Causal-attribution-to-sales-growth-and-spend-intervention">
-<h1>Causal attribution to sales growth and spend intervention<a class="headerlink" href="#Causal-attribution-to-sales-growth-and-spend-intervention" title="Permalink to this heading">#</a></h1>
+<h1>Causal attribution to sales growth and spend intervention<a class="headerlink" href="#Causal-attribution-to-sales-growth-and-spend-intervention" title="Link to this heading">#</a></h1>
 <section id="The-Scenario">
-<h2>The Scenario<a class="headerlink" href="#The-Scenario" title="Permalink to this heading">#</a></h2>
+<h2>The Scenario<a class="headerlink" href="#The-Scenario" title="Link to this heading">#</a></h2>
 <p>Suppose we have an advertiser selling products online. To promote sales, they give out discounts through price promotions, and advertise online through both display ads and sponsored ads in search results pages. To prepare for an upcoming business review, the advertiser compares 2024 and 2023 data and observes steady KPI growth such as sales, and product page views. However, the analytics team wonders what factors drive that growth, is it advertising, price promotion, or simply organic growth
 due to shopper trends? Answers to this question are key to understanding past growth. Furthermore, this advertiser wants actionable suggestions for business planning, such as spending on areas with higher returns on investment to double down next. In the following scenario, we will use DoWhy two-fold: first to causally attribute KPI growth drivers properly, so the analytics team understands what fueled past growth in a data-driven way. Second, we conduct interventions based on causal impact
 estimates to derive incremental return on investment (iROI), so the advertiser can forecast future KPI growth with additional investment. These factors and KPIs are:</p>
@@ -609,7 +587,7 @@ estimates to derive incremental return on investment (iROI), so the advertiser c
 </div>
 </section>
 <section id="1.-Explore-the-data">
-<h2>1. Explore the data<a class="headerlink" href="#1.-Explore-the-data" title="Permalink to this heading">#</a></h2>
+<h2>1. Explore the data<a class="headerlink" href="#1.-Explore-the-data" title="Link to this heading">#</a></h2>
 <p>First, let’s load our data representing the spending, discounts, sale and other information for 2023 and 2024. Note that for this simulated data, we didn’t change the distribution of price discounts over periods of comparison and shouldn’t detect as such in the later attribution model.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
@@ -890,9 +868,9 @@ estimates to derive incremental return on investment (iROI), so the advertiser c
 </div>
 </section>
 <section id="2.-Draw-causal-graph">
-<h2>2. Draw causal graph<a class="headerlink" href="#2.-Draw-causal-graph" title="Permalink to this heading">#</a></h2>
+<h2>2. Draw causal graph<a class="headerlink" href="#2.-Draw-causal-graph" title="Link to this heading">#</a></h2>
 <section id="2.1.Set-up-basic-causal-graphs">
-<h3>2.1.Set up basic causal graphs<a class="headerlink" href="#2.1.Set-up-basic-causal-graphs" title="Permalink to this heading">#</a></h3>
+<h3>2.1.Set up basic causal graphs<a class="headerlink" href="#2.1.Set-up-basic-causal-graphs" title="Link to this heading">#</a></h3>
 <p>In the first step, we make use of our domain knowledge that all the ad investment and the shopping events can be potential causes of product page views and sale, but not vice versa. Further, detail page views can also lead to sales, regardless of ad investment.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
@@ -932,7 +910,7 @@ estimates to derive incremental return on investment (iROI), so the advertiser c
 <p>It is unlikely that all these edges are significant. Let’s prune some potential causes in the next step. This is to have a more refined causal graph. i.e, closer to the truth.</p>
 </section>
 <section id="2.2.-Prune-nodes-and-edges">
-<h3>2.2. Prune nodes and edges<a class="headerlink" href="#2.2.-Prune-nodes-and-edges" title="Permalink to this heading">#</a></h3>
+<h3>2.2. Prune nodes and edges<a class="headerlink" href="#2.2.-Prune-nodes-and-edges" title="Link to this heading">#</a></h3>
 <p>One way to prune insignificant causal connections is conducting causal minimality tests through statistical dependence tests. The causality minimality test rules out any parent-child edge (<span class="math notranslate nohighlight">\(X\to Y\)</span>) for a node <span class="math notranslate nohighlight">\(Y\)</span> if <span class="math notranslate nohighlight">\(Y\)</span> is conditionally independent of <span class="math notranslate nohighlight">\(X\)</span> given other parents of <span class="math notranslate nohighlight">\(Y\)</span>. If that is the case, node <span class="math notranslate nohighlight">\(X\)</span> does not provide additional information on top of the other parents of <span class="math notranslate nohighlight">\(Y\)</span>. In layman’s language, some ads may not provide incremental
 information in the presence of others. Thus, we can remove those edges of <span class="math notranslate nohighlight">\(X \to Y\)</span>. Note that the test is adjusted for multihypothesis testing to guarantee a consistent false discovery rate.</p>
 <div class="nbinput nblast docutils container">
@@ -1012,7 +990,7 @@ Insignificant connection: [(&#39;other_shopping_event&#39;, &#39;dpv&#39;), (&#3
 </section>
 </section>
 <section id="3.-Fit-causal-graph">
-<h2>3. Fit causal graph<a class="headerlink" href="#3.-Fit-causal-graph" title="Permalink to this heading">#</a></h2>
+<h2>3. Fit causal graph<a class="headerlink" href="#3.-Fit-causal-graph" title="Link to this heading">#</a></h2>
 <p>Next, we need to assign functional causal models (FCMs) to each node, which describe the data generation process from x to y with an error term. The auto assignment method compares different prediction models for each node and takes the one with the smallest error. The <code class="docutils literal notranslate"><span class="pre">quality</span></code> parameter controls the set of model types that are tested, where <code class="docutils literal notranslate"><span class="pre">BETTER</span></code> indicates some of the most common regression and classification models, such as trees, support vector regression etc. You can also use
 <code class="docutils literal notranslate"><span class="pre">GOOD</span></code> which fits fewer models to speed up, or <code class="docutils literal notranslate"><span class="pre">BEST</span></code> that is computationally heavy (and requres AutoGluon to be installed). After assigning the models, we can fit them to the data:</p>
 <div class="nbinput nblast docutils container">
@@ -1115,12 +1093,12 @@ For more insights toward the quality of the fitted graphical causal model, consi
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node discount: 100%|██████████| 6/6 [00:00&lt;00:00, 27.74it/s]
+Fitting causal mechanism of node discount: 100%|██████████| 6/6 [00:00&lt;00:00, 27.64it/s]
 </pre></div></div>
 </div>
 </section>
 <section id="4.-Identify-causal-drivers-for-KPI-changes">
-<h2>4. Identify causal drivers for KPI changes<a class="headerlink" href="#4.-Identify-causal-drivers-for-KPI-changes" title="Permalink to this heading">#</a></h2>
+<h2>4. Identify causal drivers for KPI changes<a class="headerlink" href="#4.-Identify-causal-drivers-for-KPI-changes" title="Link to this heading">#</a></h2>
 <p>To answer the question on drivers for past growth, we test if any of the potential drivers lead to KPI changes by comparing the data from 2023 and 2024. Below we quantify the contribution to changes in the mean of our KPI, but one can similarly estimate the contributions with respect to the median or variance etc.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
@@ -1151,11 +1129,11 @@ Fitting causal mechanism of node discount: 100%|██████████| 
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Evaluating set functions...: 100%|██████████| 61/61 [00:03&lt;00:00, 18.11it/s]
-Evaluating set functions...: 100%|██████████| 61/61 [00:01&lt;00:00, 31.42it/s]
-Evaluating set functions...: 100%|██████████| 62/62 [00:01&lt;00:00, 34.50it/s]
-Evaluating set functions...: 100%|██████████| 62/62 [00:01&lt;00:00, 34.50it/s]
-Estimating bootstrap interval...: 100%|██████████| 4/4 [00:14&lt;00:00,  3.50s/it]
+Evaluating set functions...: 100%|██████████| 61/61 [00:02&lt;00:00, 30.45it/s]
+Evaluating set functions...: 100%|██████████| 62/62 [00:01&lt;00:00, 31.30it/s]
+Evaluating set functions...: 100%|██████████| 59/59 [00:01&lt;00:00, 30.60it/s]
+Evaluating set functions...: 100%|██████████| 62/62 [00:03&lt;00:00, 16.57it/s]
+Estimating bootstrap interval...: 100%|██████████| 4/4 [00:14&lt;00:00,  3.71s/it]
 </pre></div></div>
 </div>
 <p>Then we plot drivers’ contribution to KPI changes visually, followed by a tabular format.</p>
@@ -1231,39 +1209,39 @@ Estimating bootstrap interval...: 100%|██████████| 4/4 [00:1
   <tbody>
     <tr>
       <th>discount</th>
-      <td>-1810.011296</td>
-      <td>-2351.954517</td>
-      <td>424.608728</td>
+      <td>404.249464</td>
+      <td>-2541.978891</td>
+      <td>1871.992788</td>
     </tr>
     <tr>
       <th>dpv</th>
-      <td>-17865.805004</td>
-      <td>-20495.635150</td>
-      <td>-16255.578160</td>
+      <td>-17030.755266</td>
+      <td>-20822.520925</td>
+      <td>-12808.318982</td>
     </tr>
     <tr>
       <th>dsp_spend</th>
-      <td>10219.005392</td>
-      <td>9890.028357</td>
-      <td>12702.789510</td>
+      <td>13230.332551</td>
+      <td>8285.398025</td>
+      <td>15570.497543</td>
     </tr>
     <tr>
       <th>sale</th>
-      <td>2230.337416</td>
-      <td>14.939261</td>
-      <td>13218.827985</td>
+      <td>2385.261508</td>
+      <td>-3828.367497</td>
+      <td>5810.297447</td>
     </tr>
     <tr>
       <th>sp_spend</th>
-      <td>81392.392557</td>
-      <td>75001.284410</td>
-      <td>84178.124307</td>
+      <td>80356.934864</td>
+      <td>74540.709426</td>
+      <td>87494.532581</td>
     </tr>
     <tr>
       <th>special_shopping_event</th>
-      <td>-1019.724448</td>
-      <td>-1713.046781</td>
-      <td>70.768253</td>
+      <td>-1105.261287</td>
+      <td>-2518.043702</td>
+      <td>929.361176</td>
     </tr>
   </tbody>
 </table>
@@ -1333,21 +1311,15 @@ Estimating bootstrap interval...: 100%|██████████| 4/4 [00:1
   <tbody>
     <tr>
       <th>dsp_spend</th>
-      <td>10219.005392</td>
-      <td>9890.028357</td>
-      <td>12702.789510</td>
-    </tr>
-    <tr>
-      <th>sale</th>
-      <td>2230.337416</td>
-      <td>14.939261</td>
-      <td>13218.827985</td>
+      <td>13230.332551</td>
+      <td>8285.398025</td>
+      <td>15570.497543</td>
     </tr>
     <tr>
       <th>sp_spend</th>
-      <td>81392.392557</td>
-      <td>75001.284410</td>
-      <td>84178.124307</td>
+      <td>80356.934864</td>
+      <td>74540.709426</td>
+      <td>87494.532581</td>
     </tr>
   </tbody>
 </table>
@@ -1356,7 +1328,7 @@ Estimating bootstrap interval...: 100%|██████████| 4/4 [00:1
 <p>This tells us, ‘dsp_spend’ and ‘sp_spend’ had a significantly positive contribution to the shift in ‘sale’.</p>
 </section>
 <section id="5.-Optimal-intervention">
-<h2>5. Optimal intervention<a class="headerlink" href="#5.-Optimal-intervention" title="Permalink to this heading">#</a></h2>
+<h2>5. Optimal intervention<a class="headerlink" href="#5.-Optimal-intervention" title="Link to this heading">#</a></h2>
 <p>Section 4 above helps us to understand drivers for past growth. Now, looking forward to business planning, we conduct interventions to understand incremental contributions to KPIs. Intuitively, the spend types resulting in higher returns should be doubled down on. Here, we explicitly remove ‘sale’, ‘dpv’ and ‘special_shopping_event’ as a possible intervention targets.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
@@ -1442,6 +1414,15 @@ Estimating bootstrap interval...: 100%|██████████| 4/4 [00:1
 <span class="n">interv_result</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/runner/.cache/pypoetry/virtualenvs/dowhy-n6DJFijf-py3.9/lib/python3.9/site-packages/joblib/externals/loky/process_executor.py:782: UserWarning: A worker stopped while some jobs were given to the executor. This can be caused by a too short worker timeout or by a memory leak.
+  warnings.warn(
+</pre></div></div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
@@ -1569,7 +1550,7 @@ Increasing discount by 1 decreases sale by around -0.3838008170953823 with a con
 <p>This tells us that there is a clear benefit in doubling down on ‘sp_spend’ and ‘dsp_spend’. Note that the quantitative numbers here can be off due to model misspecifications, but they nevertheless provide some helpful insights.</p>
 </section>
 <section id="Summary">
-<h2>Summary<a class="headerlink" href="#Summary" title="Permalink to this heading">#</a></h2>
+<h2>Summary<a class="headerlink" href="#Summary" title="Link to this heading">#</a></h2>
 <p>This advertiser comes to us to understand what drove past growth. Starting with a causal graph drawn from domain knowledge, we refined the graph to prune unnecessary nodes and edges. Then we fit a causal attribution model in Section 4 to test which types of investment changes lead to KPI growth. We find that increases in both dsp_spend and sp_spend contribute to KPIs growth in 2024 vs. 2023. This conclusion helps the analytics team to understand root causes of past sales growth. Looking forward
 to future budget planning, we conducted interventions to understand incremental return on investment (iROI), and identify those types of spend way above $1 to double down on.</p>
 </section>
@@ -1582,7 +1563,7 @@ to future budget planning, we conducted interventions to understand incremental 
               
               
               
-                <footer class="prev-next-footer">
+                <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
     <a class="left-prev"
@@ -1610,14 +1591,17 @@ to future budget planning, we conducted interventions to understand incremental 
             
             
               
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
 
   <div class="sidebar-secondary-item">
-
-  <div class="page-toc tocsection onthispage">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> On this page
   </div>
-  <nav class="bd-toc-nav page-toc">
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#The-Scenario">The Scenario</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#1.-Explore-the-data">1. Explore the data</a></li>
@@ -1634,13 +1618,13 @@ to future budget planning, we conducted interventions to understand incremental 
   </nav></div>
 
   <div class="sidebar-secondary-item">
-
-  <div class="tocsection sourcelink">
-    <a href="../_sources/example_notebooks/sales_attribution_intervention.ipynb.txt">
-      <i class="fa-solid fa-file-lines"></i> Show Source
-    </a>
-  </div>
-</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/example_notebooks/sales_attribution_intervention.ipynb.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
 
 </div></div>
               
@@ -1655,8 +1639,8 @@ to future budget planning, we conducted interventions to understand incremental 
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1676,7 +1660,7 @@ to future budget planning, we conducted interventions to understand incremental 
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
     <br/>
   </p>
 </div>
@@ -1689,7 +1673,8 @@ to future budget planning, we conducted interventions to understand incremental 
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.4.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

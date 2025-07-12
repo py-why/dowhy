@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 
 
-<html lang="en" data-content_root="" >
+<html lang="en" data-content_root="../" >
 
   <head>
     <meta charset="utf-8" />
@@ -23,35 +23,38 @@
   
   <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
-    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-
-  
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=949a1ff5" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
   
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
-  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../_static/jquery.js?v=5d32c60e"></script>
     <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=b3ba4146"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
-    <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=0c6e27e1"></script>
     <script src="../_static/design-tabs.js?v=36754332"></script>
@@ -66,6 +69,7 @@
     <link rel="prev" title="A Simple Example on Creating a Custom Refutation Using User-Defined Outcome Functions" href="dowhy_demo_dummy_outcome_refuter.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="main" />
   </head>
   
   
@@ -73,32 +77,16 @@
 
   
   
-  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
   
   <div id="pst-scroll-pixel-helper"></div>
-
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
-    <i class="fa-solid fa-arrow-up"></i>
-    Back to top
-  </button>
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__primary"
-          id="__primary"/>
-  <label class="overlay overlay-primary" for="__primary"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__secondary"
-          id="__secondary"/>
-  <label class="overlay overlay-secondary" for="__secondary"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="../search.html"
       method="get">
@@ -106,7 +94,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -114,20 +101,27 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
   
-    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <label class="sidebar-toggle primary-toggle" for="__primary">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
-  </label>
+  </button>
   
   
   <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
 
+  
+    
   
 
 <a class="navbar-brand logo" href="../index.html">
@@ -142,7 +136,7 @@
     
     
     <img src="../_static/dowhy-logo-small.png" class="logo__image only-light" alt="DoWhy  documentation - Home"/>
-    <script>document.write(`<img src="../_static/dowhy-logo-small.png" class="logo__image only-dark" alt="DoWhy  documentation - Home"/>`);</script>
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-dark pst-js-only" alt="DoWhy  documentation - Home"/>
   
   
 </a></div>
@@ -154,68 +148,64 @@
     <div class="me-auto navbar-header-items__center">
       
         <div class="navbar-item">
-<nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../getting_started/index.html">
-                        Getting Started
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../user_guide/index.html">
-                        User Guide
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="nb_index.html">
-                        Examples
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../cite.html">
-                        Citing this package
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../contributing.html">
-                        Contributing
-                      </a>
-                    </li>
-                
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="nb_index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing.html">
+    Contributing
+  </a>
+</li>
+
             <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
                     More
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
-                        dowhy package
-                      </a>
-                    </li>
-                
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
+    dowhy package
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
-                        Release notes
-                      </a>
-                    </li>
-                
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
+    Release notes
+  </a>
+</li>
+
                 </ul>
             </li>
             
@@ -230,15 +220,11 @@
         <div class="navbar-item navbar-persistent--container">
           
 
- <script>
- document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
         </div>
       
       
@@ -281,31 +267,31 @@
   
     <div class="navbar-persistent--mobile">
 
- <script>
- document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
     </div>
   
 
   
-    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
       <span class="fa-solid fa-outdent"></span>
-    </label>
+    </button>
   
 </div>
 
-    </nav>
+    </header>
   
+
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
       
-      <div class="bd-sidebar-primary bd-sidebar">
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -314,74 +300,63 @@
     
       <div class="sidebar-header-items__center">
         
-          <div class="navbar-item">
-<nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+          
+          
+            <div class="navbar-item">
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../getting_started/index.html">
-                        Getting Started
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../user_guide/index.html">
-                        User Guide
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="nb_index.html">
-                        Examples
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../cite.html">
-                        Citing this package
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../contributing.html">
-                        Contributing
-                      </a>
-                    </li>
-                
-            <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links-2">
-                    More
-                </button>
-                <ul id="pst-nav-more-links-2" class="dropdown-menu">
-                    
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
-                        dowhy package
-                      </a>
-                    </li>
-                
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="nb_index.html">
+    Examples
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
-                        Release notes
-                      </a>
-                    </li>
-                
-                </ul>
-            </li>
-            
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../dowhy.html">
+    dowhy package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../code_repo.html">
+    Release notes
+  </a>
+</li>
+
   </ul>
 </nav></div>
+          
         
       </div>
     
@@ -521,29 +496,32 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
       
-      <main id="main-content" class="bd-main">
+      <main id="main-content" class="bd-main" role="main">
         
         
           <div class="bd-content">
             <div class="bd-article-container">
               
-              <div class="bd-header-article">
+              <div class="bd-header-article d-print-none">
 <div class="header-article-items header-article__inner">
   
     <div class="header-article-items__start">
       
         <div class="header-article-item">
 
-
-
-<nav aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
@@ -554,7 +532,7 @@
     
     <li class="breadcrumb-item"><a href="nb_index.html" class="nav-link">Example notebooks</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">DoWhy:...</li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">DoWhy: Different estimation methods for causal inference</span></li>
   </ul>
 </nav>
 </div>
@@ -569,10 +547,10 @@
               
                 
 <div id="searchbox"></div>
-                <article class="bd-article" role="main">
+                <article class="bd-article">
                   
   <section id="DoWhy:-Different-estimation-methods-for-causal-inference">
-<h1>DoWhy: Different estimation methods for causal inference<a class="headerlink" href="#DoWhy:-Different-estimation-methods-for-causal-inference" title="Permalink to this heading">#</a></h1>
+<h1>DoWhy: Different estimation methods for causal inference<a class="headerlink" href="#DoWhy:-Different-estimation-methods-for-causal-inference" title="Link to this heading">#</a></h1>
 <p>This is a quick introduction to the DoWhy causal inference library. We will load in a sample dataset and use different methods for estimating the causal effect of a (pre-specified)treatment variable on a (pre-specified) outcome variable.</p>
 <p>We will see that not all estimators return the correct effect for this dataset.</p>
 <p>First, let us add the required path for Python to find the DoWhy code and load all required packages</p>
@@ -656,62 +634,62 @@
     <tr>
       <th>0</th>
       <td>1.0</td>
-      <td>0.850350</td>
-      <td>-1.118241</td>
-      <td>1.664254</td>
-      <td>-0.895615</td>
-      <td>-0.136125</td>
-      <td>-1.208790</td>
+      <td>0.067469</td>
+      <td>1.139225</td>
+      <td>-1.556378</td>
+      <td>1.584170</td>
+      <td>-0.049836</td>
+      <td>2.982195</td>
       <td>True</td>
-      <td>5.610020</td>
+      <td>19.162002</td>
     </tr>
     <tr>
       <th>1</th>
       <td>1.0</td>
-      <td>0.899355</td>
-      <td>-2.778745</td>
-      <td>-0.441698</td>
-      <td>-1.138712</td>
-      <td>0.639804</td>
-      <td>-0.076657</td>
+      <td>0.236469</td>
+      <td>-0.523458</td>
+      <td>-0.471689</td>
+      <td>-1.265474</td>
+      <td>0.254634</td>
+      <td>0.465413</td>
       <td>True</td>
-      <td>-8.793210</td>
+      <td>7.467301</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>1.0</td>
-      <td>0.919285</td>
-      <td>-1.025734</td>
-      <td>-1.909335</td>
-      <td>-1.940192</td>
-      <td>-2.545390</td>
-      <td>1.699552</td>
+      <td>0.0</td>
+      <td>0.749620</td>
+      <td>1.953159</td>
+      <td>-0.561866</td>
+      <td>1.414990</td>
+      <td>0.024328</td>
+      <td>1.172151</td>
       <td>True</td>
-      <td>-11.289692</td>
+      <td>17.711392</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>1.0</td>
-      <td>0.810912</td>
-      <td>-0.184854</td>
-      <td>-1.811417</td>
-      <td>-1.063920</td>
-      <td>-0.594259</td>
-      <td>1.252866</td>
+      <td>0.0</td>
+      <td>0.053967</td>
+      <td>-0.458742</td>
+      <td>-2.113044</td>
+      <td>1.068224</td>
+      <td>-0.186028</td>
+      <td>0.572580</td>
       <td>True</td>
-      <td>-0.326203</td>
+      <td>8.981181</td>
     </tr>
     <tr>
       <th>4</th>
       <td>1.0</td>
-      <td>0.869387</td>
-      <td>-0.214487</td>
-      <td>0.952365</td>
-      <td>1.107983</td>
-      <td>0.128857</td>
-      <td>1.174026</td>
+      <td>0.950518</td>
+      <td>0.593030</td>
+      <td>-0.227614</td>
+      <td>0.025152</td>
+      <td>0.391616</td>
+      <td>1.082178</td>
       <td>True</td>
-      <td>20.606841</td>
+      <td>13.998419</td>
     </tr>
     <tr>
       <th>...</th>
@@ -728,62 +706,62 @@
     <tr>
       <th>9995</th>
       <td>1.0</td>
-      <td>0.452445</td>
-      <td>-2.096983</td>
-      <td>0.844339</td>
-      <td>-0.468537</td>
-      <td>-0.879138</td>
-      <td>0.517546</td>
+      <td>0.555513</td>
+      <td>2.028870</td>
+      <td>-1.114285</td>
+      <td>-0.503128</td>
+      <td>2.494131</td>
+      <td>0.950050</td>
       <td>True</td>
-      <td>0.993900</td>
+      <td>18.516492</td>
     </tr>
     <tr>
       <th>9996</th>
       <td>1.0</td>
-      <td>0.345086</td>
-      <td>-0.439439</td>
-      <td>-0.993354</td>
-      <td>-0.020213</td>
-      <td>0.061161</td>
-      <td>2.672074</td>
-      <td>True</td>
-      <td>11.410591</td>
+      <td>0.603578</td>
+      <td>-0.446501</td>
+      <td>-0.384174</td>
+      <td>0.440955</td>
+      <td>-0.596330</td>
+      <td>-0.070830</td>
+      <td>False</td>
+      <td>-2.017704</td>
     </tr>
     <tr>
       <th>9997</th>
       <td>1.0</td>
-      <td>0.972712</td>
-      <td>-2.525724</td>
-      <td>0.788755</td>
-      <td>0.277582</td>
-      <td>-2.283744</td>
-      <td>0.646747</td>
+      <td>0.902266</td>
+      <td>1.316117</td>
+      <td>-2.221594</td>
+      <td>1.552766</td>
+      <td>0.928517</td>
+      <td>1.180270</td>
       <td>True</td>
-      <td>-2.886275</td>
+      <td>16.615636</td>
     </tr>
     <tr>
       <th>9998</th>
       <td>1.0</td>
-      <td>0.483175</td>
-      <td>-0.177375</td>
-      <td>-0.741847</td>
-      <td>-0.505023</td>
-      <td>-1.767509</td>
-      <td>-1.181964</td>
+      <td>0.800979</td>
+      <td>0.328951</td>
+      <td>-1.268813</td>
+      <td>0.241366</td>
+      <td>0.924847</td>
+      <td>1.203273</td>
       <td>True</td>
-      <td>-4.397673</td>
+      <td>13.973898</td>
     </tr>
     <tr>
       <th>9999</th>
       <td>1.0</td>
-      <td>0.207344</td>
-      <td>-0.455726</td>
-      <td>1.134181</td>
-      <td>-0.559928</td>
-      <td>0.707949</td>
-      <td>2.197020</td>
+      <td>0.151531</td>
+      <td>0.977229</td>
+      <td>0.775893</td>
+      <td>0.348922</td>
+      <td>0.656066</td>
+      <td>-0.257566</td>
       <td>True</td>
-      <td>20.627103</td>
+      <td>14.506658</td>
     </tr>
   </tbody>
 </table>
@@ -792,7 +770,7 @@
 </div>
 <p>Note that we are using a pandas dataframe to load the data.</p>
 <section id="Identifying-the-causal-estimand">
-<h2>Identifying the causal estimand<a class="headerlink" href="#Identifying-the-causal-estimand" title="Permalink to this heading">#</a></h2>
+<h2>Identifying the causal estimand<a class="headerlink" href="#Identifying-the-causal-estimand" title="Link to this heading">#</a></h2>
 <p>We now input a causal graph in the DOT graph format.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
@@ -861,9 +839,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W4,W1,W0,W3,W2])
+─────(E[y|W2,W1,W3,W4,W0])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W4,W1,W0,W3,W2,U) = P(y|v0,W4,W1,W0,W3,W2)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W1,W3,W4,W0,U) = P(y|v0,W2,W1,W3,W4,W0)
 
 ### Estimand : 2
 Estimand name: iv
@@ -883,7 +861,7 @@ No such variable(s) found!
 </div>
 </section>
 <section id="Method-1:-Regression">
-<h2>Method 1: Regression<a class="headerlink" href="#Method-1:-Regression" title="Permalink to this heading">#</a></h2>
+<h2>Method 1: Regression<a class="headerlink" href="#Method-1:-Regression" title="Link to this heading">#</a></h2>
 <p>Use linear regression.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
@@ -897,7 +875,7 @@ No such variable(s) found!
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
+<div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
@@ -911,24 +889,33 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W4,W1,W0,W3,W2])
+─────(E[y|W2,W1,W3,W4,W0])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W4,W1,W0,W3,W2,U) = P(y|v0,W4,W1,W0,W3,W2)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W1,W3,W4,W0,U) = P(y|v0,W2,W1,W3,W4,W0)
 
 ## Realized estimand
-b: y~v0+W4+W1+W0+W3+W2
+b: y~v0+W2+W1+W3+W4+W0
 Target units: ate
 
 ## Estimate
-Mean value: 10.00008367140593
+Mean value: 10.000632488698557
 p-value: [0.]
 
-Causal Estimate is 10.00008367140593
+Causal Estimate is 10.000632488698557
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/runner/work/dowhy/dowhy/dowhy/causal_estimators/regression_estimator.py:131: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  intercept_parameter = self.model.params[0]
 </pre></div></div>
 </div>
 </section>
 <section id="Method-2:-Distance-Matching">
-<h2>Method 2: Distance Matching<a class="headerlink" href="#Method-2:-Distance-Matching" title="Permalink to this heading">#</a></h2>
+<h2>Method 2: Distance Matching<a class="headerlink" href="#Method-2:-Distance-Matching" title="Link to this heading">#</a></h2>
 <p>Define a distance metric and then use the metric to match closest points between treatment and control.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
@@ -957,23 +944,23 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W4,W1,W0,W3,W2])
+─────(E[y|W2,W1,W3,W4,W0])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W4,W1,W0,W3,W2,U) = P(y|v0,W4,W1,W0,W3,W2)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W1,W3,W4,W0,U) = P(y|v0,W2,W1,W3,W4,W0)
 
 ## Realized estimand
-b: y~v0+W4+W1+W0+W3+W2
+b: y~v0+W2+W1+W3+W4+W0
 Target units: att
 
 ## Estimate
-Mean value: 11.187076160376193
+Mean value: 10.720284862110208
 
-Causal Estimate is 11.187076160376193
+Causal Estimate is 10.720284862110208
 </pre></div></div>
 </div>
 </section>
 <section id="Method-3:-Propensity-Score-Stratification">
-<h2>Method 3: Propensity Score Stratification<a class="headerlink" href="#Method-3:-Propensity-Score-Stratification" title="Permalink to this heading">#</a></h2>
+<h2>Method 3: Propensity Score Stratification<a class="headerlink" href="#Method-3:-Propensity-Score-Stratification" title="Link to this heading">#</a></h2>
 <p>We will be using propensity scores to stratify units in the data.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
@@ -1001,23 +988,23 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W4,W1,W0,W3,W2])
+─────(E[y|W2,W1,W3,W4,W0])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W4,W1,W0,W3,W2,U) = P(y|v0,W4,W1,W0,W3,W2)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W1,W3,W4,W0,U) = P(y|v0,W2,W1,W3,W4,W0)
 
 ## Realized estimand
-b: y~v0+W4+W1+W0+W3+W2
+b: y~v0+W2+W1+W3+W4+W0
 Target units: att
 
 ## Estimate
-Mean value: 10.194864768705349
+Mean value: 9.924159784977949
 
-Causal Estimate is 10.194864768705349
+Causal Estimate is 9.924159784977949
 </pre></div></div>
 </div>
 </section>
 <section id="Method-4:-Propensity-Score-Matching">
-<h2>Method 4: Propensity Score Matching<a class="headerlink" href="#Method-4:-Propensity-Score-Matching" title="Permalink to this heading">#</a></h2>
+<h2>Method 4: Propensity Score Matching<a class="headerlink" href="#Method-4:-Propensity-Score-Matching" title="Link to this heading">#</a></h2>
 <p>We will be using propensity scores to match units in the data.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
@@ -1045,23 +1032,23 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W4,W1,W0,W3,W2])
+─────(E[y|W2,W1,W3,W4,W0])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W4,W1,W0,W3,W2,U) = P(y|v0,W4,W1,W0,W3,W2)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W1,W3,W4,W0,U) = P(y|v0,W2,W1,W3,W4,W0)
 
 ## Realized estimand
-b: y~v0+W4+W1+W0+W3+W2
+b: y~v0+W2+W1+W3+W4+W0
 Target units: atc
 
 ## Estimate
-Mean value: 10.051736318758014
+Mean value: 10.000838531183241
 
-Causal Estimate is 10.051736318758014
+Causal Estimate is 10.000838531183241
 </pre></div></div>
 </div>
 </section>
 <section id="Method-5:-Weighting">
-<h2>Method 5: Weighting<a class="headerlink" href="#Method-5:-Weighting" title="Permalink to this heading">#</a></h2>
+<h2>Method 5: Weighting<a class="headerlink" href="#Method-5:-Weighting" title="Link to this heading">#</a></h2>
 <p>We will be using (inverse) propensity scores to assign weights to units in the data. DoWhy supports a few different weighting schemes:</p>
 <ol class="arabic simple">
 <li><p>Vanilla Inverse Propensity Score weighting (IPS) (weighting_scheme=”ips_weight”)</p></li>
@@ -1095,23 +1082,23 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W4,W1,W0,W3,W2])
+─────(E[y|W2,W1,W3,W4,W0])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W4,W1,W0,W3,W2,U) = P(y|v0,W4,W1,W0,W3,W2)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W2,W1,W3,W4,W0,U) = P(y|v0,W2,W1,W3,W4,W0)
 
 ## Realized estimand
-b: y~v0+W4+W1+W0+W3+W2
+b: y~v0+W2+W1+W3+W4+W0
 Target units: ate
 
 ## Estimate
-Mean value: 11.962825867075477
+Mean value: 11.16444419262605
 
-Causal Estimate is 11.962825867075477
+Causal Estimate is 11.16444419262605
 </pre></div></div>
 </div>
 </section>
 <section id="Method-6:-Instrumental-Variable">
-<h2>Method 6: Instrumental Variable<a class="headerlink" href="#Method-6:-Instrumental-Variable" title="Permalink to this heading">#</a></h2>
+<h2>Method 6: Instrumental Variable<a class="headerlink" href="#Method-6:-Instrumental-Variable" title="Link to this heading">#</a></h2>
 <p>We will be using the Wald estimator for the provided instrumental variable.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
@@ -1163,14 +1150,14 @@ Estimand assumption 4, outcome_effect_homogeneity: Each unit&#39;s outcome [&#39
 Target units: ate
 
 ## Estimate
-Mean value: 11.06590706894136
+Mean value: 10.197446787848596
 
-Causal Estimate is 11.06590706894136
+Causal Estimate is 10.197446787848596
 </pre></div></div>
 </div>
 </section>
 <section id="Method-7:-Regression-Discontinuity">
-<h2>Method 7: Regression Discontinuity<a class="headerlink" href="#Method-7:-Regression-Discontinuity" title="Permalink to this heading">#</a></h2>
+<h2>Method 7: Regression Discontinuity<a class="headerlink" href="#Method-7:-Regression-Discontinuity" title="Link to this heading">#</a></h2>
 <p>We will be internally converting this to an equivalent instrumental variables problem.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
@@ -1225,9 +1212,9 @@ Estimand assumption 4, outcome_effect_homogeneity: Each unit&#39;s outcome [&#39
 Target units: ate
 
 ## Estimate
-Mean value: 33.38674793338614
+Mean value: 6.848904723214152
 
-Causal Estimate is 33.38674793338614
+Causal Estimate is 6.848904723214152
 </pre></div></div>
 </div>
 </section>
@@ -1240,7 +1227,7 @@ Causal Estimate is 33.38674793338614
               
               
               
-                <footer class="prev-next-footer">
+                <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
     <a class="left-prev"
@@ -1268,14 +1255,17 @@ Causal Estimate is 33.38674793338614
             
             
               
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
 
   <div class="sidebar-secondary-item">
-
-  <div class="page-toc tocsection onthispage">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> On this page
   </div>
-  <nav class="bd-toc-nav page-toc">
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Identifying-the-causal-estimand">Identifying the causal estimand</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Method-1:-Regression">Method 1: Regression</a></li>
@@ -1289,13 +1279,13 @@ Causal Estimate is 33.38674793338614
   </nav></div>
 
   <div class="sidebar-secondary-item">
-
-  <div class="tocsection sourcelink">
-    <a href="../_sources/example_notebooks/dowhy_estimation_methods.ipynb.txt">
-      <i class="fa-solid fa-file-lines"></i> Show Source
-    </a>
-  </div>
-</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/example_notebooks/dowhy_estimation_methods.ipynb.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
 
 </div></div>
               
@@ -1310,8 +1300,8 @@ Causal Estimate is 33.38674793338614
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1331,7 +1321,7 @@ Causal Estimate is 33.38674793338614
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
     <br/>
   </p>
 </div>
@@ -1344,7 +1334,8 @@ Causal Estimate is 33.38674793338614
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.4.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

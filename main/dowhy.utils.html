@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 
 
-<html lang="en" data-content_root="" >
+<html lang="en" data-content_root="./" >
 
   <head>
     <meta charset="utf-8" />
@@ -23,34 +23,37 @@
   
   <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
-    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-
-  
-  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=949a1ff5" />
-    <link rel="stylesheet" type="text/css" href="_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
   
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
-  <script src="_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="_static/jquery.js?v=5d32c60e"></script>
     <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=b3ba4146"></script>
-    <script src="_static/doctools.js?v=888ff710"></script>
-    <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="_static/copybutton.js?v=0c6e27e1"></script>
     <script src="_static/design-tabs.js?v=36754332"></script>
@@ -63,6 +66,7 @@
     <link rel="prev" title="dowhy.interpreters package" href="dowhy.interpreters.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="main" />
   </head>
   
   
@@ -70,32 +74,16 @@
 
   
   
-  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
   
   <div id="pst-scroll-pixel-helper"></div>
-
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
-    <i class="fa-solid fa-arrow-up"></i>
-    Back to top
-  </button>
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__primary"
-          id="__primary"/>
-  <label class="overlay overlay-primary" for="__primary"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__secondary"
-          id="__secondary"/>
-  <label class="overlay overlay-secondary" for="__secondary"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="search.html"
       method="get">
@@ -103,7 +91,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -111,20 +98,27 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
   
-    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <label class="sidebar-toggle primary-toggle" for="__primary">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
-  </label>
+  </button>
   
   
   <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
 
+  
+    
   
 
 <a class="navbar-brand logo" href="index.html">
@@ -139,7 +133,7 @@
     
     
     <img src="_static/dowhy-logo-small.png" class="logo__image only-light" alt="DoWhy  documentation - Home"/>
-    <script>document.write(`<img src="_static/dowhy-logo-small.png" class="logo__image only-dark" alt="DoWhy  documentation - Home"/>`);</script>
+    <img src="_static/dowhy-logo-small.png" class="logo__image only-dark pst-js-only" alt="DoWhy  documentation - Home"/>
   
   
 </a></div>
@@ -151,68 +145,64 @@
     <div class="me-auto navbar-header-items__center">
       
         <div class="navbar-item">
-<nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="getting_started/index.html">
-                        Getting Started
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="getting_started/index.html">
+    Getting Started
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="user_guide/index.html">
-                        User Guide
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="example_notebooks/nb_index.html">
-                        Examples
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="user_guide/index.html">
+    User Guide
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="cite.html">
-                        Citing this package
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="contributing.html">
-                        Contributing
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="example_notebooks/nb_index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="contributing.html">
+    Contributing
+  </a>
+</li>
+
             <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
                     More
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
-                    <li class="nav-item current active">
-                      <a class="nav-link dropdown-item nav-internal" href="dowhy.html">
-                        dowhy package
-                      </a>
-                    </li>
-                
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="dowhy.html">
+    dowhy package
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="code_repo.html">
-                        Release notes
-                      </a>
-                    </li>
-                
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="code_repo.html">
+    Release notes
+  </a>
+</li>
+
                 </ul>
             </li>
             
@@ -227,15 +217,11 @@
         <div class="navbar-item navbar-persistent--container">
           
 
- <script>
- document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
         </div>
       
       
@@ -278,31 +264,31 @@
   
     <div class="navbar-persistent--mobile">
 
- <script>
- document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
     </div>
   
 
   
-    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
       <span class="fa-solid fa-outdent"></span>
-    </label>
+    </button>
   
 </div>
 
-    </nav>
+    </header>
   
+
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
       
-      <div class="bd-sidebar-primary bd-sidebar">
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -311,74 +297,63 @@
     
       <div class="sidebar-header-items__center">
         
-          <div class="navbar-item">
-<nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+          
+          
+            <div class="navbar-item">
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="getting_started/index.html">
-                        Getting Started
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="getting_started/index.html">
+    Getting Started
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="user_guide/index.html">
-                        User Guide
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="example_notebooks/nb_index.html">
-                        Examples
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="user_guide/index.html">
+    User Guide
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="cite.html">
-                        Citing this package
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="contributing.html">
-                        Contributing
-                      </a>
-                    </li>
-                
-            <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links-2">
-                    More
-                </button>
-                <ul id="pst-nav-more-links-2" class="dropdown-menu">
-                    
-                    <li class="nav-item current active">
-                      <a class="nav-link dropdown-item nav-internal" href="dowhy.html">
-                        dowhy package
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="example_notebooks/nb_index.html">
+    Examples
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="code_repo.html">
-                        Release notes
-                      </a>
-                    </li>
-                
-                </ul>
-            </li>
-            
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="contributing.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="dowhy.html">
+    dowhy package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="code_repo.html">
+    Release notes
+  </a>
+</li>
+
   </ul>
 </nav></div>
+          
         
       </div>
     
@@ -431,28 +406,28 @@
 <li class="toctree-l1"><a class="reference internal" href="dowhy.api.html">dowhy.api package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy.causal_estimators.html">dowhy.causal_estimators package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy.causal_identifier.html">dowhy.causal_identifier package</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="dowhy.causal_prediction.html">dowhy.causal_prediction package</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="dowhy.causal_prediction.html">dowhy.causal_prediction package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="dowhy.causal_prediction.algorithms.html">dowhy.causal_prediction.algorithms package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dowhy.causal_prediction.dataloaders.html">dowhy.causal_prediction.dataloaders package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dowhy.causal_prediction.datasets.html">dowhy.causal_prediction.datasets package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dowhy.causal_prediction.models.html">dowhy.causal_prediction.models package</a></li>
 </ul>
-</li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="dowhy.causal_refuters.html">dowhy.causal_refuters package</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l2 has-children"><a class="reference internal" href="dowhy.causal_refuters.overrule.html">dowhy.causal_refuters.overrule package</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="dowhy.causal_refuters.html">dowhy.causal_refuters package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="dowhy.causal_refuters.overrule.html">dowhy.causal_refuters.overrule package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l3"><a class="reference internal" href="dowhy.causal_refuters.overrule.BCS.html">dowhy.causal_refuters.overrule.BCS package</a></li>
 </ul>
-</li>
+</details></li>
 </ul>
-</li>
+</details></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy.data_transformers.html">dowhy.data_transformers package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy.do_samplers.html">dowhy.do_samplers package</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="dowhy.gcm.html">dowhy.gcm package</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="dowhy.gcm.html">dowhy.gcm package</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="dowhy.gcm.independence_test.html">dowhy.gcm.independence_test package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dowhy.gcm.ml.html">dowhy.gcm.ml package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dowhy.gcm.util.html">dowhy.gcm.util package</a></li>
 </ul>
-</li>
+</details></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy.graph_learners.html">dowhy.graph_learners package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy.interpreters.html">dowhy.interpreters package</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">dowhy.utils package</a></li>
@@ -463,29 +438,32 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
       
-      <main id="main-content" class="bd-main">
+      <main id="main-content" class="bd-main" role="main">
         
         
           <div class="bd-content">
             <div class="bd-article-container">
               
-              <div class="bd-header-article">
+              <div class="bd-header-article d-print-none">
 <div class="header-article-items header-article__inner">
   
     <div class="header-article-items__start">
       
         <div class="header-article-item">
 
-
-
-<nav aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb" class="d-print-none">
   <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
@@ -496,7 +474,7 @@
     
     <li class="breadcrumb-item"><a href="dowhy.html" class="nav-link">dowhy package</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">dowhy.utils package</li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">dowhy.utils package</span></li>
   </ul>
 </nav>
 </div>
@@ -511,26 +489,26 @@
               
                 
 <div id="searchbox"></div>
-                <article class="bd-article" role="main">
+                <article class="bd-article">
                   
   <section id="dowhy-utils-package">
-<h1>dowhy.utils package<a class="headerlink" href="#dowhy-utils-package" title="Permalink to this heading">#</a></h1>
+<h1>dowhy.utils package<a class="headerlink" href="#dowhy-utils-package" title="Link to this heading">#</a></h1>
 <section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading">#</a></h2>
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">#</a></h2>
 </section>
 <section id="module-dowhy.utils.api">
-<span id="dowhy-utils-api-module"></span><h2>dowhy.utils.api module<a class="headerlink" href="#module-dowhy.utils.api" title="Permalink to this heading">#</a></h2>
+<span id="dowhy-utils-api-module"></span><h2>dowhy.utils.api module<a class="headerlink" href="#module-dowhy.utils.api" title="Link to this heading">#</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.api.parse_state">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.api.</span></span><span class="sig-name descname"><span class="pre">parse_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/api.html#parse_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.api.parse_state" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.api.</span></span><span class="sig-name descname"><span class="pre">parse_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/api.html#parse_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.api.parse_state" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </section>
 <section id="module-dowhy.utils.cit">
-<span id="dowhy-utils-cit-module"></span><h2>dowhy.utils.cit module<a class="headerlink" href="#module-dowhy.utils.cit" title="Permalink to this heading">#</a></h2>
+<span id="dowhy-utils-cit-module"></span><h2>dowhy.utils.cit module<a class="headerlink" href="#module-dowhy.utils.cit" title="Link to this heading">#</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.cit.compute_ci">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.cit.</span></span><span class="sig-name descname"><span class="pre">compute_ci</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/cit.html#compute_ci"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.cit.compute_ci" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.cit.</span></span><span class="sig-name descname"><span class="pre">compute_ci</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/cit.html#compute_ci"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.cit.compute_ci" title="Link to this definition">#</a></dt>
 <dd><p>Compute Parametric confidence intervals around correlation coefficient.
 See : <a class="reference external" href="https://online.stat.psu.edu/stat505/lesson/6/6.3">https://online.stat.psu.edu/stat505/lesson/6/6.3</a></p>
 <p>This is done by applying Fisher’s r to z transform
@@ -550,7 +528,7 @@ z ± critical value*error</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.cit.conditional_MI">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.cit.</span></span><span class="sig-name descname"><span class="pre">conditional_MI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/cit.html#conditional_MI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.cit.conditional_MI" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.cit.</span></span><span class="sig-name descname"><span class="pre">conditional_MI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/cit.html#conditional_MI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.cit.conditional_MI" title="Link to this definition">#</a></dt>
 <dd><p>Method to return conditional mutual information between X and Y given Z
 I(X, Y | Z) = H(X|Z) - H(X|Y,Z)</p>
 <blockquote>
@@ -564,7 +542,7 @@ I(X, Y | Z) = H(X|Z) - H(X|Y,Z)</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.cit.entropy">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.cit.</span></span><span class="sig-name descname"><span class="pre">entropy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/cit.html#entropy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.cit.entropy" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.cit.</span></span><span class="sig-name descname"><span class="pre">entropy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/cit.html#entropy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.cit.entropy" title="Link to this definition">#</a></dt>
 <dd><p>”
 Returns entropy for a random variable x
 H(x) = - Σ p(x)log(p(x))
@@ -574,7 +552,7 @@ H(x) = - Σ p(x)log(p(x))
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.cit.partial_corr">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.cit.</span></span><span class="sig-name descname"><span class="pre">partial_corr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pearson'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/cit.html#partial_corr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.cit.partial_corr" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.cit.</span></span><span class="sig-name descname"><span class="pre">partial_corr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pearson'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/cit.html#partial_corr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.cit.partial_corr" title="Link to this definition">#</a></dt>
 <dd><p>Calculate Partial correlation which is the degree of association between
 x and y after removing effect of z. This is done by calculating correlation
 coefficient between the residuals of two linear regressions :
@@ -601,10 +579,10 @@ p-val: p-value</p>
 
 </section>
 <section id="module-dowhy.utils.cli_helpers">
-<span id="dowhy-utils-cli-helpers-module"></span><h2>dowhy.utils.cli_helpers module<a class="headerlink" href="#module-dowhy.utils.cli_helpers" title="Permalink to this heading">#</a></h2>
+<span id="dowhy-utils-cli-helpers-module"></span><h2>dowhy.utils.cli_helpers module<a class="headerlink" href="#module-dowhy.utils.cli_helpers" title="Link to this heading">#</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.cli_helpers.query_yes_no">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.cli_helpers.</span></span><span class="sig-name descname"><span class="pre">query_yes_no</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">question</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/cli_helpers.html#query_yes_no"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.cli_helpers.query_yes_no" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.cli_helpers.</span></span><span class="sig-name descname"><span class="pre">query_yes_no</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">question</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/cli_helpers.html#query_yes_no"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.cli_helpers.query_yes_no" title="Link to this definition">#</a></dt>
 <dd><p>Ask a yes/no question via standard input and return the answer.</p>
 <p>Source: <a class="reference external" href="https://stackoverflow.com/questions/3041986/apt-command-line-interface-like-yes-no-input">https://stackoverflow.com/questions/3041986/apt-command-line-interface-like-yes-no-input</a></p>
 <p>If invalid input is given, the user will be asked until they actually give valid input.</p>
@@ -625,41 +603,113 @@ When None, there is no default value and the query will loop.</p></li>
 
 </section>
 <section id="module-dowhy.utils.dgp">
-<span id="dowhy-utils-dgp-module"></span><h2>dowhy.utils.dgp module<a class="headerlink" href="#module-dowhy.utils.dgp" title="Permalink to this heading">#</a></h2>
+<span id="dowhy-utils-dgp-module"></span><h2>dowhy.utils.dgp module<a class="headerlink" href="#module-dowhy.utils.dgp" title="Link to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="dowhy.utils.dgp.DataGeneratingProcess">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.utils.dgp.</span></span><span class="sig-name descname"><span class="pre">DataGeneratingProcess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/dgp.html#DataGeneratingProcess"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.dgp.DataGeneratingProcess" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.utils.dgp.</span></span><span class="sig-name descname"><span class="pre">DataGeneratingProcess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/dgp.html#DataGeneratingProcess"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.dgp.DataGeneratingProcess" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Base class for implementation of data generating process.</p>
 <p>Subclasses implement functions that create various data generating processes. All data generating processes are in the package “dowhy.utils.dgps”.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="dowhy.utils.dgp.DataGeneratingProcess.DEFAULT_PERCENTILE">
-<span class="sig-name descname"><span class="pre">DEFAULT_PERCENTILE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.9</span></em><a class="headerlink" href="#dowhy.utils.dgp.DataGeneratingProcess.DEFAULT_PERCENTILE" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">DEFAULT_PERCENTILE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.9</span></em><a class="headerlink" href="#dowhy.utils.dgp.DataGeneratingProcess.DEFAULT_PERCENTILE" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="dowhy.utils.dgp.DataGeneratingProcess.convert_to_binary">
-<span class="sig-name descname"><span class="pre">convert_to_binary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deterministic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/dgp.html#DataGeneratingProcess.convert_to_binary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.dgp.DataGeneratingProcess.convert_to_binary" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">convert_to_binary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deterministic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/dgp.html#DataGeneratingProcess.convert_to_binary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.dgp.DataGeneratingProcess.convert_to_binary" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="dowhy.utils.dgp.DataGeneratingProcess.generate_data">
-<span class="sig-name descname"><span class="pre">generate_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/dgp.html#DataGeneratingProcess.generate_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.dgp.DataGeneratingProcess.generate_data" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">generate_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/dgp.html#DataGeneratingProcess.generate_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.dgp.DataGeneratingProcess.generate_data" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="dowhy.utils.dgp.DataGeneratingProcess.generation_process">
-<span class="sig-name descname"><span class="pre">generation_process</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/dgp.html#DataGeneratingProcess.generation_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.dgp.DataGeneratingProcess.generation_process" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">generation_process</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/dgp.html#DataGeneratingProcess.generation_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.dgp.DataGeneratingProcess.generation_process" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 </section>
+<section id="module-dowhy.utils.encoding">
+<span id="dowhy-utils-encoding-module"></span><h2>dowhy.utils.encoding module<a class="headerlink" href="#module-dowhy.utils.encoding" title="Link to this heading">#</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="dowhy.utils.encoding.Encoders">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.utils.encoding.</span></span><span class="sig-name descname"><span class="pre">Encoders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">drop_first</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/encoding.html#Encoders"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.encoding.Encoders" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Categorical data One-Hot encoding helper object.</p>
+<p>Initializes a factory object which manages a set of sklearn.preprocessing.OneHotEncoder instances,
+although the <cite>encode()</cite> method can be overriden to replace these with your preferred encoder.</p>
+<p>Each Encoder instance is given a name to retrieve it in future, and is used to encode
+a different set of variables.</p>
+<p>Initializes an instance and calls <cite>reset_encoders()</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>drop_first</strong> – If true, will not encode the first category value with a bit in 1-hot encoding.
+It will be implicit instead, by the absence of any bit representing this value in the relevant columns.
+Set to False to include a bit for each value of every categorical variable.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.utils.encoding.Encoders.encode">
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoder_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/encoding.html#Encoders.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.encoding.Encoders.encode" title="Link to this definition">#</a></dt>
+<dd><p>Encodes categorical columns in the given data, returning a new dataframe containing
+all original data and the encoded columns. Numerical data is unchanged, categorical
+types are one-hot encoded. <cite>encoder_name</cite> identifies a specific encoder to be used
+if available, or created if not. The encoder can be reused in subsequent calls.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – Data to encode.</p></li>
+<li><p><strong>encoder_name</strong> – The name for the encoder to be used.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The encoded data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.utils.encoding.Encoders.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/encoding.html#Encoders.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.encoding.Encoders.reset" title="Link to this definition">#</a></dt>
+<dd><p>Removes any reference to data encoders, causing them to be re-created on next <cite>encode()</cite>.
+A separate encoder is used for each named set of variables.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dowhy.utils.encoding.one_hot_encode">
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.encoding.</span></span><span class="sig-name descname"><span class="pre">one_hot_encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_first</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">OneHotEncoder</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/encoding.html#one_hot_encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.encoding.one_hot_encode" title="Link to this definition">#</a></dt>
+<dd><p>Replaces pandas’ get_dummies with an implementation of sklearn.preprocessing.OneHotEncoder.</p>
+<p>The purpose of replacement is to allow encoding of new data using the same encoder, which ensures that the resulting encodings are consistent.</p>
+<p>If encoder is None, a new instance of sklearn.preprocessing.OneHotEncoder will be created using <cite>fit_transform()</cite>. Otherwise, the existing encoder is used with <cite>fit()</cite>.</p>
+<p>For compatibility with get_dummies, the encoded data will be transformed into a DataFrame.</p>
+<p>In all cases, the return value will be the encoded data and the encoder object (even if passed in). If <cite>data</cite> contains other columns than the
+dummy-coded one(s), these will be prepended, unaltered, to the result.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – Data of which to get dummy indicators.</p></li>
+<li><p><strong>columns</strong> – List-like structure containing specific columns to encode.</p></li>
+<li><p><strong>drop_first</strong> – Whether to get k-1 dummies out of k categorical levels by removing the first level.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>DataFrame, OneHotEncoder</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 <section id="module-dowhy.utils.graph_operations">
-<span id="dowhy-utils-graph-operations-module"></span><h2>dowhy.utils.graph_operations module<a class="headerlink" href="#module-dowhy.utils.graph_operations" title="Permalink to this heading">#</a></h2>
+<span id="dowhy-utils-graph-operations-module"></span><h2>dowhy.utils.graph_operations module<a class="headerlink" href="#module-dowhy.utils.graph_operations" title="Link to this heading">#</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.graph_operations.add_edge">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.graph_operations.</span></span><span class="sig-name descname"><span class="pre">add_edge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/graph_operations.html#add_edge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.graph_operations.add_edge" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.graph_operations.</span></span><span class="sig-name descname"><span class="pre">add_edge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/graph_operations.html#add_edge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.graph_operations.add_edge" title="Link to this definition">#</a></dt>
 <dd><p>Adds an edge i –&gt; j to the graph, g. The edge is only
 added if this addition does NOT cause the graph to have
 cycles.</p>
@@ -667,7 +717,7 @@ cycles.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.graph_operations.adjacency_matrix_to_adjacency_list">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.graph_operations.</span></span><span class="sig-name descname"><span class="pre">adjacency_matrix_to_adjacency_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adjacency_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/graph_operations.html#adjacency_matrix_to_adjacency_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.graph_operations.adjacency_matrix_to_adjacency_list" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.graph_operations.</span></span><span class="sig-name descname"><span class="pre">adjacency_matrix_to_adjacency_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adjacency_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/graph_operations.html#adjacency_matrix_to_adjacency_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.graph_operations.adjacency_matrix_to_adjacency_list" title="Link to this definition">#</a></dt>
 <dd><p>Convert the adjacency matrix of a graph to an adjacency list.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -684,7 +734,7 @@ cycles.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.graph_operations.adjacency_matrix_to_graph">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.graph_operations.</span></span><span class="sig-name descname"><span class="pre">adjacency_matrix_to_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adjacency_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/graph_operations.html#adjacency_matrix_to_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.graph_operations.adjacency_matrix_to_graph" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.graph_operations.</span></span><span class="sig-name descname"><span class="pre">adjacency_matrix_to_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adjacency_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/graph_operations.html#adjacency_matrix_to_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.graph_operations.adjacency_matrix_to_graph" title="Link to this definition">#</a></dt>
 <dd><p>Convert a given graph adjacency matrix to DOT format.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -701,12 +751,12 @@ cycles.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.graph_operations.convert_to_undirected_graph">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.graph_operations.</span></span><span class="sig-name descname"><span class="pre">convert_to_undirected_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/graph_operations.html#convert_to_undirected_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.graph_operations.convert_to_undirected_graph" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.graph_operations.</span></span><span class="sig-name descname"><span class="pre">convert_to_undirected_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/graph_operations.html#convert_to_undirected_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.graph_operations.convert_to_undirected_graph" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.graph_operations.daggity_to_dot">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.graph_operations.</span></span><span class="sig-name descname"><span class="pre">daggity_to_dot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daggity_string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/graph_operations.html#daggity_to_dot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.graph_operations.daggity_to_dot" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.graph_operations.</span></span><span class="sig-name descname"><span class="pre">daggity_to_dot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daggity_string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/graph_operations.html#daggity_to_dot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.graph_operations.daggity_to_dot" title="Link to this definition">#</a></dt>
 <dd><p>Converts the input daggity_string to valid DOT graph format.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -720,7 +770,7 @@ cycles.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.graph_operations.del_edge">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.graph_operations.</span></span><span class="sig-name descname"><span class="pre">del_edge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/graph_operations.html#del_edge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.graph_operations.del_edge" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.graph_operations.</span></span><span class="sig-name descname"><span class="pre">del_edge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/graph_operations.html#del_edge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.graph_operations.del_edge" title="Link to this definition">#</a></dt>
 <dd><p>Deletes the edge i –&gt; j in the graph, g. The edge is only
 deleted if this removal does NOT cause the graph to be
 disconnected.</p>
@@ -728,7 +778,7 @@ disconnected.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.graph_operations.find_ancestor">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.graph_operations.</span></span><span class="sig-name descname"><span class="pre">find_ancestor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_set</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adjacency_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node2idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx2node</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/graph_operations.html#find_ancestor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.graph_operations.find_ancestor" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.graph_operations.</span></span><span class="sig-name descname"><span class="pre">find_ancestor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_set</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adjacency_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node2idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx2node</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/graph_operations.html#find_ancestor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.graph_operations.find_ancestor" title="Link to this definition">#</a></dt>
 <dd><p>Finds ancestors of a given set of nodes in a given graph.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -748,7 +798,7 @@ disconnected.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.graph_operations.find_c_components">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.graph_operations.</span></span><span class="sig-name descname"><span class="pre">find_c_components</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adjacency_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_set</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx2node</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/graph_operations.html#find_c_components"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.graph_operations.find_c_components" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.graph_operations.</span></span><span class="sig-name descname"><span class="pre">find_c_components</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adjacency_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_set</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx2node</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/graph_operations.html#find_c_components"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.graph_operations.find_c_components" title="Link to this definition">#</a></dt>
 <dd><p>Obtain C-components in a graph.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -766,20 +816,20 @@ disconnected.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.graph_operations.find_predecessor">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.graph_operations.</span></span><span class="sig-name descname"><span class="pre">find_predecessor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/graph_operations.html#find_predecessor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.graph_operations.find_predecessor" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.graph_operations.</span></span><span class="sig-name descname"><span class="pre">find_predecessor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/graph_operations.html#find_predecessor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.graph_operations.find_predecessor" title="Link to this definition">#</a></dt>
 <dd><p>Finds a predecessor, k, in the path between two nodes, i and j,
 in the graph, g.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.graph_operations.get_random_node_pair">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.graph_operations.</span></span><span class="sig-name descname"><span class="pre">get_random_node_pair</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/graph_operations.html#get_random_node_pair"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.graph_operations.get_random_node_pair" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.graph_operations.</span></span><span class="sig-name descname"><span class="pre">get_random_node_pair</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/graph_operations.html#get_random_node_pair"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.graph_operations.get_random_node_pair" title="Link to this definition">#</a></dt>
 <dd><p>Randomly generates a pair of nodes.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.graph_operations.get_simple_ordered_tree">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.graph_operations.</span></span><span class="sig-name descname"><span class="pre">get_simple_ordered_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/graph_operations.html#get_simple_ordered_tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.graph_operations.get_simple_ordered_tree" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.graph_operations.</span></span><span class="sig-name descname"><span class="pre">get_simple_ordered_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/graph_operations.html#get_simple_ordered_tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.graph_operations.get_simple_ordered_tree" title="Link to this definition">#</a></dt>
 <dd><p>Generates a simple-ordered tree. The tree is just a
 directed acyclic graph of n nodes with the structure
 0 –&gt; 1 –&gt; …. –&gt; n.</p>
@@ -787,7 +837,7 @@ directed acyclic graph of n nodes with the structure
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.graph_operations.induced_graph">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.graph_operations.</span></span><span class="sig-name descname"><span class="pre">induced_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_set</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adjacency_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node2idx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/graph_operations.html#induced_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.graph_operations.induced_graph" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.graph_operations.</span></span><span class="sig-name descname"><span class="pre">induced_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_set</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adjacency_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node2idx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/graph_operations.html#induced_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.graph_operations.induced_graph" title="Link to this definition">#</a></dt>
 <dd><p>To obtain the induced graph corresponding to a subset of nodes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -805,13 +855,13 @@ directed acyclic graph of n nodes with the structure
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.graph_operations.is_connected">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.graph_operations.</span></span><span class="sig-name descname"><span class="pre">is_connected</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/graph_operations.html#is_connected"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.graph_operations.is_connected" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.graph_operations.</span></span><span class="sig-name descname"><span class="pre">is_connected</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/graph_operations.html#is_connected"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.graph_operations.is_connected" title="Link to this definition">#</a></dt>
 <dd><p>Checks if a the directed acyclic graph is connected.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.graph_operations.str_to_dot">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.graph_operations.</span></span><span class="sig-name descname"><span class="pre">str_to_dot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/graph_operations.html#str_to_dot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.graph_operations.str_to_dot" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.graph_operations.</span></span><span class="sig-name descname"><span class="pre">str_to_dot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/graph_operations.html#str_to_dot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.graph_operations.str_to_dot" title="Link to this definition">#</a></dt>
 <dd><p>Converts input string from graphviz library to valid DOT graph format.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -825,32 +875,32 @@ directed acyclic graph of n nodes with the structure
 
 </section>
 <section id="module-dowhy.utils.graphviz_plotting">
-<span id="dowhy-utils-graphviz-plotting-module"></span><h2>dowhy.utils.graphviz_plotting module<a class="headerlink" href="#module-dowhy.utils.graphviz_plotting" title="Permalink to this heading">#</a></h2>
+<span id="dowhy-utils-graphviz-plotting-module"></span><h2>dowhy.utils.graphviz_plotting module<a class="headerlink" href="#module-dowhy.utils.graphviz_plotting" title="Link to this heading">#</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.graphviz_plotting.plot_causal_graph_graphviz">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.graphviz_plotting.</span></span><span class="sig-name descname"><span class="pre">plot_causal_graph_graphviz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">causal_graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Graph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layout_prog</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display_causal_strengths</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">causal_strengths</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display_plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/dowhy/utils/graphviz_plotting.html#plot_causal_graph_graphviz"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.graphviz_plotting.plot_causal_graph_graphviz" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.graphviz_plotting.</span></span><span class="sig-name descname"><span class="pre">plot_causal_graph_graphviz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">causal_graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Graph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layout_prog</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display_causal_strengths</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">causal_strengths</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display_plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/dowhy/utils/graphviz_plotting.html#plot_causal_graph_graphviz"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.graphviz_plotting.plot_causal_graph_graphviz" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </section>
 <section id="module-dowhy.utils.networkx_plotting">
-<span id="dowhy-utils-networkx-plotting-module"></span><h2>dowhy.utils.networkx_plotting module<a class="headerlink" href="#module-dowhy.utils.networkx_plotting" title="Permalink to this heading">#</a></h2>
+<span id="dowhy-utils-networkx-plotting-module"></span><h2>dowhy.utils.networkx_plotting module<a class="headerlink" href="#module-dowhy.utils.networkx_plotting" title="Link to this heading">#</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.networkx_plotting.plot_causal_graph_networkx">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.networkx_plotting.</span></span><span class="sig-name descname"><span class="pre">plot_causal_graph_networkx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">causal_graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Graph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layout_prog</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">causal_strengths</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display_plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_wrap_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/dowhy/utils/networkx_plotting.html#plot_causal_graph_networkx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.networkx_plotting.plot_causal_graph_networkx" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.networkx_plotting.</span></span><span class="sig-name descname"><span class="pre">plot_causal_graph_networkx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">causal_graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Graph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layout_prog</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">causal_strengths</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display_plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_wrap_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/dowhy/utils/networkx_plotting.html#plot_causal_graph_networkx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.networkx_plotting.plot_causal_graph_networkx" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </section>
 <section id="module-dowhy.utils.ordered_set">
-<span id="dowhy-utils-ordered-set-module"></span><h2>dowhy.utils.ordered_set module<a class="headerlink" href="#module-dowhy.utils.ordered_set" title="Permalink to this heading">#</a></h2>
+<span id="dowhy-utils-ordered-set-module"></span><h2>dowhy.utils.ordered_set module<a class="headerlink" href="#module-dowhy.utils.ordered_set" title="Link to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="dowhy.utils.ordered_set.OrderedSet">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.utils.ordered_set.</span></span><span class="sig-name descname"><span class="pre">OrderedSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/ordered_set.html#OrderedSet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.ordered_set.OrderedSet" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.utils.ordered_set.</span></span><span class="sig-name descname"><span class="pre">OrderedSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/ordered_set.html#OrderedSet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.ordered_set.OrderedSet" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Python class for ordered set.
 Code taken from <a class="github reference external" href="https://github.com/buyalsky/ordered-hash-set/tree/5198b23e01faeac3f5398ab2c08cb013d14b3702">buyalsky/ordered-hash-set</a>.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="dowhy.utils.ordered_set.OrderedSet.add">
-<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/ordered_set.html#OrderedSet.add"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.ordered_set.OrderedSet.add" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/ordered_set.html#OrderedSet.add"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.ordered_set.OrderedSet.add" title="Link to this definition">#</a></dt>
 <dd><p>Function to add an element to do set if it does not exit.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -861,7 +911,7 @@ Code taken from <a class="github reference external" href="https://github.com/bu
 
 <dl class="py method">
 <dt class="sig sig-object py" id="dowhy.utils.ordered_set.OrderedSet.difference">
-<span class="sig-name descname"><span class="pre">difference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other_set</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/ordered_set.html#OrderedSet.difference"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.ordered_set.OrderedSet.difference" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">difference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other_set</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/ordered_set.html#OrderedSet.difference"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.ordered_set.OrderedSet.difference" title="Link to this definition">#</a></dt>
 <dd><p>Function to remove elements in self._set which are also present in other_set.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -875,7 +925,7 @@ Code taken from <a class="github reference external" href="https://github.com/bu
 
 <dl class="py method">
 <dt class="sig sig-object py" id="dowhy.utils.ordered_set.OrderedSet.get_all">
-<span class="sig-name descname"><span class="pre">get_all</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/ordered_set.html#OrderedSet.get_all"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.ordered_set.OrderedSet.get_all" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_all</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/ordered_set.html#OrderedSet.get_all"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.ordered_set.OrderedSet.get_all" title="Link to this definition">#</a></dt>
 <dd><p>Function to return list of all elements in the set.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -886,7 +936,7 @@ Code taken from <a class="github reference external" href="https://github.com/bu
 
 <dl class="py method">
 <dt class="sig sig-object py" id="dowhy.utils.ordered_set.OrderedSet.intersection">
-<span class="sig-name descname"><span class="pre">intersection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other_set</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/ordered_set.html#OrderedSet.intersection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.ordered_set.OrderedSet.intersection" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">intersection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other_set</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/ordered_set.html#OrderedSet.intersection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.ordered_set.OrderedSet.intersection" title="Link to this definition">#</a></dt>
 <dd><p>Function to compute the intersection of self._set and other_set.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -900,7 +950,7 @@ Code taken from <a class="github reference external" href="https://github.com/bu
 
 <dl class="py method">
 <dt class="sig sig-object py" id="dowhy.utils.ordered_set.OrderedSet.is_empty">
-<span class="sig-name descname"><span class="pre">is_empty</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/ordered_set.html#OrderedSet.is_empty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.ordered_set.OrderedSet.is_empty" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">is_empty</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/ordered_set.html#OrderedSet.is_empty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.ordered_set.OrderedSet.is_empty" title="Link to this definition">#</a></dt>
 <dd><p>Function to determine if the set is empty or not.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -911,7 +961,7 @@ Code taken from <a class="github reference external" href="https://github.com/bu
 
 <dl class="py method">
 <dt class="sig sig-object py" id="dowhy.utils.ordered_set.OrderedSet.union">
-<span class="sig-name descname"><span class="pre">union</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other_set</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/ordered_set.html#OrderedSet.union"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.ordered_set.OrderedSet.union" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">union</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other_set</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/ordered_set.html#OrderedSet.union"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.ordered_set.OrderedSet.union" title="Link to this definition">#</a></dt>
 <dd><p>Function to compute the union of self._set and other_set.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -927,10 +977,10 @@ Code taken from <a class="github reference external" href="https://github.com/bu
 
 </section>
 <section id="module-dowhy.utils.plotting">
-<span id="dowhy-utils-plotting-module"></span><h2>dowhy.utils.plotting module<a class="headerlink" href="#module-dowhy.utils.plotting" title="Permalink to this heading">#</a></h2>
+<span id="dowhy-utils-plotting-module"></span><h2>dowhy.utils.plotting module<a class="headerlink" href="#module-dowhy.utils.plotting" title="Link to this heading">#</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.plotting.bar_plot">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.plotting.</span></span><span class="sig-name descname"><span class="pre">bar_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uncertainties</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display_plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bar_width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xticks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xticks_rotation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">90</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/dowhy/utils/plotting.html#bar_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.plotting.bar_plot" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.plotting.</span></span><span class="sig-name descname"><span class="pre">bar_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uncertainties</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display_plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bar_width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xticks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xticks_rotation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">90</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/dowhy/utils/plotting.html#bar_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.plotting.bar_plot" title="Link to this definition">#</a></dt>
 <dd><p>Convenience function to make a bar plot of the given values with uncertainty bars, if provided. Useful for all
 kinds of attribution results (including confidence intervals).</p>
 <dl class="field-list simple">
@@ -954,7 +1004,7 @@ are used.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.plotting.plot">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.plotting.</span></span><span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">causal_graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Graph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layout_prog</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">causal_strengths</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display_plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/dowhy/utils/plotting.html#plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.plotting.plot" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.plotting.</span></span><span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">causal_graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Graph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layout_prog</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">causal_strengths</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display_plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/dowhy/utils/plotting.html#plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.plotting.plot" title="Link to this definition">#</a></dt>
 <dd><p>Convenience function to plot causal graphs. This function uses different backends based on what’s
 available on the system. The best result is achieved when using Graphviz as the backend. This requires both
 the shared system library (e.g. <code class="docutils literal notranslate"><span class="pre">brew</span> <span class="pre">install</span> <span class="pre">graphviz</span></code> or <code class="docutils literal notranslate"><span class="pre">apt-get</span> <span class="pre">install</span> <span class="pre">graphviz</span></code>) and the Python pygraphviz
@@ -985,12 +1035,12 @@ modify pyplot’s ‘figure.figsize’ parameter. If None is given, the current/
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.plotting.plot_adjacency_matrix">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.plotting.</span></span><span class="sig-name descname"><span class="pre">plot_adjacency_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adjacency_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_directed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display_plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/dowhy/utils/plotting.html#plot_adjacency_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.plotting.plot_adjacency_matrix" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.plotting.</span></span><span class="sig-name descname"><span class="pre">plot_adjacency_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">adjacency_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_directed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display_plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/dowhy/utils/plotting.html#plot_adjacency_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.plotting.plot_adjacency_matrix" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.plotting.pretty_print_graph">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.plotting.</span></span><span class="sig-name descname"><span class="pre">pretty_print_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DiGraph</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/dowhy/utils/plotting.html#pretty_print_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.plotting.pretty_print_graph" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.plotting.</span></span><span class="sig-name descname"><span class="pre">pretty_print_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DiGraph</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/dowhy/utils/plotting.html#pretty_print_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.plotting.pretty_print_graph" title="Link to this definition">#</a></dt>
 <dd><p>Pretty print the graph edges with time lags.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1007,53 +1057,53 @@ modify pyplot’s ‘figure.figsize’ parameter. If None is given, the current/
 
 </section>
 <section id="module-dowhy.utils.propensity_score">
-<span id="dowhy-utils-propensity-score-module"></span><h2>dowhy.utils.propensity_score module<a class="headerlink" href="#module-dowhy.utils.propensity_score" title="Permalink to this heading">#</a></h2>
+<span id="dowhy-utils-propensity-score-module"></span><h2>dowhy.utils.propensity_score module<a class="headerlink" href="#module-dowhy.utils.propensity_score" title="Link to this heading">#</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.propensity_score.binarize_discrete">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.propensity_score.</span></span><span class="sig-name descname"><span class="pre">binarize_discrete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">covariates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable_types</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/propensity_score.html#binarize_discrete"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.propensity_score.binarize_discrete" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.propensity_score.</span></span><span class="sig-name descname"><span class="pre">binarize_discrete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">covariates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable_types</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/propensity_score.html#binarize_discrete"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.propensity_score.binarize_discrete" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.propensity_score.binary_treatment_model">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.propensity_score.</span></span><span class="sig-name descname"><span class="pre">binary_treatment_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">covariates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable_types</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/propensity_score.html#binary_treatment_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.propensity_score.binary_treatment_model" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.propensity_score.</span></span><span class="sig-name descname"><span class="pre">binary_treatment_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">covariates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable_types</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/propensity_score.html#binary_treatment_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.propensity_score.binary_treatment_model" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.propensity_score.categorical_treatment_model">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.propensity_score.</span></span><span class="sig-name descname"><span class="pre">categorical_treatment_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">covariates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable_types</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/propensity_score.html#categorical_treatment_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.propensity_score.categorical_treatment_model" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.propensity_score.</span></span><span class="sig-name descname"><span class="pre">categorical_treatment_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">covariates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable_types</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/propensity_score.html#categorical_treatment_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.propensity_score.categorical_treatment_model" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.propensity_score.continuous_treatment_model">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.propensity_score.</span></span><span class="sig-name descname"><span class="pre">continuous_treatment_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">covariates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable_types</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/propensity_score.html#continuous_treatment_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.propensity_score.continuous_treatment_model" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.propensity_score.</span></span><span class="sig-name descname"><span class="pre">continuous_treatment_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">covariates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable_types</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/propensity_score.html#continuous_treatment_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.propensity_score.continuous_treatment_model" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.propensity_score.discrete_to_integer">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.propensity_score.</span></span><span class="sig-name descname"><span class="pre">discrete_to_integer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">discrete</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/propensity_score.html#discrete_to_integer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.propensity_score.discrete_to_integer" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.propensity_score.</span></span><span class="sig-name descname"><span class="pre">discrete_to_integer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">discrete</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/propensity_score.html#discrete_to_integer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.propensity_score.discrete_to_integer" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.propensity_score.get_type_string">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.propensity_score.</span></span><span class="sig-name descname"><span class="pre">get_type_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable_types</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/propensity_score.html#get_type_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.propensity_score.get_type_string" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.propensity_score.</span></span><span class="sig-name descname"><span class="pre">get_type_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable_types</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/propensity_score.html#get_type_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.propensity_score.get_type_string" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.propensity_score.propensity_of_treatment_score">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.propensity_score.</span></span><span class="sig-name descname"><span class="pre">propensity_of_treatment_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">covariates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'logistic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/propensity_score.html#propensity_of_treatment_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.propensity_score.propensity_of_treatment_score" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.propensity_score.</span></span><span class="sig-name descname"><span class="pre">propensity_of_treatment_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">covariates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'logistic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/propensity_score.html#propensity_of_treatment_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.propensity_score.propensity_of_treatment_score" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.propensity_score.state_propensity_score">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.propensity_score.</span></span><span class="sig-name descname"><span class="pre">state_propensity_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">covariates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatments</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/propensity_score.html#state_propensity_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.propensity_score.state_propensity_score" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.propensity_score.</span></span><span class="sig-name descname"><span class="pre">state_propensity_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">covariates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatments</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/propensity_score.html#state_propensity_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.propensity_score.state_propensity_score" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </section>
 <section id="module-dowhy.utils.regression">
-<span id="dowhy-utils-regression-module"></span><h2>dowhy.utils.regression module<a class="headerlink" href="#module-dowhy.utils.regression" title="Permalink to this heading">#</a></h2>
+<span id="dowhy-utils-regression-module"></span><h2>dowhy.utils.regression module<a class="headerlink" href="#module-dowhy.utils.regression" title="Link to this heading">#</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.regression.create_polynomial_function">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.regression.</span></span><span class="sig-name descname"><span class="pre">create_polynomial_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_degree</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/regression.html#create_polynomial_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.regression.create_polynomial_function" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.regression.</span></span><span class="sig-name descname"><span class="pre">create_polynomial_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_degree</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/regression.html#create_polynomial_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.regression.create_polynomial_function" title="Link to this definition">#</a></dt>
 <dd><p>Creates a list of polynomial functions</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1067,14 +1117,14 @@ modify pyplot’s ‘figure.figsize’ parameter. If None is given, the current/
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.regression.generate_moment_function">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.regression.</span></span><span class="sig-name descname"><span class="pre">generate_moment_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">W</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/regression.html#generate_moment_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.regression.generate_moment_function" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.regression.</span></span><span class="sig-name descname"><span class="pre">generate_moment_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">W</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/regression.html#generate_moment_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.regression.generate_moment_function" title="Link to this definition">#</a></dt>
 <dd><p>Generate and returns moment function
 m(W,g) = g(1,W) - g(0,W) for Average Causal Effect</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dowhy.utils.regression.get_numeric_features">
-<span class="sig-prename descclassname"><span class="pre">dowhy.utils.regression.</span></span><span class="sig-name descname"><span class="pre">get_numeric_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/regression.html#get_numeric_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.regression.get_numeric_features" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.regression.</span></span><span class="sig-name descname"><span class="pre">get_numeric_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/utils/regression.html#get_numeric_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.regression.get_numeric_features" title="Link to this definition">#</a></dt>
 <dd><p>Finds the numeric feature columns in a dataset</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1085,8 +1135,111 @@ m(W,g) = g(1,W) - g(0,W) for Average Causal Effect</p>
 </dd></dl>
 
 </section>
+<section id="module-dowhy.utils.timeseries">
+<span id="dowhy-utils-timeseries-module"></span><h2>dowhy.utils.timeseries module<a class="headerlink" href="#module-dowhy.utils.timeseries" title="Link to this heading">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="dowhy.utils.timeseries.create_graph_from_csv">
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.timeseries.</span></span><span class="sig-name descname"><span class="pre">create_graph_from_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DiGraph</span></span></span><a class="reference internal" href="_modules/dowhy/utils/timeseries.html#create_graph_from_csv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.timeseries.create_graph_from_csv" title="Link to this definition">#</a></dt>
+<dd><p>Creates a directed graph from a CSV file.</p>
+<p>The time_lag parameter of the networkx graph represents the exact causal lag of an edge between any 2 nodes in the graph.
+Each edge can contain multiple time lags, therefore each combination of (node1,node2,time_lag) must be input individually in the CSV file.</p>
+<p>The CSV file should have at least three columns: ‘node1’, ‘node2’, and ‘time_lag’.
+Each row represents an edge from ‘node1’ to ‘node2’ with a ‘time_lag’ attribute.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file_path</strong> (<em>str</em>) – The path to the CSV file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A directed graph created from the CSV file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nx.DiGraph</p>
+</dd>
+</dl>
+<dl>
+<dt>Example:</dt><dd><p>Example CSV content:</p>
+<div class="highlight-csv notranslate"><div class="highlight"><pre><span></span>node1,node2,time_lag
+A,B,5
+B,C,2
+A,C,7
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dowhy.utils.timeseries.create_graph_from_dot_format">
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.timeseries.</span></span><span class="sig-name descname"><span class="pre">create_graph_from_dot_format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DiGraph</span></span></span><a class="reference internal" href="_modules/dowhy/utils/timeseries.html#create_graph_from_dot_format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.timeseries.create_graph_from_dot_format" title="Link to this definition">#</a></dt>
+<dd><p>Creates a directed graph from a DOT file and ensures it is a DiGraph.</p>
+<p>The time_lag parameter of the networkx graph represents the exact causal lag of an edge between any 2 nodes in the graph.
+Each edge can contain multiple valid time lags.</p>
+<p>The DOT file should contain a graph in DOT format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file_path</strong> (<em>str</em>) – The path to the DOT file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A directed graph (DiGraph) created from the DOT file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nx.DiGraph</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dowhy.utils.timeseries.create_graph_from_networkx_array">
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.timeseries.</span></span><span class="sig-name descname"><span class="pre">create_graph_from_networkx_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DiGraph</span></span></span><a class="reference internal" href="_modules/dowhy/utils/timeseries.html#create_graph_from_networkx_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.timeseries.create_graph_from_networkx_array" title="Link to this definition">#</a></dt>
+<dd><p>Create a NetworkX directed graph from a numpy array with time lag information.</p>
+<p>The time_lag parameter of the networkx graph represents the exact causal lag of an edge between any 2 nodes in the graph.
+Each edge can contain multiple valid time lags.</p>
+<p>The resulting graph will be a directed graph with edge attributes indicating
+the type of link based on the array values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>array</strong> (<em>np.ndarray</em>) – A numpy array of shape (n, n, tau) representing the causal links.</p></li>
+<li><p><strong>var_names</strong> (<em>list</em>) – A list of variable names.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A directed graph with edge attributes based on the array values.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nx.DiGraph</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dowhy.utils.timeseries.create_graph_from_user">
+<span class="sig-prename descclassname"><span class="pre">dowhy.utils.timeseries.</span></span><span class="sig-name descname"><span class="pre">create_graph_from_user</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DiGraph</span></span></span><a class="reference internal" href="_modules/dowhy/utils/timeseries.html#create_graph_from_user"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.utils.timeseries.create_graph_from_user" title="Link to this definition">#</a></dt>
+<dd><p>Creates a directed graph based on user input from the console.</p>
+<p>The time_lag parameter of the networkx graph represents the exact causal lag of an edge between any 2 nodes in the graph.
+Each edge can contain multiple time lags, therefore each combination of (node1,node2,time_lag) must be input individually by the user.</p>
+<p>The user is prompted to enter edges one by one in the format ‘node1 node2 time_lag’,
+where ‘node1’ and ‘node2’ are the nodes connected by the edge, and ‘time_lag’ is a numerical
+value representing the weight of the edge. The user should enter ‘done’ to finish inputting edges.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A directed graph created from the user’s input.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>nx.DiGraph</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Example user input:</dt><dd><p>Enter an edge: A B 4
+Enter an edge: B C 2
+Enter an edge: done</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 <section id="module-dowhy.utils">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-dowhy.utils" title="Permalink to this heading">#</a></h2>
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-dowhy.utils" title="Link to this heading">#</a></h2>
 </section>
 </section>
 
@@ -1097,7 +1250,7 @@ m(W,g) = g(1,W) - g(0,W) for Average Causal Effect</p>
               
               
               
-                <footer class="prev-next-footer">
+                <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
     <a class="left-prev"
@@ -1125,14 +1278,17 @@ m(W,g) = g(1,W) - g(0,W) for Average Causal Effect</p>
             
             
               
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
 
   <div class="sidebar-secondary-item">
-
-  <div class="page-toc tocsection onthispage">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> On this page
   </div>
-  <nav class="bd-toc-nav page-toc">
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#submodules">Submodules</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-dowhy.utils.api">dowhy.utils.api module</a><ul class="nav section-nav flex-column">
@@ -1158,6 +1314,15 @@ m(W,g) = g(1,W) - g(0,W) for Average Causal Effect</p>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#dowhy.utils.dgp.DataGeneratingProcess.generation_process"><code class="docutils literal notranslate"><span class="pre">DataGeneratingProcess.generation_process()</span></code></a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-dowhy.utils.encoding">dowhy.utils.encoding module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dowhy.utils.encoding.Encoders"><code class="docutils literal notranslate"><span class="pre">Encoders</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#dowhy.utils.encoding.Encoders.encode"><code class="docutils literal notranslate"><span class="pre">Encoders.encode()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#dowhy.utils.encoding.Encoders.reset"><code class="docutils literal notranslate"><span class="pre">Encoders.reset()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dowhy.utils.encoding.one_hot_encode"><code class="docutils literal notranslate"><span class="pre">one_hot_encode()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-dowhy.utils.graph_operations">dowhy.utils.graph_operations module</a><ul class="nav section-nav flex-column">
@@ -1221,18 +1386,25 @@ m(W,g) = g(1,W) - g(0,W) for Average Causal Effect</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dowhy.utils.regression.get_numeric_features"><code class="docutils literal notranslate"><span class="pre">get_numeric_features()</span></code></a></li>
 </ul>
 </li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-dowhy.utils.timeseries">dowhy.utils.timeseries module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dowhy.utils.timeseries.create_graph_from_csv"><code class="docutils literal notranslate"><span class="pre">create_graph_from_csv()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dowhy.utils.timeseries.create_graph_from_dot_format"><code class="docutils literal notranslate"><span class="pre">create_graph_from_dot_format()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dowhy.utils.timeseries.create_graph_from_networkx_array"><code class="docutils literal notranslate"><span class="pre">create_graph_from_networkx_array()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dowhy.utils.timeseries.create_graph_from_user"><code class="docutils literal notranslate"><span class="pre">create_graph_from_user()</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-dowhy.utils">Module contents</a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
-
-  <div class="tocsection sourcelink">
-    <a href="_sources/dowhy.utils.rst.txt">
-      <i class="fa-solid fa-file-lines"></i> Show Source
-    </a>
-  </div>
-</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/dowhy.utils.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
 
 </div></div>
               
@@ -1247,8 +1419,8 @@ m(W,g) = g(1,W) - g(0,W) for Average Causal Effect</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
-<script src="_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1268,7 +1440,7 @@ m(W,g) = g(1,W) - g(0,W) for Average Causal Effect</p>
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
     <br/>
   </p>
 </div>
@@ -1281,7 +1453,8 @@ m(W,g) = g(1,W) - g(0,W) for Average Causal Effect</p>
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.4.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

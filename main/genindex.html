@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 
 
-<html lang="en" data-content_root="" >
+<html lang="en" data-content_root="./" >
 
   <head>
     <meta charset="utf-8" />
@@ -22,34 +22,37 @@
   
   <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
-    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
-<link href="_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
-
-  
-  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=949a1ff5" />
-    <link rel="stylesheet" type="text/css" href="_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
   
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
-<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
-  <script src="_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="_static/jquery.js?v=5d32c60e"></script>
     <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=b3ba4146"></script>
-    <script src="_static/doctools.js?v=888ff710"></script>
-    <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="_static/copybutton.js?v=0c6e27e1"></script>
     <script src="_static/design-tabs.js?v=36754332"></script>
@@ -60,6 +63,7 @@
     <link rel="search" title="Search" href="search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="main" />
   </head>
   
   
@@ -67,32 +71,16 @@
 
   
   
-  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
   
   <div id="pst-scroll-pixel-helper"></div>
-
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
-    <i class="fa-solid fa-arrow-up"></i>
-    Back to top
-  </button>
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
 
   
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__primary"
-          id="__primary"/>
-  <label class="overlay overlay-primary" for="__primary"></label>
-  
-  <input type="checkbox"
-          class="sidebar-toggle"
-          name="__secondary"
-          id="__secondary"/>
-  <label class="overlay overlay-secondary" for="__secondary"></label>
-  
-  <div class="search-button__wrapper">
-    <div class="search-button__overlay"></div>
-    <div class="search-button__search-container">
+  <dialog id="pst-search-dialog">
+    
 <form class="bd-search d-flex align-items-center"
       action="search.html"
       method="get">
@@ -100,7 +88,6 @@
   <input type="search"
          class="form-control"
          name="q"
-         id="search-input"
          placeholder="Search the docs ..."
          aria-label="Search the docs ..."
          autocomplete="off"
@@ -108,20 +95,27 @@
          autocapitalize="off"
          spellcheck="false"/>
   <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form></div>
-  </div>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
   
-    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <label class="sidebar-toggle primary-toggle" for="__primary">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
-  </label>
+  </button>
   
   
   <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
 
+  
+    
   
 
 <a class="navbar-brand logo" href="index.html">
@@ -136,7 +130,7 @@
     
     
     <img src="_static/dowhy-logo-small.png" class="logo__image only-light" alt="DoWhy  documentation - Home"/>
-    <script>document.write(`<img src="_static/dowhy-logo-small.png" class="logo__image only-dark" alt="DoWhy  documentation - Home"/>`);</script>
+    <img src="_static/dowhy-logo-small.png" class="logo__image only-dark pst-js-only" alt="DoWhy  documentation - Home"/>
   
   
 </a></div>
@@ -148,68 +142,64 @@
     <div class="me-auto navbar-header-items__center">
       
         <div class="navbar-item">
-<nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="getting_started/index.html">
-                        Getting Started
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="getting_started/index.html">
+    Getting Started
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="user_guide/index.html">
-                        User Guide
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="example_notebooks/nb_index.html">
-                        Examples
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="user_guide/index.html">
+    User Guide
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="cite.html">
-                        Citing this package
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="contributing.html">
-                        Contributing
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="example_notebooks/nb_index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="contributing.html">
+    Contributing
+  </a>
+</li>
+
             <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
                     More
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="dowhy.html">
-                        dowhy package
-                      </a>
-                    </li>
-                
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="dowhy.html">
+    dowhy package
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="code_repo.html">
-                        Release notes
-                      </a>
-                    </li>
-                
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="code_repo.html">
+    Release notes
+  </a>
+</li>
+
                 </ul>
             </li>
             
@@ -224,15 +214,11 @@
         <div class="navbar-item navbar-persistent--container">
           
 
- <script>
- document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
         </div>
       
       
@@ -275,27 +261,29 @@
   
     <div class="navbar-persistent--mobile">
 
- <script>
- document.write(`
-   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <span class="search-button__default-text">Search</span>
-    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
-   </button>
- `);
- </script>
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
     </div>
   
 
   
 </div>
 
-    </nav>
+    </header>
   
+
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
       
-      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
         
 
   
@@ -304,74 +292,63 @@
     
       <div class="sidebar-header-items__center">
         
-          <div class="navbar-item">
-<nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+          
+          
+            <div class="navbar-item">
+<nav>
   <ul class="bd-navbar-elements navbar-nav">
     
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="getting_started/index.html">
-                        Getting Started
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="getting_started/index.html">
+    Getting Started
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="user_guide/index.html">
-                        User Guide
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="example_notebooks/nb_index.html">
-                        Examples
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="user_guide/index.html">
+    User Guide
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="cite.html">
-                        Citing this package
-                      </a>
-                    </li>
-                
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="contributing.html">
-                        Contributing
-                      </a>
-                    </li>
-                
-            <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links-2">
-                    More
-                </button>
-                <ul id="pst-nav-more-links-2" class="dropdown-menu">
-                    
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="dowhy.html">
-                        dowhy package
-                      </a>
-                    </li>
-                
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="example_notebooks/nb_index.html">
+    Examples
+  </a>
+</li>
 
-                    <li class="nav-item">
-                      <a class="nav-link dropdown-item nav-internal" href="code_repo.html">
-                        Release notes
-                      </a>
-                    </li>
-                
-                </ul>
-            </li>
-            
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="contributing.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="dowhy.html">
+    dowhy package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="code_repo.html">
+    Release notes
+  </a>
+</li>
+
   </ul>
 </nav></div>
+          
         
       </div>
     
@@ -417,26 +394,31 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
       
-      <main id="main-content" class="bd-main">
+      <main id="main-content" class="bd-main" role="main">
         
         
           <div class="bd-content">
             <div class="bd-article-container">
               
-              <div class="bd-header-article"></div>
+              <div class="bd-header-article d-print-none"></div>
               
               
               
                 
 <div id="searchbox"></div>
-                <article class="bd-article" role="main">
+                <article class="bd-article">
                   
 
 <h1 id="index">Index</h1>
@@ -511,6 +493,8 @@
       <li><a href="dowhy.utils.html#dowhy.utils.graph_operations.adjacency_matrix_to_adjacency_list">adjacency_matrix_to_adjacency_list() (in module dowhy.utils.graph_operations)</a>
 </li>
       <li><a href="dowhy.utils.html#dowhy.utils.graph_operations.adjacency_matrix_to_graph">adjacency_matrix_to_graph() (in module dowhy.utils.graph_operations)</a>
+</li>
+      <li><a href="dowhy.causal_identifier.html#dowhy.causal_identifier.adjustment_set.AdjustmentSet">AdjustmentSet (class in dowhy.causal_identifier.adjustment_set)</a>
 </li>
       <li><a href="dowhy.html#dowhy.causal_graph.CausalGraph.all_observed">all_observed() (dowhy.causal_graph.CausalGraph method)</a>
 </li>
@@ -607,6 +591,8 @@
 </li>
       </ul></li>
       <li><a href="dowhy.causal_identifier.html#dowhy.causal_identifier.backdoor.Backdoor">Backdoor (class in dowhy.causal_identifier.backdoor)</a>
+</li>
+      <li><a href="dowhy.causal_identifier.html#dowhy.causal_identifier.adjustment_set.AdjustmentSet.BACKDOOR">BACKDOOR (dowhy.causal_identifier.adjustment_set.AdjustmentSet attribute)</a>
 </li>
       <li><a href="dowhy.causal_identifier.html#dowhy.causal_identifier.auto_identifier.BackdoorAdjustment.BACKDOOR_DEFAULT">BACKDOOR_DEFAULT (dowhy.causal_identifier.auto_identifier.BackdoorAdjustment attribute)</a>
 
@@ -849,6 +835,8 @@
 </li>
         <li><a href="dowhy.gcm.html#dowhy.gcm.causal_models.ProbabilisticCausalModel.clone">(dowhy.gcm.causal_models.ProbabilisticCausalModel method)</a>
 </li>
+        <li><a href="dowhy.gcm.html#dowhy.gcm.equation_parser.CustomEquationModel.clone">(dowhy.gcm.equation_parser.CustomEquationModel method)</a>
+</li>
         <li><a href="dowhy.gcm.ml.html#dowhy.gcm.ml.classification.SklearnClassificationModel.clone">(dowhy.gcm.ml.classification.SklearnClassificationModel method)</a>
 </li>
         <li><a href="dowhy.gcm.ml.html#dowhy.gcm.ml.classification.SklearnClassificationModelWeighted.clone">(dowhy.gcm.ml.classification.SklearnClassificationModelWeighted method)</a>
@@ -888,12 +876,12 @@
 </li>
       <li><a href="dowhy.causal_refuters.overrule.BCS.html#dowhy.causal_refuters.overrule.BCS.overlap_boolean_rule.OverlapBooleanRule.compute_conjunctions">compute_conjunctions() (dowhy.causal_refuters.overrule.BCS.overlap_boolean_rule.OverlapBooleanRule method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="dowhy.causal_refuters.overrule.BCS.html#dowhy.causal_refuters.overrule.BCS.beam_search.PricingInstance.compute_LB">compute_LB() (dowhy.causal_refuters.overrule.BCS.beam_search.PricingInstance method)</a>
 </li>
       <li><a href="dowhy.causal_refuters.html#dowhy.causal_refuters.partial_linear_sensitivity_analyzer.PartialLinearSensitivityAnalyzer.compute_r2diff_benchmarking_covariates">compute_r2diff_benchmarking_covariates() (dowhy.causal_refuters.partial_linear_sensitivity_analyzer.PartialLinearSensitivityAnalyzer method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="dowhy.causal_identifier.html#dowhy.causal_identifier.efficient_backdoor.EfficientBackdoor.compute_smallest_mincut">compute_smallest_mincut() (dowhy.causal_identifier.efficient_backdoor.EfficientBackdoor method)</a>
 </li>
       <li><a href="dowhy.do_samplers.html#dowhy.do_samplers.multivariate_weighting_sampler.MultivariateWeightingSampler.compute_weights">compute_weights() (dowhy.do_samplers.multivariate_weighting_sampler.MultivariateWeightingSampler method)</a>
@@ -992,6 +980,8 @@
 </li>
       <li><a href="dowhy.gcm.ml.html#dowhy.gcm.ml.regression.create_ada_boost_regressor">create_ada_boost_regressor() (in module dowhy.gcm.ml.regression)</a>
 </li>
+      <li><a href="dowhy.gcm.html#dowhy.gcm.equation_parser.create_causal_model_from_equations">create_causal_model_from_equations() (in module dowhy.gcm.equation_parser)</a>
+</li>
       <li><a href="dowhy.html#dowhy.datasets.create_discrete_column">create_discrete_column() (in module dowhy.datasets)</a>
 </li>
       <li><a href="dowhy.html#dowhy.datasets.create_dot_graph">create_dot_graph() (in module dowhy.datasets)</a>
@@ -1009,6 +999,14 @@
       <li><a href="dowhy.gcm.ml.html#dowhy.gcm.ml.regression.create_gaussian_process_regressor">create_gaussian_process_regressor() (in module dowhy.gcm.ml.regression)</a>
 </li>
       <li><a href="dowhy.html#dowhy.datasets.create_gml_graph">create_gml_graph() (in module dowhy.datasets)</a>
+</li>
+      <li><a href="dowhy.utils.html#dowhy.utils.timeseries.create_graph_from_csv">create_graph_from_csv() (in module dowhy.utils.timeseries)</a>
+</li>
+      <li><a href="dowhy.utils.html#dowhy.utils.timeseries.create_graph_from_dot_format">create_graph_from_dot_format() (in module dowhy.utils.timeseries)</a>
+</li>
+      <li><a href="dowhy.utils.html#dowhy.utils.timeseries.create_graph_from_networkx_array">create_graph_from_networkx_array() (in module dowhy.utils.timeseries)</a>
+</li>
+      <li><a href="dowhy.utils.html#dowhy.utils.timeseries.create_graph_from_user">create_graph_from_user() (in module dowhy.utils.timeseries)</a>
 </li>
       <li><a href="dowhy.gcm.ml.html#dowhy.gcm.ml.classification.create_hist_gradient_boost_classifier">create_hist_gradient_boost_classifier() (in module dowhy.gcm.ml.classification)</a>
 </li>
@@ -1045,6 +1043,8 @@
       <li><a href="dowhy.gcm.ml.html#dowhy.gcm.ml.regression.create_support_vector_regressor">create_support_vector_regressor() (in module dowhy.gcm.ml.regression)</a>
 </li>
       <li><a href="dowhy.gcm.html#dowhy.gcm.model_evaluation.crps">crps() (in module dowhy.gcm.model_evaluation)</a>
+</li>
+      <li><a href="dowhy.gcm.html#dowhy.gcm.equation_parser.CustomEquationModel">CustomEquationModel (class in dowhy.gcm.equation_parser)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1165,6 +1165,8 @@
       <li><a href="dowhy.gcm.html#dowhy.gcm.distribution_change.distribution_change">distribution_change() (in module dowhy.gcm.distribution_change)</a>
 </li>
       <li><a href="dowhy.gcm.html#dowhy.gcm.distribution_change.distribution_change_of_graphs">distribution_change_of_graphs() (in module dowhy.gcm.distribution_change)</a>
+</li>
+      <li><a href="dowhy.gcm.html#dowhy.gcm.distribution_change_robust.distribution_change_robust">distribution_change_robust() (in module dowhy.gcm.distribution_change_robust)</a>
 </li>
       <li><a href="dowhy.api.html#dowhy.api.causal_data_frame.CausalAccessor.do">do() (dowhy.api.causal_data_frame.CausalAccessor method)</a>
 
@@ -1330,6 +1332,13 @@
 
       <ul>
         <li><a href="dowhy.causal_identifier.html#module-dowhy.causal_identifier">module</a>
+</li>
+      </ul></li>
+      <li>
+    dowhy.causal_identifier.adjustment_set
+
+      <ul>
+        <li><a href="dowhy.causal_identifier.html#module-dowhy.causal_identifier.adjustment_set">module</a>
 </li>
       </ul></li>
       <li>
@@ -1612,8 +1621,6 @@
         <li><a href="dowhy.causal_refuters.overrule.BCS.html#module-dowhy.causal_refuters.overrule.BCS.overlap_boolean_rule">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     dowhy.causal_refuters.overrule.ruleset
 
@@ -1621,6 +1628,8 @@
         <li><a href="dowhy.causal_refuters.overrule.html#module-dowhy.causal_refuters.overrule.ruleset">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     dowhy.causal_refuters.overrule.utils
 
@@ -1832,10 +1841,24 @@
 </li>
       </ul></li>
       <li>
+    dowhy.gcm.distribution_change_robust
+
+      <ul>
+        <li><a href="dowhy.gcm.html#module-dowhy.gcm.distribution_change_robust">module</a>
+</li>
+      </ul></li>
+      <li>
     dowhy.gcm.divergence
 
       <ul>
         <li><a href="dowhy.gcm.html#module-dowhy.gcm.divergence">module</a>
+</li>
+      </ul></li>
+      <li>
+    dowhy.gcm.equation_parser
+
+      <ul>
+        <li><a href="dowhy.gcm.html#module-dowhy.gcm.equation_parser">module</a>
 </li>
       </ul></li>
       <li>
@@ -2147,6 +2170,13 @@
 </li>
       </ul></li>
       <li>
+    dowhy.utils.encoding
+
+      <ul>
+        <li><a href="dowhy.utils.html#module-dowhy.utils.encoding">module</a>
+</li>
+      </ul></li>
+      <li>
     dowhy.utils.graph_operations
 
       <ul>
@@ -2193,6 +2223,13 @@
 
       <ul>
         <li><a href="dowhy.utils.html#module-dowhy.utils.regression">module</a>
+</li>
+      </ul></li>
+      <li>
+    dowhy.utils.timeseries
+
+      <ul>
+        <li><a href="dowhy.utils.html#module-dowhy.utils.timeseries">module</a>
 </li>
       </ul></li>
       <li><a href="dowhy.gcm.html#dowhy.gcm.causal_mechanisms.ClassifierFCM.draw_noise_samples">draw_noise_samples() (dowhy.gcm.causal_mechanisms.ClassifierFCM method)</a>
@@ -2251,6 +2288,10 @@
 </li>
       <li><a href="dowhy.gcm.html#dowhy.gcm.config.enable_progress_bars">enable_progress_bars() (in module dowhy.gcm.config)</a>
 </li>
+      <li><a href="dowhy.utils.html#dowhy.utils.encoding.Encoders.encode">encode() (dowhy.utils.encoding.Encoders method)</a>
+</li>
+      <li><a href="dowhy.utils.html#dowhy.utils.encoding.Encoders">Encoders (class in dowhy.utils.encoding)</a>
+</li>
       <li><a href="dowhy.utils.html#dowhy.utils.cit.entropy">entropy() (in module dowhy.utils.cit)</a>
 </li>
       <li><a href="dowhy.causal_prediction.datasets.html#dowhy.causal_prediction.datasets.base_dataset.MultipleDomainDataset.ENVIRONMENTS">ENVIRONMENTS (dowhy.causal_prediction.datasets.base_dataset.MultipleDomainDataset attribute)</a>
@@ -2264,6 +2305,10 @@
 </li>
       </ul></li>
       <li><a href="dowhy.causal_prediction.algorithms.html#dowhy.causal_prediction.algorithms.erm.ERM">ERM (class in dowhy.causal_prediction.algorithms.erm)</a>
+</li>
+      <li><a href="dowhy.gcm.html#dowhy.gcm.distribution_change_robust.ThetaC.est_scores">est_scores() (dowhy.gcm.distribution_change_robust.ThetaC method)</a>
+</li>
+      <li><a href="dowhy.gcm.html#dowhy.gcm.distribution_change_robust.ThetaC.est_theta">est_theta() (dowhy.gcm.distribution_change_robust.ThetaC method)</a>
 </li>
       <li><a href="dowhy.html#dowhy.EstimandType">EstimandType (class in dowhy)</a>
 
@@ -2311,12 +2356,12 @@
 </li>
       <li><a href="dowhy.gcm.html#dowhy.gcm.uncertainty.estimate_entropy_discrete">estimate_entropy_discrete() (in module dowhy.gcm.uncertainty)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="dowhy.gcm.html#dowhy.gcm.uncertainty.estimate_entropy_kmeans">estimate_entropy_kmeans() (in module dowhy.gcm.uncertainty)</a>
 </li>
       <li><a href="dowhy.gcm.html#dowhy.gcm.uncertainty.estimate_entropy_of_probabilities">estimate_entropy_of_probabilities() (in module dowhy.gcm.uncertainty)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="dowhy.gcm.html#dowhy.gcm.uncertainty.estimate_entropy_using_discretization">estimate_entropy_using_discretization() (in module dowhy.gcm.uncertainty)</a>
 </li>
       <li><a href="dowhy.gcm.html#dowhy.gcm.stats.estimate_ftest_pvalue">estimate_ftest_pvalue() (in module dowhy.gcm.stats)</a>
@@ -2516,6 +2561,8 @@
 </li>
         <li><a href="dowhy.gcm.html#dowhy.gcm.density_estimators.KernelDensityEstimator1D.fit">(dowhy.gcm.density_estimators.KernelDensityEstimator1D method)</a>
 </li>
+        <li><a href="dowhy.gcm.html#dowhy.gcm.equation_parser.CustomEquationModel.fit">(dowhy.gcm.equation_parser.CustomEquationModel method)</a>
+</li>
         <li><a href="dowhy.gcm.ml.html#dowhy.gcm.ml.prediction_model.PredictionModel.fit">(dowhy.gcm.ml.prediction_model.PredictionModel method)</a>
 </li>
         <li><a href="dowhy.gcm.ml.html#dowhy.gcm.ml.regression.LinearRegressionWithFixedParameter.fit">(dowhy.gcm.ml.regression.LinearRegressionWithFixedParameter method)</a>
@@ -2579,6 +2626,8 @@
 </li>
       <li><a href="dowhy.gcm.html#dowhy.gcm.density_estimators.GaussianMixtureDensityEstimator">GaussianMixtureDensityEstimator (class in dowhy.gcm.density_estimators)</a>
 </li>
+      <li><a href="dowhy.causal_identifier.html#dowhy.causal_identifier.adjustment_set.AdjustmentSet.GENERAL">GENERAL (dowhy.causal_identifier.adjustment_set.AdjustmentSet attribute)</a>
+</li>
       <li><a href="dowhy.gcm.independence_test.html#dowhy.gcm.independence_test.generalised_cov_measure.generalised_cov_based">generalised_cov_based() (in module dowhy.gcm.independence_test.generalised_cov_measure)</a>
 </li>
       <li><a href="dowhy.causal_identifier.html#dowhy.causal_identifier.auto_identifier.GeneralizedAdjustment.GENERALIZED_ADJUSTMENT_DEFAULT">GENERALIZED_ADJUSTMENT_DEFAULT (dowhy.causal_identifier.auto_identifier.GeneralizedAdjustment attribute)</a>
@@ -2625,6 +2674,10 @@
         <li><a href="dowhy.causal_identifier.html#dowhy.causal_identifier.IdentifiedEstimand.get_adjustment_set">(dowhy.causal_identifier.IdentifiedEstimand method)</a>
 </li>
       </ul></li>
+      <li><a href="dowhy.causal_identifier.html#dowhy.causal_identifier.adjustment_set.AdjustmentSet.get_adjustment_type">get_adjustment_type() (dowhy.causal_identifier.adjustment_set.AdjustmentSet method)</a>
+</li>
+      <li><a href="dowhy.causal_identifier.html#dowhy.causal_identifier.adjustment_set.AdjustmentSet.get_adjustment_variables">get_adjustment_variables() (dowhy.causal_identifier.adjustment_set.AdjustmentSet method)</a>
+</li>
       <li><a href="dowhy.utils.html#dowhy.utils.ordered_set.OrderedSet.get_all">get_all() (dowhy.utils.ordered_set.OrderedSet method)</a>
 </li>
       <li><a href="dowhy.html#dowhy.causal_graph.CausalGraph.get_all_directed_paths">get_all_directed_paths() (dowhy.causal_graph.CausalGraph method)</a>
@@ -2764,6 +2817,8 @@
 </li>
       </ul></li>
       <li><a href="dowhy.html#dowhy.causal_estimator.CausalEstimator.get_new_estimator_object">get_new_estimator_object() (dowhy.causal_estimator.CausalEstimator method)</a>
+</li>
+      <li><a href="dowhy.causal_identifier.html#dowhy.causal_identifier.adjustment_set.AdjustmentSet.get_num_paths_blocked_by_observed_nodes">get_num_paths_blocked_by_observed_nodes() (dowhy.causal_identifier.adjustment_set.AdjustmentSet method)</a>
 </li>
       <li><a href="dowhy.utils.html#dowhy.utils.regression.get_numeric_features">get_numeric_features() (in module dowhy.utils.regression)</a>
 </li>
@@ -3237,6 +3292,8 @@
 </li>
         <li><a href="dowhy.causal_identifier.html#module-dowhy.causal_identifier">dowhy.causal_identifier</a>
 </li>
+        <li><a href="dowhy.causal_identifier.html#module-dowhy.causal_identifier.adjustment_set">dowhy.causal_identifier.adjustment_set</a>
+</li>
         <li><a href="dowhy.causal_identifier.html#module-dowhy.causal_identifier.auto_identifier">dowhy.causal_identifier.auto_identifier</a>
 </li>
         <li><a href="dowhy.causal_identifier.html#module-dowhy.causal_identifier.backdoor">dowhy.causal_identifier.backdoor</a>
@@ -3379,7 +3436,11 @@
 </li>
         <li><a href="dowhy.gcm.html#module-dowhy.gcm.distribution_change">dowhy.gcm.distribution_change</a>
 </li>
+        <li><a href="dowhy.gcm.html#module-dowhy.gcm.distribution_change_robust">dowhy.gcm.distribution_change_robust</a>
+</li>
         <li><a href="dowhy.gcm.html#module-dowhy.gcm.divergence">dowhy.gcm.divergence</a>
+</li>
+        <li><a href="dowhy.gcm.html#module-dowhy.gcm.equation_parser">dowhy.gcm.equation_parser</a>
 </li>
         <li><a href="dowhy.gcm.html#module-dowhy.gcm.falsify">dowhy.gcm.falsify</a>
 </li>
@@ -3469,6 +3530,8 @@
 </li>
         <li><a href="dowhy.utils.html#module-dowhy.utils.dgp">dowhy.utils.dgp</a>
 </li>
+        <li><a href="dowhy.utils.html#module-dowhy.utils.encoding">dowhy.utils.encoding</a>
+</li>
         <li><a href="dowhy.utils.html#module-dowhy.utils.graph_operations">dowhy.utils.graph_operations</a>
 </li>
         <li><a href="dowhy.utils.html#module-dowhy.utils.graphviz_plotting">dowhy.utils.graphviz_plotting</a>
@@ -3482,6 +3545,8 @@
         <li><a href="dowhy.utils.html#module-dowhy.utils.propensity_score">dowhy.utils.propensity_score</a>
 </li>
         <li><a href="dowhy.utils.html#module-dowhy.utils.regression">dowhy.utils.regression</a>
+</li>
+        <li><a href="dowhy.utils.html#module-dowhy.utils.timeseries">dowhy.utils.timeseries</a>
 </li>
       </ul></li>
   </ul></td>
@@ -3586,6 +3651,8 @@
 <h2 id="O">O</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dowhy.utils.html#dowhy.utils.encoding.one_hot_encode">one_hot_encode() (in module dowhy.utils.encoding)</a>
+</li>
       <li><a href="dowhy.causal_identifier.html#dowhy.causal_identifier.efficient_backdoor.EfficientBackdoor.optimal_adj_set">optimal_adj_set() (dowhy.causal_identifier.efficient_backdoor.EfficientBackdoor method)</a>
 </li>
       <li><a href="dowhy.causal_identifier.html#dowhy.causal_identifier.efficient_backdoor.EfficientBackdoor.optimal_mincost_adj_set">optimal_mincost_adj_set() (dowhy.causal_identifier.efficient_backdoor.EfficientBackdoor method)</a>
@@ -3706,10 +3773,10 @@
 </li>
       <li><a href="dowhy.gcm.html#dowhy.gcm.falsify.plot_local_insights">plot_local_insights() (in module dowhy.gcm.falsify)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="dowhy.causal_refuters.html#dowhy.causal_refuters.linear_sensitivity_analyzer.LinearSensitivityAnalyzer.plot_t">plot_t() (dowhy.causal_refuters.linear_sensitivity_analyzer.LinearSensitivityAnalyzer method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="dowhy.html#dowhy.plotter.plot_treatment_outcome">plot_treatment_outcome() (in module dowhy.plotter)</a>
 </li>
       <li><a href="dowhy.causal_refuters.html#dowhy.causal_refuters.reisz.PluginReisz">PluginReisz (class in dowhy.causal_refuters.reisz)</a>
@@ -3732,6 +3799,8 @@
         <li><a href="dowhy.causal_refuters.html#dowhy.causal_refuters.reisz.PluginReisz.predict">(dowhy.causal_refuters.reisz.PluginReisz method)</a>
 </li>
         <li><a href="dowhy.causal_refuters.html#dowhy.causal_refuters.reisz.ReiszRepresenter.predict">(dowhy.causal_refuters.reisz.ReiszRepresenter method)</a>
+</li>
+        <li><a href="dowhy.gcm.html#dowhy.gcm.equation_parser.CustomEquationModel.predict">(dowhy.gcm.equation_parser.CustomEquationModel method)</a>
 </li>
         <li><a href="dowhy.gcm.ml.html#dowhy.gcm.ml.prediction_model.PredictionModel.predict">(dowhy.gcm.ml.prediction_model.PredictionModel method)</a>
 </li>
@@ -3936,6 +4005,8 @@
 
       <ul>
         <li><a href="dowhy.html#dowhy.do_sampler.DoSampler.reset">(dowhy.do_sampler.DoSampler method)</a>
+</li>
+        <li><a href="dowhy.utils.html#dowhy.utils.encoding.Encoders.reset">(dowhy.utils.encoding.Encoders method)</a>
 </li>
       </ul></li>
       <li><a href="dowhy.html#dowhy.causal_estimator.CausalEstimator.reset_encoders">reset_encoders() (dowhy.causal_estimator.CausalEstimator method)</a>
@@ -4192,12 +4263,16 @@
 </li>
       <li><a href="dowhy.interpreters.html#dowhy.interpreters.textual_interpreter.TextualInterpreter">TextualInterpreter (class in dowhy.interpreters.textual_interpreter)</a>
 </li>
+      <li><a href="dowhy.gcm.html#dowhy.gcm.distribution_change_robust.ThetaC">ThetaC (class in dowhy.gcm.distribution_change_robust)</a>
+</li>
       <li><a href="dowhy.causal_refuters.html#dowhy.causal_refuters.assess_overlap_overrule.OverlapConfig.thresh_override">thresh_override (dowhy.causal_refuters.assess_overlap_overrule.OverlapConfig attribute)</a>
 
       <ul>
         <li><a href="dowhy.causal_refuters.html#dowhy.causal_refuters.assess_overlap_overrule.SupportConfig.thresh_override">(dowhy.causal_refuters.assess_overlap_overrule.SupportConfig attribute)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="dowhy.causal_prediction.datasets.html#dowhy.causal_prediction.datasets.mnist.MNISTCausalAttribute.torch_bernoulli_">torch_bernoulli_() (dowhy.causal_prediction.datasets.mnist.MNISTCausalAttribute method)</a>
 
       <ul>
@@ -4214,24 +4289,8 @@
         <li><a href="dowhy.causal_prediction.datasets.html#dowhy.causal_prediction.datasets.mnist.MNISTIndAttribute.torch_xor_">(dowhy.causal_prediction.datasets.mnist.MNISTIndAttribute method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="dowhy.causal_prediction.models.html#dowhy.causal_prediction.models.networks.ResNet.train">train() (dowhy.causal_prediction.models.networks.ResNet method)</a>
 </li>
-      <li><a href="dowhy.causal_prediction.models.html#dowhy.causal_prediction.models.networks.ContextNet.training">training (dowhy.causal_prediction.models.networks.ContextNet attribute)</a>
-
-      <ul>
-        <li><a href="dowhy.causal_prediction.models.html#dowhy.causal_prediction.models.networks.Identity.training">(dowhy.causal_prediction.models.networks.Identity attribute)</a>
-</li>
-        <li><a href="dowhy.causal_prediction.models.html#dowhy.causal_prediction.models.networks.MLP.training">(dowhy.causal_prediction.models.networks.MLP attribute)</a>
-</li>
-        <li><a href="dowhy.causal_prediction.models.html#dowhy.causal_prediction.models.networks.MNIST_CNN.training">(dowhy.causal_prediction.models.networks.MNIST_CNN attribute)</a>
-</li>
-        <li><a href="dowhy.causal_prediction.models.html#dowhy.causal_prediction.models.networks.MNIST_MLP.training">(dowhy.causal_prediction.models.networks.MNIST_MLP attribute)</a>
-</li>
-        <li><a href="dowhy.causal_prediction.models.html#dowhy.causal_prediction.models.networks.ResNet.training">(dowhy.causal_prediction.models.networks.ResNet attribute)</a>
-</li>
-      </ul></li>
       <li><a href="dowhy.causal_prediction.algorithms.html#dowhy.causal_prediction.algorithms.base_algorithm.PredictionAlgorithm.training_step">training_step() (dowhy.causal_prediction.algorithms.base_algorithm.PredictionAlgorithm method)</a>
 
       <ul>
@@ -4373,7 +4432,7 @@
               
               
               
-                <footer class="prev-next-footer">
+                <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
 </div>
@@ -4394,8 +4453,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
-<script src="_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -4415,7 +4474,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
     <br/>
   </p>
 </div>
@@ -4428,7 +4487,8 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.4.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>
