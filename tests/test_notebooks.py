@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 import tempfile
 
 import nbformat
@@ -30,6 +31,10 @@ econml_notebooks = {
     "sensitivity_analysis_nonparametric_estimators.ipynb",
     "tutorial-causalinference-machinelearning-using-dowhy-econml.ipynb",
     "dowhy_functional_api.ipynb",
+}
+
+py310_dependent_notebooks = {
+    "dowhy_generalized_covariate_adjustment_estimation_example.ipynb",
 }
 
 # TODO: should probably move more notebooks here to ignore, because
@@ -103,5 +108,7 @@ for nb in notebooks_list:
 
 @mark.parametrize("notebook_filename", parameter_list)
 def test_notebook(notebook_filename):
+    if notebook_filename in py310_dependent_notebooks and sys.version_info < (3, 10):
+        return
     nb, errors = _notebook_run(NOTEBOOKS_PATH + notebook_filename)
     assert errors == []

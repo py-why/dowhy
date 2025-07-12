@@ -36,6 +36,14 @@ dowhy.utils.dgp module
    :undoc-members:
    :show-inheritance:
 
+dowhy.utils.encoding module
+---------------------------
+
+.. automodule:: dowhy.utils.encoding
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 dowhy.utils.graph\_operations module
 ------------------------------------
 
@@ -88,6 +96,14 @@ dowhy.utils.regression module
 -----------------------------
 
 .. automodule:: dowhy.utils.regression
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dowhy.utils.timeseries module
+-----------------------------
+
+.. automodule:: dowhy.utils.timeseries
    :members:
    :undoc-members:
    :show-inheritance:

@@ -118,10 +118,26 @@ dowhy.gcm.distribution\_change module
    :undoc-members:
    :show-inheritance:
 
+dowhy.gcm.distribution\_change\_robust module
+---------------------------------------------
+
+.. automodule:: dowhy.gcm.distribution_change_robust
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 dowhy.gcm.divergence module
 ---------------------------
 
 .. automodule:: dowhy.gcm.divergence
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+dowhy.gcm.equation\_parser module
+---------------------------------
+
+.. automodule:: dowhy.gcm.equation_parser
    :members:
    :undoc-members:
    :show-inheritance:

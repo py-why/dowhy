@@ -4,6 +4,14 @@ dowhy.causal\_identifier package
 Submodules
 ----------
 
+dowhy.causal\_identifier.adjustment\_set module
+-----------------------------------------------
+
+.. automodule:: dowhy.causal_identifier.adjustment_set
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 dowhy.causal\_identifier.auto\_identifier module
 ------------------------------------------------
 
