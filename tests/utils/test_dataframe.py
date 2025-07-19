@@ -61,15 +61,12 @@ def single_col_df(df_lib):
     return df_lib({"A": [10, 20, 30]})
 
 
-# --- Test Suite: Verifying Every Component Under Every Condition ---
-
-
 class TestDataFrameWrapper:
     """Comprehensive test suite for the DataFrameWrapper."""
 
     def test_initialization_success(self, df_lib, basic_data):
         """
-        VERIFICATION: Ensures the wrapper can be instantiated with a valid
+        Ensures the wrapper can be instantiated with a valid
         dataframe object from both pandas and polars.
         """
         df = df_lib(basic_data)
@@ -79,7 +76,7 @@ class TestDataFrameWrapper:
 
     def test_initialization_failure_unsupported_type(self):
         """
-        VERIFICATION: Ensures the wrapper raises a TypeError for objects
+        Ensures the wrapper raises a TypeError for objects
         that do not implement the interchange protocol.
         FAILURE MODE: Passing a raw NumPy array or list should fail gracefully.
         """
@@ -88,27 +85,27 @@ class TestDataFrameWrapper:
         with pytest.raises(TypeError):
             DataFrameWrapper([1, 2, 3])
 
-    # --- Metadata Property Tests ---
+    # Metadata Property Tests
 
     def test_shape_property(self, df_lib, basic_data):
-        """VERIFICATION: Checks if the .shape property is correct."""
+        """Checks if the .shape property is correct."""
         df = df_lib(basic_data)
         wrapper = DataFrameWrapper(df)
         assert wrapper.shape == (4, 3)
 
     def test_shape_property_empty(self, empty_df):
-        """VERIFICATION: Checks .shape on an empty dataframe."""
+        """Checks .shape on an empty dataframe."""
         wrapper = DataFrameWrapper(empty_df)
         assert wrapper.shape == (0, 0)
 
     def test_columns_property(self, df_lib, basic_data):
-        """VERIFICATION: Checks if the .columns property returns correct names."""
+        """Checks if the .columns property returns correct names."""
         df = df_lib(basic_data)
         wrapper = DataFrameWrapper(df)
         assert wrapper.columns == ["A", "B", "C"]
 
     def test_dtypes_property(self, df_lib, mixed_type_data):
-        """VERIFICATION: Checks if .dtypes correctly maps protocol types to NumPy types."""
+        """Checks if .dtypes correctly maps protocol types to NumPy types."""
         df = df_lib(mixed_type_data)
         wrapper = DataFrameWrapper(df)
         expected_dtypes = {
@@ -119,10 +116,10 @@ class TestDataFrameWrapper:
         }
         assert wrapper.dtypes == expected_dtypes
 
-    # --- Column Access and Selection Tests ---
+    # Column Access and Selection Tests
 
     def test_get_column_success(self, df_lib, basic_data):
-        """VERIFICATION: Ensures a single column can be retrieved successfully."""
+        """Ensures a single column can be retrieved successfully."""
         df = df_lib(basic_data)
         wrapper = DataFrameWrapper(df)
         col_wrapper = wrapper.get_column("B")
@@ -130,7 +127,7 @@ class TestDataFrameWrapper:
         assert col_wrapper.name == "B"
 
     def test_getitem_for_get_column(self, df_lib, basic_data):
-        """VERIFICATION: Ensures dict-like access `wrapper['col']` works."""
+        """Ensures dict-like access `wrapper['col']` works."""
         df = df_lib(basic_data)
         wrapper = DataFrameWrapper(df)
         col_wrapper = wrapper["B"]
@@ -139,7 +136,7 @@ class TestDataFrameWrapper:
 
     def test_get_column_failure_nonexistent(self, df_lib, basic_data):
         """
-        VERIFICATION: Ensures retrieving a non-existent column raises a KeyError.
+        Ensures retrieving a non-existent column raises a KeyError.
         FAILURE MODE: Requesting a column that is not in the dataframe.
         """
         df = df_lib(basic_data)
@@ -148,7 +145,7 @@ class TestDataFrameWrapper:
             wrapper.get_column("X")
 
     def test_select_columns_success(self, df_lib, basic_data):
-        """VERIFICATION: Ensures selecting a subset of columns works correctly."""
+        """Ensures selecting a subset of columns works correctly."""
         df = df_lib(basic_data)
         wrapper = DataFrameWrapper(df)
         new_wrapper = wrapper.select(["C", "A"])
@@ -156,10 +153,10 @@ class TestDataFrameWrapper:
         assert new_wrapper.columns == ["C", "A"]
         assert new_wrapper.shape == (4, 2)
 
-    # --- Critical ColumnWrapper Tests ---
+    # ColumnWrapper Tests
 
     def test_column_to_numpy_numeric(self, df_lib, basic_data):
-        """VERIFICATION: Converts a clean numeric column to a NumPy array."""
+        """Converts a clean numeric column to a NumPy array."""
         df = df_lib(basic_data)
         wrapper = DataFrameWrapper(df)
         col_numpy = wrapper.get_column("A").to_numpy()
@@ -169,7 +166,7 @@ class TestDataFrameWrapper:
 
     def test_column_to_numpy_with_nulls(self, df_lib, null_data):
         """
-        VERIFICATION: Correctly handles nulls when converting to NumPy.
+        Correctly handles nulls when converting to NumPy.
         - Floats should use np.nan.
         - Integers and others should use None, resulting in an 'object' dtype.
         """
@@ -191,10 +188,10 @@ class TestDataFrameWrapper:
         assert int_col[1] is None
         np.testing.assert_array_equal(int_col[[0, 2, 3]], np.array([1, 3, 4]))
 
-    # --- Full DataFrame Conversion and Reconstruction ---
+    # Full DataFrame Conversion and Reconstruction
 
     def test_to_numpy_full_df(self, df_lib, basic_data):
-        """VERIFICATION: Converts an entire dataframe to a 2D NumPy array."""
+        """Converts an entire dataframe to a 2D NumPy array."""
         df = df_lib(basic_data)
         wrapper = DataFrameWrapper(df)
         full_array = wrapper.to_numpy()
@@ -204,7 +201,7 @@ class TestDataFrameWrapper:
 
     def test_from_numpy_reconstruction(self, df_lib, basic_data):
         """
-        VERIFICATION: Reconstructs a dataframe of the original type from a NumPy array.
+        Reconstructs a dataframe of the original type from a NumPy array.
         This is critical for ensuring outputs match user inputs.
         """
         df = df_lib(basic_data)
@@ -221,7 +218,7 @@ class TestDataFrameWrapper:
             assert reconstructed_df.equals(df)
 
     def test_filter_success(self, df_lib, mixed_type_data):
-        """VERIFICATION: Filters rows correctly using a boolean mask."""
+        """Filters rows correctly using a boolean mask."""
         df = df_lib(mixed_type_data)
         wrapper = DataFrameWrapper(df)
 
@@ -235,7 +232,7 @@ class TestDataFrameWrapper:
 
     def test_filter_failure_non_boolean_mask(self, df_lib, basic_data):
         """
-        VERIFICATION: Raises TypeError when attempting to filter with a non-boolean column.
+        Raises TypeError when attempting to filter with a non-boolean column.
         FAILURE MODE: Using a numeric or string column as a filter mask.
         """
         df = df_lib(basic_data)

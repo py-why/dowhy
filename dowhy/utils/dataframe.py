@@ -6,11 +6,9 @@ import polars as pl
 from typing import Any, Dict, Iterable, List, Literal, Tuple
 
 
-# Represents a dataframe object that should have the __dataframe__ method
+# Type aliases for objects related to the dataframe interchange protocol.
 DataFrameObject = Any
-# Represents the object returned by the __dataframe__() method
 InterchangeObject = Any
-# Represents a column object from the interchange protocol
 InterchangeColumn = Any
 
 # Mapping from the protocol's DType enumeration to NumPy's dtype objects
