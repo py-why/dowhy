@@ -34,7 +34,7 @@ class OverlapBooleanRule:
         eps=1e-6,
         silent=False,
         verbose=False,
-        solver="ECOS",
+        solver="CLARABEL",
         rounding="greedy_sweep",
     ):
         """
@@ -60,7 +60,7 @@ class OverlapBooleanRule:
         :type silent: bool
         :param verbose: Verbose optimizer output, defaults to False
         :type verbose: bool, optional
-        :param solver: Linear programming solver used by CVXPY to solve the LP relaxation, defaults to 'ECOS'
+        :param solver: Linear programming solver used by CVXPY to solve the LP relaxation, defaults to 'CLARABEL'
         :type solver: str, optional
         :param rounding: Strategy to perform rounding, either 'greedy' or 'greedy_sweep', defaults to 'greedy_sweep'
         :type rounding: str, optional
