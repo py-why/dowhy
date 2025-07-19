@@ -36,10 +36,21 @@ jobs:
       - name: Install Poetry
         run: python3 -m pip install poetry
 
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc g++ pkg-config libgraphviz-dev graphviz-dev graphviz nodejs npm pandoc
+
+      - name: Install Poetry
+        run: python3 -m pip install poetry
+
       - name: Install Python Dependencies
         run: poetry install -E plotting -E pydot -E pygraphviz -E econml --with docs
-
-      - run: git config --global --add safe.directory /__w/dowhy/dowhy
 
       - name: Build
         run: ./docs/generate_docs.sh

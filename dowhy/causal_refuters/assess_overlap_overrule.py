@@ -40,7 +40,7 @@ class SupportConfig:
         the following, will only be applied to continuous features with more than num_thresh unique values
         `thresh_override = {column_name: np.linspace(0, 100, 10)}`
     :type thresh_override: Optional[Dict], optional
-    :param solver: Linear programming solver used by CVXPY to solve the LP relaxation, defaults to 'ECOS'
+    :param solver: Linear programming solver used by CVXPY to solve the LP relaxation, defaults to 'CLARABEL'
     :type solver: str, optional
     :param rounding: Strategy to perform rounding, either 'greedy' or 'greedy_sweep', defaults to 'greedy_sweep'
     :type rounding: str, optional
@@ -57,7 +57,7 @@ class SupportConfig:
     iterMax: int = 10
     num_thresh: int = 9
     thresh_override: Optional[Dict] = None
-    solver: str = "ECOS"
+    solver: str = "CLARABEL"
     rounding: str = "greedy_sweep"
 
 
@@ -86,7 +86,7 @@ class OverlapConfig:
         the following, will only be applied to continuous features with more than num_thresh unique values
         `thresh_override = {column_name: np.linspace(0, 100, 10)}`
     :type thresh_override: Optional[Dict], optional
-    :param solver: Linear programming solver used by CVXPY to solve the LP relaxation, defaults to 'ECOS'
+    :param solver: Linear programming solver used by CVXPY to solve the LP relaxation, defaults to 'CLARABEL'
     :type solver: str, optional
     :param rounding: Strategy to perform rounding, either 'greedy' or 'greedy_sweep', defaults to 'greedy_sweep'
     :type rounding: str, optional
@@ -101,7 +101,7 @@ class OverlapConfig:
     iterMax: int = 10
     num_thresh: int = 9
     thresh_override: Optional[Dict] = None
-    solver: str = "ECOS"
+    solver: str = "CLARABEL"
     rounding: str = "greedy_sweep"
 
 

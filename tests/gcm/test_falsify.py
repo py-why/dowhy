@@ -1,3 +1,4 @@
+import math
 from functools import partial
 
 import networkx as nx
@@ -47,7 +48,7 @@ def test_given_exclude_original_order_when_generating_permutations_then_return_c
         perms.add(perm)
         assert list(G.nodes) != list(perm.nodes)
 
-    assert len(perms) == np.math.factorial(num_nodes) - 1
+    assert len(perms) == math.factorial(num_nodes) - 1
 
 
 @flaky(max_runs=1)
@@ -63,7 +64,7 @@ def test_given_not_exclude_original_order_when_generating_permutations_then_retu
             found_orig_perm = True
 
     assert found_orig_perm
-    assert len(perms) == np.math.factorial(num_nodes)
+    assert len(perms) == math.factorial(num_nodes)
 
 
 @flaky(max_runs=5)
