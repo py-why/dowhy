@@ -4,6 +4,7 @@ from enum import Enum, auto
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import networkx as nx
+from dowhy.utils.dataframe import DataFrameWrapper
 import numpy as np
 import pandas as pd
 from statsmodels.stats.multitest import multipletests
@@ -20,7 +21,7 @@ class RejectionResult(Enum):
 
 def refute_causal_structure(
     causal_graph: DirectedGraph,
-    data: pd.DataFrame,
+    data: Any,
     independence_test: Callable[[np.ndarray, np.ndarray], float] = kernel_based,
     conditional_independence_test: Callable[[np.ndarray, np.ndarray, np.ndarray], float] = kernel_based,
     significance_level: float = 0.05,
@@ -44,6 +45,8 @@ def refute_causal_structure(
                 'Z': {'local_markov_test': {'p_value': 0.0, 'fdr_adjusted_p_value': 0.5, 'success': False},
                       'edge_dependence_test': {'Y': {'p_value': 0.5, 'fdr_adjusted_p_value': 0.5, 'success': True}}}}]
     """
+    data = DataFrameWrapper(data)
+    
     is_dag_valid = True
     validation_summary = dict()
     all_p_values = []
@@ -101,7 +104,7 @@ def refute_causal_structure(
 
 def refute_invertible_model(
     causal_model: InvertibleStructuralCausalModel,
-    data: pd.DataFrame,
+    data: Any,
     independence_test: Callable[[np.ndarray, np.ndarray], float] = kernel_based,
     significance_level: float = 0.05,
     fdr_control_method: Optional[str] = None,
@@ -130,6 +133,8 @@ def refute_invertible_model(
     :return: The outcome of the validation. The causal model can not be rejected if all causal mechanisms are consistent with
              the invertible model assumption.
     """
+    data = DataFrameWrapper(data)
+        
     validate_causal_graph(causal_model.graph)
 
     all_p_values = []
