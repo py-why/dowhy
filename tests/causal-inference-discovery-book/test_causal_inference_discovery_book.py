@@ -17,10 +17,10 @@ from dowhy import CausalModel
 class GPSMemorySCM:
     def __init__(self, random_seed=None):
         self.random_seed = random_seed
-        self.u_x = stats.truncnorm(0, np.infty, scale=5)
+        self.u_x = stats.truncnorm(0, np.inf, scale=5)
         self.u_y = stats.norm(scale=2)
         self.u_z = stats.norm(scale=2)
-        self.u = stats.truncnorm(0, np.infty, scale=4)
+        self.u = stats.truncnorm(0, np.inf, scale=4)
 
     def sample(self, sample_size=100, treatment_value=None):
         """Samples from the SCM"""
