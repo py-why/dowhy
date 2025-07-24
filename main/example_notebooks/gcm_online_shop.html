@@ -246,6 +246,7 @@
             <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
             <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
             <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.13/index.html">v0.13</a></dd>
             <dd><a href="/dowhy/v0.12/index.html">v0.12</a></dd>
             <dd><a href="/dowhy/v0.11.1/index.html">v0.11.1</a></dd>
             <dd><a href="/dowhy/v0.11/index.html">v0.11</a></dd>
@@ -382,6 +383,7 @@
             <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
             <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
             <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.13/index.html">v0.13</a></dd>
             <dd><a href="/dowhy/v0.12/index.html">v0.12</a></dd>
             <dd><a href="/dowhy/v0.11.1/index.html">v0.11.1</a></dd>
             <dd><a href="/dowhy/v0.11/index.html">v0.11</a></dd>
@@ -840,21 +842,21 @@ In total, 8 nodes were analyzed:
 Node Shopping Event? is a root node. Therefore, assigning &#39;Empirical Distribution&#39; to the node representing the marginal distribution.
 
 --- Node: Unit Price
-Node Unit Price is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using LinearRegression&#39; to the node.
+Node Unit Price is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using Pipeline&#39; to the node.
 This represents the causal relationship as Unit Price := f(Shopping Event?) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
-LinearRegression: 142.77431246551515
 Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 142.78271703597315
+                (&#39;linearregression&#39;, LinearRegression)]): 142.7425632619611
+LinearRegression: 142.7425632619612
 HistGradientBoostingRegressor: 439.63843778273156
 
 --- Node: Ad Spend
-Node Ad Spend is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using LinearRegression&#39; to the node.
+Node Ad Spend is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using Pipeline&#39; to the node.
 This represents the causal relationship as Ad Spend := f(Shopping Event?) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
-LinearRegression: 15950.378625434218
 Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 16057.728423653647
+                (&#39;linearregression&#39;, LinearRegression)]): 15892.166632432025
+LinearRegression: 15892.16663243203
 HistGradientBoostingRegressor: 80313.4296584338
 
 --- Node: Page Views
@@ -925,7 +927,7 @@ For more insights toward the quality of the fitted graphical causal model, consi
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node Operational Cost: 100%|██████████| 8/8 [00:00&lt;00:00, 327.02it/s]
+Fitting causal mechanism of node Operational Cost: 100%|██████████| 8/8 [00:00&lt;00:00, 304.31it/s]
 </pre></div></div>
 </div>
 <p>The fit method learns the parameters of the generative models in each node. Before we continue, let’s have a quick look into the performance of the causal mechanisms and how well they capture the distribution:</p>
@@ -942,7 +944,7 @@ Fitting causal mechanism of node Operational Cost: 100%|████████
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Evaluating causal mechanisms...: 100%|██████████| 8/8 [00:00&lt;00:00, 787.51it/s]
+Evaluating causal mechanisms...: 100%|██████████| 8/8 [00:00&lt;00:00, 699.12it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -968,18 +970,18 @@ We will mostly utilize the CRPS for comparing and interpreting the performance o
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
 --- Node Unit Price
-- The MSE is 156.48090806251736.
-- The NMSE is 0.6938977880013996.
-- The R2 coefficient is 0.35194776992616694.
-- The normalized CRPS is 0.1255269994288885.
+- The MSE is 156.46540554460086.
+- The NMSE is 0.6939536439834632.
+- The R2 coefficient is 0.3516658699382417.
+- The normalized CRPS is 0.12554419367870595.
 The estimated CRPS indicates a very good model performance.
 The mechanism is better or equally good than all 7 baseline mechanisms.
 
 --- Node Ad Spend
-- The MSE is 16677.202023167338.
-- The NMSE is 0.48344956888514795.
-- The R2 coefficient is 0.7512082042758019.
-- The normalized CRPS is 0.27348046539832216.
+- The MSE is 16438.021001388122.
+- The NMSE is 0.4794342019721892.
+- The R2 coefficient is 0.7572348396845705.
+- The normalized CRPS is 0.2717222295000458.
 The estimated CRPS indicates a good model performance.
 The mechanism is better or equally good than all 7 baseline mechanisms.
 
@@ -1024,8 +1026,8 @@ The estimated CRPS indicates a very good model performance.
 The mechanism is better or equally good than all 7 baseline mechanisms.
 
 ==== Evaluation of Generated Distribution ====
-The overall average KL divergence between the generated and observed distribution is 1.0102049246716855
-The estimated KL divergence indicates some mismatches between the distributions.
+The overall average KL divergence between the generated and observed distribution is 0.9996952516279922
+The estimated KL divergence indicates a good representation of the data distribution, but might indicate some smaller mismatches between the distributions.
 
 ==== NOTE ====
 Always double check the made model assumptions with respect to the graph structure and choice of causal mechanisms.
@@ -1153,13 +1155,13 @@ All these evaluations give some insight into the goodness of the causal model, b
     <tr>
       <th>6</th>
       <td>False</td>
-      <td>$989.76</td>
+      <td>$989.79</td>
       <td>$1,240.77</td>
       <td>11710</td>
       <td>2394</td>
-      <td>$2,369,495.96</td>
+      <td>$2,369,568.65</td>
       <td>$1,698,243.13</td>
-      <td>$671,252.83</td>
+      <td>$671,325.52</td>
     </tr>
     <tr>
       <th>7</th>
@@ -1292,7 +1294,7 @@ paper</a> for more details.</p>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Evaluating set functions...: 100%|██████████| 115/115 [02:28&lt;00:00,  1.29s/it]
+Evaluating set functions...: 100%|██████████| 115/115 [02:26&lt;00:00,  1.28s/it]
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -1331,7 +1333,7 @@ the number of sold units or number of page views have a rather small influence, 
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.LineCollection at 0x7fc399c70d00&gt;
+&lt;matplotlib.collections.LineCollection at 0x7f7089e1fca0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1361,7 +1363,7 @@ the number of sold units or number of page views have a rather small influence, 
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/tmp/ipykernel_14357/4061400578.py:2: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+/tmp/ipykernel_14761/4061400578.py:2: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
   (first_day_2022[&#39;Sold Units&#39;][0] / data_2021[&#39;Sold Units&#39;][0] - 1) * 100
 </pre></div></div>
 </div>
@@ -1387,7 +1389,7 @@ $\displaystyle 18.9469141130773$</div></div>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/tmp/ipykernel_14357/2530870091.py:1: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+/tmp/ipykernel_14761/2530870091.py:1: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
   (1 - first_day_2022[&#39;Profit&#39;][0] / data_2021[&#39;Profit&#39;][0]) * 100
 </pre></div></div>
 </div>
@@ -1416,7 +1418,7 @@ $\displaystyle 8.57891513840979$</div></div>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Evaluating set functions...: 100%|██████████| 116/116 [00:02&lt;00:00, 42.35it/s]
+Evaluating set functions...: 100%|██████████| 116/116 [00:03&lt;00:00, 37.03it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
