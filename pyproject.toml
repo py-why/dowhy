@@ -1,3 +1,9 @@
+[project]
+name = "dowhy"
+
+[project.license]
+text = "MIT"
+
 [tool.poetry]
 name = "dowhy"
 #
@@ -14,11 +20,11 @@ repository = "https://github.com/py-why/dowhy"
 classifiers = [
     'Development Status :: 4 - Beta',
     'License :: OSI Approved :: MIT License',
-    'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
     'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3.13',
 ]
 keywords = [
     'causality',
@@ -36,7 +42,12 @@ priority = "explicit"
 
 
 [build-system]
-requires = ["poetry-core>=1.0.0", "cython>=3"]
+requires = [
+    "poetry-core>=1.0.0", 
+    "cython>=3.0",
+    "setuptools>=61.0; python_version>='3.13'",
+    "setuptools>=40.0; python_version<'3.13'"
+]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry-dynamic-versioning]
@@ -53,21 +64,15 @@ files = ["dowhy/__init__.py"]
 # * numba (imported by econml) requires python <3.11
 #
 [tool.poetry.dependencies]
-python = ">=3.8,<3.13"
+python = ">=3.9,<3.14"
 cython = ">=3.0"
 scipy = [
-    { version = ">=1.7,<1.14", python = "<3.9" },
     { version = "<=1.15.3", python = ">=3.9,<3.13" },
+    { version = ">=1.15", python = ">=3.13" },
 ]
 statsmodels = ">=0.14"
-numpy = [
-    { version = "<2.0", python = "<3.9" },
-    { version = ">1.0", python = ">=3.9" }
-]
-pandas = [
-    { version = "<2.0", python = "<3.9" },
-    { version = ">1.0", python = ">=3.9" }
-]
+numpy = ">2.0"
+pandas = ">1.0"
 networkx = [
     { version = ">=3.3", python = ">=3.10" },
     { version = ">=2.8.5", python = "<3.10" }
@@ -77,17 +82,14 @@ scikit-learn = ">1.0"
 pydot = { version = "^1.4.2", optional = true }
 joblib = ">=1.1.0"
 pygraphviz = { version = ">=1.9", optional = true }
-econml = ">=0.15.1"
+econml = ">=0.16"
 tqdm = ">=4.64.0"
 causal-learn = ">=0.1.3.0"
-numba = [
-    { version = "<0.59", python = "<3.9" },
-    { version = ">=0.59", python = ">=3.9" }
-]
+numba = ">=0.59"
 
 #Plotting Extra
 matplotlib = { version = ">=3.5.3", optional = true }
-cvxpy = "<1.5"
+cvxpy = "^1.7.1"
 
 [tool.poetry.extras]
 pygraphviz = ["pygraphviz"]
@@ -109,10 +111,13 @@ flaky = ">=3.7.0"
 keras = ">=2.9.0"
 xgboost = ">=2.0.2"
 mypy = ">=1.7.1"
-torch = "==2.4.1"
+torch = [
+    { version = "==2.4.1", python = "<3.13" },
+    { version = ">=2.0", python = ">=3.13" }
+]
 torchvision = ">=0.13.1"
 pytorch-lightning = [
-    { version = "<2.0", python = ">=3.8,<3.11" },
+    { version = "<2.0", python = ">=3.9,<3.11" },
     { version = ">=2.0", python = ">=3.11" }
 ]
 
@@ -184,7 +189,7 @@ ignore_fail = "return_non_zero"
 
 [tool.black]
 line-length = 120
-target-version = ['py38', 'py39']
+target-version = ['py39', 'py310', 'py311', 'py312', 'py313']
 include = '\.pyi?$'
 extend-exclude = '''
 (
