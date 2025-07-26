@@ -473,8 +473,8 @@ def has_linear_relationship(X: np.ndarray, Y: np.ndarray, max_num_samples: int =
         for i in range(all_classes.size):
             # Making sure that there are at least 2 samples from one class (here, simply duplicate the point).
             if counts[i] == 1:
-                X = np.row_stack([X, X[indices[i], :]])
-                Y = np.row_stack([Y, Y[indices[i], :]])
+                X = np.vstack([X, X[indices[i], :]])
+                Y = np.vstack([Y, Y[indices[i], :]])
 
         x_train, x_test, y_train, y_test = train_test_split(
             X, Y, train_size=num_trainings_samples, test_size=num_test_samples, stratify=Y
