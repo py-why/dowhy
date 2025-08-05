@@ -128,7 +128,7 @@ class RegressionEstimator(CausalEstimator):
             conditional_effect_estimates = self._estimate_conditional_effects(
                 data, self._estimate_effect_fn, effect_modifier_names=self._effect_modifier_names
             )
-        intercept_parameter = self.model.params[0]
+        intercept_parameter = self.model.params.iloc[0]
         estimate = CausalEstimate(
             data=data,
             treatment_name=self._target_estimand.treatment_variable,
