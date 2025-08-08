@@ -143,9 +143,7 @@ class Regularizer:
                     cardinality = 1 + torch.max(grouping_data, dim=0)[0]
                     cumprod = torch.cumprod(cardinality, dim=0)
                     n_groups = cumprod[-1].item()
-                    factors = torch.cat(
-                            (torch.tensor([1], dtype=cumprod.dtype, device=cumprod.device), cumprod[:-1])
-                    )
+                    factors = torch.cat((torch.tensor([1], dtype=cumprod.dtype, device=cumprod.device), cumprod[:-1]))
                     group_indices = (grouping_data.float() @ factors.float()).long()
 
                     for group_idx in range(n_groups):
@@ -207,9 +205,7 @@ class Regularizer:
                     cardinality = 1 + torch.max(grouping_data, dim=0)[0]
                     cumprod = torch.cumprod(cardinality, dim=0)
                     n_groups = cumprod[-1].item()
-                    factors = torch.cat(
-                            (torch.tensor([1], dtype=cumprod.dtype, device=cumprod.device), cumprod[:-1])
-                    )
+                    factors = torch.cat((torch.tensor([1], dtype=cumprod.dtype, device=cumprod.device), cumprod[:-1]))
                     group_indices = (grouping_data.float() @ factors.float()).long()
 
                     for group_idx in range(n_groups):
@@ -248,9 +244,7 @@ class Regularizer:
                     cardinality = 1 + torch.max(grouping_data, dim=0)[0]
                     cumprod = torch.cumprod(cardinality, dim=0)
                     n_groups = cumprod[-1].item()
-                    factors = torch.cat(
-                            (torch.tensor([1], dtype=cumprod.dtype, device=cumprod.device), cumprod[:-1])
-                    )
+                    factors = torch.cat((torch.tensor([1], dtype=cumprod.dtype, device=cumprod.device), cumprod[:-1]))
                     group_indices = (grouping_data.float() @ factors.float()).long()
 
                     for group_idx in range(n_groups):
