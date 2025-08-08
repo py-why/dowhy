@@ -143,9 +143,10 @@ class Regularizer:
                     cardinality = 1 + torch.max(grouping_data, dim=0)[0]
                     cumprod = torch.cumprod(cardinality, dim=0)
                     n_groups = cumprod[-1].item()
-                    factors_np = np.concatenate(([1], cumprod[:-1]))
-                    factors = torch.from_numpy(factors_np)
-                    group_indices = grouping_data @ factors
+                    factors = torch.cat(
+                            (torch.tensor([1], dtype=cumprod.dtype, device=cumprod.device), cumprod[:-1])
+                    )
+                    group_indices = (grouping_data.float() @ factors.float()).long()
 
                     for group_idx in range(n_groups):
                         group_idx_indices = [
@@ -206,9 +207,10 @@ class Regularizer:
                     cardinality = 1 + torch.max(grouping_data, dim=0)[0]
                     cumprod = torch.cumprod(cardinality, dim=0)
                     n_groups = cumprod[-1].item()
-                    factors_np = np.concatenate(([1], cumprod[:-1]))
-                    factors = torch.from_numpy(factors_np)
-                    group_indices = grouping_data @ factors
+                    factors = torch.cat(
+                            (torch.tensor([1], dtype=cumprod.dtype, device=cumprod.device), cumprod[:-1])
+                    )
+                    group_indices = (grouping_data.float() @ factors.float()).long()
 
                     for group_idx in range(n_groups):
                         group_idx_indices = [
@@ -246,9 +248,10 @@ class Regularizer:
                     cardinality = 1 + torch.max(grouping_data, dim=0)[0]
                     cumprod = torch.cumprod(cardinality, dim=0)
                     n_groups = cumprod[-1].item()
-                    factors_np = np.concatenate(([1], cumprod[:-1]))
-                    factors = torch.from_numpy(factors_np)
-                    group_indices = grouping_data @ factors
+                    factors = torch.cat(
+                            (torch.tensor([1], dtype=cumprod.dtype, device=cumprod.device), cumprod[:-1])
+                    )
+                    group_indices = (grouping_data.float() @ factors.float()).long()
 
                     for group_idx in range(n_groups):
                         group_idx_indices = [
