@@ -621,33 +621,33 @@
   <tbody>
     <tr>
       <th>0</th>
-      <td>0.316210</td>
-      <td>1.881414</td>
-      <td>4.531009</td>
+      <td>0.699083</td>
+      <td>1.707903</td>
+      <td>5.602738</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>-0.963217</td>
-      <td>-2.334555</td>
-      <td>-5.471774</td>
+      <td>-0.859548</td>
+      <td>-1.137579</td>
+      <td>-5.940257</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>0.994831</td>
-      <td>0.634849</td>
-      <td>1.035054</td>
+      <td>-0.349405</td>
+      <td>-1.610604</td>
+      <td>-4.715544</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>-0.016210</td>
-      <td>0.204744</td>
-      <td>1.002621</td>
+      <td>1.001546</td>
+      <td>2.470392</td>
+      <td>6.935618</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>0.666541</td>
-      <td>1.942052</td>
-      <td>3.653023</td>
+      <td>0.493291</td>
+      <td>0.852472</td>
+      <td>4.131949</td>
     </tr>
   </tbody>
 </table>
@@ -700,22 +700,22 @@ In total, 3 nodes were analyzed:
 Node X is a root node. Therefore, assigning &#39;Empirical Distribution&#39; to the node representing the marginal distribution.
 
 --- Node: Y
-Node Y is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using Pipeline&#39; to the node.
+Node Y is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using LinearRegression&#39; to the node.
 This represents the causal relationship as Y := f(X) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
+LinearRegression: 1.0012101794976656
 Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 0.9459366268023471
-LinearRegression: 0.9464104396572122
-HistGradientBoostingRegressor: 1.0308085644553278
+                (&#39;linearregression&#39;, LinearRegression)]): 1.0025147996375252
+HistGradientBoostingRegressor: 1.1557216352396593
 
 --- Node: Z
-Node Z is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using LinearRegression&#39; to the node.
+Node Z is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using Pipeline&#39; to the node.
 This represents the causal relationship as Z := f(Y) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
-LinearRegression: 1.021856520455208
 Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 1.0254389165693762
-HistGradientBoostingRegressor: 1.3488752366581855
+                (&#39;linearregression&#39;, LinearRegression)]): 0.9444961483771028
+LinearRegression: 0.9473097690618018
+HistGradientBoostingRegressor: 1.2215453409376624
 
 ===Note===
 Note, based on the selected auto assignment quality, the set of evaluated models changes.
@@ -752,7 +752,7 @@ For more insights toward the quality of the fitted graphical causal model, consi
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node Z: 100%|██████████| 3/3 [00:00&lt;00:00, 412.80it/s]
+Fitting causal mechanism of node Z: 100%|██████████| 3/3 [00:00&lt;00:00, 476.86it/s]
 </pre></div></div>
 </div>
 <p>Fitting means, we learn the generative models of the variables in the SCM according to the data.</p>
@@ -770,8 +770,8 @@ Fitting causal mechanism of node Z: 100%|██████████| 3/3 [00
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Evaluating causal mechanisms...: 100%|██████████| 3/3 [00:00&lt;00:00, 5617.37it/s]
-Test permutations of given graph: 100%|██████████| 6/6 [00:00&lt;00:00, 18.64it/s]
+Evaluating causal mechanisms...: 100%|██████████| 3/3 [00:00&lt;00:00, 3654.64it/s]
+Test permutations of given graph: 100%|██████████| 6/6 [00:00&lt;00:00, 18.65it/s]
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -800,26 +800,26 @@ NOTE: Every metric focuses on different aspects and they might not consistently 
 We will mostly utilize the CRPS for comparing and interpreting the performance of the mechanisms, since this captures the most important properties for the causal model.
 
 --- Node X
-- The KL divergence between generated and observed distribution is 0.021675059599745326.
+- The KL divergence between generated and observed distribution is 0.02511368380482897.
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
 --- Node Y
-- The MSE is 0.9387309749493639.
-- The NMSE is 0.46100291485207096.
-- The R2 coefficient is 0.7873674572489607.
-- The normalized CRPS is 0.2636099000438813.
+- The MSE is 0.9971658802637167.
+- The NMSE is 0.44478931898479834.
+- The R2 coefficient is 0.8014728216147832.
+- The normalized CRPS is 0.2540831073917599.
 The estimated CRPS indicates a good model performance.
 
 --- Node Z
-- The MSE is 1.0260208415251522.
-- The NMSE is 0.15954619418096164.
-- The R2 coefficient is 0.9744065902989287.
-- The normalized CRPS is 0.09095491748076956.
+- The MSE is 0.9452371840342648.
+- The NMSE is 0.1435458781871423.
+- The R2 coefficient is 0.9793531909579268.
+- The normalized CRPS is 0.08220321582639953.
 The estimated CRPS indicates a very good model performance.
 
 ==== Evaluation of Invertible Functional Causal Model Assumption ====
 
---- The model assumption for node Y is not rejected with a p-value of 0.6360488784400449 (after potential adjustment) and a significance level of 0.05.
+--- The model assumption for node Y is not rejected with a p-value of 1.0 (after potential adjustment) and a significance level of 0.05.
 This implies that the model assumption might be valid.
 
 --- The model assumption for node Z is not rejected with a p-value of 1.0 (after potential adjustment) and a significance level of 0.05.
@@ -904,33 +904,33 @@ All these evaluations give some insight into the goodness of the causal model, b
   <tbody>
     <tr>
       <th>0</th>
-      <td>0.006660</td>
+      <td>-0.757620</td>
       <td>2.34</td>
-      <td>7.659848</td>
+      <td>9.213297</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>-0.864872</td>
+      <td>-0.268262</td>
       <td>2.34</td>
-      <td>8.620423</td>
+      <td>6.785888</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>-1.270399</td>
+      <td>-0.013229</td>
       <td>2.34</td>
-      <td>6.507049</td>
+      <td>6.783666</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>0.416217</td>
+      <td>-0.079346</td>
       <td>2.34</td>
-      <td>9.536925</td>
+      <td>8.562700</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>0.461581</td>
+      <td>-1.003382</td>
       <td>2.34</td>
-      <td>6.875016</td>
+      <td>5.923107</td>
     </tr>
   </tbody>
 </table>
