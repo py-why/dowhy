@@ -263,7 +263,8 @@ class CausalEstimator:
                 data[prefix + str(em)] = pd.qcut(data[em], num_quantiles, duplicates="drop")
                 effect_modifier_names[i] = prefix + str(em)
         # Grouping by effect modifiers and computing effect separately
-        by_effect_mods = data.groupby(effect_modifier_names)
+        # Adding observed=True to avoid a FutureWarning in pandas (see #1316)
+        by_effect_mods = data.groupby(effect_modifier_names, observed=True)
 
         def cond_est_fn(x):
             return self._do(self._treatment_value, x) - self._do(self._control_value, x)
