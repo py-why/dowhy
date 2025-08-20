@@ -122,7 +122,6 @@ class PropensityScoreEstimator(CausalEstimator):
             error_msg = "Propensity score methods are applicable only for binary treatments"
             self.logger.error(error_msg)
             raise Exception(error_msg)
-        
         if self.propensity_score_column not in data:
             if self.propensity_score_model is None:
                 self.propensity_score_model = linear_model.LogisticRegression()
@@ -132,15 +131,7 @@ class PropensityScoreEstimator(CausalEstimator):
         return self
 
     def estimate_propensity_score_column(self, data):
-        try:
-            # Get the common causes from the input data and encode them the same way as during training
-            if self._observed_common_causes_names:
-                input_common_causes = data[self._observed_common_causes_names]
-                # Apply the same encoding that was used during training
-                encoded_common_causes = self._encode(input_common_causes, "observed_common_causes")
-            else:
-                raise ValueError("No common causes available for propensity score estimation")
-                
+        try:    
             data[self.propensity_score_column] = self.propensity_score_model.predict_proba(
                 encoded_common_causes
             )[:, 1]
