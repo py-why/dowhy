@@ -1,12 +1,13 @@
-from dowhy.causal_estimator import CausalEstimate, CausalEstimator
-from dowhy.causal_identifier import IdentifiedEstimand
 from typing import List, Optional, Union
-import pandas as pd
-import numpy as np
-from dowhy.causal_estimators.regression_estimator import RegressionEstimator
-from dowhy.causal_estimators.propensity_score_estimator import PropensityScoreEstimator
 
+import numpy as np
+import pandas as pd
+
+from dowhy.causal_estimator import CausalEstimate, CausalEstimator
 from dowhy.causal_estimators.linear_regression_estimator import LinearRegressionEstimator
+from dowhy.causal_estimators.propensity_score_estimator import PropensityScoreEstimator
+from dowhy.causal_estimators.regression_estimator import RegressionEstimator
+from dowhy.causal_identifier import IdentifiedEstimand
 
 
 class DoublyRobustEstimator(CausalEstimator):
@@ -18,7 +19,6 @@ class DoublyRobustEstimator(CausalEstimator):
     # Default propensity score model for doubly robust estimation
     DEFAULT_PROPENSITY_SCORE_MODEL = PropensityScoreEstimator
 
-    
     def __init__(
         self,
         identified_estimand: IdentifiedEstimand,
@@ -57,7 +57,6 @@ class DoublyRobustEstimator(CausalEstimator):
         self.propensity_score_model_class = propensity_score_model_class
         self.propensity_score_model_kwargs = propensity_score_model_kwargs or {}
 
-
     def fit(
         self,
         data: pd.DataFrame,
@@ -88,7 +87,6 @@ class DoublyRobustEstimator(CausalEstimator):
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
         return self
 
-
     def estimate_effect(
         self,
         data: pd.DataFrame,
@@ -101,7 +99,9 @@ class DoublyRobustEstimator(CausalEstimator):
         self._treatment_value = treatment_value
         self._control_value = control_value
         self._target_units = target_units
-        effect_estimate = self._do(treatment_value, treatment_value, data) - self._do(control_value, treatment_value, data)
+        effect_estimate = self._do(treatment_value, treatment_value, data) - self._do(
+            control_value, treatment_value, data
+        )
 
         estimate = CausalEstimate(
             data=data,
@@ -117,7 +117,6 @@ class DoublyRobustEstimator(CausalEstimator):
         estimate.add_estimator(self)
         return estimate
 
-    
     def _do(
         self,
         treatment,
@@ -139,13 +138,21 @@ class DoublyRobustEstimator(CausalEstimator):
         # Vector representation of Y
         true_outcomes = np.array(data_df[self._target_estimand.outcome_variable[0]])
         # Vector representation of Pr[T_i=t | X_i]
-        propensity_scores = np.array(self.propensity_score_model.predict_proba(data_df)[:, int(treatment == treatment_value)])
+        propensity_scores = np.array(
+            self.propensity_score_model.predict_proba(data_df)[:, int(treatment == treatment_value)]
+        )
         # Vector representation of 1\\{T_i=t\\}
         treatment_indicator = np.array(data_df[self._target_estimand.treatment_variable[0]] == treatment)
 
         # Doubly robust formula
-        outcomes = regression_est_outcomes + (true_outcomes - regression_est_outcomes) / propensity_scores * treatment_indicator
+        outcomes = (
+            regression_est_outcomes
+            + (true_outcomes - regression_est_outcomes) / propensity_scores * treatment_indicator
+        )
         return outcomes.mean()
 
     def construct_symbolic_estimator(self, estimand):
-        return "(TODO)"
+        expr = "b: " + ",".join(estimand.outcome_variable) + "~"
+        var_list = estimand.treatment_variable + estimand.get_adjustment_set()
+        expr += "+".join(var_list)
+        return expr

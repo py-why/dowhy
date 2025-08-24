@@ -122,6 +122,7 @@ class PropensityScoreEstimator(CausalEstimator):
             error_msg = "Propensity score methods are applicable only for binary treatments"
             self.logger.error(error_msg)
             raise Exception(error_msg)
+
         if self.propensity_score_column not in data:
             if self.propensity_score_model is None:
                 self.propensity_score_model = linear_model.LogisticRegression()
@@ -131,6 +132,7 @@ class PropensityScoreEstimator(CausalEstimator):
         return self
 
     def predict_proba(self, data):
+        """Estimate propensity scores on data using propensity score mode."""
         data = data[self._observed_common_causes_names]
         data = self._encode(data, "observed_common_causes")
         return self.propensity_score_model.predict_proba(data)

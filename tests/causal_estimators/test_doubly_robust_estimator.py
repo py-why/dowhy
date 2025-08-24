@@ -24,9 +24,7 @@ class TestDoublyRobustEstimator(object):
             (
                 0.1,
                 DoublyRobustEstimator,
-                [
-                    1,
-                ],
+                [1, 2],
                 [0, 1],
                 [
                     0,
@@ -45,46 +43,30 @@ class TestDoublyRobustEstimator(object):
                 ],
                 "backdoor",
             ),
-            # (
-            #     0.1,
-            #     DoublyRobustEstimator,
-            #     [0, 1],
-            #     [0, 1],
-            #     [
-            #         0,
-            #     ],
-            #     [1, 2],
-            #     [
-            #         False,
-            #     ],
-            #     [
-            #         True,
-            #     ],
-            #     [
-            #         False,
-            #     ],
-            #     "general_adjustment",
-            # ),
-            # (
-            #     0.1,
-            #     DoublyRobustEstimator,
-            #     [0, 1],
-            #     [0, 1],
-            #     [
-            #         0,
-            #     ],
-            #     [1, 2],
-            #     [
-            #         False,
-            #     ],
-            #     [
-            #         False,
-            #     ],
-            #     [
-            #         False,
-            #     ],
-            #     "general_adjustment",
-            # ),
+            (
+                0.2,
+                DoublyRobustEstimator,
+                [1, 2],
+                [
+                    0,
+                ],
+                [
+                    0,
+                ],
+                [
+                    1,
+                ],
+                [
+                    True,
+                ],
+                [
+                    False,
+                ],
+                [
+                    True,
+                ],
+                "general_adjustment",
+            ),
         ],
     )
     def test_average_treatment_effect(
