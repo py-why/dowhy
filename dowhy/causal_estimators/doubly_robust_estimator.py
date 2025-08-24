@@ -5,10 +5,8 @@ import pandas as pd
 import numpy as np
 from dowhy.causal_estimators.regression_estimator import RegressionEstimator
 from dowhy.causal_estimators.propensity_score_estimator import PropensityScoreEstimator
-# from sklearn import linear_model
 
 from dowhy.causal_estimators.linear_regression_estimator import LinearRegressionEstimator
-from dowhy.causal_estimators.propensity_score_weighting_estimator import PropensityScoreWeightingEstimator
 
 
 class DoublyRobustEstimator(CausalEstimator):
@@ -53,9 +51,10 @@ class DoublyRobustEstimator(CausalEstimator):
             **kwargs,
         )
         self.logger.info("INFO: Using Doubly Robust Estimator")
+        # Initialize the models; most constructor parameters aren't necessary
         self.regression_model_class = regression_model_class
-        self.propensity_score_model_class = propensity_score_model_class
         self.regression_model_kwargs = regression_model_kwargs or {}
+        self.propensity_score_model_class = propensity_score_model_class
         self.propensity_score_model_kwargs = propensity_score_model_kwargs or {}
 
 
@@ -73,7 +72,6 @@ class DoublyRobustEstimator(CausalEstimator):
             error_msg = str(self.__class__) + "cannot handle more than one outcome variable"
             raise Exception(error_msg)
 
-        # Initialize the models; most constructor parameters aren't necessary
         self.regression_model = self.regression_model_class(
             identified_estimand=self._target_estimand,
             **self.regression_model_kwargs,
@@ -84,10 +82,10 @@ class DoublyRobustEstimator(CausalEstimator):
         )
 
         # Fit the models
+        self._set_effect_modifiers(data, effect_modifier_names)
         self.regression_model = self.regression_model.fit(data, effect_modifier_names=effect_modifier_names)
         self.propensity_score_model = self.propensity_score_model.fit(data, effect_modifier_names=effect_modifier_names)
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
-        
         return self
 
 
@@ -100,8 +98,10 @@ class DoublyRobustEstimator(CausalEstimator):
         **kwargs,
     ):
         """Estimate the causal effect using the Doubly Robust Formula."""
+        self._treatment_value = treatment_value
+        self._control_value = control_value
         self._target_units = target_units
-        effect_estimate = self._do(treatment_value, data) - self._do(control_value, data)
+        effect_estimate = self._do(treatment_value, treatment_value, data) - self._do(control_value, treatment_value, data)
 
         estimate = CausalEstimate(
             data=data,
@@ -120,7 +120,8 @@ class DoublyRobustEstimator(CausalEstimator):
     
     def _do(
         self,
-        treatment_val,
+        treatment,
+        treatment_value,
         data_df: pd.DataFrame,
     ):
         """
@@ -134,17 +135,15 @@ class DoublyRobustEstimator(CausalEstimator):
         """
 
         # Vector representation of E[Y | X_i, T_i=t]
-        regression_est_outcomes = self.regression_model.interventional_outcomes(data_df, treatment_val)
+        regression_est_outcomes = self.regression_model.interventional_outcomes(data_df, treatment)
         # Vector representation of Y
         true_outcomes = np.array(data_df[self._target_estimand.outcome_variable[0]])
         # Vector representation of Pr[T_i=t | X_i]
-        if self.propensity_score_model.propensity_score_column not in data_df:
-            self.propensity_score_model.estimate_propensity_score_column(data_df)
-        propensity_scores = np.array(data_df[self.propensity_score_model.propensity_score_column])
+        propensity_scores = np.array(self.propensity_score_model.predict_proba(data_df)[:, int(treatment == treatment_value)])
         # Vector representation of 1\\{T_i=t\\}
-        treatment_indicator = np.array(data_df[self._target_estimand.treatment_variable[0]] == treatment_val)
+        treatment_indicator = np.array(data_df[self._target_estimand.treatment_variable[0]] == treatment)
 
-        # combine to create doubly robust formula
+        # Doubly robust formula
         outcomes = regression_est_outcomes + (true_outcomes - regression_est_outcomes) / propensity_scores * treatment_indicator
         return outcomes.mean()
 
