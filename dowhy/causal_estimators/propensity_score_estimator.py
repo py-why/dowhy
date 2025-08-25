@@ -132,7 +132,7 @@ class PropensityScoreEstimator(CausalEstimator):
         return self
 
     def predict_proba(self, data):
-        """Estimate propensity scores on data using propensity score mode."""
+        """Estimate propensity scores on data using propensity score model."""
         data = data[self._observed_common_causes_names]
         data = self._encode(data, "observed_common_causes")
         return self.propensity_score_model.predict_proba(data)

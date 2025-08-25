@@ -11,7 +11,19 @@ from dowhy.causal_identifier import IdentifiedEstimand
 
 
 class DoublyRobustEstimator(CausalEstimator):
-    """Doubly Robust Estimator for Causal Effect Estimation."""
+    """Doubly Robust Estimator for Causal Effect Estimation.
+
+    Supports any Regression Estimator for the regression stage, and for the
+    propensity stage, see the propensity_score_model parameter of the
+    PropensityScoreEstimator class.
+
+    References
+    ----------
+    [1] Michele Jonsson Funk, Daniel Westreich, Chris Wiesen, Til Stürmer,
+        M. Alan Brookhart, Marie Davidian, Doubly Robust Estimation of Causal
+        Effects, American Journal of Epidemiology, Volume 173, Issue 7,
+        1 April 2011, Pages 761-767, https://doi.org/10.1093/aje/kwq439
+    """
 
     # Default regression model for doubly robust estimation
     DEFAULT_REGRESSION_MODEL = LinearRegressionEstimator
@@ -71,19 +83,20 @@ class DoublyRobustEstimator(CausalEstimator):
             error_msg = str(self.__class__) + "cannot handle more than one outcome variable"
             raise Exception(error_msg)
 
-        self.regression_model = self.regression_model_class(
+        # Initialize models
+        regression_model = self.regression_model_class(
             identified_estimand=self._target_estimand,
             **self.regression_model_kwargs,
         )
-        self.propensity_score_model = self.propensity_score_model_class(
+        propensity_score_model = self.propensity_score_model_class(
             identified_estimand=self._target_estimand,
             **self.propensity_score_model_kwargs,
         )
 
-        # Fit the models
+        # Fit the models and return
         self._set_effect_modifiers(data, effect_modifier_names)
-        self.regression_model = self.regression_model.fit(data, effect_modifier_names=effect_modifier_names)
-        self.propensity_score_model = self.propensity_score_model.fit(data, effect_modifier_names=effect_modifier_names)
+        self.regression_model = regression_model.fit(data, effect_modifier_names=effect_modifier_names)
+        self.propensity_score_model = propensity_score_model.fit(data, effect_modifier_names=effect_modifier_names)
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
         return self
 
@@ -141,6 +154,8 @@ class DoublyRobustEstimator(CausalEstimator):
         propensity_scores = np.array(
             self.propensity_score_model.predict_proba(data_df)[:, int(treatment == treatment_value)]
         )
+        if propensity_scores.min() <= 0:
+            raise ValueError("Propensity scores must be strictly positive for doubly robust estimation.")
         # Vector representation of 1\\{T_i=t\\}
         treatment_indicator = np.array(data_df[self._target_estimand.treatment_variable[0]] == treatment)
 
