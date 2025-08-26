@@ -6,6 +6,7 @@ import sklearn
 from packaging import version
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import PolynomialFeatures
+from sklearn.tree import DecisionTreeClassifier
 
 from dowhy.gcm.ml.prediction_model import PredictionModel
 
@@ -107,3 +108,7 @@ def create_polynom_logistic_regression_classifier(
             PolynomialFeatures(degree=degree, include_bias=False), LogisticRegression(**kwargs_logistic_regression)
         )
     )
+
+
+def create_decision_tree_classifier() -> SklearnClassificationModel:
+    return SklearnClassificationModel(DecisionTreeClassifier())

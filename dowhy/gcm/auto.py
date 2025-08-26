@@ -11,7 +11,6 @@ from sklearn import metrics
 from sklearn.exceptions import ConvergenceWarning
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.model_selection import KFold, StratifiedKFold, train_test_split
-from sklearn.preprocessing import MultiLabelBinarizer
 
 from dowhy.gcm import config
 from dowhy.gcm.causal_mechanisms import AdditiveNoiseModel, ClassifierFCM, DiscreteAdditiveNoiseModel
@@ -30,6 +29,7 @@ from dowhy.gcm.ml import (
 )
 from dowhy.gcm.ml.classification import (
     create_ada_boost_classifier,
+    create_decision_tree_classifier,
     create_extra_trees_classifier,
     create_gaussian_nb_classifier,
     create_knn_classifier,
@@ -55,8 +55,9 @@ from dowhy.gcm.util.general import (
 from dowhy.graph import get_ordered_predecessors, is_root_node
 
 _LIST_OF_POTENTIAL_CLASSIFIERS_GOOD = [
-    partial(create_logistic_regression_classifier, max_iter=10000),
     create_hist_gradient_boost_classifier,
+    partial(create_logistic_regression_classifier, max_iter=10000),
+    create_decision_tree_classifier,
 ]
 _LIST_OF_POTENTIAL_REGRESSORS_GOOD = [
     create_linear_regressor,
@@ -152,9 +153,8 @@ class AutoAssignmentSummary:
         summary_strings.append(
             "A functional causal model based on a classifier, i.e., X_i = f(PA_i, N_i).\n"
             "Here, N_i follows a uniform distribution on [0, 1] and is used to randomly sample a "
-            "class (category) using the conditional probability distribution produced by a "
-            "classification model."
-            "Here, different model classes are evaluated using the (negative) F1 score and the best"
+            "class (category) using the conditional probability distribution produced by a classification model. "
+            "Here, different model classes are evaluated using the log loss metric and the best"
             " performing model class is selected."
         )
         summary_strings.append("\nIn total, %d nodes were analyzed:" % len(list(self._nodes)))
@@ -223,7 +223,7 @@ def assign_causal_mechanisms(
     A functional causal model based on a classifier, i.e., X_i = f(PA_i, N_i).
     Here, N_i follows a uniform distribution on [0, 1] and is used to randomly sample a class (category) using the
     conditional probability distribution produced by a classification model. Here, different model classes are evaluated
-    using the (negative) F1 score and the best performing model class is selected.
+    using the log loss metric and the best performing model class is selected.
 
     The current model zoo is:
 
@@ -528,19 +528,12 @@ def find_best_model(
     metric_name = "given"
 
     if metric is None:
-        metric_name = "(negative) F1"
         if is_classification_problem:
-            metric = lambda y_true, y_preds: -metrics.f1_score(
-                y_true, y_preds, average="macro", zero_division=0
-            )  # Higher score is better
+            metric_name = "log loss"
+            metric = metrics.log_loss  # Lower score is better (better calibrated probabilities)
         else:
             metric_name = "mean squared error (MSE)"
             metric = metrics.mean_squared_error
-
-    labelBinarizer = None
-    if is_classification_problem:
-        labelBinarizer = MultiLabelBinarizer()
-        labelBinarizer.fit(Y)
 
     if is_classification_problem:
         if len(np.unique(Y)) == 1:
@@ -559,20 +552,29 @@ def find_best_model(
 
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=ConvergenceWarning)
+            warnings.filterwarnings("ignore", category=RuntimeWarning)
             for train_indices, test_indices in kfolds:
-                if is_classification_problem and len(np.unique(Y[train_indices[:max_samples_per_split]])) == 1:
-                    continue
+                if is_classification_problem:
+                    unique_training_labels = np.unique(Y[train_indices[:max_samples_per_split]])
+                    unique_test_labels = np.unique(Y[test_indices[:max_samples_per_split]])
+                    if len(unique_training_labels) == 1 or len(unique_test_labels) == 1:
+                        continue
 
                 model_instance = prediction_model_factory()
                 model_instance.fit(X[train_indices[:max_samples_per_split]], Y[train_indices[:max_samples_per_split]])
 
                 y_true = Y[test_indices[:max_samples_per_split]]
-                y_pred = model_instance.predict(X[test_indices[:max_samples_per_split]])
-                if labelBinarizer is not None:
-                    y_true = labelBinarizer.transform(y_true)
-                    y_pred = labelBinarizer.transform(y_pred)
 
-                average_result.append(metric(y_true, y_pred))
+                if is_classification_problem:
+                    # For classification, use probabilities for log loss calculation
+                    y_pred_proba = model_instance.predict_probabilities(X[test_indices[:max_samples_per_split]])
+                    # Convert string labels to label indices for log_loss
+                    label_to_idx = {label: idx for idx, label in enumerate(unique_test_labels)}
+                    y_true_indices = np.array([label_to_idx[label] for label in y_true.flatten()])
+                    average_result.append(metric(y_true_indices, y_pred_proba))
+                else:
+                    y_pred = model_instance.predict(X[test_indices[:max_samples_per_split]])
+                    average_result.append(metric(y_true, y_pred))
 
         if len(average_result) == 0:
             return float("inf")

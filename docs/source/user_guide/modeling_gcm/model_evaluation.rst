@@ -81,7 +81,7 @@ the chain structure example X→Y→Z again:
 
     If non-root node and the data is categorical:
     A functional causal model based on a classifier, i.e., X_i = f(PA_i, N_i).
-    Here, N_i follows a uniform distribution on [0, 1] and is used to randomly sample a class (category) using the conditional probability distribution produced by a classification model.Here, different model classes are evaluated using the (negative) F1 score and the best performing model class is selected.
+    Here, N_i follows a uniform distribution on [0, 1] and is used to randomly sample a class (category) using the conditional probability distribution produced by a classification model. Here, different model classes are evaluated using the log loss metric and the best performing model class is selected.
 
     In total, 3 nodes were analyzed:
 
