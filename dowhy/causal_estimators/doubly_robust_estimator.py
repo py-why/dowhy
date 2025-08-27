@@ -151,9 +151,9 @@ class DoublyRobustEstimator(CausalEstimator):
         :param data: data frame containing the data
         :param control_value: value associated with not receiving the treatment. Default=0
         :param treatment_value: value associated with receiving the treatment. Default=1
-        :param target_units: (Experimental) The units for which the treatment effect should be estimated. This can be of three types. (1) a string for common specifications of target units (namely, "ate", "att" and "atc"), (2) a lambda function that can be used as an index for the data (pandas DataFrame), or (3) a new DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.
+        :param target_units: (Experimental) The units for which the treatment effect should be estimated. Eventually, this can be of three types. (1) a string for common specifications of target units (namely, "ate", "att" and "atc"), (2) a lambda function that can be used as an index for the data (pandas DataFrame), or (3) a new DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data. Currently, only "ate" is supported.
         """
-        if target_units and (target_units != "ate"):
+        if target_units != "ate":
             raise NotImplementedError("ATE is the only target unit supported for " + str(self.__class__))
 
         self._treatment_value = treatment_value
