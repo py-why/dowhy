@@ -121,7 +121,7 @@ class DoublyRobustEstimator(CausalEstimator):
         if self._target_estimand.identifier_method not in ["backdoor", "general_adjustment"]:
             error_msg = str(self.__class__) + " only supports covariate adjustment identifiers"
             raise Exception(error_msg)
-        if effect_modifier_names or (len(effect_modifier_names) > 0):
+        if effect_modifier_names and (len(effect_modifier_names) > 0):
             # TODO: Add support for effect modifiers in the Doubly Robust Estimator
             raise NotImplementedError("Effect Modifiers not supported yet for " + str(self.__class__))
 
