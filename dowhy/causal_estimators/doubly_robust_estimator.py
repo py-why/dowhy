@@ -71,6 +71,10 @@ class DoublyRobustEstimator(CausalEstimator):
             predict_proba() methods. If None, LogisticRegression is used
         :param propensity_score_column: Column name that stores the
             propensity score. Default='propensity_score'
+        :param min_ps_score: Lower bound used to clip the propensity score.
+            Default=0.05
+        :param max_ps_score: Upper bound used to clip the propensity score.
+            Default=0.95
         :param kwargs: (optional) Additional estimator-specific parameters
         """
         super().__init__(
