@@ -39,6 +39,8 @@ class DoublyRobustEstimator(CausalEstimator):
         regression_estimator: Union[RegressionEstimator, Type[RegressionEstimator]] = LinearRegressionEstimator,
         propensity_score_model: Optional[Any] = None,
         propensity_score_column: str = "propensity_score",
+        min_ps_score: float = 0.01,
+        max_ps_score: float = 0.99,
         **kwargs,
     ):
         """
@@ -98,6 +100,8 @@ class DoublyRobustEstimator(CausalEstimator):
             propensity_score_model=propensity_score_model,
             propensity_score_column=propensity_score_column,
         )
+        self.min_ps_score = min_ps_score
+        self.max_ps_score = max_ps_score
 
     def fit(
         self,
@@ -196,7 +200,9 @@ class DoublyRobustEstimator(CausalEstimator):
         propensity_scores = np.array(
             self.propensity_score_model.predict_proba(data_df)[:, int(treatment == received_treatment_value)]
         )
-        if propensity_scores.min() <= 0:
+        propensity_scores = np.maximum(self.min_ps_score, propensity_scores)
+        propensity_scores = np.minimum(self.max_ps_score, propensity_scores)
+        if propensity_scores.min() <= 0:  # Can only be reached if the caller sets min_ps_score <= 0
             raise ValueError("Propensity scores must be strictly positive for doubly robust estimation.")
         # Vector representation of 1_{T_i=t}
         treatment_indicator = np.array(data_df[self._target_estimand.treatment_variable[0]] == treatment)
