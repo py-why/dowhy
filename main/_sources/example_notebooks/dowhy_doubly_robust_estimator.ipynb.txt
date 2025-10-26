@@ -1,0 +1,480 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "ce707eef-8911-484c-87ff-cdd447c96919",
+   "metadata": {},
+   "source": [
+    "# Doubly Robust Estimator - Example Notebook\n",
+    "\n",
+    "The Doubly Robust Estimator (Jonsson Funk et al., 2011) combines a regression estimator with a propensity score estimator, yielding an estimator which is robust if either the regression model or the propensity score model is correctly specified. It models the potential outcomes with the following formula:\n",
+    "\n",
+    "$Y^{DR}_{i, t} = \\hat{m}(X_i, T_i=t) +  \\frac{\\mathbf{1}\\{T_i=t\\}}{\\hat{e}(X_i)}\\big(Y_i - \\hat{m}(X_i,t)\\big)$,\n",
+    "\n",
+    "where $\\hat{m}(X_i, t)$ is our outcome (regression) model and $\\hat{e}(X_i)$ is our propensity score model.\n",
+    "\n",
+    "## To see it in action, we'll walk through an example. \n",
+    "\n",
+    "Lets imagine we are trying to estimate the average-treatment-effect (ATE) of our data, and we believe two things to be true:\n",
+    "* **(Assumption A)**: The potential outcomes of our data are accurately modeled as a linear function of the treatment plus the common causes.\n",
+    "* **(Assumption B)**: The propensity score of our data is accurately modeled by just a few axis-aligned splits, which can be represented with a decision tree.\n",
+    "\n",
+    "We will compare three estimators of the ATE: a linear regression estimator, a propensity score weighting estimator which models the propensity score as a decision tree, and finally the doubly robust estimator which combines the two. We will specifically compare these estimators in two situations.\n",
+    "\n",
+    "* When **Assumption A** is true but **Assumption B** is false.\n",
+    "* When **Assumption B** is true but **Assumption A** is false.\n",
+    "\n",
+    "Ultimately, we will see that as long as just one of the assumptions is true, the Doubly Robust Estimator is consistent and yields a good estimate for the ATE. The other two estimators, on the other hand, will perform more poorly when they are misspecified."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "6bce28e3-a200-4670-a3b8-b9855859b7b9",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "import logging\n",
+    "\n",
+    "import dowhy\n",
+    "from dowhy import CausalModel\n",
+    "import dowhy.datasets \n",
+    "\n",
+    "from sklearn.tree import DecisionTreeClassifier\n",
+    "import matplotlib.pyplot as plt\n",
+    "import matplotlib.patches as mpatches"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "463b32c6-5ca2-46ca-9d67-b1a3ab5d4861",
+   "metadata": {},
+   "source": [
+    "## Generate Data\n",
+    "\n",
+    "Lets generate two datasets: \n",
+    "* **df_linear** will follow a linear outcome model and will have a linear propensity score model.\n",
+    "* **df_nonlinear** will follow an explicitly non-linear outcome model, and will have a nonlinear propensity score model which satisfies just two axis-aligned boundary splits (and so is easily modeled using a decision tree)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "59418b11-a168-4e93-8cc0-e5603f3e111e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ATE = 10\n",
+    "\n",
+    "# ========================================================\n",
+    "# Lets start by using the linear_dataset() helper method, but we will tweak the values to fit our toy example\n",
+    "data = dowhy.datasets.linear_dataset(beta=ATE,\n",
+    "        num_common_causes=2, \n",
+    "        num_instruments = 0,\n",
+    "        num_treatments=1,\n",
+    "        num_samples=20000,\n",
+    "        treatment_is_binary=True,\n",
+    "        outcome_is_binary=False,\n",
+    "        stddev_treatment_noise=10)\n",
+    "df_base = data[\"df\"]\n",
+    "\n",
+    "# ========================================================\n",
+    "# Helper methods\n",
+    "mean_w0 = df_base[\"W0\"].mean()\n",
+    "mean_w1 = df_base[\"W1\"].mean()\n",
+    "def assign_treatment_linear(row):\n",
+    "    linear_term = 1.5*row[\"W0\"] + 1.5*row[\"W1\"]\n",
+    "    prob = 1 / (1 + np.exp(-1 * linear_term))\n",
+    "    return np.random.binomial(1, prob)\n",
+    "def assign_treatment_nonlinear(row):\n",
+    "    if (row[\"W0\"] < mean_w0 and row[\"W1\"] < mean_w1):\n",
+    "        return int(np.random.rand() < 0.9)\n",
+    "    return int(np.random.rand() < 0.1)\n",
+    "def assign_effect_linear(row, ate):\n",
+    "    return 6.5 * row[\"W0\"] + 5.5 * row[\"W1\"] + ate * row[\"v0\"]\n",
+    "def assign_effect_nonlinear(row, ate):\n",
+    "    if (row[\"W0\"] < mean_w0 and row[\"W1\"] < mean_w1):\n",
+    "        return 2 * (row[\"W0\"]**2) + 2 * (row[\"W1\"] ** 2) + ate * row[\"v0\"]\n",
+    "    return 2 * (row[\"W0\"] ** 3) + 2 * (row[\"W1\"] ** 3) + ate * row[\"v0\"]\n",
+    "\n",
+    "# ========================================================\n",
+    "# Specify linear data such that propensity scores are also linear\n",
+    "df_linear = df_base.copy(deep=True)\n",
+    "df_linear[\"v0\"] = df_linear.apply(assign_treatment_linear, axis=1)\n",
+    "df_linear[\"y\"] = df_linear.apply(assign_effect_linear, axis=1, args=(ATE,))\n",
+    "\n",
+    "# ========================================================\n",
+    "# Specify linear data such that propensity scores are nonlinear\n",
+    "df_nonlinear = df_base.copy(deep=True)\n",
+    "df_nonlinear[\"v0\"] = df_nonlinear.apply(assign_treatment_nonlinear, axis=1)\n",
+    "df_nonlinear[\"y\"] = df_nonlinear.apply(assign_effect_nonlinear, axis=1, args=(ATE,))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "42207052-51b9-4da1-a041-512e583cb373",
+   "metadata": {},
+   "source": [
+    "## Visualizing the Treatment Assignment Data\n",
+    "\n",
+    "The visual below helps capture the relationship between the common causes and the treatment assignment, in our synthetically generated data. In the linear setting, it is not possible for the decision tree classifier to provide an accurate model of the propensity scores. Meanwhile, in the  non-linear setting, the linear outcome model will not accurately model the effects. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "5bb8b0a8-c84d-4d7f-99ea-1164a0850a91",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df_linear_sample = df_linear.sample(n=1000, random_state=0)\n",
+    "colors_linear = df_linear_sample[\"v0\"].map({0: \"red\", 1: \"green\"})\n",
+    "df_nonlinear_sample = df_nonlinear.sample(n=1000, random_state=0)\n",
+    "colors_nonlinear = df_nonlinear_sample[\"v0\"].map({0: \"red\", 1: \"green\"})\n",
+    "fig, axes = plt.subplots(1, 2, figsize=(12, 6))\n",
+    "\n",
+    "# ========================================================\n",
+    "# Left plot: Linear\n",
+    "ax = axes[0]\n",
+    "ax.scatter(df_linear_sample[\"W0\"], df_linear_sample[\"W1\"], c=colors_linear, alpha=0.7, edgecolor=\"k\")\n",
+    "x_vals = np.linspace(df_linear_sample[\"W0\"].min(), df_linear_sample[\"W0\"].max(), 200)\n",
+    "ax.plot(x_vals, -x_vals, color=\"blue\", linestyle=\"--\", label=\"W1 = -W0\")\n",
+    "ax.set_xlabel(\"W0\")\n",
+    "ax.set_ylabel(\"W1\")\n",
+    "ax.set_title(\"DF_Linear\")\n",
+    "red_patch = mpatches.Patch(color=\"red\", label=\"v0 = 0\")\n",
+    "green_patch = mpatches.Patch(color=\"green\", label=\"v0 = 1\")\n",
+    "ax.legend(handles=[red_patch, green_patch], loc=\"upper left\")\n",
+    "\n",
+    "# ========================================================\n",
+    "# Right plot: Nonlinear\n",
+    "ax = axes[1]\n",
+    "ax.scatter(df_nonlinear_sample[\"W0\"], df_nonlinear_sample[\"W1\"], c=colors_nonlinear, alpha=0.7, edgecolor=\"k\")\n",
+    "ax.axvline(x=mean_w0, color=\"blue\", linestyle=\"--\", label=f\"Mean W0 = {mean_w0:.2f}\")\n",
+    "ax.axhline(y=mean_w1, color=\"blue\", linestyle=\"--\", label=f\"Mean W1 = {mean_w1:.2f}\")\n",
+    "ax.set_xlabel(\"W0\")\n",
+    "ax.set_ylabel(\"W1\")\n",
+    "ax.set_title(\"DF_Nonlinear\")\n",
+    "ax.legend(handles=[red_patch, green_patch], loc=\"upper left\")\n",
+    "\n",
+    "# ========================================================\n",
+    "# Display\n",
+    "fig.text(0.25, -0.05,\n",
+    "         \"Figure 1: The linear propensity scores are such that a decision tree \"\n",
+    "         \"would struggle to accurately model the relationship, \"\n",
+    "         \"because decision trees are limited to axis aligned splits.\",\n",
+    "         wrap=True, ha=\"center\", fontsize=10)\n",
+    "\n",
+    "fig.text(0.75, -0.05,\n",
+    "         \"Figure 2: The non-linear propensity scores are well modeled using a decision tree, whereas \"\n",
+    "         \" a linear model would struggle to accurately model the data\",\n",
+    "         wrap=True, ha=\"center\", fontsize=10)\n",
+    "\n",
+    "plt.tight_layout()\n",
+    "plt.show()\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a26e8916-d96e-4c61-a15b-bbeafee14751",
+   "metadata": {},
+   "source": [
+    "## Initialize Causal Models & Identify Estimand"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "e8119695-50c5-411e-870b-ba44379e8f0c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "model_linear=CausalModel(\n",
+    "    data = df_linear,\n",
+    "    treatment=data[\"treatment_name\"],\n",
+    "    outcome=data[\"outcome_name\"],\n",
+    "    graph=data[\"gml_graph\"],\n",
+    "    instruments=data[\"instrument_names\"]\n",
+    ")\n",
+    "model_nonlinear=CausalModel(\n",
+    "    data = df_nonlinear,\n",
+    "    treatment=data[\"treatment_name\"],\n",
+    "    outcome=data[\"outcome_name\"],\n",
+    "    graph=data[\"gml_graph\"],\n",
+    "    instruments=data[\"instrument_names\"]\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "827e0f4d-e87d-4c17-9eec-c85732baa79a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "model_linear.view_model()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a15e52f8-e0ba-49d1-9f89-6a26caf2004f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "identified_estimand = model_linear.identify_effect(proceed_when_unidentifiable=True)\n",
+    "print(identified_estimand)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "7d8a668f-cde2-4482-8378-16b115f59d07",
+   "metadata": {},
+   "source": [
+    "## Estimate Effect\n",
+    "\n",
+    "Now, we will compare our three estimators: the Doubly Robust Estimator, against its individual sub-components: the linear regression estimator and the propensity score estimator. We will compare these across both datasets, to see if in fact the Doubly Robust Estimator performs well on both **df_linear** which follows a true linear model, and **df_nonlinear** which follows a non-linear model but has a propensity score model which can be well modeled with our assumed decision tree.\n",
+    "\n",
+    "In all cases, the true ATE is 10.0."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "9650a78f-9146-4845-afe1-92b3f1ec85f1",
+   "metadata": {},
+   "source": [
+    "### DF_Linear"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "2dd08427-3944-4360-83bc-45bf348a2665",
+   "metadata": {},
+   "source": [
+    "**Linear model**"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "f3bdca76-d717-46dc-9fb8-0315deb821dd",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "causal_estimate_reg = model_linear.estimate_effect(identified_estimand,\n",
+    "        method_name=\"backdoor.linear_regression\",\n",
+    "        test_significance=False)\n",
+    "reg_estimate_lin_model = causal_estimate_reg.value\n",
+    "print(\"Causal Estimate of Linear Outcome Model is \" + str(reg_estimate_lin_model))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "5e4aebf0-e71d-474d-bb0d-47386f6f2708",
+   "metadata": {},
+   "source": [
+    "**Propensity score model**"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "e7391019-aecf-4f3c-980d-5d4f2edd8599",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "causal_estimate_ipw = model_linear.estimate_effect(identified_estimand,\n",
+    "        method_name=\"backdoor.propensity_score_weighting\",\n",
+    "        target_units = \"ate\",\n",
+    "        method_params={\n",
+    "            \"weighting_scheme\":\"ips_weight\",\n",
+    "            \"propensity_score_model\":DecisionTreeClassifier(max_depth=2, min_samples_leaf=2000, random_state=42)\n",
+    "        })\n",
+    "prop_estimate_lin_model = causal_estimate_ipw.value\n",
+    "print(\"Causal Estimate of Propensity Score Weighting (with Decision Tree Classifier) is \" + str(prop_estimate_lin_model))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "7e122a13-e31d-4f4b-aa2f-b5ae42388be2",
+   "metadata": {},
+   "source": [
+    "**Doubly robust model**"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "2f8f1e45-181f-49cf-a895-d9d1d02da4ae",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "causal_estimate_dr = model_linear.estimate_effect(identified_estimand,\n",
+    "        method_name=\"backdoor.doubly_robust\",\n",
+    "        target_units = \"ate\",\n",
+    "        method_params={\n",
+    "            \"propensity_score_model\": DecisionTreeClassifier(max_depth=2, min_samples_leaf=2000, random_state=42),\n",
+    "            \"propensity_score_column\":\"propensity_score_dr\"\n",
+    "        })\n",
+    "dr_estimate_lin_model = causal_estimate_dr.value\n",
+    "print(\"Causal Estimate of Doubly Robust Estimator is \" + str(dr_estimate_lin_model))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "9fdbaa50-ca90-485f-8dc3-ac1b16ccf7f3",
+   "metadata": {},
+   "source": [
+    "### DF_Nonlinear"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "e49724c3-2dee-4c29-8302-e586cf736ebf",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "causal_estimate_reg = model_nonlinear.estimate_effect(identified_estimand,\n",
+    "        method_name=\"backdoor.linear_regression\",\n",
+    "        test_significance=True)\n",
+    "reg_estimate_nonlin_model = causal_estimate_reg.value\n",
+    "print(\"Causal Estimate of Linear Outcome Model is \" + str(reg_estimate_nonlin_model))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "7103a263-03f1-49f3-9936-7936e4d2ff12",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "causal_estimate_ipw = model_nonlinear.estimate_effect(identified_estimand,\n",
+    "        method_name=\"backdoor.propensity_score_weighting\",\n",
+    "        target_units = \"ate\",\n",
+    "        method_params={\n",
+    "            \"weighting_scheme\":\"ips_weight\",\n",
+    "            \"propensity_score_model\":DecisionTreeClassifier(max_depth=2, min_samples_leaf=2000, random_state=42)  # , min_samples_leaf=2000,\n",
+    "        })\n",
+    "prop_estimate_nonlin_model = causal_estimate_ipw.value\n",
+    "print(\"Causal Estimate of Propensity Score Weighting (with Decision Tree Classifier) is \" + str(prop_estimate_nonlin_model))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "dd3da134-6f67-4117-bb0b-d3c741d9d3c6",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "causal_estimate_dr = model_nonlinear.estimate_effect(identified_estimand,\n",
+    "        method_name=\"backdoor.doubly_robust\",\n",
+    "        target_units = \"ate\",\n",
+    "        method_params={\n",
+    "            \"propensity_score_model\": DecisionTreeClassifier(max_depth=2, min_samples_leaf=2000, random_state=42),\n",
+    "            \"propensity_score_column\":\"propensity_score_dr\"\n",
+    "        })\n",
+    "dr_estimate_nonlin_model = causal_estimate_dr.value\n",
+    "print(\"Causal Estimate of Doubly Robust Estimator is \" + str(dr_estimate_nonlin_model))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "5cb48d3a-9c94-4167-9414-061f777dbebd",
+   "metadata": {},
+   "source": [
+    "### Comparing Results"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "9e6c2770-7fa8-4d56-b827-5b759d0edd40",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# ========================================================\n",
+    "# Building table\n",
+    "row_labels = [\"True ATE\", \"Linear Est.\", \"Propensity Score Est.\", \"Doubly Robust Est.\"]\n",
+    "col_labels = [\"df_linear\", \"df_nonlinear\"]\n",
+    "data = [\n",
+    "    [10.0, 10.0],\n",
+    "    [reg_estimate_lin_model, reg_estimate_nonlin_model],\n",
+    "    [prop_estimate_lin_model, prop_estimate_nonlin_model],\n",
+    "    [dr_estimate_lin_model, dr_estimate_nonlin_model],\n",
+    "]\n",
+    "fig, ax = plt.subplots(figsize=(6, 3))\n",
+    "ax.axis(\"off\")\n",
+    "table = ax.table(\n",
+    "    cellText=data,\n",
+    "    rowLabels=row_labels,\n",
+    "    colLabels=col_labels,\n",
+    "    loc=\"center\",\n",
+    "    cellLoc=\"center\"\n",
+    ")\n",
+    "\n",
+    "# ========================================================\n",
+    "# Styling\n",
+    "table.auto_set_font_size(False)\n",
+    "table.set_fontsize(10)\n",
+    "table.scale(1.2, 1.4)\n",
+    "for i in range(len(row_labels)):  # Add alternating row colors\n",
+    "    for j in range(len(col_labels)):\n",
+    "        cell = table[(i+1, j)]\n",
+    "        if i % 2 == 0:\n",
+    "            cell.set_facecolor(\"#f2f2f2\")\n",
+    "        else:\n",
+    "            cell.set_facecolor(\"white\")\n",
+    "for key, cell in table.get_celld().items():  # Bold headers\n",
+    "    if key[0] == 0 or key[1] == -1:\n",
+    "        cell.set_text_props(weight=\"bold\", color=\"white\")\n",
+    "        cell.set_facecolor(\"#4c72b0\")\n",
+    "table[(2, 0)].get_text().set_weight(\"bold\")  # Custom bolding for specific cells\n",
+    "table[(4, 0)].get_text().set_weight(\"bold\")\n",
+    "table[(3, 1)].get_text().set_weight(\"bold\")\n",
+    "table[(4, 1)].get_text().set_weight(\"bold\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "fffcb505-d401-4dac-9056-5c1d503dba42",
+   "metadata": {},
+   "source": [
+    "## References\n",
+    "\n",
+    "1. Michele Jonsson Funk, Daniel Westreich, Chris Wiesen, Til Stürmer,  M. Alan Brookhart, Marie Davidian, Doubly Robust Estimation of Causa   Effects, American Journal of Epidemiology, Volume 173, Issue     1 April 2011, Pages 761-767, https://doi.org/10.1093/aje/kwq439"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "972a3c58-26df-44c6-8f0e-9632ca83473a",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.11.7"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
