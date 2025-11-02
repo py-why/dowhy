@@ -20,6 +20,14 @@ dowhy.causal\_estimators.distance\_matching\_estimator module
    :undoc-members:
    :show-inheritance:
 
+dowhy.causal\_estimators.doubly\_robust\_estimator module
+---------------------------------------------------------
+
+.. automodule:: dowhy.causal_estimators.doubly_robust_estimator
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 dowhy.causal\_estimators.econml module
 --------------------------------------
 
