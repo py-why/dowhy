@@ -559,7 +559,7 @@
 cancellations.</p>
 <p>The gold standard of finding this out would be to use experiments such as <em>Randomized Controlled Trials</em> wherein each customer is randomly assigned to one of the two categories i.e. each customer is either assigned a car parking or not. However, such an experiment can be too costly and also unethical in some cases (for example, a hotel would start losing its reputation if people learn that its randomly assigning people to different level of service).</p>
 <p>Can we somehow answer our query using only observational data or data that has been collected in the past?</p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
@@ -570,6 +570,14 @@ cancellations.</p>
 <span class="kn">import</span><span class="w"> </span><span class="nn">dowhy</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Matplotlib is building the font cache; this may take a moment.
+</pre></div></div>
 </div>
 <section id="Data-Description">
 <h2>Data Description<a class="headerlink" href="#Data-Description" title="Link to this heading">#</a></h2>
@@ -886,9 +894,9 @@ Index([&#39;hotel&#39;, &#39;is_canceled&#39;, &#39;lead_time&#39;, &#39;arrival
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/tmp/ipykernel_7669/1229820826.py:3: FutureWarning: Downcasting behavior in `replace` is deprecated and will be removed in a future version. To retain the old behavior, explicitly call `result.infer_objects(copy=False)`. To opt-in to the future behavior, set `pd.set_option(&#39;future.no_silent_downcasting&#39;, True)`
+/tmp/ipykernel_7709/1229820826.py:3: FutureWarning: Downcasting behavior in `replace` is deprecated and will be removed in a future version. To retain the old behavior, explicitly call `result.infer_objects(copy=False)`. To opt-in to the future behavior, set `pd.set_option(&#39;future.no_silent_downcasting&#39;, True)`
   dataset[&#39;different_room_assigned&#39;]= dataset[&#39;different_room_assigned&#39;].replace(0,False)
-/tmp/ipykernel_7669/1229820826.py:5: FutureWarning: Downcasting behavior in `replace` is deprecated and will be removed in a future version. To retain the old behavior, explicitly call `result.infer_objects(copy=False)`. To opt-in to the future behavior, set `pd.set_option(&#39;future.no_silent_downcasting&#39;, True)`
+/tmp/ipykernel_7709/1229820826.py:5: FutureWarning: Downcasting behavior in `replace` is deprecated and will be removed in a future version. To retain the old behavior, explicitly call `result.infer_objects(copy=False)`. To opt-in to the future behavior, set `pd.set_option(&#39;future.no_silent_downcasting&#39;, True)`
   dataset[&#39;is_canceled&#39;]= dataset[&#39;is_canceled&#39;].replace(0,False)
 </pre></div></div>
 </div>
@@ -1295,7 +1303,7 @@ definite conclusion at this stage. Thus assigning rooms different to what a cust
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle 588.7284$</div></div>
+$\displaystyle 588.4045$</div></div>
 </div>
 <p>We now consider the scenario when there were no booking changes and recalculate the expected count.</p>
 <div class="nbinput docutils container">
@@ -1319,7 +1327,7 @@ $\displaystyle 588.7284$</div></div>
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle 572.6935$</div></div>
+$\displaystyle 572.9035$</div></div>
 </div>
 <p>In the 2nd case, we take the scenario when there were booking changes(&gt;0) and recalculate the expected count.</p>
 <div class="nbinput docutils container">
@@ -1343,7 +1351,7 @@ $\displaystyle 572.6935$</div></div>
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle 665.8907$</div></div>
+$\displaystyle 665.8083$</div></div>
 </div>
 <p>There is definitely some change happening when the number of booking changes are non-zero. So it gives us a hint that <em>Booking Changes</em> may be affecting room cancellation.</p>
 <p>But is <em>Booking Changes</em> the only confounding variable? What if there were some unobserved confounders, regarding which we have no information(feature) present in our dataset. Would we still be able to make the same claims as before?</p>
@@ -1472,17 +1480,17 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
             d                                                                  ↪
-──────────────────────────(E[is_canceled|total_of_special_requests,lead_time,g ↪
+──────────────────────────(E[is_canceled|guests,lead_time,total_stay,hotel,req ↪
 d[different_room_assigned]                                                     ↪
 
 ↪                                                                              ↪
-↪ uests,days_in_waiting_list,required_car_parking_spaces,hotel,total_stay,book ↪
+↪ uired_car_parking_spaces,total_of_special_requests,booking_changes,is_repeat ↪
 ↪                                                                              ↪
 
 ↪
-↪ ing_changes,is_repeated_guest])
+↪ ed_guest,days_in_waiting_list])
 ↪
-Estimand assumption 1, Unconfoundedness: If U→{different_room_assigned} and U→is_canceled then P(is_canceled|different_room_assigned,total_of_special_requests,lead_time,guests,days_in_waiting_list,required_car_parking_spaces,hotel,total_stay,booking_changes,is_repeated_guest,U) = P(is_canceled|different_room_assigned,total_of_special_requests,lead_time,guests,days_in_waiting_list,required_car_parking_spaces,hotel,total_stay,booking_changes,is_repeated_guest)
+Estimand assumption 1, Unconfoundedness: If U→{different_room_assigned} and U→is_canceled then P(is_canceled|different_room_assigned,guests,lead_time,total_stay,hotel,required_car_parking_spaces,total_of_special_requests,booking_changes,is_repeated_guest,days_in_waiting_list,U) = P(is_canceled|different_room_assigned,guests,lead_time,total_stay,hotel,required_car_parking_spaces,total_of_special_requests,booking_changes,is_repeated_guest,days_in_waiting_list)
 
 ### Estimand : 2
 Estimand name: iv
@@ -1524,20 +1532,20 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
             d                                                                  ↪
-──────────────────────────(E[is_canceled|total_of_special_requests,lead_time,g ↪
+──────────────────────────(E[is_canceled|guests,lead_time,total_stay,hotel,req ↪
 d[different_room_assigned]                                                     ↪
 
 ↪                                                                              ↪
-↪ uests,days_in_waiting_list,required_car_parking_spaces,hotel,total_stay,book ↪
+↪ uired_car_parking_spaces,total_of_special_requests,booking_changes,is_repeat ↪
 ↪                                                                              ↪
 
 ↪
-↪ ing_changes,is_repeated_guest])
+↪ ed_guest,days_in_waiting_list])
 ↪
-Estimand assumption 1, Unconfoundedness: If U→{different_room_assigned} and U→is_canceled then P(is_canceled|different_room_assigned,total_of_special_requests,lead_time,guests,days_in_waiting_list,required_car_parking_spaces,hotel,total_stay,booking_changes,is_repeated_guest,U) = P(is_canceled|different_room_assigned,total_of_special_requests,lead_time,guests,days_in_waiting_list,required_car_parking_spaces,hotel,total_stay,booking_changes,is_repeated_guest)
+Estimand assumption 1, Unconfoundedness: If U→{different_room_assigned} and U→is_canceled then P(is_canceled|different_room_assigned,guests,lead_time,total_stay,hotel,required_car_parking_spaces,total_of_special_requests,booking_changes,is_repeated_guest,days_in_waiting_list,U) = P(is_canceled|different_room_assigned,guests,lead_time,total_stay,hotel,required_car_parking_spaces,total_of_special_requests,booking_changes,is_repeated_guest,days_in_waiting_list)
 
 ## Realized estimand
-b: is_canceled~different_room_assigned+total_of_special_requests+lead_time+guests+days_in_waiting_list+required_car_parking_spaces+hotel+total_stay+booking_changes+is_repeated_guest
+b: is_canceled~different_room_assigned+guests+lead_time+total_stay+hotel+required_car_parking_spaces+total_of_special_requests+booking_changes+is_repeated_guest+days_in_waiting_list
 Target units: ate
 
 ## Estimate
@@ -1614,7 +1622,7 @@ p value:1.0
 <div class="highlight"><pre>
 Refute: Use a Placebo Treatment
 Estimated effect:-0.2621129267901838
-New effect:0.05502307437978695
+New effect:0.055357988426645216
 p value:0.0
 
 </pre></div></div>
@@ -1640,8 +1648,8 @@ p value:0.0
 <div class="highlight"><pre>
 Refute: Use a subset of data
 Estimated effect:-0.2621129267901838
-New effect:-0.26229074637372346
-p value:0.82
+New effect:-0.2621188381790588
+p value:0.98
 
 </pre></div></div>
 </div>

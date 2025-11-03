@@ -653,6 +653,123 @@ methods support this currently.</p>
 </dd></dl>
 
 </section>
+<section id="module-dowhy.causal_estimators.doubly_robust_estimator">
+<span id="dowhy-causal-estimators-doubly-robust-estimator-module"></span><h2>dowhy.causal_estimators.doubly_robust_estimator module<a class="headerlink" href="#module-dowhy.causal_estimators.doubly_robust_estimator" title="Link to this heading">#</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="dowhy.causal_estimators.doubly_robust_estimator.DoublyRobustEstimator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dowhy.causal_estimators.doubly_robust_estimator.</span></span><span class="sig-name descname"><span class="pre">DoublyRobustEstimator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">identified_estimand:</span> <span class="pre">~dowhy.causal_identifier.identified_estimand.IdentifiedEstimand</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_significance:</span> <span class="pre">bool</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evaluate_effect_strength:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence_intervals:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_null_simulations:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_simulations:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">399</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_size_fraction:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence_level:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">need_conditional_estimates:</span> <span class="pre">bool</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_quantiles_to_discretize_cont_cols:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regression_estimator:</span> <span class="pre">~dowhy.causal_estimators.regression_estimator.RegressionEstimator</span> <span class="pre">|</span> <span class="pre">~typing.Type[~dowhy.causal_estimators.regression_estimator.RegressionEstimator]</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'dowhy.causal_estimators.linear_regression_estimator.LinearRegressionEstimator'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">propensity_score_model:</span> <span class="pre">~typing.Any</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">propensity_score_column:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'propensity_score'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_ps_score:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_ps_score:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_estimators/doubly_robust_estimator.html#DoublyRobustEstimator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_estimators.doubly_robust_estimator.DoublyRobustEstimator" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="dowhy.html#dowhy.causal_estimator.CausalEstimator" title="dowhy.causal_estimator.CausalEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">CausalEstimator</span></code></a></p>
+<p>Doubly Robust Estimator for Causal Effect Estimation.</p>
+<p>Supports any RegressionEstimator for the regression stage, and accepts
+a propensity score model and column for the propensity score stage.</p>
+<section id="references">
+<h3>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h3>
+<dl class="simple">
+<dt>[1] Michele Jonsson Funk, Daniel Westreich, Chris Wiesen, Til Stürmer,</dt><dd><p>M. Alan Brookhart, Marie Davidian, Doubly Robust Estimation of Causal
+Effects, American Journal of Epidemiology, Volume 173, Issue 7,
+1 April 2011, Pages 761-767, <a class="reference external" href="https://doi.org/10.1093/aje/kwq439">https://doi.org/10.1093/aje/kwq439</a></p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">param identified_estimand<span class="colon">:</span></dt>
+<dd class="field-odd"><p>probability expression
+representing the target identified estimand to estimate.</p>
+</dd>
+<dt class="field-even">param test_significance<span class="colon">:</span></dt>
+<dd class="field-even"><p>Binary flag or a string indicating whether to test significance and by which method. All estimators support test_significance=”bootstrap” that estimates a p-value for the obtained estimate using the bootstrap method. Individual estimators can override this to support custom testing methods. The bootstrap method supports an optional parameter, num_null_simulations. If False, no testing is done. If True, significance of the estimate is tested using the custom method if available, otherwise by bootstrap.</p>
+</dd>
+<dt class="field-odd">param evaluate_effect_strength<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(Experimental) whether to evaluate the strength of effect</p>
+</dd>
+<dt class="field-even">param confidence_intervals<span class="colon">:</span></dt>
+<dd class="field-even"><p>Binary flag or a string indicating whether the confidence intervals should be computed and which method should be used. All methods support estimation of confidence intervals using the bootstrap method by using the parameter confidence_intervals=”bootstrap”. The bootstrap method takes in two arguments (num_simulations and sample_size_fraction) that can be optionally specified in the params dictionary. Estimators may also override this to implement their own confidence interval method. If this parameter is False, no confidence intervals are computed. If True, confidence intervals are computed by the estimator’s specific method if available, otherwise through bootstrap</p>
+</dd>
+<dt class="field-odd">param num_null_simulations<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The number of simulations for testing the
+statistical significance of the estimator</p>
+</dd>
+<dt class="field-even">param num_simulations<span class="colon">:</span></dt>
+<dd class="field-even"><p>The number of simulations for finding the
+confidence interval (and/or standard error) for a estimate</p>
+</dd>
+<dt class="field-odd">param sample_size_fraction<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The size of the sample for the bootstrap
+estimator</p>
+</dd>
+<dt class="field-even">param confidence_level<span class="colon">:</span></dt>
+<dd class="field-even"><p>The confidence level of the confidence
+interval estimate</p>
+</dd>
+<dt class="field-odd">param need_conditional_estimates<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Boolean flag indicating whether
+conditional estimates should be computed. Defaults to True if
+there are effect modifiers in the graph</p>
+</dd>
+<dt class="field-even">param num_quantiles_to_discretize_cont_cols<span class="colon">:</span></dt>
+<dd class="field-even"><p>The number of quantiles
+into which a numeric effect modifier is split, to enable
+estimation of conditional treatment effect over it</p>
+</dd>
+<dt class="field-odd">param regression_estimator<span class="colon">:</span></dt>
+<dd class="field-odd"><p>RegressionEstimator used for the regression
+stage of the doubly robust formula. Can be any class that extends the
+RegressionEstimator class. Default=’LinearRegressionEstimator’</p>
+</dd>
+<dt class="field-even">param propensity_score_model<span class="colon">:</span></dt>
+<dd class="field-even"><p>Model used to compute propensity score.
+Can be any classification model that supports fit() and
+predict_proba() methods. If None, LogisticRegression is used</p>
+</dd>
+<dt class="field-odd">param propensity_score_column<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Column name that stores the
+propensity score. Default=’propensity_score’</p>
+</dd>
+<dt class="field-even">param min_ps_score<span class="colon">:</span></dt>
+<dd class="field-even"><p>Lower bound used to clip the propensity score.
+Default=0.01</p>
+</dd>
+<dt class="field-odd">param max_ps_score<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Upper bound used to clip the propensity score.
+Default=0.99</p>
+</dd>
+<dt class="field-even">param kwargs<span class="colon">:</span></dt>
+<dd class="field-even"><p>(optional) Additional estimator-specific parameters</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_estimators.doubly_robust_estimator.DoublyRobustEstimator.construct_symbolic_estimator">
+<span class="sig-name descname"><span class="pre">construct_symbolic_estimator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">estimand</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_estimators/doubly_robust_estimator.html#DoublyRobustEstimator.construct_symbolic_estimator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_estimators.doubly_robust_estimator.DoublyRobustEstimator.construct_symbolic_estimator" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_estimators.doubly_robust_estimator.DoublyRobustEstimator.estimate_effect">
+<span class="sig-name descname"><span class="pre">estimate_effect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treatment_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_units</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">DataFrame</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'ate'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_estimators/doubly_robust_estimator.html#DoublyRobustEstimator.estimate_effect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_estimators.doubly_robust_estimator.DoublyRobustEstimator.estimate_effect" title="Link to this definition">#</a></dt>
+<dd><p>Estimate the causal effect using the Doubly Robust Formula:</p>
+<p>Y_{i, t}^{DR} = E[Y | X_i, T_i=t]            + frac{Y_i - E[Y | X_i, T_i=t]}{Pr[T_i=t | X_i]} cdot 1{T_i=t}</p>
+<p>Where we use our regression_model to estimate E[Y | X_i, T_i=t], and our propensity_score_model
+to estimate Pr[T_i=t | X_i].
+:param data: data frame containing the data
+:param control_value: value associated with not receiving the treatment. Default=0
+:param treatment_value: value associated with receiving the treatment. Default=1
+:param target_units: (Experimental) The units for which the treatment effect should be estimated. Eventually, this can be of three types. (1) a string for common specifications of target units (namely, “ate”, “att” and “atc”), (2) a lambda function that can be used as an index for the data (pandas DataFrame), or (3) a new DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data. Currently, only “ate” is supported.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dowhy.causal_estimators.doubly_robust_estimator.DoublyRobustEstimator.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effect_modifier_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dowhy/causal_estimators/doubly_robust_estimator.html#DoublyRobustEstimator.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dowhy.causal_estimators.doubly_robust_estimator.DoublyRobustEstimator.fit" title="Link to this definition">#</a></dt>
+<dd><p>Fits the estimator with data for effect estimation
+:param data: data frame containing the data
+:param effect_modifier_names: Variables on which to compute separate</p>
+<blockquote>
+<div><p>effects, or return a heterogeneous effect function. Not all
+methods support this currently.</p>
+</div></blockquote>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+</section>
 <section id="module-dowhy.causal_estimators.econml">
 <span id="dowhy-causal-estimators-econml-module"></span><h2>dowhy.causal_estimators.econml module<a class="headerlink" href="#module-dowhy.causal_estimators.econml" title="Link to this heading">#</a></h2>
 <dl class="py class">
@@ -1588,6 +1705,15 @@ methods support this currently.</p>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#dowhy.causal_estimators.distance_matching_estimator.DistanceMatchingEstimator.construct_symbolic_estimator"><code class="docutils literal notranslate"><span class="pre">DistanceMatchingEstimator.construct_symbolic_estimator()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#dowhy.causal_estimators.distance_matching_estimator.DistanceMatchingEstimator.estimate_effect"><code class="docutils literal notranslate"><span class="pre">DistanceMatchingEstimator.estimate_effect()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#dowhy.causal_estimators.distance_matching_estimator.DistanceMatchingEstimator.fit"><code class="docutils literal notranslate"><span class="pre">DistanceMatchingEstimator.fit()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-dowhy.causal_estimators.doubly_robust_estimator">dowhy.causal_estimators.doubly_robust_estimator module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dowhy.causal_estimators.doubly_robust_estimator.DoublyRobustEstimator"><code class="docutils literal notranslate"><span class="pre">DoublyRobustEstimator</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#dowhy.causal_estimators.doubly_robust_estimator.DoublyRobustEstimator.construct_symbolic_estimator"><code class="docutils literal notranslate"><span class="pre">DoublyRobustEstimator.construct_symbolic_estimator()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#dowhy.causal_estimators.doubly_robust_estimator.DoublyRobustEstimator.estimate_effect"><code class="docutils literal notranslate"><span class="pre">DoublyRobustEstimator.estimate_effect()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#dowhy.causal_estimators.doubly_robust_estimator.DoublyRobustEstimator.fit"><code class="docutils literal notranslate"><span class="pre">DoublyRobustEstimator.fit()</span></code></a></li>
 </ul>
 </li>
 </ul>
