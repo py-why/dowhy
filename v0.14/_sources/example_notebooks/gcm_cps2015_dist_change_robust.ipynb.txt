@@ -1,0 +1,517 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "b075c6f9-2474-449f-8191-a45d77b6d3f8",
+   "metadata": {},
+   "source": [
+    "# Decomposing the Gender Wage Gap\n",
+    "\n",
+    "In this notebook, we investigate how much of the gender wage gap in real census data can be attributed to differences in education or occupation between women and men. We use the multiply-robust causal change attribution method from the following paper:\n",
+    ">Quintas-Martínez, V., Bahadori, M. T., Santiago, E., Mu, J. and Heckerman, D. \"Multiply-Robust Causal Change Attribution,\" *Proceedings of the 41 st International Conference on Machine Learning*, Vienna, Austria. PMLR 235, 2024."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "ad74db4b-2c96-4d97-86e6-ef0a5dc6ff69",
+   "metadata": {},
+   "source": [
+    "### Read and prepare data\n",
+    "\n",
+    "We will be working with data from the Current Population Survey (CPS) 2015. After applying the same sample restrictions as [Chernozhukov et al. (2018)](https://arxiv.org/abs/1512.05635), the resulting sample contains 18,137 male and 14,382 female employed individuals."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "6e926b16-37e2-4921-9afb-1c99db9c9feb",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "import pandas as pd\n",
+    "\n",
+    "# Read and prepare data:\n",
+    "df = pd.read_csv('./cps2015.csv')\n",
+    "\n",
+    "# LightGBM works best with integer encoding for categorical variables:\n",
+    "educ_int = {'lhs' : 0, 'hsg' : 1, 'sc' : 2, 'cg' : 3, 'ad' : 4}\n",
+    "df['education'] = pd.from_dummies(df[['lhs', 'hsg', 'sc', 'cg', 'ad']])\n",
+    "df['education'] = df['education'].replace(educ_int)\n",
+    "\n",
+    "df = df[['female', 'education', 'occ2', 'wage', 'weight']]\n",
+    "df.columns = ['female', 'education', 'occupation', 'wage', 'weight']\n",
+    "df[['education', 'occupation']] = df[['education', 'occupation']].astype('category')\n",
+    "\n",
+    "# We want to explain the change Male -> Female:\n",
+    "data_old, data_new = df.loc[df.female == 0], df.loc[df.female == 1]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "8c4f1dd7-0f59-4a78-ab30-6e8ab80d11f7",
+   "metadata": {},
+   "source": [
+    "### Causal Model\n",
+    "\n",
+    "To use our causal change attribution method, we need a causal model linking the outcome (wage) and explanatory variables. (In practice, the method only requires knowing a *causal ordering*.) We will work with the following DAG:\n",
+    "\n",
+    "<img src=\"./images/gender_gap_DAG.png\" width=\"250\" style=\"margin:auto\"/>\n",
+    "\n",
+    "The DAG above implies the following causal Markov factorization of the distribution of the data:\n",
+    "$$P(\\mathtt{wage} \\mid \\mathtt{occup}, \\mathtt{educ}) \\times P(\\mathtt{occup} \\mid \\mathtt{educ}) \\times P(\\mathtt{educ})$$\n",
+    "Each of the components of this factorization (the distribution of each node in the DAG given its direct causes) is called a *causal mechanism*. Differences in the marginal distribution of the wage between men and women could be due to differences in each causal mechanism. Our goal is going to be to disentangle the contribution of each one to the total change.\n",
+    "\n",
+    "In the code below, we define a ```dowhy.gcm``` causal model:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "2ca5daf9-be47-4c12-bd02-bb5b01014e0c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import networkx as nx\n",
+    "import dowhy.gcm as gcm\n",
+    "\n",
+    "dag = nx.DiGraph([('education', 'occupation'), ('occupation', 'wage'), ('education', 'wage')])\n",
+    "causal_model = gcm.ProbabilisticCausalModel(dag)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "10562621-f29c-463d-97b3-8f073a53be86",
+   "metadata": {},
+   "source": [
+    "### Implementation with ```dowhy.gcm.distribution_change_robust```\n",
+    "\n",
+    "First, we show how to compute a causal change attribution measure (Shapley values) using the ```dowhy.gcm.distribution_change_robust``` function.\n",
+    "\n",
+    "The multiply-robust causal change attribution method is based on a combination of *regression* and *re-weighting* approaches. In the regression approach, we learn the dependence between a node and its parents in one sample, and then use the data from the other sample to shift the distribution of that node. In the re-weighting approach, we average the data giving more weight to those observations that closely resemble the target distribution. \n",
+    "\n",
+    "By default, ```dowhy.gcm.distribution_change_robust``` uses linear and logistic regression to learn the regression function and the weights. Here, since our dataset is quite large, we will use the more flexible algorithms ```HistGradientBoostingRegressor``` and ```HistGradientBoostingClassifier``` instead.\n",
+    "\n",
+    "We also use ```IsotonicRegression``` to calibrate the probabilities that make up the weights for the re-weighting approach on a leave-out calibration sample. This is optional, but it has been shown to improve the performance of the method in simulations.\n",
+    "\n",
+    "Finally, since our dataset is large, we will use sample splitting (rather than cross-fitting). That is, we will randomly split our data in a training set, where we learn the regression and weights, and an evaluation set, where we use the regression and weights to compute the final attribution measures."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "39dcb294-25df-4358-81cb-3ee5a41e0419",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "from sklearn.ensemble import HistGradientBoostingRegressor, HistGradientBoostingClassifier\n",
+    "from sklearn.isotonic import IsotonicRegression\n",
+    "from dowhy.gcm.ml.classification import SklearnClassificationModelWeighted\n",
+    "from dowhy.gcm.ml.regression import SklearnRegressionModelWeighted\n",
+    "from dowhy.gcm.util.general import auto_apply_encoders, auto_fit_encoders, shape_into_2d\n",
+    "\n",
+    "def make_custom_regressor():\n",
+    "    return SklearnRegressionModelWeighted(HistGradientBoostingRegressor(random_state = 0))\n",
+    "\n",
+    "def make_custom_classifier():\n",
+    "    return SklearnClassificationModelWeighted(HistGradientBoostingClassifier(random_state = 0))\n",
+    "\n",
+    "def make_custom_calibrator():\n",
+    "    return SklearnRegressionModelWeighted(IsotonicRegression(out_of_bounds = 'clip'))\n",
+    "\n",
+    "gcm.distribution_change_robust(causal_model, data_old, data_new, 'wage', sample_weight = 'weight',\n",
+    "                               xfit = False, calib_size = 0.2,\n",
+    "                               regressor = make_custom_regressor,\n",
+    "                               classifier = make_custom_classifier,\n",
+    "                               calibrator = make_custom_calibrator)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "34e901d2-34aa-4cf0-a426-5e41eebf9d40",
+   "metadata": {},
+   "source": [
+    "The function returns a dictionary, where each value is the Shapley Value causal attribution measure for the causal mechanism corresponding to the key. (See the research paper for a formal definition of Shapley Values.) We give a more in depth interpretation of the results in the final section of this notebook."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "47a109db-74a7-4826-9a80-1afcafb073ee",
+   "metadata": {},
+   "source": [
+    "### Manual Implementation (Advanced)\n",
+    "\n",
+    "Second, we show how to implement the method more directly with the class ```dowhy.gcm.distribution_change_robust.ThetaC```, which allows for more advanced capabilities, including computing standard errors via the Gaussian multiplier bootstrap (see below)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "f7febdc3-8c1e-46cf-816b-4a62251d641b",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "from sklearn.model_selection import StratifiedKFold, train_test_split\n",
+    "\n",
+    "# Split data into train and test set:\n",
+    "X = df[['education', 'occupation']].values\n",
+    "y = df['wage'].values\n",
+    "T = df['female'].values\n",
+    "w = df['weight'].values\n",
+    "\n",
+    "# To get the same train-test split:\n",
+    "kf = StratifiedKFold(n_splits = 2, shuffle = True, random_state = 0)\n",
+    "train_index, test_index = next(kf.split(X, T))\n",
+    "\n",
+    "X_train, X_eval, y_train, y_eval, T_train, T_eval = X[train_index], X[test_index], y[train_index], y[test_index], T[train_index], T[test_index]\n",
+    "w_train, w_eval = w[train_index], w[test_index]\n",
+    "\n",
+    "X_calib, X_train, _, y_train, T_calib, T_train, w_calib, w_train = train_test_split(X_train, y_train, T_train, w_train, \n",
+    "                                                                                    train_size = 0.2, stratify = T_train, random_state = 0)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "5f9e1bad-ae6e-432d-bbb8-1f65ab7bbab6",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "import itertools\n",
+    "from dowhy.gcm.distribution_change_robust import ThetaC\n",
+    "import numpy as np\n",
+    "from math import comb\n",
+    "\n",
+    "# All combinations of 0s and 1s, needed for Shapley Values:\n",
+    "all_combos = [list(i) for i in itertools.product([0, 1], repeat=3)]\n",
+    "all_combos_minus1 = [list(i) for i in itertools.product([0, 1], repeat=2)]\n",
+    "\n",
+    "# Dictionary to store the multiply-robust scores, will be used later for bootstrap:\n",
+    "scores = {}\n",
+    "\n",
+    "# Here we compute the theta^c parameters that make up the Shapley Values (see paper):\n",
+    "for C in all_combos:\n",
+    "    scores[''.join(str(x) for x in C)] = ThetaC(C).est_scores(\n",
+    "        X_eval,\n",
+    "        y_eval,\n",
+    "        T_eval,\n",
+    "        X_train,\n",
+    "        y_train,\n",
+    "        T_train,\n",
+    "        w_eval=w_eval,\n",
+    "        w_train=w_train,\n",
+    "        X_calib=X_calib,\n",
+    "        T_calib=T_calib,\n",
+    "        w_calib=w_calib,\n",
+    "        regressor = make_custom_regressor,\n",
+    "        classifier = make_custom_classifier,\n",
+    "        calibrator = make_custom_calibrator)\n",
+    "\n",
+    "# This function combines the theta^c parameters to obtain Shapley values:\n",
+    "w_sort = np.concatenate((w_eval[T_eval==0], w_eval[T_eval==1])) # Order weights in same way as scores\n",
+    "\n",
+    "def compute_attr_measure(res_dict, path=False):\n",
+    "    # Alternative to Shapley Value: along-a-causal-path (see paper)\n",
+    "    if path: \n",
+    "        path = np.zeros(3)\n",
+    "        path[0] = np.average(res_dict['100'], weights=w_sort) - np.average(res_dict['000'], weights=w_sort)\n",
+    "        path[1] = np.average(res_dict['110'], weights=w_sort) - np.average(res_dict['100'], weights=w_sort)\n",
+    "        path[2] = np.average(res_dict['111'], weights=w_sort) - np.average(res_dict['110'], weights=w_sort)\n",
+    "        return path\n",
+    "    \n",
+    "    # Shapley values:\n",
+    "    else: \n",
+    "        shap = np.zeros(3)\n",
+    "        for k in range(3):\n",
+    "            sv = 0.0\n",
+    "            for C in all_combos_minus1:\n",
+    "                C1 = np.insert(C, k, True)\n",
+    "                C0 = np.insert(C, k, False)\n",
+    "                chg = (np.average(res_dict[''.join(map(lambda x : str(int(x)), C1))], weights=w_sort) - \n",
+    "                       np.average(res_dict[''.join(map(lambda x : str(int(x)), C0))], weights=w_sort))\n",
+    "                sv += chg/(3*comb(2, np.sum(C)))\n",
+    "            shap[k] = sv\n",
+    "        return shap\n",
+    "\n",
+    "shap = compute_attr_measure(scores, path=False)\n",
+    "shap # Should coincide with the above"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "feb423b1-52ef-4e5b-a3be-589cbe70bbc8",
+   "metadata": {},
+   "source": [
+    "Thanks to the multiple robustness property, we can compute standard errors using a quick form of the bootstrap, which does not require re-estimating the regression and weights at each bootstrap iteration. Instead, we just re-weight the data using i.i.d. Normal(0, 1) draws."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "e6d0b582-20c6-476b-a07c-9d336ccda3fa",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "w_sort = np.concatenate((w_eval[T_eval==0], w_eval[T_eval==1])) # Order weights in same way as scores\n",
+    "\n",
+    "def mult_boot(res_dict, Nsim=1000, path=False):\n",
+    "    thetas = np.zeros((8, Nsim))\n",
+    "    attr = np.zeros((3, Nsim))\n",
+    "    for s in range(Nsim):\n",
+    "        np.random.seed(s)\n",
+    "        new_scores = {}\n",
+    "        for k, x in res_dict.items():\n",
+    "            new_scores[k] = x + np.random.normal(0,1, X_eval.shape[0])*(x - np.average(x, weights=w_sort))\n",
+    "        thetas[:, s] = np.average(np.array([x for k, x in new_scores.items()]), axis=1, weights=w_sort)\n",
+    "        attr[:, s] = compute_attr_measure(new_scores, path)\n",
+    "    return np.std(attr, axis=1)\n",
+    "    \n",
+    "shap_se = mult_boot(scores, path=False)\n",
+    "shap_se"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "2cb64bab-fcf3-4a32-ad8b-16da0b26536c",
+   "metadata": {},
+   "source": [
+    "We can present the results visually in a graph, as in the paper:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "95ec0312-84c2-4405-a823-740c98482090",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "from scipy.stats import norm\n",
+    "from statsmodels.stats.weightstats import DescrStatsW\n",
+    "from matplotlib.patches import Rectangle\n",
+    "import matplotlib.pyplot as plt\n",
+    "\n",
+    "# Significance stars:\n",
+    "def star(est, se):\n",
+    "    if np.abs(est/se)<norm.ppf(.95): # 10%\n",
+    "        return ''\n",
+    "    elif np.abs(est/se)<norm.ppf(.975): # 5%\n",
+    "        return '*'\n",
+    "    elif np.abs(est/se)<norm.ppf(.995): # 1%\n",
+    "        return '**'\n",
+    "    else:\n",
+    "        return '***'\n",
+    "\n",
+    "# Unconditional wage gap:\n",
+    "stats0 = DescrStatsW(y_eval[T_eval==0], weights=w_eval[T_eval==0], ddof=0)\n",
+    "stats1 = DescrStatsW(y_eval[T_eval==1], weights=w_eval[T_eval==1], ddof=0)\n",
+    "\n",
+    "wagegap = (stats1.mean - stats0.mean)\n",
+    "wagegap_se = np.sqrt(stats1.std_mean**2 + stats0.std_mean**2)\n",
+    "\n",
+    "# Plot\n",
+    "nam = [\"P(educ)\", \"P(occup | educ)\", \"P(wage | occup, educ)\"]\n",
+    "\n",
+    "crit = norm.ppf(.975) # 5% critical value (for error bars)\n",
+    "stars = [star(est, se) for est, se in zip(shap, shap_se)]\n",
+    "fig, ax = plt.subplots()\n",
+    "ax.axvline(x = 0, color='lightgray', zorder=0)\n",
+    "fig.set_size_inches(7, 4)\n",
+    "\n",
+    "color = 'C1' \n",
+    "ax.add_patch(Rectangle((0, 4.75), width = wagegap, height = 0.5, color=color, alpha=0.8))\n",
+    "ax.plot((wagegap-crit*wagegap_se, wagegap+crit*wagegap_se,), (5.0, 5.0), color='darkslategray', marker='|', solid_capstyle='butt')\n",
+    "ax.axhline(y = 5.0, color='lightgray', linestyle='dotted', zorder=0)\n",
+    "\n",
+    "for i in range(len(shap)):\n",
+    "    pos = (shap[i], 3-i+0.25) if shap[i] < 0 else (0, 3-i+0.25)\n",
+    "    width = np.abs(shap[i])\n",
+    "    ax.add_patch(Rectangle(pos, width = width, height = 0.5, color=color, alpha=0.8))\n",
+    "    ax.axhline(y = 3+0.5-i, color='lightgray', linestyle='dotted', zorder=0)\n",
+    "    ax.plot((shap[i]-crit*shap_se[i], shap[i]+crit*shap_se[i]), (3-i+0.5, 3-i+0.5), color='darkslategray', marker='|', solid_capstyle='butt')\n",
+    "plt.yticks([5.0] + [3+0.5-i for i in range(3)], [f'Unconditional Wage Gap: {wagegap:.2f}*** ({wagegap_se:.2f})'] + \n",
+    "           [\"{}: {:.2f}{} ({:.2f})\".format(nam[i], shap[i], stars[i], shap_se[i]) for i in range(3)])\n",
+    "plt.xlabel('Gender Wage Gap ($/hour)')\n",
+    "plt.show()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "1ef85911-2e9d-458d-b71c-d7e90acd0a92",
+   "metadata": {},
+   "source": [
+    "### Interpretation\n",
+    "\n",
+    "First, notice that the Shapley values for $P(\\mathtt{educ})$, $P(\\mathtt{occup} \\mid \\mathtt{educ})$ and $P(\\mathtt{wage} \\mid \\mathtt{occup}, \\mathtt{educ})$ add up to the total effect.\n",
+    "\n",
+    "Second, the Shapley value for $P(\\mathtt{educ})$ is positive and statistically significant. One way to interpret this measure is that, if men and women differed only in their $P(\\mathtt{educ})$ (but their other causal mechanisms were the same), women would earn \\\\$1.13/hour more than men on average. Conversely, the Shapley value for $P(\\mathtt{educ} \\mid \\mathtt{educ})$ is negative, statistically significant and of larger magnitude as the first Shapley value, hence cancelling out with the effect of differences in education. These effects measure two things:\n",
+    "1. How different is a causal mechanism between males and females?\n",
+    "2. How important is a causal mechanism for the outcome?\n",
+    "\n",
+    "Third, most of the unconditional wage gap is attributed to the causal mechanism $P(\\mathtt{wage} \\mid \\mathtt{occup}, \\mathtt{educ})$. This can be interpreted in various ways:\n",
+    "1. *Unexplained variation*: There could be other relevant variables that we are not measuring, which are subsumed into $P(\\mathtt{wage} \\mid \\mathtt{occup}, \\mathtt{educ})$. For example, there could be differences in experience between men and women which are not measured in the CPS data. Notice that this does not bias our results for the other Shapley values, because experience is not a direct cause of education or occupation.\n",
+    "2. *Structural differences*: A different interpretation is that, for some reason (which may or may not be discrimination), women and men with the same observable characteristics are paid differently.\n",
+    "\n",
+    "Below we try to make sense of this with some plots. First, notice how women tend to have higher education levels than men. For comparison, a college graduate earns \\\\$12.60/hour more on average than a high-school graduate."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a5b5dbf8-046b-4d9d-848c-694eb742aafb",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "w0, w1 = w_eval[T_eval==0], w_eval[T_eval==1]\n",
+    "\n",
+    "data_male_eval = pd.DataFrame({'education' : X_eval[:,0][T_eval==0], \n",
+    "                              'occupation' : X_eval[:,1][T_eval==0],\n",
+    "                              'wage' : y_eval[T_eval==0]})\n",
+    "data_female_eval = pd.DataFrame({'education' : X_eval[:,0][T_eval==1], \n",
+    "                              'occupation' : X_eval[:,1][T_eval==1],\n",
+    "                              'wage' : y_eval[T_eval==1]})\n",
+    "\n",
+    "educ_names = {0 : 'Less than HS', 1 : 'HS Graduate', 2 : 'Some College', 3 : 'College Graduate', 4 : 'Advanced Degree'}\n",
+    "data_male_eval['education'] = data_male_eval['education'].replace(educ_names)\n",
+    "data_female_eval['education'] = data_female_eval['education'].replace(educ_names)\n",
+    "\n",
+    "cats_educ = [educ_names[i] for i in range(5)]\n",
+    "\n",
+    "ind = np.arange(len(cats_educ))\n",
+    "share0, share1 = np.zeros(len(cats_educ)), np.zeros(len(cats_educ))\n",
+    "for i, c in enumerate(cats_educ):\n",
+    "    share0[i] = np.sum(w0*(data_male_eval['education'] == c))/np.sum(w0)*100\n",
+    "    share1[i] = np.sum(w1*(data_female_eval['education'] == c))/np.sum(w1)*100\n",
+    "\n",
+    "fig = plt.figure()\n",
+    "fig.set_size_inches(6, 5)\n",
+    "plt.bar(ind, share0, 0.4, label='Male')\n",
+    "plt.bar(ind+0.4, share1, 0.4, label='Female')\n",
+    "plt.xticks(ind+0.2, cats_educ, rotation=20, ha='right')\n",
+    "plt.ylabel('Relative Frequency (%)')\n",
+    "plt.xlabel('Education')\n",
+    "plt.legend()\n",
+    "plt.show()\n",
+    "\n",
+    "# College graduates vs. high school graduates\n",
+    "diff = (np.average(df[df['education'] == 3]['wage'], weights=df[df['education'] == 3]['weight']) - \n",
+    "        np.average(df[df['education'] == 1]['wage'], weights=df[df['education'] == 1]['weight']))\n",
+    "print(f\"College vs. HS: {diff:.2f}\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a746699d-5688-456d-a76c-9cb448a67b77",
+   "metadata": {},
+   "source": [
+    "Women with college degrees are more predominant in administrative, education or healthcare occupations, whereas men with college degrees are more likely to work in management or sales. For comparison, managers earn  \\\\$16.66/hour more than educators and \\\\$6.29/hour more than healthcare practitioners on average. \n",
+    "\n",
+    "At the same time, however, there are large differences that cannot be explained by education or occupation. For example, female college graduate managers earn \\\\$13.77/hour less than their male counterparts."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "8b977dca-89e4-406c-80a9-6d24dd8a3aca",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "occup_names= {1 : 'Management', 2 : 'Business/Finance', 3 : 'Computer/Math', 4 : 'Architecture/Engineering', 5 : 'Life/Physical/Social Science', \n",
+    "              6 : 'Community/Social Sevice', 7 : 'Legal', 8 : 'Education', 9 : 'Arts/Sports/Media', 10 : 'Healthcare Practitioner', \n",
+    "              11 : 'Healthcare Support', 12 : 'Protective Services', 13 : 'Food Preparation/Serving', 14 : 'Building Cleaning/Maintenance', \n",
+    "              15 : 'Personal Care', 16 : 'Sales', 17 : 'Administrative', 18: 'Farming/Fishing/Forestry', 19 : 'Construction/Mining', \n",
+    "              20 : 'Installation/Repairs', 21 : 'Production', 22 : 'Transportation'}\n",
+    "data_male_eval['occupation'] = data_male_eval['occupation'].replace(occup_names)\n",
+    "data_female_eval['occupation'] = data_female_eval['occupation'].replace(occup_names)\n",
+    "\n",
+    "cats_occu = ['Management', 'Sales', 'Administrative', 'Education', 'Healthcare Practitioner', 'Other']\n",
+    "\n",
+    "ind = np.arange(len(cats_occu))\n",
+    "share0, share1 = np.zeros(len(cats_occu)), np.zeros(len(cats_occu))\n",
+    "for i, c in enumerate(cats_occu[:-1]):\n",
+    "    share0[i] = np.sum(w0*((data_male_eval['occupation'] == c) & (data_male_eval['education'] ==\n",
+    "                                               'College Graduate')))/np.sum(w0 * (data_male_eval['education'] ==\n",
+    "                                               'College Graduate'))*100\n",
+    "    share1[i] = np.sum(w1*((data_female_eval['occupation'] == c) & (data_female_eval['education'] ==\n",
+    "                                               'College Graduate')))/np.sum(w1 * (data_female_eval['education'] ==\n",
+    "                                               'College Graduate'))*100\n",
+    "share0[-1] = np.sum(w0*((~data_male_eval['occupation'].isin(cats_occu[:-1])) & (data_male_eval['education'] ==\n",
+    "                                               'College Graduate')))/np.sum(w0 * (data_male_eval['education'] ==\n",
+    "                                               'College Graduate'))*100\n",
+    "share1[-1] = np.sum(w1*((~data_female_eval['occupation'].isin(cats_occu[:-1])) & (data_female_eval['education'] ==\n",
+    "                                               'College Graduate')))/np.sum(w1 * (data_female_eval['education'] ==\n",
+    "                                               'College Graduate'))*100\n",
+    "\n",
+    "fig = plt.figure()\n",
+    "fig.set_size_inches(6, 5)\n",
+    "plt.bar(ind, share0, 0.4, label='Male')\n",
+    "plt.bar(ind+0.4, share1, 0.4, label='Female')\n",
+    "plt.xticks(ind+0.2, cats_occu, rotation=20, ha='right')\n",
+    "plt.ylabel('Relative Frequency (%)')\n",
+    "plt.xlabel('Occupation | College Graduate')\n",
+    "plt.legend()\n",
+    "plt.show()\n",
+    "\n",
+    "# Managers vs. Education\n",
+    "diff = (np.average(df[df['occupation'] == 1]['wage'], weights=df[df['occupation'] == 1]['weight']) - \n",
+    "        np.average(df[df['occupation'] == 8]['wage'], weights=df[df['occupation'] == 8]['weight']))\n",
+    "print(f\"Management vs. Education: {diff:.2f}\")\n",
+    "\n",
+    "# Managers vs. Healthcare\n",
+    "diff = (np.average(df[df['occupation'] == 1]['wage'], weights=df[df['occupation'] == 1]['weight']) - \n",
+    "        np.average(df[df['occupation'] == 10]['wage'], weights=df[df['occupation'] == 10]['weight']))\n",
+    "print(f\"Management vs. Healthcare: {diff:.2f}\")\n",
+    "\n",
+    "# Female vs. Male College Managers\n",
+    "diff = (np.average(data_female_eval[np.logical_and(data_female_eval['occupation'] == 'Management', data_female_eval['education'] == 'College Graduate')]['wage'], \n",
+    "                   weights=w1[np.logical_and(data_female_eval['occupation'] == 'Management', data_female_eval['education'] == 'College Graduate')]) - \n",
+    "        np.average(data_male_eval[np.logical_and(data_male_eval['occupation'] == 'Management', data_male_eval['education'] == 'College Graduate')]['wage'], \n",
+    "                   weights=w0[np.logical_and(data_male_eval['occupation'] == 'Management', data_male_eval['education'] == 'College Graduate')]))\n",
+    "print(f\"Female vs. Male College Managers: {diff:.2f}\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "db5001a2-098d-4123-b3db-ac8ae7e18ab7",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.9.13"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

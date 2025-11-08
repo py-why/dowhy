@@ -1,0 +1,1509 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B139P18WHM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-B139P18WHM');
+    </script>
+    
+    <title>Finding the Root Cause of Elevated Latencies in a Microservice Architecture &#8212; DoWhy  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=949a1ff5" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/jquery.js?v=5d32c60e"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=0c6e27e1"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'example_notebooks/gcm_rca_microservice_architecture';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Impact of 401(k) eligibility on net financial assets" href="gcm_401k_analysis.html" />
+    <link rel="prev" title="Causal Attributions and Root-Cause Analysis in an Online Shop" href="gcm_online_shop.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="v0.14" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-light" alt="DoWhy  documentation - Home"/>
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-dark pst-js-only" alt="DoWhy  documentation - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="nb_index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing.html">
+    Contributing
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
+    dowhy package
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
+    Release notes
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item"><div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        v0.14
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.9.1/index.html">v0.9.1</a></dd>
+            <dd><a href="/dowhy/v0.9/index.html">v0.9</a></dd>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.13/index.html">v0.13</a></dd>
+            <dd><a href="/dowhy/v0.12/index.html">v0.12</a></dd>
+            <dd><a href="/dowhy/v0.11.1/index.html">v0.11.1</a></dd>
+            <dd><a href="/dowhy/v0.11/index.html">v0.11</a></dd>
+            <dd><a href="/dowhy/v0.10.1/index.html">v0.10.1</a></dd>
+            <dd><a href="/dowhy/v0.10/index.html">v0.10</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="nb_index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../dowhy.html">
+    dowhy package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../code_repo.html">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        v0.14
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.9.1/index.html">v0.9.1</a></dd>
+            <dd><a href="/dowhy/v0.9/index.html">v0.9</a></dd>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.13/index.html">v0.13</a></dd>
+            <dd><a href="/dowhy/v0.12/index.html">v0.12</a></dd>
+            <dd><a href="/dowhy/v0.11.1/index.html">v0.11.1</a></dd>
+            <dd><a href="/dowhy/v0.11/index.html">v0.11</a></dd>
+            <dd><a href="/dowhy/v0.10.1/index.html">v0.10.1</a></dd>
+            <dd><a href="/dowhy/v0.10/index.html">v0.10</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Introductory examples</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="dowhy_simple_example.html">Basic Example for Calculating the Causal Effect</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_basic_example.html">Basic Example for Graphical Causal Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_draw_samples.html">Basic Example for generating samples from a GCM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial-causalinference-machinelearning-using-dowhy-econml.html">Tutorial on Causal Inference and its Connections to Machine Learning (Using DoWhy+EconML)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_mediation_analysis.html">Mediation analysis with DoWhy: Direct and Indirect Effects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_refuter_notebook.html">Iterating over multiple refutation tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="do_sampler_demo.html">Do-sampler Introduction</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Real world-inspired examples</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="DoWhy-The%20Causal%20Story%20Behind%20Hotel%20Booking%20Cancellations.html">Exploring Causes of Hotel Booking Cancellations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_example_effect_of_memberrewards_program.html">Estimating the Effect of a Member Rewards Program</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_online_shop.html">Causal Attributions and Root-Cause Analysis in an Online Shop</a></li>
+
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Finding the Root Cause of Elevated Latencies in a Microservice Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_401k_analysis.html">Impact of 401(k) eligibility on net financial assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_supply_chain_dist_change.html">Finding Root Causes of Changes in a Supply Chain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_icc.html">Estimating intrinsic causal influences in real-world examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_counterfactual_medical_dry_eyes.html">Counterfactual Analysis in a Medical Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_falsify_dag.html">Falsification of User-Given Directed Acyclic Graphs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="counterfactual_fairness_dowhy.html">Counterfactual Fairness</a></li>
+
+
+
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="sales_attribution_intervention.html">Causal attribution to sales growth and spend intervention</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples on benchmarks datasets</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="dowhy_ihdp_data_example.html">DoWhy example on ihdp (Infant Health and Development Program) dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_lalonde_example.html">DoWhy example on the Lalonde dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_refutation_testing.html">Applying refutation tests to the Lalonde and IHDP datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_401k_analysis.html">Impact of 401(k) eligibility on net financial assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prediction/dowhy_causal_prediction_demo.html">Demo for DoWhy Causal Prediction on MNIST</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lalonde_pandas_api.html">Lalonde Pandas API Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="counterfactual_fairness_dowhy.html">Counterfactual Fairness</a></li>
+
+
+
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="dowhy_twins_example.html">DoWhy example on Twins dataset</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Modeling and refuting causal assumptions</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="load_graph_example.html">Different ways to load an input graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_causal_discovery_example.html">Causal Discovery example</a></li>
+
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="gcm_falsify_dag.html">Falsification of User-Given Directed Acyclic Graphs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sensitivity_analysis_testing.html">Sensitivity Analysis for Regression Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sensitivity_analysis_nonparametric_estimators.html">Sensitivity analysis for non-parametric causal estimators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_refuter_notebook.html">Iterating over multiple refutation tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_refuter_assess_overlap.html">Assessing Support and Overlap with OverRule</a></li>
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="dowhy_ranking_methods.html">Ranking of estimation methods for a given dataset</a></li>
+
+
+<li class="toctree-l1"><a class="reference internal" href="dowhy_demo_dummy_outcome_refuter.html">A Simple Example on Creating a Custom Refutation Using User-Defined Outcome Functions</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Miscellaneous</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy-simple-iv-example.html">Simple example on using Instrumental Variables method for estimation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_interpreter.html">DoWhy: Interpreters for Causal Estimators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_mediation_analysis.html">Mediation analysis with DoWhy: Direct and Indirect Effects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_multiple_treatments.html">Estimating effect of multiple treatments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_efficient_backdoor_example.html">Finding optimal adjustment sets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="identifying_effects_using_id_algorithm.html">Identifying Effect using ID Algorithm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_optimize_backdoor_example.html">Example to demonstrate optimized backdoor variable search for Causal Identification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_functional_api.html">Functional API Preview</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="nb_index.html" class="nav-link">Example notebooks</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Finding the Root Cause of Elevated Latencies in a Microservice Architecture</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Finding-the-Root-Cause-of-Elevated-Latencies-in-a-Microservice-Architecture">
+<h1>Finding the Root Cause of Elevated Latencies in a Microservice Architecture<a class="headerlink" href="#Finding-the-Root-Cause-of-Elevated-Latencies-in-a-Microservice-Architecture" title="Link to this heading">#</a></h1>
+<p>In this case study, we identify the root causes of “unexpected” observed latencies in cloud services that empower an online shop. We focus on the process of placing an order, which involves different services to make sure that the placed order is valid, the customer is authenticated, the shipping costs are calculated correctly, and the shipping process is initiated accordingly. The dependencies of the services is shown in the graph below.</p>
+<p><img alt="92e995a3474d42a98d4a59f27cb31b9c" class="no-scaled-link" src="../_images/microservice-architecture-dependencies.png" style="width: 800px;" /></p>
+<p>This kind of dependency graph could be obtained from services like <a class="reference external" href="https://aws.amazon.com/xray/">Amazon X-Ray</a> or defined manually based on the trace structure of requests.</p>
+<p>We assume that the dependency graph above is correct and that we are able to measure the latency (in seconds) of each node for an order request. In case of <code class="docutils literal notranslate"><span class="pre">Website</span></code>, the latency would represent the time until a confirmation of the order is shown. For simplicity, let us assume that the services are synchronized, i.e., a service has to wait for downstream services in order to proceed. Further, we assume that two nodes are not impacted by unobserved factors (hidden confounders) at the same time
+(i.e., causal sufficiency). Seeing that, for instance, network traffic affects multiple services, this assumption might be typically violated in a real-world scenario. However, weak confounders can be neglected, while stronger ones (like network traffic) could falsely render multiple nodes as root causes. Generally, we can only identify causes that are part of the data.</p>
+<p>Under these assumptions, the observed latency of a node is defined by the latency of the node itself (intrinsic latency), and the sum over all latencies of direct child nodes. This could also include calling a child node multiple times.</p>
+<p>Let us load data with observed latencies of each node.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="n">normal_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;rca_microservice_architecture_latencies.csv&quot;</span><span class="p">)</span>
+<span class="n">normal_data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Product DB</th>
+      <th>Customer DB</th>
+      <th>Order DB</th>
+      <th>Shipping Cost Service</th>
+      <th>Caching Service</th>
+      <th>Product Service</th>
+      <th>Auth Service</th>
+      <th>Order Service</th>
+      <th>API</th>
+      <th>www</th>
+      <th>Website</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0.553608</td>
+      <td>0.057729</td>
+      <td>0.153977</td>
+      <td>0.120217</td>
+      <td>0.122195</td>
+      <td>0.391738</td>
+      <td>0.399664</td>
+      <td>0.710525</td>
+      <td>2.103962</td>
+      <td>2.580403</td>
+      <td>2.971071</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>0.053393</td>
+      <td>0.239560</td>
+      <td>0.297794</td>
+      <td>0.142854</td>
+      <td>0.275471</td>
+      <td>0.545372</td>
+      <td>0.646370</td>
+      <td>0.991620</td>
+      <td>2.932192</td>
+      <td>3.804571</td>
+      <td>3.895535</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.023860</td>
+      <td>0.300044</td>
+      <td>0.042169</td>
+      <td>0.125017</td>
+      <td>0.152685</td>
+      <td>0.574918</td>
+      <td>0.672228</td>
+      <td>0.964807</td>
+      <td>3.106218</td>
+      <td>4.076227</td>
+      <td>4.441924</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0.118598</td>
+      <td>0.478097</td>
+      <td>0.042383</td>
+      <td>0.143969</td>
+      <td>0.222720</td>
+      <td>0.618129</td>
+      <td>0.638179</td>
+      <td>0.938366</td>
+      <td>3.217643</td>
+      <td>4.043560</td>
+      <td>4.334924</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>0.524901</td>
+      <td>0.078031</td>
+      <td>0.031694</td>
+      <td>0.231884</td>
+      <td>0.647452</td>
+      <td>1.081753</td>
+      <td>0.388506</td>
+      <td>0.711937</td>
+      <td>2.793605</td>
+      <td>3.215307</td>
+      <td>3.255062</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Let us also take a look at the pair-wise scatter plots and histograms of the variables.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">axes</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">plotting</span><span class="o">.</span><span class="n">scatter_matrix</span><span class="p">(</span><span class="n">normal_data</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;#ff0d57&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">hist_kwds</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;color&#39;</span><span class="p">:[</span><span class="s1">&#39;#1E88E5&#39;</span><span class="p">]});</span>
+<span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axes</span><span class="o">.</span><span class="n">flatten</span><span class="p">():</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_rotation</span><span class="p">(</span><span class="mi">90</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_rotation</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_ha</span><span class="p">(</span><span class="s1">&#39;right&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_rca_microservice_architecture_5_0.png" src="../_images/example_notebooks_gcm_rca_microservice_architecture_5_0.png" />
+</div>
+</div>
+<p>In the matrix above, the plots on the diagonal line are histograms of variables, whereas those outside of the diagonal are scatter plots of pair of variables. The histograms of services without a dependency, namely <code class="docutils literal notranslate"><span class="pre">Customer</span> <span class="pre">DB</span></code>, <code class="docutils literal notranslate"><span class="pre">Product</span> <span class="pre">DB</span></code>, <code class="docutils literal notranslate"><span class="pre">Order</span> <span class="pre">DB</span></code> and <code class="docutils literal notranslate"><span class="pre">Shipping</span> <span class="pre">Cost</span> <span class="pre">Service</span></code>, have shapes similar to one half of a Gaussian distribution. The scatter plots of various pairs of variables (e.g., <code class="docutils literal notranslate"><span class="pre">API</span></code> and <code class="docutils literal notranslate"><span class="pre">www</span></code>, <code class="docutils literal notranslate"><span class="pre">www</span></code> and <code class="docutils literal notranslate"><span class="pre">Website</span></code>, <code class="docutils literal notranslate"><span class="pre">Order</span> <span class="pre">Service</span></code> and <code class="docutils literal notranslate"><span class="pre">Order</span> <span class="pre">DB</span></code>) show linear
+relations. We shall use this information shortly to assign generative causal models to nodes in the causal graph.</p>
+<section id="Setting-up-the-causal-model">
+<h2>Setting up the causal model<a class="headerlink" href="#Setting-up-the-causal-model" title="Link to this heading">#</a></h2>
+<p>If we look at the <code class="docutils literal notranslate"><span class="pre">Website</span></code> node, it becomes apparent that the latency we experience there depends on the latencies of all downstream nodes. In particular, if one of the downstream nodes takes a long time, <code class="docutils literal notranslate"><span class="pre">Website</span></code> will also take a long time to show an update. Seeing this, the causal graph of the latencies can be built by inverting the arrows of the service graph.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">networkx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nx</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy</span><span class="w"> </span><span class="kn">import</span> <span class="n">gcm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot</span><span class="p">,</span> <span class="n">bar_plot</span>
+<span class="n">gcm</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">causal_graph</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">([(</span><span class="s1">&#39;www&#39;</span><span class="p">,</span> <span class="s1">&#39;Website&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;Auth Service&#39;</span><span class="p">,</span> <span class="s1">&#39;www&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;API&#39;</span><span class="p">,</span> <span class="s1">&#39;www&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;Customer DB&#39;</span><span class="p">,</span> <span class="s1">&#39;Auth Service&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;Customer DB&#39;</span><span class="p">,</span> <span class="s1">&#39;API&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;Product Service&#39;</span><span class="p">,</span> <span class="s1">&#39;API&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;Auth Service&#39;</span><span class="p">,</span> <span class="s1">&#39;API&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;Order Service&#39;</span><span class="p">,</span> <span class="s1">&#39;API&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;Shipping Cost Service&#39;</span><span class="p">,</span> <span class="s1">&#39;Product Service&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;Caching Service&#39;</span><span class="p">,</span> <span class="s1">&#39;Product Service&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;Product DB&#39;</span><span class="p">,</span> <span class="s1">&#39;Caching Service&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;Customer DB&#39;</span><span class="p">,</span> <span class="s1">&#39;Product Service&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;Order DB&#39;</span><span class="p">,</span> <span class="s1">&#39;Order Service&#39;</span><span class="p">)])</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">,</span> <span class="n">figure_size</span><span class="o">=</span><span class="p">[</span><span class="mi">13</span><span class="p">,</span> <span class="mi">13</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_rca_microservice_architecture_9_0.png" src="../_images/example_notebooks_gcm_rca_microservice_architecture_9_0.png" />
+</div>
+</div>
+<blockquote>
+<div><p>Here, we are interested in the causal relationships between latencies of services rather than the order of calling the services.</p>
+</div></blockquote>
+<p>We will use the information from the pair-wise scatter plots and histograms to manually assign causal models. In particular, we assign half-Normal distributions to the root nodes (i.e., <code class="docutils literal notranslate"><span class="pre">Customer</span> <span class="pre">DB</span></code>, <code class="docutils literal notranslate"><span class="pre">Product</span> <span class="pre">DB</span></code>, <code class="docutils literal notranslate"><span class="pre">Order</span> <span class="pre">DB</span></code> and <code class="docutils literal notranslate"><span class="pre">Shipping</span> <span class="pre">Cost</span> <span class="pre">Service</span></code>). For non-root nodes, we assign linear additive noise models (which scatter plots of many parent-child pairs indicate) with empirical distribution of noise terms.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">halfnorm</span>
+
+<span class="n">causal_model</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">StructuralCausalModel</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">causal_graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">causal_graph</span><span class="o">.</span><span class="n">predecessors</span><span class="p">(</span><span class="n">node</span><span class="p">)))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">AdditiveNoiseModel</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">ml</span><span class="o">.</span><span class="n">create_linear_regressor</span><span class="p">()))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">causal_model</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">gcm</span><span class="o">.</span><span class="n">ScipyDistribution</span><span class="p">(</span><span class="n">halfnorm</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<blockquote>
+<div><p>Alternatively, we can also automate this <strong>if</strong> we don’t have prior knowledge or are not familiar with the statistical implications:</p>
+</div></blockquote>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>gcm.auto.assign_causal_mechanisms(causal_model, normal_data)
+</pre></div>
+</div>
+<p>Before we contiue with the first scenario, let’s first evaluate our causal model:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gcm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">normal_data</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">evaluate_causal_model</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">normal_data</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Fitting causal mechanism of node Order DB: 100%|██████████| 11/11 [00:00&lt;00:00, 390.07it/s]
+Evaluating causal mechanisms...: 100%|██████████| 11/11 [00:03&lt;00:00,  3.49it/s]
+Test permutations of given graph: 100%|██████████| 50/50 [01:13&lt;00:00,  1.47s/it]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_rca_microservice_architecture_15_1.png" src="../_images/example_notebooks_gcm_rca_microservice_architecture_15_1.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Evaluated the performance of the causal mechanisms and the invertibility assumption of the causal mechanisms and the overall average KL divergence between generated and observed distribution and the graph structure. The results are as follows:
+
+==== Evaluation of Causal Mechanisms ====
+The used evaluation metrics are:
+- KL divergence (only for root-nodes): Evaluates the divergence between the generated and the observed distribution.
+- Mean Squared Error (MSE): Evaluates the average squared differences between the observed values and the conditional expectation of the causal mechanisms.
+- Normalized MSE (NMSE): The MSE normalized by the standard deviation for better comparison.
+- R2 coefficient: Indicates how much variance is explained by the conditional expectations of the mechanisms. Note, however, that this can be misleading for nonlinear relationships.
+- F1 score (only for categorical non-root nodes): The harmonic mean of the precision and recall indicating the goodness of the underlying classifier model.
+- (normalized) Continuous Ranked Probability Score (CRPS): The CRPS generalizes the Mean Absolute Percentage Error to probabilistic predictions. This gives insights into the accuracy and calibration of the causal mechanisms.
+NOTE: Every metric focuses on different aspects and they might not consistently indicate a good or bad performance.
+We will mostly utilize the CRPS for comparing and interpreting the performance of the mechanisms, since this captures the most important properties for the causal model.
+
+--- Node Customer DB
+- The KL divergence between generated and observed distribution is 0.031352954239255215.
+The estimated KL divergence indicates an overall very good representation of the data distribution.
+
+--- Node Shipping Cost Service
+- The KL divergence between generated and observed distribution is 0.00670680844289501.
+The estimated KL divergence indicates an overall very good representation of the data distribution.
+
+--- Node Product DB
+- The KL divergence between generated and observed distribution is 0.035667505650581466.
+The estimated KL divergence indicates an overall very good representation of the data distribution.
+
+--- Node Order DB
+- The KL divergence between generated and observed distribution is 0.038852361630356304.
+The estimated KL divergence indicates an overall very good representation of the data distribution.
+
+--- Node Auth Service
+- The MSE is 0.014405407564615797.
+- The NMSE is 0.5465495860903358.
+- The R2 coefficient is 0.7012359660103364.
+- The normalized CRPS is 0.30265499391971407.
+The estimated CRPS indicates a good model performance.
+
+--- Node Caching Service
+- The MSE is 0.02313410655739081.
+- The NMSE is 0.8421286359832795.
+- The R2 coefficient is 0.2907975654579837.
+- The normalized CRPS is 0.46264654494762336.
+The estimated CRPS indicates only a fair model performance. Note, however, that a high CRPS could also result from a small signal to noise ratio.
+
+--- Node Order Service
+- The MSE is 0.014402623661901339.
+- The NMSE is 0.5485279868056235.
+- The R2 coefficient is 0.6990119423108653.
+- The normalized CRPS is 0.30321497413904863.
+The estimated CRPS indicates a good model performance.
+
+--- Node Product Service
+- The MSE is 0.020441295317239063.
+- The NMSE is 0.6498526098564431.
+- The R2 coefficient is 0.5775517273698512.
+- The normalized CRPS is 0.3643692225262228.
+The estimated CRPS indicates only a fair model performance. Note, however, that a high CRPS could also result from a small signal to noise ratio.
+
+--- Node API
+- The MSE is 0.014478740667166996.
+- The NMSE is 0.20970446018379812.
+- The R2 coefficient is 0.9559977978951697.
+- The normalized CRPS is 0.11586910197147379.
+The estimated CRPS indicates a very good model performance.
+
+--- Node www
+- The MSE is 0.011040360284322542.
+- The NMSE is 0.1375983208617472.
+- The R2 coefficient is 0.9810608560286648.
+- The normalized CRPS is 0.0779437689368548.
+The estimated CRPS indicates a very good model performance.
+
+--- Node Website
+- The MSE is 0.020774228074041143.
+- The NMSE is 0.185120350663801.
+- The R2 coefficient is 0.9657171988034176.
+- The normalized CRPS is 0.10227892839479753.
+The estimated CRPS indicates a very good model performance.
+
+==== Evaluation of Invertible Functional Causal Model Assumption ====
+
+--- The model assumption for node www is not rejected with a p-value of 1.0 (after potential adjustment) and a significance level of 0.05.
+This implies that the model assumption might be valid.
+
+--- The model assumption for node Website is not rejected with a p-value of 1.0 (after potential adjustment) and a significance level of 0.05.
+This implies that the model assumption might be valid.
+
+--- The model assumption for node Auth Service is not rejected with a p-value of 0.46642517211292034 (after potential adjustment) and a significance level of 0.05.
+This implies that the model assumption might be valid.
+
+--- The model assumption for node API is rejected with a p-value of 0.010732197989039571 (after potential adjustment) and a significance level of 0.05.
+This implies that the model assumption might not be valid. This is, the relationship cannot be represent with this type of mechanism or there is a hidden confounder between the node and its parents.
+
+--- The model assumption for node Product Service is rejected with a p-value of 0.0 (after potential adjustment) and a significance level of 0.05.
+This implies that the model assumption might not be valid. This is, the relationship cannot be represent with this type of mechanism or there is a hidden confounder between the node and its parents.
+
+--- The model assumption for node Order Service is not rejected with a p-value of 1.0 (after potential adjustment) and a significance level of 0.05.
+This implies that the model assumption might be valid.
+
+--- The model assumption for node Caching Service is rejected with a p-value of 0.0 (after potential adjustment) and a significance level of 0.05.
+This implies that the model assumption might not be valid. This is, the relationship cannot be represent with this type of mechanism or there is a hidden confounder between the node and its parents.
+
+Note that these results are based on statistical independence tests, and the fact that the assumption was not rejected does not necessarily imply that it is correct. There is just no evidence against it.
+
+==== Evaluation of Generated Distribution ====
+The overall average KL divergence between the generated and observed distribution is 0.11258599391818472
+The estimated KL divergence indicates an overall very good representation of the data distribution.
+
+==== Evaluation of the Causal Graph Structure ====
++-------------------------------------------------------------------------------------------------------+
+|                                         Falsification Summary                                         |
++-------------------------------------------------------------------------------------------------------+
+| The given DAG is informative because 0 / 50 of the permutations lie in the Markov                     |
+| equivalence class of the given DAG (p-value: 0.00).                                                   |
+| The given DAG violates 3/63 LMCs and is better than 100.0% of the permuted DAGs (p-value: 0.00).      |
+| Based on the provided significance level (0.2) and because the DAG is informative,                    |
+| we do not reject the DAG.                                                                             |
++-------------------------------------------------------------------------------------------------------+
+
+==== NOTE ====
+Always double check the made model assumptions with respect to the graph structure and choice of causal mechanisms.
+All these evaluations give some insight into the goodness of the causal model, but should not be overinterpreted, since some causal relationships can be intrinsically hard to model. Furthermore, many algorithms are fairly robust against misspecifications or poor performances of causal mechanisms.
+</pre></div></div>
+</div>
+<p>This confirms the goodness of our causal model. However, we also see that for two nodes (‘Product Service’ and ‘Caching Service’), the additive noise model assumption is violated. This also aligns with the data generation process, where these two nodes follow non-additive noise models. As we see in the following, most of the algorithms are still fairly robust against such violations or poor performance of the causal mechanism.</p>
+<blockquote>
+<div><p>For more detailed insights, set compare_mechanism_baselines to True. However, this will take significantly longer.</p>
+</div></blockquote>
+</section>
+<section id="Scenario-1:-Observing-a-single-outlier">
+<h2>Scenario 1: Observing a single outlier<a class="headerlink" href="#Scenario-1:-Observing-a-single-outlier" title="Link to this heading">#</a></h2>
+<p>Suppose we get an alert from our system where a customer experienced an unusually high latency when an order is placed. Our task is now to investigate this issue and to find the root cause of this behaviour.</p>
+<p>We first load the latency to the corresponding alert.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">outlier_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;rca_microservice_architecture_anomaly.csv&quot;</span><span class="p">)</span>
+<span class="n">outlier_data</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Product DB</th>
+      <th>Customer DB</th>
+      <th>Order DB</th>
+      <th>Shipping Cost Service</th>
+      <th>Caching Service</th>
+      <th>Product Service</th>
+      <th>Auth Service</th>
+      <th>Order Service</th>
+      <th>API</th>
+      <th>www</th>
+      <th>Website</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0.493145</td>
+      <td>0.180896</td>
+      <td>0.192593</td>
+      <td>0.197001</td>
+      <td>2.130865</td>
+      <td>2.48584</td>
+      <td>0.533847</td>
+      <td>1.132151</td>
+      <td>4.85583</td>
+      <td>5.522179</td>
+      <td>5.572588</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>We are interested in the increased latency of <code class="docutils literal notranslate"><span class="pre">Website</span></code> which the customer directly experienced.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">outlier_data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;Website&#39;</span><span class="p">]</span><span class="o">-</span><span class="n">normal_data</span><span class="p">[</span><span class="s1">&#39;Website&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle 2.00895545064217$</div></div>
+</div>
+<p>For this customer, <code class="docutils literal notranslate"><span class="pre">Website</span></code> was roughly 2 seconds slower than for other customers on average. Why?</p>
+<section id="Attributing-an-outlier-latency-at-a-target-service-to-other-services">
+<h3>Attributing an outlier latency at a target service to other services<a class="headerlink" href="#Attributing-an-outlier-latency-at-a-target-service-to-other-services" title="Link to this heading">#</a></h3>
+<p>To answer why <code class="docutils literal notranslate"><span class="pre">Website</span></code> was slower for this customer, we attribute the outlier latency at <code class="docutils literal notranslate"><span class="pre">Website</span></code> to upstream services in the causal graph. We refer the reader to <a class="reference external" href="https://arxiv.org/abs/1912.02724">Janzing et al., 2019</a> for scientific details behind this API. We will calculate a 95% bootstrapped confidence interval of our attributions. In particular, we learn the causal models from a random subset of normal data and attribute the target outlier score using those models, repeating the
+process 10 times. This way, the confidence intervals we report account for (a) the uncertainty of our causal models as well as (b) the uncertainty in the attributions due to the variance in the samples drawn from those causal models.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gcm</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">disable_progress_bars</span><span class="p">()</span> <span class="c1"># to disable print statements when computing Shapley values</span>
+
+<span class="n">median_attribs</span><span class="p">,</span> <span class="n">uncertainty_attribs</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">confidence_intervals</span><span class="p">(</span>
+    <span class="n">gcm</span><span class="o">.</span><span class="n">fit_and_compute</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">attribute_anomalies</span><span class="p">,</span>
+                        <span class="n">causal_model</span><span class="p">,</span>
+                        <span class="n">normal_data</span><span class="p">,</span>
+                        <span class="n">target_node</span><span class="o">=</span><span class="s1">&#39;Website&#39;</span><span class="p">,</span>
+                        <span class="n">anomaly_samples</span><span class="o">=</span><span class="n">outlier_data</span><span class="p">),</span>
+    <span class="n">num_bootstrap_resamples</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<blockquote>
+<div><p>By default, a quantile-based anomaly score is used that estimates the negative log-probability of a sample being normal. This is, the higher the probabilty of an outlier, the larger the score. The library offers different kinds of outlier scoring functions, such as the z-score, where the mean is the expected value based on the causal model.</p>
+</div></blockquote>
+<p>Let us visualize the attributions along with their uncertainty in a bar plot.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bar_plot</span><span class="p">(</span><span class="n">median_attribs</span><span class="p">,</span> <span class="n">uncertainty_attribs</span><span class="p">,</span> <span class="s1">&#39;Attribution Score&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_rca_microservice_architecture_27_0.png" src="../_images/example_notebooks_gcm_rca_microservice_architecture_27_0.png" />
+</div>
+</div>
+<p>The attributions indicate that <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> is the main driver of high latency in <code class="docutils literal notranslate"><span class="pre">Website</span></code> which is expected as we perturb the causal mechanism of <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> to generate an outlier latency in <code class="docutils literal notranslate"><span class="pre">Website</span></code> (see Appendix below). Interestingly, <code class="docutils literal notranslate"><span class="pre">Customer</span> <span class="pre">DB</span></code> has a negative contribution, indicating that it was particularly fast, decreasing the outlier in the <code class="docutils literal notranslate"><span class="pre">Website</span></code>. Note that some of the attributions are also due to model misspecifications. For instance, the parent
+child-relationship between <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> and <code class="docutils literal notranslate"><span class="pre">Product</span> <span class="pre">DB</span></code> seems to indicate two mechanisms. This could be due to an unobserved binary variable (e.g., Cache hit/miss) that has a multiplicative effect on <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code>. An additive noise cannot capture the multiplicative effect of this unobserved variable.</p>
+</section>
+</section>
+<section id="Scenario-2:-Observing-permanent-degradation-of-latencies">
+<h2>Scenario 2: Observing permanent degradation of latencies<a class="headerlink" href="#Scenario-2:-Observing-permanent-degradation-of-latencies" title="Link to this heading">#</a></h2>
+<p>In the previous scenario, we attributed a <em>single</em> outlier latency in <code class="docutils literal notranslate"><span class="pre">Website</span></code> to services that are nodes in the causal graph, which is useful for anecdotal deep dives. Next, we consider a scenario where we observe a permanent degradation of latencies and we want to understand its drivers. In particular, we attribute the change in the average latency of <code class="docutils literal notranslate"><span class="pre">Website</span></code> to upstream nodes.</p>
+<p>Suppose we get additional 1000 requests with higher latencies as follows.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">outlier_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;rca_microservice_architecture_anomaly_1000.csv&quot;</span><span class="p">)</span>
+<span class="n">outlier_data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Product DB</th>
+      <th>Customer DB</th>
+      <th>Order DB</th>
+      <th>Shipping Cost Service</th>
+      <th>Caching Service</th>
+      <th>Product Service</th>
+      <th>Auth Service</th>
+      <th>Order Service</th>
+      <th>API</th>
+      <th>www</th>
+      <th>Website</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0.140874</td>
+      <td>0.270117</td>
+      <td>0.021619</td>
+      <td>0.159421</td>
+      <td>2.201327</td>
+      <td>2.453859</td>
+      <td>0.958687</td>
+      <td>0.572128</td>
+      <td>4.921074</td>
+      <td>5.891927</td>
+      <td>5.937950</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>0.160903</td>
+      <td>0.008235</td>
+      <td>0.182182</td>
+      <td>0.114568</td>
+      <td>2.105901</td>
+      <td>2.259432</td>
+      <td>0.325054</td>
+      <td>0.683030</td>
+      <td>4.009969</td>
+      <td>4.373290</td>
+      <td>4.418746</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.013300</td>
+      <td>0.127177</td>
+      <td>0.591904</td>
+      <td>0.112362</td>
+      <td>2.160395</td>
+      <td>2.278189</td>
+      <td>0.645109</td>
+      <td>1.097460</td>
+      <td>4.915487</td>
+      <td>5.578015</td>
+      <td>5.708616</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>1.317167</td>
+      <td>0.145850</td>
+      <td>0.094301</td>
+      <td>0.401206</td>
+      <td>3.505417</td>
+      <td>3.622197</td>
+      <td>0.502680</td>
+      <td>0.880008</td>
+      <td>5.652773</td>
+      <td>6.265665</td>
+      <td>6.356730</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>0.699519</td>
+      <td>0.425039</td>
+      <td>0.233269</td>
+      <td>0.572897</td>
+      <td>2.931482</td>
+      <td>3.062255</td>
+      <td>0.598265</td>
+      <td>0.885846</td>
+      <td>5.585744</td>
+      <td>6.266662</td>
+      <td>6.346390</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>We are interested in the increased latency of <code class="docutils literal notranslate"><span class="pre">Website</span></code> on average for 1000 requests which the customers directly experienced.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">outlier_data</span><span class="p">[</span><span class="s1">&#39;Website&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">-</span> <span class="n">normal_data</span><span class="p">[</span><span class="s1">&#39;Website&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle 1.93236488530225$</div></div>
+</div>
+<p>The <em>Website</em> is slower on average (by almost 2 seconds) than usual. Why?</p>
+<section id="Attributing-permanent-degradation-of-latencies-at-a-target-service-to-other-services">
+<h3>Attributing permanent degradation of latencies at a target service to other services<a class="headerlink" href="#Attributing-permanent-degradation-of-latencies-at-a-target-service-to-other-services" title="Link to this heading">#</a></h3>
+<p>To answer why <code class="docutils literal notranslate"><span class="pre">Website</span></code> is slower for those 1000 requests compared to before, we attribute the change in the average latency of <code class="docutils literal notranslate"><span class="pre">Website</span></code> to services upstream in the causal graph. We refer the reader to <a class="reference external" href="https://assets.amazon.science/b6/c0/604565d24d049a1b83355921cc6c/why-did-the-distribution-change.pdf">Budhathoki et al., 2021</a> for scientific details behind this API. As in the previous scenario, we will calculate a 95% bootstrapped confidence interval of our attributions and visualize
+them in a bar plot.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="n">median_attribs</span><span class="p">,</span> <span class="n">uncertainty_attribs</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">confidence_intervals</span><span class="p">(</span>
+    <span class="k">lambda</span> <span class="p">:</span> <span class="n">gcm</span><span class="o">.</span><span class="n">distribution_change</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span>
+                                     <span class="n">normal_data</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">frac</span><span class="o">=</span><span class="mf">0.6</span><span class="p">),</span>
+                                     <span class="n">outlier_data</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">frac</span><span class="o">=</span><span class="mf">0.6</span><span class="p">),</span>
+                                     <span class="s1">&#39;Website&#39;</span><span class="p">,</span>
+                                     <span class="n">difference_estimation_func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x</span><span class="p">)),</span>
+    <span class="n">num_bootstrap_resamples</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span>
+
+<span class="n">bar_plot</span><span class="p">(</span><span class="n">median_attribs</span><span class="p">,</span> <span class="n">uncertainty_attribs</span><span class="p">,</span> <span class="s1">&#39;Attribution Score&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_rca_microservice_architecture_35_0.png" src="../_images/example_notebooks_gcm_rca_microservice_architecture_35_0.png" />
+</div>
+</div>
+<p>We observe that <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> is the root cause that slowed down <code class="docutils literal notranslate"><span class="pre">Website</span></code>. In particular, the method we used tells us that the change in the causal mechanism (i.e., the input-output behaviour) of <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> (e.g., Caching algorithm) slowed down <code class="docutils literal notranslate"><span class="pre">Website</span></code>. This is also expected as the outlier latencies were generated by changing the causal mechanism of <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> (see Appendix below).</p>
+</section>
+</section>
+<section id="Scenario-3:-Simulating-the-intervention-of-shifting-resources">
+<h2>Scenario 3: Simulating the intervention of shifting resources<a class="headerlink" href="#Scenario-3:-Simulating-the-intervention-of-shifting-resources" title="Link to this heading">#</a></h2>
+<p>Next, let us imagine a scenario where permanent degradation has happened as in scenario 2 and we’ve successfully identified <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> as the root cause. Furthermore, we figured out that a recent deployment of the <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> contained a bug that is causing the overloaded hosts. A proper fix must be deployed, or the previous deployment must be rolled back. But, in the meantime, could we mitigate the situation by shifting over some resources from <code class="docutils literal notranslate"><span class="pre">Shipping</span> <span class="pre">Service</span></code> to
+<code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code>? And would that help? Before doing it in reality, let us simulate it first and see whether it improves the situation.</p>
+<p><img alt="e0f4cd4e6ba34dccb9ce76619eacfaa6" class="no-scaled-link" src="../_images/shifting-resources.png" style="width: 600px;" /></p>
+<p>Let’s perform an intervention where we say we can reduce the average time of <code class="docutils literal notranslate"><span class="pre">Caching</span> <span class="pre">Service</span></code> by 1s. But at the same time we buy this speed-up by an average slow-down of 2s in <code class="docutils literal notranslate"><span class="pre">Shipping</span> <span class="pre">Cost</span> <span class="pre">Service</span></code>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">median_mean_latencies</span><span class="p">,</span> <span class="n">uncertainty_mean_latencies</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">confidence_intervals</span><span class="p">(</span>
+    <span class="k">lambda</span> <span class="p">:</span> <span class="n">gcm</span><span class="o">.</span><span class="n">fit_and_compute</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">interventional_samples</span><span class="p">,</span>
+                                 <span class="n">causal_model</span><span class="p">,</span>
+                                 <span class="n">outlier_data</span><span class="p">,</span>
+                                 <span class="n">interventions</span> <span class="o">=</span> <span class="p">{</span>
+                                    <span class="s2">&quot;Caching Service&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+                                    <span class="s2">&quot;Shipping Cost Service&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">+</span><span class="mi">2</span>
+                                 <span class="p">},</span>
+                                 <span class="n">observed_data</span><span class="o">=</span><span class="n">outlier_data</span><span class="p">)()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span>
+    <span class="n">num_bootstrap_resamples</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Has the situation improved? Let’s visualize the results.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">avg_website_latency_before</span> <span class="o">=</span> <span class="n">outlier_data</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()[</span><span class="s1">&#39;Website&#39;</span><span class="p">]</span>
+<span class="n">bar_plot</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">before</span><span class="o">=</span><span class="n">avg_website_latency_before</span><span class="p">,</span> <span class="n">after</span><span class="o">=</span><span class="n">median_mean_latencies</span><span class="p">[</span><span class="s1">&#39;Website&#39;</span><span class="p">]),</span>
+                  <span class="nb">dict</span><span class="p">(</span><span class="n">before</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">avg_website_latency_before</span><span class="p">,</span> <span class="n">avg_website_latency_before</span><span class="p">]),</span> <span class="n">after</span><span class="o">=</span><span class="n">uncertainty_mean_latencies</span><span class="p">[</span><span class="s1">&#39;Website&#39;</span><span class="p">]),</span>
+                  <span class="n">ylabel</span><span class="o">=</span><span class="s1">&#39;Avg. Website Latency&#39;</span><span class="p">,</span>
+                  <span class="n">figure_size</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+                  <span class="n">bar_width</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+                  <span class="n">xticks</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Before&#39;</span><span class="p">,</span> <span class="s1">&#39;After&#39;</span><span class="p">],</span>
+                  <span class="n">xticks_rotation</span><span class="o">=</span><span class="mi">45</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_rca_microservice_architecture_40_0.png" src="../_images/example_notebooks_gcm_rca_microservice_architecture_40_0.png" />
+</div>
+</div>
+<p>Indeed, we do get an improvement by about 1s. We’re not back at normal operation, but we’ve mitigated part of the problem. From here, maybe we can wait until a proper fix is deployed.</p>
+</section>
+<section id="Appendix:-Data-generation-process">
+<h2>Appendix: Data generation process<a class="headerlink" href="#Appendix:-Data-generation-process" title="Link to this heading">#</a></h2>
+<p>The scenarios above work on synthetic data. The normal data was generated using the following functions:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">truncexpon</span><span class="p">,</span> <span class="n">halfnorm</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">create_observed_latency_data</span><span class="p">(</span><span class="n">unobserved_intrinsic_latencies</span><span class="p">):</span>
+    <span class="n">observed_latencies</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Product DB&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">unobserved_intrinsic_latencies</span><span class="p">[</span><span class="s1">&#39;Product DB&#39;</span><span class="p">]</span>
+    <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Customer DB&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">unobserved_intrinsic_latencies</span><span class="p">[</span><span class="s1">&#39;Customer DB&#39;</span><span class="p">]</span>
+    <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Order DB&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">unobserved_intrinsic_latencies</span><span class="p">[</span><span class="s1">&#39;Order DB&#39;</span><span class="p">]</span>
+    <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Shipping Cost Service&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">unobserved_intrinsic_latencies</span><span class="p">[</span><span class="s1">&#39;Shipping Cost Service&#39;</span><span class="p">]</span>
+    <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Caching Service&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Product DB&#39;</span><span class="p">]),),</span>
+                                                             <span class="n">p</span><span class="o">=</span><span class="p">[</span><span class="mf">.5</span><span class="p">,</span> <span class="mf">.5</span><span class="p">])</span> <span class="o">*</span> \
+                                            <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Product DB&#39;</span><span class="p">]</span> \
+                                            <span class="o">+</span> <span class="n">unobserved_intrinsic_latencies</span><span class="p">[</span><span class="s1">&#39;Caching Service&#39;</span><span class="p">]</span>
+    <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Product Service&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Shipping Cost Service&#39;</span><span class="p">],</span>
+                                                                  <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Caching Service&#39;</span><span class="p">]),</span>
+                                                       <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Customer DB&#39;</span><span class="p">])</span> \
+                                            <span class="o">+</span> <span class="n">unobserved_intrinsic_latencies</span><span class="p">[</span><span class="s1">&#39;Product Service&#39;</span><span class="p">]</span>
+    <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Auth Service&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Customer DB&#39;</span><span class="p">]</span> \
+                                         <span class="o">+</span> <span class="n">unobserved_intrinsic_latencies</span><span class="p">[</span><span class="s1">&#39;Auth Service&#39;</span><span class="p">]</span>
+    <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Order Service&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Order DB&#39;</span><span class="p">]</span> \
+                                          <span class="o">+</span> <span class="n">unobserved_intrinsic_latencies</span><span class="p">[</span><span class="s1">&#39;Order Service&#39;</span><span class="p">]</span>
+    <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;API&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Product Service&#39;</span><span class="p">]</span> \
+                                <span class="o">+</span> <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Customer DB&#39;</span><span class="p">]</span> \
+                                <span class="o">+</span> <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Auth Service&#39;</span><span class="p">]</span> \
+                                <span class="o">+</span> <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Order Service&#39;</span><span class="p">]</span> \
+                                <span class="o">+</span> <span class="n">unobserved_intrinsic_latencies</span><span class="p">[</span><span class="s1">&#39;API&#39;</span><span class="p">]</span>
+    <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;www&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;API&#39;</span><span class="p">]</span> \
+                                <span class="o">+</span> <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Auth Service&#39;</span><span class="p">]</span> \
+                                <span class="o">+</span> <span class="n">unobserved_intrinsic_latencies</span><span class="p">[</span><span class="s1">&#39;www&#39;</span><span class="p">]</span>
+    <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;Website&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">observed_latencies</span><span class="p">[</span><span class="s1">&#39;www&#39;</span><span class="p">]</span> \
+                                    <span class="o">+</span> <span class="n">unobserved_intrinsic_latencies</span><span class="p">[</span><span class="s1">&#39;Website&#39;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">observed_latencies</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">unobserved_intrinsic_latencies_normal</span><span class="p">(</span><span class="n">num_samples</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;Website&#39;</span><span class="p">:</span> <span class="n">truncexpon</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
+        <span class="s1">&#39;www&#39;</span><span class="p">:</span> <span class="n">truncexpon</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
+        <span class="s1">&#39;API&#39;</span><span class="p">:</span> <span class="n">halfnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
+        <span class="s1">&#39;Auth Service&#39;</span><span class="p">:</span> <span class="n">halfnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
+        <span class="s1">&#39;Product Service&#39;</span><span class="p">:</span> <span class="n">halfnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
+        <span class="s1">&#39;Order Service&#39;</span><span class="p">:</span> <span class="n">halfnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
+        <span class="s1">&#39;Shipping Cost Service&#39;</span><span class="p">:</span> <span class="n">halfnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
+        <span class="s1">&#39;Caching Service&#39;</span><span class="p">:</span> <span class="n">halfnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.1</span><span class="p">),</span>
+        <span class="s1">&#39;Order DB&#39;</span><span class="p">:</span> <span class="n">truncexpon</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
+        <span class="s1">&#39;Customer DB&#39;</span><span class="p">:</span> <span class="n">truncexpon</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
+        <span class="s1">&#39;Product DB&#39;</span><span class="p">:</span> <span class="n">truncexpon</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+    <span class="p">}</span>
+
+
+<span class="n">normal_data</span> <span class="o">=</span> <span class="n">create_observed_latency_data</span><span class="p">(</span><span class="n">unobserved_intrinsic_latencies_normal</span><span class="p">(</span><span class="mi">10000</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<p>This simulates the latency relationships under the assumption of having synchronized services and that there are no hidden aspects that impact two nodes at the same time. Furthermore, we assume that the Caching Service has to call through to the Product DB only in 50% of the cases (i.e., we have a 50% cache miss rate). Also, we assume that the Product Service can make calls in parallel to its downstream services Shipping Cost Service, Caching Service, and Customer DB and join the threads when
+all three service have returned.</p>
+<blockquote>
+<div><p>We use truncated exponential and half-normal distributions, since their shapes are similar to distributions observed in real services.</p>
+</div></blockquote>
+<p>The anomalous data is generated in the following way:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">unobserved_intrinsic_latencies_anomalous</span><span class="p">(</span><span class="n">num_samples</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;Website&#39;</span><span class="p">:</span> <span class="n">truncexpon</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
+        <span class="s1">&#39;www&#39;</span><span class="p">:</span> <span class="n">truncexpon</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
+        <span class="s1">&#39;API&#39;</span><span class="p">:</span> <span class="n">halfnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
+        <span class="s1">&#39;Auth Service&#39;</span><span class="p">:</span> <span class="n">halfnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
+        <span class="s1">&#39;Product Service&#39;</span><span class="p">:</span> <span class="n">halfnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
+        <span class="s1">&#39;Order Service&#39;</span><span class="p">:</span> <span class="n">halfnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
+        <span class="s1">&#39;Shipping Cost Service&#39;</span><span class="p">:</span> <span class="n">halfnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
+        <span class="s1">&#39;Caching Service&#39;</span><span class="p">:</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">halfnorm</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.1</span><span class="p">),</span>
+        <span class="s1">&#39;Order DB&#39;</span><span class="p">:</span> <span class="n">truncexpon</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
+        <span class="s1">&#39;Customer DB&#39;</span><span class="p">:</span> <span class="n">truncexpon</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
+        <span class="s1">&#39;Product DB&#39;</span><span class="p">:</span> <span class="n">truncexpon</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+    <span class="p">}</span>
+
+<span class="n">outlier_data</span> <span class="o">=</span> <span class="n">create_observed_latency_data</span><span class="p">(</span><span class="n">unobserved_intrinsic_latencies_anomalous</span><span class="p">(</span><span class="mi">1000</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<p>Here, we significantly increased the average time of the <em>Caching Service</em> by two seconds, which coincides with our results from the RCA. Note that a high latency in <em>Caching Service</em> would lead to a constantly higher latency in upstream services. In particular, customers experience a higher latency than usual.</p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="gcm_online_shop.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Causal Attributions and Root-Cause Analysis in an Online Shop</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="gcm_401k_analysis.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Impact of 401(k) eligibility on net financial assets</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Setting-up-the-causal-model">Setting up the causal model</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Scenario-1:-Observing-a-single-outlier">Scenario 1: Observing a single outlier</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Attributing-an-outlier-latency-at-a-target-service-to-other-services">Attributing an outlier latency at a target service to other services</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Scenario-2:-Observing-permanent-degradation-of-latencies">Scenario 2: Observing permanent degradation of latencies</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Attributing-permanent-degradation-of-latencies-at-a-target-service-to-other-services">Attributing permanent degradation of latencies at a target service to other services</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Scenario-3:-Simulating-the-intervention-of-shifting-resources">Scenario 3: Simulating the intervention of shifting resources</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Appendix:-Data-generation-process">Appendix: Data generation process</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/example_notebooks/gcm_rca_microservice_architecture.ipynb.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2022, PyWhy contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,809 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "d1b60604",
+   "metadata": {
+    "tags": []
+   },
+   "source": [
+    "# Causal attribution to sales growth and spend intervention"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "6140025d-504e-4500-83cb-7b31643f546f",
+   "metadata": {},
+   "source": [
+    "## The Scenario "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "e1a090e0-b5da-4835-9cfe-9bf1e53aef4e",
+   "metadata": {},
+   "source": [
+    "Suppose we have an advertiser selling products online. To promote sales, they give out discounts through price promotions, and advertise online through both display ads and sponsored ads in search results pages. To prepare for an upcoming business review, the advertiser compares 2024 and 2023 data and observes steady KPI growth such as sales, and product page views. However, the analytics team wonders what factors drive that growth, is it advertising, price promotion, or simply organic growth due to shopper trends? Answers to this question are key to understanding past growth. Furthermore, this advertiser wants actionable suggestions for business planning, such as spending on areas with higher returns on investment to double down next. <br> In the following scenario, we will use DoWhy two-fold: first to causally attribute KPI growth drivers properly, so the analytics team understands what fueled past growth in a data-driven way. Second, we conduct interventions based on causal impact estimates to derive incremental return on investment (iROI), so the advertiser can forecast future KPI growth with additional investment. These factors and KPIs are: \n",
+    "* **dsp_spend**: Ad spend on Demand Side Platform (DSP) through display ads\n",
+    "* **sp_spend**: Ad spend on search results pages to bump up product rankings for easy discovery \n",
+    "* **discount**: Discounts given through price reductions\n",
+    "* **special_shopping_event**: A binary variable indicating whether a shopping event hosted by the ecommerce platform took place, such as Black Friday or Cyber Monday \n",
+    "* **other_shopping_event**: A binary variable indicating other shopping events off the ecommerce platform. It can be from the advertiser itself, or its advertising with other platforms. \n",
+    "* **dpv**: Number of product detail page views\n",
+    "* **sale**: Daily revenue on the focal ecommerce platform"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "671dc59b",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "import matplotlib.pyplot as plt\n",
+    "import networkx as nx\n",
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "from functools import partial\n",
+    "from dowhy import gcm\n",
+    "from dowhy.utils.plotting import plot\n",
+    "\n",
+    "from scipy import stats\n",
+    "from statsmodels.stats.multitest import multipletests\n",
+    "\n",
+    "gcm.util.general.set_random_seed(0)\n",
+    "%matplotlib inline"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "de1ed2e1",
+   "metadata": {},
+   "source": [
+    "## 1. Explore the data\n",
+    "\n",
+    "First, let's load our data representing the spending, discounts, sale and other information for 2023 and 2024. Note that for this simulated data, we didn't change the distribution of price discounts over periods of comparison and shouldn't detect as such in the later attribution model. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "81bc8978",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "df = pd.read_csv('datasets/sales_attribution.csv', index_col=0)\n",
+    "df.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "29af43df-4406-44ef-b44f-77d6cdaf1cc2",
+   "metadata": {},
+   "source": [
+    "To causally attribute factors of interests to changes, we first need to define time periods for comparisons. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "502a8f3f",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "def generate_new_old_dataframes(df, new_year, new_quarters, new_months, old_year, old_quarters, old_months):\n",
+    "    # Filter new data based on year, quarters, and months\n",
+    "    new_conditions = (df['year'] == new_year) & (df['quarter'].isin(new_quarters)) & (df['month'].isin(new_months))\n",
+    "    df_new = df[new_conditions].copy()\n",
+    "\n",
+    "    # Filter old data based on year, quarters, and months\n",
+    "    old_conditions = (df['year'] == old_year) & (df['quarter'].isin(old_quarters)) & (df['month'].isin(old_months))\n",
+    "    df_old = df[old_conditions].copy()\n",
+    "\n",
+    "    return df_new, df_old\n",
+    "\n",
+    "df_new, df_old = generate_new_old_dataframes(df, new_year=2024, new_quarters=[1,2], new_months=[1,2,3,4,5,6], old_year=2023, old_quarters=[1,2], old_months=[1,2,3,4,5,6])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "5c3b2dfe",
+   "metadata": {},
+   "source": [
+    "Then we define cumulative distribution functions to eyeball changes in metrics across two periods. Let's plot them:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "cc8b8a7d",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "def plot_metric_distributions(df_new, df_old, metric_columns):\n",
+    "    for metric_column in metric_columns:\n",
+    "        fig, ax = plt.subplots()\n",
+    "        \n",
+    "        kde_new = stats.gaussian_kde(df_new[metric_column].dropna())\n",
+    "        kde_old = stats.gaussian_kde(df_old[metric_column].dropna())\n",
+    "        \n",
+    "        x_range = np.linspace(\n",
+    "            min(df_new[metric_column].min(), df_old[metric_column].min()),\n",
+    "            max(df_new[metric_column].max(), df_old[metric_column].max()),\n",
+    "            1000\n",
+    "        )\n",
+    "        ax.plot(x_range, kde_new(x_range), color='#FF6B6B', lw=2, label='After')\n",
+    "        ax.plot(x_range, kde_old(x_range), color='#4ECDC4', lw=2, label='Before')\n",
+    "        \n",
+    "        ax.fill_between(x_range, kde_new(x_range), alpha=0.3, color='#FF6B6B')\n",
+    "        ax.fill_between(x_range, kde_old(x_range), alpha=0.3, color='#4ECDC4')\n",
+    "\n",
+    "        ax.set_xlabel(metric_column)\n",
+    "        ax.set_ylabel('Density')\n",
+    "        ax.set_title(f'Comparison of {metric_column} distribution')\n",
+    "\n",
+    "        ax.spines['top'].set_visible(False)\n",
+    "        ax.spines['right'].set_visible(False)\n",
+    "    \n",
+    "        ax.grid(True, linestyle='--', alpha=0.7)\n",
+    "        ax.legend(fontsize=10)\n",
+    "\n",
+    "        plt.tight_layout()\n",
+    "        plt.show()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "37904e2e-ae77-4a24-b5aa-a0769f6fe541",
+   "metadata": {},
+   "source": [
+    "Here, we are interested in the 'dpv' and 'sale' variables."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "402264f5",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "# Define KPI\n",
+    "metric_columns = ['dpv', 'sale']  \n",
+    "plot_metric_distributions(df_new, df_old, metric_columns)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "ddaecc17",
+   "metadata": {},
+   "source": [
+    "We can further quantify the magnitude of changes by comparing mean, median and variance of both KPIs and potential drivers. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "2e932e4c-af36-4083-ad78-036cd39433c2",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "def compare_metrics(df_new, df_old, metrics):\n",
+    "    comparison_data = []\n",
+    "\n",
+    "    for metric in metrics:\n",
+    "        try:\n",
+    "            mean_old = df_old[metric].mean()\n",
+    "            median_old = df_old[metric].median()\n",
+    "            variance_old = df_old[metric].var()\n",
+    "            \n",
+    "            mean_new = df_new[metric].mean()\n",
+    "            median_new = df_new[metric].median()\n",
+    "            variance_new = df_new[metric].var()\n",
+    "            \n",
+    "            if mean_old == 0:\n",
+    "                print(f\"Mean for {metric} in the old data is zero. Skipping mean change calculation.\")\n",
+    "                mean_change = None\n",
+    "            else:\n",
+    "                mean_change = ((mean_new - mean_old) / mean_old) * 100\n",
+    "\n",
+    "            if median_old == 0:\n",
+    "                print(f\"Median for {metric} in the old data is zero. Skipping median change calculation.\")\n",
+    "                median_change = None\n",
+    "            else:\n",
+    "                median_change = ((median_new - median_old) / median_old) * 100\n",
+    "\n",
+    "            if variance_old == 0:\n",
+    "                print(f\"Variance for {metric} in the old data is zero. Skipping variance change calculation.\")\n",
+    "                variance_change = None\n",
+    "            else:\n",
+    "                variance_change = ((variance_new - variance_old) / variance_old) * 100\n",
+    "            \n",
+    "            comparison_data.append({\n",
+    "                'Metric': metric,\n",
+    "                'Δ mean': mean_change,\n",
+    "                'Δ median': median_change,\n",
+    "                'Δ variance': variance_change\n",
+    "            })\n",
+    "        except KeyError as e:\n",
+    "            print(f\"Metric {metric} not found in one of the DataFrames: {e}\")\n",
+    "            pass\n",
+    "\n",
+    "    comparison_df = pd.DataFrame(comparison_data)\n",
+    "    return comparison_df"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c9e55350-6582-4baa-b707-f92f53e8f979",
+   "metadata": {
+    "tags": []
+   },
+   "source": [
+    "For simplicity, below we assume KPIs are revenue (sale), and product views (DPV), with potential drivers including ad spend on demand side platform (dsp_spend) and search results (sp_spend), and price promotion (discount)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "6ed87c2d-1766-4a22-89e5-72f5ebeaef75",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "comparison_df = compare_metrics(df_new, df_old, ['sale', 'dpv', 'dsp_spend',  'sp_spend', 'discount'])\n",
+    "print(comparison_df)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "1ffd24ec",
+   "metadata": {},
+   "source": [
+    "## 2. Draw causal graph"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a26f4482",
+   "metadata": {},
+   "source": [
+    "### 2.1.Set up basic causal graphs \n",
+    "\n",
+    "In the first step, we make use of our domain knowledge that all the ad investment and the shopping events can be potential causes of product page views and sale, but not vice versa. Further, detail page views can also lead to sales, regardless of ad investment. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "6be2afc6",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "edges = []\n",
+    "for col in df.columns:\n",
+    "    if 'spend' in col:\n",
+    "        edges.append((col, 'dpv'))\n",
+    "        edges.append((col, 'sale'))\n",
+    "edges.append(('special_shopping_event', 'dpv')) \n",
+    "edges.append(('other_shopping_event', 'dpv'))\n",
+    "edges.append(('special_shopping_event', 'sale')) \n",
+    "edges.append(('other_shopping_event', 'sale'))\n",
+    "edges.append(('discount', 'sale')) \n",
+    "edges.append(('dpv', 'sale'))\n",
+    "\n",
+    "causal_graph = nx.DiGraph(edges)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "bed7a9e2",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "plot(causal_graph)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "96cf0a02",
+   "metadata": {},
+   "source": [
+    "It is unlikely that all these edges are significant. Let's prune some potential causes in the next step. This is to have a more refined causal graph. i.e, closer to the truth. "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d3fd49f7",
+   "metadata": {
+    "tags": []
+   },
+   "source": [
+    "### 2.2. Prune nodes and edges "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a66222c5",
+   "metadata": {},
+   "source": [
+    "One way to prune insignificant causal connections is conducting causal minimality tests through statistical dependence tests. The causality minimality test rules out any parent-child edge ($X\\to Y$) for a node $Y$ if $Y$ is conditionally independent of $X$ given other parents of $Y$. If that is the case, node $X$ does not provide additional information on top of the other parents of $Y$. In layman's language, some ads may not provide incremental information in the presence of others. Thus, we can remove those edges of $X \\to Y$. Note that the test is adjusted for multihypothesis testing to guarantee a consistent false discovery rate."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "bb612e8e",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "def test_causal_minimality(graph, target, data, method='kernel', significance_level=0.10, fdr_control_method='fdr_bh'):\n",
+    "    p_vals = []\n",
+    "    all_parents = list(graph.predecessors(target))\n",
+    "    for node in all_parents:\n",
+    "        tmp_conditioning_set = list(all_parents)\n",
+    "        tmp_conditioning_set.remove(node)\n",
+    "        p_vals.append(gcm.independence_test(data[target].to_numpy(), data[node].to_numpy(), data[tmp_conditioning_set].to_numpy(), method=method))    \n",
+    "        \n",
+    "    if fdr_control_method is not None:\n",
+    "        p_vals = multipletests(p_vals, significance_level, method=fdr_control_method)[1]\n",
+    "        \n",
+    "    nodes_above_threshold = []\n",
+    "    nodes_below_threshold = []\n",
+    "    for i, node in enumerate(all_parents):\n",
+    "        if p_vals[i] < significance_level:\n",
+    "            nodes_above_threshold.append(node)            \n",
+    "        else:\n",
+    "            nodes_below_threshold.append(node)\n",
+    "            \n",
+    "    print(\"Significant connection:\", [(n, target) for n in sorted(nodes_above_threshold)])\n",
+    "    print(\"Insignificant connection:\", [(n, target) for n in sorted(nodes_below_threshold)])\n",
+    "    \n",
+    "    return sorted(nodes_below_threshold)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d1ca09a1-9dd0-41fe-8884-576e510a2daf",
+   "metadata": {
+    "tags": []
+   },
+   "source": [
+    "Then we remove insignificant edges and their associated nodes, resulting a refined causal graph."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a24b69ad",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "for insignificant_parent in test_causal_minimality(causal_graph, 'sale', df):\n",
+    "    causal_graph.remove_edge(insignificant_parent, 'sale')\n",
+    "\n",
+    "for insignificant_parent in test_causal_minimality(causal_graph, 'dpv', df):\n",
+    "    causal_graph.remove_edge(insignificant_parent, 'dpv')\n",
+    "\n",
+    "cols_to_remove=[]\n",
+    "cols_to_remove.extend([node for node in causal_graph.nodes if causal_graph.in_degree(node) + causal_graph.out_degree(node) == 0])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "34b2eda5",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "causal_graph.remove_nodes_from(set(cols_to_remove))\n",
+    "plot(causal_graph)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "b165f1c3-d63b-4e3e-93f7-786da73ad60f",
+   "metadata": {},
+   "source": [
+    "Interestingly, the 'other_shopping_event' variable has no significant impact on either 'dpv' or 'sale'."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "630fed0a",
+   "metadata": {},
+   "source": [
+    "## 3. Fit causal graph "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "4d7468ec",
+   "metadata": {},
+   "source": [
+    "Next, we need to assign functional causal models (FCMs) to each node, which describe the data generation process from x to y with an error term. The auto assignment method compares different prediction models for each node and takes the one with the smallest error. The `quality` parameter controls the set of model types that are tested, where `BETTER` indicates some of the most common regression and classification models, such as trees, support vector regression etc. You can also use `GOOD` which fits fewer models to speed up, or `BEST` that is computationally heavy (and requres AutoGluon to be installed). After assigning the models, we can fit them to the data:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "ecc52227",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "causal_model = gcm.StructuralCausalModel(causal_graph)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "36362ed7",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "print(gcm.auto.assign_causal_mechanisms(causal_model, df, quality=gcm.auto.AssignmentQuality.BETTER))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "ea648e8c",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "gcm.fit(causal_model, df)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "83d92578",
+   "metadata": {},
+   "source": [
+    "## 4. Identify causal drivers for KPI changes "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "202e06e5",
+   "metadata": {},
+   "source": [
+    "To answer the question on drivers for past growth, we test if any of the potential drivers lead to KPI changes by comparing the data from 2023 and 2024. Below we quantify the contribution to changes in the mean of our KPI, but one can similarly estimate the contributions with respect to the median or variance etc. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "70afd219-707f-4c73-a4fe-807920b78613",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "def calculate_difference_estimation(causal_model, df_old, df_new, target_column, difference_estimation_func, num_samples=2000, confidence_level=0.90, num_bootstrap_resamples=4):\n",
+    "\n",
+    "    difference_contribs, uncertainty_contribs = gcm.confidence_intervals(\n",
+    "        lambda : gcm.distribution_change(causal_model, \n",
+    "                                          df_old, \n",
+    "                                          df_new, \n",
+    "                                          target_column, \n",
+    "                                          num_samples=num_samples,\n",
+    "                                          difference_estimation_func=difference_estimation_func,\n",
+    "                                          shapley_config=gcm.shapley.ShapleyConfig(approximation_method=gcm.shapley.ShapleyApproximationMethods.PERMUTATION, num_permutations=50)),\n",
+    "        confidence_level=confidence_level,\n",
+    "        num_bootstrap_resamples=num_bootstrap_resamples\n",
+    "    )\n",
+    "\n",
+    "    return difference_contribs, uncertainty_contribs\n",
+    "\n",
+    "median_diff_contribs, median_diff_uncertainty = calculate_difference_estimation(causal_model, df_old, df_new, 'sale', lambda x1, x2: np.mean(x2) - np.mean(x1))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "18a8208a-2e1b-4048-a15b-56d8bd9e7768",
+   "metadata": {},
+   "source": [
+    "Then we plot drivers' contribution to KPI changes visually, followed by a tabular format. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "c7e42600",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "gcm.util.bar_plot(median_diff_contribs, median_diff_uncertainty, 'Contribution', figure_size=(10,5))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "6d9d2ba9-e78d-406d-beed-f2895aa05d65",
+   "metadata": {},
+   "source": [
+    "Here, we see that 'sp_spend' has the larges contribution to the change in the mean of 'sale', while the 'discount' and 'special_shopping_event' has little to none contribution. This aligns with the way how the data was generated.\n",
+    "\n",
+    "Taking a look at the tabular overview to look for significance based on the confidence intervals:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "4cc6ac14",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "def show_tabular(median_contribs, uncertainty_contribs):\n",
+    "    rows = []\n",
+    "    for node, median_contrib in median_contribs.items():\n",
+    "        rows.append(dict(node=node, median=median_contrib, lb=uncertainty_contribs[node][0], ub=uncertainty_contribs[node][1]))\n",
+    "    df = pd.DataFrame(rows).set_index('node')\n",
+    "    df.rename(columns=dict(median='median', lb='lb', ub='ub'), inplace=True)\n",
+    "    return df\n",
+    "    \n",
+    "# show_tabular(median_contribs, uncertainty_contribs)\n",
+    "result_df = pd.DataFrame(show_tabular(median_diff_contribs, median_diff_uncertainty))\n",
+    "result_df"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d2ab2655-0d80-4112-8e65-1a27a3622b37",
+   "metadata": {},
+   "source": [
+    "Next, we remove all variables that have a 0 as part of their confidence interval or are negative, i.e., do not have a clear significant positive contribution:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "85396307-7dee-4606-909b-b0c24900a7a9",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "def filter_significant_rows(result_df, direction, ub_col, lb_col):\n",
+    "\n",
+    "    if direction == 'positive':\n",
+    "        significant_rows = result_df[(result_df[ub_col] > 0) & (result_df[lb_col] > 0)]\n",
+    "    elif direction == 'negative':\n",
+    "        significant_rows = result_df[(result_df[ub_col] < 0) & (result_df[lb_col] < 0)]\n",
+    "    else:\n",
+    "        raise ValueError(\"Invalid direction. Choose 'positive' or 'negative'.\")\n",
+    "\n",
+    "    return significant_rows"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "81e7ce4c-3a6e-49df-a636-5fd226f5dfd9",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "positive_significant_rows = filter_significant_rows(result_df, 'positive', 'ub', 'lb')\n",
+    "positive_significant_rows"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "65649c3b-a290-49f3-af4b-5086dc9a156f",
+   "metadata": {},
+   "source": [
+    "This tells us, 'dsp_spend' and 'sp_spend' had a significantly positive contribution to the shift in 'sale'."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "221a3f07-f04c-4f0d-95bf-7cb0199b3e48",
+   "metadata": {
+    "tags": []
+   },
+   "source": [
+    "## 5. Optimal intervention"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "5908d58e-a928-4a85-9a72-2ec2a53fa3d0",
+   "metadata": {},
+   "source": [
+    "Section 4 above helps us to understand drivers for past growth. Now, looking forward to business planning, we conduct interventions to understand incremental contributions to KPIs. Intuitively, the spend types resulting in higher returns should be doubled down on. Here, we explicitly remove 'sale', 'dpv' and 'special_shopping_event' as a possible intervention targets."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "b6bee9e7-ed99-4cbc-9c70-6b0552de4338",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "def intervention_influence(causal_model, target, step_size=1, non_interveneable_nodes=None, confidence_level=0.95, prints=False, threshold_insignificant=0.0001):\n",
+    "    progress_bar_was_on = gcm.config.show_progress_bars\n",
+    "\n",
+    "    if progress_bar_was_on:\n",
+    "        gcm.config.disable_progress_bars()\n",
+    "    \n",
+    "    causal_effects = {}\n",
+    "    causal_effects_confidence_interval = {}\n",
+    "    capped_effects = []\n",
+    "\n",
+    "    if non_interveneable_nodes is None:\n",
+    "        non_interveneable_nodes = []\n",
+    "    \n",
+    "    for node in causal_model.graph.nodes:\n",
+    "        if node in non_interveneable_nodes:\n",
+    "            continue\n",
+    "\n",
+    "        # Define interventions\n",
+    "        def intervention(x):\n",
+    "            return x + step_size\n",
+    "\n",
+    "        def non_intervention(x):\n",
+    "            return x\n",
+    "            \n",
+    "        interventions_alternative = {node: intervention}\n",
+    "        interventions_reference = {node: non_intervention}\n",
+    "\n",
+    "        effect = gcm.confidence_intervals(\n",
+    "            partial(gcm.average_causal_effect,\n",
+    "                    causal_model=causal_model,\n",
+    "                    target_node=target,\n",
+    "                    interventions_alternative=interventions_alternative,\n",
+    "                    interventions_reference=interventions_reference,\n",
+    "                    num_samples_to_draw=10000),\n",
+    "            n_jobs=-1,\n",
+    "            num_bootstrap_resamples=40,\n",
+    "            confidence_level=confidence_level)\n",
+    "\n",
+    "        causal_effects[node] = effect[0][0]\n",
+    "        causal_effects_confidence_interval[node] = effect[1].squeeze()\n",
+    "\n",
+    "        # Apply non-negativity constraint - Here, spend cannot be negative. However, small negative values can happen in the analysis due to misspecifications.\n",
+    "        if  node.endswith('_spend') and causal_effects[node] < 0:\n",
+    "            causal_effects[node] = 0\n",
+    "            causal_effects_confidence_interval[node] = [np.nan, np.nan]\n",
+    "\n",
+    "    if progress_bar_was_on:\n",
+    "        gcm.config.enable_progress_bars()\n",
+    "\n",
+    "    print(causal_effects)\n",
+    "    if prints:\n",
+    "        for node in sorted(causal_effects, key=causal_effects.get, reverse=True):\n",
+    "            if abs(causal_effects[node]) < threshold_insignificant:\n",
+    "                print(f\"{'Increasing' if step_size > 0 else 'Decreasing'} {node} by {step_size} has no significant effect on {target}.\")\n",
+    "            else:\n",
+    "                print(f\"{'Increasing' if step_size > 0 else 'Decreasing'} {node} by {step_size} {'increases' if causal_effects[node] > 0 else 'decreases'} {target} \"\n",
+    "                        f\"by around {causal_effects[node]} with a confidence interval ({confidence_level * 100}%) of {causal_effects_confidence_interval[node]}.\")\n",
+    "\n",
+    "    all_variables = list(causal_effects.keys())\n",
+    "    all_causal_effects = [causal_effects[key] for key in all_variables]\n",
+    "    all_lower_bounds = [causal_effects_confidence_interval[key][0] for key in all_variables]\n",
+    "    all_upper_bounds = [causal_effects_confidence_interval[key][1] for key in all_variables]\n",
+    "    result_df = pd.DataFrame({'Variable': all_variables, \n",
+    "                              'Causal Effect': all_causal_effects, \n",
+    "                              'Lower CI': all_lower_bounds, \n",
+    "                              'Upper CI': all_upper_bounds},\n",
+    "                             index = all_variables)\n",
+    "    \n",
+    "    return result_df"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "5c42552e-9349-4182-b404-eab91ab70a8f",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "interv_result = intervention_influence(causal_model=causal_model, target='sale', non_interveneable_nodes=['dpv', 'sale', 'special_shopping_event'], prints=True)\n",
+    "interv_result"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "8bce37de-ca68-42ce-aac1-6a86d7834320",
+   "metadata": {},
+   "source": [
+    "We similarly filter to positively significant interventions, i.e., the spending with statistically significant positive returns. The interpretation is, for each dollar spent on one type of ad, we receive X amount in return, with X indicated in the 'Causal Effect' column. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "f5f2e83a-3fed-4a75-9936-fd817153367a",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "filter_significant_rows(interv_result, 'positive', 'Upper CI', 'Lower CI')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "64f11dbf-cf72-42fa-a945-4450042c8588",
+   "metadata": {},
+   "source": [
+    "This tells us that there is a clear benefit in doubling down on 'sp_spend' and 'dsp_spend'. Note that the quantitative numbers here can be off due to model misspecifications, but they nevertheless provide some helpful insights."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "bb5a679d-b0c9-48c0-ba2d-9f9654491370",
+   "metadata": {},
+   "source": [
+    "## Summary"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "532c4ee0-9b9a-48c0-9e49-d7b093116bb9",
+   "metadata": {},
+   "source": [
+    "This advertiser comes to us to understand what drove past growth. Starting with a causal graph drawn from domain knowledge, we refined the graph to prune unnecessary nodes and edges. Then we fit a causal attribution model in Section 4 to test which types of investment changes lead to KPI growth. We find that increases in both dsp_spend and sp_spend contribute to KPIs growth in 2024 vs. 2023. This conclusion helps the analytics team to understand root causes of past sales growth. Looking forward to future budget planning, we conducted interventions to understand incremental return on investment (iROI), and identify those types of spend way above $1 to double down on."
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.9.18"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

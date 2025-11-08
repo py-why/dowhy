@@ -1,0 +1,605 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Finding the Root Cause of Elevated Latencies in a Microservice Architecture\n",
+    "\n",
+    "In this case study, we identify the root causes of \"unexpected\" observed latencies in cloud services that empower an\n",
+    "online shop. We focus on the process of placing an order, which involves different services to make sure that\n",
+    "the placed order is valid, the customer is authenticated, the shipping costs are calculated correctly, and the shipping\n",
+    "process is initiated accordingly. The dependencies of the services is shown in the graph below."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "<img src=\"./microservice-architecture-dependencies.png\" width=\"800\"/>"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "This kind of dependency graph could be obtained from services like [Amazon X-Ray](https://aws.amazon.com/xray/) or\n",
+    "defined manually based on the trace structure of requests.\n",
+    "\n",
+    "We assume that the dependency graph above is correct and that we are able to measure the latency (in seconds) of each node for an order request. In case of `Website`, the latency would represent the time until a confirmation of the order is shown. For simplicity, let us assume that the services are synchronized, i.e., a service has to wait for downstream services in order to proceed. Further, we assume that two nodes are not impacted by unobserved factors (hidden confounders) at the same time (i.e., causal sufficiency). Seeing that, for instance, network traffic affects multiple services, this assumption might be typically violated in a real-world scenario. However, weak confounders can be neglected, while stronger ones (like network traffic) could falsely render multiple nodes as root causes. Generally, we can only identify causes that are part of the data.\n",
+    "\n",
+    "Under these assumptions, the observed latency of a node is defined by the latency of the node itself (intrinsic latency), and the sum over all latencies of direct child nodes. This could also include calling a child node multiple times.\n",
+    "\n",
+    "Let us load data with observed latencies of each node."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import pandas as pd\n",
+    "\n",
+    "normal_data = pd.read_csv(\"rca_microservice_architecture_latencies.csv\")\n",
+    "normal_data.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Let us also take a look at the pair-wise scatter plots and histograms of the variables."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "axes = pd.plotting.scatter_matrix(normal_data, figsize=(10, 10), c='#ff0d57', alpha=0.2, hist_kwds={'color':['#1E88E5']});\n",
+    "for ax in axes.flatten():\n",
+    "    ax.xaxis.label.set_rotation(90)\n",
+    "    ax.yaxis.label.set_rotation(0)\n",
+    "    ax.yaxis.label.set_ha('right')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "In the matrix above, the plots on the diagonal line are histograms of variables, whereas those outside of the diagonal are scatter plots of pair of variables. The histograms of services without a dependency, namely `Customer DB`, `Product DB`, `Order DB` and `Shipping Cost Service`, have shapes similar to one half of a Gaussian distribution. The scatter plots of various pairs of variables (e.g., `API` and `www`, `www` and `Website`, `Order Service` and `Order DB`) show linear relations. We shall use this information shortly to assign generative causal models to nodes in the causal graph."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Setting up the causal model\n",
+    "\n",
+    "If we look at the `Website` node, it becomes apparent that the latency we experience there depends on the latencies of\n",
+    "all downstream nodes. In particular, if one of the downstream nodes takes a long time, `Website` will also take a\n",
+    "long time to show an update. Seeing this, the causal graph of the latencies can be built by inverting the arrows of the\n",
+    "service graph."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import networkx as nx\n",
+    "from dowhy import gcm\n",
+    "from dowhy.utils import plot, bar_plot\n",
+    "gcm.util.general.set_random_seed(0)\n",
+    "\n",
+    "causal_graph = nx.DiGraph([('www', 'Website'),\n",
+    "                           ('Auth Service', 'www'),\n",
+    "                           ('API', 'www'),\n",
+    "                           ('Customer DB', 'Auth Service'),\n",
+    "                           ('Customer DB', 'API'),\n",
+    "                           ('Product Service', 'API'),\n",
+    "                           ('Auth Service', 'API'),\n",
+    "                           ('Order Service', 'API'),\n",
+    "                           ('Shipping Cost Service', 'Product Service'),\n",
+    "                           ('Caching Service', 'Product Service'),\n",
+    "                           ('Product DB', 'Caching Service'),\n",
+    "                           ('Customer DB', 'Product Service'),\n",
+    "                           ('Order DB', 'Order Service')])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "plot(causal_graph, figure_size=[13, 13])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "> Here, we are interested in the causal relationships between latencies of services rather than the order of calling the services."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We will use the information from the pair-wise scatter plots and histograms to manually assign causal models. In particular, we assign half-Normal distributions to the root nodes (i.e., `Customer DB`, `Product DB`, `Order DB` and `Shipping Cost Service`). For non-root nodes, we assign linear additive noise models (which scatter plots of many parent-child pairs indicate) with empirical distribution of noise terms."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from scipy.stats import halfnorm\n",
+    "\n",
+    "causal_model = gcm.StructuralCausalModel(causal_graph)\n",
+    "\n",
+    "for node in causal_graph.nodes:\n",
+    "    if len(list(causal_graph.predecessors(node))) > 0:\n",
+    "        causal_model.set_causal_mechanism(node, gcm.AdditiveNoiseModel(gcm.ml.create_linear_regressor()))\n",
+    "    else:\n",
+    "        causal_model.set_causal_mechanism(node, gcm.ScipyDistribution(halfnorm))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "> Alternatively, we can also automate this **if** we don't have prior knowledge or are not familiar with the statistical implications:\n",
+    "```\n",
+    "gcm.auto.assign_causal_mechanisms(causal_model, normal_data)\n",
+    "```"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Before we contiue with the first scenario, let's first evaluate our causal model:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "gcm.fit(causal_model, normal_data)\n",
+    "print(gcm.evaluate_causal_model(causal_model, normal_data))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "This confirms the goodness of our causal model. However, we also see that for two nodes ('Product Service' and 'Caching Service'), the additive noise model assumption is violated. This also aligns with the data generation process, where these two nodes follow non-additive noise models. As we see in the following, most of the algorithms are still fairly robust against such violations or poor performance of the causal mechanism."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "> For more detailed insights, set compare_mechanism_baselines to True. However, this will take significantly longer."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Scenario 1: Observing a single outlier\n",
+    "\n",
+    "Suppose we get an alert from our system where a customer experienced an unusually high latency when\n",
+    "an order is placed. Our task is now to investigate this issue and to find the root cause of this behaviour.\n",
+    "\n",
+    "We first load the latency to the corresponding alert."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": false,
+    "jupyter": {
+     "outputs_hidden": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "outlier_data = pd.read_csv(\"rca_microservice_architecture_anomaly.csv\")\n",
+    "outlier_data"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We are interested in the increased latency of `Website` which the customer directly experienced."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": false,
+    "jupyter": {
+     "outputs_hidden": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "outlier_data.iloc[0]['Website']-normal_data['Website'].mean()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "For this customer, `Website` was roughly 2 seconds slower than for other customers on average. Why?"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Attributing an outlier latency at a target service to other services\n",
+    "\n",
+    "To answer why `Website` was slower for this customer, we attribute the outlier latency at `Website` to upstream services in the causal graph. We refer the reader to [Janzing et al., 2019](https://arxiv.org/abs/1912.02724) for scientific details behind this API. We will calculate a 95% bootstrapped confidence interval of our attributions. In particular, we learn the causal models from a random subset of normal data and attribute the target outlier score using those models, repeating the process 10 times. This way, the confidence intervals we report account for (a) the uncertainty of our causal models as well as (b) the uncertainty in the attributions due to the variance in the samples drawn from those causal models."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": false,
+    "jupyter": {
+     "outputs_hidden": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "gcm.config.disable_progress_bars() # to disable print statements when computing Shapley values\n",
+    "\n",
+    "median_attribs, uncertainty_attribs = gcm.confidence_intervals(\n",
+    "    gcm.fit_and_compute(gcm.attribute_anomalies,\n",
+    "                        causal_model,\n",
+    "                        normal_data,\n",
+    "                        target_node='Website',\n",
+    "                        anomaly_samples=outlier_data),\n",
+    "    num_bootstrap_resamples=10)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "> By default, a quantile-based anomaly score is used that estimates the negative log-probability of a sample being\n",
+    "normal. This is, the higher the probabilty of an outlier, the larger the score. The library offers different kinds of outlier scoring functions, such as the <a href=\"https://en.wikipedia.org/wiki/Standard_score\">z-score</a>, where the mean is the expected value based on the causal model."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Let us visualize the attributions along with their uncertainty in a bar plot."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": false,
+    "jupyter": {
+     "outputs_hidden": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "bar_plot(median_attribs, uncertainty_attribs, 'Attribution Score')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The attributions indicate that `Caching Service` is the main driver of high latency in `Website` which is expected as we perturb the causal mechanism of `Caching Service` to generate an outlier latency in `Website` (see Appendix below). Interestingly, `Customer DB` has a negative contribution, indicating that it was particularly fast, decreasing the outlier in the `Website`. Note that some of the attributions are also due to model misspecifications. For instance, the parent child-relationship between `Caching Service` and `Product DB` seems to indicate two mechanisms. This could be due to an unobserved binary variable (e.g., Cache hit/miss) that has a multiplicative effect on `Caching Service`. An additive noise cannot capture the multiplicative effect of this unobserved variable."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Scenario 2: Observing permanent degradation of latencies\n",
+    "\n",
+    "In the previous scenario, we attributed a *single* outlier latency in `Website` to services that are nodes in the causal graph, which is useful for anecdotal deep dives. Next, we consider a scenario where we observe a permanent degradation of latencies and we want to understand its drivers. In particular, we attribute the change in the average latency of `Website` to upstream nodes.\n",
+    "\n",
+    "Suppose we get additional 1000 requests with higher latencies as follows."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "outlier_data = pd.read_csv(\"rca_microservice_architecture_anomaly_1000.csv\")\n",
+    "outlier_data.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We are interested in the increased latency of `Website` on average for 1000 requests which the customers directly experienced."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "outlier_data['Website'].mean() - normal_data['Website'].mean()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The _Website_ is slower on average (by almost 2 seconds) than usual. Why?"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Attributing permanent degradation of latencies at a target service to other services\n",
+    "\n",
+    "To answer why `Website` is slower for those 1000 requests compared to before, we attribute the change in the average latency of `Website` to services upstream in the causal graph. We refer the reader to [Budhathoki et al., 2021](https://assets.amazon.science/b6/c0/604565d24d049a1b83355921cc6c/why-did-the-distribution-change.pdf) for scientific details behind this API. As in the previous scenario, we will calculate a 95% bootstrapped confidence interval of our attributions and visualize them in a bar plot."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "\n",
+    "median_attribs, uncertainty_attribs = gcm.confidence_intervals(\n",
+    "    lambda : gcm.distribution_change(causal_model,\n",
+    "                                     normal_data.sample(frac=0.6),\n",
+    "                                     outlier_data.sample(frac=0.6),\n",
+    "                                     'Website',\n",
+    "                                     difference_estimation_func=lambda x, y: np.mean(y) - np.mean(x)),\n",
+    "    num_bootstrap_resamples = 10)\n",
+    "\n",
+    "bar_plot(median_attribs, uncertainty_attribs, 'Attribution Score')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We observe that `Caching Service` is the root cause that slowed down `Website`. In particular, the method we used tells us that the change in the causal mechanism (i.e., the input-output behaviour) of `Caching Service` (e.g., Caching algorithm) slowed down `Website`. This is also expected as the outlier latencies were generated by changing the causal mechanism of `Caching Service` (see Appendix below)."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Scenario 3: Simulating the intervention of shifting resources\n",
+    "\n",
+    "Next, let us imagine a scenario where permanent degradation has happened as in scenario 2 and we've successfully identified `Caching Service` as the root cause. Furthermore, we figured out that a recent deployment of the `Caching Service` contained a bug that is causing the overloaded hosts. A proper fix must be deployed, or the previous deployment must be rolled back. But, in the meantime, could we mitigate the situation by shifting over some resources from `Shipping Service` to `Caching Service`? And would that help? Before doing it in reality, let us simulate it first and see whether it improves the situation.\n",
+    "\n",
+    "<img src=\"shifting-resources.png\" width=\"600\"/>\n",
+    "\n",
+    "Let’s perform an intervention where we say we can reduce the average time of `Caching Service` by 1s. But at the same time we buy this speed-up by an average slow-down of 2s in `Shipping Cost Service`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "median_mean_latencies, uncertainty_mean_latencies = gcm.confidence_intervals(\n",
+    "    lambda : gcm.fit_and_compute(gcm.interventional_samples,\n",
+    "                                 causal_model,\n",
+    "                                 outlier_data,\n",
+    "                                 interventions = {\n",
+    "                                    \"Caching Service\": lambda x: x-1,\n",
+    "                                    \"Shipping Cost Service\": lambda x: x+2\n",
+    "                                 },\n",
+    "                                 observed_data=outlier_data)().mean().to_dict(),\n",
+    "    num_bootstrap_resamples=10)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Has the situation improved? Let's visualize the results."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "avg_website_latency_before = outlier_data.mean().to_dict()['Website']\n",
+    "bar_plot(dict(before=avg_website_latency_before, after=median_mean_latencies['Website']),\n",
+    "                  dict(before=np.array([avg_website_latency_before, avg_website_latency_before]), after=uncertainty_mean_latencies['Website']),\n",
+    "                  ylabel='Avg. Website Latency',\n",
+    "                  figure_size=(3, 2),\n",
+    "                  bar_width=0.4,\n",
+    "                  xticks=['Before', 'After'],\n",
+    "                  xticks_rotation=45)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Indeed, we do get an improvement by about 1s. We’re not back at normal operation, but we’ve mitigated part of the problem. From here, maybe we can wait until a proper fix is deployed."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Appendix: Data generation process\n",
+    "\n",
+    "The scenarios above work on synthetic data. The normal data was generated using the following functions:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from scipy.stats import truncexpon, halfnorm\n",
+    "\n",
+    "\n",
+    "def create_observed_latency_data(unobserved_intrinsic_latencies):\n",
+    "    observed_latencies = {}\n",
+    "    observed_latencies['Product DB'] = unobserved_intrinsic_latencies['Product DB']\n",
+    "    observed_latencies['Customer DB'] = unobserved_intrinsic_latencies['Customer DB']\n",
+    "    observed_latencies['Order DB'] = unobserved_intrinsic_latencies['Order DB']\n",
+    "    observed_latencies['Shipping Cost Service'] = unobserved_intrinsic_latencies['Shipping Cost Service']\n",
+    "    observed_latencies['Caching Service'] = np.random.choice([0, 1], size=(len(observed_latencies['Product DB']),),\n",
+    "                                                             p=[.5, .5]) * \\\n",
+    "                                            observed_latencies['Product DB'] \\\n",
+    "                                            + unobserved_intrinsic_latencies['Caching Service']\n",
+    "    observed_latencies['Product Service'] = np.maximum(np.maximum(observed_latencies['Shipping Cost Service'],\n",
+    "                                                                  observed_latencies['Caching Service']),\n",
+    "                                                       observed_latencies['Customer DB']) \\\n",
+    "                                            + unobserved_intrinsic_latencies['Product Service']\n",
+    "    observed_latencies['Auth Service'] = observed_latencies['Customer DB'] \\\n",
+    "                                         + unobserved_intrinsic_latencies['Auth Service']\n",
+    "    observed_latencies['Order Service'] = observed_latencies['Order DB'] \\\n",
+    "                                          + unobserved_intrinsic_latencies['Order Service']\n",
+    "    observed_latencies['API'] = observed_latencies['Product Service'] \\\n",
+    "                                + observed_latencies['Customer DB'] \\\n",
+    "                                + observed_latencies['Auth Service'] \\\n",
+    "                                + observed_latencies['Order Service'] \\\n",
+    "                                + unobserved_intrinsic_latencies['API']\n",
+    "    observed_latencies['www'] = observed_latencies['API'] \\\n",
+    "                                + observed_latencies['Auth Service'] \\\n",
+    "                                + unobserved_intrinsic_latencies['www']\n",
+    "    observed_latencies['Website'] = observed_latencies['www'] \\\n",
+    "                                    + unobserved_intrinsic_latencies['Website']\n",
+    "\n",
+    "    return pd.DataFrame(observed_latencies)\n",
+    "\n",
+    "\n",
+    "def unobserved_intrinsic_latencies_normal(num_samples):\n",
+    "    return {\n",
+    "        'Website': truncexpon.rvs(size=num_samples, b=3, scale=0.2),\n",
+    "        'www': truncexpon.rvs(size=num_samples, b=2, scale=0.2),\n",
+    "        'API': halfnorm.rvs(size=num_samples, loc=0.5, scale=0.2),\n",
+    "        'Auth Service': halfnorm.rvs(size=num_samples, loc=0.1, scale=0.2),\n",
+    "        'Product Service': halfnorm.rvs(size=num_samples, loc=0.1, scale=0.2),\n",
+    "        'Order Service': halfnorm.rvs(size=num_samples, loc=0.5, scale=0.2),\n",
+    "        'Shipping Cost Service': halfnorm.rvs(size=num_samples, loc=0.1, scale=0.2),\n",
+    "        'Caching Service': halfnorm.rvs(size=num_samples, loc=0.1, scale=0.1),\n",
+    "        'Order DB': truncexpon.rvs(size=num_samples, b=5, scale=0.2),\n",
+    "        'Customer DB': truncexpon.rvs(size=num_samples, b=6, scale=0.2),\n",
+    "        'Product DB': truncexpon.rvs(size=num_samples, b=10, scale=0.2)\n",
+    "    }\n",
+    "\n",
+    "\n",
+    "normal_data = create_observed_latency_data(unobserved_intrinsic_latencies_normal(10000))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "This simulates the latency relationships under the assumption of having synchronized services and that there are no\n",
+    "hidden aspects that impact two nodes at the same time. Furthermore, we assume that the Caching Service has to call through to the Product DB only in 50% of the cases (i.e., we have a 50% cache miss rate). Also, we assume that the Product Service can make calls in parallel to its downstream services Shipping Cost Service, Caching Service, and Customer DB and join the threads when all three service have returned."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "> We use <a href=\"https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.truncexpon.html\">truncated exponential</a> and\n",
+    "<a href=\"https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.halfnorm.html\">half-normal</a> distributions,\n",
+    "since their shapes are similar to distributions observed in real services."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The anomalous data is generated in the following way:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def unobserved_intrinsic_latencies_anomalous(num_samples):\n",
+    "    return {\n",
+    "        'Website': truncexpon.rvs(size=num_samples, b=3, scale=0.2),\n",
+    "        'www': truncexpon.rvs(size=num_samples, b=2, scale=0.2),\n",
+    "        'API': halfnorm.rvs(size=num_samples, loc=0.5, scale=0.2),\n",
+    "        'Auth Service': halfnorm.rvs(size=num_samples, loc=0.1, scale=0.2),\n",
+    "        'Product Service': halfnorm.rvs(size=num_samples, loc=0.1, scale=0.2),\n",
+    "        'Order Service': halfnorm.rvs(size=num_samples, loc=0.5, scale=0.2),\n",
+    "        'Shipping Cost Service': halfnorm.rvs(size=num_samples, loc=0.1, scale=0.2),\n",
+    "        'Caching Service': 2 + halfnorm.rvs(size=num_samples, loc=0.1, scale=0.1),\n",
+    "        'Order DB': truncexpon.rvs(size=num_samples, b=5, scale=0.2),\n",
+    "        'Customer DB': truncexpon.rvs(size=num_samples, b=6, scale=0.2),\n",
+    "        'Product DB': truncexpon.rvs(size=num_samples, b=10, scale=0.2)\n",
+    "    }\n",
+    "\n",
+    "outlier_data = create_observed_latency_data(unobserved_intrinsic_latencies_anomalous(1000))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Here, we significantly increased the average time of the *Caching Service* by two seconds, which coincides with our\n",
+    "results from the RCA. Note that a high latency in *Caching Service* would lead to a constantly higher latency in upstream\n",
+    "services. In particular, customers experience a higher latency than usual."
+   ]
+  }
+ ],
+ "metadata": {
+  "instance_type": "ml.t3.medium",
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.9.18"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}

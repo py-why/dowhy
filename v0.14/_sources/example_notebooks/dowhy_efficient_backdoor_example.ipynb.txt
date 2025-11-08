@@ -1,0 +1,612 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Finding optimal adjustment sets"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Preliminaries"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "This notebook illustrates the use of the algorithms developed in [Smucler, Sapienza and Rotnitzky (Biometrika, 2022)](https://arxiv.org/abs/1912.00306) and [Smucler and Rotnitzky (Journal of Causal Inference, 2022)](https://www.degruyter.com/document/doi/10.1515/jci-2022-0015/html) to compute backdoor sets that yield efficient estimators of interventional means and their contrasts (such as the ATE), under various constraints. We begin by recalling some definitions from these papers. We ommit most technical details, and point the reader to the original papers for them."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The **optimal backdoor set** is a backdoor set comprised of observable variables that yields non-parametric\n",
+    "estimators of the interventional mean with the smallest asymptotic variance\n",
+    "among those that are based on observable backdoor sets. This optimal backdoor\n",
+    "set always exists when no variables are latent, and the algorithm is guaranteed to compute\n",
+    "it in this case. Under a non-parametric graphical model with latent variables,\n",
+    "such a backdoor set can fail to exist. \n",
+    "\n",
+    "The **optimal minimal backdoor set** is a minimal backdoor set comprised of observable variables that yields non-parametric\n",
+    "estimators of the interventional mean with the smallest asymptotic variance\n",
+    "among those that are based on observable minimal backdoor sets.\n",
+    "\n",
+    "The **optimal minimum cost backdoor set** is a minimum cost backdoor set comprised of observable variables that yields non-parametric estimators of the interventional mean with the smallest asymptotic variance\n",
+    "among those that are based on observable minimum cost backdoor sets. The cost\n",
+    "of a backdoor set is defined as the sum of the costs of the variables that comprise it. Note that \n",
+    "when all costs are equal, the optimal minimum cost backdoor set is the optimal backdoor set among those that \n",
+    "have minimum cardinality.\n",
+    "\n",
+    "These various optimal backdoor sets are not only optimal under\n",
+    "non-parametric graphical models and non-parametric estimators of interventional mean,\n",
+    "but also under linear graphical models and OLS estimators, per results in [Henckel, Perkovic\n",
+    "and Maathuis (JRSS B, 2022)](https://arxiv.org/abs/1907.02435)."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### The design of an observational study"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from dowhy.causal_graph import CausalGraph\n",
+    "from dowhy.causal_identifier import AutoIdentifier, BackdoorAdjustment, EstimandType\n",
+    "from dowhy.graph import build_graph_from_str\n",
+    "from dowhy.utils.plotting import plot"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Consider the design of the following hypothetical observational study discussed in [Shrier & Platt (2008)](https://doi.org/10.1186/1471-2288-8-70). The aim of the study is to assess the\n",
+    "effect of warm-up exercises on injury after playing sports. Suppose that a researcher postulates\n",
+    "that the graph below represents a causal graphical model. The node warm-up is the treatment variable, which stands for the type of exercise an athlete performs prior to playing sports,\n",
+    "and the node injury stands for the outcome variable. \n",
+    "\n",
+    "Suppose that the goal of the study is to estimate and\n",
+    "compare the interventional means corresponding to different individualised treatment rules. Each\n",
+    "rule prescribes the type of warm-up exercise as a function of previous injury and team motivation. For example, one such rule could be to allocate a patient to perform soft warm-up excercises when she has previous injury = 1 and team motivation > 6, but any other (possibly randomised) function of previous injury and team motivation to set the treatment variable could be of interest. More formally, the goal of the study is, for some set of policies such as the aforementioned one, to estimate the mean of the outcome, in a world in which all patients are allocated to a treatment variant according to one of these policies. We will suppose moreover that due to practical limitations, the variables genetics, pre-grame proprioception,\n",
+    "intra-game proprioception and tissue weakness cannot be measured. Proprioception is an individual's ability to sense the movement, action, and location of their own bodies.\n",
+    "\n",
+    "To build the graph, we first create a string declaring the graph's nodes and edges. We then create a list of all observable variables, in this case, all variables in the graph except genetics, pre-game proprioception, intra-game proprioception and tissue weakness. We then pass all this information to the ```CausalGraph``` class, to create an instance of it."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "graph_str = \"\"\"graph[directed 1 node[id \"coach\" label \"coach\"]\n",
+    "                        node[id \"team motivation\" label \"team motivation\"]\n",
+    "                        node[id \"fitness\" label \"fitness\"]\n",
+    "                        node[id \"pre-game prop\" label \"pre-game prop\"]\n",
+    "                        node[id \"intra-game prop\" label \"intra-game prop\"]                       \n",
+    "                        node[id \"neuromusc fatigue\" label \"neuromusc fatigue\"]\n",
+    "                        node[id \"warm-up\" label \"warm-up\"]\n",
+    "                        node[id \"previous injury\" label \"previous injury\"]\n",
+    "                        node[id \"contact sport\" label \"contact sport\"]\n",
+    "                        node[id \"genetics\" label \"genetics\"]\n",
+    "                        node[id \"injury\" label \"injury\"]\n",
+    "                        node[id \"tissue disorder\" label \"tissue disorder\"]\n",
+    "                        node[id \"tissue weakness\" label \"tissue weakness\"]\n",
+    "                        edge[source \"coach\" target \"team motivation\"]\n",
+    "                        edge[source \"coach\" target \"fitness\"]\n",
+    "                        edge[source \"fitness\" target \"pre-game prop\"]\n",
+    "                        edge[source \"fitness\" target \"neuromusc fatigue\"]\n",
+    "                        edge[source \"team motivation\" target \"warm-up\"]\n",
+    "                        edge[source \"team motivation\" target \"previous injury\"]\n",
+    "                        edge[source \"pre-game prop\" target \"warm-up\"]\n",
+    "                        edge[source \"warm-up\" target \"intra-game prop\"]\n",
+    "                        edge[source \"contact sport\" target \"previous injury\"]\n",
+    "                        edge[source \"contact sport\" target \"intra-game prop\"]\n",
+    "                        edge[source \"intra-game prop\" target \"injury\"]\n",
+    "                        edge[source \"genetics\" target \"fitness\"]\n",
+    "                        edge[source \"genetics\" target \"neuromusc fatigue\"]\n",
+    "                        edge[source \"genetics\" target \"tissue disorder\"]\n",
+    "                        edge[source \"tissue disorder\" target \"neuromusc fatigue\"]\n",
+    "                        edge[source \"tissue disorder\" target \"tissue weakness\"]\n",
+    "                        edge[source \"neuromusc fatigue\" target \"intra-game prop\"]\n",
+    "                        edge[source \"neuromusc fatigue\" target \"injury\"]\n",
+    "                        edge[source \"tissue weakness\" target \"injury\"]\n",
+    "                        ]\n",
+    "\"\"\"\n",
+    "observed_node_names = [\n",
+    "    \"coach\",\n",
+    "    \"team motivation\",\n",
+    "    \"fitness\",\n",
+    "    \"neuromusc fatigue\",\n",
+    "    \"warm-up\",\n",
+    "    \"previous injury\",\n",
+    "    \"contact sport\",\n",
+    "    \"tissue disorder\",\n",
+    "    \"injury\",\n",
+    "]\n",
+    "treatment_name = \"warm-up\"\n",
+    "outcome_name = \"injury\"\n",
+    "G = build_graph_from_str(graph_str)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We can easily create a plot of the graph using the ```view_graph``` method."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "plot(G)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Next, we illustrate how to compute the backdoor sets defined in the preliminaries section for the example graph above, using the ```CausalIdentifier``` class. To compute the optimal backdoor set, optimal minimal backdoor set and optimal minimum cost backdoor set, we need to instantiate objects of the ```CausalIdentifier``` class, passing as ```method_name``` the values \"efficient-adjustment\", \"efficient-minimal-adjustment\" and \"efficient-mincost-adjustment\" respectively. Then, we need to call the ```identify_effect``` method, passing as an argument a list of conditional nodes, that is, the nodes that would be used to decide how to allocate treatment. As discussed above, in this example these nodes are previous injury and team motivation. For settings in which we are not interested in individualized interventions, we can just pass an empty list as conditional nodes."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "conditional_node_names = [\"previous injury\", \"team motivation\"]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ident_eff = AutoIdentifier(\n",
+    "    estimand_type=EstimandType.NONPARAMETRIC_ATE,\n",
+    "    backdoor_adjustment=BackdoorAdjustment.BACKDOOR_EFFICIENT,\n",
+    ")\n",
+    "print(\n",
+    "    ident_eff.identify_effect(\n",
+    "        graph=G, \n",
+    "        action_nodes=treatment_name, \n",
+    "        outcome_nodes=outcome_name,\n",
+    "        observed_nodes=observed_node_names,\n",
+    "        conditional_node_names=conditional_node_names\n",
+    "    )\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Thus, the optimal backdoor set is formed by previous injury, neuromusc fatigue, team motivation, tissue disorder and contact sport."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Similarly, we can compute the optimal minimal backdoor set."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ident_minimal_eff = AutoIdentifier(\n",
+    "    estimand_type=EstimandType.NONPARAMETRIC_ATE,\n",
+    "    backdoor_adjustment=BackdoorAdjustment.BACKDOOR_MIN_EFFICIENT,\n",
+    ")\n",
+    "print(\n",
+    "    ident_minimal_eff.identify_effect(\n",
+    "        graph=G, \n",
+    "        action_nodes=treatment_name, \n",
+    "        outcome_nodes=outcome_name, \n",
+    "        observed_nodes=observed_node_names,\n",
+    "        conditional_node_names=conditional_node_names\n",
+    "    )\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Finally, we can compute the optimal minimum cost backdoor set. Since this graph does not have any costs associated with its nodes, we will not pass any costs to ```identify_effect```. The method will raise a warning, set the costs to one, and compute the optimal minimum cost backdoor set, which as stated above, in this case coincides with the optimal backdoor set of minimum cardinality."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ident_mincost_eff = AutoIdentifier(\n",
+    "    estimand_type=EstimandType.NONPARAMETRIC_ATE,\n",
+    "    backdoor_adjustment=BackdoorAdjustment.BACKDOOR_MINCOST_EFFICIENT,\n",
+    ")\n",
+    "print(\n",
+    "    ident_mincost_eff.identify_effect(\n",
+    "        graph=G, \n",
+    "        action_nodes=treatment_name, \n",
+    "        outcome_nodes=outcome_name,\n",
+    "        observed_nodes=observed_node_names,\n",
+    "        conditional_node_names=conditional_node_names\n",
+    "    )\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Later, we will compute the optimal minimum cost backdoor set for a graph with costs associated with its nodes."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### An example in which sufficient conditions to guarantee the existence of an optimal backdoor set do not hold"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "[Smucler, Sapienza and Rotnitzky (Biometrika, 2022)](https://arxiv.org/abs/1912.00306) proved that when all variables are observable, or when all observable variables are ancestors of either the treatment, outcome or conditional nodes, then an optimal backdoor set can be found solely based on the graph, and provided an algorithm to compute it. This is the algorithm implemented in the examples above. \n",
+    "\n",
+    "However, there exist cases in which an observable optimal backdoor sets cannot be found solely using graphical criteria. For the graph below, [Rotnitzky and Smucler (JMLR, 2021)](https://jmlr.csail.mit.edu/papers/volume21/19-1026/19-1026.pdf) in their Example 5 showed that depending on the law generating the data, the optimal backdoor set could be formed by Z1 and Z2, or be the empty set. More precisely, they showed that there exist probability laws compatible with the graph under which {Z1, Z2} is the most efficient adjustment set, and other probability laws under which the empty set is the most efficient adjustment set; unfortunately one cannot tell from the graph alone which of the two will be better. \n",
+    "\n",
+    "Notice that in this graph, the aforementioned sufficient condition for the existence of an optimal backdoor set does not hold, since Z2 is observable but not an ancestor of treatment outcome or the conditional nodes (the empty set in this case).  \n",
+    "\n",
+    "On the other hand, [Smucler, Sapienza and Rotnitzky (Biometrika, 2022)](https://arxiv.org/abs/1912.00306) showed that optimal minimal and optimal minimum cost (cardinality) observable backdoor sets always exist, as long as there exists at least one backdoor set comprised of observable variables. That is, when the search is restricted to minimal or minimum cost (cardinality) backdoor sets, a situation such as the one described above cannot happen, and the most efficient backdoor set can always be detected based solely on graphical criteria.\n",
+    "\n",
+    "For this example, calling the ```identify_effect``` method of an instance of ```CausalIdentifier``` with attribute ```method_name``` equal to \"efficient-adjustment\" will raise an error. For this graph, the optimal minimal and the optimal minimum cardinality backdoor sets are equal to the empty set."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "graph_str = \"\"\"graph[directed 1 node[id \"X\" label \"X\"]\n",
+    "                        node[id \"Y\" label \"Y\"]\n",
+    "                        node[id \"Z1\" label \"Z1\"]\n",
+    "                        node[id \"Z2\" label \"Z2\"]\n",
+    "                        node[id \"U\" label \"U\"]                       \n",
+    "                        edge[source \"X\" target \"Y\"]\n",
+    "                        edge[source \"Z1\" target \"X\"]\n",
+    "                        edge[source \"Z1\" target \"Z2\"]\n",
+    "                        edge[source \"U\" target \"Z2\"]\n",
+    "                        edge[source \"U\" target \"Y\"]\n",
+    "                        ]\n",
+    "\"\"\"\n",
+    "observed_node_names = [\"X\", \"Y\", \"Z1\", \"Z2\"]\n",
+    "treatment_name = \"X\"\n",
+    "outcome_name = \"Y\"\n",
+    "G = build_graph_from_str(graph_str)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "In this example, the treatment intervention is static, thus there are no conditional nodes."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ident_eff = AutoIdentifier(\n",
+    "    estimand_type=EstimandType.NONPARAMETRIC_ATE,\n",
+    "    backdoor_adjustment=BackdoorAdjustment.BACKDOOR_EFFICIENT,\n",
+    ")\n",
+    "try:\n",
+    "    results_eff = ident_eff.identify_effect(graph=G, \n",
+    "                                            action_nodes=treatment_name, \n",
+    "                                            outcome_nodes=outcome_name,\n",
+    "                                            observed_nodes=observed_node_names)\n",
+    "except ValueError as e:\n",
+    "    print(e)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ident_eff = AutoIdentifier(\n",
+    "    estimand_type=EstimandType.NONPARAMETRIC_ATE,\n",
+    "    backdoor_adjustment=BackdoorAdjustment.BACKDOOR_MIN_EFFICIENT,\n",
+    ")\n",
+    "print(\n",
+    "    ident_minimal_eff.identify_effect(\n",
+    "        graph=G,\n",
+    "        action_nodes=treatment_name,\n",
+    "        outcome_nodes=outcome_name,\n",
+    "        observed_nodes=observed_node_names\n",
+    "    )\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ident_eff = AutoIdentifier(\n",
+    "    estimand_type=EstimandType.NONPARAMETRIC_ATE,\n",
+    "    backdoor_adjustment=BackdoorAdjustment.BACKDOOR_MINCOST_EFFICIENT,\n",
+    ")\n",
+    "print(\n",
+    "    ident_mincost_eff.identify_effect(\n",
+    "        graph=G,\n",
+    "        action_nodes=treatment_name,\n",
+    "        outcome_nodes=outcome_name,\n",
+    "        observed_nodes=observed_node_names\n",
+    "    )\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### An example in which there are no observable adjustment sets"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "In the graph below there are no adjustment sets comprised of only observable variables. In this setting, using any of the above methods will raise an error."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "graph_str = \"\"\"graph[directed 1 node[id \"X\" label \"X\"]\n",
+    "                        node[id \"Y\" label \"Y\"]\n",
+    "                        node[id \"U\" label \"U\"]                       \n",
+    "                        edge[source \"X\" target \"Y\"]\n",
+    "                        edge[source \"U\" target \"X\"]\n",
+    "                        edge[source \"U\" target \"Y\"]\n",
+    "                        ]\n",
+    "\"\"\"\n",
+    "observed_node_names = [\"X\", \"Y\"]\n",
+    "treatment_name = \"X\"\n",
+    "outcome_name = \"Y\"\n",
+    "G = build_graph_from_str(graph_str)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ident_eff = AutoIdentifier(\n",
+    "    estimand_type=EstimandType.NONPARAMETRIC_ATE,\n",
+    "    backdoor_adjustment=BackdoorAdjustment.BACKDOOR_EFFICIENT,\n",
+    ")\n",
+    "try:\n",
+    "    results_eff = ident_eff.identify_effect(\n",
+    "        graph=G,\n",
+    "        action_nodes=treatment_name,\n",
+    "        outcome_nodes=outcome_name,\n",
+    "        observed_nodes=observed_node_names\n",
+    "    )\n",
+    "except ValueError as e:\n",
+    "    print(e)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### An example with costs"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "This is the graph in Figures 1 and 2 of [Smucler and Rotnitzky (Journal of Causal Inference, 2022)](https://www.degruyter.com/document/doi/10.1515/jci-2022-0015/html). Here we assume that there are positive costs associated to observable variables."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "pycharm": {
+     "name": "#%%\n"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "graph_str = \"\"\"graph[directed 1 node[id \"L\" label \"L\"]\n",
+    "                        node[id \"X\" label \"X\"]\n",
+    "                        node[id \"K\" label \"K\"]\n",
+    "                        node[id \"B\" label \"B\"]\n",
+    "                        node[id \"Q\" label \"Q\"]\n",
+    "                        node[id \"R\" label \"R\"]\n",
+    "                        node[id \"T\" label \"T\"]\n",
+    "                        node[id \"M\" label \"M\"]\n",
+    "                        node[id \"Y\" label \"Y\"]\n",
+    "                        node[id \"U\" label \"U\"]\n",
+    "                        node[id \"F\" label \"F\"]\n",
+    "                        edge[source \"L\" target \"X\"]\n",
+    "                        edge[source \"X\" target \"M\"]\n",
+    "                        edge[source \"K\" target \"X\"]\n",
+    "                        edge[source \"B\" target \"K\"]\n",
+    "                        edge[source \"B\" target \"R\"]\n",
+    "                        edge[source \"Q\" target \"K\"]\n",
+    "                        edge[source \"Q\" target \"T\"]\n",
+    "                        edge[source \"R\" target \"Y\"]\n",
+    "                        edge[source \"T\" target \"Y\"]\n",
+    "                        edge[source \"M\" target \"Y\"]\n",
+    "                        edge[source \"U\" target \"Y\"]\n",
+    "                        edge[source \"U\" target \"F\"]\n",
+    "                        ]\n",
+    "                        \"\"\"\n",
+    "observed_node_names = [\"L\", \"X\", \"B\", \"K\", \"Q\", \"R\", \"M\", \"T\", \"Y\", \"F\"]\n",
+    "conditional_node_names = [\"L\"]\n",
+    "costs = [\n",
+    "    (\"L\", {\"cost\": 1}),\n",
+    "    (\"B\", {\"cost\": 1}),\n",
+    "    (\"K\", {\"cost\": 4}),\n",
+    "    (\"Q\", {\"cost\": 1}),\n",
+    "    (\"R\", {\"cost\": 2}),\n",
+    "    (\"T\", {\"cost\": 1}),\n",
+    "]\n",
+    "G = build_graph_from_str(graph_str)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Notice how in this case we pass both the ```conditional_node_names``` list and the ```costs``` list to the ```identify_effect``` method."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "pycharm": {
+     "name": "#%%\n"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "ident_eff = AutoIdentifier(\n",
+    "    estimand_type=EstimandType.NONPARAMETRIC_ATE,\n",
+    "    backdoor_adjustment=BackdoorAdjustment.BACKDOOR_MINCOST_EFFICIENT,\n",
+    "    costs=costs,\n",
+    ")\n",
+    "print(\n",
+    "    ident_mincost_eff.identify_effect(\n",
+    "        graph=G, \n",
+    "        action_nodes=treatment_name, \n",
+    "        outcome_nodes=outcome_name, \n",
+    "        observed_nodes=observed_node_names,\n",
+    "        conditional_node_names=conditional_node_names\n",
+    "    )\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We also compute the optimal minimal backdoor set, which in this case is different from the optimal minimum cost backdoor set."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ident_eff = AutoIdentifier(\n",
+    "    estimand_type=EstimandType.NONPARAMETRIC_ATE,\n",
+    "    backdoor_adjustment=BackdoorAdjustment.BACKDOOR_MIN_EFFICIENT,\n",
+    ")\n",
+    "print(\n",
+    "    ident_minimal_eff.identify_effect(\n",
+    "        graph=G, \n",
+    "        action_nodes=treatment_name,\n",
+    "        outcome_nodes=outcome_name, \n",
+    "        observed_nodes=observed_node_names,\n",
+    "        conditional_node_names=conditional_node_names\n",
+    "    )\n",
+    ")"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.10"
+  },
+  "varInspector": {
+   "cols": {
+    "lenName": 16,
+    "lenType": 16,
+    "lenVar": 40
+   },
+   "kernels_config": {
+    "python": {
+     "delete_cmd_postfix": "",
+     "delete_cmd_prefix": "del ",
+     "library": "var_list.py",
+     "varRefreshCmd": "print(var_dic_list())"
+    },
+    "r": {
+     "delete_cmd_postfix": ") ",
+     "delete_cmd_prefix": "rm(",
+     "library": "var_list.r",
+     "varRefreshCmd": "cat(var_dic_list()) "
+    }
+   },
+   "types_to_exclude": [
+    "module",
+    "function",
+    "builtin_function_or_method",
+    "instance",
+    "_Feature"
+   ],
+   "window_display": false
+  },
+  "vscode": {
+   "interpreter": {
+    "hash": "dcb481ad5d98e2afacd650b2c07afac80a299b7b701b553e333fc82865502500"
+   }
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}

@@ -1,0 +1,406 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Finding Root Causes of Changes in a Supply Chain\n",
+    "\n",
+    "In a supply chain, the number of units of each product in the inventory that is available for shipment is crucial to fulfill customers' demand faster. For this reason, retailers continuously buy products anticipating customers' demand in the future.\n",
+    "\n",
+    "Suppose that each week a retailer submits purchase orders (POs) to vendors taking into account future demands for products and capacity constraints to consider for demands. The vendors will then confirm whether they can fulfill some or all of the retailer's purchase orders. Once confirmed by the vendors and agreed by the retailer, products are then sent to the retailer. All of the confirmed POs, however, may not arrive at once.\n",
+    "\n",
+    "<img src=\"./images/supply-chain.png\" width=\"800\"/>"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Week-over-week changes\n",
+    "\n",
+    "For this case study, we consider synthetic data inspired from a real-world use case in supply chain. Let us look at data over two weeks, *w1* and *w2* in particular."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import pandas as pd\n",
+    "\n",
+    "data = pd.read_csv('supply_chain_week_over_week.csv')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": false,
+    "jupyter": {
+     "outputs_hidden": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "from IPython.display import HTML\n",
+    "\n",
+    "data_week1 = data[data.week == 'w1']\n",
+    "\n",
+    "HTML(data_week1.head().to_html(index=False)+'<br/>')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": false,
+    "jupyter": {
+     "outputs_hidden": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "data_week2 = data[data.week=='w2']\n",
+    "\n",
+    "HTML(data_week2.head().to_html(index=False)+'<br/>')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "collapsed": false,
+    "jupyter": {
+     "outputs_hidden": false
+    }
+   },
+   "source": [
+    "Our target of interest is the average value of *received* over those two weeks."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": false,
+    "jupyter": {
+     "outputs_hidden": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "data.groupby(['week']).mean(numeric_only=True)[['received']].plot(kind='bar', title='average received', legend=False);"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data_week2.received.mean() - data_week1.received.mean()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The average value of *received* quantity has increased from week *w1* to week *w2*. Why?"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Why did the average value of `received` quantity change week-over-week?"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Ad-hoc attribution analysis\n",
+    "\n",
+    "To answer the question, one option is to look at the average value of other variables week-over-week, and see if there are any associations."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data.groupby(['week']).mean(numeric_only=True).plot(kind='bar', title='average', legend=True);"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We see that the average values of other variables, except *constraint*, have also increased. While this suggests that some event(s) that changed the average values of other variables could possibly have changed the average value of *received*, that on itself is not a satisfactory answer. One may also use domain knowledge here to claim that change in the average value of demand could be the main driver, after all demand is a key variable. We will see later that such conclusions can miss other important factors. For a rather systematic answer, we turn to attribution analysis based on causality."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Causal Attribution Analysis\n",
+    "\n",
+    "We consider the distribution-change-attribution method based on graphical causal models described in [Budhathoki et al., 2021](https://arxiv.org/abs/2102.13384), which is also implmented in DoWhy. In summary, given the underlying causal graph of variables, the attribution method attributes the change in the marginal distribution of a target variable (or its summary, such as its mean) to changes in data-generating processes (also called \"causal mechanisms\") of variables upstream in the causal graph. A causal mechanism of a variable is the conditional distribution of the variable given its *direct causes*. We can also think of a causal mechanism as an algorithm (or a compute program) in the system that takes the values of direct causes as input and produces the value of the effect as an output. To use the attribution method, we first require the causal graph of the variables, namely *demand*, *constraint*, *submitted*, *confirmed* and *received*."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "collapsed": false,
+    "jupyter": {
+     "outputs_hidden": false
+    }
+   },
+   "source": [
+    "#### Graphical causal model\n",
+    "\n",
+    "We build the causal graph using domain knowledge. Based on the description of supply chain in the introduction, it is plausible to assume the following causal graph. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": false,
+    "jupyter": {
+     "outputs_hidden": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "import networkx as nx\n",
+    "import dowhy.gcm as gcm\n",
+    "from dowhy.utils import plot\n",
+    "gcm.util.general.set_random_seed(0)\n",
+    "\n",
+    "causal_graph = nx.DiGraph([('demand', 'submitted'),\n",
+    "                           ('constraint', 'submitted'),\n",
+    "                           ('submitted', 'confirmed'), \n",
+    "                           ('confirmed', 'received')])\n",
+    "plot(causal_graph)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Now, we can setup the causal model:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import matplotlib.pyplot as plt\n",
+    "import numpy as np\n",
+    "\n",
+    "# disabling progress bar to not clutter the output here\n",
+    "gcm.config.disable_progress_bars()\n",
+    "\n",
+    "# setting random seed for reproducibility\n",
+    "np.random.seed(10)\n",
+    "\n",
+    "causal_model = gcm.StructuralCausalModel(causal_graph)\n",
+    "\n",
+    "# Automatically assign appropriate causal models to each node in graph\n",
+    "auto_assignment_summary = gcm.auto.assign_causal_mechanisms(causal_model, data_week1)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Before we attributing the changes to the nodes, let's first take a look at the result of the auto assignment:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(auto_assignment_summary)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "It seems most of the relationship can be well captured using a linear model. Let's further evaluate the assumed graph structure."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "gcm.falsify.falsify_graph(causal_graph, data_week1, n_permutations=20, plot_histogram=True)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Since we do not reject the DAG, we consider our causal graph structure to be confirmed."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### Attributing change"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We can now attribute the week-over-week change in the average value of *received* quantity:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# call the API for attributing change in the average value of `received`\n",
+    "contributions = gcm.distribution_change(causal_model,\n",
+    "                                        data_week1, \n",
+    "                                        data_week2, \n",
+    "                                        'received', \n",
+    "                                        num_samples=2000,\n",
+    "                                        difference_estimation_func=lambda x1, x2 : np.mean(x2) - np.mean(x1))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from dowhy.utils import bar_plot\n",
+    "bar_plot(contributions, ylabel='Contribution')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "These point estimates suggest that changes in the causal mechanisms of *demand* and *confirmed* are the main drivers of the change in the average value of *received* between two weeks. It would be risky, however, to draw conclusions from these point estimates. Therefore, we compute the bootstrap confidence interval for each attribution."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "median_contribs, uncertainty_contribs = gcm.confidence_intervals(\n",
+    "    gcm.bootstrap_sampling(gcm.distribution_change,\n",
+    "                           causal_model,\n",
+    "                           data_week1, \n",
+    "                           data_week2, \n",
+    "                           'received',\n",
+    "                           num_samples=2000,\n",
+    "                           difference_estimation_func=lambda x1, x2 : np.mean(x2) - np.mean(x1)), \n",
+    "    confidence_level=0.95, \n",
+    "    num_bootstrap_resamples=5,\n",
+    "    n_jobs=-1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "bar_plot(median_contribs, ylabel='Contribution', uncertainties=uncertainty_contribs)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Whereas the $95\\%$ confidence intervals for the contributions of *demand* and *confirmed* are above $0$, those of other nodes are close to $0$.\n",
+    "Overall, these results suggest that changes in the causal mechanisms of *demand* and *confirmed* are the drivers for the observed change in the *received* quantity week-over-week. Causal mechanisms can change in a real-world system, for instance, after deploying a new subsystem with a different algorithm. In fact, these results are consistent with the **ground truth** (see Appendix).\n",
+    "\n",
+    "## Appendix: Ground Truth\n",
+    "\n",
+    "We generate synthetic data inspired from a real-world use case in Amazon's supply chain. To this end, we assume a linear Additive Noise Model (ANM) as the underlying data-generating process at each node. That is, each node is a linear function of its direct causes and an additive unobserved noise term. For more technical details on ANMs, we refer the interested reader to Chapter 7.1.2 of [Elements of Causal Inference book](https://library.oapen.org/bitstream/handle/20.500.12657/26040/11283.pdf?sequence=1&isAllowed=y). Using linear ANMs, we generate data (or draw i.i.d. samples) from the distribution of each variable. We use the Gamma distribution for noise terms mainly to mimic real-world setting, where the distribution of variables often show heavy-tail behaviour. Between two weeks, we only change the data-generating process (causal mechanism) of *demand* and *confirmed* respectively by changing the value of demand mean from $2$ to $4$, and  linear coefficient $\\alpha$ from $1$ to $2$."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": false,
+    "jupyter": {
+     "outputs_hidden": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "import pandas as pd\n",
+    "import secrets\n",
+    "\n",
+    "ASINS = [secrets.token_hex(5).upper() for i in range(1000)]\n",
+    "import numpy as np\n",
+    "def buying_data(alpha, beta, demand_mean):\n",
+    "    constraint = np.random.gamma(1, scale=1, size=1000)\n",
+    "    demand = np.random.gamma(demand_mean, scale=1, size=1000)\n",
+    "    submitted = demand - constraint + np.random.gamma(1, scale=1, size=1000)\n",
+    "    confirmed = alpha * submitted + np.random.gamma(0.1, scale=1, size=1000)\n",
+    "    received = beta * confirmed + np.random.gamma(0.1, scale=1, size=1000)\n",
+    "    return pd.DataFrame(dict(asin=ASINS,\n",
+    "                              demand=np.round(demand),\n",
+    "                              constraint=np.round(constraint),\n",
+    "                              submitted = np.round(submitted), \n",
+    "                              confirmed = np.round(confirmed), \n",
+    "                              received = np.round(received)))\n",
+    "\n",
+    "\n",
+    "# we change the parameters alpha and demand_mean between weeks\n",
+    "data_week1 = buying_data(1, 1, demand_mean=2)\n",
+    "data_week1['week'] = 'w1'\n",
+    "data_week2 = buying_data(2, 1, demand_mean=4)\n",
+    "data_week2['week'] = 'w2'\n",
+    "\n",
+    "data = pd.concat([data_week1, data_week2], ignore_index=True)\n",
+    "# write data to a csv file\n",
+    "# data.to_csv('supply_chain_week_over_week.csv', index=False)"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.9.18"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}

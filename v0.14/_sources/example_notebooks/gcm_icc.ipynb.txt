@@ -1,0 +1,322 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "0c87cb32-1cdc-4bf7-80bf-cbdbaa25b77a",
+   "metadata": {},
+   "source": [
+    "# Estimating intrinsic causal influences in real-world examples"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "5b1241d5-010d-4532-9889-f719f30f19c2",
+   "metadata": {},
+   "source": [
+    "This notebook demonstrates the usage of the [intrinsic causal influence (ICC) method](https://proceedings.mlr.press/v238/janzing24a.html), a way to estimate causal influence in a system. A common question in many applications is: \"What is the causal influence of node X on node Y?\" Here, \"causal influence\" can be defined in various ways. One approach could be to measure the interventional influence, which asks, \"How much does node Y change if I intervene on node X?\" or, from a more feature relevance perspective, \"How relevant is X in describing Y?\"\n",
+    "\n",
+    "In the following we focus on a particular type of causal influence, which is based on decomposing the generating process into mechanisms in place at each node, formalized by the respective causal mechanism. Then, ICC quantifies for each node the amount of uncertainty of the target that can be traced back to the respective mechanism. Hence, nodes that are deterministically computed from their parents obtain zero contribution. This concept may initially seem complex, but it is based on a simple idea:\n",
+    "\n",
+    "Consider a chain of nodes: X -> Y -> Z. Y is more informative about Z than X, as Y directly determines Z and also incorporates all information from X. It is obvious that when intervening on either X or Y, Y has a more significant impact on Z. But, what if Y is just a rescaled copy of X, i.e., $Y = a \\cdot X$? In this case, Y still has the largest interventional influence on Z, but it is not adding any new information on top of X. The ICC method, on the other hand, would attribute 0 influence to Y as it only passes on what it inherits from X. \n",
+    "\n",
+    "The idea behind ICC is not to estimate the contribution of observed upstream nodes to the target node, but instead to attribute the influence of their noise terms. Since we model each node as a functional causal model of the form $X_i = f_i(PA_i, N_i)$, we aim to estimate the contribution of the $N_i$ terms to the target. In the previous example, we have deterministic relationships with zero noise, i.e., the intrinsic influence is 0. This type of attribution is only possible when we explicitly model our causal relationships using functional causal models, as we do in the GCM module.\n",
+    "\n",
+    "In the following, we will look at two real-world examples where we apply ICC."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "cfa0e464-9cdb-4083-8774-5f9f759007fd",
+   "metadata": {},
+   "source": [
+    "## Intrinsic influence on car MPG consumption"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "098c7ca0-9391-4033-b056-d09ac5365abf",
+   "metadata": {},
+   "source": [
+    "In the first example, we use the famous [MPG data set](https://archive.ics.uci.edu/dataset/9/auto+mpg), which contains different features that are used for the prediction of miles per gallon (mpg) of a car engine. Let's say our task is to improve the design process where we need a good understanding of the influences of our variables on the mpg consumption. The relationship between these features can be modeled as a graphical causal model. For this, we follow the causal graph defined in the [work by Wang et al.](https://ieeexplore.ieee.org/document/8585647) and remove all nodes that have no influence on MPG. This leaves us with the following graph:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "6bfa09f9-67e2-4c65-a27c-903c2742fe0f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import pandas as pd\n",
+    "import networkx as nx\n",
+    "import numpy as np\n",
+    "\n",
+    "from dowhy import gcm\n",
+    "from dowhy.utils.plotting import plot, bar_plot\n",
+    "gcm.util.general.set_random_seed(0)\n",
+    "\n",
+    "# Load a modified version of the Auto MPG data: Quinlan,R.. (1993). Auto MPG. UCI Machine Learning Repository. https://doi.org/10.24432/C5859H.\n",
+    "auto_mpg_data = pd.read_csv(\"datasets/auto_mpg.csv\", index_col=0)\n",
+    "\n",
+    "mpg_graph = nx.DiGraph([('cylinders', 'displacement'), \n",
+    "                        ('cylinders', 'displacement'),\n",
+    "                        ('displacement', 'weight'),\n",
+    "                        ('displacement', 'horsepower'),\n",
+    "                        ('weight', 'mpg'),\n",
+    "                        ('horsepower', 'mpg')])\n",
+    "\n",
+    "plot(mpg_graph)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "950cdb45-192d-4319-a215-cc61d51ff177",
+   "metadata": {},
+   "source": [
+    "Seeing this graph, we can expect some strong confounders between the nodes, but nevertheless, we will see that the ICC method still provides non-trivial insights.\n",
+    "\n",
+    "Let's define the corresponding structural causal model and fit it to the data:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "04f25d22-df49-45c8-9e4d-6fe05bc30e88",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "scm_mpg = gcm.StructuralCausalModel(mpg_graph)\n",
+    "gcm.auto.assign_causal_mechanisms(scm_mpg, auto_mpg_data)\n",
+    "gcm.fit(scm_mpg, auto_mpg_data)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d86c4a1f-f288-4d59-be28-8242a8ccec26",
+   "metadata": {},
+   "source": [
+    "Optionally, we can get some insights into the performance of the causal mechanisms by using the evaluation method:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "ec3eadc5-e305-4291-864a-fab105c27443",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(gcm.evaluate_causal_model(scm_mpg, auto_mpg_data, evaluate_invertibility_assumptions=False, evaluate_causal_structure=False))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "8b95b48a-a6ac-4d7c-84a6-718a73841aeb",
+   "metadata": {},
+   "source": [
+    "After defining our structural causal model, we can now obtain more insights into what factors influence fuel consumption. As a first insight, we can estimate the direct arrow strength of the connections weight -> mpg and horsepower -> mpg. Note that by default, the arrow strength method measures the influence with respect to the variance."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "6257a9e2-a1f4-4c16-b629-b5a13bbf32dc",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "arrow_strengths_mpg = gcm.arrow_strength(scm_mpg, target_node='mpg')\n",
+    "gcm.util.plot(scm_mpg.graph, causal_strengths=arrow_strengths_mpg)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "42e62ed2-7e29-49ac-99cd-bca20d7565ca",
+   "metadata": {},
+   "source": [
+    "As we see here, the weight has a much higher influence on the variance in mpg than horsepower does."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "5258a976-dce8-4268-9fb9-2a03c03325a5",
+   "metadata": {},
+   "source": [
+    "While knowing how much the direct parents influence our node of interest provides some valuable insights, the weight and horsepower might only just inherit information from their common parent. To distinguish between the information inherited from the parent and their own contribution, we apply the ICC method:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "9cbc1002-57e4-4b79-8b8b-cab7dff25d4a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "iccs_mpg = gcm.intrinsic_causal_influence(scm_mpg, target_node='mpg')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "0b5e3cc2-0709-4a73-9edb-06afc0e569e4",
+   "metadata": {},
+   "source": [
+    "For a better interpretation of the results, we convert the variance attribution to percentages by normalizing it over the total sum."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "885195c7-f9d7-449e-a96f-894ce09562d9",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def convert_to_percentage(value_dictionary):\n",
+    "    total_absolute_sum = np.sum([abs(v) for v in value_dictionary.values()])\n",
+    "    return {k: abs(v) / total_absolute_sum * 100 for k, v in value_dictionary.items()}"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a80ca005-23aa-46b0-889d-4de7144adb33",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "bar_plot(convert_to_percentage(iccs_mpg), ylabel='Variance contribution in %')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "1606ebc4-7223-48c0-b92d-5fb13761d81b",
+   "metadata": {},
+   "source": [
+    "It turns out that the number of cylinders already explains a large fraction of the fuel consumption and the intermediate nodes like displacement, horsepower, and weight mostly inherit uncertainty from their parents. This is because, although weight and horsepower are the more direct predictors of mpg, they are mostly determined by displacement and cylinders. This gives some useful insights for potential optimizations. As we also see with the contribution of mpg itself, roughly 1/4 of the variance of mpg remains unexplained by all of the above factors, which may be partially due to model inaccuracies.\n",
+    "\n",
+    "While the model evaluation showed that there are some inaccuracies with respect to the KL divergence between the generated and observed distributions, we see that ICC still provides non-trivial results in the sense that the contributions differ significantly across nodes and that not everything is simply attributed to the target node itself."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "043ab28d-6732-4fa8-8c59-8a592f2058be",
+   "metadata": {},
+   "source": [
+    "> Note that estimating the contribution to the variance of the target in ICC can be seen as a nonlinear version of ANOVA that incorporates the causal structure."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "3f24e91f-d440-439e-8f16-a095785af091",
+   "metadata": {},
+   "source": [
+    "## Intrinsic influence on river flow"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "5fa50502-152a-4d77-985c-b4ae51426e96",
+   "metadata": {},
+   "source": [
+    "In the next example, we look at different recordings taken of the river flows ($m^3/s$) at a 15 minute frequency across 5 different measuring stations in England at Henthorn, New Jumbles Rock, Hodder Place, Whalley Weir and Samlesbury. Here, obtaining a better understanding of how the river flows behave can help to plan potential mitigation steps to avoid overflows. The data is taken from the [UK Department for Environment Food & Rural Affairs website](https://environment.data.gov.uk/hydrology/explore). Here is a map of the rivers:"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "68bfc4ad-94e9-43ff-84bb-5fa1c82a06c4",
+   "metadata": {},
+   "source": [
+    "<img src=\"./river-map.jpg\" width=\"600\"/>"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "55e91a4f-6b0b-456c-a051-af63f75c9245",
+   "metadata": {},
+   "source": [
+    "New Jumbles Rock lies at a confluence point of the 3 rivers passing Henthorn, Hodder Place, and Whalley Weir and New Jumbles Rock flows into Samlesbury. The water passing a certain measuring station is certainly a mixture of some fraction of the amount observed at the next stations further upstream plus some amount contributed by streams and little rivers entering the river in between. This defines our causal graph as:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "c3cb5016-edca-4314-ae34-dc64e3686ce5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "river_graph = nx.DiGraph([('Henthorn', 'New Jumbles Rock'), \n",
+    "                          ('Hodder Place', 'New Jumbles Rock'), \n",
+    "                          ('Whalley Weir', 'New Jumbles Rock'), \n",
+    "                          ('New Jumbles Rock', 'Samlesbury')])\n",
+    "\n",
+    "plot(river_graph)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "38ea910f-b7f3-4923-9fc9-b40bb3a7f2b6",
+   "metadata": {},
+   "source": [
+    "In this setting, we are interested in the causal influence of the upstream rivers on the Samlesbury river. Similar to the example before, we would expect these nodes to be heavily confounded by, e.g., the weather. That is, the true graph is more likely to be along the lines of:"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c0a0441a-929f-40f7-a4ed-5601846959da",
+   "metadata": {},
+   "source": [
+    "<img src=\"./river-confounded.png\" width=\"400\"/>"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "b94dea14-9058-406d-8466-eb066815c095",
+   "metadata": {},
+   "source": [
+    "Nevertheless, we still expect the ICC algorithm to provide some insights into the contribution to the river flow of Samlesbury, even with the hidden confounder in place:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "5c5a439d-4b43-4a38-bb78-975b0694a2c6",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "river_data = pd.read_csv(\"river.csv\", index_col=False)\n",
+    "\n",
+    "scm_river = gcm.StructuralCausalModel(river_graph)\n",
+    "gcm.auto.assign_causal_mechanisms(scm_river, river_data)\n",
+    "gcm.fit(scm_river, river_data)\n",
+    "\n",
+    "iccs_river = gcm.intrinsic_causal_influence(scm_river, target_node='Samlesbury')\n",
+    "bar_plot(convert_to_percentage(iccs_river), ylabel='Variance contribution in %')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "b5a3aed2-e864-4047-9e45-328fc43c5156",
+   "metadata": {},
+   "source": [
+    "Interestingly, the intrinsic contribution of New Jumbles Rock on Samlesbury is small, although the interventional effect on New Jumbles Rock would certaintly have a large effect. This illustrates that ICC does not measure influence in the sense of the strength of a treatment effect and points out here that New Jumbles Rock simply passes the flow onto Samlesbury. The contribution by Samlesbury itself represents the (hidden) factors that are not captured. Even though we can expect the nodes to be heavily confounded by the weather, the analysis still provides some interesting insights which we only obtain by carefully distinguishing between influences that were just inherited from the parents and 'information' that is newly added by the node."
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.9.18"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
