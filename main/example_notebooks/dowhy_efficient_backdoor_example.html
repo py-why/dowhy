@@ -246,6 +246,7 @@
             <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
             <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
             <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.14/index.html">v0.14</a></dd>
             <dd><a href="/dowhy/v0.13/index.html">v0.13</a></dd>
             <dd><a href="/dowhy/v0.12/index.html">v0.12</a></dd>
             <dd><a href="/dowhy/v0.11.1/index.html">v0.11.1</a></dd>
@@ -383,6 +384,7 @@
             <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
             <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
             <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.14/index.html">v0.14</a></dd>
             <dd><a href="/dowhy/v0.13/index.html">v0.13</a></dd>
             <dd><a href="/dowhy/v0.12/index.html">v0.12</a></dd>
             <dd><a href="/dowhy/v0.11.1/index.html">v0.11.1</a></dd>
@@ -556,7 +558,7 @@
 <section id="Preliminaries">
 <h2>Preliminaries<a class="headerlink" href="#Preliminaries" title="Link to this heading">#</a></h2>
 <p>This notebook illustrates the use of the algorithms developed in <a class="reference external" href="https://arxiv.org/abs/1912.00306">Smucler, Sapienza and Rotnitzky (Biometrika, 2022)</a> and <a class="reference external" href="https://www.degruyter.com/document/doi/10.1515/jci-2022-0015/html">Smucler and Rotnitzky (Journal of Causal Inference, 2022)</a> to compute backdoor sets that yield efficient estimators of interventional means and their contrasts (such as the ATE), under various constraints. We begin by recalling some definitions from these papers. We
-ommit most technical details, and point the reader to the original papers for them.</p>
+omit most technical details, and point the reader to the original papers for them.</p>
 <p>The <strong>optimal backdoor set</strong> is a backdoor set comprised of observable variables that yields non-parametric estimators of the interventional mean with the smallest asymptotic variance among those that are based on observable backdoor sets. This optimal backdoor set always exists when no variables are latent, and the algorithm is guaranteed to compute it in this case. Under a non-parametric graphical model with latent variables, such a backdoor set can fail to exist.</p>
 <p>The <strong>optimal minimal backdoor set</strong> is a minimal backdoor set comprised of observable variables that yields non-parametric estimators of the interventional mean with the smallest asymptotic variance among those that are based on observable minimal backdoor sets.</p>
 <p>The <strong>optimal minimum cost backdoor set</strong> is a minimum cost backdoor set comprised of observable variables that yields non-parametric estimators of the interventional mean with the smallest asymptotic variance among those that are based on observable minimum cost backdoor sets. The cost of a backdoor set is defined as the sum of the costs of the variables that comprise it. Note that when all costs are equal, the optimal minimum cost backdoor set is the optimal backdoor set among those that have
@@ -578,7 +580,7 @@ minimum cardinality.</p>
 </div>
 <p>Consider the design of the following hypothetical observational study discussed in <a class="reference external" href="https://doi.org/10.1186/1471-2288-8-70">Shrier &amp; Platt (2008)</a>. The aim of the study is to assess the effect of warm-up exercises on injury after playing sports. Suppose that a researcher postulates that the graph below represents a causal graphical model. The node warm-up is the treatment variable, which stands for the type of exercise an athlete performs prior to playing sports, and the node injury stands
 for the outcome variable.</p>
-<p>Suppose that the goal of the study is to estimate and compare the interventional means corresponding to different individualised treatment rules. Each rule prescribes the type of warm-up exercise as a function of previous injury and team motivation. For example, one such rule could be to allocate a patient to perform soft warm-up excercises when she has previous injury = 1 and team motivation &gt; 6, but any other (possibly randomised) function of previous injury and team motivation to set the
+<p>Suppose that the goal of the study is to estimate and compare the interventional means corresponding to different individualised treatment rules. Each rule prescribes the type of warm-up exercise as a function of previous injury and team motivation. For example, one such rule could be to allocate a patient to perform soft warm-up exercises when she has previous injury = 1 and team motivation &gt; 6, but any other (possibly randomised) function of previous injury and team motivation to set the
 treatment variable could be of interest. More formally, the goal of the study is, for some set of policies such as the aforementioned one, to estimate the mean of the outcome, in a world in which all patients are allocated to a treatment variant according to one of these policies. We will suppose moreover that due to practical limitations, the variables genetics, pre-grame proprioception, intra-game proprioception and tissue weakness cannot be measured. Proprioception is an individual’s ability
 to sense the movement, action, and location of their own bodies.</p>
 <p>To build the graph, we first create a string declaring the graph’s nodes and edges. We then create a list of all observable variables, in this case, all variables in the graph except genetics, pre-game proprioception, intra-game proprioception and tissue weakness. We then pass all this information to the <code class="docutils literal notranslate"><span class="pre">CausalGraph</span></code> class, to create an instance of it.</p>
@@ -694,13 +696,13 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
     d                                                                          ↪
-──────────(E[injury|team motivation,previous injury,neuromusc fatigue,contact  ↪
+──────────(E[injury|tissue disorder,contact sport,previous injury,team motivat ↪
 d[warm-up]                                                                     ↪
 
 ↪
-↪ sport,tissue disorder])
+↪ ion,neuromusc fatigue])
 ↪
-Estimand assumption 1, Unconfoundedness: If U→{warm-up} and U→injury then P(injury|warm-up,team motivation,previous injury,neuromusc fatigue,contact sport,tissue disorder,U) = P(injury|warm-up,team motivation,previous injury,neuromusc fatigue,contact sport,tissue disorder)
+Estimand assumption 1, Unconfoundedness: If U→{warm-up} and U→injury then P(injury|warm-up,tissue disorder,contact sport,previous injury,team motivation,neuromusc fatigue,U) = P(injury|warm-up,tissue disorder,contact sport,previous injury,team motivation,neuromusc fatigue)
 
 ### Estimand : 2
 Estimand name: iv
@@ -745,13 +747,13 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
     d                                                                          ↪
-──────────(E[injury|team motivation,tissue disorder,previous injury,neuromusc  ↪
+──────────(E[injury|tissue disorder,team motivation,neuromusc fatigue,previous ↪
 d[warm-up]                                                                     ↪
 
 ↪
-↪ fatigue])
+↪  injury])
 ↪
-Estimand assumption 1, Unconfoundedness: If U→{warm-up} and U→injury then P(injury|warm-up,team motivation,tissue disorder,previous injury,neuromusc fatigue,U) = P(injury|warm-up,team motivation,tissue disorder,previous injury,neuromusc fatigue)
+Estimand assumption 1, Unconfoundedness: If U→{warm-up} and U→injury then P(injury|warm-up,tissue disorder,team motivation,neuromusc fatigue,previous injury,U) = P(injury|warm-up,tissue disorder,team motivation,neuromusc fatigue,previous injury)
 
 ### Estimand : 2
 Estimand name: iv
@@ -1159,9 +1161,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
  d
-────(E[Y|T,L,R])
+────(E[Y|R,T,L])
 d[X]
-Estimand assumption 1, Unconfoundedness: If U→{X} and U→Y then P(Y|X,T,L,R,U) = P(Y|X,T,L,R)
+Estimand assumption 1, Unconfoundedness: If U→{X} and U→Y then P(Y|X,R,T,L,U) = P(Y|X,R,T,L)
 
 ### Estimand : 2
 Estimand name: iv
