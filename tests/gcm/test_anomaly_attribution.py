@@ -340,3 +340,54 @@ def test_given_non_trivial_graph_with_nonlinear_relationships_when_attribute_ano
 
 def test_relative_frequency():
     assert np.abs(_relative_frequency(np.array([True, True, False, True])) - 4 / 5) < 0.1
+
+
+@flaky(max_runs=3)
+def test_when_attribute_anomaly_scores_with_then_ignores_downstream_nodes_of_target():
+    num_training_samples = 5000
+    X0 = np.random.normal(0, 1, num_training_samples)
+    X1 = X0 + np.random.normal(0, 1, num_training_samples)
+    X2 = X1 + np.random.normal(0, 1, num_training_samples)
+    X3 = X2 + np.random.normal(0, 1, num_training_samples)
+    training_data = pd.DataFrame({"X0": X0, "X1": X1, "X2": X2, "X3": X3})
+
+    causal_model = InvertibleStructuralCausalModel(nx.DiGraph([("X0", "X1"), ("X1", "X2"), ("X2", "X3")]))
+    auto.assign_causal_mechanisms(causal_model, training_data, auto.AssignmentQuality.GOOD)
+
+    fit(causal_model, training_data)
+
+    # Three examples:
+    # X0 is the root cause (+ 10 to the noise)
+    # Target is X2, we can ignore X3
+    anomaly_data = pd.DataFrame(
+        {
+            "X0": np.array([10]),
+            "X1": np.array([10]),
+            "X2": np.array([10]),
+            "X3": np.array([np.nan]),
+        }
+    )
+
+    scores = attribute_anomalies(
+        causal_model,
+        "X2",
+        anomaly_data,
+        anomaly_scorer=MedianCDFQuantileScorer(),
+        num_distribution_samples=num_training_samples,
+        attribute_mean_deviation=True,
+    )
+
+    def total_anomaly_score(training_data, anomaly_sample):
+        distribution_samples = training_data["X2"].to_numpy()
+        anomaly_scorer = MedianCDFQuantileScorer()
+        anomaly_scorer.fit(distribution_samples)
+        return anomaly_scorer.score(anomaly_sample) - np.mean(anomaly_scorer.score(distribution_samples))
+
+    assert scores["X0"][0] > 0.4
+    assert scores["X1"][0] == approx(0, abs=0.1)  # Not anomalous given upstream nodes.
+    assert scores["X2"][0] == approx(0, abs=0.1)  # Not anomalous given upstream nodes.
+
+    # The sum of the scores should add up to the anomaly score of the target (here X2).
+    assert scores["X0"][0] + scores["X1"][0] + scores["X2"][0] == approx(
+        total_anomaly_score(training_data, anomaly_data["X2"].to_numpy()[0]), abs=0.001
+    )

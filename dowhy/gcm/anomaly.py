@@ -13,7 +13,7 @@ from dowhy.gcm.causal_models import InvertibleStructuralCausalModel, Probabilist
 from dowhy.gcm.shapley import ShapleyConfig, estimate_shapley_values
 from dowhy.gcm.stats import permute_features
 from dowhy.gcm.util.general import shape_into_2d
-from dowhy.graph import get_ordered_predecessors, is_root_node
+from dowhy.graph import get_ordered_predecessors, is_root_node, node_connected_subgraph_view
 
 
 def conditional_anomaly_scores(
@@ -130,6 +130,7 @@ def attribute_anomalies(
              for the i-th observation in anomaly_samples.
     """
     validate_causal_dag(causal_model.graph)
+    causal_model = InvertibleStructuralCausalModel(node_connected_subgraph_view(causal_model.graph, target_node))
 
     if anomaly_scorer is None:
         anomaly_scorer = MedianCDFQuantileScorer()
