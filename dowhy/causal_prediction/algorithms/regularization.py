@@ -69,12 +69,15 @@ class Regularizer:
             covas = []
             for t, cent in zip(valid_tensors, cents):
                 n = t.shape[0]
+                d_dim = t.shape[1]
                 if n > 1:
                     covas.append((cent.t() @ cent) / (n - 1))
                 else:
-                    covas.append(torch.zeros_like(means[0].diag()))
+                    covas.append(
+                        torch.zeros_likes((d_dim, d_dim), device=original_device, dtype=torch.float64)
+                    )
 
-            penalty = torch.tensor(0.0, device=original_device, dtype=torch.float64)
+            penalty = tensor(0.0, device=original_device, dtype=torch.float64)
             for i in range(k):
                 for j in range(i + 1, k):
                     mean_diff = (means[i] - means[j]).pow(2).mean()
@@ -97,9 +100,12 @@ class Regularizer:
         :param classifs: feature representations output from classifier layer (gφ(x))
         :param attribute_labels: attribute labels loaded with the dataset for attribute A_i
         :param num_envs: number of environments/domains
-        :param E_eq_A: Binary flag indicating whether attribute (A_i) coinicides with environment (E) definition
-        :param use_optimization: If True, uses an algebraically optimized method to compute the penalty.
-                                 If False, uses the original nested loop, which is more extensible for new MMD
+        :param E_eq_A: Binary flag indicating whether attribute (A_i) coincides with environment (E) definition
+        :param use_optimization: If True, uses an algebraically optimized method to compute the penalty, which is
+        faster and suitable for standard MMD computations. If False, uses the original nested loop, which is more
+        extensible for implementing new or custom MMD variants, but may be slower. Choose True for performance
+        with standard MMD, and False when correctness or extensibility for new MMD types is required.
+
 
         """
 
@@ -153,7 +159,7 @@ class Regularizer:
         :param attribute_labels: attribute labels loaded with the dataset for attribute A_i
         :param conditioning_subset: list of subset of observed variables A_s (attributes + targets) such that (X_c, A_i) are d-separated conditioned on this subset
         :param num_envs: number of environments/domains
-        :param E_eq_A: Binary flag indicating whether attribute (A_i) coinicides with environment (E) definition
+        :param E_eq_A: Binary flag indicating whether attribute (A_i) coincides with environment (E) definition
         :param use_optimization: If True, uses an algebraically optimized method to compute the penalty.
                                  If False, uses the original nested loop, which is more extensible for new MMD
 
@@ -235,7 +241,7 @@ class Regularizer:
         return penalty
 
     def _compute_conditional_penalty(self, features, attributes, group_data, use_optimization):
-        penalty = tensor(0.0, dtype=features[0].dtype, device=features[0].device)
+        penalty = tensor(0.0, dtype=features.dtype, device=features.device)
 
         unique_groups, group_indices = torch.unique(group_data, dim=0, return_inverse=True)
         present_group_ids = torch.unique(group_indices)
