@@ -73,9 +73,7 @@ class Regularizer:
                 if n > 1:
                     covas.append((cent.t() @ cent) / (n - 1))
                 else:
-                    covas.append(
-                        torch.zeros_likes((d_dim, d_dim), device=original_device, dtype=torch.float64)
-                    )
+                    covas.append(torch.zeros_likes((d_dim, d_dim), device=original_device, dtype=torch.float64))
 
             penalty = tensor(0.0, device=original_device, dtype=torch.float64)
             for i in range(k):
