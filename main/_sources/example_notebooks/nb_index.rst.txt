@@ -207,7 +207,16 @@ Real world-inspired examples
         | **Level:** Advanced
         | **Task:** Causal Inference
 
+.. grid:: 2
 
+    .. grid-item-card:: :doc:`gcm_mta_incrementality_time_decay`
+
+        .. image:: ../_static/gcm_mta_incrementality_time_decay.png
+            :height: 120px
+            :align: center
+        +++
+        | **Level:** Advanced
+        | **Task:** Attribution to sales channels via GCM
 
 Examples on benchmark datasets
 -------------------------------

@@ -1,0 +1,1794 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B139P18WHM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-B139P18WHM');
+    </script>
+    
+    <title>Time-decay Attribution and Causal Analysis &#8212; DoWhy  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=949a1ff5" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/jquery.js?v=5d32c60e"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=0c6e27e1"></script>
+    <script src="../_static/design-tabs.js?v=36754332"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'example_notebooks/gcm_mta_incrementality_time_decay';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="main" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-light" alt="DoWhy  documentation - Home"/>
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-dark pst-js-only" alt="DoWhy  documentation - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="nb_index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing.html">
+    Contributing
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
+    dowhy package
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
+    Release notes
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item"><div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        main
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.9.1/index.html">v0.9.1</a></dd>
+            <dd><a href="/dowhy/v0.9/index.html">v0.9</a></dd>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.14/index.html">v0.14</a></dd>
+            <dd><a href="/dowhy/v0.13/index.html">v0.13</a></dd>
+            <dd><a href="/dowhy/v0.12/index.html">v0.12</a></dd>
+            <dd><a href="/dowhy/v0.11.1/index.html">v0.11.1</a></dd>
+            <dd><a href="/dowhy/v0.11/index.html">v0.11</a></dd>
+            <dd><a href="/dowhy/v0.10.1/index.html">v0.10.1</a></dd>
+            <dd><a href="/dowhy/v0.10/index.html">v0.10</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="nb_index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../dowhy.html">
+    dowhy package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../code_repo.html">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        main
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.9.1/index.html">v0.9.1</a></dd>
+            <dd><a href="/dowhy/v0.9/index.html">v0.9</a></dd>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.14/index.html">v0.14</a></dd>
+            <dd><a href="/dowhy/v0.13/index.html">v0.13</a></dd>
+            <dd><a href="/dowhy/v0.12/index.html">v0.12</a></dd>
+            <dd><a href="/dowhy/v0.11.1/index.html">v0.11.1</a></dd>
+            <dd><a href="/dowhy/v0.11/index.html">v0.11</a></dd>
+            <dd><a href="/dowhy/v0.10.1/index.html">v0.10.1</a></dd>
+            <dd><a href="/dowhy/v0.10/index.html">v0.10</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Time-decay Attribution and Causal Analysis</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Time-decay-Attribution-and-Causal-Analysis">
+<h1>Time-decay Attribution and Causal Analysis<a class="headerlink" href="#Time-decay-Attribution-and-Causal-Analysis" title="Link to this heading">#</a></h1>
+<p><strong>The problem</strong>: Advertisers run campaigns across multiple channels (search, display, video) but struggle to know which ads actually drive sales. The standard approach, last-touch attribution (LTA), credits the final ad a customer saw before purchasing. This can systematically overcredit lower-funnel ads (search) that appear right before conversion, while undercrediting upper-funnel ads (display, video) that built awareness earlier. The result is misallocated budgets and underinvestment in
+channels with higher true ROI.</p>
+<p><strong>Two measurement approaches</strong>:</p>
+<ol class="arabic simple">
+<li><p><strong>Time Decay Attribution (TDA)</strong>: Reallocates LTA credit by modeling ad carryover, i.e., how impressions accumulate and decay over time. If upper-funnel ads have longer carryover, they gain credit in the time-decay approach vs LTA.</p></li>
+<li><p><strong>Causal Attribution (CA)</strong>: Uses DoWhy to decompose YoY sales growth into ad-driven contributions. Thus we know how much each spend change contributed to business outcome.</p></li>
+</ol>
+<p>These two approaches together tell you what types of ads influenced conversions beyond rule-based approaches and what drove growth.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">networkx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nx</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">optimize</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">Ridge</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeSeriesSplit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">mean_absolute_error</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy</span><span class="w"> </span><span class="kn">import</span> <span class="n">gcm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy.gcm.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot</span> <span class="k">as</span> <span class="n">plot_graph</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy.gcm.falsify</span><span class="w"> </span><span class="kn">import</span> <span class="n">falsify_graph</span><span class="p">,</span> <span class="n">apply_suggestions</span>
+</pre></div>
+</div>
+</div>
+<section id="1.-Data-Generation">
+<h2>1. Data Generation<a class="headerlink" href="#1.-Data-Generation" title="Link to this heading">#</a></h2>
+<p><strong>Synthetic data with 4 ad channels: SP, SB, Display, Video</strong>:</p>
+<ol class="arabic simple">
+<li><p>SP/SB: high LTA share (75% combined), lower iROI ($2.20-2.50), fast decay</p></li>
+<li><p>Display/Video: low LTA share (25%), higher iROI ($3.80-4.50), slow decay</p></li>
+</ol>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">generate_advertising_data</span><span class="p">(</span><span class="n">start_date</span><span class="o">=</span><span class="s1">&#39;2024-01-01&#39;</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="s1">&#39;2025-12-31&#39;</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+
+    <span class="n">dates</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;D&#39;</span><span class="p">)</span>
+    <span class="n">n_days</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dates</span><span class="p">)</span>
+
+    <span class="n">day_of_year</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">d</span><span class="o">.</span><span class="n">dayofyear</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dates</span><span class="p">])</span>
+    <span class="n">year</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">d</span><span class="o">.</span><span class="n">year</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dates</span><span class="p">])</span>
+    <span class="n">day_of_week</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">d</span><span class="o">.</span><span class="n">dayofweek</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dates</span><span class="p">])</span>
+
+    <span class="c1"># Seasonality: ±15% weekly, ±30% yearly (peaks ~June)</span>
+    <span class="n">weekly_pattern</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="mf">0.15</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">day_of_week</span> <span class="o">/</span> <span class="mi">7</span><span class="p">)</span>
+    <span class="n">yearly_pattern</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="mf">0.3</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">day_of_year</span> <span class="o">-</span> <span class="mi">80</span><span class="p">)</span> <span class="o">/</span> <span class="mi">365</span><span class="p">)</span>
+    <span class="n">yoy_growth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">year</span> <span class="o">==</span> <span class="mi">2025</span><span class="p">,</span> <span class="mf">1.08</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>  <span class="c1"># 8% YoY growth</span>
+
+    <span class="c1"># Events: with year-over-year variation</span>
+    <span class="n">special_shopping_event</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_days</span><span class="p">)</span>
+    <span class="n">other_shopping_event</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_days</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dates</span><span class="p">):</span>
+        <span class="c1"># === SPECIAL SHOPPING EVENTS ===</span>
+        <span class="c1"># Prime Day</span>
+        <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">year</span> <span class="o">==</span> <span class="mi">2024</span> <span class="ow">and</span> <span class="n">d</span><span class="o">.</span><span class="n">month</span> <span class="o">==</span> <span class="mi">7</span> <span class="ow">and</span> <span class="mi">16</span> <span class="o">&lt;=</span> <span class="n">d</span><span class="o">.</span><span class="n">day</span> <span class="o">&lt;=</span> <span class="mi">17</span><span class="p">:</span>
+            <span class="n">special_shopping_event</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">year</span> <span class="o">==</span> <span class="mi">2025</span> <span class="ow">and</span> <span class="n">d</span><span class="o">.</span><span class="n">month</span> <span class="o">==</span> <span class="mi">7</span> <span class="ow">and</span> <span class="mi">8</span> <span class="o">&lt;=</span> <span class="n">d</span><span class="o">.</span><span class="n">day</span> <span class="o">&lt;=</span> <span class="mi">9</span><span class="p">:</span>
+            <span class="n">special_shopping_event</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="c1"># Black Friday week</span>
+        <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">year</span> <span class="o">==</span> <span class="mi">2024</span> <span class="ow">and</span> <span class="n">d</span><span class="o">.</span><span class="n">month</span> <span class="o">==</span> <span class="mi">11</span> <span class="ow">and</span> <span class="mi">25</span> <span class="o">&lt;=</span> <span class="n">d</span><span class="o">.</span><span class="n">day</span> <span class="o">&lt;=</span> <span class="mi">30</span><span class="p">:</span>  <span class="c1"># Thanksgiving Nov 28</span>
+            <span class="n">special_shopping_event</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">year</span> <span class="o">==</span> <span class="mi">2025</span> <span class="ow">and</span> <span class="n">d</span><span class="o">.</span><span class="n">month</span> <span class="o">==</span> <span class="mi">11</span> <span class="ow">and</span> <span class="mi">24</span> <span class="o">&lt;=</span> <span class="n">d</span><span class="o">.</span><span class="n">day</span> <span class="o">&lt;=</span> <span class="mi">29</span><span class="p">:</span>  <span class="c1"># Thanksgiving Nov 27</span>
+            <span class="n">special_shopping_event</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="c1"># Holiday shopping season</span>
+        <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">month</span> <span class="o">==</span> <span class="mi">12</span> <span class="ow">and</span> <span class="n">d</span><span class="o">.</span><span class="n">day</span> <span class="o">&lt;=</span> <span class="mi">24</span><span class="p">:</span>
+            <span class="n">special_shopping_event</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.7</span>
+        <span class="c1"># Cyber Monday extended</span>
+        <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">year</span> <span class="o">==</span> <span class="mi">2024</span> <span class="ow">and</span> <span class="n">d</span><span class="o">.</span><span class="n">month</span> <span class="o">==</span> <span class="mi">12</span> <span class="ow">and</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">d</span><span class="o">.</span><span class="n">day</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">special_shopping_event</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">year</span> <span class="o">==</span> <span class="mi">2025</span> <span class="ow">and</span> <span class="n">d</span><span class="o">.</span><span class="n">month</span> <span class="o">==</span> <span class="mi">11</span> <span class="ow">and</span> <span class="n">d</span><span class="o">.</span><span class="n">day</span> <span class="o">==</span> <span class="mi">30</span><span class="p">:</span>
+            <span class="n">special_shopping_event</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="c1"># === OTHER SHOPPING EVENTS ===</span>
+        <span class="c1"># Valentine&#39;s Day</span>
+        <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">month</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="mi">7</span> <span class="o">&lt;=</span> <span class="n">d</span><span class="o">.</span><span class="n">day</span> <span class="o">&lt;=</span> <span class="mi">14</span><span class="p">:</span>
+            <span class="n">other_shopping_event</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="c1"># Easter</span>
+        <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">year</span> <span class="o">==</span> <span class="mi">2024</span> <span class="ow">and</span> <span class="n">d</span><span class="o">.</span><span class="n">month</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="mi">25</span> <span class="o">&lt;=</span> <span class="n">d</span><span class="o">.</span><span class="n">day</span> <span class="o">&lt;=</span> <span class="mi">31</span><span class="p">:</span>  <span class="c1"># Easter Mar 31</span>
+            <span class="n">other_shopping_event</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">year</span> <span class="o">==</span> <span class="mi">2025</span> <span class="ow">and</span> <span class="n">d</span><span class="o">.</span><span class="n">month</span> <span class="o">==</span> <span class="mi">4</span> <span class="ow">and</span> <span class="mi">14</span> <span class="o">&lt;=</span> <span class="n">d</span><span class="o">.</span><span class="n">day</span> <span class="o">&lt;=</span> <span class="mi">20</span><span class="p">:</span>  <span class="c1"># Easter Apr 20</span>
+            <span class="n">other_shopping_event</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="c1"># Mother&#39;s Day week</span>
+        <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">year</span> <span class="o">==</span> <span class="mi">2024</span> <span class="ow">and</span> <span class="n">d</span><span class="o">.</span><span class="n">month</span> <span class="o">==</span> <span class="mi">5</span> <span class="ow">and</span> <span class="mi">6</span> <span class="o">&lt;=</span> <span class="n">d</span><span class="o">.</span><span class="n">day</span> <span class="o">&lt;=</span> <span class="mi">12</span><span class="p">:</span>  <span class="c1"># May 12</span>
+            <span class="n">other_shopping_event</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">year</span> <span class="o">==</span> <span class="mi">2025</span> <span class="ow">and</span> <span class="n">d</span><span class="o">.</span><span class="n">month</span> <span class="o">==</span> <span class="mi">5</span> <span class="ow">and</span> <span class="mi">5</span> <span class="o">&lt;=</span> <span class="n">d</span><span class="o">.</span><span class="n">day</span> <span class="o">&lt;=</span> <span class="mi">11</span><span class="p">:</span>  <span class="c1"># May 11</span>
+            <span class="n">other_shopping_event</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="c1"># Memorial Day</span>
+        <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">year</span> <span class="o">==</span> <span class="mi">2024</span> <span class="ow">and</span> <span class="n">d</span><span class="o">.</span><span class="n">month</span> <span class="o">==</span> <span class="mi">5</span> <span class="ow">and</span> <span class="mi">24</span> <span class="o">&lt;=</span> <span class="n">d</span><span class="o">.</span><span class="n">day</span> <span class="o">&lt;=</span> <span class="mi">27</span><span class="p">:</span>
+            <span class="n">other_shopping_event</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">year</span> <span class="o">==</span> <span class="mi">2025</span> <span class="ow">and</span> <span class="n">d</span><span class="o">.</span><span class="n">month</span> <span class="o">==</span> <span class="mi">5</span> <span class="ow">and</span> <span class="mi">23</span> <span class="o">&lt;=</span> <span class="n">d</span><span class="o">.</span><span class="n">day</span> <span class="o">&lt;=</span> <span class="mi">26</span><span class="p">:</span>
+            <span class="n">other_shopping_event</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="c1"># Father&#39;s Day week</span>
+        <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">year</span> <span class="o">==</span> <span class="mi">2024</span> <span class="ow">and</span> <span class="n">d</span><span class="o">.</span><span class="n">month</span> <span class="o">==</span> <span class="mi">6</span> <span class="ow">and</span> <span class="mi">10</span> <span class="o">&lt;=</span> <span class="n">d</span><span class="o">.</span><span class="n">day</span> <span class="o">&lt;=</span> <span class="mi">16</span><span class="p">:</span>  <span class="c1"># Jun 16</span>
+            <span class="n">other_shopping_event</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">year</span> <span class="o">==</span> <span class="mi">2025</span> <span class="ow">and</span> <span class="n">d</span><span class="o">.</span><span class="n">month</span> <span class="o">==</span> <span class="mi">6</span> <span class="ow">and</span> <span class="mi">9</span> <span class="o">&lt;=</span> <span class="n">d</span><span class="o">.</span><span class="n">day</span> <span class="o">&lt;=</span> <span class="mi">15</span><span class="p">:</span>  <span class="c1"># Jun 15</span>
+            <span class="n">other_shopping_event</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="c1"># Back to school</span>
+        <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">month</span> <span class="o">==</span> <span class="mi">8</span> <span class="ow">and</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">d</span><span class="o">.</span><span class="n">day</span> <span class="o">&lt;=</span> <span class="mi">31</span><span class="p">:</span>
+            <span class="n">other_shopping_event</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.7</span>
+        <span class="c1"># Labor Day</span>
+        <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">year</span> <span class="o">==</span> <span class="mi">2024</span> <span class="ow">and</span> <span class="n">d</span><span class="o">.</span><span class="n">month</span> <span class="o">==</span> <span class="mi">9</span> <span class="ow">and</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">d</span><span class="o">.</span><span class="n">day</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">other_shopping_event</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">year</span> <span class="o">==</span> <span class="mi">2025</span> <span class="ow">and</span> <span class="n">d</span><span class="o">.</span><span class="n">month</span> <span class="o">==</span> <span class="mi">9</span> <span class="ow">and</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">d</span><span class="o">.</span><span class="n">day</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">other_shopping_event</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="c1"># Halloween</span>
+        <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">month</span> <span class="o">==</span> <span class="mi">10</span> <span class="ow">and</span> <span class="mi">20</span> <span class="o">&lt;=</span> <span class="n">d</span><span class="o">.</span><span class="n">day</span> <span class="o">&lt;=</span> <span class="mi">31</span><span class="p">:</span>
+            <span class="n">other_shopping_event</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.7</span>
+        <span class="c1"># Super Bowl week</span>
+        <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">year</span> <span class="o">==</span> <span class="mi">2024</span> <span class="ow">and</span> <span class="n">d</span><span class="o">.</span><span class="n">month</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="mi">5</span> <span class="o">&lt;=</span> <span class="n">d</span><span class="o">.</span><span class="n">day</span> <span class="o">&lt;=</span> <span class="mi">11</span><span class="p">:</span>  <span class="c1"># Feb 11</span>
+            <span class="n">other_shopping_event</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">year</span> <span class="o">==</span> <span class="mi">2025</span> <span class="ow">and</span> <span class="n">d</span><span class="o">.</span><span class="n">month</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="mi">3</span> <span class="o">&lt;=</span> <span class="n">d</span><span class="o">.</span><span class="n">day</span> <span class="o">&lt;=</span> <span class="mi">9</span><span class="p">:</span>  <span class="c1"># Feb 9</span>
+            <span class="n">other_shopping_event</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="c1"># Spend: SP/SB track demand closely; Display/Video more stable for brand building</span>
+    <span class="n">base_spend_sp</span> <span class="o">=</span> <span class="mi">15000</span> <span class="o">*</span> <span class="n">yoy_growth</span> <span class="o">*</span> <span class="n">weekly_pattern</span> <span class="o">*</span> <span class="n">yearly_pattern</span>
+    <span class="n">base_spend_sb</span> <span class="o">=</span> <span class="mi">8000</span> <span class="o">*</span> <span class="n">yoy_growth</span> <span class="o">*</span> <span class="n">weekly_pattern</span> <span class="o">*</span> <span class="n">yearly_pattern</span>
+    <span class="n">base_spend_display</span> <span class="o">=</span> <span class="mi">12000</span> <span class="o">*</span> <span class="n">yoy_growth</span> <span class="o">*</span> <span class="n">weekly_pattern</span> <span class="o">*</span> <span class="p">(</span><span class="n">yearly_pattern</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">base_spend_video</span> <span class="o">=</span> <span class="mi">6000</span> <span class="o">*</span> <span class="n">yoy_growth</span> <span class="o">*</span> <span class="n">weekly_pattern</span> <span class="o">*</span> <span class="p">(</span><span class="n">yearly_pattern</span> <span class="o">**</span> <span class="mf">0.3</span><span class="p">)</span>
+
+    <span class="n">event_multiplier</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">special_shopping_event</span> <span class="o">+</span> <span class="mf">0.2</span> <span class="o">*</span> <span class="n">other_shopping_event</span>
+
+    <span class="c1"># Noise: upper-funnel has more variance</span>
+    <span class="n">sp_spend</span> <span class="o">=</span> <span class="n">base_spend_sp</span> <span class="o">*</span> <span class="n">event_multiplier</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mf">0.15</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n_days</span><span class="p">))</span>
+    <span class="n">sb_spend</span> <span class="o">=</span> <span class="n">base_spend_sb</span> <span class="o">*</span> <span class="n">event_multiplier</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mf">0.12</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n_days</span><span class="p">))</span>
+    <span class="n">display_spend</span> <span class="o">=</span> <span class="n">base_spend_display</span> <span class="o">*</span> <span class="n">event_multiplier</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mf">0.18</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n_days</span><span class="p">))</span>
+    <span class="n">video_spend</span> <span class="o">=</span> <span class="n">base_spend_video</span> <span class="o">*</span> <span class="n">event_multiplier</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mf">0.20</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n_days</span><span class="p">))</span>
+
+    <span class="n">sp_spend</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">sp_spend</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="n">sb_spend</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">sb_spend</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+    <span class="n">display_spend</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">display_spend</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="n">video_spend</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">video_spend</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+
+    <span class="c1"># Impressions via CPM: SP=$2.50, SB=$3.00, Display=$1.50, Video=$8.00</span>
+    <span class="n">sp_impressions</span> <span class="o">=</span> <span class="n">sp_spend</span> <span class="o">/</span> <span class="mf">2.5</span> <span class="o">*</span> <span class="mi">1000</span>
+    <span class="n">sb_impressions</span> <span class="o">=</span> <span class="n">sb_spend</span> <span class="o">/</span> <span class="mf">3.0</span> <span class="o">*</span> <span class="mi">1000</span>
+    <span class="n">display_impressions</span> <span class="o">=</span> <span class="n">display_spend</span> <span class="o">/</span> <span class="mf">1.5</span> <span class="o">*</span> <span class="mi">1000</span>
+    <span class="n">video_impressions</span> <span class="o">=</span> <span class="n">video_spend</span> <span class="o">/</span> <span class="mf">8.0</span> <span class="o">*</span> <span class="mi">1000</span>
+
+    <span class="c1"># Ground truth: upper-funnel has higher iROI but gets less LTA credit</span>
+    <span class="n">iroi_sp</span><span class="p">,</span> <span class="n">iroi_sb</span><span class="p">,</span> <span class="n">iroi_display</span><span class="p">,</span> <span class="n">iroi_video</span> <span class="o">=</span> <span class="mf">2.5</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.8</span><span class="p">,</span> <span class="mf">4.5</span>
+    <span class="n">carryover_sp</span><span class="p">,</span> <span class="n">carryover_sb</span><span class="p">,</span> <span class="n">carryover_display</span><span class="p">,</span> <span class="n">carryover_video</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.85</span>
+    <span class="n">lta_rate_sp</span><span class="p">,</span> <span class="n">lta_rate_sb</span><span class="p">,</span> <span class="n">lta_rate_display</span><span class="p">,</span> <span class="n">lta_rate_video</span> <span class="o">=</span> <span class="mf">0.45</span><span class="p">,</span> <span class="mf">0.30</span><span class="p">,</span> <span class="mf">0.18</span><span class="p">,</span> <span class="mf">0.07</span>
+
+    <span class="c1"># Adstock: effective_spend[t] = spend[t] + carryover * effective_spend[t-1]</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_adstock</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">carryover</span><span class="p">):</span>
+        <span class="n">adstocked</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">adstocked</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)):</span>
+            <span class="n">adstocked</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">+</span> <span class="n">carryover</span> <span class="o">*</span> <span class="n">adstocked</span><span class="p">[</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">adstocked</span>
+
+    <span class="n">sp_adstocked</span> <span class="o">=</span> <span class="n">apply_adstock</span><span class="p">(</span><span class="n">sp_spend</span><span class="p">,</span> <span class="n">carryover_sp</span><span class="p">)</span>
+    <span class="n">sb_adstocked</span> <span class="o">=</span> <span class="n">apply_adstock</span><span class="p">(</span><span class="n">sb_spend</span><span class="p">,</span> <span class="n">carryover_sb</span><span class="p">)</span>
+    <span class="n">display_adstocked</span> <span class="o">=</span> <span class="n">apply_adstock</span><span class="p">(</span><span class="n">display_spend</span><span class="p">,</span> <span class="n">carryover_display</span><span class="p">)</span>
+    <span class="n">video_adstocked</span> <span class="o">=</span> <span class="n">apply_adstock</span><span class="p">(</span><span class="n">video_spend</span><span class="p">,</span> <span class="n">carryover_video</span><span class="p">)</span>
+
+    <span class="c1"># Total sales = organic + (iROI × adstocked_spend) + event_lift + noise</span>
+    <span class="n">organic_baseline</span> <span class="o">=</span> <span class="mi">80000</span> <span class="o">*</span> <span class="n">yoy_growth</span> <span class="o">*</span> <span class="n">weekly_pattern</span> <span class="o">*</span> <span class="n">yearly_pattern</span>
+    <span class="n">incremental_from_sp</span> <span class="o">=</span> <span class="n">iroi_sp</span> <span class="o">*</span> <span class="n">sp_adstocked</span>
+    <span class="n">incremental_from_sb</span> <span class="o">=</span> <span class="n">iroi_sb</span> <span class="o">*</span> <span class="n">sb_adstocked</span>
+    <span class="n">incremental_from_display</span> <span class="o">=</span> <span class="n">iroi_display</span> <span class="o">*</span> <span class="n">display_adstocked</span>
+    <span class="n">incremental_from_video</span> <span class="o">=</span> <span class="n">iroi_video</span> <span class="o">*</span> <span class="n">video_adstocked</span>
+    <span class="n">event_lift</span> <span class="o">=</span> <span class="mi">30000</span> <span class="o">*</span> <span class="n">special_shopping_event</span> <span class="o">+</span> <span class="mi">10000</span> <span class="o">*</span> <span class="n">other_shopping_event</span>
+
+    <span class="n">total_sales</span> <span class="o">=</span> <span class="p">(</span><span class="n">organic_baseline</span> <span class="o">+</span>
+                   <span class="n">incremental_from_sp</span> <span class="o">+</span> <span class="n">incremental_from_sb</span> <span class="o">+</span>
+                   <span class="n">incremental_from_display</span> <span class="o">+</span> <span class="n">incremental_from_video</span> <span class="o">+</span>
+                   <span class="n">event_lift</span> <span class="o">+</span> <span class="mi">5000</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n_days</span><span class="p">))</span>
+    <span class="n">total_sales</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">total_sales</span><span class="p">,</span> <span class="mi">10000</span><span class="p">)</span>
+
+    <span class="c1"># LTA: 60% of sales are ad-touched, distributed by LTA contribution rates (independent of true iROI)</span>
+    <span class="n">ad_touched_sales</span> <span class="o">=</span> <span class="mf">0.6</span> <span class="o">*</span> <span class="n">total_sales</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n_days</span><span class="p">))</span>
+    <span class="n">lta_sp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">lta_rate_sp</span> <span class="o">*</span> <span class="n">ad_touched_sales</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mf">0.08</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n_days</span><span class="p">)),</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">lta_sb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">lta_rate_sb</span> <span class="o">*</span> <span class="n">ad_touched_sales</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mf">0.10</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n_days</span><span class="p">)),</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">lta_display</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">lta_rate_display</span> <span class="o">*</span> <span class="n">ad_touched_sales</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mf">0.12</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n_days</span><span class="p">)),</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">lta_video</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">lta_rate_video</span> <span class="o">*</span> <span class="n">ad_touched_sales</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mf">0.15</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n_days</span><span class="p">)),</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+        <span class="s1">&#39;activity_date&#39;</span><span class="p">:</span> <span class="n">dates</span><span class="p">,</span>
+        <span class="s1">&#39;year&#39;</span><span class="p">:</span> <span class="n">year</span><span class="p">,</span>
+        <span class="s1">&#39;quarter&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">quarter</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dates</span><span class="p">],</span>
+        <span class="s1">&#39;month&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">month</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dates</span><span class="p">],</span>
+        <span class="s1">&#39;day_of_week&#39;</span><span class="p">:</span> <span class="n">day_of_week</span><span class="p">,</span>
+        <span class="s1">&#39;sp_spend&#39;</span><span class="p">:</span> <span class="n">sp_spend</span><span class="p">,</span> <span class="s1">&#39;sb_spend&#39;</span><span class="p">:</span> <span class="n">sb_spend</span><span class="p">,</span>
+        <span class="s1">&#39;display_spend&#39;</span><span class="p">:</span> <span class="n">display_spend</span><span class="p">,</span> <span class="s1">&#39;video_spend&#39;</span><span class="p">:</span> <span class="n">video_spend</span><span class="p">,</span>
+        <span class="s1">&#39;sp_impressions&#39;</span><span class="p">:</span> <span class="n">sp_impressions</span><span class="p">,</span> <span class="s1">&#39;sb_impressions&#39;</span><span class="p">:</span> <span class="n">sb_impressions</span><span class="p">,</span>
+        <span class="s1">&#39;display_impressions&#39;</span><span class="p">:</span> <span class="n">display_impressions</span><span class="p">,</span> <span class="s1">&#39;video_impressions&#39;</span><span class="p">:</span> <span class="n">video_impressions</span><span class="p">,</span>
+        <span class="s1">&#39;special_shopping_event&#39;</span><span class="p">:</span> <span class="n">special_shopping_event</span><span class="p">,</span>
+        <span class="s1">&#39;other_shopping_event&#39;</span><span class="p">:</span> <span class="n">other_shopping_event</span><span class="p">,</span>
+        <span class="s1">&#39;total_sales&#39;</span><span class="p">:</span> <span class="n">total_sales</span><span class="p">,</span>
+        <span class="s1">&#39;ad_touched_sales&#39;</span><span class="p">:</span> <span class="n">ad_touched_sales</span><span class="p">,</span>
+        <span class="s1">&#39;lta_sales_sp&#39;</span><span class="p">:</span> <span class="n">lta_sp</span><span class="p">,</span> <span class="s1">&#39;lta_sales_sb&#39;</span><span class="p">:</span> <span class="n">lta_sb</span><span class="p">,</span>
+        <span class="s1">&#39;lta_sales_display&#39;</span><span class="p">:</span> <span class="n">lta_display</span><span class="p">,</span> <span class="s1">&#39;lta_sales_video&#39;</span><span class="p">:</span> <span class="n">lta_video</span><span class="p">,</span>
+    <span class="p">})</span>
+
+    <span class="n">ground_truth</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;iroi&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;SP&#39;</span><span class="p">:</span> <span class="n">iroi_sp</span><span class="p">,</span> <span class="s1">&#39;SB&#39;</span><span class="p">:</span> <span class="n">iroi_sb</span><span class="p">,</span> <span class="s1">&#39;Display&#39;</span><span class="p">:</span> <span class="n">iroi_display</span><span class="p">,</span> <span class="s1">&#39;Video&#39;</span><span class="p">:</span> <span class="n">iroi_video</span><span class="p">},</span>
+        <span class="s1">&#39;carryover&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;SP&#39;</span><span class="p">:</span> <span class="n">carryover_sp</span><span class="p">,</span> <span class="s1">&#39;SB&#39;</span><span class="p">:</span> <span class="n">carryover_sb</span><span class="p">,</span> <span class="s1">&#39;Display&#39;</span><span class="p">:</span> <span class="n">carryover_display</span><span class="p">,</span> <span class="s1">&#39;Video&#39;</span><span class="p">:</span> <span class="n">carryover_video</span><span class="p">},</span>
+        <span class="s1">&#39;lta_rate&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;SP&#39;</span><span class="p">:</span> <span class="n">lta_rate_sp</span><span class="p">,</span> <span class="s1">&#39;SB&#39;</span><span class="p">:</span> <span class="n">lta_rate_sb</span><span class="p">,</span> <span class="s1">&#39;Display&#39;</span><span class="p">:</span> <span class="n">lta_rate_display</span><span class="p">,</span> <span class="s1">&#39;Video&#39;</span><span class="p">:</span> <span class="n">lta_rate_video</span><span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">df</span><span class="p">,</span> <span class="n">ground_truth</span>
+
+<span class="n">df</span><span class="p">,</span> <span class="n">ground_truth</span> <span class="o">=</span> <span class="n">generate_advertising_data</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Data: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span><span class="si">}</span><span class="s2"> days, </span><span class="si">{</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;activity_date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">date</span><span class="p">()</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;activity_date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">date</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Special event days: </span><span class="si">{</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;special_shopping_event&#39;</span><span class="p">]</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;special_shopping_event&#39;</span><span class="p">]</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%)&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Other event days: </span><span class="si">{</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;other_shopping_event&#39;</span><span class="p">]</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;other_shopping_event&#39;</span><span class="p">]</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%)&quot;</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Data: 731 days, 2024-01-01 to 2025-12-31
+Special event days: 65 (8.9%)
+Other event days: 161 (22.0%)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>activity_date</th>
+      <th>year</th>
+      <th>quarter</th>
+      <th>month</th>
+      <th>day_of_week</th>
+      <th>sp_spend</th>
+      <th>sb_spend</th>
+      <th>display_spend</th>
+      <th>video_spend</th>
+      <th>sp_impressions</th>
+      <th>...</th>
+      <th>display_impressions</th>
+      <th>video_impressions</th>
+      <th>special_shopping_event</th>
+      <th>other_shopping_event</th>
+      <th>total_sales</th>
+      <th>ad_touched_sales</th>
+      <th>lta_sales_sp</th>
+      <th>lta_sales_sb</th>
+      <th>lta_sales_display</th>
+      <th>lta_sales_video</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2024-01-01</td>
+      <td>2024</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>13404.441671</td>
+      <td>5099.747577</td>
+      <td>8952.575520</td>
+      <td>3858.257279</td>
+      <td>5.361777e+06</td>
+      <td>...</td>
+      <td>5.968384e+06</td>
+      <td>482282.159891</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>155454.198911</td>
+      <td>87939.951886</td>
+      <td>37143.728760</td>
+      <td>23460.738849</td>
+      <td>13858.642324</td>
+      <td>6293.988387</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2024-01-02</td>
+      <td>2024</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>12573.576417</td>
+      <td>5940.908870</td>
+      <td>10486.819125</td>
+      <td>5283.133227</td>
+      <td>5.029431e+06</td>
+      <td>...</td>
+      <td>6.991213e+06</td>
+      <td>660391.653381</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>219463.068045</td>
+      <td>145232.875195</td>
+      <td>52965.494493</td>
+      <td>44159.286689</td>
+      <td>30375.435747</td>
+      <td>14314.282119</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2024-01-03</td>
+      <td>2024</td>
+      <td>1</td>
+      <td>1</td>
+      <td>2</td>
+      <td>13979.535290</td>
+      <td>5680.663153</td>
+      <td>11816.388289</td>
+      <td>7530.793229</td>
+      <td>5.591814e+06</td>
+      <td>...</td>
+      <td>7.877592e+06</td>
+      <td>941349.153615</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>284656.682628</td>
+      <td>172537.129670</td>
+      <td>76023.283438</td>
+      <td>46311.842059</td>
+      <td>27777.802951</td>
+      <td>9154.003839</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2024-01-04</td>
+      <td>2024</td>
+      <td>1</td>
+      <td>1</td>
+      <td>3</td>
+      <td>15161.875157</td>
+      <td>7865.616003</td>
+      <td>9500.538566</td>
+      <td>5050.795393</td>
+      <td>6.064750e+06</td>
+      <td>...</td>
+      <td>6.333692e+06</td>
+      <td>631349.424145</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>313792.139323</td>
+      <td>236249.947675</td>
+      <td>107409.255926</td>
+      <td>85420.610730</td>
+      <td>53827.211856</td>
+      <td>20315.500984</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2024-01-05</td>
+      <td>2024</td>
+      <td>1</td>
+      <td>1</td>
+      <td>4</td>
+      <td>12775.945666</td>
+      <td>3888.599153</td>
+      <td>9579.377571</td>
+      <td>6822.546123</td>
+      <td>5.110378e+06</td>
+      <td>...</td>
+      <td>6.386252e+06</td>
+      <td>852818.265345</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>323851.281693</td>
+      <td>185840.293859</td>
+      <td>75548.541173</td>
+      <td>61245.391132</td>
+      <td>32032.104714</td>
+      <td>8354.883341</td>
+    </tr>
+  </tbody>
+</table>
+<p>5 rows × 21 columns</p>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Ground Truth:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  iROI: </span><span class="si">{</span><span class="n">ground_truth</span><span class="p">[</span><span class="s1">&#39;iroi&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Carryover: </span><span class="si">{</span><span class="n">ground_truth</span><span class="p">[</span><span class="s1">&#39;carryover&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  LTA rates: </span><span class="si">{</span><span class="n">ground_truth</span><span class="p">[</span><span class="s1">&#39;lta_rate&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Ground Truth:
+  iROI: {&#39;SP&#39;: 2.5, &#39;SB&#39;: 2.2, &#39;Display&#39;: 3.8, &#39;Video&#39;: 4.5}
+  Carryover: {&#39;SP&#39;: 0.3, &#39;SB&#39;: 0.4, &#39;Display&#39;: 0.7, &#39;Video&#39;: 0.85}
+  LTA rates: {&#39;SP&#39;: 0.45, &#39;SB&#39;: 0.3, &#39;Display&#39;: 0.18, &#39;Video&#39;: 0.07}
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df_2024</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;year&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2024</span><span class="p">]</span>
+<span class="n">df_2025</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;year&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2025</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;YoY Change (2025 vs 2024):&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;total_sales&#39;</span><span class="p">,</span> <span class="s1">&#39;sp_spend&#39;</span><span class="p">,</span> <span class="s1">&#39;sb_spend&#39;</span><span class="p">,</span> <span class="s1">&#39;display_spend&#39;</span><span class="p">,</span> <span class="s1">&#39;video_spend&#39;</span><span class="p">]:</span>
+    <span class="n">pct</span> <span class="o">=</span> <span class="p">(</span><span class="n">df_2025</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">-</span> <span class="n">df_2024</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">/</span> <span class="n">df_2024</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">*</span> <span class="mi">100</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">pct</span><span class="si">:</span><span class="s2">+.1f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+YoY Change (2025 vs 2024):
+  total_sales: +8.2%
+  sp_spend: +5.9%
+  sb_spend: +8.4%
+  display_spend: +7.9%
+  video_spend: +7.1%
+</pre></div></div>
+</div>
+</section>
+<section id="2.-Time-Decay-MTA">
+<h2>2. Time Decay MTA<a class="headerlink" href="#2.-Time-Decay-MTA" title="Link to this heading">#</a></h2>
+<p>Reallocate LTA credit using adstock transformation. Channels with higher carryover (Display/Video) accumulate more effective impressions over time, gaining credit vs LTA.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">apply_adstock</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">carryover</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Geometric adstock: result[t] = x[t] + carryover * result[t-1]&quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">series</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">series</span><span class="p">)):</span>
+        <span class="n">result</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">series</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">+</span> <span class="n">carryover</span> <span class="o">*</span> <span class="n">result</span><span class="p">[</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">build_adstocked_features</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">carryover_map</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply channel-specific carryover to build adstocked feature matrix.&quot;&quot;&quot;</span>
+    <span class="n">X_adstocked</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">carry</span> <span class="o">=</span> <span class="n">carryover_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="n">X_adstocked</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">apply_adstock</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">carry</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">X_adstocked</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">time_decay_attribution</span><span class="p">(</span><span class="n">X_adstocked</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">lam</span><span class="o">=</span><span class="mf">10.0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ridge regression on adstocked features, rescaled to sum to total LTA.&quot;&quot;&quot;</span>
+    <span class="n">X_arr</span> <span class="o">=</span> <span class="n">X_adstocked</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">X_mean</span> <span class="o">=</span> <span class="n">X_arr</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">X_std</span> <span class="o">=</span> <span class="n">X_arr</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-8</span>
+    <span class="n">X_scaled</span> <span class="o">=</span> <span class="p">(</span><span class="n">X_arr</span> <span class="o">-</span> <span class="n">X_mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">X_std</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Ridge</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">lam</span><span class="p">,</span> <span class="n">fit_intercept</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_scaled</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+    <span class="n">coefs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">coef_</span> <span class="o">/</span> <span class="n">X_std</span>
+    <span class="n">y_pred</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_scaled</span><span class="p">)</span>
+
+    <span class="n">contributions</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">X_adstocked</span><span class="o">.</span><span class="n">columns</span><span class="p">):</span>
+        <span class="n">contrib</span> <span class="o">=</span> <span class="n">coefs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">X_adstocked</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">contributions</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">contrib</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+    <span class="n">total_contrib</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">contributions</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">total_contrib</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">total_contrib</span>
+        <span class="n">contributions</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="o">*</span> <span class="n">scale</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">contributions</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+    <span class="k">return</span> <span class="n">contributions</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">y_pred</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">cv_objective</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">channels</span><span class="p">,</span> <span class="n">carryover_bounds</span><span class="p">,</span> <span class="n">lambda_bounds</span><span class="p">,</span> <span class="n">n_splits</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Cross-validation objective: validation MAE + overfitting penalty + regularization on carryover.&quot;&quot;&quot;</span>
+    <span class="n">n_channels</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">channels</span><span class="p">)</span>
+    <span class="n">carryover_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span> <span class="n">params</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_channels</span><span class="p">)}</span>
+    <span class="n">lam</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="n">n_channels</span><span class="p">]</span>
+
+    <span class="c1"># Boundary check</span>
+    <span class="k">for</span> <span class="n">carry</span> <span class="ow">in</span> <span class="n">carryover_map</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">carry</span> <span class="o">&lt;</span> <span class="n">carryover_bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="n">carry</span> <span class="o">&gt;</span> <span class="n">carryover_bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="mf">1e10</span>
+    <span class="k">if</span> <span class="n">lam</span> <span class="o">&lt;</span> <span class="n">lambda_bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="n">lam</span> <span class="o">&gt;</span> <span class="n">lambda_bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="mf">1e10</span>
+
+    <span class="n">X_adstocked</span> <span class="o">=</span> <span class="n">build_adstocked_features</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">carryover_map</span><span class="p">)</span>
+    <span class="n">tscv</span> <span class="o">=</span> <span class="n">TimeSeriesSplit</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="n">n_splits</span><span class="p">)</span>
+
+    <span class="n">train_maes</span><span class="p">,</span> <span class="n">val_maes</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">train_idx</span><span class="p">,</span> <span class="n">val_idx</span> <span class="ow">in</span> <span class="n">tscv</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">X_adstocked</span><span class="p">):</span>
+        <span class="n">X_train</span><span class="p">,</span> <span class="n">X_val</span> <span class="o">=</span> <span class="n">X_adstocked</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">train_idx</span><span class="p">],</span> <span class="n">X_adstocked</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">val_idx</span><span class="p">]</span>
+        <span class="n">y_train</span><span class="p">,</span> <span class="n">y_val</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">train_idx</span><span class="p">],</span> <span class="n">y</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">val_idx</span><span class="p">]</span>
+
+        <span class="c1"># Standardize using train stats only</span>
+        <span class="n">X_train_arr</span> <span class="o">=</span> <span class="n">X_train</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">X_mean</span> <span class="o">=</span> <span class="n">X_train_arr</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">X_std</span> <span class="o">=</span> <span class="n">X_train_arr</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-8</span>
+        <span class="n">X_train_scaled</span> <span class="o">=</span> <span class="p">(</span><span class="n">X_train_arr</span> <span class="o">-</span> <span class="n">X_mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">X_std</span>
+
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Ridge</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">lam</span><span class="p">,</span> <span class="n">fit_intercept</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train_scaled</span><span class="p">,</span> <span class="n">y_train</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+
+        <span class="n">y_train_pred</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_train_scaled</span><span class="p">)</span>
+        <span class="n">X_val_scaled</span> <span class="o">=</span> <span class="p">(</span><span class="n">X_val</span><span class="o">.</span><span class="n">values</span> <span class="o">-</span> <span class="n">X_mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">X_std</span>
+        <span class="n">y_val_pred</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_val_scaled</span><span class="p">)</span>
+
+        <span class="n">train_maes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mean_absolute_error</span><span class="p">(</span><span class="n">y_train</span><span class="p">,</span> <span class="n">y_train_pred</span><span class="p">))</span>
+        <span class="n">val_maes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mean_absolute_error</span><span class="p">(</span><span class="n">y_val</span><span class="p">,</span> <span class="n">y_val_pred</span><span class="p">))</span>
+
+    <span class="n">train_mae</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">train_maes</span><span class="p">)</span>
+    <span class="n">val_mae</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">val_maes</span><span class="p">)</span>
+    <span class="n">gap_penalty</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">val_mae</span> <span class="o">-</span> <span class="n">train_mae</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">train_mae</span> <span class="o">+</span> <span class="mf">1e-8</span><span class="p">)</span>
+    <span class="n">carryover_penalty</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">c</span><span class="o">**</span><span class="mi">2</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">carryover_map</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">/</span> <span class="n">n_channels</span>
+
+    <span class="k">return</span> <span class="n">val_mae</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">gap_penalty</span> <span class="o">*</span> <span class="n">val_mae</span> <span class="o">+</span> <span class="mf">0.05</span> <span class="o">*</span> <span class="n">carryover_penalty</span> <span class="o">*</span> <span class="n">val_mae</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">optimize_carryover</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">channels</span><span class="p">,</span> <span class="n">carryover_bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">),</span> <span class="n">lambda_bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="n">maxiter</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find optimal carryover rates via differential evolution.&quot;&quot;&quot;</span>
+    <span class="n">n_channels</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">channels</span><span class="p">)</span>
+    <span class="n">bounds</span> <span class="o">=</span> <span class="p">[</span><span class="n">carryover_bounds</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_channels</span> <span class="o">+</span> <span class="p">[</span><span class="n">lambda_bounds</span><span class="p">]</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">optimize</span><span class="o">.</span><span class="n">differential_evolution</span><span class="p">(</span>
+        <span class="n">cv_objective</span><span class="p">,</span>
+        <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span>
+        <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">channels</span><span class="p">,</span> <span class="n">carryover_bounds</span><span class="p">,</span> <span class="n">lambda_bounds</span><span class="p">),</span>
+        <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">maxiter</span><span class="o">=</span><span class="n">maxiter</span><span class="p">,</span>
+        <span class="n">tol</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span>
+        <span class="n">disp</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="mi">1</span>
+    <span class="p">)</span>
+
+    <span class="n">carryover_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span> <span class="n">result</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_channels</span><span class="p">)}</span>
+    <span class="n">lam_opt</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">n_channels</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">carryover_map</span><span class="p">,</span> <span class="n">lam_opt</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">channels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;SP&#39;</span><span class="p">,</span> <span class="s1">&#39;SB&#39;</span><span class="p">,</span> <span class="s1">&#39;Display&#39;</span><span class="p">,</span> <span class="s1">&#39;Video&#39;</span><span class="p">]</span>
+<span class="n">X_impressions</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;activity_date&#39;</span><span class="p">)[[</span><span class="s1">&#39;sp_impressions&#39;</span><span class="p">,</span> <span class="s1">&#39;sb_impressions&#39;</span><span class="p">,</span> <span class="s1">&#39;display_impressions&#39;</span><span class="p">,</span> <span class="s1">&#39;video_impressions&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">X_impressions</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">channels</span>
+<span class="n">y_lta_total</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;activity_date&#39;</span><span class="p">)[[</span><span class="s1">&#39;lta_sales_sp&#39;</span><span class="p">,</span> <span class="s1">&#39;lta_sales_sb&#39;</span><span class="p">,</span> <span class="s1">&#39;lta_sales_display&#39;</span><span class="p">,</span> <span class="s1">&#39;lta_sales_video&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;X: </span><span class="si">{</span><span class="n">X_impressions</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">, y: </span><span class="si">{</span><span class="n">y_lta_total</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+X: (731, 4), y: (731,)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">carryover_opt</span><span class="p">,</span> <span class="n">lam_opt</span> <span class="o">=</span> <span class="n">optimize_carryover</span><span class="p">(</span>
+    <span class="n">X_impressions</span><span class="p">,</span> <span class="n">y_lta_total</span><span class="p">,</span> <span class="n">channels</span><span class="p">,</span>
+    <span class="n">carryover_bounds</span><span class="o">=</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">),</span>
+    <span class="n">lambda_bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
+    <span class="n">maxiter</span><span class="o">=</span><span class="mi">50</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Optimized carryover rates:&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">ch</span><span class="p">,</span> <span class="n">carry</span> <span class="ow">in</span> <span class="n">carryover_opt</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">half_life</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">carry</span><span class="p">)</span> <span class="k">if</span> <span class="n">carry</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="n">true_carry</span> <span class="o">=</span> <span class="n">ground_truth</span><span class="p">[</span><span class="s1">&#39;carryover&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ch</span><span class="p">,</span> <span class="s1">&#39;N/A&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">ch</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">carry</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> (half-life: </span><span class="si">{</span><span class="n">half_life</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">d) | actual: </span><span class="si">{</span><span class="n">true_carry</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Lambda: </span><span class="si">{</span><span class="n">lam_opt</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Optimized carryover rates:
+  SP: 0.270 (half-life: 0.5d) | actual: 0.3
+  SB: 0.163 (half-life: 0.4d) | actual: 0.4
+  Display: 0.768 (half-life: 2.6d) | actual: 0.7
+  Video: 0.803 (half-life: 3.2d) | actual: 0.85
+Lambda: 31.33
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">X_adstocked</span> <span class="o">=</span> <span class="n">build_adstocked_features</span><span class="p">(</span><span class="n">X_impressions</span><span class="p">,</span> <span class="n">carryover_opt</span><span class="p">)</span>
+<span class="n">mta_contrib</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">time_decay_attribution</span><span class="p">(</span><span class="n">X_adstocked</span><span class="p">,</span> <span class="n">y_lta_total</span><span class="p">,</span> <span class="n">lam_opt</span><span class="p">)</span>
+
+<span class="n">lta_totals</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;SP&#39;</span><span class="p">:</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;lta_sales_sp&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span>
+    <span class="s1">&#39;SB&#39;</span><span class="p">:</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;lta_sales_sb&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span>
+    <span class="s1">&#39;Display&#39;</span><span class="p">:</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;lta_sales_display&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span>
+    <span class="s1">&#39;Video&#39;</span><span class="p">:</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;lta_sales_video&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="p">}</span>
+
+<span class="n">total_lta</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">lta_totals</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+<span class="n">total_mta</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">mta_contrib</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;LTA vs MTA Attribution:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;Channel&#39;</span><span class="si">:</span><span class="s2">&lt;10</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">&#39;LTA ($M)&#39;</span><span class="si">:</span><span class="s2">&lt;12</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">&#39;LTA %&#39;</span><span class="si">:</span><span class="s2">&lt;10</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">&#39;MTA ($M)&#39;</span><span class="si">:</span><span class="s2">&lt;12</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">&#39;MTA %&#39;</span><span class="si">:</span><span class="s2">&lt;10</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">&#39;Shift&#39;</span><span class="si">:</span><span class="s2">&lt;10</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">64</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="n">channels</span><span class="p">:</span>
+    <span class="n">lta_val</span> <span class="o">=</span> <span class="n">lta_totals</span><span class="p">[</span><span class="n">ch</span><span class="p">]</span> <span class="o">/</span> <span class="mf">1e6</span>
+    <span class="n">lta_pct</span> <span class="o">=</span> <span class="n">lta_totals</span><span class="p">[</span><span class="n">ch</span><span class="p">]</span> <span class="o">/</span> <span class="n">total_lta</span> <span class="o">*</span> <span class="mi">100</span>
+    <span class="n">mta_val</span> <span class="o">=</span> <span class="n">mta_contrib</span><span class="p">[</span><span class="n">ch</span><span class="p">]</span> <span class="o">/</span> <span class="mf">1e6</span>
+    <span class="n">mta_pct</span> <span class="o">=</span> <span class="n">mta_contrib</span><span class="p">[</span><span class="n">ch</span><span class="p">]</span> <span class="o">/</span> <span class="n">total_mta</span> <span class="o">*</span> <span class="mi">100</span>
+    <span class="n">shift</span> <span class="o">=</span> <span class="n">mta_pct</span> <span class="o">-</span> <span class="n">lta_pct</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ch</span><span class="si">:</span><span class="s2">&lt;10</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">lta_val</span><span class="si">:</span><span class="s2">&lt;12.1f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">lta_pct</span><span class="si">:</span><span class="s2">&lt;10.1f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">mta_val</span><span class="si">:</span><span class="s2">&lt;12.1f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">mta_pct</span><span class="si">:</span><span class="s2">&lt;10.1f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">shift</span><span class="si">:</span><span class="s2">+.1f</span><span class="si">}</span><span class="s2">pp&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+LTA vs MTA Attribution:
+Channel    LTA ($M)     LTA %      MTA ($M)     MTA %      Shift
+----------------------------------------------------------------
+SP         106.9        45.1       30.3         12.8       -32.3pp
+SB         71.2         30.0       28.8         12.1       -17.9pp
+Display    42.5         17.9       90.7         38.2       +20.3pp
+Video      16.6         7.0        87.4         36.8       +29.8pp
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">channels</span><span class="p">))</span>
+<span class="n">width</span> <span class="o">=</span> <span class="mf">0.35</span>
+
+<span class="n">ax1</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">lta_pcts</span> <span class="o">=</span> <span class="p">[</span><span class="n">lta_totals</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">/</span><span class="n">total_lta</span><span class="o">*</span><span class="mi">100</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">channels</span><span class="p">]</span>
+<span class="n">mta_pcts</span> <span class="o">=</span> <span class="p">[</span><span class="n">mta_contrib</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">/</span><span class="n">total_mta</span><span class="o">*</span><span class="mi">100</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">channels</span><span class="p">]</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">lta_pcts</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Last Touch&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;tab:red&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">mta_pcts</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Time Decay MTA&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;tab:blue&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">(</span><span class="n">channels</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Share (%)&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;LTA vs MTA Attribution&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">55</span><span class="p">)</span>
+
+<span class="n">ax2</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">shifts</span> <span class="o">=</span> <span class="p">[</span><span class="n">mta_pcts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">lta_pcts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">channels</span><span class="p">))]</span>
+<span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;tab:green&#39;</span> <span class="k">if</span> <span class="n">s</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="s1">&#39;tab:red&#39;</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">shifts</span><span class="p">]</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">channels</span><span class="p">,</span> <span class="n">shifts</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Credit Shift (pp)&#39;</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;MTA - LTA Shift&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_mta_incrementality_time_decay_12_0.png" src="../_images/example_notebooks_gcm_mta_incrementality_time_decay_12_0.png" />
+</div>
+</div>
+</section>
+<section id="3.-Causal-Attribution-(DoWhy)">
+<h2>3. Causal Attribution (DoWhy)<a class="headerlink" href="#3.-Causal-Attribution-(DoWhy)" title="Link to this heading">#</a></h2>
+<p>Decompose YoY sales growth into driver contributions using DoWhy GCM:</p>
+<ol class="arabic simple">
+<li><p>Build DAG: spend variables, other drivers → sale</p></li>
+<li><p>Fit causal model</p></li>
+<li><p>Attribute mean change via Shapley values</p></li>
+</ol>
+<section id="3.1-With-Raw-Spend">
+<h3>3.1 With Raw Spend<a class="headerlink" href="#3.1-With-Raw-Spend" title="Link to this heading">#</a></h3>
+<p>This is the default approach by fitting the model directly on observed spend without any time-series transformation.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df_causal</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="s1">&#39;activity_date&#39;</span><span class="p">,</span> <span class="s1">&#39;year&#39;</span><span class="p">,</span> <span class="s1">&#39;quarter&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;sp_spend&#39;</span><span class="p">,</span> <span class="s1">&#39;sb_spend&#39;</span><span class="p">,</span> <span class="s1">&#39;display_spend&#39;</span><span class="p">,</span> <span class="s1">&#39;video_spend&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;special_shopping_event&#39;</span><span class="p">,</span> <span class="s1">&#39;other_shopping_event&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;total_sales&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">df_causal</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;activity_date&#39;</span><span class="p">,</span> <span class="s1">&#39;year&#39;</span><span class="p">,</span> <span class="s1">&#39;quarter&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;sp_spend&#39;</span><span class="p">,</span> <span class="s1">&#39;sb_spend&#39;</span><span class="p">,</span> <span class="s1">&#39;display_spend&#39;</span><span class="p">,</span> <span class="s1">&#39;video_spend&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;special_shopping_event&#39;</span><span class="p">,</span> <span class="s1">&#39;other_shopping_event&#39;</span><span class="p">,</span> <span class="s1">&#39;sale&#39;</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Causal data: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">df_causal</span><span class="p">)</span><span class="si">}</span><span class="s2"> rows&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Causal data: 731 rows
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Build graph matching DGP structure</span>
+<span class="n">day_of_year</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;activity_date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">dayofyear</span>
+<span class="n">df_causal</span><span class="p">[</span><span class="s1">&#39;yearly_seasonality&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="mf">0.3</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">day_of_year</span> <span class="o">-</span> <span class="mi">80</span><span class="p">)</span> <span class="o">/</span> <span class="mi">365</span><span class="p">)</span>
+<span class="n">df_causal</span><span class="p">[</span><span class="s1">&#39;weekly_seasonality&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="mf">0.15</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;activity_date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">dayofweek</span> <span class="o">/</span> <span class="mi">7</span><span class="p">)</span>
+
+<span class="n">edges</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="c1"># Spend → sale</span>
+<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;sp_spend&#39;</span><span class="p">,</span> <span class="s1">&#39;sb_spend&#39;</span><span class="p">,</span> <span class="s1">&#39;display_spend&#39;</span><span class="p">,</span> <span class="s1">&#39;video_spend&#39;</span><span class="p">]:</span>
+    <span class="n">edges</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">col</span><span class="p">,</span> <span class="s1">&#39;sale&#39;</span><span class="p">))</span>
+
+<span class="c1"># Seasonality → sale</span>
+<span class="n">edges</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;yearly_seasonality&#39;</span><span class="p">,</span> <span class="s1">&#39;sale&#39;</span><span class="p">))</span>
+<span class="n">edges</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;weekly_seasonality&#39;</span><span class="p">,</span> <span class="s1">&#39;sale&#39;</span><span class="p">))</span>
+
+<span class="c1"># Seasonality → all spend</span>
+<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;sp_spend&#39;</span><span class="p">,</span> <span class="s1">&#39;sb_spend&#39;</span><span class="p">,</span> <span class="s1">&#39;display_spend&#39;</span><span class="p">,</span> <span class="s1">&#39;video_spend&#39;</span><span class="p">]:</span>
+    <span class="n">edges</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;yearly_seasonality&#39;</span><span class="p">,</span> <span class="n">col</span><span class="p">))</span>
+    <span class="n">edges</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;weekly_seasonality&#39;</span><span class="p">,</span> <span class="n">col</span><span class="p">))</span>
+
+<span class="c1"># Events → sale</span>
+<span class="n">edges</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;special_shopping_event&#39;</span><span class="p">,</span> <span class="s1">&#39;sale&#39;</span><span class="p">))</span>
+<span class="n">edges</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;other_shopping_event&#39;</span><span class="p">,</span> <span class="s1">&#39;sale&#39;</span><span class="p">))</span>
+
+<span class="c1"># Events → all spend</span>
+<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;sp_spend&#39;</span><span class="p">,</span> <span class="s1">&#39;sb_spend&#39;</span><span class="p">,</span> <span class="s1">&#39;display_spend&#39;</span><span class="p">,</span> <span class="s1">&#39;video_spend&#39;</span><span class="p">]:</span>
+    <span class="n">edges</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;special_shopping_event&#39;</span><span class="p">,</span> <span class="n">col</span><span class="p">))</span>
+    <span class="n">edges</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;other_shopping_event&#39;</span><span class="p">,</span> <span class="n">col</span><span class="p">))</span>
+
+<span class="n">causal_graph</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span>
+<span class="n">plot_graph</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_mta_incrementality_time_decay_16_0.png" src="../_images/example_notebooks_gcm_mta_incrementality_time_decay_16_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Graph validation</span>
+<span class="n">RUN_GRAPH_VALIDATION</span> <span class="o">=</span> <span class="kc">True</span>
+
+<span class="k">if</span> <span class="n">RUN_GRAPH_VALIDATION</span><span class="p">:</span>
+    <span class="n">validation_data</span> <span class="o">=</span> <span class="n">df_causal</span><span class="p">[[</span><span class="s1">&#39;sp_spend&#39;</span><span class="p">,</span><span class="s1">&#39;sb_spend&#39;</span><span class="p">,</span><span class="s1">&#39;display_spend&#39;</span><span class="p">,</span><span class="s1">&#39;video_spend&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;yearly_seasonality&#39;</span><span class="p">,</span> <span class="s1">&#39;weekly_seasonality&#39;</span><span class="p">,</span><span class="s1">&#39;special_shopping_event&#39;</span><span class="p">,</span> <span class="s1">&#39;other_shopping_event&#39;</span><span class="p">,</span><span class="s1">&#39;sale&#39;</span><span class="p">]]</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">falsify_graph</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">,</span> <span class="n">validation_data</span><span class="p">,</span> <span class="n">suggestions</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_permutations</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="n">causal_graph</span> <span class="o">=</span> <span class="n">apply_suggestions</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Revised graph edges: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">causal_graph</span><span class="o">.</span><span class="n">edges</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Graph validation skipped&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Test permutations of given graph: 100%|██████████| 20/20 [00:20&lt;00:00,  1.03s/it]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
++-------------------------------------------------------------------------------------------------------+
+|                                         Falsification Summary                                         |
++-------------------------------------------------------------------------------------------------------+
+| The given DAG is informative because 0 / 20 of the permutations lie in the Markov                     |
+| equivalence class of the given DAG (p-value: 0.00).                                                   |
+| The given DAG violates 12/24 LMCs and is better than 100.0% of the permuted DAGs (p-value: 0.00).     |
+| Based on the provided significance level (0.05) and because the DAG is informative,                   |
+| we do not reject the DAG.                                                                             |
++-------------------------------------------------------------------------------------------------------+
+|                                              Suggestions                                              |
++-------------------------------------------------------------------------------------------------------+
+| Causal Minimality | - Remove edge weekly_seasonality --&gt; sale                                         |
++-------------------------------------------------------------------------------------------------------+
+
+Revised graph edges: [(&#39;sp_spend&#39;, &#39;sale&#39;), (&#39;sb_spend&#39;, &#39;sale&#39;), (&#39;display_spend&#39;, &#39;sale&#39;), (&#39;video_spend&#39;, &#39;sale&#39;), (&#39;yearly_seasonality&#39;, &#39;sale&#39;), (&#39;yearly_seasonality&#39;, &#39;sp_spend&#39;), (&#39;yearly_seasonality&#39;, &#39;sb_spend&#39;), (&#39;yearly_seasonality&#39;, &#39;display_spend&#39;), (&#39;yearly_seasonality&#39;, &#39;video_spend&#39;), (&#39;weekly_seasonality&#39;, &#39;sp_spend&#39;), (&#39;weekly_seasonality&#39;, &#39;sb_spend&#39;), (&#39;weekly_seasonality&#39;, &#39;display_spend&#39;), (&#39;weekly_seasonality&#39;, &#39;video_spend&#39;), (&#39;special_shopping_event&#39;, &#39;sale&#39;), (&#39;special_shopping_event&#39;, &#39;sp_spend&#39;), (&#39;special_shopping_event&#39;, &#39;sb_spend&#39;), (&#39;special_shopping_event&#39;, &#39;display_spend&#39;), (&#39;special_shopping_event&#39;, &#39;video_spend&#39;), (&#39;other_shopping_event&#39;, &#39;sale&#39;), (&#39;other_shopping_event&#39;, &#39;sp_spend&#39;), (&#39;other_shopping_event&#39;, &#39;sb_spend&#39;), (&#39;other_shopping_event&#39;, &#39;display_spend&#39;), (&#39;other_shopping_event&#39;, &#39;video_spend&#39;)]
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">causal_model</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">StructuralCausalModel</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">)</span>
+<span class="n">gcm</span><span class="o">.</span><span class="n">auto</span><span class="o">.</span><span class="n">assign_causal_mechanisms</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">df_causal</span><span class="p">,</span> <span class="n">quality</span><span class="o">=</span><span class="n">gcm</span><span class="o">.</span><span class="n">auto</span><span class="o">.</span><span class="n">AssignmentQuality</span><span class="o">.</span><span class="n">BETTER</span><span class="p">)</span>
+<span class="n">gcm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">df_causal</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Fitting causal mechanism of node other_shopping_event: 100%|██████████| 9/9 [00:00&lt;00:00, 39.20it/s]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define growth period for comparison</span>
+
+<span class="n">df_new</span> <span class="o">=</span> <span class="n">df_causal</span><span class="p">[(</span><span class="n">df_causal</span><span class="p">[</span><span class="s1">&#39;year&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2025</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df_causal</span><span class="p">[</span><span class="s1">&#39;quarter&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]))]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">df_old</span> <span class="o">=</span> <span class="n">df_causal</span><span class="p">[(</span><span class="n">df_causal</span><span class="p">[</span><span class="s1">&#39;year&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2024</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df_causal</span><span class="p">[</span><span class="s1">&#39;quarter&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]))]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+<span class="n">mean_old</span> <span class="o">=</span> <span class="n">df_old</span><span class="p">[</span><span class="s1">&#39;sale&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="n">mean_new</span> <span class="o">=</span> <span class="n">df_new</span><span class="p">[</span><span class="s1">&#39;sale&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="n">total_change</span> <span class="o">=</span> <span class="n">mean_new</span> <span class="o">-</span> <span class="n">mean_old</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Comparing: 2025 H1 (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">df_new</span><span class="p">)</span><span class="si">}</span><span class="s2">d) vs 2024 H1 (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">df_old</span><span class="p">)</span><span class="si">}</span><span class="s2">d)&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Mean daily sales: 2024=$</span><span class="si">{</span><span class="n">mean_old</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2">, 2025=$</span><span class="si">{</span><span class="n">mean_new</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Daily change: $</span><span class="si">{</span><span class="n">total_change</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Comparing: 2025 H1 (181d) vs 2024 H1 (182d)
+Mean daily sales: 2024=$512,443, 2025=$558,526
+Daily change: $46,083
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Decompose mean change via Shapley values</span>
+<span class="c1"># Can swap np.mean for np.median or np.var to decompose those instead</span>
+
+<span class="n">median_contribs</span><span class="p">,</span> <span class="n">uncertainty</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">confidence_intervals</span><span class="p">(</span>
+    <span class="k">lambda</span><span class="p">:</span> <span class="n">gcm</span><span class="o">.</span><span class="n">distribution_change</span><span class="p">(</span>
+        <span class="n">causal_model</span><span class="p">,</span> <span class="n">df_old</span><span class="p">,</span> <span class="n">df_new</span><span class="p">,</span> <span class="s1">&#39;sale&#39;</span><span class="p">,</span>
+        <span class="n">num_samples</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>
+        <span class="n">difference_estimation_func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="p">),</span>
+    <span class="n">confidence_level</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span>
+    <span class="n">num_bootstrap_resamples</span><span class="o">=</span><span class="mi">20</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Evaluating set functions...: 100%|██████████| 154/154 [00:03&lt;00:00, 42.84it/s]
+Evaluating set functions...: 100%|██████████| 147/147 [00:03&lt;00:00, 43.82it/s]
+Evaluating set functions...: 100%|██████████| 149/149 [00:03&lt;00:00, 44.56it/s]
+Evaluating set functions...: 100%|██████████| 147/147 [00:03&lt;00:00, 44.41it/s]
+Evaluating set functions...: 100%|██████████| 156/156 [00:03&lt;00:00, 43.23it/s]
+Evaluating set functions...: 100%|██████████| 141/141 [00:03&lt;00:00, 44.81it/s]
+Evaluating set functions...: 100%|██████████| 148/148 [00:03&lt;00:00, 43.10it/s]
+Evaluating set functions...: 100%|██████████| 151/151 [00:03&lt;00:00, 44.70it/s]
+Evaluating set functions...: 100%|██████████| 154/154 [00:03&lt;00:00, 43.08it/s]
+Evaluating set functions...: 100%|██████████| 144/144 [00:03&lt;00:00, 42.51it/s]
+Evaluating set functions...: 100%|██████████| 148/148 [00:03&lt;00:00, 43.79it/s]
+Evaluating set functions...: 100%|██████████| 152/152 [00:03&lt;00:00, 42.78it/s]
+Evaluating set functions...: 100%|██████████| 143/143 [00:03&lt;00:00, 45.63it/s]
+Evaluating set functions...: 100%|██████████| 146/146 [00:03&lt;00:00, 43.83it/s]
+Evaluating set functions...: 100%|██████████| 145/145 [00:03&lt;00:00, 41.30it/s]
+Evaluating set functions...: 100%|██████████| 151/151 [00:03&lt;00:00, 42.98it/s]
+Evaluating set functions...: 100%|██████████| 148/148 [00:03&lt;00:00, 42.94it/s]
+Evaluating set functions...: 100%|██████████| 143/143 [00:03&lt;00:00, 44.90it/s]
+Evaluating set functions...: 100%|██████████| 146/146 [00:03&lt;00:00, 43.09it/s]
+Evaluating set functions...: 100%|██████████| 144/144 [00:03&lt;00:00, 36.62it/s]
+Estimating bootstrap interval...: 100%|██████████| 20/20 [01:30&lt;00:00,  4.54s/it]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">growth_rate</span> <span class="o">=</span> <span class="p">(</span><span class="n">mean_new</span> <span class="o">-</span> <span class="n">mean_old</span><span class="p">)</span> <span class="o">/</span> <span class="n">mean_old</span> <span class="o">*</span> <span class="mi">100</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Causal Attribution to YoY Sales Change:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;Driver&#39;</span><span class="si">:</span><span class="s2">&lt;20</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">&#39;Contrib $&#39;</span><span class="si">:</span><span class="s2">&lt;12</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">&#39;</span><span class="si">% o</span><span class="s1">f Total&#39;</span><span class="si">:</span><span class="s2">&lt;12</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">&#39;</span><span class="si">% o</span><span class="s1">f Growth&#39;</span><span class="si">:</span><span class="s2">&lt;12</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">&#39;iROAS&#39;</span><span class="si">:</span><span class="s2">&lt;10</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">&#39;95% CI&#39;</span><span class="si">:</span><span class="s2">&lt;22</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">98</span><span class="p">)</span>
+
+<span class="n">sum_contribs</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">total_abs_contrib</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">median_contribs</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+<span class="n">spend_changes</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;sp_spend&#39;</span><span class="p">,</span> <span class="s1">&#39;sb_spend&#39;</span><span class="p">,</span> <span class="s1">&#39;display_spend&#39;</span><span class="p">,</span> <span class="s1">&#39;video_spend&#39;</span><span class="p">]:</span>
+    <span class="n">spend_changes</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_new</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">-</span> <span class="n">df_old</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">median_contribs</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="o">-</span><span class="nb">abs</span><span class="p">(</span><span class="n">median_contribs</span><span class="p">[</span><span class="n">x</span><span class="p">])):</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="n">median_contribs</span><span class="p">[</span><span class="n">node</span><span class="p">]</span>
+    <span class="n">sum_contribs</span> <span class="o">+=</span> <span class="n">val</span>
+    <span class="n">pct_total</span> <span class="o">=</span> <span class="p">(</span><span class="n">val</span> <span class="o">/</span> <span class="n">total_abs_contrib</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span> <span class="k">if</span> <span class="n">total_abs_contrib</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="n">pct_growth</span> <span class="o">=</span> <span class="p">(</span><span class="n">val</span> <span class="o">/</span> <span class="n">mean_old</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span> <span class="o">=</span> <span class="n">uncertainty</span><span class="p">[</span><span class="n">node</span><span class="p">]</span>
+    <span class="n">sig</span> <span class="o">=</span> <span class="s2">&quot;*&quot;</span> <span class="k">if</span> <span class="p">(</span><span class="n">lb</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">ub</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">spend_changes</span><span class="p">:</span>
+        <span class="n">spend_chg</span> <span class="o">=</span> <span class="n">spend_changes</span><span class="p">[</span><span class="n">node</span><span class="p">]</span>
+        <span class="n">iroas</span> <span class="o">=</span> <span class="n">val</span> <span class="o">/</span> <span class="n">spend_chg</span> <span class="k">if</span> <span class="n">spend_chg</span> <span class="o">!=</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">node</span><span class="si">:</span><span class="s2">&lt;20</span><span class="si">}</span><span class="s2"> $</span><span class="si">{</span><span class="n">val</span><span class="si">:</span><span class="s2">&gt;10,.0f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">pct_total</span><span class="si">:</span><span class="s2">&gt;10.1f</span><span class="si">}</span><span class="s2">%  </span><span class="si">{</span><span class="n">pct_growth</span><span class="si">:</span><span class="s2">&gt;10.2f</span><span class="si">}</span><span class="s2">%    $</span><span class="si">{</span><span class="n">iroas</span><span class="si">:</span><span class="s2">&gt;7.2f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">sig</span><span class="si">:</span><span class="s2">&lt;2</span><span class="si">}</span><span class="s2"> [</span><span class="si">{</span><span class="n">lb</span><span class="si">:</span><span class="s2">&gt;8,.0f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">ub</span><span class="si">:</span><span class="s2">&gt;8,.0f</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">node</span><span class="si">:</span><span class="s2">&lt;20</span><span class="si">}</span><span class="s2"> $</span><span class="si">{</span><span class="n">val</span><span class="si">:</span><span class="s2">&gt;10,.0f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">pct_total</span><span class="si">:</span><span class="s2">&gt;10.1f</span><span class="si">}</span><span class="s2">%  </span><span class="si">{</span><span class="n">pct_growth</span><span class="si">:</span><span class="s2">&gt;10.2f</span><span class="si">}</span><span class="s2">%    </span><span class="si">{</span><span class="s1">&#39;N/A&#39;</span><span class="si">:</span><span class="s2">&gt;8</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">sig</span><span class="si">:</span><span class="s2">&lt;2</span><span class="si">}</span><span class="s2"> [</span><span class="si">{</span><span class="n">lb</span><span class="si">:</span><span class="s2">&gt;8,.0f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">ub</span><span class="si">:</span><span class="s2">&gt;8,.0f</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">98</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;Sum of contributions&#39;</span><span class="si">:</span><span class="s2">&lt;20</span><span class="si">}</span><span class="s2"> $</span><span class="si">{</span><span class="n">sum_contribs</span><span class="si">:</span><span class="s2">&gt;10,.0f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">&#39;&#39;</span><span class="si">:</span><span class="s2">&gt;11</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">sum_contribs</span><span class="o">/</span><span class="n">mean_old</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">&gt;10.2f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;Actual mean change&#39;</span><span class="si">:</span><span class="s2">&lt;20</span><span class="si">}</span><span class="s2"> $</span><span class="si">{</span><span class="n">total_change</span><span class="si">:</span><span class="s2">&gt;10,.0f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">&#39;&#39;</span><span class="si">:</span><span class="s2">&gt;11</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">growth_rate</span><span class="si">:</span><span class="s2">&gt;10.2f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">KPI summary (daily sales):&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  2024 H1: mean=$</span><span class="si">{</span><span class="n">mean_old</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2">, median=$</span><span class="si">{</span><span class="n">df_old</span><span class="p">[</span><span class="s1">&#39;sale&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">median</span><span class="p">()</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  2025 H1: mean=$</span><span class="si">{</span><span class="n">mean_new</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2">, median=$</span><span class="si">{</span><span class="n">df_new</span><span class="p">[</span><span class="s1">&#39;sale&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">median</span><span class="p">()</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  YoY growth: </span><span class="si">{</span><span class="n">growth_rate</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">% (mean)&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">* = CI excludes 0&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;% of Growth = contribution / baseline mean&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;iROAS = sales contribution / spend change&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;sale&#39; row = unexplained variance (organic growth, noise)&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Note: Sum ≠ actual due to Monte Carlo sampling in Shapley estimation. Increase num_samples/num_bootstrap_resamples to reduce gap.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Causal Attribution to YoY Sales Change:
+Driver               Contrib $    % of Total   % of Growth  iROAS      95% CI
+--------------------------------------------------------------------------------------------------
+sale                 $    33,194       73.3%        6.48%         N/A *  [  32,110,   34,160]
+sb_spend             $     5,374       11.9%        1.05%    $   5.89 *  [   4,410,    6,080]
+display_spend        $     2,849        6.3%        0.56%    $   3.09 *  [   1,738,    3,867]
+sp_spend             $     2,319        5.1%        0.45%    $   2.86 *  [   1,367,    3,318]
+video_spend          $     1,398        3.1%        0.27%    $   2.85 *  [     673,    2,151]
+weekly_seasonality   $        64        0.1%        0.01%         N/A    [    -890,    1,274]
+yearly_seasonality   $        58        0.1%        0.01%         N/A    [  -1,183,      950]
+special_shopping_event $        24        0.1%        0.00%         N/A    [  -1,078,    1,310]
+other_shopping_event $       -15       -0.0%       -0.00%         N/A    [  -1,135,      608]
+--------------------------------------------------------------------------------------------------
+Sum of contributions $    45,266                   8.83%
+Actual mean change   $    46,083                   8.99%
+
+KPI summary (daily sales):
+  2024 H1: mean=$512,443, median=$526,496
+  2025 H1: mean=$558,526, median=$556,330
+  YoY growth: 8.99% (mean)
+
+* = CI excludes 0
+% of Growth = contribution / baseline mean
+iROAS = sales contribution / spend change
+&#39;sale&#39; row = unexplained variance (organic growth, noise)
+Note: Sum ≠ actual due to Monte Carlo sampling in Shapley estimation. Increase num_samples/num_bootstrap_resamples to reduce gap.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+
+<span class="n">drivers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">median_contribs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+<span class="n">contribs</span> <span class="o">=</span> <span class="p">[</span><span class="n">median_contribs</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">drivers</span><span class="p">]</span>
+<span class="n">sorted_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">contribs</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">drivers</span> <span class="o">=</span> <span class="p">[</span><span class="n">drivers</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">sorted_idx</span><span class="p">]</span>
+<span class="n">contribs</span> <span class="o">=</span> <span class="p">[</span><span class="n">contribs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">sorted_idx</span><span class="p">]</span>
+
+<span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;tab:green&#39;</span> <span class="k">if</span> <span class="n">c</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="s1">&#39;tab:red&#39;</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">contribs</span><span class="p">]</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">barh</span><span class="p">(</span><span class="n">drivers</span><span class="p">,</span> <span class="n">contribs</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Contribution to Daily Sales Change ($)&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Causal Attribution: H1 2025 vs H1 2024&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">invert_yaxis</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_mta_incrementality_time_decay_22_0.png" src="../_images/example_notebooks_gcm_mta_incrementality_time_decay_22_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;iROI Estimation (via intervention):&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;Channel&#39;</span><span class="si">:</span><span class="s2">&lt;15</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">&#39;Est. iROI&#39;</span><span class="si">:</span><span class="s2">&lt;15</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">&#39;Actual iROI&#39;</span><span class="si">:</span><span class="s2">&lt;15</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">45</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">spend_var</span><span class="p">,</span> <span class="n">ch</span> <span class="ow">in</span> <span class="p">[(</span><span class="s1">&#39;sp_spend&#39;</span><span class="p">,</span> <span class="s1">&#39;SP&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;sb_spend&#39;</span><span class="p">,</span> <span class="s1">&#39;SB&#39;</span><span class="p">),</span>
+                       <span class="p">(</span><span class="s1">&#39;display_spend&#39;</span><span class="p">,</span> <span class="s1">&#39;Display&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;video_spend&#39;</span><span class="p">,</span> <span class="s1">&#39;Video&#39;</span><span class="p">)]:</span>
+    <span class="n">step</span> <span class="o">=</span> <span class="mi">1000</span>
+    <span class="n">effect</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">average_causal_effect</span><span class="p">(</span>
+        <span class="n">causal_model</span><span class="o">=</span><span class="n">causal_model</span><span class="p">,</span>
+        <span class="n">target_node</span><span class="o">=</span><span class="s1">&#39;sale&#39;</span><span class="p">,</span>
+        <span class="n">interventions_alternative</span><span class="o">=</span><span class="p">{</span><span class="n">spend_var</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">step</span><span class="p">:</span> <span class="n">x</span> <span class="o">+</span> <span class="n">s</span><span class="p">},</span>
+        <span class="n">interventions_reference</span><span class="o">=</span><span class="p">{</span><span class="n">spend_var</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">},</span>
+        <span class="n">num_samples_to_draw</span><span class="o">=</span><span class="mi">10000</span>
+    <span class="p">)</span>
+    <span class="n">iroi</span> <span class="o">=</span> <span class="n">effect</span> <span class="o">/</span> <span class="n">step</span>
+    <span class="n">actual_iroi</span> <span class="o">=</span> <span class="n">ground_truth</span><span class="p">[</span><span class="s1">&#39;iroi&#39;</span><span class="p">][</span><span class="n">ch</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ch</span><span class="si">:</span><span class="s2">&lt;15</span><span class="si">}</span><span class="s2"> $</span><span class="si">{</span><span class="n">iroi</span><span class="si">:</span><span class="s2">&lt;14.2f</span><span class="si">}</span><span class="s2"> $</span><span class="si">{</span><span class="n">actual_iroi</span><span class="si">:</span><span class="s2">&lt;14.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+iROI Estimation (via intervention):
+Channel         Est. iROI       Actual iROI
+---------------------------------------------
+SP              $2.09           $2.50
+SB              $8.42           $2.20
+Display         $3.96           $3.80
+Video           $4.14           $4.50
+</pre></div></div>
+</div>
+<p>The iROI estimates differ from ground truth. Possible reasons:</p>
+<ul class="simple">
+<li><p>DAG uses raw spend, but DGP applies adstock before computing sales</p></li>
+<li><p>Auto-assigned mechanism may not capture the adstock transform</p></li>
+<li><p>Unmeasured confounders (competitor activity, macro factors, etc.)</p></li>
+</ul>
+</section>
+<section id="3.2-With-Adstocked-Spend">
+<h3>3.2 With Adstocked Spend<a class="headerlink" href="#3.2-With-Adstocked-Spend" title="Link to this heading">#</a></h3>
+<p>Section 3.1 used raw spend as inputs, but our DGP generates sales from adstocked spend, where each day’s effect accumulates from prior days’ spending. This mismatch could explain the iROI gaps above.</p>
+<p>To test this, we transform spend using ground truth carryover rates and refit:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create adstocked spend columns using ground truth carryover rates</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">apply_adstock</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">carryover</span><span class="p">):</span>
+    <span class="n">adstocked</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">adstocked</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)):</span>
+        <span class="n">adstocked</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">+</span> <span class="n">carryover</span> <span class="o">*</span> <span class="n">adstocked</span><span class="p">[</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">adstocked</span>
+
+<span class="n">df_causal_adstocked</span> <span class="o">=</span> <span class="n">df_causal</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">df_causal_adstocked</span><span class="p">[</span><span class="s1">&#39;sp_spend&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">apply_adstock</span><span class="p">(</span><span class="n">df_causal</span><span class="p">[</span><span class="s1">&#39;sp_spend&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">)</span>
+<span class="n">df_causal_adstocked</span><span class="p">[</span><span class="s1">&#39;sb_spend&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">apply_adstock</span><span class="p">(</span><span class="n">df_causal</span><span class="p">[</span><span class="s1">&#39;sb_spend&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">)</span>
+<span class="n">df_causal_adstocked</span><span class="p">[</span><span class="s1">&#39;display_spend&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">apply_adstock</span><span class="p">(</span><span class="n">df_causal</span><span class="p">[</span><span class="s1">&#39;display_spend&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">)</span>
+<span class="n">df_causal_adstocked</span><span class="p">[</span><span class="s1">&#39;video_spend&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">apply_adstock</span><span class="p">(</span><span class="n">df_causal</span><span class="p">[</span><span class="s1">&#39;video_spend&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="mf">0.85</span><span class="p">)</span>
+
+<span class="c1"># Rebuild causal model with adstocked data</span>
+<span class="n">causal_model_adstocked</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">StructuralCausalModel</span><span class="p">(</span><span class="n">causal_graph</span><span class="p">)</span>
+<span class="n">gcm</span><span class="o">.</span><span class="n">auto</span><span class="o">.</span><span class="n">assign_causal_mechanisms</span><span class="p">(</span><span class="n">causal_model_adstocked</span><span class="p">,</span> <span class="n">df_causal_adstocked</span><span class="p">,</span> <span class="n">quality</span><span class="o">=</span><span class="n">gcm</span><span class="o">.</span><span class="n">auto</span><span class="o">.</span><span class="n">AssignmentQuality</span><span class="o">.</span><span class="n">BETTER</span><span class="p">)</span>
+<span class="n">gcm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">causal_model_adstocked</span><span class="p">,</span> <span class="n">df_causal_adstocked</span><span class="p">)</span>
+
+<span class="c1"># Test iROI</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;iROI with adstocked spend:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;Channel&#39;</span><span class="si">:</span><span class="s2">&lt;15</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">&#39;Est. iROI&#39;</span><span class="si">:</span><span class="s2">&lt;15</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">&#39;Actual iROI&#39;</span><span class="si">:</span><span class="s2">&lt;15</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">45</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">spend_var</span><span class="p">,</span> <span class="n">ch</span> <span class="ow">in</span> <span class="p">[(</span><span class="s1">&#39;sp_spend&#39;</span><span class="p">,</span> <span class="s1">&#39;SP&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;sb_spend&#39;</span><span class="p">,</span> <span class="s1">&#39;SB&#39;</span><span class="p">),</span>
+                       <span class="p">(</span><span class="s1">&#39;display_spend&#39;</span><span class="p">,</span> <span class="s1">&#39;Display&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;video_spend&#39;</span><span class="p">,</span> <span class="s1">&#39;Video&#39;</span><span class="p">)]:</span>
+    <span class="n">step</span> <span class="o">=</span> <span class="mi">1000</span>
+    <span class="n">effect</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">average_causal_effect</span><span class="p">(</span>
+        <span class="n">causal_model</span><span class="o">=</span><span class="n">causal_model_adstocked</span><span class="p">,</span>
+        <span class="n">target_node</span><span class="o">=</span><span class="s1">&#39;sale&#39;</span><span class="p">,</span>
+        <span class="n">interventions_alternative</span><span class="o">=</span><span class="p">{</span><span class="n">spend_var</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">step</span><span class="p">:</span> <span class="n">x</span> <span class="o">+</span> <span class="n">s</span><span class="p">},</span>
+        <span class="n">interventions_reference</span><span class="o">=</span><span class="p">{</span><span class="n">spend_var</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">},</span>
+        <span class="n">num_samples_to_draw</span><span class="o">=</span><span class="mi">10000</span>
+    <span class="p">)</span>
+    <span class="n">iroi</span> <span class="o">=</span> <span class="n">effect</span> <span class="o">/</span> <span class="n">step</span>
+    <span class="n">actual_iroi</span> <span class="o">=</span> <span class="n">ground_truth</span><span class="p">[</span><span class="s1">&#39;iroi&#39;</span><span class="p">][</span><span class="n">ch</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ch</span><span class="si">:</span><span class="s2">&lt;15</span><span class="si">}</span><span class="s2"> $</span><span class="si">{</span><span class="n">iroi</span><span class="si">:</span><span class="s2">&lt;14.2f</span><span class="si">}</span><span class="s2"> $</span><span class="si">{</span><span class="n">actual_iroi</span><span class="si">:</span><span class="s2">&lt;14.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Fitting causal mechanism of node other_shopping_event: 100%|██████████| 9/9 [00:00&lt;00:00, 40.08it/s]
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+iROI with adstocked spend:
+Channel         Est. iROI       Actual iROI
+---------------------------------------------
+SP              $2.58           $2.50
+SB              $5.62           $2.20
+Display         $3.95           $3.80
+Video           $3.40           $4.50
+</pre></div></div>
+</div>
+<p>SP and SB improved drastically because these channels have correlated spend in the DGP, with both following demand seasonality and spike during events. We generated data that way to mimic real-world investment preferences.</p>
+<p>When inputs are highly correlated, the model struggles to separate individual effects (that’s why SB showed bigger differences before because it was absorbing variance from other channels). Different carryover rates transform each channel differently, reducing correlation and letting the model distinguish their contributions.</p>
+<p>In contrast, Display and Video were already close because their spend is more stable and less correlated with other channels (dampened seasonality in DGP). The model already works reasonably well without the transform.</p>
+<p>Real data doesn’t come with known carryover rates, so this is more of a sanity check on the DGP than a practical approach.</p>
+</section>
+</section>
+<section id="4.-Summary">
+<h2>4. Summary<a class="headerlink" href="#4.-Summary" title="Link to this heading">#</a></h2>
+<p>For reporting: LTA reflects what most attribution systems currently credits, MTA shows what credit would look like with carryover modeled, and causal attribution estimates actual business impact. When presenting to stakeholders, you can show all three to highlight the gap between LTA and MTA/causal highlights where budget reallocation opportunities exist.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Summary: LTA vs MTA vs Incrementality&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;Channel&#39;</span><span class="si">:</span><span class="s2">&lt;10</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">&#39;LTA %&#39;</span><span class="si">:</span><span class="s2">&lt;12</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">&#39;MTA %&#39;</span><span class="si">:</span><span class="s2">&lt;12</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">&#39;Shift&#39;</span><span class="si">:</span><span class="s2">&lt;12</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">&#39;Actual iROI&#39;</span><span class="si">:</span><span class="s2">&lt;12</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">58</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="n">channels</span><span class="p">:</span>
+    <span class="n">lta_pct</span> <span class="o">=</span> <span class="n">lta_totals</span><span class="p">[</span><span class="n">ch</span><span class="p">]</span> <span class="o">/</span> <span class="n">total_lta</span> <span class="o">*</span> <span class="mi">100</span>
+    <span class="n">mta_pct</span> <span class="o">=</span> <span class="n">mta_contrib</span><span class="p">[</span><span class="n">ch</span><span class="p">]</span> <span class="o">/</span> <span class="n">total_mta</span> <span class="o">*</span> <span class="mi">100</span>
+    <span class="n">shift</span> <span class="o">=</span> <span class="n">mta_pct</span> <span class="o">-</span> <span class="n">lta_pct</span>
+    <span class="n">iroi</span> <span class="o">=</span> <span class="n">ground_truth</span><span class="p">[</span><span class="s1">&#39;iroi&#39;</span><span class="p">][</span><span class="n">ch</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ch</span><span class="si">:</span><span class="s2">&lt;10</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">lta_pct</span><span class="si">:</span><span class="s2">&lt;12.1f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">mta_pct</span><span class="si">:</span><span class="s2">&lt;12.1f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">shift</span><span class="si">:</span><span class="s2">+11.1f</span><span class="si">}</span><span class="s2">pp $</span><span class="si">{</span><span class="n">iroi</span><span class="si">:</span><span class="s2">&lt;11.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">58</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">SP+SB LTA share: </span><span class="si">{</span><span class="p">(</span><span class="n">lta_totals</span><span class="p">[</span><span class="s1">&#39;SP&#39;</span><span class="p">]</span><span class="o">+</span><span class="n">lta_totals</span><span class="p">[</span><span class="s1">&#39;SB&#39;</span><span class="p">])</span><span class="o">/</span><span class="n">total_lta</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;SP+SB MTA share: </span><span class="si">{</span><span class="p">(</span><span class="n">mta_contrib</span><span class="p">[</span><span class="s1">&#39;SP&#39;</span><span class="p">]</span><span class="o">+</span><span class="n">mta_contrib</span><span class="p">[</span><span class="s1">&#39;SB&#39;</span><span class="p">])</span><span class="o">/</span><span class="n">total_mta</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Display+Video gain: </span><span class="si">{</span><span class="p">(</span><span class="n">mta_contrib</span><span class="p">[</span><span class="s1">&#39;Display&#39;</span><span class="p">]</span><span class="o">+</span><span class="n">mta_contrib</span><span class="p">[</span><span class="s1">&#39;Video&#39;</span><span class="p">])</span><span class="o">/</span><span class="n">total_mta</span><span class="o">*</span><span class="mi">100</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">(</span><span class="n">lta_totals</span><span class="p">[</span><span class="s1">&#39;Display&#39;</span><span class="p">]</span><span class="o">+</span><span class="n">lta_totals</span><span class="p">[</span><span class="s1">&#39;Video&#39;</span><span class="p">])</span><span class="o">/</span><span class="n">total_lta</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">+.0f</span><span class="si">}</span><span class="s2">pp&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+======================================================================
+Summary: LTA vs MTA vs Incrementality
+======================================================================
+Channel    LTA %        MTA %        Shift        Actual iROI
+----------------------------------------------------------
+SP         45.1         12.8               -32.3pp $2.50
+SB         30.0         12.1               -17.9pp $2.20
+Display    17.9         38.2               +20.3pp $3.80
+Video      7.0          36.8               +29.8pp $4.50
+----------------------------------------------------------
+
+SP+SB LTA share: 75%
+SP+SB MTA share: 25%
+Display+Video gain: +50pp
+</pre></div></div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#1.-Data-Generation">1. Data Generation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#2.-Time-Decay-MTA">2. Time Decay MTA</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#3.-Causal-Attribution-(DoWhy)">3. Causal Attribution (DoWhy)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#3.1-With-Raw-Spend">3.1 With Raw Spend</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#3.2-With-Adstocked-Spend">3.2 With Adstocked Spend</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#4.-Summary">4. Summary</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/example_notebooks/gcm_mta_incrementality_time_decay.ipynb.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2022, PyWhy contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
