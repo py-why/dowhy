@@ -160,13 +160,18 @@ class TabPFNModelWrapper:
         """Return predicted probabilities for classifiers."""
         if self.resolved_model_type != "Classifier":
             return None
+        raw = None
         if self._single_model is not None:
             if hasattr(self._single_model, "predict_proba"):
-                return self._single_model.predict_proba(features)
+                raw = self._single_model.predict_proba(features)
+        elif self.device_ids:
+            raw = self.predict_multiprocess(features, want_proba=True)
+        if raw is None:
             return None
-        if self.device_ids:
-            return self.predict_multiprocess(features, want_proba=True)
-        return None
+        # Ensure (n_samples, n_classes) shape.
+        if raw.ndim == 1:
+            raw = np.column_stack([1.0 - raw, raw])
+        return raw
 
     def predict_multiprocess(self, features: np.ndarray, want_proba: bool) -> np.ndarray:
         """Fit per-device models and average predictions across devices.
