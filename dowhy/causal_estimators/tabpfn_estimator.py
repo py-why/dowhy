@@ -178,10 +178,12 @@ class TabPFNModelWrapper:
         if not self.device_ids:
             raise ValueError("No device_ids provided for multiprocessing path.")
 
+        ctx = mp.get_context('spawn')
+        
         num_devices = len(self.device_ids)
         num_samples = self.train_X.shape[0]
         chunk_size = max(1, num_samples // num_devices)
-        out_queue = mp.Queue()
+        out_queue = ctx.Queue()
         procs: List[mp.Process] = []
         
         for i, device_id in enumerate(self.device_ids):
@@ -189,7 +191,7 @@ class TabPFNModelWrapper:
             end_idx = (i + 1) * chunk_size if i < num_devices - 1 else num_samples
             X_chunk = self.train_X[start_idx:end_idx]
             y_chunk = self.train_y[start_idx:end_idx]
-            p = mp.Process(
+            p = ctx.Process(
                 target=_mp_fit_and_predict_worker,
                 args=(self.resolved_model_type, device_id, self.model_kwargs, X_chunk, y_chunk, features, want_proba, out_queue),
             )
