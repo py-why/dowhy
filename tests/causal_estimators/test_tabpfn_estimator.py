@@ -54,7 +54,7 @@ class TestTabpfnEstimator(object):
                 [False],
                 [True, False],
                 [True, False],
-                500,  # Small sample size for CPU compatibility (increase for GPU testing)
+                200,  # Small sample size for CPU compatibility (increase for GPU testing)
                 "backdoor",
             ),
             (
@@ -68,7 +68,7 @@ class TestTabpfnEstimator(object):
                 [True],
                 [True, False],
                 [True, False],
-                500,  # Small sample size for CPU compatibility (increase for GPU testing)
+                200,  # Small sample size for CPU compatibility (increase for GPU testing)
                 "backdoor",
             ),
         ],
