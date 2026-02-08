@@ -261,6 +261,13 @@ class TabpfnEstimator(RegressionEstimator):
             - device_ids: List of GPU device IDs (default: [])
         :param kwargs: (optional) Additional estimator-specific parameters
         """
+        # Extract TabPFN-specific params from kwargs and merge into method_params
+        # to support both method_params={...} and **method_params call patterns
+        tabpfn_keys = {"model_type", "n_estimators", "max_num_classes", "use_multi_gpu", "device_ids"}
+        tabpfn_params = {k: v for k, v in kwargs.items() if k in tabpfn_keys}
+        other_kwargs = {k: v for k, v in kwargs.items() if k not in tabpfn_keys}
+        self.method_params = {**(method_params or {}), **tabpfn_params}
+
         super().__init__(
             identified_estimand=identified_estimand,
             test_significance=test_significance,
@@ -272,10 +279,9 @@ class TabpfnEstimator(RegressionEstimator):
             confidence_level=confidence_level,
             need_conditional_estimates=need_conditional_estimates,
             num_quantiles_to_discretize_cont_cols=num_quantiles_to_discretize_cont_cols,
-            **kwargs,
+            **other_kwargs,
         )
         self.logger.info("INFO: Using TabPFN Estimator")
-        self.method_params = method_params if method_params is not None else {}
         self.tabpfn_model = None
         self._use_multi_gpu = bool(self.method_params.get("use_multi_gpu", False))
         self.device_ids = self.method_params.get("device_ids", [])
@@ -284,7 +290,7 @@ class TabpfnEstimator(RegressionEstimator):
         
         if self._use_multi_gpu and not self.device_ids and torch.cuda.is_available():
             self.device_ids = list(range(torch.cuda.device_count()))
-            self.logger.info(f"INFO: Auto-detected {len(self.device_ids)} GPUs for multi-processing: {self.device_ids}")
+            self.logger.info(f"INFO: Auto-detected {len(self.device_ids)} GPUs: {self.device_ids}")
         
         self._device = self._get_device()
 

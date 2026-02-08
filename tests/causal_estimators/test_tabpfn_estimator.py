@@ -24,7 +24,7 @@ class TestTabpfnEstimator(object):
     Important notes for test configuration:
     - TabPFN is extremely slow on CPU. For CPU environments, use small sample sizes (<=1000).
     - For GPU environments, sample sizes up to 5000 are reasonable.
-    - To enable GPU testing, set use_multi_gpu=True in method_params (requires multiple GPUs).
+    - To enable multi-GPU testing, set use_multi_gpu=True in method_params.
     """
     
     @mark.parametrize(
