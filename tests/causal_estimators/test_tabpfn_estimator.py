@@ -23,7 +23,6 @@ class TestTabpfnEstimator(object):
     
     Important notes for test configuration:
     - TabPFN is extremely slow on CPU. For CPU environments, use small sample sizes (<=1000).
-    - For GPU environments, sample sizes up to 5000 are reasonable.
     - To enable multi-GPU testing, set use_multi_gpu=True in method_params.
     """
     
@@ -54,7 +53,7 @@ class TestTabpfnEstimator(object):
                 [False],
                 [True, False],
                 [True, False],
-                200,  # Small sample size for CPU compatibility (increase for GPU testing)
+                200,  # Small sample size for CPU compatibility
                 "backdoor",
             ),
             (
@@ -68,7 +67,7 @@ class TestTabpfnEstimator(object):
                 [True],
                 [True, False],
                 [True, False],
-                200,  # Small sample size for CPU compatibility (increase for GPU testing)
+                200,  # Small sample size for CPU compatibility
                 "backdoor",
             ),
         ],
