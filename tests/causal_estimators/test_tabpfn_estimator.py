@@ -1,8 +1,9 @@
+import itertools
+
 import numpy as np
 import pandas as pd
 import pytest
 from pytest import mark
-import itertools
 
 import dowhy.datasets
 from dowhy import CausalModel
@@ -17,6 +18,15 @@ from .base import SimpleEstimator
 
 @mark.usefixtures("fixed_seed")
 class TestTabpfnEstimator(object):
+    """
+    Test suite for TabPFN estimator.
+    
+    Important notes for test configuration:
+    - TabPFN is extremely slow on CPU. For CPU environments, use small sample sizes (<=1000).
+    - For GPU environments, sample sizes up to 5000 are reasonable.
+    - To enable GPU testing, set use_multi_gpu=True in method_params (requires multiple GPUs).
+    """
+    
     @mark.parametrize(
         [
             "error_tolerance",
@@ -27,18 +37,24 @@ class TestTabpfnEstimator(object):
             "num_treatments",
             "treatment_is_binary",
             "outcome_is_binary",
+            "confidence_intervals",
+            "test_significance",
+            "num_samples",
             "identifier_method",
         ],
         [
             (
                 0.4,
                 TabpfnEstimator,
-                [1,2],
+                [1, 2],
                 [0],
                 [0],
                 [1],
                 [True],
                 [False],
+                [True, False],
+                [True, False],
+                500,  # Small sample size for CPU compatibility (increase for GPU testing)
                 "backdoor",
             ),
             (
@@ -50,6 +66,9 @@ class TestTabpfnEstimator(object):
                 [1],
                 [True],
                 [True],
+                [True, False],
+                [True, False],
+                500,  # Small sample size for CPU compatibility (increase for GPU testing)
                 "backdoor",
             ),
         ],
@@ -64,9 +83,22 @@ class TestTabpfnEstimator(object):
         num_treatments,
         treatment_is_binary,
         outcome_is_binary,
+        confidence_intervals,
+        test_significance,
+        num_samples,
         identifier_method,
     ):
+        """
+        Test average treatment effect estimation using TabPFN.
+        
+        Note: We call average_treatment_effect_test directly instead of using
+        average_treatment_effect_testsuite because the testsuite does not accept
+        num_samples as a parameter. TabPFN requires smaller sample sizes on CPU
+        due to performance constraints, so we need explicit control over num_samples.
+        """
         estimator_tester = SimpleEstimator(error_tolerance, Estimator, identifier_method=identifier_method)
+        
+        # Generate all test configurations
         args_dict = {
             "num_common_causes": num_common_causes,
             "num_instruments": num_instruments,
@@ -74,24 +106,27 @@ class TestTabpfnEstimator(object):
             "num_treatments": num_treatments,
             "treatment_is_binary": treatment_is_binary,
             "outcome_is_binary": outcome_is_binary,
+            "confidence_intervals": confidence_intervals,
+            "test_significance": test_significance,
         }
         keys, values = zip(*args_dict.items())
         configs = [dict(zip(keys, v)) for v in itertools.product(*values)]
+        
         for cfg in configs:
-            print("\nConfig:", cfg)
-            cfg["dataset"] = "linear"
-            cfg["num_samples"] = 5000 
-            cfg["confidence_intervals"] = True
-            cfg["test_significance"] = True
-            cfg["method_params"] = {
-                "num_simulations": 8, 
-                "num_null_simulations": 10,
-                "n_estimators": 4,
-                "model_type": "auto",
-                "use_multi_gpu": True,
-                "max_num_classes": 10,
-            }
-            estimator_tester.average_treatment_effect_test(**cfg)
+            print(f"\nConfig: {cfg}")
+            estimator_tester.average_treatment_effect_test(
+                dataset="linear",
+                num_samples=num_samples,
+                **cfg,
+                method_params={
+                    "num_simulations": 8,
+                    "num_null_simulations": 10,
+                    "n_estimators": 4,
+                    "model_type": "auto",
+                    "use_multi_gpu": False,  # Set to True if testing with multiple GPUs
+                    "max_num_classes": 10,
+                },
+            )
 
     def test_model_type_auto_detection(self):
         """Test that TabPFN correctly auto-detects classifier vs regressor based on outcome."""
@@ -124,7 +159,7 @@ class TestTabpfnEstimator(object):
                 "estimator": TabpfnEstimator,
                 "model_type": "auto",
                 "n_estimators": 4,
-                "use_multi_gpu": True,
+                "use_multi_gpu": False,
             },
         )
 
@@ -159,7 +194,7 @@ class TestTabpfnEstimator(object):
                 "estimator": TabpfnEstimator,
                 "model_type": "auto",
                 "n_estimators": 4,
-                "use_multi_gpu": True,
+                "use_multi_gpu": False,
             },
         )
 
@@ -193,7 +228,7 @@ class TestTabpfnEstimator(object):
         est = TabpfnEstimator(
             identified_estimand,
             confidence_intervals=False,
-            method_params={"model_type": "classifier", "n_estimators": 4, "use_multi_gpu": True},
+            method_params={"model_type": "classifier", "n_estimators": 4, "use_multi_gpu": False},
         )
         est.fit(data["df"])
 

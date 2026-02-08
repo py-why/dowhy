@@ -19,16 +19,16 @@ logger = logging.getLogger(__name__)
 def _mp_fit_and_predict_worker(model_type: str, device_id: int, model_kwargs: dict,
                                X_train: np.ndarray, y_train: np.ndarray,
                                X_pred: np.ndarray, want_proba: bool, out_queue):
-    """Multiprocessing worker to fit a TabPFN model on a device-local data chunk and predict on X_pred.
+    """Multiprocessing worker to fit a TabPFN model and predict.
 
-    :param model_type: Resolved model type. One of "Classifier" or "Regressor".
-    :param device_id: CUDA device index for this worker. Ignored if CUDA is unavailable.
-    :param model_kwargs: Keyword arguments forwarded to TabPFN model (e.g., n_estimators).
-    :param X_train: Feature chunk used to fit the local model (NumPy array, float32).
-    :param y_train: Outcome values for the local chunk (NumPy array; int64 for classification, float32 for regression).
-    :param X_pred: Full feature matrix to predict on (shared across workers) (NumPy array, float32).
-    :param want_proba: If True and classifier supports predict_proba, return probability of positive class.
-    :param out_queue: Multiprocessing queue to send tuple (device_id, predictions|None, error_msg|None).
+    :param model_type: Model type ("Classifier" or "Regressor")
+    :param device_id: CUDA device index for this worker
+    :param model_kwargs: Keyword arguments forwarded to TabPFN model
+    :param X_train: Feature chunk used to fit the local model
+    :param y_train: Outcome values for the local chunk
+    :param X_pred: Full feature matrix to predict on
+    :param want_proba: If True, return probability for classifiers
+    :param out_queue: Multiprocessing queue for results
     """
     try:
         if torch.cuda.is_available():
@@ -52,33 +52,32 @@ def _mp_fit_and_predict_worker(model_type: str, device_id: int, model_kwargs: di
 
 
 class TabPFNModelWrapper:
-    """Single or multi-processing TabPFN wrapper.
+    """Wrapper for TabPFN models with single or multi-GPU support.
 
-    Encapsulates model-type resolution (including auto with warning), dataset pretraining-limit advisories,
-    single-device fitting, and optional multiprocessing-based inference across multiple GPUs.
+    Handles model type resolution, dataset pretraining limits validation,
+    and optional multiprocessing-based inference across multiple GPUs.
     """
 
     def __init__(self, model_type_param: str, model_kwargs: dict, max_num_classes: int = 10, device_ids: Optional[List[int]] = None):
         """Initialize the wrapper with modeling options.
 
-        :param model_type_param: One of 'classifier' | 'regressor' | 'auto'. If 'auto', wrapper decides and logs a warning.
-        :param model_kwargs: Arguments forwarded to TabPFN model (e.g., {'n_estimators': 8}).
-        :param max_num_classes: When auto-detecting classification for integer outcomes, threshold of unique classes.
-        :param device_ids: Optional list of CUDA device indices for multiprocessing path. Empty/None ⇒ single-device path.
+        :param model_type_param: Model type ('classifier', 'regressor', or 'auto')
+        :param model_kwargs: Arguments forwarded to TabPFN model
+        :param max_num_classes: Threshold for auto-detecting classification tasks
+        :param device_ids: List of CUDA device indices for multiprocessing
         """
         self.model_type_param = (model_type_param or "auto").lower()
         self.model_kwargs = dict(model_kwargs)
         self.max_num_classes = int(max_num_classes)
         self.device_ids = list(device_ids or [])
 
-        # resolved at prepare()
-        self.resolved_model_type: Optional[str] = None  # 'Classifier' or 'Regressor'
+        self.resolved_model_type: Optional[str] = None
         self.train_X: Optional[np.ndarray] = None
         self.train_y: Optional[np.ndarray] = None
-        self._single_model = None  # for single-device path
+        self._single_model = None
 
     def _resolve_auto(self, outcome_series: pd.Series, logger: logging.Logger) -> str:
-        """Heuristically resolve model type from outcome dtype and cardinality and log the decision."""
+        """Automatically determine model type based on outcome characteristics."""
         num_unique = int(pd.Series(outcome_series).nunique())
         dtype = outcome_series.dtype
         looks_categorical = str(dtype) in ["object", "category", "bool"]
@@ -95,7 +94,7 @@ class TabPFNModelWrapper:
         return "Regressor"
 
     def _advise_pretraining_limits(self, features: np.ndarray, outcome_values: np.ndarray, logger: logging.Logger):
-        """Log TabPFN pretraining-regime advisories for samples, features, and (for classifiers) classes."""
+        """Validate dataset against TabPFN pretraining limits."""
         num_samples, num_features = features.shape
         if num_samples > 10000:
             logger.warning("WARNING: TabPFN performs best up to ~10k samples. Your dataset has %d samples.", num_samples)
@@ -107,14 +106,13 @@ class TabPFNModelWrapper:
                 raise ValueError(f"Number of classes {num_classes} exceeds TabPFN limit (10). Reduce classes.")
 
     def prepare(self, features: np.ndarray, outcome_series: pd.Series, logger: logging.Logger):
-        """Resolve model type, build outcome array, and emit dataset advisories.
+        """Prepare the wrapper by resolving model type and validating data.
 
-        :param features: TabPFN-ready feature matrix .
-        :param outcome_series: Outcome column as a pandas Series.
-        :param logger: Logger to emit auto-selection and advisory warnings.
-        :returns: self (prepared wrapper).
+        :param features: Feature matrix
+        :param outcome_series: Outcome column as pandas Series
+        :param logger: Logger for warnings
+        :returns: self
         """
-        # Resolve model type
         if self.model_type_param == "classifier":
             self.resolved_model_type = "Classifier"
         elif self.model_type_param == "regressor":
@@ -122,21 +120,15 @@ class TabPFNModelWrapper:
         else:
             self.resolved_model_type = self._resolve_auto(outcome_series, logger)
 
-        # Build outcome values by resolved type
         if self.resolved_model_type == "Classifier":
             s = pd.Series(outcome_series)
-
-            # 1) binary case: bool or {0, 1} subset
             unique_vals = pd.unique(s.dropna())
             if s.dtype == bool or set(unique_vals).issubset({0, 1}):
                 y = s.astype(np.int64).to_numpy()
-
             else:
-                # 2) multiclass: convert to categorical codes
-                cats = sorted(pd.unique(s.astype(str).dropna()))
+                cats = sorted([str(val) for val in unique_vals])
                 y = pd.Categorical(s.astype(str), categories=cats, ordered=True).codes
                 y = y.astype(np.int64)
-
             self.train_y = y
         else:
             self.train_y = outcome_series.to_numpy(dtype=np.float32)
@@ -157,10 +149,7 @@ class TabPFNModelWrapper:
         return self
 
     def predict(self, features: np.ndarray) -> np.ndarray:
-        """Predict outcomes using single-device model if available; otherwise use multiprocessing path.
-
-        For classification, this returns class labels (not probabilities). For probabilities, call predict_proba.
-        """
+        """Predict outcomes for the given features."""
         if self._single_model is not None:
             return self._single_model.predict(features)
         if self.device_ids:
@@ -168,10 +157,7 @@ class TabPFNModelWrapper:
         raise ValueError("TabPFNModelWrapper: model not fitted. Call fit_single() or provide device_ids for MP.")
 
     def predict_proba(self, features: np.ndarray):
-        """Return predicted probabilities for classifiers; supports single-device and multiprocessing paths.
-
-        Returns None for regressors or when probabilities are unavailable.
-        """
+        """Return predicted probabilities for classifiers."""
         if self.resolved_model_type != "Classifier":
             return None
         if self._single_model is not None:
@@ -183,11 +169,11 @@ class TabPFNModelWrapper:
         return None
 
     def predict_multiprocess(self, features: np.ndarray, want_proba: bool) -> np.ndarray:
-        """Fit per-device models on stored partitions and average predictions across devices.
+        """Fit per-device models and average predictions across devices.
 
-        :param features: Full feature matrix to predict on (shared across workers).
-        :param want_proba: If True and classifier supports predict_proba, aggregate probabilities; else predictions.
-        :returns: Averaged predictions as a NumPy array (float array for regression, probabilities for classification).
+        :param features: Feature matrix to predict on (shared across workers)
+        :param want_proba: If True, return probabilities for classifiers
+        :returns: Averaged predictions
         """
         if not self.device_ids:
             raise ValueError("No device_ids provided for multiprocessing path.")
@@ -209,19 +195,26 @@ class TabPFNModelWrapper:
             )
             p.start()
             procs.append(p)
-        preds = []
-        errors = []
+        
+        results = []
         for _ in procs:
             device_id, pred, err = out_queue.get()
+            results.append((device_id, pred, err))
+        
+        for p in procs:
+            p.join()
+        
+        preds = []
+        errors = []
+        for device_id, pred, err in results:
             if err is not None:
                 errors.append((device_id, err))
             else:
                 preds.append(pred)
-        for p in procs:
-            p.join()
+        
         if errors:
             raise RuntimeError(f"TabPFN multiprocessing prediction errors: {errors}")
-        return np.mean(preds, axis=0) # average predictions across devices
+        return np.mean(preds, axis=0)
 
 
 class TabpfnEstimator(RegressionEstimator):
@@ -240,9 +233,7 @@ class TabpfnEstimator(RegressionEstimator):
         method_params: Optional[dict] = None,
         **kwargs,
     ):
-        """For a list of args and kwargs, see documentation for
-        :class:`~dowhy.causal_estimator.CausalEstimator`.
-
+        """
         :param identified_estimand: probability expression
             representing the target identified estimand to estimate.
         :param test_significance: Binary flag or a string indicating whether to test significance and by which method. All estimators support test_significance="bootstrap" that estimates a p-value for the obtained estimate using the bootstrap method. Individual estimators can override this to support custom testing methods. The bootstrap method supports an optional parameter, num_null_simulations. If False, no testing is done. If True, significance of the estimate is tested using the custom method if available, otherwise by bootstrap.
@@ -262,25 +253,13 @@ class TabpfnEstimator(RegressionEstimator):
         :param num_quantiles_to_discretize_cont_cols: The number of quantiles
             into which a numeric effect modifier is split, to enable
             estimation of conditional treatment effect over it.
-        :param glm_family: statsmodels family for the generalized linear model.
-            For example, use statsmodels.api.families.Binomial() for logistic
-            regression or statsmodels.api.families.Poisson() for count data.
-        :param predict_score: For models that have a binary output, whether
-            to output the model's score or the binary output based on the score.
+        :param method_params: Dictionary of TabPFN-specific parameters
+            - model_type: "auto", "classifier", or "regressor" (default: "auto")
+            - n_estimators: Number of TabPFN models to ensemble (default: 8)
+            - max_num_classes: Threshold for classification task detection (default: 10)
+            - use_multi_gpu: Whether to use multiple GPUs (default: False)
+            - device_ids: List of GPU device IDs (default: [])
         :param kwargs: (optional) Additional estimator-specific parameters
-        :param method_params: (optional) Dictionary of additional estimator-specific parameters for TabPFN.
-            - model_type: "auto" | "classifier" | "regressor", default: "auto"
-                Specifies the type of model to use. 
-                If "auto", the estimator will infer whether to use a classifier or regressor based on the outcome variable.
-            - n_estimators: int, default: 8
-                The number of TabPFN models to ensemble (ensemble size).
-            - max_num_classes: int, default: 10
-                When model_type is "auto", this sets the threshold for the number of unique outcome classes to treat the task as classification.
-            - use_multi_gpu: bool, default: False
-                Whether to use multiple GPUs for parallel prediction.
-            - device_ids: list or None, default: []
-                List of GPU device IDs to use for multi-GPU processing. If not specified or empty, all available GPUs will be used automatically when use_multi_gpu is True.
-
         """
         super().__init__(
             identified_estimand=identified_estimand,
@@ -295,17 +274,14 @@ class TabpfnEstimator(RegressionEstimator):
             num_quantiles_to_discretize_cont_cols=num_quantiles_to_discretize_cont_cols,
             **kwargs,
         )
-        self.logger.info("INFO: Using TabPFNEstimator")
+        self.logger.info("INFO: Using TabPFN Estimator")
         self.method_params = method_params if method_params is not None else {}
         self.tabpfn_model = None
         self._use_multi_gpu = bool(self.method_params.get("use_multi_gpu", False))
-        
-        # Get device_ids from method_params (prefer device_ids over gpu_ids for consistency)
         self.device_ids = self.method_params.get("device_ids", [])
         
         self._check_tabpfn_dependencies()
         
-        # Auto-detect GPUs if use_multi_gpu is True but device_ids is not specified
         if self._use_multi_gpu and not self.device_ids and torch.cuda.is_available():
             self.device_ids = list(range(torch.cuda.device_count()))
             self.logger.info(f"INFO: Auto-detected {len(self.device_ids)} GPUs for multi-processing: {self.device_ids}")
@@ -320,7 +296,13 @@ class TabpfnEstimator(RegressionEstimator):
         except ImportError:
             raise ImportError(
                 "TabPFNEstimator requires tabpfn and torch to be installed. "
-                "Please install them with: pip install tabpfn torch"
+                "Please install them with: pip install tabpfn torch\n\n"
+                "Note: TabPFN v2.5 models require HuggingFace authentication.\n"
+                "If you encounter authentication errors:\n"
+                "  1. Visit https://huggingface.co/Prior-Labs/tabpfn_2_5 and accept terms\n"
+                "  2. Run: huggingface-cli login\n"
+                "  3. Or set environment variable: export HF_TOKEN=\"your_huggingface_token\"\n"
+                "For more details: https://docs.priorlabs.ai/how-to-access-gated-models"
             )
 
     def _get_device(self):
@@ -336,18 +318,6 @@ class TabpfnEstimator(RegressionEstimator):
             )
         
         return torch.device(device)
-
-    def construct_symbolic_estimator(self, estimand):
-        """Constructs a symbolic expression for the estimator."""
-        expr = "E[{} | do({})] = E[{} | {}, {}]".format(
-            self._target_estimand.outcome_variable[0],
-            self._target_estimand.treatment_variable[0],
-            self._target_estimand.outcome_variable[0],
-            ", ".join(self._target_estimand.treatment_variable),
-            ", ".join(self._target_estimand.get_backdoor_variables()),
-        )
-        return expr
-    
 
     def fit(
         self,
@@ -377,7 +347,6 @@ class TabpfnEstimator(RegressionEstimator):
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
         self.logger.info(self.symbolic_estimator)
 
-        # Build model on entire data, consistent with RegressionEstimator
         _, self.model = self._build_model(data)
         return self
 
@@ -390,10 +359,6 @@ class TabpfnEstimator(RegressionEstimator):
         need_conditional_estimates: bool = None,
         **_,
     ):
-        """
-        Estimates the causal effect (ATE) using the fitted TabPFN model.
-        Supports estimating effects on custom target units.
-        """
         self._target_units = target_units
         self._treatment_value = treatment_value
         self._control_value = control_value
@@ -433,59 +398,42 @@ class TabpfnEstimator(RegressionEstimator):
 
         estimate.add_estimator(self)
         return estimate
-
-
-    def _build_features(self, data_df: pd.DataFrame, treatment_values=None):
-        """
-        Delegate to RegressionEstimator to preserve encoding and intercept handling.
-        """
-        return super()._build_features(data_df, treatment_values)
     
     def _build_model(self, data: pd.DataFrame):
-        """Build TabPFN wrapper and fit if single-device; return (features, wrapper) as estimator model.
+        """Build and fit TabPFN model wrapper.
 
-        :param data: DataFrame containing treatment, outcome and confounders.
-        :returns: Tuple of (design-matrix with intercept, model-wrapper instance).
+        :param data: DataFrame containing treatment, outcome and confounders
+        :returns: Tuple of (features, model wrapper)
         """
         features = self._build_features(data)
         tabpfn_features = features[:, 1:]  # remove intercept column for TabPFN
         outcome_col = self._target_estimand.outcome_variable[0]
         outcome_series = data[outcome_col]
 
-        n_estimators = self.method_params.get("n_estimators", 8)
-        
         wrapper = TabPFNModelWrapper(
             model_type_param=self.method_params.get("model_type", "auto"),
-            model_kwargs={"n_estimators": n_estimators},
+            model_kwargs={"n_estimators": self.method_params.get("n_estimators", 8)},
             max_num_classes=self.method_params.get("max_num_classes", 10),
             device_ids=self.device_ids,
         )
         wrapper.prepare(tabpfn_features, outcome_series, self.logger)
-        if wrapper.device_ids:
-            model = wrapper  # multi-processing path
-        else:
+        
+        if not wrapper.device_ids:
             wrapper.fit_single(self._device)
-            model = wrapper
-
-        self.tabpfn_model = model
-        return (features, model)
+        
+        self.tabpfn_model = wrapper
+        return (features, wrapper)
     
     def predict_fn(self, data: pd.DataFrame, model, features):
         tabpfn_features = features[:, 1:]
-        is_classifier = getattr(model, "resolved_model_type", None) == "Classifier"
-        if is_classifier:
+        if getattr(model, "resolved_model_type", None) == "Classifier":
             proba = model.predict_proba(tabpfn_features)
             if proba is not None:
                 return proba[:, 1] if proba.ndim == 2 else proba
-            # Fallback to labels if proba unavailable
             return model.predict(tabpfn_features)
         return model.predict(tabpfn_features)
 
     def _generate_bootstrap_estimates(self, data, num_bootstrap_simulations, sample_size_fraction):
-        """
-        Bootstrap 구현
-        CausalEstimator._generate_bootstrap_estimates() 오버라이드
-        """
         simulation_results = np.zeros(num_bootstrap_simulations)
         sample_size = int(sample_size_fraction * len(data))
         
@@ -493,27 +441,33 @@ class TabpfnEstimator(RegressionEstimator):
         
         for index in range(num_bootstrap_simulations):
             new_data = resample(data, n_samples=sample_size)
-            
             new_estimator = self.get_new_estimator_object(
                 self._target_estimand,
                 test_significance=False,
                 evaluate_effect_strength=False,
                 confidence_intervals=False,
             )
-            
             new_estimator.fit(new_data, effect_modifier_names=self._effect_modifier_names)
-            
             new_effect = new_estimator.estimate_effect(
                 new_data,
                 treatment_value=self._treatment_value,
                 control_value=self._control_value,
                 target_units=self._target_units,
             )
-            
             simulation_results[index] = new_effect.value
         
         return CausalEstimator.BootstrapEstimates(
             simulation_results,
             {"num_simulations": num_bootstrap_simulations, "sample_size_fraction": sample_size_fraction}
         )
+
+    def construct_symbolic_estimator(self, estimand):
+        expr = "E[{} | do({})] = E[{} | {}, {}]".format(
+            self._target_estimand.outcome_variable[0],
+            self._target_estimand.treatment_variable[0],
+            self._target_estimand.outcome_variable[0],
+            ", ".join(self._target_estimand.treatment_variable),
+            ", ".join(self._target_estimand.get_backdoor_variables()),
+        )
+        return expr
     
