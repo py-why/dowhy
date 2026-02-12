@@ -708,7 +708,7 @@ def crps(
     """
 
     def empirical_crps(generated_Y, observed_y):
-        """Estimates \int (F(x) - 1_{x >= y})**2 dx = E[|X - y|] - 1/2 E[|X - X'|]
+        r"""Estimates \int (F(x) - 1_{x >= y})**2 dx = E[|X - y|] - 1/2 E[|X - X'|]
 
         Here, X is generated_Y and y is observed_y. The X' are another set of generated_Y, however, we can also take
         the difference over all combinations to estimate the expectation."""

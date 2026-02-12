@@ -208,7 +208,7 @@ class ThetaC:
         calibrator: Optional[PredictionModel] = None,
         crop: float = 1e-3,
     ) -> None:
-        """
+        r"""
         This helper function uses the classifiers (and, if appropriate, the probability calibrators)
         to compute the weights alpha_k (defined in Theorem 2.4 of the paper),
         which are then stored in self.alpha_dict.

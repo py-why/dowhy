@@ -489,7 +489,7 @@ def build_graph_from_str(graph_str: str) -> nx.DiGraph:
             except Exception as e:
                 _logger.error("Error: Pydot cannot be loaded. " + str(e))
                 raise e
-    elif re.match(".*graph\s*\[.*\]\s*", graph_str):
+    elif re.match(r".*graph\s*\[.*\]\s*", graph_str):
         return nx.DiGraph(nx.parse_gml(graph_str))
     else:
         _logger.error("Error: Please provide graph (as string or text file) in dot or gml format.")
