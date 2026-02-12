@@ -44,7 +44,7 @@ def compute_ci(r=None, nx=None, ny=None, confidence=0.95):
 
 
 def partial_corr(data=None, x=None, y=None, z=None, method="pearson"):
-    """Calculate Partial correlation which is the degree of association between
+    r"""Calculate Partial correlation which is the degree of association between
     x and y after removing effect of z. This is done by calculating correlation
     coefficient between the residuals of two linear regressions :
     x\sim z, y\sim z

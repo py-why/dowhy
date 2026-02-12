@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 
 
 def create_causal_model_from_equations(node_equations: str) -> StructuralCausalModel:
-    """
+    r"""
     Create a causal model from a set of equations defining causal relationships between nodes.
     The equation format supports the following cases in which expression can be defined:
     1. Specifying root node equation:

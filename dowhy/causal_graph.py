@@ -98,7 +98,7 @@ class CausalGraph:
                 except Exception as e:
                     self.logger.error("Error: Pydot cannot be loaded. " + str(e))
                     raise e
-        elif isinstance(graph, str) and re.match(".*graph\s*\[.*\]\s*", graph):
+        elif isinstance(graph, str) and re.match(r".*graph\s*\[.*\]\s*", graph):
             self._graph = nx.DiGraph(nx.parse_gml(graph))
         else:
             error_msg = "Incorrect format: Please provide graph as a networkx DiGraph, GCM model, or as a string or text file in dot, gml format."

@@ -296,7 +296,7 @@ class TestEconMLEstimator:
         user_graph = data["gml_graph"]
         for col in dropped_cols:
             user_graph = user_graph.replace('node[ id "{0}" label "{0}"]'.format(col), "")
-            user_graph = re.sub('edge\[ source "{}" target "[vy][0]*"\]'.format(col), "", user_graph)
+            user_graph = re.sub(r'edge\[ source "{}" target "[vy][0]*"\]'.format(col), "", user_graph)
 
         model = CausalModel(
             data=user_data,

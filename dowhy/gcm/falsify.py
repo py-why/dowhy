@@ -185,7 +185,7 @@ def validate_tpa(
     causal_graph_reference: DirectedGraph,
     include_unconditional: bool = True,
 ) -> Dict[str, int]:
-    """
+    r"""
     Graphical criterion to evaluate which pairwise parental d-separations (parental triples) in `causal_graph` are
     violated, assuming `causal_graph_reference` is the ground truth graph. If none are violated, then both graphs lie
     in the same Markov equivalence class.
