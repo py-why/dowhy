@@ -91,3 +91,47 @@ This confirms that the generated distribution is close to the observed one.
     distribution (e.g., when intervening on Y).
 
 The next section provides more details about the evaluation method.
+
+Generate samples from a random SCM
+-----------------------------------
+
+For benchmarking and testing, it is often useful to generate synthetic data from a random causal model with
+realistic properties. The ``dowhy.gcm.data_generator`` module provides a configurable random SCM generator
+that creates arbitrary-size DAGs with a mix of linear and nonlinear causal mechanisms, additive and
+non-additive noise, and optional output transforms (clipping, discretisation).
+
+A quick way to generate samples without manually constructing a graph:
+
+>>> from dowhy.gcm.data_generator import generate_samples_from_random_scm
+>>>
+>>> samples = generate_samples_from_random_scm(num_roots=3, num_children=5, num_samples=1000)
+>>> samples.head()
+ X0        X1        X2        X3        X4        X5        X6        X7
+0.0 -1.743020 -0.002892  0.703364 -0.373855 -0.173426  1.349900 -0.180954
+0.0 -0.707959 -0.063673  0.570420 -1.515796 -0.025515  0.399103 -0.203826
+0.0 -0.054094 -0.092459  0.554522 -1.041175 -0.037628  0.464503  0.088043
+1.0  0.609341 -1.125348  0.000000 -0.499892  0.568477 -0.421944 -0.950801
+0.0  0.420774 -0.203749  0.481462 -0.904529 -0.094425  1.263864 -0.294394
+
+To get the SCM object itself (e.g. for inspection or intervention experiments):
+
+>>> from dowhy.gcm.data_generator import generate_random_scm, DataGeneratorConfig
+>>> from dowhy.utils.plotting import plot
+>>> import dowhy.gcm as gcm
+>>>
+>>> scm = generate_random_scm(num_roots=3, num_children=5)
+>>> samples = gcm.draw_samples(scm, 2000)
+>>> plot(scm.graph)
+
+.. image:: random_dag.png
+    :alt: Randomly Generated SCM
+
+The behaviour is controlled through :class:`~dowhy.gcm.data_generator.DataGeneratorConfig`:
+
+>>> config = DataGeneratorConfig(
+...     edge_density=0.5,              # denser graph (more parents per node)
+...     prob_linear_mechanism=0.0,     # all nonlinear mechanisms
+...     prob_non_additive_noise=0.5,   # half of nodes have non-additive noise
+...     noise_std_range=(0.01, 0.05),  # low noise for cleaner relationships
+... )
+>>> samples = generate_samples_from_random_scm(5, 10, 2000, config=config)
