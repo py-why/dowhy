@@ -105,7 +105,7 @@ def estimate_kl_divergence_continuous_clf(
     ),
     epsilon: float = EPS,
 ) -> float:
-    """Estimates KL-Divergence based on probabilities given by classifier. This is:
+    r"""Estimates KL-Divergence based on probabilities given by classifier. This is:
 
         D_f(P || Q) = \int f(p(x)/q(x)) q(x) dx ~= -1/N \sum_x log(p(Y = 1 | x) / (1 - p(Y = 1 | x)))
 
