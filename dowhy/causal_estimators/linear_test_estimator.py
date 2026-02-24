@@ -125,7 +125,7 @@ class LinearTestEstimator(RegressionEstimator):
             conditional_effect_estimates = self._estimate_conditional_effects(
                 data, self._estimate_effect_fn, effect_modifier_names=self._effect_modifier_names
             )
-        
+
         # `sklearn` 모델은 절편을 `intercept_` 속성에 저장합니다.
         intercept_parameter = self.model.intercept_
 

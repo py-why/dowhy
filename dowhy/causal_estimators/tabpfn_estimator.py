@@ -1,13 +1,12 @@
 import importlib
 import logging
+import multiprocessing as mp
 from typing import Any, List, Optional, Union
 
 import numpy as np
 import pandas as pd
-from sklearn.utils import resample
-
 import torch
-import multiprocessing as mp
+from sklearn.utils import resample
 
 from dowhy.causal_estimator import CausalEstimate, CausalEstimator
 from dowhy.causal_estimators.regression_estimator import RegressionEstimator
@@ -16,9 +15,16 @@ from dowhy.causal_identifier import IdentifiedEstimand
 logger = logging.getLogger(__name__)
 
 
-def _mp_fit_and_predict_worker(model_type: str, device_id: int, model_kwargs: dict,
-                               X_train: np.ndarray, y_train: np.ndarray,
-                               X_pred: np.ndarray, want_proba: bool, out_queue):
+def _mp_fit_and_predict_worker(
+    model_type: str,
+    device_id: int,
+    model_kwargs: dict,
+    X_train: np.ndarray,
+    y_train: np.ndarray,
+    X_pred: np.ndarray,
+    want_proba: bool,
+    out_queue,
+):
     """Multiprocessing worker to fit a TabPFN model and predict.
 
     :param model_type: Model type ("Classifier" or "Regressor")
@@ -58,7 +64,13 @@ class TabPFNModelWrapper:
     and optional multiprocessing-based inference across multiple GPUs.
     """
 
-    def __init__(self, model_type_param: str, model_kwargs: dict, max_num_classes: int = 10, device_ids: Optional[List[int]] = None):
+    def __init__(
+        self,
+        model_type_param: str,
+        model_kwargs: dict,
+        max_num_classes: int = 10,
+        device_ids: Optional[List[int]] = None,
+    ):
         """Initialize the wrapper with modeling options.
 
         :param model_type_param: Model type ('classifier', 'regressor', or 'auto')
@@ -97,9 +109,13 @@ class TabPFNModelWrapper:
         """Validate dataset against TabPFN pretraining limits."""
         num_samples, num_features = features.shape
         if num_samples > 10000:
-            logger.warning("WARNING: TabPFN performs best up to ~10k samples. Your dataset has %d samples.", num_samples)
+            logger.warning(
+                "WARNING: TabPFN performs best up to ~10k samples. Your dataset has %d samples.", num_samples
+            )
         if num_features > 500:
-            logger.warning("WARNING: TabPFN performs best up to ~500 features. Your dataset has %d features.", num_features)
+            logger.warning(
+                "WARNING: TabPFN performs best up to ~500 features. Your dataset has %d features.", num_features
+            )
         if self.resolved_model_type == "Classifier":
             num_classes = int(pd.Series(outcome_values).nunique())
             if num_classes > 10:
@@ -183,14 +199,14 @@ class TabPFNModelWrapper:
         if not self.device_ids:
             raise ValueError("No device_ids provided for multiprocessing path.")
 
-        ctx = mp.get_context('spawn')
-        
+        ctx = mp.get_context("spawn")
+
         num_devices = len(self.device_ids)
         num_samples = self.train_X.shape[0]
         chunk_size = max(1, num_samples // num_devices)
         out_queue = ctx.Queue()
         procs: List[mp.Process] = []
-        
+
         for i, device_id in enumerate(self.device_ids):
             start_idx = i * chunk_size
             end_idx = (i + 1) * chunk_size if i < num_devices - 1 else num_samples
@@ -198,19 +214,28 @@ class TabPFNModelWrapper:
             y_chunk = self.train_y[start_idx:end_idx]
             p = ctx.Process(
                 target=_mp_fit_and_predict_worker,
-                args=(self.resolved_model_type, device_id, self.model_kwargs, X_chunk, y_chunk, features, want_proba, out_queue),
+                args=(
+                    self.resolved_model_type,
+                    device_id,
+                    self.model_kwargs,
+                    X_chunk,
+                    y_chunk,
+                    features,
+                    want_proba,
+                    out_queue,
+                ),
             )
             p.start()
             procs.append(p)
-        
+
         results = []
         for _ in procs:
             device_id, pred, err = out_queue.get()
             results.append((device_id, pred, err))
-        
+
         for p in procs:
             p.join()
-        
+
         preds = []
         errors = []
         for device_id, pred, err in results:
@@ -218,13 +243,21 @@ class TabPFNModelWrapper:
                 errors.append((device_id, err))
             else:
                 preds.append(pred)
-        
+
         if errors:
             raise RuntimeError(f"TabPFN multiprocessing prediction errors: {errors}")
         return np.mean(preds, axis=0)
 
 
 class TabpfnEstimator(RegressionEstimator):
+    """TabPFN-based outcome model estimator.
+    
+    References
+    ----------
+    [1] Hollmann, N., Müller, S., Eggensperger, K., and Hutter, F.
+        TabPFN: A Prior-Data Fitted Network for Tabular Data.
+        ICLR (2023). https://doi.org/10.48550/arXiv.2207.01848
+    """
     def __init__(
         self,
         identified_estimand: IdentifiedEstimand,
@@ -292,13 +325,13 @@ class TabpfnEstimator(RegressionEstimator):
         self.tabpfn_model = None
         self._use_multi_gpu = bool(self.method_params.get("use_multi_gpu", False))
         self.device_ids = self.method_params.get("device_ids", [])
-        
+
         self._check_tabpfn_dependencies()
-        
+
         if self._use_multi_gpu and not self.device_ids and torch.cuda.is_available():
             self.device_ids = list(range(torch.cuda.device_count()))
             self.logger.info(f"INFO: Auto-detected {len(self.device_ids)} GPUs: {self.device_ids}")
-        
+
         self._device = self._get_device()
 
     def _check_tabpfn_dependencies(self):
@@ -314,7 +347,7 @@ class TabpfnEstimator(RegressionEstimator):
                 "If you encounter authentication errors:\n"
                 "  1. Visit https://huggingface.co/Prior-Labs/tabpfn_2_5 and accept terms\n"
                 "  2. Run: huggingface-cli login\n"
-                "  3. Or set environment variable: export HF_TOKEN=\"your_huggingface_token\"\n"
+                '  3. Or set environment variable: export HF_TOKEN="your_huggingface_token"\n'
                 "For more details: https://docs.priorlabs.ai/how-to-access-gated-models"
             )
 
@@ -329,7 +362,7 @@ class TabpfnEstimator(RegressionEstimator):
                 "WARNING: No GPU found. TabPFN will run on CPU, which can be very slow."
                 "For better performance, consider using a GPU instance."
             )
-        
+
         return torch.device(device)
 
     def fit(
@@ -389,11 +422,11 @@ class TabpfnEstimator(RegressionEstimator):
         effect_intervals = None
         if self._confidence_intervals:
             effect_intervals = self._estimate_confidence_intervals_with_bootstrap(
-                data, 
-                effect_estimate, 
+                data,
+                effect_estimate,
                 confidence_level=self.confidence_level,
                 num_simulations=self.num_simulations,
-                sample_size_fraction=self.sample_size_fraction
+                sample_size_fraction=self.sample_size_fraction,
             )
 
         estimate = CausalEstimate(
@@ -411,7 +444,7 @@ class TabpfnEstimator(RegressionEstimator):
 
         estimate.add_estimator(self)
         return estimate
-    
+
     def _build_model(self, data: pd.DataFrame):
         """Build and fit TabPFN model wrapper.
 
@@ -430,13 +463,13 @@ class TabpfnEstimator(RegressionEstimator):
             device_ids=self.device_ids,
         )
         wrapper.prepare(tabpfn_features, outcome_series, self.logger)
-        
+
         if not wrapper.device_ids:
             wrapper.fit_single(self._device)
-        
+
         self.tabpfn_model = wrapper
         return (features, wrapper)
-    
+
     def predict_fn(self, data: pd.DataFrame, model, features):
         tabpfn_features = features[:, 1:]
         if getattr(model, "resolved_model_type", None) == "Classifier":
@@ -449,9 +482,9 @@ class TabpfnEstimator(RegressionEstimator):
     def _generate_bootstrap_estimates(self, data, num_bootstrap_simulations, sample_size_fraction):
         simulation_results = np.zeros(num_bootstrap_simulations)
         sample_size = int(sample_size_fraction * len(data))
-        
+
         self.logger.info(f"TabPFN Bootstrap: {num_bootstrap_simulations} simulations, sample_size: {sample_size}")
-        
+
         for index in range(num_bootstrap_simulations):
             new_data = resample(data, n_samples=sample_size)
             new_estimator = self.get_new_estimator_object(
@@ -468,10 +501,10 @@ class TabpfnEstimator(RegressionEstimator):
                 target_units=self._target_units,
             )
             simulation_results[index] = new_effect.value
-        
+
         return CausalEstimator.BootstrapEstimates(
             simulation_results,
-            {"num_simulations": num_bootstrap_simulations, "sample_size_fraction": sample_size_fraction}
+            {"num_simulations": num_bootstrap_simulations, "sample_size_fraction": sample_size_fraction},
         )
 
     def construct_symbolic_estimator(self, estimand):
@@ -483,4 +516,3 @@ class TabpfnEstimator(RegressionEstimator):
             ", ".join(self._target_estimand.get_backdoor_variables()),
         )
         return expr
-    

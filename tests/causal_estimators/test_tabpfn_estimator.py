@@ -1,7 +1,6 @@
 import itertools
 
 import numpy as np
-import pandas as pd
 import pytest
 from pytest import mark
 
@@ -9,23 +8,23 @@ import dowhy.datasets
 from dowhy import CausalModel
 from dowhy.causal_estimators.tabpfn_estimator import TabpfnEstimator
 
+from .base import SimpleEstimator
+
 # TabPFN and PyTorch are required for this test
 tabpfn = pytest.importorskip("tabpfn")
 torch = pytest.importorskip("torch")
-
-from .base import SimpleEstimator
 
 
 @mark.usefixtures("fixed_seed")
 class TestTabpfnEstimator(object):
     """
     Test suite for TabPFN estimator.
-    
+
     Important notes for test configuration:
     - TabPFN is extremely slow on CPU. For CPU environments, use small sample sizes (<=1000).
     - To enable multi-GPU testing, set use_multi_gpu=True in method_params.
     """
-    
+
     @mark.parametrize(
         [
             "error_tolerance",
@@ -89,14 +88,14 @@ class TestTabpfnEstimator(object):
     ):
         """
         Test average treatment effect estimation using TabPFN.
-        
+
         Note: We call average_treatment_effect_test directly instead of using
         average_treatment_effect_testsuite because the testsuite does not accept
         num_samples as a parameter. TabPFN requires smaller sample sizes on CPU
         due to performance constraints, so we need explicit control over num_samples.
         """
         estimator_tester = SimpleEstimator(error_tolerance, Estimator, identifier_method=identifier_method)
-        
+
         # Generate all test configurations
         args_dict = {
             "num_common_causes": num_common_causes,
@@ -110,7 +109,7 @@ class TestTabpfnEstimator(object):
         }
         keys, values = zip(*args_dict.items())
         configs = [dict(zip(keys, v)) for v in itertools.product(*values)]
-        
+
         for cfg in configs:
             print(f"\nConfig: {cfg}")
             estimator_tester.average_treatment_effect_test(
@@ -198,7 +197,6 @@ class TestTabpfnEstimator(object):
         )
 
         assert estimate_classification.estimator.tabpfn_model.resolved_model_type == "Classifier"
-
 
     def test_tabpfn_predict_proba(self):
         """Test that classifier can predict probabilities correctly."""
