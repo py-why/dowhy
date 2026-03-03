@@ -25,14 +25,14 @@ def sigmoid(x):
 def convert_to_binary(x, stochastic=True):
     p = sigmoid(x)
     if stochastic:
-        return choice([0, 1], 1, p=[1 - p, p])
+        return choice([0, 1], p=[1 - p, p])
     else:
         return int(p > 0.5)
 
 
 def stochastically_convert_to_three_level_categorical(x):
     p = sigmoid(x)
-    return choice([0, 1, 2], 1, p=[0.8 * (1 - p), 0.8 * p, 0.2])
+    return choice([0, 1, 2], p=[0.8 * (1 - p), 0.8 * p, 0.2])
 
 
 def convert_to_categorical(arr, num_vars, num_discrete_vars, quantiles=[0.25, 0.5, 0.75], one_hot_encode=False):
