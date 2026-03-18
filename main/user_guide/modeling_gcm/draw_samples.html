@@ -635,6 +635,47 @@ distribution (since they encode the same conditionals), but only X→Y→Z would
 distribution (e.g., when intervening on Y).</p>
 </div>
 <p>The next section provides more details about the evaluation method.</p>
+<section id="generate-samples-from-a-random-scm">
+<h2>Generate samples from a random SCM<a class="headerlink" href="#generate-samples-from-a-random-scm" title="Link to this heading">#</a></h2>
+<p>For benchmarking and testing, it is often useful to generate synthetic data from a random causal model with
+realistic properties. The <code class="docutils literal notranslate"><span class="pre">dowhy.gcm.data_generator</span></code> module provides a configurable random SCM generator
+that creates arbitrary-size DAGs with a mix of linear and nonlinear causal mechanisms, additive and
+non-additive noise, and optional output transforms (clipping, discretisation).</p>
+<p>A quick way to generate samples without manually constructing a graph:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">dowhy.gcm.data_generator</span><span class="w"> </span><span class="kn">import</span> <span class="n">generate_samples_from_random_scm</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">samples</span> <span class="o">=</span> <span class="n">generate_samples_from_random_scm</span><span class="p">(</span><span class="n">num_roots</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">num_children</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">samples</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="go"> X0        X1        X2        X3        X4        X5        X6        X7</span>
+<span class="go">0.0 -1.743020 -0.002892  0.703364 -0.373855 -0.173426  1.349900 -0.180954</span>
+<span class="go">0.0 -0.707959 -0.063673  0.570420 -1.515796 -0.025515  0.399103 -0.203826</span>
+<span class="go">0.0 -0.054094 -0.092459  0.554522 -1.041175 -0.037628  0.464503  0.088043</span>
+<span class="go">1.0  0.609341 -1.125348  0.000000 -0.499892  0.568477 -0.421944 -0.950801</span>
+<span class="go">0.0  0.420774 -0.203749  0.481462 -0.904529 -0.094425  1.263864 -0.294394</span>
+</pre></div>
+</div>
+<p>To get the SCM object itself (e.g. for inspection or intervention experiments):</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">dowhy.gcm.data_generator</span><span class="w"> </span><span class="kn">import</span> <span class="n">generate_random_scm</span><span class="p">,</span> <span class="n">DataGeneratorConfig</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">dowhy.utils.plotting</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">dowhy.gcm</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gcm</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">scm</span> <span class="o">=</span> <span class="n">generate_random_scm</span><span class="p">(</span><span class="n">num_roots</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">num_children</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">samples</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">draw_samples</span><span class="p">(</span><span class="n">scm</span><span class="p">,</span> <span class="mi">2000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plot</span><span class="p">(</span><span class="n">scm</span><span class="o">.</span><span class="n">graph</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="Randomly Generated SCM" src="../../_images/random_dag.png" />
+<p>The behaviour is controlled through <code class="xref py py-class docutils literal notranslate"><span class="pre">DataGeneratorConfig</span></code>:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">config</span> <span class="o">=</span> <span class="n">DataGeneratorConfig</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">edge_density</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>              <span class="c1"># denser graph (more parents per node)</span>
+<span class="gp">... </span>    <span class="n">prob_linear_mechanism</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>     <span class="c1"># all nonlinear mechanisms</span>
+<span class="gp">... </span>    <span class="n">prob_non_additive_noise</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>   <span class="c1"># half of nodes have non-additive noise</span>
+<span class="gp">... </span>    <span class="n">noise_std_range</span><span class="o">=</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">),</span>  <span class="c1"># low noise for cleaner relationships</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">samples</span> <span class="o">=</span> <span class="n">generate_samples_from_random_scm</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">2000</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
 </section>
 
 
@@ -675,6 +716,18 @@ distribution (e.g., when intervening on Y).</p>
                 <dialog id="pst-secondary-sidebar-modal"></dialog>
                 <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generate-samples-from-a-random-scm">Generate samples from a random SCM</a></li>
+</ul>
+  </nav></div>
 
   <div class="sidebar-secondary-item">
   <div role="note" aria-label="source link">
