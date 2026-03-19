@@ -905,7 +905,10 @@ class CausalEstimate:
         :returns: A (multi-index) dataframe that provides separate effects for each value of the (discretized) effect modifiers.
         """
         return self.estimator._estimate_conditional_effects(
-            self._data, self.estimator._estimate_effect_fn, effect_modifiers, num_quantiles
+            data=self._data,
+            estimate_effect_fn=self.estimator._estimate_effect_fn,
+            effect_modifier_names=effect_modifiers,
+            num_quantiles=num_quantiles,
         )
 
     def interpret(self, method_name=None, **kwargs):
