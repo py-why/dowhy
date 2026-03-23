@@ -1,3 +1,4 @@
+import math
 from typing import Any, List, Optional, Union
 
 import pandas as pd
@@ -129,43 +130,49 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
         # Infer the right strata based on clipping threshold
         if self.num_strata == "auto":
             # 0.5 because there are two values for the treatment
-            clipping_t = self.clipping_threshold
-            num_strata = 0.5 * data.shape[0] / clipping_t
-            # To be conservative and allow most strata to be included in the
-            # analysis
-            strata_found = False
-            while not strata_found:
+            num_strata = int(0.5 * data.shape[0] / self.clipping_threshold)
+            # Bound the number of attempts to log2(initial_num_strata) + 1
+            max_attempts = int(math.log2(max(num_strata, 2))) + 1
+
+            for attempt in range(max_attempts):
                 self.logger.info("'num_strata' selected as {}".format(num_strata))
+                # Check termination condition at the top, before any try/except,
+                # so it cannot be accidentally swallowed by the except block below.
+                if num_strata < 2:
+                    raise ValueError(
+                        "Not enough data to generate at least two strata. "
+                        "This error may be due to a high value of 'clipping_threshold'."
+                    )
                 try:
                     clipped = self._get_strata(
                         data,
                         num_strata,
                         self.clipping_threshold,
                     )
-                    num_ret_strata = clipped.groupby(["strata"]).count().reset_index()
-                    # At least 90% of the strata should be included in analysis
-                    if num_ret_strata.shape[0] >= 0.5 * num_strata:
-                        strata_found = True
-                    else:
-                        num_strata = int(num_strata / 2)
-                        self.logger.info(
-                            f"Less than half the strata have at least {self.clipping_threshold} data points. Selecting fewer number of strata."
-                        )
-                        if num_strata < 2:
-                            raise ValueError(
-                                "Not enough data to generate at least two strata. This error may be due to a high value of 'clipping_threshold'."
-                            )
                 except ValueError:
                     self.logger.info(
-                        "No strata found with at least {} data points. Selecting fewer number of strata".format(
-                            self.clipping_threshold
-                        )
+                        "No strata found with at least {} data points. "
+                        "Selecting fewer number of strata.".format(self.clipping_threshold)
                     )
-                    num_strata = int(num_strata / 2)
-                    if num_strata < 2:
-                        raise ValueError(
-                            "Not enough data to generate at least two strata. This error may be due to a high value of 'clipping_threshold'."
-                        )
+                    num_strata = num_strata // 2
+                    continue
+
+                num_ret_strata = clipped.groupby(["strata"]).count().reset_index()
+                # At least 50% of the strata should be included in the analysis
+                if num_ret_strata.shape[0] >= 0.5 * num_strata:
+                    break  # success
+                else:
+                    self.logger.info(
+                        f"Less than half the strata have at least {self.clipping_threshold} "
+                        f"data points. Selecting fewer number of strata."
+                    )
+                    num_strata = num_strata // 2
+            else:
+                # for/else: loop exhausted without finding valid strata
+                raise ValueError(
+                    f"Not enough data to generate at least two strata after "
+                    f"{max_attempts} attempts. Consider decreasing 'clipping_threshold'."
+                )
         else:
             clipped = self._get_strata(
                 data,
