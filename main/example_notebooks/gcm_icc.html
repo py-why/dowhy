@@ -572,7 +572,10 @@ explicitly model our causal relationships using functional causal models, as we 
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">dowhy</span>
+<span class="n">dowhy</span><span class="o">.</span><span class="n">enable_notebook_rendering</span><span class="p">()</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">networkx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nx</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
@@ -618,7 +621,7 @@ explicitly model our causal relationships using functional causal models, as we 
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node mpg: 100%|██████████| 5/5 [00:00&lt;00:00, 23.08it/s]
+Fitting causal mechanism of node mpg: 100%|██████████| 5/5 [00:00&lt;00:00, 23.28it/s]
 </pre></div></div>
 </div>
 <p>Optionally, we can get some insights into the performance of the causal mechanisms by using the evaluation method:</p>
@@ -635,7 +638,7 @@ Fitting causal mechanism of node mpg: 100%|██████████| 5/5 [
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Evaluating causal mechanisms...: 100%|██████████| 5/5 [00:00&lt;00:00, 409.50it/s]
+Evaluating causal mechanisms...: 100%|██████████| 5/5 [00:00&lt;00:00, 410.02it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -769,7 +772,7 @@ variance of mpg remains unexplained by all of the above factors, which may be pa
 <h2>Intrinsic influence on river flow<a class="headerlink" href="#Intrinsic-influence-on-river-flow" title="Link to this heading">#</a></h2>
 <p>In the next example, we look at different recordings taken of the river flows (<span class="math notranslate nohighlight">\(m^3/s\)</span>) at a 15 minute frequency across 5 different measuring stations in England at Henthorn, New Jumbles Rock, Hodder Place, Whalley Weir and Samlesbury. Here, obtaining a better understanding of how the river flows behave can help to plan potential mitigation steps to avoid overflows. The data is taken from the <a class="reference external" href="https://environment.data.gov.uk/hydrology/explore">UK Department for Environment Food &amp; Rural Affairs
 website</a>. Here is a map of the rivers:</p>
-<p><img alt="5afe6ad1c8524e3a9f63271bf3da1ef9" class="no-scaled-link" src="../_images/river-map.jpg" style="width: 600px;" /></p>
+<p><img alt="85608dc3fd544a858af3fb4f2731014b" class="no-scaled-link" src="../_images/river-map.jpg" style="width: 600px;" /></p>
 <p>New Jumbles Rock lies at a confluence point of the 3 rivers passing Henthorn, Hodder Place, and Whalley Weir and New Jumbles Rock flows into Samlesbury. The water passing a certain measuring station is certainly a mixture of some fraction of the amount observed at the next stations further upstream plus some amount contributed by streams and little rivers entering the river in between. This defines our causal graph as:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
@@ -792,7 +795,7 @@ website</a>. Here is a map of the rivers:</p>
 </div>
 </div>
 <p>In this setting, we are interested in the causal influence of the upstream rivers on the Samlesbury river. Similar to the example before, we would expect these nodes to be heavily confounded by, e.g., the weather. That is, the true graph is more likely to be along the lines of:</p>
-<p><img alt="da14d6782631477d85b6cce60b7d26a2" class="no-scaled-link" src="../_images/river-confounded.png" style="width: 400px;" /></p>
+<p><img alt="b4030b67966d4e81b76b23eae4b462f3" class="no-scaled-link" src="../_images/river-confounded.png" style="width: 400px;" /></p>
 <p>Nevertheless, we still expect the ICC algorithm to provide some insights into the contribution to the river flow of Samlesbury, even with the hidden confounder in place:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
@@ -814,8 +817,8 @@ website</a>. Here is a map of the rivers:</p>
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node Samlesbury: 100%|██████████| 5/5 [00:00&lt;00:00, 370.72it/s]
-Evaluating set functions...: 100%|██████████| 32/32 [00:00&lt;00:00, 233.42it/s]
+Fitting causal mechanism of node Samlesbury: 100%|██████████| 5/5 [00:00&lt;00:00, 355.03it/s]
+Evaluating set functions...: 100%|██████████| 32/32 [00:00&lt;00:00, 232.00it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
