@@ -266,7 +266,7 @@ def _infer_default_kappa_t(
     elif effect_on_t == "linear":
         # Estimating the regression coefficient from standardized features to t
         corrcoef_var_t = np.corrcoef(observed_common_causes, t, rowvar=False)[-1, :-1]
-        std_dev_t = np.std(t)[0]
+        std_dev_t = float(np.std(t))
         max_coeff = max(corrcoef_var_t) * std_dev_t
         min_coeff = min(corrcoef_var_t) * std_dev_t
     else:
@@ -318,7 +318,7 @@ def _infer_default_kappa_y(
         min_coeff, max_coeff = min(flips), max(flips)
     elif effect_on_y == "linear":
         corrcoef_var_y = np.corrcoef(observed_common_causes, y, rowvar=False)[-1, :-1]
-        std_dev_y = np.std(y)[0]
+        std_dev_y = float(np.std(y))
         max_coeff = max(corrcoef_var_y) * std_dev_y
         min_coeff = min(corrcoef_var_y) * std_dev_y
     else:
