@@ -366,6 +366,10 @@ TEST_GRAPH_SOLUTIONS = {
         maximal_adjustment_sets=[{"W"}],
         direct_maximal_adjustment_sets=[{"W", "M"}],
     ),
+    # Treatment node must be named "X" and outcome "Y" to match the convention
+    # hardcoded in IdentificationTestGraphSolution (base.py) and all parametrized
+    # backdoor tests. The graph encodes D->Y, D->M1->Y, D->M2->Y from issue #1334
+    # — here renamed to X->Y, X->M1->Y, X->M2->Y for fixture compatibility.
     "parallel-mediators": dict(
         graph_str="""graph[directed 1 node[id "X" label "X"]
                 node[id "Y" label "Y"]
