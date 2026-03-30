@@ -7,8 +7,6 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 import scipy.stats as ss
-from numpy.random import choice
-from scipy.stats import bernoulli, halfnorm, poisson, uniform
 from sklearn.neural_network import MLPRegressor
 
 from dowhy.utils.graph_operations import add_edge, del_edge, get_random_node_pair, get_simple_ordered_tree
@@ -25,14 +23,14 @@ def sigmoid(x):
 def convert_to_binary(x, stochastic=True):
     p = sigmoid(x)
     if stochastic:
-        return choice([0, 1], p=[1 - p, p])
+        return np.random.choice([0, 1], p=[1 - p, p])
     else:
         return int(p > 0.5)
 
 
 def stochastically_convert_to_three_level_categorical(x):
     p = sigmoid(x)
-    return choice([0, 1, 2], p=[0.8 * (1 - p), 0.8 * p, 0.2])
+    return np.random.choice([0, 1, 2], p=[0.8 * (1 - p), 0.8 * p, 0.2])
 
 
 def convert_to_categorical(arr, num_vars, num_discrete_vars, quantiles=[0.25, 0.5, 0.75], one_hot_encode=False):
@@ -590,7 +588,7 @@ def create_discrete_column(num_samples, std_dev=1):
         xL, scale=std_dev
     )  # probability of selecting a number x is p(x-0.5 < x < x+0.5) where x is a normal random variable with mean 0 and standard deviation std_dev
     prob = prob / prob.sum()  # normalize the probabilities so their sum is 1
-    nums = choice(a=x, size=num_samples, p=prob)  # pick up an element
+    nums = np.random.choice(a=x, size=num_samples, p=prob)  # pick up an element
     return nums
 
 
@@ -1099,22 +1097,22 @@ def sales_dataset(
 
     df[ad_spend_col] = (
         based_ad_spending
-        + df[shopping_event_col] * uniform.rvs(loc=1000, scale=1000, size=df.shape[0])
-        + (1 - df[shopping_event_col]) * uniform.rvs(loc=100, scale=400, size=df.shape[0])
+        + df[shopping_event_col] * ss.uniform.rvs(loc=1000, scale=1000, size=df.shape[0])
+        + (1 - df[shopping_event_col]) * ss.uniform.rvs(loc=100, scale=400, size=df.shape[0])
     )
 
     df[page_visit_col] = (
-        poisson.rvs(mu=10000 * page_visitor_factor, size=df.shape[0])
-        + uniform.rvs(loc=5000 * page_visitor_factor, scale=5000, size=df.shape[0]) * df[shopping_event_col]
-        + halfnorm.rvs(loc=0.5 * page_visitor_factor, scale=0.01, size=df.shape[0]) * df[ad_spend_col]
-        + halfnorm.rvs(loc=1000 * page_visitor_factor, scale=100, size=df.shape[0])
+        ss.poisson.rvs(mu=10000 * page_visitor_factor, size=df.shape[0])
+        + ss.uniform.rvs(loc=5000 * page_visitor_factor, scale=5000, size=df.shape[0]) * df[shopping_event_col]
+        + ss.halfnorm.rvs(loc=0.5 * page_visitor_factor, scale=0.01, size=df.shape[0]) * df[ad_spend_col]
+        + ss.halfnorm.rvs(loc=1000 * page_visitor_factor, scale=100, size=df.shape[0])
     )
     df[page_visit_col] = df[page_visit_col].astype(int)
 
     df[price_col] = (
         base_price
-        + uniform.rvs(loc=-200, scale=200, size=df.shape[0]) * df[shopping_event_col]
-        + bernoulli.rvs(p=0.02, size=df.shape[0]) * uniform.rvs(loc=-20, scale=20, size=df.shape[0])
+        + ss.uniform.rvs(loc=-200, scale=200, size=df.shape[0]) * df[shopping_event_col]
+        + ss.bernoulli.rvs(p=0.02, size=df.shape[0]) * ss.uniform.rvs(loc=-20, scale=20, size=df.shape[0])
     )
 
     price_changes = 1 - df[price_col] / original_product_price
@@ -1123,9 +1121,9 @@ def sales_dataset(
     price_changes[price_changes == 0] = 1
 
     df[units_sold_col] = [
-        poisson.rvs(
+        ss.poisson.rvs(
             mu=demand_changes.iloc[i] / price_changes.iloc[i] * 0.2 * df[page_visit_col].iloc[i]
-            + uniform.rvs(loc=100, scale=1000) * df[shopping_event_col].iloc[i]
+            + ss.uniform.rvs(loc=100, scale=1000) * df[shopping_event_col].iloc[i]
         )
         for i in range(df.shape[0])
     ]
@@ -1136,7 +1134,7 @@ def sales_dataset(
     df[operation_col] = (
         df[ad_spend_col]
         + product_production_cost * df[units_sold_col]
-        + halfnorm.rvs(loc=500000, scale=10, size=df.shape[0])
+        + ss.halfnorm.rvs(loc=500000, scale=10, size=df.shape[0])
     )
 
     df[profit_col] = df[revenue_col] - df[operation_col]
