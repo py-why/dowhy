@@ -10,15 +10,16 @@ by running simulations in parallel.
 # This is a mock example since we don't have all dependencies installed
 # In practice, this would work with real data and full dowhy environment
 
+
 def example_usage():
     """
     Example of how to use the new parallelization features.
     """
-    
+
     print("Example: Using parallel refutation with dowhy")
     print("=" * 50)
-    
-    example_code = '''
+
+    example_code = """
 import dowhy
 
 # Load your data and create a causal model
@@ -107,18 +108,18 @@ refute_unobserved = model.refute_estimate(
 )
 
 print("All refutations completed with parallel execution!")
-'''
+"""
 
     print(example_code)
-    
+
     print("\nKey improvements:")
     print("- ✅ BootstrapRefuter: Already had parallelization")
-    print("- ✅ PlaceboTreatmentRefuter: Already had parallelization") 
+    print("- ✅ PlaceboTreatmentRefuter: Already had parallelization")
     print("- ✅ RandomCommonCause: Already had parallelization")
     print("- ✅ DataSubsetRefuter: Already had parallelization")
     print("- 🆕 DummyOutcomeRefuter: NOW has parallelization")
     print("- 🆕 AddUnobservedCommonCause: NOW has parallelization")
-    
+
     print("\nPerformance tips:")
     print("- Use n_jobs=-1 to utilize all CPU cores")
     print("- Use n_jobs=1 for sequential execution (backward compatible)")
@@ -126,5 +127,6 @@ print("All refutations completed with parallel execution!")
     print("- Set verbose=1 to see progress and timing information")
     print("- Larger num_simulations will benefit more from parallelization")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     example_usage()

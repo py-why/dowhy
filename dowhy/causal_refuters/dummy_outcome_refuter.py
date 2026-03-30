@@ -270,7 +270,7 @@ def _refute_once(
 ):
     """Execute one iteration of the dummy outcome refutation."""
     estimates = []
-    
+
     if estimator_present == False:
         # Adding an unobserved confounder if provided by the user
         data_copy = data.copy()
@@ -279,7 +279,7 @@ def _refute_once(
             chosen_variables_copy = chosen_variables + ["simulated"]
         else:
             chosen_variables_copy = chosen_variables
-        
+
         # We set X_train = 0 and outcome_train to be 0
         validation_df = data_copy
         X_train = None
@@ -339,9 +339,7 @@ def _refute_once(
 
             for key_validation, _ in groups:
                 if key_validation != key_train:
-                    validation_df.append(
-                        groups.get_group(key_validation).sample(frac=test_fraction[group_count].other)
-                    )
+                    validation_df.append(groups.get_group(key_validation).sample(frac=test_fraction[group_count].other))
 
             validation_df = pd.concat(validation_df)
             X_validation_df = validation_df[chosen_variables]
@@ -359,7 +357,7 @@ def _refute_once(
 
             # Get true causal effect for this group
             true_effect = true_causal_effect(validation_df[treatment_name[0]])
-            
+
             # Add h(t) to f(W) to get the dummy outcome
             outcome_validation += true_effect
 
@@ -664,12 +662,12 @@ def refute_dummy_outcome(
         # Each simulation result contains estimates for all groups
         if len(simulation_results) > 0:
             num_groups = len(simulation_results[0])
-            
+
             for train_category in range(num_groups):
                 # Compute true effect for this group (using first simulation as reference)
                 # In practice, this would be the same across simulations for the same group
                 true_effect_value = true_causal_effect(data[treatment_name[0]])
-                
+
                 dummy_estimate = CausalEstimate(
                     data=None,
                     treatment_name=estimate._treatment_name,
@@ -690,9 +688,7 @@ def refute_dummy_outcome(
                     refutation_type="Refute: Use a Dummy Outcome",
                 )
 
-                refute.add_significance_test_results(
-                    test_significance(dummy_estimate, np.array(group_results))
-                )
+                refute.add_significance_test_results(test_significance(dummy_estimate, np.array(group_results)))
 
                 refute_list.append(refute)
 

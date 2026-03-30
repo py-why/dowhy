@@ -917,9 +917,7 @@ def sensitivity_simulation(
 
             # Create list of parameter combinations for parallel execution
             param_combinations = [
-                (i, j, kappa_t[i], kappa_y[j]) 
-                for i in range(len(kappa_t)) 
-                for j in range(len(kappa_y))
+                (i, j, kappa_t[i], kappa_y[j]) for i in range(len(kappa_t)) for j in range(len(kappa_y))
             ]
 
             # Run simulations in parallel
