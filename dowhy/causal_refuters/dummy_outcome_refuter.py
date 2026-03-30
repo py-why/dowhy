@@ -254,7 +254,7 @@ def _refute_once(
     data: pd.DataFrame,
     target_estimand: IdentifiedEstimand,
     estimate: CausalEstimate,
-    treatment_name: str,
+    treatment_name: List[str],
     outcome_name: str,
     required_variables: Optional[Union[int, list, bool]] = None,
     min_data_point_threshold: float = MIN_DATA_POINT_THRESHOLD,
@@ -316,7 +316,7 @@ def _refute_once(
 
     else:
         groups = preprocess_data_by_treatment(
-            data, [treatment_name], unobserved_confounder_values, bucket_size_scale_factor, chosen_variables
+            data, treatment_name, unobserved_confounder_values, bucket_size_scale_factor, chosen_variables
         )
         group_count = 0
 
@@ -385,7 +385,7 @@ def refute_dummy_outcome(
     data: pd.DataFrame,
     target_estimand: IdentifiedEstimand,
     estimate: CausalEstimate,
-    treatment_name: str,
+    treatment_name: List[str],
     outcome_name: str,
     required_variables: Optional[Union[int, list, bool]] = None,
     min_data_point_threshold: float = MIN_DATA_POINT_THRESHOLD,
