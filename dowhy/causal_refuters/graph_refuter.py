@@ -1,6 +1,8 @@
 import logging
+from math import log
 
 import numpy as np
+from scipy.stats import chi2
 
 from dowhy.causal_refuter import CausalRefutation, CausalRefuter
 from dowhy.utils.cit import conditional_MI, partial_corr
@@ -56,14 +58,27 @@ class GraphRefuter(CausalRefuter):
             self._results[key] = [p_value, True]
 
     def conditional_mutual_information(self, x=None, y=None, z=None):
-        cmi_val = conditional_MI(data=self._data, x=x, y=y, z=list(z))
+        cmi_bits = conditional_MI(data=self._data, x=x, y=y, z=list(z))
         key = (x, y) + (z,)
-        if cmi_val <= 0.05:
+
+        n = len(self._data)
+        # Convert CMI (bits) to G-test statistic (asymptotically chi-squared under H0)
+        g_stat = 2 * n * cmi_bits * log(2)
+
+        # Degrees of freedom: (|X| - 1)(|Y| - 1) * number of distinct Z combinations
+        x_card = self._data[x].nunique()
+        y_card = self._data[y].nunique()
+        z_card = self._data[list(z)].drop_duplicates().shape[0] if z else 1
+        df = max(1, (x_card - 1) * (y_card - 1) * z_card)
+
+        p_value = float(chi2.sf(g_stat, df=df))
+
+        if p_value >= 0.05:
             self._true_implications.append([x, y, z])
-            self._results[key] = [cmi_val, True]
+            self._results[key] = [p_value, True]
         else:
             self._false_implications.append([x, y, z])
-            self._results[key] = [cmi_val, False]
+            self._results[key] = [p_value, False]
 
     def refute_model(self, independence_constraints):
         """
