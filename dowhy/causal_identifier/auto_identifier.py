@@ -962,7 +962,8 @@ def identify_mediation(graph: nx.DiGraph, action_nodes: List[str], outcome_nodes
         logger.debug("Candidate mediation set: {0}, on_mediating_path: {1}".format(candidate_var, is_valid_mediation))
         if is_valid_mediation:
             mediation_vars.append(candidate_var)
-    return mediation_vars
+    # Sort for deterministic output — eligible_variables is a set.
+    return sorted(mediation_vars)
 
 
 def identify_mediation_first_stage_confounders(
