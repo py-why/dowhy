@@ -102,7 +102,7 @@ class KernelSampler(object):
         ]
 
         res = np.meshgrid(*cum_ranges)
-        points = np.array(res).reshape(len(self._outcome_names), np.int(n.cumprod()[-1])).T
+        points = np.array(res).reshape(len(self._outcome_names), int(n.cumprod()[-1])).T
 
         x_z_repeated = np.repeat(x_z, len(points)).reshape(len(points), len(x_z))
         cdf_vals = self._evaluate_cdf(points, x_z_repeated)
