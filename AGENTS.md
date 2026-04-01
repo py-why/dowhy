@@ -188,7 +188,7 @@ Before opening or updating a PR, confirm:
 - [ ] `poetry run poe format_check` passes (black + isort compliant).
 - [ ] `poetry run poe test` passes (or a justification is provided for a new failure).
 - [ ] New code is covered by tests.
-- [ ] All commits are signed off (`git log --show-signature` or `--format="%H %s %GS"`).
+- [ ] All commits include a DCO sign-off (`Signed-off-by:` trailer in the commit message). For example, check with `git log --format='%h %s%n%n%b'` and verify each commit body contains `Signed-off-by:`.
 - [ ] If a new dependency was added or `poetry.lock` changed, a justification is included in the PR description.
 - [ ] Optional imports are guarded and fail gracefully.
 - [ ] Public API additions are documented (docstrings + `docs/` RST where appropriate).
