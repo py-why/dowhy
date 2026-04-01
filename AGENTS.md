@@ -73,14 +73,7 @@ poetry install -E "pygraphviz"     # Graph visualization via graphviz
 poetry install -E "econml"         # EconML CATE estimators
 ```
 
-On Linux, `pygraphviz` may require:
-
-```bash
-sudo apt install graphviz libgraphviz-dev graphviz-dev pkg-config
-pip install --global-option=build_ext \
-  --global-option="-I/usr/local/include/graphviz/" \
-  --global-option="-L/usr/local/lib/graphviz" pygraphviz
-```
+On Linux, `pygraphviz` may require installation of graphviz and its developer package
 
 ---
 
