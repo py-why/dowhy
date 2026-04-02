@@ -316,7 +316,7 @@ def _refute_once(
 
     else:
         groups = preprocess_data_by_treatment(
-            data, [treatment_name], unobserved_confounder_values, bucket_size_scale_factor, chosen_variables
+            data, treatment_name, unobserved_confounder_values, bucket_size_scale_factor, chosen_variables
         )
         group_count = 0
 
