@@ -1,7 +1,9 @@
 import itertools
 from typing import List, Optional, Union
 
+import numpy as np
 import pandas as pd
+import scipy.stats
 import statsmodels.api as sm
 
 from dowhy.causal_estimator import CausalEstimator
@@ -105,16 +107,57 @@ class LinearRegressionEstimator(RegressionEstimator):
         model = sm.OLS(data[self._target_estimand.outcome_variable[0]], features).fit()
         return (features, model)
 
+    def _ate_and_se_for_treatment(self, treatment_index: int):
+        """Compute the unscaled ATE and its standard error for one treatment variable.
+
+        Uses the Delta method: for ATE = c'β, SE = sqrt(c' Σ c), where Σ is the
+        OLS parameter covariance matrix and c is the contrast vector.
+
+        The feature column order produced by ``_build_features`` (after ``sm.add_constant``) is:
+        [const, T_0, …, T_k, W_0, …, W_m, T_0·X_0, …, T_0·X_n, T_1·X_0, …]
+
+        :param treatment_index: 0-based index into the treatment variable list.
+        :returns: Tuple of (ate_unscaled, se_unscaled).
+        """
+        n_treatments = len(self._target_estimand.treatment_variable)
+        n_common_causes = len(self._observed_common_causes_names)
+        n_effect_modifiers = len(self._effect_modifier_names)
+
+        em_means = np.asarray(self._effect_modifiers.mean(axis=0))
+
+        params = self.model.params.to_numpy()
+        cov = self.model.cov_params().to_numpy()
+
+        n_params = len(params)
+        c = np.zeros(n_params)
+        # Direct treatment coefficient (offset by 1 for the intercept)
+        c[1 + treatment_index] = 1.0
+        # Interaction coefficients T_i · X_j start at:
+        # 1 (const) + n_treatments + n_common_causes + treatment_index * n_effect_modifiers
+        interaction_start = 1 + n_treatments + n_common_causes + treatment_index * n_effect_modifiers
+        c[interaction_start : interaction_start + n_effect_modifiers] = em_means
+
+        ate = float(c @ params)
+        var_ate = float(c @ cov @ c)
+        se = float(np.sqrt(max(var_ate, 0.0)))
+        return ate, se
+
     def _estimate_confidence_intervals(self, confidence_level, method=None):
         if self._effect_modifier_names:
-            # The average treatment effect is a combination of different
-            # regression coefficients. Complicated to compute the confidence
-            # interval analytically. For example, if y=a + b1.t + b2.tx, then
-            # the average treatment effect is b1+b2.mean(x).
-            # Refer Gelman, Hill. ARM Book. Chapter 9
-            # http://www.stat.columbia.edu/~gelman/arm/chap9.pdf
-            # TODO: Looking for contributions
-            raise NotImplementedError
+            # Use the Delta method to compute asymptotic confidence intervals for the
+            # ATE when effect modifiers are present.  The ATE is a linear combination
+            # of the OLS coefficients: ATE = b_T + b_{TX_1}*E[X_1] + …
+            # Reference: Gelman & Hill, ARM Book, Chapter 9
+            n_treatments = len(self._target_estimand.treatment_variable)
+            scale = self._treatment_value - self._control_value
+            t_score = scipy.stats.t.ppf((1.0 + confidence_level) / 2.0, df=self.model.df_resid)
+            rows = []
+            for i in range(n_treatments):
+                ate_unscaled, se_unscaled = self._ate_and_se_for_treatment(i)
+                ate_scaled = scale * ate_unscaled
+                margin = abs(scale) * t_score * se_unscaled
+                rows.append([ate_scaled - margin, ate_scaled + margin])
+            return np.array(rows)
         else:
             conf_ints = self.model.conf_int(alpha=1 - confidence_level)
             # For a linear regression model, the causal effect of a variable is equal to the coefficient corresponding to the
@@ -126,7 +169,15 @@ class LinearRegressionEstimator(RegressionEstimator):
 
     def _estimate_std_error(self, method=None):
         if self._effect_modifier_names:
-            raise NotImplementedError
+            # Delta method: SE(scale * ATE) = |scale| * sqrt(c' Σ c)
+            scale = self._treatment_value - self._control_value
+            ses = np.array(
+                [
+                    abs(scale) * self._ate_and_se_for_treatment(i)[1]
+                    for i in range(len(self._target_estimand.treatment_variable))
+                ]
+            )
+            return ses
         else:
             std_error = self.model.bse[1 : (len(self._target_estimand.treatment_variable) + 1)]
 
