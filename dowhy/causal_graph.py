@@ -347,39 +347,33 @@ class CausalGraph:
         causes_1 = set()
         causes_2 = set()
         for node in nodes1:
-            causes_1 = causes_1.union(self.get_ancestors(node))
+            causes_1.update(self.get_ancestors(node))
         for node in nodes2:
             # Cannot simply compute ancestors, since that will also include nodes1 and its parents (e.g. instruments)
             parents_2 = self.get_parents(node)
             for parent in parents_2:
                 if parent not in nodes1:
-                    causes_2 = causes_2.union(
-                        set(
-                            [
-                                parent,
-                            ]
-                        )
-                    )
-                    causes_2 = causes_2.union(self.get_ancestors(parent))
+                    causes_2.add(parent)
+                    causes_2.update(self.get_ancestors(parent))
         return list(causes_1.intersection(causes_2))
 
     def get_effect_modifiers(self, nodes1, nodes2):
         # Return effect modifiers according to the graph
         modifiers = set()
         for node in nodes2:
-            modifiers = modifiers.union(self.get_ancestors(node))
-        modifiers = modifiers.difference(nodes1)
+            modifiers.update(self.get_ancestors(node))
+        modifiers.difference_update(nodes1)
         for node in nodes1:
-            modifiers = modifiers.difference(self.get_ancestors(node))
+            modifiers.difference_update(self.get_ancestors(node))
         # removing all mediators
         for node1 in nodes1:
             for node2 in nodes2:
                 all_directed_paths = nx.all_simple_paths(self._graph, node1, node2)
                 for path in all_directed_paths:
-                    modifiers = modifiers.difference(path)
+                    modifiers.difference_update(path)
         # Also add any effect modifiers that could not be auto-detected (e.g., they are also common causes)
         marked_modifiers = [n for n, ndata in self._graph.nodes(data=True) if "effectmodifier" in ndata]
-        modifiers = modifiers.union(marked_modifiers)
+        modifiers.update(marked_modifiers)
         return list(modifiers)
 
     def get_parents(self, node_name):
@@ -395,7 +389,7 @@ class CausalGraph:
     def get_descendants(self, nodes):
         descendants = set()
         for node_name in nodes:
-            descendants = descendants.union(set(nx.descendants(self._graph, node_name)))
+            descendants.update(nx.descendants(self._graph, node_name))
         return descendants
 
     def all_observed(self, node_names):
@@ -429,14 +423,15 @@ class CausalGraph:
         g_no_parents_treatment = self.do_surgery(treatment_nodes, remove_incoming_edges=True)
         ancestors_outcome = set()
         for node in outcome_nodes:
-            ancestors_outcome = ancestors_outcome.union(nx.ancestors(g_no_parents_treatment, node))
+            ancestors_outcome.update(nx.ancestors(g_no_parents_treatment, node))
         # [TODO: double check these work with multivariate implementation:]
         # Exclusion
         candidate_instruments = parents_treatment.difference(ancestors_outcome)
         self.logger.debug("Candidate instruments after satisfying exclusion: %s", candidate_instruments)
         # As-if-random setup
-        children_causes_outcome = [nx.descendants(g_no_parents_treatment, v) for v in ancestors_outcome]
-        children_causes_outcome = set([item for sublist in children_causes_outcome for item in sublist])
+        children_causes_outcome = set()
+        for v in ancestors_outcome:
+            children_causes_outcome.update(nx.descendants(g_no_parents_treatment, v))
 
         # As-if-random
         instruments = candidate_instruments.difference(children_causes_outcome)

@@ -48,8 +48,10 @@ def refute_causal_structure(
     validation_summary = dict()
     all_p_values = []
 
+    parents_per_node = {node: get_ordered_predecessors(causal_graph, node) for node in causal_graph.nodes}
+
     for node in causal_graph.nodes:
-        parents = get_ordered_predecessors(causal_graph, node)
+        parents = parents_per_node[node]
         non_descendants = _get_non_descendants(causal_graph, node, exclude_parents=True)
 
         lmc_test_result = dict()
@@ -88,7 +90,7 @@ def refute_causal_structure(
             is_dag_valid &= not successes[index]
             index += 1
 
-        for parent in get_ordered_predecessors(causal_graph, node):
+        for parent in parents_per_node[node]:
             validation_summary[node]["edge_dependence_test"][parent]["fdr_adjusted_p_value"] = adjusted_p_values[index]
             validation_summary[node]["edge_dependence_test"][parent]["success"] = successes[index]
             is_dag_valid &= successes[index]

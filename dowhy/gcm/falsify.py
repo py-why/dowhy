@@ -994,7 +994,8 @@ def _to_frozenset(x: Union[Set, List, str]):
 
 
 def _get_non_descendants(causal_graph: DirectedGraph, node: Any, exclude_parents: bool = False) -> List[Any]:
-    nodes_to_exclude = nx.descendants(causal_graph, node).union({node})
+    nodes_to_exclude = nx.descendants(causal_graph, node)
+    nodes_to_exclude.add(node)
     if exclude_parents:
-        nodes_to_exclude = nodes_to_exclude.union(causal_graph.predecessors(node))
-    return list(set(causal_graph.nodes).difference(nodes_to_exclude))
+        nodes_to_exclude.update(causal_graph.predecessors(node))
+    return list(set(causal_graph.nodes) - nodes_to_exclude)
