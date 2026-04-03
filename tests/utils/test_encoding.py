@@ -85,3 +85,31 @@ def test_one_hot_encode_consistent_with_new_data():
     c_z2 = df_encoded2["C_Z"]
     assert c_z1[2] == c_z2[1]
     assert c_z1[5] == c_z2[5]
+
+
+def test_one_hot_encode_preserves_index():
+    """Regression test for https://github.com/py-why/dowhy/issues/1372.
+
+    When a DataFrame with a non-default (non-sequential) index is encoded,
+    the output must retain the original index so that index-aligned operations
+    downstream (e.g. pd.concat or boolean .loc indexing) continue to work
+    correctly. This scenario occurs whenever a data-subset refuter passes a
+    sampled subset of the original DataFrame to an estimator like
+    DistanceMatchingEstimator.
+    """
+    data = pd.DataFrame(
+        {"cat": ["a", "b", "a", "c", "b"], "num": [1.0, 2.0, 3.0, 4.0, 5.0]}
+    )
+    # Simulate a data-subset refuter that samples rows without resetting the index.
+    subset = data.iloc[[1, 3, 4]]
+
+    result, _ = one_hot_encode(subset)
+
+    assert list(result.index) == [1, 3, 4], "Index must be preserved after encoding"
+
+
+def test_one_hot_encode_preserves_index_no_categorical():
+    """Index must be preserved even when there are no categorical columns."""
+    data = pd.DataFrame({"x": [1.0, 2.0, 3.0]}, index=[5, 10, 15])
+    result, _ = one_hot_encode(data)
+    assert list(result.index) == [5, 10, 15], "Index must be preserved when no encoding is needed"

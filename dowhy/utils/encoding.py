@@ -38,7 +38,7 @@ def one_hot_encode(data: pd.DataFrame, columns=None, drop_first: bool = False, e
 
     # Columns to keep in the result - not encoded.
     columns_to_keep = data.columns.difference(data_to_encode.columns)
-    df_columns_to_keep = data[columns_to_keep].reset_index(drop=True)
+    df_columns_to_keep = data[columns_to_keep]
 
     if encoder is None:  # Create new encoder
         drop = None
@@ -51,10 +51,12 @@ def one_hot_encode(data: pd.DataFrame, columns=None, drop_first: bool = False, e
     else:  # Use existing encoder
         encoded_data = encoder.transform(data_to_encode)
 
-    # Convert the encoded data to a DataFrame
+    # Convert the encoded data to a DataFrame, preserving the original index so that
+    # callers relying on index alignment (e.g. distance matching with a data subset) work
+    # correctly.
     columns_encoded = encoder.get_feature_names_out(data_to_encode.columns)
 
-    df_encoded = pd.DataFrame(encoded_data, columns=columns_encoded).reset_index(drop=True)  # drop index from original
+    df_encoded = pd.DataFrame(encoded_data, columns=columns_encoded, index=data_to_encode.index)
 
     # Concatenate the encoded DataFrame with the original non-categorical columns
     df_result = pd.concat([df_columns_to_keep, df_encoded], axis=1)
