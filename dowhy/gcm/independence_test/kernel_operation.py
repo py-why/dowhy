@@ -36,7 +36,7 @@ def apply_rbf_kernel_with_adaptive_precision(X: np.ndarray) -> np.ndarray:
 
     result = np.ones((X.shape[0], X.shape[0]))
     for i in range(X.shape[1]):
-        distance_matrix = euclidean_distances(X, squared=True)
+        distance_matrix = euclidean_distances(X[:, [i]], squared=True)
         result *= np.exp(-_median_based_precision(distance_matrix) * distance_matrix)
 
     return result
