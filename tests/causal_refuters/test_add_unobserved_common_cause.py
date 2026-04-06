@@ -599,7 +599,6 @@ class TestAddUnobservedCommonCauseRefuter(object):
         assert refute.stats["evalue_lower_ci"] < refute.stats["evalue_estimate"]
         assert mock_fig.call_count > 0
 
-
     def test_infer_default_kappa_linear_does_not_crash(self):
         """Regression test: _infer_default_kappa_t/y crashed with IndexError when effect strengths
         were omitted and confounders_effect_on_treatment/outcome were 'linear' because np.std()
@@ -617,9 +616,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
             graph=data["gml_graph"],
         )
         identified_estimand = model.identify_effect()
-        estimate = model.estimate_effect(
-            identified_estimand, method_name="backdoor.linear_regression"
-        )
+        estimate = model.estimate_effect(identified_estimand, method_name="backdoor.linear_regression")
         # No effect_strength_on_treatment / effect_strength_on_outcome supplied — forces
         # _infer_default_kappa_t and _infer_default_kappa_y to run the "linear" branch.
         refute = model.refute_estimate(
