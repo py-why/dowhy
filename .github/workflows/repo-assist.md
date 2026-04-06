@@ -14,13 +14,7 @@ description: |
   Always polite, constructive, and mindful of the project's goals.
 
 on:
-<<<<<<< current (local changes)
   schedule: daily
-||||||| base (original)
-  schedule: every 6h
-=======
-  schedule: every 12h
->>>>>>> new (upstream)
   workflow_dispatch:
   slash_command:
     name: repo-assist
@@ -181,14 +175,8 @@ steps:
           json.dump(result, f, indent=2)
       EOF
 
-<<<<<<< current (local changes)
 source: githubnext/agentics/workflows/repo-assist.md@b897c2f3e43bde9ff7923c8fa9211055b26e27cc
 engine: copilot
-||||||| base (original)
-source: githubnext/agentics/workflows/repo-assist.md@b897c2f3e43bde9ff7923c8fa9211055b26e27cc
-=======
-source: githubnext/agentics/workflows/repo-assist.md@1f672aef974f4246124860fc532f82fe8a93a57e
->>>>>>> new (upstream)
 ---
 
 # Repo Assist
