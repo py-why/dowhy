@@ -125,7 +125,7 @@ def identify_effect_id(
 
     try:
         tsort_node_names = OrderedSet(list(nx.topological_sort(graph)))  # topological sorting of graph nodes
-    except:
+    except nx.NetworkXUnfeasible:
         raise Exception("The graph must be a directed acyclic graph (DAG).")
 
     return __adjacency_matrix_identify_effect(
