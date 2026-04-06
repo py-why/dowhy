@@ -105,6 +105,27 @@ be answered. DoWhy's API to answer these causal questions follows a simple 3-ste
 If you want to learn more about this and other GCM features, we recommend starting with :doc:`../user_guide/modeling_gcm/index` in
 the user guide or check out :doc:`../example_notebooks/gcm_basic_example`.
 
+Jupyter notebook rendering
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+When working in a Jupyter notebook you can call :func:`dowhy.enable_notebook_rendering` once at the top of your
+notebook to activate SymPy's pretty-printer. This renders symbolic math expressions (such as identified estimands)
+as nicely formatted LaTeX output:
+
+.. code:: python
+
+    import dowhy
+    dowhy.enable_notebook_rendering()
+
+.. note::
+    ``enable_notebook_rendering`` is **not** called automatically on ``import dowhy`` because
+    ``sympy.init_printing`` replaces ``sys.displayhook`` globally and can interfere with other
+    libraries (e.g. PyTorch) that display non-SymPy objects in the same session.
+
+All example notebooks in the DoWhy repository call ``dowhy.enable_notebook_rendering()`` as their
+first step, so you can use them as a reference.
+
+
 Further resources
 ^^^^^^^^^^^^^^^^^
 
