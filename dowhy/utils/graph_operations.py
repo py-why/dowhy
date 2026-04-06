@@ -241,7 +241,7 @@ def find_predecessor(i, j, g):
         try:
             path = shortest_path(u, pa, i)
             return pa
-        except:
+        except nx.NetworkXNoPath:
             pass
     return None
 
