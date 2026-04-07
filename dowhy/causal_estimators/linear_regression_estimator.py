@@ -120,15 +120,22 @@ class LinearRegressionEstimator(RegressionEstimator):
         :returns: Tuple of (ate_unscaled, se_unscaled).
         """
         n_treatments = len(self._target_estimand.treatment_variable)
-        n_common_causes = len(self._observed_common_causes_names)
-        n_effect_modifiers = len(self._effect_modifier_names)
-
-        em_means = np.asarray(self._effect_modifiers.mean(axis=0))
+        # Use actual encoded column counts, not variable name counts.
+        # Categorical variables are one-hot encoded and expand into multiple columns,
+        # so len(names) underestimates the true column count.
+        n_common_causes = self._observed_common_causes.shape[1] if self._observed_common_causes is not None else 0
+        em_means = self._effect_modifiers.mean(axis=0).to_numpy()
+        n_effect_modifiers = len(em_means)
 
         params = self.model.params.to_numpy()
         cov = self.model.cov_params().to_numpy()
 
         n_params = len(params)
+        assert n_params == 1 + n_treatments + n_common_causes + n_treatments * n_effect_modifiers, (
+            f"Model has {n_params} params but expected "
+            f"{1 + n_treatments + n_common_causes + n_treatments * n_effect_modifiers}. "
+            "Column ordering assumption in _ate_and_se_for_treatment may be broken."
+        )
         c = np.zeros(n_params)
         # Direct treatment coefficient (offset by 1 for the intercept)
         c[1 + treatment_index] = 1.0
@@ -144,10 +151,6 @@ class LinearRegressionEstimator(RegressionEstimator):
 
     def _estimate_confidence_intervals(self, confidence_level, method=None):
         if self._effect_modifier_names:
-            # Use the Delta method to compute asymptotic confidence intervals for the
-            # ATE when effect modifiers are present.  The ATE is a linear combination
-            # of the OLS coefficients: ATE = b_T + b_{TX_1}*E[X_1] + …
-            # Reference: Gelman & Hill, ARM Book, Chapter 9
             n_treatments = len(self._target_estimand.treatment_variable)
             scale = self._treatment_value - self._control_value
             t_score = scipy.stats.t.ppf((1.0 + confidence_level) / 2.0, df=self.model.df_resid)
@@ -169,7 +172,6 @@ class LinearRegressionEstimator(RegressionEstimator):
 
     def _estimate_std_error(self, method=None):
         if self._effect_modifier_names:
-            # Delta method: SE(scale * ATE) = |scale| * sqrt(c' Σ c)
             scale = self._treatment_value - self._control_value
             ses = np.array(
                 [

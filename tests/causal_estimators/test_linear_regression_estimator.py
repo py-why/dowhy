@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from pytest import mark
 
 import dowhy.datasets
@@ -297,3 +298,116 @@ class TestLinearRegressionAsymptoticCI:
         assert ci is not None
         lower, upper = ci[0]
         assert lower < upper
+
+    GML_GRAPH = """
+    graph [
+        directed 1
+        node [ id "W" label "W" ]
+        node [ id "T" label "T" ]
+        node [ id "X" label "X" ]
+        node [ id "Y" label "Y" ]
+        edge [ source "W" target "T" ]
+        edge [ source "W" target "Y" ]
+        edge [ source "T" target "Y" ]
+        edge [ source "X" target "Y" ]
+    ]
+    """
+
+    def _make_estimand(self, df):
+        graph = build_graph_from_str(self.GML_GRAPH)
+        estimand = identify_effect_auto(
+            graph,
+            observed_nodes=list(df.columns),
+            action_nodes=["T"],
+            outcome_nodes=["Y"],
+            estimand_type=EstimandType.NONPARAMETRIC_ATE,
+        )
+        estimand.set_identifier_method("backdoor")
+        return estimand
+
+    def _make_continuous_dataset(self, n=3000, seed=0):
+        rng = np.random.default_rng(seed)
+        W = rng.normal(0, 1, size=n)
+        X = rng.normal(0, 1, size=n)
+        T = 0.5 * W + rng.normal(0, 1, size=n)
+        Y = 5.0 * T + 3.0 * T * X + 2.0 * W + rng.normal(0, 1, size=n)
+        return pd.DataFrame({"T": T, "W": W, "X": X, "Y": Y})
+
+    def _make_categorical_dataset(self, n=3000, seed=0):
+        """Common cause W is categorical with 3 levels → 2 encoded columns after one-hot encoding."""
+        rng = np.random.default_rng(seed)
+        W = rng.choice(["a", "b", "c"], size=n)
+        W_effect = np.where(W == "a", 0.0, np.where(W == "b", 2.0, 4.0))
+        X = rng.normal(0, 1, size=n)
+        T = 0.3 * W_effect + rng.normal(0, 1, size=n)
+        Y = 5.0 * T + 3.0 * T * X + W_effect + rng.normal(0, 1, size=n)
+        return pd.DataFrame({"T": T, "W": pd.Categorical(W), "X": X, "Y": Y})
+
+    def _fit_and_get_ci(self, df):
+        estimand = self._make_estimand(df)
+        estimator = LinearRegressionEstimator(
+            identified_estimand=estimand,
+            confidence_intervals=True,
+            confidence_level=0.95,
+        )
+        estimator.fit(df, effect_modifier_names=["X"])
+        estimate = estimator.estimate_effect(df, treatment_value=1, control_value=0, confidence_intervals=True)
+        return estimator, estimate
+
+    def test_ci_no_error_continuous_common_cause(self):
+        """CI computation does not raise with a continuous common cause and effect modifier."""
+        df = self._make_continuous_dataset()
+        _, estimate = self._fit_and_get_ci(df)
+        ci = estimate.get_confidence_intervals()
+        assert ci is not None
+        assert ci.shape == (1, 2)
+        assert ci[0, 0] < ci[0, 1], "CI lower must be less than upper"
+
+    def test_ci_no_error_categorical_common_cause(self):
+        """CI computation does not raise when the common cause is categorical (one-hot encoded)."""
+        df = self._make_categorical_dataset()
+        _, estimate = self._fit_and_get_ci(df)
+        ci = estimate.get_confidence_intervals()
+        assert ci is not None
+        assert ci.shape == (1, 2)
+        assert ci[0, 0] < ci[0, 1], "CI lower must be less than upper"
+
+    def test_ci_uses_actual_encoded_column_count_not_name_count(self):
+        """Regression test: interaction_start must use shape[1] not len(names).
+
+        With a 3-level categorical common cause, one-hot encoding (drop_first=True)
+        produces 2 columns from 1 variable name. The buggy code used len(names)=1,
+        making interaction_start point at the wrong coefficient.
+        This test confirms the fix uses the actual encoded column count.
+        """
+        df = self._make_categorical_dataset()
+        estimator, _ = self._fit_and_get_ci(df)
+
+        n_names = len(estimator._observed_common_causes_names)
+        n_cols = estimator._observed_common_causes.shape[1]
+
+        # The categorical W expands from 1 name to 2 encoded columns
+        assert n_cols > n_names, (
+            "Expected categorical variable to expand beyond 1 column, "
+            "but got n_cols == n_names. Check dataset has categorical variable."
+        )
+
+        # The assert inside _ate_and_se_for_treatment will catch wrong indexing;
+        # if it passes, the fixed column count is being used correctly.
+        # (The buggy code would compute the wrong interaction_start and either
+        # silently return wrong CI or fail the internal assert we added.)
+        n_treatments = 1
+        em_means = estimator._effect_modifiers.mean(axis=0).to_numpy()
+        n_effect_modifiers = len(em_means)
+        expected_n_params = 1 + n_treatments + n_cols + n_treatments * n_effect_modifiers
+        assert len(estimator.model.params) == expected_n_params
+
+    def test_ci_contains_estimate(self):
+        """The CI should be centered around the ATE estimate (not population truth)."""
+        df = self._make_categorical_dataset()
+        _, estimate = self._fit_and_get_ci(df)
+        ci = estimate.get_confidence_intervals()
+        lower, upper = ci[0]
+        assert lower <= estimate.value <= upper, (
+            f"CI [{lower:.4f}, {upper:.4f}] does not contain estimate {estimate.value:.4f}"
+        )
