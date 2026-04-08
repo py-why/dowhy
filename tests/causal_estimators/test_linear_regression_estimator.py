@@ -297,3 +297,78 @@ class TestLinearRegressionAsymptoticCI:
         assert ci is not None
         lower, upper = ci[0]
         assert lower < upper
+
+    def _make_dataset_with_categorical_common_cause(self, n_levels=3, seed=42):
+        """Build a simple synthetic dataset with one continuous effect modifier and
+        one categorical common cause (n_levels levels), for testing categorical encoding."""
+        import pandas as pd
+        from dowhy import CausalModel
+
+        rng = np.random.default_rng(seed)
+        n = 500
+        # Categorical common cause W with n_levels levels
+        w = rng.integers(0, n_levels, size=n).astype(str)
+        # Continuous effect modifier X
+        x = rng.standard_normal(n)
+        # Treatment T (continuous, affected by W)
+        t = (w == "0").astype(float) + rng.standard_normal(n) * 0.5
+        # Outcome Y depends on T, T*X interaction, and W (true ATE ~2)
+        beta_t = 2.0
+        y = beta_t * t + 0.5 * t * x + 0.3 * (w == "1").astype(float) + rng.standard_normal(n) * 0.2
+
+        df = pd.DataFrame({"T": t, "Y": y, "W": pd.Categorical(w), "X": x})
+        graph_str = "digraph { W -> T; W -> Y; T -> Y; X -> Y }"
+        model = CausalModel(data=df, treatment="T", outcome="Y", graph=graph_str)
+        estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        estimand.set_identifier_method("backdoor")
+        return df, estimand, beta_t
+
+    def test_ci_no_error_with_categorical_common_cause(self):
+        """Delta-method CI should work when a common cause is categorical (multi-level)."""
+        df, estimand, _ = self._make_dataset_with_categorical_common_cause(n_levels=3)
+        estimator = LinearRegressionEstimator(
+            identified_estimand=estimand,
+            confidence_intervals=True,
+        )
+        estimator.fit(df, effect_modifier_names=["X"])
+        estimate = estimator.estimate_effect(
+            df,
+            treatment_value=1,
+            control_value=0,
+            confidence_intervals=True,
+        )
+        ci = estimate.get_confidence_intervals()
+        assert ci is not None
+        lower, upper = ci[0]
+        assert lower < upper, "CI lower bound must be less than upper bound"
+
+    def test_ci_uses_encoded_column_count_not_name_count(self):
+        """Regression test: interaction_start must use encoded column width, not len(names).
+
+        A 3-level categorical common cause W encodes to 2 columns (drop_first=True).
+        If we use len(observed_common_causes_names)==1 instead of shape[1]==2, the
+        interaction_start index is off-by-one and we silently pick the wrong coefficient.
+        This test verifies the CI is finite and the assertion inside
+        _ate_and_se_for_treatment does not fire.
+        """
+        df, estimand, true_ate = self._make_dataset_with_categorical_common_cause(n_levels=4, seed=7)
+        estimator = LinearRegressionEstimator(
+            identified_estimand=estimand,
+            confidence_intervals=True,
+            confidence_level=0.95,
+        )
+        estimator.fit(df, effect_modifier_names=["X"])
+        estimate = estimator.estimate_effect(
+            df,
+            treatment_value=1,
+            control_value=0,
+            confidence_intervals=True,
+        )
+        ci = estimate.get_confidence_intervals()
+        assert ci is not None
+        lower, upper = ci[0]
+        assert np.isfinite(lower) and np.isfinite(upper), "CI bounds must be finite"
+        assert lower < upper, "CI lower bound must be less than upper bound"
+        se = estimate.get_standard_error()
+        assert se is not None
+        assert np.all(np.isfinite(se)) and np.all(se > 0), "SE must be positive and finite"

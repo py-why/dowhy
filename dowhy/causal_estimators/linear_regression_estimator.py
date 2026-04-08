@@ -120,15 +120,23 @@ class LinearRegressionEstimator(RegressionEstimator):
         :returns: Tuple of (ate_unscaled, se_unscaled).
         """
         n_treatments = len(self._target_estimand.treatment_variable)
-        n_common_causes = len(self._observed_common_causes_names)
-        n_effect_modifiers = len(self._effect_modifier_names)
-
-        em_means = np.asarray(self._effect_modifiers.mean(axis=0))
+        # Use the actual number of encoded columns, not the number of variable names.
+        # Categorical variables are one-hot encoded (drop_first=True), so a variable
+        # with k levels produces k-1 columns — len(names) would be wrong.
+        n_common_causes = self._observed_common_causes.shape[1] if self._observed_common_causes is not None else 0
+        em_means = self._effect_modifiers.mean(axis=0).to_numpy()
+        n_effect_modifiers = len(em_means)
 
         params = self.model.params.to_numpy()
         cov = self.model.cov_params().to_numpy()
 
         n_params = len(params)
+        expected_params = 1 + n_treatments + n_common_causes + n_treatments * n_effect_modifiers
+        assert n_params == expected_params, (
+            f"Model has {n_params} params but expected {expected_params}. "
+            "Column ordering assumption in _ate_and_se_for_treatment may be broken "
+            "(check that encoded column counts are used, not variable name counts)."
+        )
         c = np.zeros(n_params)
         # Direct treatment coefficient (offset by 1 for the intercept)
         c[1 + treatment_index] = 1.0
