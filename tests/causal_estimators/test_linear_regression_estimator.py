@@ -191,6 +191,28 @@ class TestLinearRegressionEstimator(object):
         estimator_tester = SimpleEstimator(0.1, LinearRegressionEstimator, identifier_method="general_adjustment")
         estimator_tester.custom_data_average_treatment_effect_test(data)
 
+    def test_none_identifier_method_does_not_raise(self):
+        """identifier_method=None (functional API) should not raise ValueError."""
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=1,
+            num_instruments=0,
+            num_treatments=1,
+            num_samples=500,
+            treatment_is_binary=True,
+        )
+        target_estimand = identify_effect_auto(
+            build_graph_from_str(data["gml_graph"]),
+            observed_nodes=list(data["df"].columns),
+            action_nodes=data["treatment_name"],
+            outcome_nodes=data["outcome_name"],
+            estimand_type=EstimandType.NONPARAMETRIC_ATE,
+        )
+        # functional API leaves identifier_method=None; estimator should not raise
+        target_estimand.identifier_method = None
+        estimator = LinearRegressionEstimator(identified_estimand=target_estimand)
+        estimator.fit(data["df"])  # should not raise
+
     @mark.parametrize("invalid_method", ["frontdoor", "iv", "mediation"])
     def test_invalid_identifier_method_raises(self, invalid_method):
         data = dowhy.datasets.linear_dataset(

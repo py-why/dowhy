@@ -95,7 +95,10 @@ class PropensityScoreEstimator(CausalEstimator):
         """
         self.reset_encoders()  # Forget any existing encoders
 
-        if self._target_estimand.identifier_method not in ["backdoor", "general_adjustment"]:
+        if self._target_estimand.identifier_method is not None and self._target_estimand.identifier_method not in [
+            "backdoor",
+            "general_adjustment",
+        ]:
             raise ValueError(
                 "{} only supports backdoor and general_adjustment identification strategies, "
                 "but got identifier_method='{}'. Use TwoStageRegressionEstimator for frontdoor "
