@@ -1,6 +1,6 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-50-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-51-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ## Contributors ✨
@@ -77,6 +77,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/kevinchiv"><img src="https://avatars.githubusercontent.com/u/20054278?v=4?s=100" width="100px;" alt="Kevin Chiv"/><br /><sub><b>Kevin Chiv</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=kevinchiv" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/haoyu-haoyu"><img src="https://avatars.githubusercontent.com/u/85037553?v=4?s=100" width="100px;" alt="haoyu-haoyu"/><br /><sub><b>haoyu-haoyu</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=haoyu-haoyu" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
