@@ -490,6 +490,8 @@
 <li class="toctree-l1"><a class="reference internal" href="dowhy_efficient_backdoor_example.html">Finding optimal adjustment sets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="identifying_effects_using_id_algorithm.html">Identifying Effect using ID Algorithm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_optimize_backdoor_example.html">Example to demonstrate optimized backdoor variable search for Causal Identification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_generalized_covariate_adjustment_example.html">Generalized Adjustment Criterion Example Notebook</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_generalized_covariate_adjustment_estimation_example.html">Causal Effect Estimation with the Generalized Adjustment Criterion - Example Notebook</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dowhy_functional_api.html">Functional API Preview</a></li>
 
 <li class="toctree-l1"><a class="reference internal" href="dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
@@ -918,9 +920,9 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W4,W2,W1,W3,W5,W6])
+─────(E[y|W1,W5,W2,W4,W3,W6])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W4,W2,W1,W3,W5,W6,U) = P(y|v0,W4,W2,W1,W3,W5,W6)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W5,W2,W4,W3,W6,U) = P(y|v0,W1,W5,W2,W4,W3,W6)
 
 ### Estimand : 2
 Estimand name: iv
@@ -977,17 +979,17 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W4,W2,W1,W3,W5,W6])
+─────(E[y|W1,W5,W2,W4,W3,W6])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W4,W2,W1,W3,W5,W6,U) = P(y|v0,W4,W2,W1,W3,W5,W6)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W5,W2,W4,W3,W6,U) = P(y|v0,W1,W5,W2,W4,W3,W6)
 
 ## Realized estimand
-b: y~v0+W4+W2+W1+W3+W5+W6 |
+b: y~v0+W1+W5+W2+W4+W3+W6 |
 Target units: ate
 
 ## Estimate
-Mean value: 11.721940595563787
-Effect estimates: [[11.7219406]]
+Mean value: 11.69828682148496
+Effect estimates: [[11.69828682]]
 
 </pre></div></div>
 </div>
@@ -1030,13 +1032,13 @@ Effect estimates: [[11.7219406]]
 <div class="highlight"><pre>
 Sensitivity Analysis to Unobserved Confounding using partial R^2 parameterization
 
-Original Effect Estimate : 11.721940595563787
-Robustness Value : 0.45
+Original Effect Estimate : 11.69828682148496
+Robustness Value : 0.44
 
 Robustness Value (alpha=0.05) : 0.41000000000000003
 
 Interpretation of results :
-Any confounder explaining less than 45.0% percent of the residual variance of both the treatment and the outcome would not be strong enough to explain away the observed effect i.e bring down the estimate to 0
+Any confounder explaining less than 44.0% percent of the residual variance of both the treatment and the outcome would not be strong enough to explain away the observed effect i.e bring down the estimate to 0
 
 For a significance level of 5.0%, any confounder explaining more than 41.0% percent of the residual variance of both the treatment and the outcome would be strong enough to make the estimated effect not &#39;statistically significant&#39;
 
@@ -1059,7 +1061,7 @@ For a significance level of 5.0%, any confounder explaining more than 41.0% perc
 </div>
 <div class="output_area docutils container">
 <div class="math notranslate nohighlight">
-$\displaystyle 0.45$</div></div>
+$\displaystyle 0.44$</div></div>
 </div>
 <p>The robustness value measures the minimal equal strength of <span class="math notranslate nohighlight">\(\eta^2_{T\sim U | W}\)</span> and <span class="math notranslate nohighlight">\(\eta^2_{Y \sim U | T, W}\)</span> such the bound for the average treatment effect would include zero. It can be between 0 and 1. A robustness value of 0.45 implies that confounders with <span class="math notranslate nohighlight">\(\eta^2_{T\sim U | W}\)</span> and <span class="math notranslate nohighlight">\(\eta^2_{Y \sim U | T, W}\)</span> values less than 0.4 would not be sufficient enough to bring down the estimates to zero. In general, a low robustness value implies that the results can be
 changed even by the presence of weak confounders whereas a robustness value close to 1 means the treatment effect can handle even strong confounders that may explain all residual variation of the treatment and the outcome.</p>
@@ -1167,14 +1169,14 @@ changed even by the presence of weak confounders whereas a robustness value clos
   <tbody>
     <tr>
       <th>0</th>
-      <td>0.048772</td>
-      <td>0.05272</td>
-      <td>11.721941</td>
-      <td>1.034824</td>
-      <td>10.687116</td>
-      <td>12.756765</td>
-      <td>9.538622</td>
-      <td>13.878431</td>
+      <td>0.048527</td>
+      <td>0.053455</td>
+      <td>11.698287</td>
+      <td>1.039109</td>
+      <td>10.659178</td>
+      <td>12.737396</td>
+      <td>9.511532</td>
+      <td>13.858029</td>
     </tr>
   </tbody>
 </table>
@@ -1227,17 +1229,17 @@ Estimand type: EstimandType.NONPARAMETRIC_ATE
 Estimand name: backdoor
 Estimand expression:
   d
-─────(E[y|W4,W2,W1,W3,W5,W6])
+─────(E[y|W1,W5,W2,W4,W3,W6])
 d[v₀]
-Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W4,W2,W1,W3,W5,W6,U) = P(y|v0,W4,W2,W1,W3,W5,W6)
+Estimand assumption 1, Unconfoundedness: If U→{v0} and U→y then P(y|v0,W1,W5,W2,W4,W3,W6,U) = P(y|v0,W1,W5,W2,W4,W3,W6)
 
 ## Realized estimand
-b: y~v0+W4+W2+W1+W3+W5+W6 |
+b: y~v0+W1+W5+W2+W4+W3+W6 |
 Target units: ate
 
 ## Estimate
-Mean value: 11.815855692021719
-Effect estimates: [[11.81585569]]
+Mean value: 11.834747982980492
+Effect estimates: [[11.83474798]]
 
 </pre></div></div>
 </div>
@@ -1272,7 +1274,7 @@ Effect estimates: [[11.81585569]]
 <div class="highlight"><pre>
 Sensitivity Analysis to Unobserved Confounding using partial R^2 parameterization
 
-Original Effect Estimate : 11.815855692021719
+Original Effect Estimate : 11.834747982980492
 Robustness Value : 0.66
 
 Robustness Value (alpha=0.05) : 0.64
