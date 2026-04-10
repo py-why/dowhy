@@ -94,7 +94,7 @@ class DistanceMatchingEstimator(CausalEstimator):
         # that will be passed to sklearn nearestneighbors
         self.distance_metric_params = {}
         for param_name in self.Valid_Dist_Metric_Params:
-            param_val = getattr(self, param_name, None)
+            param_val = kwargs.get(param_name, None)
             if param_val is not None:
                 self.distance_metric_params[param_name] = param_val
 
