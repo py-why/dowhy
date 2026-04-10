@@ -91,13 +91,13 @@ class DistanceMatchingEstimator(CausalEstimator):
         self.distance_metric = distance_metric
 
         # Dictionary of any user-provided params for the distance metric
-        # that will be passed to sklearn nearestneighbors.
-        # Pull values from kwargs directly since the base class discards them.
-        self.distance_metric_params = {
-            param_name: kwargs[param_name]
-            for param_name in self.Valid_Dist_Metric_Params
-            if param_name in kwargs
-        }
+        # that will be passed to sklearn nearestneighbors
+        self.distance_metric_params = {}
+        for param_name in self.Valid_Dist_Metric_Params:
+            # Pull values from kwargs directly since the base class discards them.
+            param_val = kwargs.get(param_name, None)
+            if param_val is not None:
+                self.distance_metric_params[param_name] = param_val
 
         self.logger.info("INFO: Using Distance Matching Estimator")
 
