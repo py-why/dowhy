@@ -136,11 +136,13 @@ def conditional_MI(data=None, x=None, y=None, z=None):
                 = H(X,Z) - H(Z) - H(X,Y,Z) + H(Y,Z)
                 = H(X,Z) + H(Y,Z) - H(X,Y,Z) - H(Z)
     :param data : dataset
-    :param x,y,z : column names from dataset
+    :param x : column name (str) in dataset
+    :param y : column name (str) in dataset
+    :param z : list of column names in dataset
     :returns : conditional mutual information between X and Y given Z
     """
-    X = data[list(x)].astype(int)
-    Y = data[list(y)].astype(int)
+    X = data[x].astype(int)
+    Y = data[y].astype(int)
     t = list(z)
     Z = data[t].astype(int)
     Z = Z.values.tolist()
