@@ -232,7 +232,15 @@ class CausalEstimator:
         df_withtreatment = data.loc[data[treatment_name] == treatment_value]
         df_notreatment = data.loc[data[treatment_name] == control_value]
         est = np.mean(df_withtreatment[outcome_name]) - np.mean(df_notreatment[outcome_name])
-        return CausalEstimate(data, None, None, est, None, control_value=control_value, treatment_value=treatment_value)
+        return CausalEstimate(
+            data,
+            treatment_name,
+            outcome_name,
+            est,
+            None,
+            control_value=control_value,
+            treatment_value=treatment_value,
+        )
 
     def _estimate_effect_fn(self, data_df):
         """Function used in conditional effect estimation. This function is to be overridden by each child estimator.
