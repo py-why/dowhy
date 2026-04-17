@@ -124,9 +124,7 @@ class TestTwoStageRegressionEstimator(object):
                 target "X"
             ]
         ]
-        """.replace(
-            "\n", ""
-        )
+        """.replace("\n", "")
 
         N_SAMPLES = 10000
         # Generate the data
@@ -209,9 +207,7 @@ graph [
     edge [ source "X" target "Y" ]
     edge [ source "M" target "Y" ]
 ]
-""".replace(
-    "\n", " "
-)
+""".replace("\n", " ")
 
 
 class TestTwoStageRegressionMediationNIE:
@@ -316,3 +312,52 @@ class TestTwoStageRegressionMediationNDE:
         nde_estimand = estimator._second_stage_model_nde._target_estimand
         assert nde_estimand.identifier_method == "backdoor"
         assert nde_estimand.backdoor_variables == estimand.mediation_second_stage_confounders
+
+
+class TestTwoStageRegressionPreinstantiatedSecondStage:
+    """Regression tests for #1335: KeyError when second_stage_model is a pre-instantiated CausalEstimator.
+
+    When a user passes an already-constructed estimator instance as second_stage_model,
+    the TwoStageRegressionEstimator must update its _target_estimand to use the
+    modified (backdoor) estimand rather than the original mediation estimand.
+    """
+
+    def test_nie_with_preinstantiated_second_stage_no_keyerror(self):
+        """Passing a pre-instantiated second_stage_model must not raise KeyError."""
+        import statsmodels.api as sm
+
+        from dowhy.causal_estimators.generalized_linear_model_estimator import GeneralizedLinearModelEstimator
+
+        df = _make_mediation_data()
+        model = CausalModel(data=df, treatment="X", outcome="Y", graph=_MEDIATION_GML)
+        estimand = model.identify_effect(
+            estimand_type=EstimandType.NONPARAMETRIC_NIE,
+            proceed_when_unidentifiable=True,
+        )
+        second_stage = GeneralizedLinearModelEstimator(identified_estimand=estimand, glm_family=sm.families.Gaussian())
+        # This must not raise KeyError: None
+        estimate = model.estimate_effect(
+            identified_estimand=estimand,
+            method_name="mediation.two_stage_regression",
+            method_params={"second_stage_model": second_stage},
+        )
+        assert np.isfinite(estimate.value)
+
+    def test_nie_preinstantiated_second_stage_estimand_updated(self):
+        """The pre-instantiated second_stage_model's _target_estimand is updated to backdoor."""
+        import statsmodels.api as sm
+
+        from dowhy.causal_estimators.generalized_linear_model_estimator import GeneralizedLinearModelEstimator
+
+        df = _make_mediation_data()
+        model = CausalModel(data=df, treatment="X", outcome="Y", graph=_MEDIATION_GML)
+        estimand = model.identify_effect(
+            estimand_type=EstimandType.NONPARAMETRIC_NIE,
+            proceed_when_unidentifiable=True,
+        )
+        second_stage = GeneralizedLinearModelEstimator(identified_estimand=estimand, glm_family=sm.families.Gaussian())
+        estimator = TwoStageRegressionEstimator(
+            identified_estimand=estimand,
+            second_stage_model=second_stage,
+        )
+        assert estimator._second_stage_model._target_estimand.identifier_method == "backdoor"
