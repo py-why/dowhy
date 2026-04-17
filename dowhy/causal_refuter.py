@@ -221,8 +221,10 @@ def test_significance(
     if test_type == SignificanceTestType.AUTO:
         num_simulations = len(simulations)
         if num_simulations >= 100:  # Bootstrapping
-            logger.info("Making use of Bootstrap as we have more than 100 examples.\n \
-            Note: The greater the number of examples, the more accurate are the confidence estimates")
+            logger.info(
+                "Making use of Bootstrap as we have more than 100 examples.\n \
+            Note: The greater the number of examples, the more accurate are the confidence estimates"
+            )
 
             # Perform Bootstrap Significance Test with the original estimate and the set of refutations
             p_value = perform_bootstrap_test(estimate, simulations)
@@ -248,8 +250,12 @@ def test_significance(
         p_value = perform_bootstrap_test(estimate, simulations)
 
     elif test_type == SignificanceTestType.NORMAL:
-        logger.info("Performing Normal Test with {} samples\n \
-        Note: We assume that the underlying distribution is Normal.".format(len(simulations)))
+        logger.info(
+            "Performing Normal Test with {} samples\n \
+        Note: We assume that the underlying distribution is Normal.".format(
+                len(simulations)
+            )
+        )
 
         # Perform Normal Tests of Significance with the original estimate and the set of refutations
         p_value = perform_normal_distribution_test(estimate, simulations)
