@@ -368,7 +368,7 @@ def _include_confounders_effect(
         )
         for tname in treatment_name:
             if pd.api.types.is_bool_dtype(data[tname]):
-                new_data = new_data.astype({tname: "bool"}, copy=False)
+                new_data = new_data.astype({tname: "bool"})
     elif effect_on_t == "linear":
         confounder_t_effect = kappa_t * w_random
         # By default, we add the effect of simulated confounder for treatment.
@@ -388,7 +388,7 @@ def _include_confounders_effect(
         new_data.loc[rel_interval <= w_random, outcome_name] = 1 - new_data.loc[rel_interval <= w_random, outcome_name]
         for yname in outcome_name:
             if pd.api.types.is_bool_dtype(data[yname]):
-                new_data = new_data.astype({yname: "bool"}, copy=False)
+                new_data = new_data.astype({yname: "bool"})
     elif effect_on_y == "linear":
         confounder_y_effect = (-1) * kappa_y * w_random
         # By default, we add the effect of simulated confounder for treatment.
