@@ -97,9 +97,7 @@ def test_one_hot_encode_preserves_index():
     sampled subset of the original DataFrame to an estimator like
     DistanceMatchingEstimator.
     """
-    data = pd.DataFrame(
-        {"cat": ["a", "b", "a", "c", "b"], "num": [1.0, 2.0, 3.0, 4.0, 5.0]}
-    )
+    data = pd.DataFrame({"cat": ["a", "b", "a", "c", "b"], "num": [1.0, 2.0, 3.0, 4.0, 5.0]})
     # Simulate a data-subset refuter that samples rows without resetting the index.
     subset = data.iloc[[1, 3, 4]]
 
