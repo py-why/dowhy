@@ -136,17 +136,18 @@ def conditional_MI(data=None, x=None, y=None, z=None):
                 = H(X,Z) - H(Z) - H(X,Y,Z) + H(Y,Z)
                 = H(X,Z) + H(Y,Z) - H(X,Y,Z) - H(Z)
     :param data : dataset
-    :param x,y,z : column names from dataset
+    :param x,y,z : column names from dataset (each should be a list of column name strings)
     :returns : conditional mutual information between X and Y given Z
     """
     X = data[list(x)].astype(int)
     Y = data[list(y)].astype(int)
     t = list(z)
     Z = data[t].astype(int)
-    Z = Z.values.tolist()
-    Z = list(data[t].itertuples(index=False, name=None))
-    Hxz = entropy(map(lambda x: "%s/%s" % x, zip(X, Z)))  # Finding Joint entropy of X and Z
-    Hyz = entropy(map(lambda x: "%s/%s" % x, zip(Y, Z)))  # Finding Joint entropy of Y and Z
-    Hz = entropy(Z)  # Finding Entropy of Z
-    Hxyz = entropy(map(lambda x: "%s/%s/%s" % x, zip(X, Y, Z)))  # Finding Joint Entropy of X, Y and Z
+    X_rows = list(X.itertuples(index=False, name=None))
+    Y_rows = list(Y.itertuples(index=False, name=None))
+    Z_rows = list(Z.itertuples(index=False, name=None))
+    Hxz = entropy(map(lambda row: "%s/%s" % row, zip(X_rows, Z_rows)))  # Finding Joint entropy of X and Z
+    Hyz = entropy(map(lambda row: "%s/%s" % row, zip(Y_rows, Z_rows)))  # Finding Joint entropy of Y and Z
+    Hz = entropy(Z_rows)  # Finding Entropy of Z
+    Hxyz = entropy(map(lambda row: "%s/%s/%s" % row, zip(X_rows, Y_rows, Z_rows)))  # Finding Joint Entropy of X, Y and Z
     return Hxz + Hyz - Hxyz - Hz

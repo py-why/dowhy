@@ -58,7 +58,7 @@ class GraphRefuter(CausalRefuter):
             self._results[key] = [p_value, True]
 
     def conditional_mutual_information(self, x=None, y=None, z=None):
-        cmi_bits = conditional_MI(data=self._data, x=x, y=y, z=list(z))
+        cmi_bits = conditional_MI(data=self._data, x=[x], y=[y], z=list(z))
         key = (x, y) + (z,)
 
         n = len(self._data)
@@ -66,12 +66,18 @@ class GraphRefuter(CausalRefuter):
         g_stat = 2 * n * cmi_bits * log(2)
 
         # Degrees of freedom: (|X| - 1)(|Y| - 1) * number of distinct Z combinations
-        x_card = self._data[x].nunique()
-        y_card = self._data[y].nunique()
-        z_card = self._data[list(z)].drop_duplicates().shape[0] if z else 1
-        df = max(1, (x_card - 1) * (y_card - 1) * z_card)
+        # Compute from the same int-cast data used internally by conditional_MI
+        x_card = self._data[x].astype(int).nunique()
+        y_card = self._data[y].astype(int).nunique()
+        z_card = self._data[list(z)].astype(int).drop_duplicates().shape[0] if z else 1
+        df = (x_card - 1) * (y_card - 1) * z_card
 
-        p_value = float(chi2.sf(g_stat, df=df))
+        if x_card <= 1 or y_card <= 1 or df <= 0:
+            # Degenerate contingency structure: the chi-squared approximation is not meaningful.
+            # Treat this as a non-rejection instead of forcing df=1.
+            p_value = 1.0
+        else:
+            p_value = float(chi2.sf(g_stat, df=df))
 
         if p_value >= 0.05:
             self._true_implications.append([x, y, z])
