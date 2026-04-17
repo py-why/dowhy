@@ -397,6 +397,20 @@ Miscellaneous
         | **Level:** Advanced
         | **Task:** Effect inference
 
+    .. grid-item-card:: :doc:`dowhy_generalized_covariate_adjustment_example`
+
+        +++
+        | **Level:** Advanced
+        | **Task:** Effect identification
+
+.. grid:: 2
+
+    .. grid-item-card:: :doc:`dowhy_generalized_covariate_adjustment_estimation_example`
+
+        +++
+        | **Level:** Advanced
+        | **Task:** Effect estimation
+
 .. toctree::
    :maxdepth: 1
    :caption: Introductory examples
@@ -471,5 +485,7 @@ Miscellaneous
    dowhy_efficient_backdoor_example
    identifying_effects_using_id_algorithm
    dowhy_optimize_backdoor_example
+   dowhy_generalized_covariate_adjustment_example
+   dowhy_generalized_covariate_adjustment_estimation_example
    dowhy_functional_api
    dowhy_causal_api
