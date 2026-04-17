@@ -206,13 +206,17 @@ class CausalEstimator:
         """
         :param data: Pandas dataframe to estimate effect
         """
-        # TODO Only works for binary treatment
-        df_withtreatment = data.loc[data[self._target_estimand.treatment_variable] == 1]
-        df_notreatment = data.loc[data[self._target_estimand.treatment_variable] == 0]
-        est = np.mean(df_withtreatment[self._target_estimand.outcome_variable]) - np.mean(
-            df_notreatment[self._target_estimand.outcome_variable]
-        )
-        return CausalEstimate(data, None, None, est, None, control_value=0, treatment_value=1)
+        # TODO Only works for a single treatment variable
+        treatment_variable = self._target_estimand.treatment_variable
+        treatment_name = treatment_variable[0] if isinstance(treatment_variable, list) else treatment_variable
+        outcome_variable = self._target_estimand.outcome_variable
+        outcome_name = outcome_variable[0] if isinstance(outcome_variable, list) else outcome_variable
+        treatment_value = getattr(self, "_treatment_value", 1)
+        control_value = getattr(self, "_control_value", 0)
+        df_withtreatment = data.loc[data[treatment_name] == treatment_value]
+        df_notreatment = data.loc[data[treatment_name] == control_value]
+        est = np.mean(df_withtreatment[outcome_name]) - np.mean(df_notreatment[outcome_name])
+        return CausalEstimate(data, None, None, est, None, control_value=control_value, treatment_value=treatment_value)
 
     def _estimate_effect_fn(self, data_df):
         """Function used in conditional effect estimation. This function is to be overridden by each child estimator.
