@@ -208,9 +208,25 @@ class CausalEstimator:
         """
         # TODO Only works for a single treatment variable
         treatment_variable = self._target_estimand.treatment_variable
-        treatment_name = treatment_variable[0] if isinstance(treatment_variable, list) else treatment_variable
+        if isinstance(treatment_variable, list):
+            if len(treatment_variable) != 1:
+                raise ValueError(
+                    "estimate_effect_naive only supports exactly one treatment variable, "
+                    f"got {len(treatment_variable)}: {treatment_variable}"
+                )
+            treatment_name = treatment_variable[0]
+        else:
+            treatment_name = treatment_variable
         outcome_variable = self._target_estimand.outcome_variable
-        outcome_name = outcome_variable[0] if isinstance(outcome_variable, list) else outcome_variable
+        if isinstance(outcome_variable, list):
+            if len(outcome_variable) != 1:
+                raise ValueError(
+                    "estimate_effect_naive only supports exactly one outcome variable, "
+                    f"got {len(outcome_variable)}: {outcome_variable}"
+                )
+            outcome_name = outcome_variable[0]
+        else:
+            outcome_name = outcome_variable
         treatment_value = getattr(self, "_treatment_value", 1)
         control_value = getattr(self, "_control_value", 0)
         df_withtreatment = data.loc[data[treatment_name] == treatment_value]
