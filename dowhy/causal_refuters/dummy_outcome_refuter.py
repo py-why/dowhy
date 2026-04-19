@@ -757,7 +757,7 @@ def preprocess_data_by_treatment(
         std_dev = data[treatment_variable_name].std()
         num_bins = (data.max() - data.min()) / (bucket_size_scale_factor * std_dev)
         data["bins"] = pd.cut(data[treatment_variable_name], num_bins)
-        groups = data.groupby("bins", observed=True)
+        groups = data.groupby("bins", observed=False)
         data.drop("bins", axis=1, inplace=True)
         return groups
 
