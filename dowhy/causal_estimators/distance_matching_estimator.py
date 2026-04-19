@@ -273,7 +273,8 @@ class DistanceMatchingEstimator(CausalEstimator):
                             group_control.iloc[indices[i]][self._target_estimand.outcome_variable[0]].values
                         )
                         att += treated_outcome - control_outcome
-                        self.matched_indices_att[group_treated_index[i]] = group_control.iloc[indices[i]].index.tolist()
+                        matched_ctrl_idx = group_control.iloc[indices[i]].index.tolist()
+                        self.matched_indices_att[group_treated_index[i]] = matched_ctrl_idx
                     total_treated_matched += num_group_treated
 
                 if total_treated_matched > 0:
