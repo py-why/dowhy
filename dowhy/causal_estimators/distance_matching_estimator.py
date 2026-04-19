@@ -118,6 +118,19 @@ class DistanceMatchingEstimator(CausalEstimator):
         self.exact_match_cols = exact_match_cols
         self._fit_params = {"exact_match_cols": exact_match_cols}
         self.reset_encoders()  # Forget any existing encoders
+
+        if self._target_estimand.identifier_method is not None and self._target_estimand.identifier_method not in [
+            "backdoor",
+            "general_adjustment",
+        ]:
+            raise ValueError(
+                "{} only supports backdoor and general_adjustment identification strategies, "
+                "but got identifier_method='{}'. Use TwoStageRegressionEstimator for frontdoor "
+                "or mediation identification, or InstrumentalVariableEstimator for iv.".format(
+                    self.__class__.__name__, self._target_estimand.identifier_method
+                )
+            )
+
         self._set_effect_modifiers(data, effect_modifier_names)
 
         # Check if the treatment is one-dimensional
