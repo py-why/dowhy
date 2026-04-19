@@ -247,6 +247,7 @@ class DistanceMatchingEstimator(CausalEstimator):
                 grouped = updated_df.groupby(self.exact_match_cols)
                 att = 0
                 total_treated_matched = 0
+                self.matched_indices_att = {}
                 for name, group in grouped:
                     group_treated = group.loc[group[self._target_estimand.treatment_variable[0]] == 1]
                     group_control = group.loc[group[self._target_estimand.treatment_variable[0]] == 0]
@@ -265,12 +266,14 @@ class DistanceMatchingEstimator(CausalEstimator):
                     self.logger.debug(distances)
 
                     num_group_treated = group_treated.shape[0]
+                    group_treated_index = group_treated.index.tolist()
                     for i in range(num_group_treated):
                         treated_outcome = group_treated.iloc[i][self._target_estimand.outcome_variable[0]].item()
                         control_outcome = np.mean(
                             group_control.iloc[indices[i]][self._target_estimand.outcome_variable[0]].values
                         )
                         att += treated_outcome - control_outcome
+                        self.matched_indices_att[group_treated_index[i]] = group_control.iloc[indices[i]].index.tolist()
                     total_treated_matched += num_group_treated
 
                 if total_treated_matched > 0:

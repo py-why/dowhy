@@ -85,7 +85,7 @@ class TestDistanceMatchingEstimator:
             estimand,
             method_name="backdoor.distance_matching",
             target_units="att",
-            method_params={"exact_match_cols": ["W_cat"]},
+            method_params={"fit_params": {"exact_match_cols": ["W_cat"]}},
         )
         estimator = estimate.estimator
         treated_indices = data.index[data["v0"] == 1]
@@ -93,7 +93,7 @@ class TestDistanceMatchingEstimator:
         assert estimator.matched_indices_att is not None
         assert len(estimator.matched_indices_att) == len(treated_indices)
 
-        for treated_idx, matched_control_indices in zip(treated_indices, estimator.matched_indices_att):
+        for treated_idx, matched_control_indices in estimator.matched_indices_att.items():
             matched_control_indices = np.atleast_1d(matched_control_indices)
             assert len(matched_control_indices) > 0
 
@@ -102,6 +102,7 @@ class TestDistanceMatchingEstimator:
 
             assert (matched_controls["v0"] == 0).all()
             assert (matched_controls["W_cat"] == treated_group).all()
+
     @pytest.mark.parametrize("target_units", ["att", "atc", "ate"])
     def test_exact_match_estimate_finite(self, binary_treatment_dataset_with_exact_col, target_units):
         """Estimates with exact_match_cols should be finite for all target_units."""
@@ -112,7 +113,7 @@ class TestDistanceMatchingEstimator:
             estimand,
             method_name="backdoor.distance_matching",
             target_units=target_units,
-            method_params={"exact_match_cols": ["W_cat"]},
+            method_params={"fit_params": {"exact_match_cols": ["W_cat"]}},
         )
         assert np.isfinite(estimate.value), f"Non-finite estimate for target_units={target_units}"
 
