@@ -763,7 +763,7 @@ def preprocess_data_by_treatment(
 
     elif "categorical" in variable_type.name:
         # Action for categorical variables
-        groups = data.groupby(treatment_variable_name, observed=True)
+        groups = data.groupby(treatment_variable_name, observed=False)
         return groups
     else:
         raise ValueError("Passed {}. Expected bool, float, int or categorical.".format(variable_type.name))
