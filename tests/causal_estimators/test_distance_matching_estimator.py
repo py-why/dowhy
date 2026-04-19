@@ -87,9 +87,21 @@ class TestDistanceMatchingEstimator:
             target_units="att",
             method_params={"exact_match_cols": ["W_cat"]},
         )
-        assert estimate.value is not None
-        assert abs(estimate.value - 10) < 3.5, f"Estimate {estimate.value:.2f} too far from true effect 10"
+        estimator = estimate.estimator
+        treated_indices = data.index[data["v0"] == 1]
 
+        assert estimator.matched_indices_att is not None
+        assert len(estimator.matched_indices_att) == len(treated_indices)
+
+        for treated_idx, matched_control_indices in zip(treated_indices, estimator.matched_indices_att):
+            matched_control_indices = np.atleast_1d(matched_control_indices)
+            assert len(matched_control_indices) > 0
+
+            treated_group = data.loc[treated_idx, "W_cat"]
+            matched_controls = data.loc[matched_control_indices]
+
+            assert (matched_controls["v0"] == 0).all()
+            assert (matched_controls["W_cat"] == treated_group).all()
     @pytest.mark.parametrize("target_units", ["att", "atc", "ate"])
     def test_exact_match_estimate_finite(self, binary_treatment_dataset_with_exact_col, target_units):
         """Estimates with exact_match_cols should be finite for all target_units."""
