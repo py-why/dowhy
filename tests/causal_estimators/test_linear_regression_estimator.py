@@ -302,6 +302,7 @@ class TestLinearRegressionAsymptoticCI:
         """Build a simple synthetic dataset with one continuous effect modifier and
         one categorical common cause (n_levels levels), for testing categorical encoding."""
         import pandas as pd
+
         from dowhy import CausalModel
 
         rng = np.random.default_rng(seed)
