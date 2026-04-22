@@ -90,18 +90,26 @@ class DistanceMatchingEstimator(CausalEstimator):
         self.num_matches_per_unit = num_matches_per_unit
         self.distance_metric = distance_metric
 
-        # Dictionary of any user-provided params for the distance metric
-        # that will be passed to sklearn nearestneighbors
-        self.distance_metric_params = {}
-        for param_name in self.Valid_Dist_Metric_Params:
-            param_val = kwargs.get(param_name, None)
-            if param_val is not None:
-                self.distance_metric_params[param_name] = param_val
+        # `p` is a top-level NearestNeighbors parameter (Minkowski exponent).
+        # All other valid params (V, VI, w) are metric-specific and must be
+        # passed via NearestNeighbors' `metric_params` dict, not as top-level
+        # kwargs — sklearn raises TypeError if they appear at the top level.
+        self.distance_p = kwargs.get("p", None)
+        self.distance_metric_params = {k: kwargs[k] for k in ("V", "VI", "w") if k in kwargs}
 
         self.logger.info("INFO: Using Distance Matching Estimator")
 
         self.matched_indices_att = None
         self.matched_indices_atc = None
+
+    def _nn_kwargs(self) -> dict:
+        """Return extra kwargs for NearestNeighbors based on user-supplied distance params."""
+        kwargs = {}
+        if self.distance_p is not None:
+            kwargs["p"] = self.distance_p
+        if self.distance_metric_params:
+            kwargs["metric_params"] = self.distance_metric_params
+        return kwargs
 
     def fit(self, data: pd.DataFrame, effect_modifier_names: Optional[List[str]] = None, exact_match_cols=None):
         """
@@ -213,7 +221,7 @@ class DistanceMatchingEstimator(CausalEstimator):
                     n_neighbors=self.num_matches_per_unit,
                     metric=self.distance_metric,
                     algorithm="ball_tree",
-                    **self.distance_metric_params,
+                    **self._nn_kwargs(),
                 ).fit(control[self._observed_common_causes.columns].values)
                 distances, indices = control_neighbors.kneighbors(treated[self._observed_common_causes.columns].values)
                 self.logger.debug("distances:")
@@ -251,7 +259,7 @@ class DistanceMatchingEstimator(CausalEstimator):
                         n_neighbors=self.num_matches_per_unit,
                         metric=self.distance_metric,
                         algorithm="ball_tree",
-                        **self.distance_metric_params,
+                        **self._nn_kwargs(),
                     ).fit(control[self._observed_common_causes.columns].values)
                     distances, indices = control_neighbors.kneighbors(
                         treated[self._observed_common_causes.columns].values
@@ -280,7 +288,7 @@ class DistanceMatchingEstimator(CausalEstimator):
                 n_neighbors=self.num_matches_per_unit,
                 metric=self.distance_metric,
                 algorithm="ball_tree",
-                **self.distance_metric_params,
+                **self._nn_kwargs(),
             ).fit(treated[self._observed_common_causes.columns].values)
             distances, indices = treated_neighbors.kneighbors(control[self._observed_common_causes.columns].values)
 
