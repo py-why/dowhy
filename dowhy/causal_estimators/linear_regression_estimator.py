@@ -138,6 +138,6 @@ class LinearRegressionEstimator(RegressionEstimator):
     def _test_significance(self, estimate_value, method=None):
         pvalue = self.model.pvalues[1 : (len(self._target_estimand.treatment_variable) + 1)]
         pvalue_array = pvalue.to_numpy()
-        if len(pvalue_array) == 1:
+        if pvalue_array.size == 1:
             return {"p_value": float(pvalue_array[0])}
         return {"p_value": pvalue_array}
