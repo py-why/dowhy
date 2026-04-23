@@ -115,6 +115,17 @@ class CausalEstimator:
 
         self._encoders = Encoders()
 
+    def __getstate__(self):
+        """Return picklable state, excluding the non-picklable logger (Python < 3.12)."""
+        state = self.__dict__.copy()
+        state.pop("logger", None)
+        return state
+
+    def __setstate__(self, state):
+        """Restore state and recreate the logger after unpickling."""
+        self.__dict__.update(state)
+        self.logger = logging.getLogger(__name__)
+
     def reset_encoders(self):
         """
         Removes any reference to data encoders, causing them to be re-created on next `fit()`.
