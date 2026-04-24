@@ -749,6 +749,16 @@ def estimate_effect(
             None, None, None, None, None, None, control_value=control_value, treatment_value=treatment_value
         )
 
+    # Warn if any NaN values are present in treatment or outcome columns
+    relevant_cols = [c for c in treatment + outcome if c in data.columns]
+    nan_cols = [c for c in relevant_cols if data[c].isna().any()]
+    if nan_cols:
+        logger.warning(
+            "Data contains NaN values in column(s): %s. "
+            "This may produce a NaN estimate. Consider calling data.dropna() before estimation.",
+            nan_cols,
+        )
+
     if fit_estimator:
         estimator.fit(
             data=data,
