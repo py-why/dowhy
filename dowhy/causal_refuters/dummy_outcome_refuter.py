@@ -5,6 +5,7 @@ from typing import Callable, List, Optional, Union
 
 import numpy as np
 import pandas as pd
+from joblib import Parallel, delayed
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
 from sklearn.neighbors import KNeighborsRegressor
@@ -196,6 +197,15 @@ class DummyOutcomeRefuter(CausalRefuter):
       This defaults to ``MIN_DATA_POINT_THRESHOLD``. If the number of data points is too few
       for a certain category, we make use of the ``DEFAULT_TRANSFORMATION`` for generaring the dummy outcome
     :type min_data_point_threshold: int, optional
+
+    :param n_jobs: The maximum number of concurrently running jobs. If -1 all CPUs are used. If 1 is given,
+      no parallel computing code is used at all (this is the default). For joblib details see
+      https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html.
+    :type n_jobs: int, optional
+
+    :param verbose: The verbosity level for joblib. If non zero, progress messages are printed.
+      Above 50, the output is sent to stdout. The default is 0.
+    :type verbose: int, optional
     """
 
     def __init__(self, *args, **kwargs):
@@ -235,6 +245,8 @@ class DummyOutcomeRefuter(CausalRefuter):
             unobserved_confounder_values=self._unobserved_confounder_values,
             true_causal_effect=self._true_causal_effect,
             show_progress_bar=show_progress_bar,
+            n_jobs=self._n_jobs,
+            verbose=self._verbose,
         )
         for refute in refutes:
             refute.add_refuter(self)
@@ -256,6 +268,8 @@ def refute_dummy_outcome(
     unobserved_confounder_values: Optional[List] = DEFAULT_NEW_DATA_WITH_UNOBSERVED_CONFOUNDING,
     true_causal_effect: Callable = DEFAULT_TRUE_CAUSAL_EFFECT,
     show_progress_bar=False,
+    n_jobs: int = 1,
+    verbose: int = 0,
     **_,
 ) -> List[CausalRefutation]:
     """Refute an estimate by replacing the outcome with a simulated variable
@@ -414,6 +428,14 @@ def refute_dummy_outcome(
       for a certain category, we make use of the ``DEFAULT_TRANSFORMATION`` for generaring the dummy outcome
     :type min_data_point_threshold: int, optional
 
+    :param n_jobs: The maximum number of concurrently running jobs. If -1 all CPUs are used. If 1 is given,
+      no parallel computing code is used at all (this is the default). For joblib details see
+      https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html.
+    :type n_jobs: int, optional
+
+    :param verbose: The verbosity level for joblib. If non zero, progress messages are printed.
+      Above 50, the output is sent to stdout. The default is 0.
+    :type verbose: int, optional
     """
 
     if required_variables is False:
@@ -428,11 +450,7 @@ def refute_dummy_outcome(
     logger.info("Refutation over {} simulated datasets".format(num_simulations))
     logger.info("The transformation passed: {}".format(transformation_list))
 
-    simulation_results = []
     refute_list = []
-
-    # We use collections.OrderedDict to maintain the order in which the data is stored
-    causal_effect_map = OrderedDict()
 
     # Check if we are using an estimator in the transformation list
     estimator_present = _has_estimator(transformation_list)
@@ -443,168 +461,109 @@ def refute_dummy_outcome(
         + estimate.estimator._effect_modifier_names,
     )
 
-    # The rationale behind ordering of the loops is the fact that we induce randomness everytime we create the
-    # Train and the Validation Datasets. Thus, we run the simulation loop followed by the training and the validation
-    # loops. Thus, we can get different values everytime we get the estimator.
-
-    # for _ in range( self._num_simulations ):
-    for _ in tqdm(
-        range(num_simulations),
-        colour=CausalRefuter.PROGRESS_BAR_COLOR,
-        disable=not show_progress_bar,
-        desc="Refuting Estimates: ",
-    ):
-        estimates = []
-
-        if estimator_present == False:
-
-            # Warn the user that the specified parameter is not applicable when no estimator is present in the transformation
+    if not estimator_present:
+        # Handle unobserved confounder values before the parallel loop to avoid repeated mutations.
+        if unobserved_confounder_values is not None:
             if test_fraction != DEFAULT_TEST_FRACTION:
                 logger.warning("'test_fraction' is not applicable as there is no base treatment value.")
+            data = data.copy()
+            data["simulated"] = unobserved_confounder_values
+            if "simulated" not in chosen_variables:
+                chosen_variables = list(chosen_variables) + ["simulated"]
 
-            # Adding an unobserved confounder if provided by the user
-            if unobserved_confounder_values is not None:
-                data["simulated"] = unobserved_confounder_values
-                chosen_variables.append("simulated")
-            # We set X_train = 0 and outcome_train to be 0
-            validation_df = data
-            X_train = None
-            outcome_train = None
-            X_validation_df = validation_df[chosen_variables]
+        # Pre-compute the true causal effect value once (uses full treatment column).
+        causal_effect_value = true_causal_effect(data[treatment_name[0]])
 
-            X_validation = X_validation_df.values
-            outcome_validation = validation_df[outcome_name].values
-
-            # Get the final outcome, after running through all the values in the transformation list
-            outcome_validation = process_data(
-                outcome_name, X_train, outcome_train, X_validation, outcome_validation, transformation_list
+        simulation_results = Parallel(n_jobs=n_jobs, verbose=verbose)(
+            delayed(_refute_once_without_estimator)(
+                data,
+                estimate,
+                identified_estimand,
+                outcome_name,
+                treatment_name,
+                chosen_variables,
+                transformation_list,
+                causal_effect_value,
             )
-
-            # Check if the value of true effect has been already stored
-            # We use None as the key as we have no base category for this refutation
-            if None not in causal_effect_map:
-                # As we currently support only one treatment
-                causal_effect_map[None] = true_causal_effect(validation_df[treatment_name[0]])
-
-            outcome_validation += causal_effect_map[None]
-
-            new_data = validation_df.assign(dummy_outcome=outcome_validation)
-
-            new_estimator = estimate.estimator.get_new_estimator_object(identified_estimand)
-            new_estimator.fit(
-                new_data,
-                effect_modifier_names=estimate.estimator._effect_modifier_names,
-                **new_estimator._fit_params if hasattr(new_estimator, "_fit_params") else {},
+            for _ in tqdm(
+                range(num_simulations),
+                colour=CausalRefuter.PROGRESS_BAR_COLOR,
+                disable=not show_progress_bar,
+                desc="Refuting Estimates: ",
             )
-            new_effect = new_estimator.estimate_effect(
-                new_data,
-                control_value=estimate.control_value,
-                treatment_value=estimate.treatment_value,
-                target_units=estimate.estimator._target_units,
-            )
-            estimates.append(new_effect.value)
-
-        else:
-
-            groups = preprocess_data_by_treatment(
-                data, treatment_name, unobserved_confounder_values, bucket_size_scale_factor, chosen_variables
-            )
-            group_count = 0
-
-            if len(test_fraction) == 1:
-                test_fraction = len(groups) * test_fraction
-
-            for key_train, _ in groups:
-                base_train = groups.get_group(key_train).sample(frac=test_fraction[group_count].base)
-                train_set = set([tuple(line) for line in base_train.values])
-                total_set = set([tuple(line) for line in groups.get_group(key_train).values])
-                base_validation = pd.DataFrame(list(total_set.difference(train_set)), columns=base_train.columns)
-                X_train_df = base_train[chosen_variables]
-
-                X_train = X_train_df.values
-                outcome_train = base_train[outcome_name].values
-
-                validation_df = []
-                transformation_list_temp = transformation_list
-                validation_df.append(base_validation)
-
-                for key_validation, _ in groups:
-                    if key_validation != key_train:
-                        validation_df.append(
-                            groups.get_group(key_validation).sample(frac=test_fraction[group_count].other)
-                        )
-
-                validation_df = pd.concat(validation_df)
-                X_validation_df = validation_df[chosen_variables]
-
-                X_validation = X_validation_df.values
-                outcome_validation = validation_df[outcome_name].values
-
-                # If the number of data points is too few, run the default transformation: [("zero",""),("noise", {'std_dev':1} )]
-                if X_train.shape[0] <= min_data_point_threshold:
-                    transformation_list_temp = DEFAULT_TRANSFORMATION
-                    logger.warning(
-                        "The number of data points in X_train:{} for category:{} is less than threshold:{}".format(
-                            X_train.shape[0], key_train, min_data_point_threshold
-                        )
-                    )
-                    logger.warning(
-                        "Therefore, defaulting to the minimal set of transformations:{}".format(
-                            transformation_list_temp
-                        )
-                    )
-
-                outcome_validation = process_data(
-                    outcome_name, X_train, outcome_train, X_validation, outcome_validation, transformation_list_temp
-                )
-
-                # Check if the value of true effect has been already stored
-                # This ensures that we calculate the causal effect only once.
-                # We use key_train as we map data with respect to the base category of the data
-
-                if key_train not in causal_effect_map:
-                    # As we currently support only one treatment
-                    causal_effect_map[key_train] = true_causal_effect(validation_df[treatment_name[0]])
-
-                # Add h(t) to f(W) to get the dummy outcome
-                outcome_validation += causal_effect_map[key_train]
-
-                new_data = validation_df.assign(dummy_outcome=outcome_validation)
-                new_estimator = estimate.estimator.get_new_estimator_object(identified_estimand)
-                new_estimator.fit(
-                    new_data,
-                    effect_modifier_names=estimate.estimator._effect_modifier_names,
-                    **new_estimator._fit_params if hasattr(new_estimator, "_fit_params") else {},
-                )
-                new_effect = new_estimator.estimate_effect(
-                    new_data,
-                    control_value=estimate.control_value,
-                    treatment_value=estimate.treatment_value,
-                    target_units=estimate.estimator._target_units,
-                )
-
-                estimates.append(new_effect.value)
-                group_count += 1
-
-        simulation_results.append(estimates)
-
-    # We convert to ndarray for ease in indexing
-    # The data is of the form
-    # sim1: cat1 cat2 ... catn
-    # sim2: cat1 cat2 ... catn
-    simulation_results = np.array(simulation_results)
-
-    # Note: We would like the causal_estimator to find the true causal estimate that we have specified through this
-    # refuter. Let the value of the true causal effect be h(t). In the following section of code, we wish to find out if h(t) falls in the
-    # distribution of the refuter.
-
-    if estimator_present == False:
+        )
+        simulation_results = np.array(simulation_results)
 
         dummy_estimate = CausalEstimate(
             data=None,
             treatment_name=estimate._treatment_name,
             outcome_name=estimate._outcome_name,
-            estimate=causal_effect_map[None],
+            estimate=causal_effect_value,
+            control_value=estimate.control_value,
+            treatment_value=estimate.treatment_value,
+            target_estimand=estimate.target_estimand,
+            realized_estimand_expr=estimate.realized_estimand_expr,
+        )
+        refute = CausalRefutation(
+            dummy_estimate.value, np.mean(simulation_results), refutation_type="Refute: Use a Dummy Outcome"
+        )
+        refute.add_significance_test_results(test_significance(dummy_estimate, np.ravel(simulation_results)))
+        refute_list.append(refute)
+        return refute_list
+
+    # estimator_present == True path
+    # Each simulation independently draws its own train/validation split and computes causal_effect_map,
+    # preserving the original random-state sequence. The true causal effects from the first simulation
+    # are used for the post-loop CausalEstimate objects (consistent with the original implementation).
+    #
+    # The rationale behind ordering of the loops is the fact that we induce randomness everytime we create the
+    # Train and the Validation Datasets. Thus, we run the simulation loop followed by the training and the validation
+    # loops. Thus, we can get different values everytime we get the estimator.
+    raw_results = Parallel(n_jobs=n_jobs, verbose=verbose)(
+        delayed(_refute_once_with_estimator)(
+            data,
+            estimate,
+            identified_estimand,
+            outcome_name,
+            treatment_name,
+            chosen_variables,
+            transformation_list,
+            test_fraction,
+            min_data_point_threshold,
+            bucket_size_scale_factor,
+            true_causal_effect,
+            unobserved_confounder_values,
+        )
+        for _ in tqdm(
+            range(num_simulations),
+            colour=CausalRefuter.PROGRESS_BAR_COLOR,
+            disable=not show_progress_bar,
+            desc="Refuting Estimates: ",
+        )
+    )
+
+    # raw_results is a list of (estimates, causal_effect_map) tuples.
+    # We convert to ndarray for ease in indexing
+    # The data is of the form
+    # sim1: cat1 cat2 ... catn
+    # sim2: cat1 cat2 ... catn
+    simulation_results = np.array([r[0] for r in raw_results])
+    # Use the causal_effect_map from the first simulation as ground truth (consistent with original behaviour).
+    causal_effect_map = raw_results[0][1]
+
+    # Note: We would like the causal_estimator to find the true causal estimate that we have specified through this
+    # refuter. Let the value of the true causal effect be h(t). In the following section of code, we wish to find out if h(t) falls in the
+    # distribution of the refuter.
+
+    # True Causal Effect list
+    causal_effect_list = list(causal_effect_map.values())
+    # Iterating through the refutation for each category
+    for train_category in range(simulation_results.shape[1]):
+        dummy_estimate = CausalEstimate(
+            data=None,
+            treatment_name=estimate._treatment_name,
+            outcome_name=estimate._outcome_name,
+            estimate=causal_effect_list[train_category],
             control_value=estimate.control_value,
             treatment_value=estimate.treatment_value,
             target_estimand=estimate.target_estimand,
@@ -612,42 +571,152 @@ def refute_dummy_outcome(
         )
 
         refute = CausalRefutation(
-            dummy_estimate.value, np.mean(simulation_results), refutation_type="Refute: Use a Dummy Outcome"
+            dummy_estimate.value,
+            np.mean(simulation_results[:, train_category]),
+            refutation_type="Refute: Use a Dummy Outcome",
         )
 
-        refute.add_significance_test_results(test_significance(dummy_estimate, np.ravel(simulation_results)))
+        refute.add_significance_test_results(test_significance(dummy_estimate, simulation_results[:, train_category]))
 
         refute_list.append(refute)
 
-    else:
-        # True Causal Effect list
-        causal_effect_list = list(causal_effect_map.values())
-        # Iterating through the refutation for each category
-        for train_category in range(simulation_results.shape[1]):
-            dummy_estimate = CausalEstimate(
-                data=None,
-                treatment_name=estimate._treatment_name,
-                outcome_name=estimate._outcome_name,
-                estimate=causal_effect_list[train_category],
-                control_value=estimate.control_value,
-                treatment_value=estimate.treatment_value,
-                target_estimand=estimate.target_estimand,
-                realized_estimand_expr=estimate.realized_estimand_expr,
-            )
-
-            refute = CausalRefutation(
-                dummy_estimate.value,
-                np.mean(simulation_results[:, train_category]),
-                refutation_type="Refute: Use a Dummy Outcome",
-            )
-
-            refute.add_significance_test_results(
-                test_significance(dummy_estimate, simulation_results[:, train_category])
-            )
-
-            refute_list.append(refute)
-
     return refute_list
+
+
+def _refute_once_without_estimator(
+    data: pd.DataFrame,
+    estimate: CausalEstimate,
+    identified_estimand: IdentifiedEstimand,
+    outcome_name: str,
+    treatment_name: List[str],
+    chosen_variables: List[str],
+    transformation_list: List,
+    causal_effect_value,
+) -> List:
+    """Run a single simulation for DummyOutcomeRefuter without a ML estimator in the transformation list."""
+    X_train = None
+    outcome_train = None
+    X_validation = data[chosen_variables].values
+    outcome_validation = data[outcome_name].values.copy()
+
+    outcome_validation = process_data(
+        outcome_name, X_train, outcome_train, X_validation, outcome_validation, transformation_list
+    )
+    outcome_validation += causal_effect_value
+
+    new_data = data.assign(dummy_outcome=outcome_validation)
+    new_estimator = estimate.estimator.get_new_estimator_object(identified_estimand)
+    new_estimator.fit(
+        new_data,
+        effect_modifier_names=estimate.estimator._effect_modifier_names,
+        **new_estimator._fit_params if hasattr(new_estimator, "_fit_params") else {},
+    )
+    new_effect = new_estimator.estimate_effect(
+        new_data,
+        control_value=estimate.control_value,
+        treatment_value=estimate.treatment_value,
+        target_units=estimate.estimator._target_units,
+    )
+    return [new_effect.value]
+
+
+def _refute_once_with_estimator(
+    data: pd.DataFrame,
+    estimate: CausalEstimate,
+    identified_estimand: IdentifiedEstimand,
+    outcome_name: str,
+    treatment_name: List[str],
+    chosen_variables: List[str],
+    transformation_list: List,
+    test_fraction: List,
+    min_data_point_threshold: float,
+    bucket_size_scale_factor: float,
+    true_causal_effect: Callable,
+    unobserved_confounder_values: Optional[List],
+) -> tuple:
+    """Run a single simulation for DummyOutcomeRefuter with a ML estimator in the transformation list.
+
+    Returns a tuple of (estimates, causal_effect_map) where estimates is a list of one estimate per
+    treatment category and causal_effect_map maps each training category to its true causal effect value.
+    """
+    estimates = []
+    causal_effect_map = OrderedDict()
+    # preprocess_data_by_treatment may modify chosen_variables; pass a copy to avoid side effects.
+    groups = preprocess_data_by_treatment(
+        data, treatment_name, unobserved_confounder_values, bucket_size_scale_factor, list(chosen_variables)
+    )
+    group_count = 0
+
+    test_fraction_iter = test_fraction
+    if len(test_fraction) == 1:
+        test_fraction_iter = len(groups) * test_fraction
+
+    for key_train, _ in groups:
+        base_train = groups.get_group(key_train).sample(frac=test_fraction_iter[group_count].base)
+        train_set = set([tuple(line) for line in base_train.values])
+        total_set = set([tuple(line) for line in groups.get_group(key_train).values])
+        base_validation = pd.DataFrame(list(total_set.difference(train_set)), columns=base_train.columns)
+        X_train_df = base_train[chosen_variables]
+
+        X_train = X_train_df.values
+        outcome_train = base_train[outcome_name].values
+
+        validation_df_parts = [base_validation]
+        transformation_list_temp = transformation_list
+
+        for key_validation, _ in groups:
+            if key_validation != key_train:
+                validation_df_parts.append(
+                    groups.get_group(key_validation).sample(frac=test_fraction_iter[group_count].other)
+                )
+
+        validation_df = pd.concat(validation_df_parts)
+        X_validation_df = validation_df[chosen_variables]
+
+        X_validation = X_validation_df.values
+        outcome_validation = validation_df[outcome_name].values
+
+        # If the number of data points is too few, run the default transformation
+        if X_train.shape[0] <= min_data_point_threshold:
+            transformation_list_temp = DEFAULT_TRANSFORMATION
+            logger.warning(
+                "The number of data points in X_train:{} for category:{} is less than threshold:{}".format(
+                    X_train.shape[0], key_train, min_data_point_threshold
+                )
+            )
+            logger.warning(
+                "Therefore, defaulting to the minimal set of transformations:{}".format(transformation_list_temp)
+            )
+
+        outcome_validation = process_data(
+            outcome_name, X_train, outcome_train, X_validation, outcome_validation, transformation_list_temp
+        )
+
+        # Compute the true causal effect once per category (consistent with original implementation).
+        if key_train not in causal_effect_map:
+            causal_effect_map[key_train] = true_causal_effect(validation_df[treatment_name[0]])
+
+        # Add h(t) to f(W) to get the dummy outcome
+        outcome_validation += causal_effect_map[key_train]
+
+        new_data = validation_df.assign(dummy_outcome=outcome_validation)
+        new_estimator = estimate.estimator.get_new_estimator_object(identified_estimand)
+        new_estimator.fit(
+            new_data,
+            effect_modifier_names=estimate.estimator._effect_modifier_names,
+            **new_estimator._fit_params if hasattr(new_estimator, "_fit_params") else {},
+        )
+        new_effect = new_estimator.estimate_effect(
+            new_data,
+            control_value=estimate.control_value,
+            treatment_value=estimate.treatment_value,
+            target_units=estimate.estimator._target_units,
+        )
+
+        estimates.append(new_effect.value)
+        group_count += 1
+
+    return estimates, causal_effect_map
 
 
 def process_data(

@@ -323,3 +323,49 @@ class TestDummyOutcomeRefuter(object):
             error_tolerence, estimator_method, "dummy_outcome_refuter", transformations=transformations
         )
         refuter_tester.binary_treatment_testsuite(num_samples=num_samples, tests_to_run="atleast-one-common-cause")
+
+    def test_refutation_dummy_outcome_refuter_n_jobs(self):
+        """Verify that n_jobs=2 produces results without errors for both execution paths."""
+        import dowhy.datasets
+        from dowhy import CausalModel
+
+        data = dowhy.datasets.linear_dataset(
+            beta=10, num_common_causes=1, num_samples=200, num_instruments=1, treatment_is_binary=True
+        )
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+            proceed_when_unidentifiable=True,
+            test_significance=None,
+        )
+        estimand = model.identify_effect(method_name="exhaustive-search")
+        estimand.set_identifier_method("backdoor")
+        ate_estimate = model.estimate_effect(
+            identified_estimand=estimand, method_name="backdoor.propensity_score_matching", test_significance=None
+        )
+
+        # Test estimator_present=False path (zero/noise transformations)
+        ref_list = model.refute_estimate(
+            estimand,
+            ate_estimate,
+            method_name="dummy_outcome_refuter",
+            transformation_list=[("zero", ""), ("noise", {"std_dev": 1})],
+            num_simulations=4,
+            n_jobs=2,
+        )
+        assert len(ref_list) == 1
+        assert ref_list[0].new_effect is not None
+
+        # Test estimator_present=True path (random_forest transformation)
+        ref_list_ml = model.refute_estimate(
+            estimand,
+            ate_estimate,
+            method_name="dummy_outcome_refuter",
+            transformation_list=[("random_forest", {"max_depth": 5}), ("zero", ""), ("noise", {"std_dev": 1})],
+            num_simulations=4,
+            n_jobs=2,
+        )
+        assert len(ref_list_ml) >= 1
+        assert ref_list_ml[0].new_effect is not None
