@@ -407,7 +407,7 @@ def build_graph(
                 graph.add_node(instrument)
                 graph.add_edge(instrument, treatment)
         else:
-            for instrument, treatment in itertools.product(instrument_nodes):
+            for instrument, treatment in instrument_nodes:
                 graph.add_node(instrument)
                 graph.add_edge(instrument, treatment)
 
