@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import LabelEncoder
-from statsmodels.nonparametric.kernel_density import EstimatorSettings, KDEMultivariateConditional
+from statsmodels.nonparametric.kernel_density import EstimatorSettings, KDEMultivariate, KDEMultivariateConditional
 
 from dowhy.utils.encoding import one_hot_encode
 
@@ -49,6 +49,10 @@ def state_propensity_score(data, covariates, treatments, variable_types=None):
 
 def binary_treatment_model(data, covariates, treatment, variable_types):
     data, covariates = binarize_discrete(data, covariates, variable_types)
+    if not covariates:
+        # No covariates: use marginal P(T=t_i) for each observation.
+        p = data[treatment].mean()
+        return np.where(data[treatment].values.astype(int) == 1, p, 1.0 - p)
     model = LogisticRegression(solver="lbfgs")
     model = model.fit(data[covariates], data[treatment])
     scores = model.predict_proba(data[covariates])
@@ -58,6 +62,10 @@ def binary_treatment_model(data, covariates, treatment, variable_types):
 
 def categorical_treatment_model(data, covariates, treatment, variable_types):
     data, covariates = binarize_discrete(data, covariates, variable_types)
+    if not covariates:
+        # No covariates: use marginal P(T=t_i) for each observation.
+        marginal = data[treatment].value_counts(normalize=True)
+        return data[treatment].map(marginal).values
     model = LogisticRegression(multi_class="ovr", solver="lbfgs")
     data[treatment], encoder = discrete_to_integer(data[treatment])
     model = model.fit(data[covariates], data[treatment])
@@ -68,15 +76,20 @@ def categorical_treatment_model(data, covariates, treatment, variable_types):
 
 def continuous_treatment_model(data, covariates, treatment, variable_types):
     data, covariates = binarize_discrete(data, covariates, variable_types)
-    if len(data) > 300 or len([treatment] + covariates) >= 3:
-        defaults = EstimatorSettings(n_jobs=4, efficient=True)
-    else:
-        defaults = EstimatorSettings(n_jobs=-1, efficient=False)
-
     if "c" not in variable_types.values():
         bw = "cv_ml"
     else:
         bw = "normal_reference"
+    if not covariates:
+        # No covariates: estimate marginal density using a 1-D unconditional KDE.
+        dep_type = get_type_string([treatment], variable_types)
+        model = KDEMultivariate(data=[data[treatment]], var_type="".join(dep_type), bw=bw)
+        return model.pdf(data_predict=data[treatment])
+
+    if len(data) > 300 or len([treatment] + covariates) >= 3:
+        defaults = EstimatorSettings(n_jobs=4, efficient=True)
+    else:
+        defaults = EstimatorSettings(n_jobs=-1, efficient=False)
 
     indep_type = get_type_string(covariates, variable_types)
     dep_type = get_type_string([treatment], variable_types)

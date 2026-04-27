@@ -245,3 +245,43 @@ class TestPandasDoAPI(object):
             variable_types=dict(x="c", y="c", a="c", b="c"),
         )
         print(dd)
+
+    # Regression tests for GitHub issue #225: WeightingSampler crashes when
+    # there are no covariates (empty adjustment set).
+    def test_weighting_sampler_no_covariates_binary_treatment(self):
+        """WeightingSampler must not raise when adjustment set is empty (binary treatment)."""
+        data = dowhy.datasets.linear_dataset(
+            beta=5,
+            num_common_causes=0,
+            num_instruments=0,
+            num_samples=200,
+            treatment_is_binary=True,
+        )
+        df = data["df"]
+        result = df.causal.do(
+            x="v0",
+            outcome="y",
+            variable_types={"v0": "b", "y": "c"},
+            method="weighting",
+        )
+        assert result is not None
+        assert len(result) > 0
+
+    def test_weighting_sampler_no_covariates_continuous_treatment(self):
+        """WeightingSampler must not raise when adjustment set is empty (continuous treatment)."""
+        data = dowhy.datasets.linear_dataset(
+            beta=5,
+            num_common_causes=0,
+            num_instruments=0,
+            num_samples=200,
+            treatment_is_binary=False,
+        )
+        df = data["df"]
+        result = df.causal.do(
+            x="v0",
+            outcome="y",
+            variable_types={"v0": "c", "y": "c"},
+            method="weighting",
+        )
+        assert result is not None
+        assert len(result) > 0
