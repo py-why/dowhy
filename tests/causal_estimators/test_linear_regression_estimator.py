@@ -275,6 +275,40 @@ class TestLinearRegressionEstimator(object):
         assert p_value.shape == (2,), f"Expected shape (2,), got {p_value.shape}"
         assert np.all((p_value >= 0.0) & (p_value <= 1.0)), f"p-values {p_value} are not all in [0, 1]"
 
+    def test_evaluate_effect_strength_does_not_raise(self):
+        """evaluate_effect_strength=True should not raise when treatment_variable is a list.
+
+        Regression test: estimate_effect_naive previously used data[list] for indexing,
+        which returned a DataFrame and caused 'Cannot index with multidimensional key'.
+        """
+        import warnings
+
+        import dowhy
+
+        warnings.filterwarnings("ignore")
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=1,
+            num_instruments=0,
+            num_treatments=1,
+            num_samples=500,
+            treatment_is_binary=True,
+        )
+        model = dowhy.CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+        )
+        estimand = model.identify_effect()
+        estimate = model.estimate_effect(
+            estimand,
+            method_name="backdoor.linear_regression",
+            evaluate_effect_strength=True,
+        )
+        assert estimate.effect_strength is not None, "effect_strength should be set when evaluate_effect_strength=True"
+        assert "fraction-effect" in estimate.effect_strength, "effect_strength should contain 'fraction-effect'"
+
     @mark.parametrize("invalid_method", ["frontdoor", "iv", "mediation"])
     def test_invalid_identifier_method_raises(self, invalid_method):
         data = dowhy.datasets.linear_dataset(
