@@ -9,15 +9,12 @@ import copy
 import pickle
 
 import numpy as np
-import pandas as pd
 import pytest
 
 import dowhy.datasets
 from dowhy import EstimandType, identify_effect_auto
 from dowhy.causal_estimators.linear_regression_estimator import LinearRegressionEstimator
 from dowhy.graph import build_graph_from_str
-
-from .base import example_graph
 
 
 @pytest.fixture
