@@ -23,14 +23,18 @@ from .base import example_graph
 @pytest.fixture
 def linear_estimate():
     """Fit a LinearRegressionEstimator and return (estimator, estimate)."""
-    np.random.seed(0)
-    dataset = dowhy.datasets.linear_dataset(
-        beta=1.0,
-        num_common_causes=2,
-        num_instruments=0,
-        num_samples=200,
-        treatment_is_binary=True,
-    )
+    rng_state = np.random.get_state()
+    try:
+        np.random.seed(0)
+        dataset = dowhy.datasets.linear_dataset(
+            beta=1.0,
+            num_common_causes=2,
+            num_instruments=0,
+            num_samples=200,
+            treatment_is_binary=True,
+        )
+    finally:
+        np.random.set_state(rng_state)
     graph = build_graph_from_str(dataset["gml_graph"])
     identified_estimand = identify_effect_auto(
         graph,
