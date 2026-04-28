@@ -429,7 +429,7 @@ def refute_dummy_outcome(
     :type min_data_point_threshold: int, optional
 
     :param n_jobs: The maximum number of concurrently running jobs. If -1 all CPUs are used. If 1 is given,
-      no parallel computing code is used at all (this is the default). For joblib details see
+      execution runs sequentially using joblib's backend (this is the default). For joblib details see
       https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html.
     :type n_jobs: int, optional
 
