@@ -642,9 +642,15 @@ def _refute_once_with_estimator(
     """
     estimates = []
     causal_effect_map = OrderedDict()
-    # preprocess_data_by_treatment may modify chosen_variables; pass a copy to avoid side effects.
+    # Compute the effective feature list before calling preprocess_data_by_treatment so that
+    # 'simulated' (added when unobserved_confounder_values is not None) is included when indexing
+    # X_train_df / X_validation_df below.
+    effective_chosen_variables = list(chosen_variables)
+    if unobserved_confounder_values is not None:
+        effective_chosen_variables.append("simulated")
+    # preprocess_data_by_treatment may modify its chosen_variables arg; pass a copy to avoid side effects.
     groups = preprocess_data_by_treatment(
-        data, treatment_name, unobserved_confounder_values, bucket_size_scale_factor, list(chosen_variables)
+        data, treatment_name, unobserved_confounder_values, bucket_size_scale_factor, effective_chosen_variables[:]
     )
     group_count = 0
 
@@ -657,7 +663,7 @@ def _refute_once_with_estimator(
         train_set = set([tuple(line) for line in base_train.values])
         total_set = set([tuple(line) for line in groups.get_group(key_train).values])
         base_validation = pd.DataFrame(list(total_set.difference(train_set)), columns=base_train.columns)
-        X_train_df = base_train[chosen_variables]
+        X_train_df = base_train[effective_chosen_variables]
 
         X_train = X_train_df.values
         outcome_train = base_train[outcome_name].values
@@ -672,7 +678,7 @@ def _refute_once_with_estimator(
                 )
 
         validation_df = pd.concat(validation_df_parts)
-        X_validation_df = validation_df[chosen_variables]
+        X_validation_df = validation_df[effective_chosen_variables]
 
         X_validation = X_validation_df.values
         outcome_validation = validation_df[outcome_name].values
