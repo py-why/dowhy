@@ -462,10 +462,11 @@ def refute_dummy_outcome(
     )
 
     if not estimator_present:
+        if test_fraction != DEFAULT_TEST_FRACTION:
+            logger.warning("'test_fraction' is not applicable as there is no base treatment value.")
+
         # Handle unobserved confounder values before the parallel loop to avoid repeated mutations.
         if unobserved_confounder_values is not None:
-            if test_fraction != DEFAULT_TEST_FRACTION:
-                logger.warning("'test_fraction' is not applicable as there is no base treatment value.")
             data = data.copy()
             data["simulated"] = unobserved_confounder_values
             if "simulated" not in chosen_variables:
