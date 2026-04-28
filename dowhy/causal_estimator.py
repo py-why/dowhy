@@ -685,13 +685,30 @@ class CausalEstimator:
         return s
 
     def signif_results_tostr(self, signif_results):
-        s = ""
+        """Format significance test results as a human-readable string.
+
+        When the estimate is more extreme than all bootstrap null samples, the exact
+        p-value cannot be determined; instead a bound is reported as ``p < bound``
+        (definitely significant) or ``p > bound`` (definitely not significant).
+
+        :param signif_results: Dict with key ``p_value`` (float or 2-tuple of floats).
+        :returns: Formatted string including the p-value and a significance conclusion.
+        """
         pval = signif_results["p_value"]
+        significance_level = round(1 - self.confidence_level, 10)
         if type(pval) is tuple:
-            s += "[{0}, {1}]".format(pval[0], pval[1])
+            lo, hi = pval
+            if lo == 0:
+                pval_str = "p < {:.4g}".format(hi)
+                is_significant = hi <= significance_level
+            else:
+                pval_str = "p > {:.4g}".format(lo)
+                is_significant = False
         else:
-            s += "{0}".format(pval)
-        return s
+            pval_str = "{:.4g}".format(pval)
+            is_significant = pval <= significance_level
+        sig_label = "Significant" if is_significant else "Not significant"
+        return "{} (alpha={:.4g}, {})".format(pval_str, significance_level, sig_label)
 
 
 def estimate_effect(

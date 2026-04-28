@@ -17,6 +17,57 @@ def test_causal_estimator_placeholder_methods():
         estimator.construct_symbolic_estimator(None)
 
 
+class _FakeEstimator:
+    """Minimal stand-in for CausalEstimator to test signif_results_tostr."""
+
+    confidence_level = 0.95
+
+
+def test_signif_results_tostr_scalar_significant():
+    """A scalar p-value below alpha should be reported as Significant."""
+    est = _FakeEstimator()
+    result = CausalEstimator.signif_results_tostr(est, {"p_value": 0.03})
+    assert "0.03" in result
+    assert "Significant" in result
+    assert "Not significant" not in result
+    assert "alpha=0.05" in result
+
+
+def test_signif_results_tostr_scalar_not_significant():
+    """A scalar p-value above alpha should be reported as Not significant."""
+    est = _FakeEstimator()
+    result = CausalEstimator.signif_results_tostr(est, {"p_value": 0.2})
+    assert "0.2" in result
+    assert "Not significant" in result
+
+
+def test_signif_results_tostr_tuple_lower_bound_significant():
+    """A (0, hi) tuple where hi <= alpha means definitely significant."""
+    est = _FakeEstimator()
+    result = CausalEstimator.signif_results_tostr(est, {"p_value": (0, 0.01)})
+    assert "p <" in result
+    assert "0.01" in result
+    assert "Significant" in result
+    assert "Not significant" not in result
+
+
+def test_signif_results_tostr_tuple_upper_bound_not_significant():
+    """A (lo, 1) tuple means definitely not significant."""
+    est = _FakeEstimator()
+    result = CausalEstimator.signif_results_tostr(est, {"p_value": (0.99, 1)})
+    assert "p >" in result
+    assert "Not significant" in result
+
+
+def test_signif_results_tostr_custom_confidence_level():
+    """Custom confidence_level (e.g. 0.99) should compute alpha as 0.01."""
+    est = _FakeEstimator()
+    est.confidence_level = 0.99
+    result = CausalEstimator.signif_results_tostr(est, {"p_value": 0.03})
+    assert "alpha=0.01" in result
+    assert "Not significant" in result
+
+
 class TestCausalEstimator(unittest.TestCase):
     def setUp(self):
         # self.df = pd.read_csv(os.path.join(DATA_PATH,'dgp_1/acic_1_1_data.csv'))
