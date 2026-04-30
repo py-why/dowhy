@@ -78,9 +78,7 @@ class RegressionEstimator(CausalEstimator):
         """
         Fits the estimator with data for effect estimation
         :param data: data frame containing the data
-        :param treatment: name of the treatment variable
-        :param outcome: name of the outcome variable
-        :param effect_modifiers: Variables on which to compute separate
+        :param effect_modifier_names: Variables on which to compute separate
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
@@ -112,6 +110,7 @@ class RegressionEstimator(CausalEstimator):
         self.logger.info(self.symbolic_estimator)
 
         # The model is always built on the entire data
+        self._data = data
         _, self.model = self._build_model(data)
         coefficients = self.model.params[1:]  # first coefficient is the intercept
         self.logger.debug("Coefficients of the fitted model: " + ",".join(map(str, coefficients)))

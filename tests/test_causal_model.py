@@ -698,6 +698,50 @@ class TestCausalModel(object):
         assert (estimates[1].estimator) == model.get_estimator(methods[1])
         assert (estimates[0].estimator) != model.get_estimator(methods[1])  # check not same object
 
+    def test_causal_model_do_regression(self):
+        """Tests that CausalModel.do() works correctly with linear regression estimator.
+
+        Regression test for a bug where fit() was called with (data, treatment, outcome)
+        as positional args, but RegressionEstimator.fit() only accepts (data, effect_modifier_names).
+        """
+        data = dowhy.datasets.linear_dataset(
+            beta=2.0,
+            num_common_causes=2,
+            num_samples=500,
+            num_treatments=1,
+            treatment_is_binary=False,
+        )
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+        )
+        identified_estimand = model.identify_effect()
+
+        do_result_treated = model.do(
+            1,
+            identified_estimand,
+            method_name="backdoor.linear_regression",
+        )
+        do_result_control = model.do(
+            0,
+            identified_estimand,
+            method_name="backdoor.linear_regression",
+            fit_estimator=False,
+        )
+        # model.do() returns the raw value from the estimator's do() method (a float for regression)
+        do_effect = do_result_treated - do_result_control
+
+        estimate_effect_result = model.estimate_effect(
+            identified_estimand,
+            method_name="backdoor.linear_regression",
+            control_value=0,
+            treatment_value=1,
+        )
+
+        assert abs(do_effect - estimate_effect_result.value) < 0.5
+
 
 if __name__ == "__main__":
     pytest.main([__file__])
