@@ -187,14 +187,30 @@ class Econml(CausalEstimator):
         estimator_data_args = {
             arg: named_data_args[arg] for arg in named_data_args.keys() if arg in estimator_named_args
         }
-        self.estimator.fit(**estimator_data_args, **kwargs)
+        if X is None and "X" in estimator_named_args:
+            self.logger.warning(
+                "No effect_modifiers specified (X=None). Some EconML estimators such as CausalForestDML "
+                "require effect modifiers and will raise an error. Specify effect_modifiers in the "
+                "CausalModel constructor or in estimate_effect() to avoid this."
+            )
+        try:
+            self.estimator.fit(**estimator_data_args, **kwargs)
+        except ValueError as e:
+            if X is None and "X=None" in str(e):
+                raise ValueError(
+                    f"{type(self.estimator).__name__} requires effect modifiers (X cannot be None). "
+                    "Please specify effect_modifiers in the CausalModel constructor "
+                    "or in estimate_effect(). "
+                    f"Original error: {e}"
+                ) from e
+            raise
 
         return self
 
     def _get_econml_class_object(self, module_method_name, *args, **kwargs):
         # from https://www.bnmetrics.com/blog/factory-pattern-in-python3-simple-version
         try:
-            (module_name, _, class_name) = module_method_name.rpartition(".")
+            module_name, _, class_name = module_method_name.rpartition(".")
             estimator_module = import_module(module_name)
             estimator_class = getattr(estimator_module, class_name)
 
