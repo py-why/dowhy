@@ -245,6 +245,30 @@ class TestTwoStageRegressionMediationNIE:
         )
         assert np.isscalar(estimate.value) or (isinstance(estimate.value, np.ndarray) and estimate.value.ndim == 0)
 
+    def test_nie_with_preinstantiated_second_stage_model(self):
+        """Pre-instantiated second_stage_model must not raise KeyError.
+
+        Regression test for issue #1335: when second_stage_model is a
+        pre-instantiated CausalEstimator (not a class), TwoStageRegressionEstimator
+        must update its _target_estimand to the correctly-configured backdoor estimand,
+        otherwise get_backdoor_variables() raises KeyError on a None key.
+        """
+        from dowhy.causal_estimators.linear_regression_estimator import LinearRegressionEstimator
+
+        df = _make_mediation_data()
+        model = CausalModel(data=df, treatment="X", outcome="Y", graph=_MEDIATION_GML)
+        estimand = model.identify_effect(
+            estimand_type=EstimandType.NONPARAMETRIC_NIE,
+            proceed_when_unidentifiable=True,
+        )
+        second_stage = LinearRegressionEstimator(identified_estimand=estimand)
+        estimate = model.estimate_effect(
+            identified_estimand=estimand,
+            method_name="mediation.two_stage_regression",
+            method_params={"second_stage_model": second_stage},
+        )
+        assert estimate.value == pytest.approx(0.4, abs=0.1)
+
 
 class TestTwoStageRegressionMediationNDE:
     """Tests for NDE (Natural Direct Effect) estimation via mediation.
