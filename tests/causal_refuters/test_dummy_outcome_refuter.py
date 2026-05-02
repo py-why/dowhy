@@ -27,13 +27,14 @@ class TestDummyOutcomeRefuter(object):
 
     @mark.parametrize(
         ["error_tolerance", "estimator_method", "num_samples"],
-        [(0.1, "backdoor.propensity_score_matching", 1000)],
+        [(0.1, "backdoor.linear_regression", 5000)],
     )
     def test_refutation_dummy_outcome_refuter_default_categorical_treatment(
         self, error_tolerance, estimator_method, num_samples
     ):
         # Regression test for #1316: the categorical branch had a copy-paste error that tried to
         # groupby("bins") which doesn't exist for categorical treatments, raising KeyError.
+        # Use linear_regression (not propensity_score_matching) since the latter only supports binary treatments.
         refuter_tester = SimpleRefuter(error_tolerance, estimator_method, "dummy_outcome_refuter")
         refuter_tester.categorical_treatment_testsuite(tests_to_run="atleast-one-common-cause", num_samples=num_samples)
 
