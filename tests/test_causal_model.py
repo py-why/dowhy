@@ -189,9 +189,7 @@ class TestCausalModel(object):
         edge[
         source "Z0" 
         target "{0}"
-        ]]""".format(
-            data["treatment_name"][0], data["outcome_name"]
-        )
+        ]]""".format(data["treatment_name"][0], data["outcome_name"])
         print(gml_str)
         model = CausalModel(
             data=data["df"],
@@ -433,6 +431,56 @@ class TestCausalModel(object):
         cate = linear_estimate.estimate_conditional_effects()
         assert cate is not None
         assert len(cate) > 0
+
+    def test_estimate_conditional_effects_bool_effect_modifier(self):
+        """Boolean effect modifiers should not be qcut — they should be used as-is (issue #257).
+
+        Before the fix, `is_numeric_dtype` returned True for bool columns, causing them to be
+        discretised into qcut quantile ranges instead of left as True/False groups.
+        """
+        import numpy as np
+
+        rng = np.random.default_rng(42)
+        n = 400
+
+        # Binary effect modifier with numpy bool dtype
+        em = np.array([True, False] * (n // 2))
+        treatment = rng.integers(0, 2, size=n).astype(float)
+        outcome = treatment + rng.normal(0, 0.1, size=n)
+        data = pd.DataFrame({"treatment": treatment, "outcome": outcome, "em": em})
+
+        assert pd.api.types.is_bool_dtype(data["em"]), "effect modifier should be bool dtype"
+
+        # Fit a linear regression estimator (need_conditional_estimates=False skips CATE during fit)
+        model = CausalModel(
+            data=data, treatment="treatment", outcome="outcome", graph="digraph {treatment -> outcome;}"
+        )
+        identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        estimate = model.estimate_effect(
+            identified_estimand,
+            method_name="backdoor.linear_regression",
+            effect_modifiers=["em"],
+            method_params={"need_conditional_estimates": False},
+        )
+
+        # Call _estimate_conditional_effects directly with a simple mock that does not access "em".
+        # This isolates the qcut-vs-bool fix from the full regression pipeline.
+        estimator = estimate.estimator
+        group_sizes = {}
+
+        def mock_effect_fn(group_data):
+            return 1.0
+
+        from dowhy.causal_estimator import CausalEstimator
+
+        cate = estimator._estimate_conditional_effects(data.copy(), mock_effect_fn, effect_modifier_names=["em"])
+
+        # With the fix: 2 groups (True, False). Without the fix: up to 5 qcut intervals.
+        assert len(cate) == 2, f"Expected 2 bool groups, got {len(cate)}: {list(cate.index)}"
+        # The index values should be plain booleans, not Categorical/Interval objects.
+        assert all(
+            isinstance(v, (bool, np.bool_)) for v in cate.index
+        ), f"Expected bool index values but got: {list(cate.index)}"
 
     @mark.parametrize(
         ["num_variables", "num_samples"],

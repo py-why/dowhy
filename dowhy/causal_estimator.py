@@ -259,7 +259,7 @@ class CausalEstimator:
         # For every numeric effect modifier, adding a temp categorical column
         for i in range(len(effect_modifier_names)):
             em = effect_modifier_names[i]
-            if pd.api.types.is_numeric_dtype(data[em].dtypes):
+            if pd.api.types.is_numeric_dtype(data[em].dtypes) and not pd.api.types.is_bool_dtype(data[em].dtypes):
                 data[prefix + str(em)] = pd.qcut(data[em], num_quantiles, duplicates="drop")
                 effect_modifier_names[i] = prefix + str(em)
         # Grouping by effect modifiers and computing effect separately
