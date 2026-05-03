@@ -287,6 +287,33 @@ def test_given_multivariate_inputs_when_estimate_anomaly_scores_then_does_not_ra
     assert scores["X1"][0] == approx(-np.log(1 / (data.shape[0] + 1)), abs=3)
 
 
+def test_given_nodes_parameter_when_estimate_anomaly_scores_then_only_returns_scores_for_specified_nodes():
+    """Tests that the nodes parameter correctly restricts which nodes are scored."""
+    causal_model = ProbabilisticCausalModel(nx.DiGraph([("X1", "X0"), ("X2", "X0")]))
+
+    data = np.random.normal(0, 1, (1000, 2))
+    data = pd.DataFrame(
+        {
+            "X0": (data[:, 0] + data[:, 1]).reshape(-1),
+            "X1": data[:, 0].reshape(-1),
+            "X2": data[:, 1].reshape(-1),
+        }
+    )
+    data_anomaly = pd.DataFrame({"X0": [5], "X1": [10], "X2": [0]})
+
+    auto.assign_causal_mechanisms(causal_model, data, auto.AssignmentQuality.GOOD)
+    fit(causal_model, data)
+
+    # Request scores for a subset of nodes
+    scores = anomaly_scores(causal_model, data_anomaly, nodes=["X1"])
+    assert set(scores.keys()) == {"X1"}
+    assert len(scores["X1"]) == 1
+
+    # When nodes=None (default), all nodes are scored
+    all_scores = anomaly_scores(causal_model, data_anomaly)
+    assert set(all_scores.keys()) == {"X0", "X1", "X2"}
+
+
 @flaky(max_runs=3)
 def test_given_simple_linear_data_when_estimate_conditional_anomaly_scores_then_returns_expected_result():
     X = np.random.normal(0, 1, 1000)
