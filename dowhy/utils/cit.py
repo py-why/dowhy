@@ -149,5 +149,7 @@ def conditional_MI(data=None, x=None, y=None, z=None):
     Hxz = entropy(map(lambda row: "%s/%s" % row, zip(X_rows, Z_rows)))  # Finding Joint entropy of X and Z
     Hyz = entropy(map(lambda row: "%s/%s" % row, zip(Y_rows, Z_rows)))  # Finding Joint entropy of Y and Z
     Hz = entropy(Z_rows)  # Finding Entropy of Z
-    Hxyz = entropy(map(lambda row: "%s/%s/%s" % row, zip(X_rows, Y_rows, Z_rows)))  # Finding Joint Entropy of X, Y and Z
+    Hxyz = entropy(
+        map(lambda row: "%s/%s/%s" % row, zip(X_rows, Y_rows, Z_rows))
+    )  # Finding Joint Entropy of X, Y and Z
     return Hxz + Hyz - Hxyz - Hz
