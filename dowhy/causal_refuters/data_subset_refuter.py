@@ -93,7 +93,7 @@ def refute_data_subset(
     target_estimand: IdentifiedEstimand,
     estimate: CausalEstimate,
     subset_fraction: float = 0.8,
-    num_simulations: int = 100,
+    num_simulations: int = CausalRefuter.DEFAULT_NUM_SIMULATIONS,
     random_state: Optional[Union[int, np.random.RandomState]] = None,
     show_progress_bar: bool = False,
     n_jobs: int = 1,

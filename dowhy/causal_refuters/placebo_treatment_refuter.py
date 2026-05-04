@@ -171,7 +171,7 @@ def refute_placebo_treatment(
     target_estimand: IdentifiedEstimand,
     estimate: CausalEstimate,
     treatment_names: List,
-    num_simulations: int = 100,
+    num_simulations: int = CausalRefuter.DEFAULT_NUM_SIMULATIONS,
     placebo_type: PlaceboType = PlaceboType.DEFAULT,
     random_state: Optional[Union[int, np.random.RandomState]] = None,
     show_progress_bar: bool = False,
