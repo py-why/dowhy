@@ -119,6 +119,10 @@ def identify_effect_id(
 
     :returns: target estimand, an instance of the IDExpression class.
     """
+    # Accept a CausalGraph wrapper by extracting the underlying nx.DiGraph
+    if hasattr(graph, "_graph") and isinstance(graph._graph, nx.DiGraph):
+        graph = graph._graph
+
     node_names = OrderedSet(graph.nodes)
 
     adjacency_matrix = np.asmatrix(get_adjacency_matrix(graph))
