@@ -2,7 +2,6 @@ from typing import Callable, List, Optional, Union
 
 import numpy as np
 import scipy
-from causallearn.utils.KCI.KCI import KCI_CInd, KCI_UInd
 from joblib import Parallel, delayed
 from sklearn.preprocessing import scale
 
@@ -87,12 +86,12 @@ def kernel_based(
             X, Y = _convert_to_numeric(*shape_into_2d(X, Y))
             if np.any(np.isnan(X)) or np.any(np.isnan(Y)):
                 raise ValueError("Data contains NaN values! Remove or replace missing values first.")
-            return KCI_UInd(**kwargs).compute_pvalue(X, Y)[0]
+            return _get_kci_uind(**kwargs).compute_pvalue(X, Y)[0]
         else:
             X, Y, Z = _convert_to_numeric(*shape_into_2d(X, Y, Z))
             if np.any(np.isnan(X)) or np.any(np.isnan(Y)) or np.any(np.isnan(Z)):
                 raise ValueError("Data contains NaN values! Remove or replace missing values first.")
-            return KCI_CInd(**kwargs).compute_pvalue(X, Y, Z)[0]
+            return _get_kci_cind(**kwargs).compute_pvalue(X, Y, Z)[0]
 
     random_indices = [
         np.random.choice(X.shape[0], min(X.shape[0], max_num_samples_run), replace=False)
@@ -386,3 +385,25 @@ def _convert_to_numeric(*args) -> List[np.ndarray]:
 def _remove_constant_columns(X: np.ndarray) -> np.ndarray:
     X = shape_into_2d(X)
     return X[:, [np.unique(X[:, i]).shape[0] > 1 for i in range(X.shape[1])]]
+
+
+def _get_kci_uind(**kwargs):
+    try:
+        from causallearn.utils.KCI.KCI import KCI_UInd
+    except ImportError:
+        raise ImportError(
+            "The causal-learn package is required for kernel_based() independence tests. "
+            "Install it with: pip install causal-learn"
+        )
+    return KCI_UInd(**kwargs)
+
+
+def _get_kci_cind(**kwargs):
+    try:
+        from causallearn.utils.KCI.KCI import KCI_CInd
+    except ImportError:
+        raise ImportError(
+            "The causal-learn package is required for kernel_based() independence tests. "
+            "Install it with: pip install causal-learn"
+        )
+    return KCI_CInd(**kwargs)
