@@ -1,6 +1,6 @@
 import numpy as np
 
-from dowhy.datasets import sales_dataset
+from dowhy.datasets import linear_dataset, sales_dataset
 
 
 def test_when_generating_sales_dataset_then_returns_reasonable_samples():
@@ -14,3 +14,31 @@ def test_when_generating_sales_dataset_then_returns_reasonable_samples():
     assert np.mean(sales_df1["Profit"]) > np.mean(sales_df2["Profit"])
     assert np.mean(sales_df1["Page Views"]) > np.mean(sales_df2["Page Views"])
     assert np.mean(sales_df1["Sold Units"]) < np.mean(sales_df2["Sold Units"])
+
+
+def test_linear_dataset_with_binary_treatment():
+    """Regression test for gh-1388: treatment_is_binary fails on NumPy >= 2.4."""
+    data = linear_dataset(
+        beta=10,
+        num_common_causes=5,
+        num_instruments=2,
+        num_samples=100,
+        treatment_is_binary=True,
+    )
+    df = data["df"]
+    treatment_col = data["treatment_name"][0]
+    assert set(df[treatment_col].unique()).issubset({0, 1})
+
+
+def test_linear_dataset_with_categorical_treatment():
+    """Regression test for gh-1388: treatment_is_category uses the same pattern."""
+    data = linear_dataset(
+        beta=10,
+        num_common_causes=3,
+        num_samples=100,
+        treatment_is_binary=False,
+        treatment_is_category=True,
+    )
+    df = data["df"]
+    treatment_col = data["treatment_name"][0]
+    assert set(df[treatment_col].unique()).issubset({0, 1, 2})

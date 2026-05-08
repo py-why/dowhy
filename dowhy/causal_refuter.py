@@ -157,6 +157,17 @@ def perform_normal_distribution_test(estimate, simulations: List):
     mean_refute_values = np.mean(simulations)
     # Get the standard deviation for the simulations
     std_dev_refute_values = np.std(simulations)
+
+    # Degenerate case: all simulations returned the same value (zero variance).
+    # Division by zero would produce NaN. Return p_value=1 to indicate that the
+    # original estimate is indistinguishable from the simulation distribution.
+    if std_dev_refute_values == 0:
+        logger.warning(
+            "All simulation values are identical (std = 0). "
+            "The normal-distribution p-value is undefined; returning p_value=1."
+        )
+        return 1.0
+
     # Get the Z Score [(val - mean)/ std_dev ]
     z_score = (estimate.value - mean_refute_values) / std_dev_refute_values
 

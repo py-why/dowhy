@@ -5,8 +5,6 @@ import typing
 import warnings
 from itertools import combinations
 
-from sympy import init_printing
-
 import dowhy.causal_estimators as causal_estimators
 import dowhy.causal_refuters as causal_refuters
 import dowhy.graph_learners as graph_learners
@@ -16,8 +14,6 @@ from dowhy.causal_identifier import AutoIdentifier, BackdoorAdjustment, IDIdenti
 from dowhy.causal_identifier.identify_effect import EstimandType
 from dowhy.causal_refuters.graph_refuter import GraphRefuter
 from dowhy.utils.api import parse_state
-
-init_printing()  # To display symbolic math symbols
 
 
 class CausalModel:

@@ -23,6 +23,7 @@ def plot_treatment_outcome(treatment, outcome, time_var):
     plt.xlabel("Time")
     fig.set_size_inches(8, 6)
     fig.savefig("obs_data" + datetime.now().strftime("%H-%M-%S") + ".png", bbox_inches="tight")
+    return fig
 
 
 def plot_causal_effect(estimate, treatment, outcome):
@@ -59,3 +60,4 @@ def plot_causal_effect(estimate, treatment, outcome):
 
     fig.set_size_inches(8, 6)
     fig.savefig("effect" + datetime.now().strftime("%H-%M-%S") + ".png", bbox_inches="tight")
+    return fig
