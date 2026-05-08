@@ -91,17 +91,19 @@ class TwoStageRegressionEstimator(CausalEstimator):
         modified_target_estimand.identifier_method = "backdoor"
         modified_target_estimand.backdoor_variables = self._target_estimand.mediation_first_stage_confounders
         if first_stage_model is not None:
-            self._first_stage_model = (
-                first_stage_model
-                if isinstance(first_stage_model, CausalEstimator)
-                else first_stage_model(
+            if isinstance(first_stage_model, CausalEstimator):
+                # Pre-instantiated estimator: update its target estimand so the backdoor adjustment
+                # set lookup works correctly (the original estimand has identifier_method="mediation").
+                first_stage_model._target_estimand = modified_target_estimand
+                self._first_stage_model = first_stage_model
+            else:
+                self._first_stage_model = first_stage_model(
                     modified_target_estimand,
                     test_significance=self._significance_test,
                     evaluate_effect_strength=self._effect_strength_eval,
                     confidence_intervals=self._confidence_intervals,
                     **kwargs,
                 )
-            )
         else:
             self._first_stage_model = self.__class__.DEFAULT_FIRST_STAGE_MODEL(
                 modified_target_estimand,
@@ -116,17 +118,19 @@ class TwoStageRegressionEstimator(CausalEstimator):
         modified_target_estimand.identifier_method = "backdoor"
         modified_target_estimand.backdoor_variables = self._target_estimand.mediation_second_stage_confounders
         if second_stage_model is not None:
-            self._second_stage_model = (
-                second_stage_model
-                if isinstance(second_stage_model, CausalEstimator)
-                else second_stage_model(
+            if isinstance(second_stage_model, CausalEstimator):
+                # Pre-instantiated estimator: update its target estimand so the backdoor adjustment
+                # set lookup works correctly (the original estimand has identifier_method="mediation").
+                second_stage_model._target_estimand = modified_target_estimand
+                self._second_stage_model = second_stage_model
+            else:
+                self._second_stage_model = second_stage_model(
                     modified_target_estimand,
                     test_significance=self._significance_test,
                     evaluate_effect_strength=self._effect_strength_eval,
                     confidence_intervals=self._confidence_intervals,
                     **kwargs,
                 )
-            )
         else:
             self._second_stage_model = self.__class__.DEFAULT_SECOND_STAGE_MODEL(
                 modified_target_estimand,

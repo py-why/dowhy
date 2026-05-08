@@ -4,6 +4,7 @@ import pytest
 from pytest import mark
 
 from dowhy import CausalModel
+from dowhy.causal_estimators.linear_regression_estimator import LinearRegressionEstimator
 from dowhy.causal_estimators.two_stage_regression_estimator import TwoStageRegressionEstimator
 from dowhy.causal_identifier import EstimandType
 
@@ -124,9 +125,7 @@ class TestTwoStageRegressionEstimator(object):
                 target "X"
             ]
         ]
-        """.replace(
-            "\n", ""
-        )
+        """.replace("\n", "")
 
         N_SAMPLES = 10000
         # Generate the data
@@ -209,9 +208,7 @@ graph [
     edge [ source "X" target "Y" ]
     edge [ source "M" target "Y" ]
 ]
-""".replace(
-    "\n", " "
-)
+""".replace("\n", " ")
 
 
 class TestTwoStageRegressionMediationNIE:
@@ -316,3 +313,55 @@ class TestTwoStageRegressionMediationNDE:
         nde_estimand = estimator._second_stage_model_nde._target_estimand
         assert nde_estimand.identifier_method == "backdoor"
         assert nde_estimand.backdoor_variables == estimand.mediation_second_stage_confounders
+
+
+class TestTwoStageRegressionPreInstantiatedEstimator:
+    """Regression tests for issue #1335.
+
+    When a pre-instantiated CausalEstimator is passed as second_stage_model (or
+    first_stage_model), TwoStageRegressionEstimator must update its
+    _target_estimand to the appropriate modified estimand (identifier_method =
+    "backdoor") before calling fit(), otherwise get_backdoor_variables()
+    raises KeyError: None.
+    """
+
+    def test_nie_with_preinstantiated_second_stage_model(self):
+        """Pre-instantiated second_stage_model must not raise KeyError during fit.
+
+        Regression test for:
+            KeyError: None
+        in IdentifiedEstimand.get_backdoor_variables() when a pre-instantiated
+        estimator with identifier_method='mediation' is passed as second_stage_model.
+        """
+        df = _make_mediation_data()
+        model = CausalModel(data=df, treatment="X", outcome="Y", graph=_MEDIATION_GML)
+        estimand = model.identify_effect(
+            estimand_type=EstimandType.NONPARAMETRIC_NIE,
+            proceed_when_unidentifiable=True,
+        )
+        # Pre-instantiate the second-stage model with the NIE estimand
+        # (identifier_method="mediation", default_backdoor_id=None).
+        # Before the fix this caused: KeyError: None.
+        second_stage = LinearRegressionEstimator(identified_estimand=estimand)
+        estimate = model.estimate_effect(
+            identified_estimand=estimand,
+            method_name="mediation.two_stage_regression",
+            method_params={"second_stage_model": second_stage},
+        )
+        assert np.isscalar(estimate.value) or (isinstance(estimate.value, np.ndarray) and estimate.value.ndim == 0)
+        assert estimate.value == pytest.approx(0.4, abs=0.15)
+
+    def test_nie_preinstantiated_second_stage_target_estimand_updated(self):
+        """After construction, pre-instantiated second_stage_model must have identifier_method='backdoor'."""
+        df = _make_mediation_data()
+        model = CausalModel(data=df, treatment="X", outcome="Y", graph=_MEDIATION_GML)
+        estimand = model.identify_effect(
+            estimand_type=EstimandType.NONPARAMETRIC_NIE,
+            proceed_when_unidentifiable=True,
+        )
+        second_stage = LinearRegressionEstimator(identified_estimand=estimand)
+        ts_estimator = TwoStageRegressionEstimator(
+            identified_estimand=estimand,
+            second_stage_model=second_stage,
+        )
+        assert ts_estimator._second_stage_model._target_estimand.identifier_method == "backdoor"
