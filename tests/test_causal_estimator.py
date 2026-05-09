@@ -1,5 +1,6 @@
 import unittest
 
+import numpy as np
 import pytest
 
 from dowhy.causal_estimator import CausalEstimator
@@ -56,6 +57,25 @@ def test_signif_results_tostr_tuple_upper_bound_not_significant():
     est = _FakeEstimator()
     result = CausalEstimator.signif_results_tostr(est, {"p_value": (0.99, 1)})
     assert "p >" in result
+    assert "Not significant" in result
+
+
+def test_signif_results_tostr_tuple_inconclusive():
+    """A tuple whose bounds straddle alpha cannot be conclusively classified."""
+    est = _FakeEstimator()
+    # alpha=0.05; (0.03, 0.1) straddles 0.05 → Inconclusive
+    result = CausalEstimator.signif_results_tostr(est, {"p_value": (0.03, 0.1)})
+    assert "Inconclusive" in result
+
+
+def test_signif_results_tostr_array_pvalue():
+    """An np.ndarray p-value (multi-treatment) formats each element separately."""
+    est = _FakeEstimator()
+    # alpha=0.05; first treatment significant, second not
+    result = CausalEstimator.signif_results_tostr(est, {"p_value": np.array([0.03, 0.2])})
+    assert "0.03" in result
+    assert "0.2" in result
+    assert "Significant" in result
     assert "Not significant" in result
 
 

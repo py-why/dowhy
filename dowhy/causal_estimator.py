@@ -690,8 +690,12 @@ class CausalEstimator:
         When the estimate is more extreme than all bootstrap null samples, the exact
         p-value cannot be determined; instead a bound is reported as ``p < bound``
         (definitely significant) or ``p > bound`` (definitely not significant).
+        When the bounds straddle the alpha threshold the conclusion is "Inconclusive".
 
-        :param signif_results: Dict with key ``p_value`` (float or 2-tuple of floats).
+        When there are multiple treatment variables, ``p_value`` may be a NumPy array;
+        each element is formatted and labelled separately.
+
+        :param signif_results: Dict with key ``p_value`` (float, np.ndarray, or 2-tuple of floats).
         :returns: Formatted string including the p-value and a significance conclusion.
         """
         pval = signif_results["p_value"]
@@ -700,14 +704,24 @@ class CausalEstimator:
             lo, hi = pval
             if lo == 0:
                 pval_str = "p < {:.4g}".format(hi)
-                is_significant = hi <= significance_level
-            else:
+            elif hi == 1:
                 pval_str = "p > {:.4g}".format(lo)
-                is_significant = False
+            else:
+                pval_str = "{:.4g} < p < {:.4g}".format(lo, hi)
+            if hi <= significance_level:
+                sig_label = "Significant"
+            elif lo >= significance_level:
+                sig_label = "Not significant"
+            else:
+                sig_label = "Inconclusive"
+        elif isinstance(pval, np.ndarray):
+            pval_str = "[{}]".format(", ".join("{:.4g}".format(p) for p in pval))
+            sig_label = "[{}]".format(
+                ", ".join("Significant" if p <= significance_level else "Not significant" for p in pval)
+            )
         else:
             pval_str = "{:.4g}".format(pval)
-            is_significant = pval <= significance_level
-        sig_label = "Significant" if is_significant else "Not significant"
+            sig_label = "Significant" if pval <= significance_level else "Not significant"
         return "{} (alpha={:.4g}, {})".format(pval_str, significance_level, sig_label)
 
 
