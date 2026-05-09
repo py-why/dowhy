@@ -143,6 +143,14 @@ class NonParametricSensitivityAnalyzer(PartialLinearSensitivityAnalyzer):
         self.S2 = self.nu_2 * self.sigma_2
         self.S = np.sqrt(self.S2)
 
+        if self.S2 <= 0 or np.isnan(self.S):
+            self.logger.warning(
+                "S² is non-positive (%.4f), which indicates model fitting issues. "
+                "The sensitivity analysis bounds may be unreliable. "
+                "Consider using different model estimators or providing more data.",
+                self.S2,
+            )
+
         Y_residual = Y[indices] - self.g_s[indices]
         self.neyman_orthogonal_score_outcome = Y_residual**2 - self.sigma_2
         self.neyman_orthogonal_score_treatment = 2 * self.m_alpha[indices] - self.alpha_s[indices] ** 2 - self.nu_2
@@ -152,10 +160,26 @@ class NonParametricSensitivityAnalyzer(PartialLinearSensitivityAnalyzer):
         # R^2 of outcome with observed common causes and treatment
         self.r2y_tw = np.var(self.g_s) / np.var(Y)
 
+        if self.r2y_tw < 0.1:
+            self.logger.warning(
+                "The outcome regression model has a low R² value (%.3f). "
+                "Sensitivity analysis results may be unreliable. "
+                "Consider a more flexible estimator via g_s_estimator_list.",
+                self.r2y_tw,
+            )
+
         # R^2 of treatment with observed common causes
         self.r2t_w = self.get_regression_r2(
             X=W, Y=T, numeric_features=numeric_features_alpha, split_indices=split_indices
         )
+
+        if self.r2t_w < 0.1:
+            self.logger.warning(
+                "The treatment regression model has a low R² value (%.3f). "
+                "Sensitivity analysis results may be unreliable. "
+                "Consider a more flexible estimator via alpha_s_estimator_list.",
+                self.r2t_w,
+            )
         if self.benchmarking:
             delta_r2_y_wj, var_alpha_wj = self.compute_r2diff_benchmarking_covariates(
                 treatment_df,
