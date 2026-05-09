@@ -466,7 +466,6 @@ class TestCausalModel(object):
         # Call _estimate_conditional_effects directly with a simple mock that does not access "em".
         # This isolates the qcut-vs-bool fix from the full regression pipeline.
         estimator = estimate.estimator
-        group_sizes = {}
 
         def mock_effect_fn(group_data):
             return 1.0
