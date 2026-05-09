@@ -470,8 +470,6 @@ class TestCausalModel(object):
         def mock_effect_fn(group_data):
             return 1.0
 
-        from dowhy.causal_estimator import CausalEstimator
-
         cate = estimator._estimate_conditional_effects(data.copy(), mock_effect_fn, effect_modifier_names=["em"])
 
         # With the fix: 2 groups (True, False). Without the fix: up to 5 qcut intervals.
