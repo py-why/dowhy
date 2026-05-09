@@ -203,16 +203,17 @@ class CausalEstimator:
         return new_estimator
 
     def estimate_effect_naive(self, data: pd.DataFrame):
-        """
+        """Naive (unadjusted) ATE estimate for a single binary treatment.
+
         :param data: Pandas dataframe to estimate effect
         """
-        # TODO Only works for binary treatment
-        df_withtreatment = data.loc[data[self._target_estimand.treatment_variable] == 1]
-        df_notreatment = data.loc[data[self._target_estimand.treatment_variable] == 0]
-        est = np.mean(df_withtreatment[self._target_estimand.outcome_variable]) - np.mean(
-            df_notreatment[self._target_estimand.outcome_variable]
-        )
-        return CausalEstimate(data, None, None, est, None, control_value=0, treatment_value=1)
+        # Only supports a single binary treatment variable
+        treatment_col = self._target_estimand.treatment_variable[0]
+        outcome_col = self._target_estimand.outcome_variable[0]
+        df_withtreatment = data.loc[data[treatment_col] == 1]
+        df_notreatment = data.loc[data[treatment_col] == 0]
+        est = np.mean(df_withtreatment[outcome_col]) - np.mean(df_notreatment[outcome_col])
+        return CausalEstimate(data, None, None, est, None, None, control_value=0, treatment_value=1)
 
     def _estimate_effect_fn(self, data_df):
         """Function used in conditional effect estimation. This function is to be overridden by each child estimator.
