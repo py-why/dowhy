@@ -704,7 +704,7 @@ class CausalEstimator:
         def _scalar_sig_label(p):
             return "Significant" if p <= significance_level else "Not significant"
 
-        if type(pval) is tuple:
+        if isinstance(pval, tuple):
             lo, hi = pval
             if lo == 0:
                 pval_str = "p < {:.4g}".format(hi)
