@@ -1,10 +1,11 @@
 """This module provides functionality for fitting probabilistic causal models and drawing samples from them."""
 
-from typing import Any
+from typing import Any, Optional
 
 import networkx as nx
 import numpy as np
 import pandas as pd
+from joblib import Parallel, delayed
 from tqdm import tqdm
 
 from dowhy.gcm import config
@@ -17,7 +18,12 @@ from dowhy.gcm.causal_models import (
 from dowhy.graph import get_ordered_predecessors, is_root_node
 
 
-def fit(causal_model: ProbabilisticCausalModel, data: pd.DataFrame, return_evaluation_summary: bool = False):
+def fit(
+    causal_model: ProbabilisticCausalModel,
+    data: pd.DataFrame,
+    return_evaluation_summary: bool = False,
+    n_jobs: Optional[int] = None,
+):
     """Fits the causal mechanism of each node to the data. This is done by iterating over the nodes in the graph and
     fitting their assigned causal mechanisms individually to the data by calling the corresponding fit function. Due to
     the modularity assumption, we can fit each mechanism in the graph independently of the other mechanisms. For root
@@ -40,26 +46,43 @@ def fit(causal_model: ProbabilisticCausalModel, data: pd.DataFrame, return_evalu
     :param data: Observations of nodes in the causal model.
     :param return_evaluation_summary: If True, returns a summary of the performances of the fitted mechanisms using the
                                       evaluate_causal_model method. If False, nothing is returned.
+    :param n_jobs: Number of parallel jobs for fitting node mechanisms. By default, uses
+                   ``config.default_n_jobs``. Set to ``1`` to disable parallelism. Uses thread-based
+                   parallelism (``backend="threading"``) so that in-place mechanism updates on the
+                   shared ``causal_model`` are visible to the caller.
     :return: Optionally, a CausalModelEvaluationResult summarizing the performances of the causal mechanisms via
              cross-validation.
     """
-    progress_bar = tqdm(
-        causal_model.graph.nodes,
-        desc="Fitting causal models",
-        position=0,
-        leave=True,
-        disable=not config.show_progress_bars,
-    )
-    for node in progress_bar:
+    n_jobs = config.default_n_jobs if n_jobs is None else n_jobs
+
+    nodes = list(causal_model.graph.nodes)
+    for node in nodes:
         if node not in data:
             raise RuntimeError(
                 "Could not find data for node %s in the given training data! There should be a column "
                 "containing samples for node %s." % (node, node)
             )
 
-        progress_bar.set_description("Fitting causal mechanism of node %s" % node)
-
-        fit_causal_model_of_target(causal_model, node, data)
+    if n_jobs == 1:
+        progress_bar = tqdm(
+            nodes,
+            desc="Fitting causal models",
+            position=0,
+            leave=True,
+            disable=not config.show_progress_bars,
+        )
+        for node in progress_bar:
+            progress_bar.set_description("Fitting causal mechanism of node %s" % node)
+            fit_causal_model_of_target(causal_model, node, data)
+    else:
+        Parallel(n_jobs=n_jobs, backend="threading")(
+            delayed(fit_causal_model_of_target)(causal_model, node, data)
+            for node in tqdm(
+                nodes,
+                desc="Fitting causal models",
+                disable=not config.show_progress_bars,
+            )
+        )
 
     if return_evaluation_summary:
         from dowhy.gcm import evaluate_causal_model
