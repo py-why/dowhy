@@ -700,6 +700,10 @@ class CausalEstimator:
         """
         pval = signif_results["p_value"]
         significance_level = round(1 - self.confidence_level, 10)
+
+        def _scalar_sig_label(p):
+            return "Significant" if p <= significance_level else "Not significant"
+
         if type(pval) is tuple:
             lo, hi = pval
             if lo == 0:
@@ -716,12 +720,10 @@ class CausalEstimator:
                 sig_label = "Inconclusive"
         elif isinstance(pval, np.ndarray):
             pval_str = "[{}]".format(", ".join("{:.4g}".format(p) for p in pval))
-            sig_label = "[{}]".format(
-                ", ".join("Significant" if p <= significance_level else "Not significant" for p in pval)
-            )
+            sig_label = "[{}]".format(", ".join(_scalar_sig_label(p) for p in pval))
         else:
             pval_str = "{:.4g}".format(pval)
-            sig_label = "Significant" if pval <= significance_level else "Not significant"
+            sig_label = _scalar_sig_label(pval)
         return "{} (alpha={:.4g}, {})".format(pval_str, significance_level, sig_label)
 
 
