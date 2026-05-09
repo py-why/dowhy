@@ -92,8 +92,12 @@ class TwoStageRegressionEstimator(CausalEstimator):
         modified_target_estimand.backdoor_variables = self._target_estimand.mediation_first_stage_confounders
         if first_stage_model is not None:
             if isinstance(first_stage_model, CausalEstimator):
-                self._first_stage_model = first_stage_model
-                self._first_stage_model._target_estimand = modified_target_estimand
+                self._first_stage_model = first_stage_model.get_new_estimator_object(
+                    modified_target_estimand,
+                    test_significance=self._significance_test,
+                    evaluate_effect_strength=self._effect_strength_eval,
+                    confidence_intervals=self._confidence_intervals,
+                )
             else:
                 self._first_stage_model = first_stage_model(
                     modified_target_estimand,
@@ -117,8 +121,12 @@ class TwoStageRegressionEstimator(CausalEstimator):
         modified_target_estimand.backdoor_variables = self._target_estimand.mediation_second_stage_confounders
         if second_stage_model is not None:
             if isinstance(second_stage_model, CausalEstimator):
-                self._second_stage_model = second_stage_model
-                self._second_stage_model._target_estimand = modified_target_estimand
+                self._second_stage_model = second_stage_model.get_new_estimator_object(
+                    modified_target_estimand,
+                    test_significance=self._significance_test,
+                    evaluate_effect_strength=self._effect_strength_eval,
+                    confidence_intervals=self._confidence_intervals,
+                )
             else:
                 self._second_stage_model = second_stage_model(
                     modified_target_estimand,
@@ -141,12 +149,11 @@ class TwoStageRegressionEstimator(CausalEstimator):
             nde_target_estimand = copy.deepcopy(self._target_estimand)
             nde_target_estimand.identifier_method = "backdoor"
             nde_target_estimand.backdoor_variables = self._target_estimand.mediation_second_stage_confounders
-            self._second_stage_model_nde = type(self._second_stage_model)(
+            self._second_stage_model_nde = self._second_stage_model.get_new_estimator_object(
                 nde_target_estimand,
                 test_significance=self._significance_test,
                 evaluate_effect_strength=self._effect_strength_eval,
                 confidence_intervals=self._confidence_intervals,
-                **kwargs,
             )
 
     def fit(

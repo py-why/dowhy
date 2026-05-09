@@ -268,6 +268,7 @@ class TestTwoStageRegressionMediationNIE:
             method_params={"second_stage_model": second_stage},
         )
         assert estimate.value == pytest.approx(0.4, abs=0.1)
+        assert second_stage._target_estimand.identifier_method != "backdoor"
 
 
 class TestTwoStageRegressionMediationNDE:
@@ -340,3 +341,24 @@ class TestTwoStageRegressionMediationNDE:
         nde_estimand = estimator._second_stage_model_nde._target_estimand
         assert nde_estimand.identifier_method == "backdoor"
         assert nde_estimand.backdoor_variables == estimand.mediation_second_stage_confounders
+
+    def test_nde_with_preinstantiated_second_stage_model_preserves_configuration(self):
+        import statsmodels.api as sm
+
+        from dowhy.causal_estimators.generalized_linear_model_estimator import GeneralizedLinearModelEstimator
+
+        df = _make_mediation_data()
+        model = CausalModel(data=df, treatment="X", outcome="Y", graph=_MEDIATION_GML)
+        estimand = model.identify_effect(
+            estimand_type=EstimandType.NONPARAMETRIC_NDE,
+            proceed_when_unidentifiable=True,
+        )
+        second_stage = GeneralizedLinearModelEstimator(identified_estimand=estimand, glm_family=sm.families.Binomial())
+
+        estimator = TwoStageRegressionEstimator(identified_estimand=estimand, second_stage_model=second_stage)
+
+        assert estimator._second_stage_model is not second_stage
+        assert estimator._second_stage_model_nde is not second_stage
+        assert isinstance(estimator._second_stage_model.family, sm.families.Binomial)
+        assert isinstance(estimator._second_stage_model_nde.family, sm.families.Binomial)
+        assert second_stage._target_estimand.identifier_method != "backdoor"
