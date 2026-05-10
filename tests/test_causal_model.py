@@ -189,9 +189,7 @@ class TestCausalModel(object):
         edge[
         source "Z0" 
         target "{0}"
-        ]]""".format(
-            data["treatment_name"][0], data["outcome_name"]
-        )
+        ]]""".format(data["treatment_name"][0], data["outcome_name"])
         print(gml_str)
         model = CausalModel(
             data=data["df"],
@@ -560,6 +558,43 @@ class TestCausalModel(object):
             },
         )
         assert graph_refutation_object.refutation_result == False
+
+    def test_graph_refutation_with_multi_char_column_names(self):
+        """Regression test for issue #949.
+
+        conditional_MI raised a KeyError when column names contained multiple characters
+        because ``list('Foo')`` expands to ``['F', 'o', 'o']`` instead of ``['Foo']``.
+        """
+        import numpy as np
+
+        rng = np.random.default_rng(42)
+        data = pd.DataFrame(
+            rng.binomial(1, [0.3, 0.4, 0.5, 0.5], size=(200, 4)).astype("int64"),
+            columns=["Foo", "Bar", "treatment", "outcome"],
+        )
+        gml_str = """
+        graph [
+        directed 1
+        node [ id 0 label "Foo" ]
+        node [ id 1 label "Bar" ]
+        node [ id 2 label "treatment" ]
+        node [ id 3 label "outcome" ]
+        edge [ source 0 target 1 ]
+        edge [ source 0 target 3 ]
+        edge [ source 1 target 3 ]
+        edge [ source 2 target 3 ]
+        ]
+        """
+        model = CausalModel(data=data, treatment="treatment", outcome="outcome", graph=gml_str)
+        # Before the fix this raised: KeyError: "None of [Index(['F', 'o', 'o'], ...)] are in the [columns]"
+        result = model.refute_graph(
+            k=1,
+            independence_test={
+                "test_for_continuous": "partial_correlation",
+                "test_for_discrete": "conditional_mutual_information",
+            },
+        )
+        assert result is not None
 
     def test_unobserved_graph_variables_log_warning(self, caplog):
         data = dowhy.datasets.linear_dataset(
