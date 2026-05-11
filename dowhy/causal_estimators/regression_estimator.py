@@ -221,7 +221,7 @@ class RegressionEstimator(CausalEstimator):
         original_type = data_df[self._target_estimand.treatment_variable].dtypes
         data_df[self._target_estimand.treatment_variable] = treatment_val
         data_df[self._target_estimand.treatment_variable] = data_df[self._target_estimand.treatment_variable].astype(
-            original_type, copy=False
+            original_type
         )
 
         return self.predict(data_df)

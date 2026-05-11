@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import scipy.stats
 import statsmodels.api as sm
+from joblib import Parallel, delayed
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from tqdm.auto import tqdm
@@ -72,6 +73,8 @@ class AddUnobservedCommonCause(CausalRefuter):
         :param alpha_s_estimator_param_list: list of dictionaries with parameters for finding alpha_s. (relevant only for non-parametric-partial-R2 simulation method)
         :param g_s_estimator_list: list of estimator objects for finding g_s. These objects should have fit() and predict() functions implemented. (relevant only for non-parametric-partial-R2 simulation method)
         :param g_s_estimator_param_list: list of dictionaries with parameters for tuning respective estimators in "g_s_estimator_list". The order of the dictionaries in the list should be consistent with the estimator objects order in "g_s_estimator_list". (relevant only for non-parametric-partial-R2 simulation method)
+        :param n_jobs: The maximum number of concurrently running jobs. If -1 all CPUs are used. If 1 is given, no parallel computing code is used at all (this is the default). (relevant only for direct-simulation method)
+        :param verbose: The verbosity level: if non zero, progress messages are printed. Above 50, the output is sent to stdout. The frequency of the messages increases with the verbosity level. If it more than 10, all iterations are reported. The default is 0. (relevant only for direct-simulation method)
         """
         super().__init__(*args, **kwargs)
         self.simulation_method = kwargs["simulation_method"] if "simulation_method" in kwargs else "direct-simulation"
@@ -182,6 +185,8 @@ class AddUnobservedCommonCause(CausalRefuter):
                 self.frac_strength_outcome,
                 self.plotmethod,
                 show_progress_bar,
+                self._n_jobs,
+                self._verbose,
             )
             refute.add_refuter(self)
             return refute
@@ -266,7 +271,7 @@ def _infer_default_kappa_t(
     elif effect_on_t == "linear":
         # Estimating the regression coefficient from standardized features to t
         corrcoef_var_t = np.corrcoef(observed_common_causes, t, rowvar=False)[-1, :-1]
-        std_dev_t = np.std(t)[0]
+        std_dev_t = float(np.std(t))
         max_coeff = max(corrcoef_var_t) * std_dev_t
         min_coeff = min(corrcoef_var_t) * std_dev_t
     else:
@@ -318,7 +323,7 @@ def _infer_default_kappa_y(
         min_coeff, max_coeff = min(flips), max(flips)
     elif effect_on_y == "linear":
         corrcoef_var_y = np.corrcoef(observed_common_causes, y, rowvar=False)[-1, :-1]
-        std_dev_y = np.std(y)[0]
+        std_dev_y = float(np.std(y))
         max_coeff = max(corrcoef_var_y) * std_dev_y
         min_coeff = min(corrcoef_var_y) * std_dev_y
     else:
@@ -368,7 +373,7 @@ def _include_confounders_effect(
         )
         for tname in treatment_name:
             if pd.api.types.is_bool_dtype(data[tname]):
-                new_data = new_data.astype({tname: "bool"}, copy=False)
+                new_data = new_data.astype({tname: "bool"})
     elif effect_on_t == "linear":
         confounder_t_effect = kappa_t * w_random
         # By default, we add the effect of simulated confounder for treatment.
@@ -388,7 +393,7 @@ def _include_confounders_effect(
         new_data.loc[rel_interval <= w_random, outcome_name] = 1 - new_data.loc[rel_interval <= w_random, outcome_name]
         for yname in outcome_name:
             if pd.api.types.is_bool_dtype(data[yname]):
-                new_data = new_data.astype({yname: "bool"}, copy=False)
+                new_data = new_data.astype({yname: "bool"})
     elif effect_on_y == "linear":
         confounder_y_effect = (-1) * kappa_y * w_random
         # By default, we add the effect of simulated confounder for treatment.
@@ -780,6 +785,44 @@ def sensitivity_e_value(
     return analyzer
 
 
+def _simulate_confounders_effect_once(
+    data: pd.DataFrame,
+    orig_data: pd.DataFrame,
+    target_estimand: IdentifiedEstimand,
+    estimate: CausalEstimate,
+    treatment_name: str,
+    outcome_name: str,
+    confounders_effect_on_treatment: str,
+    confounders_effect_on_outcome: str,
+    kappa_t_value: float,
+    kappa_y_value: float,
+) -> float:
+    """Execute one simulation with specific kappa_t and kappa_y values."""
+    new_data = _include_confounders_effect(
+        data,
+        orig_data,
+        confounders_effect_on_treatment,
+        treatment_name,
+        kappa_t_value,
+        confounders_effect_on_outcome,
+        outcome_name,
+        kappa_y_value,
+    )
+    new_estimator = estimate.estimator.get_new_estimator_object(target_estimand)
+    new_estimator.fit(
+        new_data,
+        effect_modifier_names=estimate.estimator._effect_modifier_names,
+        **new_estimator._fit_params if hasattr(new_estimator, "_fit_params") else {},
+    )
+    new_effect = new_estimator.estimate_effect(
+        new_data,
+        control_value=estimate.control_value,
+        treatment_value=estimate.treatment_value,
+        target_units=estimate.estimator._target_units,
+    )
+    return new_effect.value
+
+
 def sensitivity_simulation(
     data: pd.DataFrame,
     target_estimand: IdentifiedEstimand,
@@ -794,6 +837,8 @@ def sensitivity_simulation(
     frac_strength_outcome: float = 1.0,
     plotmethod: Optional[str] = None,
     show_progress_bar=False,
+    n_jobs: int = 1,
+    verbose: int = 0,
     **_,
 ) -> CausalRefutation:
     """
@@ -867,45 +912,45 @@ def sensitivity_simulation(
             # Get a 2D matrix of values
             # x,y =  np.meshgrid(self.kappa_t, self.kappa_y) # x,y are both MxN
 
-            results_matrix = np.random.rand(len(kappa_t), len(kappa_y))  # Matrix to hold all the results of NxM
+            results_matrix = np.zeros((len(kappa_t), len(kappa_y)))  # Matrix to hold all the results of NxM
             orig_data = copy.deepcopy(data)
 
-            for i in tqdm(
-                range(len(kappa_t)),
-                colour=CausalRefuter.PROGRESS_BAR_COLOR,
-                disable=not show_progress_bar,
-                desc="Refuting Estimates: ",
-            ):
-                for j in range(len(kappa_y)):
-                    new_data = _include_confounders_effect(
-                        data,
-                        orig_data,
-                        confounders_effect_on_treatment,
-                        treatment_name,
-                        kappa_t[i],
-                        confounders_effect_on_outcome,
-                        outcome_name,
-                        kappa_y[j],
-                    )
-                    new_estimator = estimate.estimator.get_new_estimator_object(target_estimand)
-                    new_estimator.fit(
-                        new_data,
-                        effect_modifier_names=estimate.estimator._effect_modifier_names,
-                        **new_estimator._fit_params if hasattr(new_estimator, "_fit_params") else {},
-                    )
-                    new_effect = new_estimator.estimate_effect(
-                        new_data,
-                        control_value=estimate.control_value,
-                        treatment_value=estimate.treatment_value,
-                        target_units=estimate.estimator._target_units,
-                    )
-                    refute = CausalRefutation(
-                        estimate.value,
-                        new_effect.value,
-                        refutation_type="Refute: Add an Unobserved Common Cause",
-                    )
-                    results_matrix[i][j] = refute.new_effect  # Populate the results
+            # Create list of parameter combinations for parallel execution
+            param_combinations = [
+                (i, j, kappa_t[i], kappa_y[j]) for i in range(len(kappa_t)) for j in range(len(kappa_y))
+            ]
 
+            # Run simulations in parallel
+            results = Parallel(n_jobs=n_jobs, verbose=verbose)(
+                delayed(_simulate_confounders_effect_once)(
+                    data,
+                    orig_data,
+                    target_estimand,
+                    estimate,
+                    treatment_name,
+                    outcome_name,
+                    confounders_effect_on_treatment,
+                    confounders_effect_on_outcome,
+                    kappa_t_val,
+                    kappa_y_val,
+                )
+                for i, j, kappa_t_val, kappa_y_val in tqdm(
+                    param_combinations,
+                    colour=CausalRefuter.PROGRESS_BAR_COLOR,
+                    disable=not show_progress_bar,
+                    desc="Refuting Estimates: ",
+                )
+            )
+
+            # Populate the results matrix
+            for (i, j, _, _), result in zip(param_combinations, results):
+                results_matrix[i][j] = result
+
+            refute = CausalRefutation(
+                estimate.value,
+                results[-1],  # Use last result as representative
+                refutation_type="Refute: Add an Unobserved Common Cause",
+            )
             refute.new_effect_array = results_matrix
             refute.new_effect = (np.min(results_matrix), np.max(results_matrix))
             # Store the values into the refute object

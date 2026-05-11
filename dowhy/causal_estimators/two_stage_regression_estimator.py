@@ -138,10 +138,11 @@ class TwoStageRegressionEstimator(CausalEstimator):
             self.logger.warning("Second stage model not provided. Defaulting to backdoor.linear_regression.")
 
         if self._target_estimand.estimand_type == EstimandType.NONPARAMETRIC_NDE:
-            modified_target_estimand.identifier_method = "backdoor"
-            modified_target_estimand = copy.deepcopy(self._target_estimand)
+            nde_target_estimand = copy.deepcopy(self._target_estimand)
+            nde_target_estimand.identifier_method = "backdoor"
+            nde_target_estimand.backdoor_variables = self._target_estimand.mediation_second_stage_confounders
             self._second_stage_model_nde = type(self._second_stage_model)(
-                modified_target_estimand,
+                nde_target_estimand,
                 test_significance=self._significance_test,
                 evaluate_effect_strength=self._effect_strength_eval,
                 confidence_intervals=self._confidence_intervals,
