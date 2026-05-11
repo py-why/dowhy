@@ -161,9 +161,9 @@ class NonParametricSensitivityAnalyzer(PartialLinearSensitivityAnalyzer):
         # Now code for benchmarking using covariates begins
         # R^2 of outcome with observed common causes and treatment
         outcome_var = np.var(Y)
-        short_outcome_model_var = np.var(self.g_s)
-        if np.isfinite(outcome_var) and outcome_var > 0 and np.isfinite(short_outcome_model_var):
-            self.r2y_tw = short_outcome_model_var / outcome_var
+        outcome_model_var = np.var(self.g_s)
+        if np.isfinite(outcome_var) and outcome_var > 0 and np.isfinite(outcome_model_var):
+            self.r2y_tw = outcome_model_var / outcome_var
         else:
             self.r2y_tw = np.nan
 
