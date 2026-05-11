@@ -160,9 +160,14 @@ class NonParametricSensitivityAnalyzer(PartialLinearSensitivityAnalyzer):
 
         # Now code for benchmarking using covariates begins
         # R^2 of outcome with observed common causes and treatment
-        self.r2y_tw = np.var(self.g_s) / np.var(Y)
+        outcome_var = np.var(Y)
+        short_outcome_model_var = np.var(self.g_s)
+        if np.isfinite(outcome_var) and outcome_var > 0 and np.isfinite(short_outcome_model_var):
+            self.r2y_tw = short_outcome_model_var / outcome_var
+        else:
+            self.r2y_tw = np.nan
 
-        if self.r2y_tw < 0.1:
+        if (not np.isfinite(self.r2y_tw)) or (self.r2y_tw < 0.1):
             self.logger.warning(
                 "The outcome regression model has a low R² value (%.3f). "
                 "Sensitivity analysis results may be unreliable. "
@@ -175,7 +180,7 @@ class NonParametricSensitivityAnalyzer(PartialLinearSensitivityAnalyzer):
             X=W, Y=T, numeric_features=numeric_features_alpha, split_indices=split_indices
         )
 
-        if self.r2t_w < 0.1:
+        if (not np.isfinite(self.r2t_w)) or (self.r2t_w < 0.1):
             self.logger.warning(
                 "The treatment regression model has a low R² value (%.3f). "
                 "Sensitivity analysis results may be unreliable. "
