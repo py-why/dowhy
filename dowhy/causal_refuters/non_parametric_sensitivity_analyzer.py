@@ -169,7 +169,7 @@ class NonParametricSensitivityAnalyzer(PartialLinearSensitivityAnalyzer):
 
         if (not np.isfinite(self.r2y_tw)) or (self.r2y_tw < 0.1):
             self.logger.warning(
-                "The outcome regression model has a low R² value (%.3f). "
+                "The outcome regression model has a low or non-finite R² value (%.3f). "
                 "Sensitivity analysis results may be unreliable. "
                 "Consider a more flexible estimator via g_s_estimator_list.",
                 self.r2y_tw,
@@ -182,7 +182,7 @@ class NonParametricSensitivityAnalyzer(PartialLinearSensitivityAnalyzer):
 
         if (not np.isfinite(self.r2t_w)) or (self.r2t_w < 0.1):
             self.logger.warning(
-                "The treatment regression model has a low R² value (%.3f). "
+                "The treatment regression model has a low or non-finite R² value (%.3f). "
                 "Sensitivity analysis results may be unreliable. "
                 "Consider a more flexible estimator via alpha_s_estimator_list.",
                 self.r2t_w,
