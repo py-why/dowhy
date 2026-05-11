@@ -12,9 +12,15 @@ from dowhy.utils.api import parse_state
 
 class TwoStageRegressionEstimator(CausalEstimator):
     """Compute treatment effect whenever the effect is fully mediated by
-    another variable (front-door) or when there is an instrument available.
+    another variable (front-door / mediation) or when there is an instrument
+    available (IV).
 
-    Currently only supports a linear model for the effects.
+    By default uses :class:`~dowhy.causal_estimators.linear_regression_estimator.LinearRegressionEstimator`
+    for both stages, but any :class:`~dowhy.causal_estimator.CausalEstimator` subclass can be
+    substituted via the ``first_stage_model`` and ``second_stage_model`` parameters.
+    For binary mediators or binary outcomes you can pass a pre-instantiated
+    :class:`~dowhy.causal_estimators.generalized_linear_model_estimator.GeneralizedLinearModelEstimator`
+    (e.g. with ``glm_family=statsmodels.api.families.Binomial()``).
 
     Supports additional parameters as listed below.
 
@@ -110,7 +116,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
                 confidence_intervals=self._confidence_intervals,
                 **kwargs,
             )
-            self.logger.warning("First stage model not provided. Defaulting to sklearn.linear_model.LinearRegression.")
+            self.logger.warning("First stage model not provided. Defaulting to LinearRegressionEstimator.")
 
         modified_target_estimand = copy.deepcopy(self._target_estimand)
         modified_target_estimand.identifier_method = "backdoor"
