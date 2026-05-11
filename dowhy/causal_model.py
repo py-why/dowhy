@@ -255,6 +255,8 @@ class CausalModel:
         effect_modifiers=None,
         fit_estimator=True,
         method_params=None,
+        num_quantiles_to_discretize_cont_cols=None,
+        sample_size_fraction=None,
     ):
         """Estimate the identified causal effect.
 
@@ -286,10 +288,28 @@ class CausalModel:
         :param fit_estimator: Boolean flag on whether to fit the estimator.
             Setting it to False is useful to estimate the effect on new data using a previously fitted estimator.
         :param method_params: Dictionary containing any method-specific parameters. These are passed directly to the estimating method. See the docs for each estimation method for allowed method-specific params.
+        :param num_quantiles_to_discretize_cont_cols: The number of quantiles into which a numeric
+            effect modifier is discretized for conditional treatment effect estimation. This is a
+            shorthand for passing ``num_quantiles_to_discretize_cont_cols`` inside ``method_params``.
+        :param sample_size_fraction: The fraction of data used per bootstrap sample when computing
+            confidence intervals via bootstrap. This is a shorthand for passing
+            ``sample_size_fraction`` inside ``method_params``.
         :returns: An instance of the CausalEstimate class, containing the causal effect estimate
             and other method-dependent information
 
         """
+        # Merge shorthand estimator params into method_params so they reach the estimator constructor.
+        # Values already present in method_params take priority over the shorthand params.
+        _extra = {}
+        if num_quantiles_to_discretize_cont_cols is not None:
+            _extra["num_quantiles_to_discretize_cont_cols"] = num_quantiles_to_discretize_cont_cols
+        if sample_size_fraction is not None:
+            _extra["sample_size_fraction"] = sample_size_fraction
+        if _extra:
+            if method_params is None:
+                method_params = {}
+            _extra.update(method_params)  # method_params values win
+            method_params = _extra
 
         if effect_modifiers is None:
             effect_modifiers = self._graph.get_effect_modifiers(self._treatment, self._outcome)
