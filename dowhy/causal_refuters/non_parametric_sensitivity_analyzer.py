@@ -162,7 +162,7 @@ class NonParametricSensitivityAnalyzer(PartialLinearSensitivityAnalyzer):
         # R^2 of outcome with observed common causes and treatment
         outcome_var = np.var(Y)
         outcome_model_var = np.var(self.g_s)
-        if np.isfinite(outcome_var) and outcome_var > 0 and np.isfinite(outcome_model_var):
+        if np.isfinite(outcome_var) and outcome_var > 0 and np.isfinite(outcome_model_var) and outcome_model_var >= 0:
             self.r2y_tw = outcome_model_var / outcome_var
         else:
             self.r2y_tw = np.nan
