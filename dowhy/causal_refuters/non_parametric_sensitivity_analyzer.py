@@ -141,9 +141,11 @@ class NonParametricSensitivityAnalyzer(PartialLinearSensitivityAnalyzer):
         self.nu_2 = np.mean(2 * self.m_alpha[indices] - self.alpha_s[indices] ** 2)
         self.sigma_2 = np.mean((Y[indices] - self.g_s[indices]) ** 2)
         self.S2 = self.nu_2 * self.sigma_2
-        self.S = np.sqrt(self.S2)
 
-        if self.S2 <= 0 or np.isnan(self.S):
+        if np.isfinite(self.S2) and self.S2 > 0:
+            self.S = np.sqrt(self.S2)
+        else:
+            self.S = np.nan
             self.logger.warning(
                 "S² is non-positive (%.4f), which indicates model fitting issues. "
                 "The sensitivity analysis bounds may be unreliable. "
