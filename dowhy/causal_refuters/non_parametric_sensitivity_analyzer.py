@@ -167,7 +167,7 @@ class NonParametricSensitivityAnalyzer(PartialLinearSensitivityAnalyzer):
         else:
             self.r2y_tw = np.nan
 
-        if (not np.isfinite(self.r2y_tw)) or (self.r2y_tw < 0.1):
+        if not np.isfinite(self.r2y_tw) or self.r2y_tw < 0.1:
             self.logger.warning(
                 "The outcome regression model has a low or non-finite R² value (%.3f). "
                 "Sensitivity analysis results may be unreliable. "
@@ -180,7 +180,7 @@ class NonParametricSensitivityAnalyzer(PartialLinearSensitivityAnalyzer):
             X=W, Y=T, numeric_features=numeric_features_alpha, split_indices=split_indices
         )
 
-        if (not np.isfinite(self.r2t_w)) or (self.r2t_w < 0.1):
+        if not np.isfinite(self.r2t_w) or self.r2t_w < 0.1:
             self.logger.warning(
                 "The treatment regression model has a low or non-finite R² value (%.3f). "
                 "Sensitivity analysis results may be unreliable. "
