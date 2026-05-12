@@ -1,4 +1,3 @@
-import networkx as nx
 import numpy as np
 import pandas as pd
 from _pytest.python_api import approx
@@ -85,3 +84,24 @@ def test_one_hot_encode_consistent_with_new_data():
     c_z2 = df_encoded2["C_Z"]
     assert c_z1[2] == c_z2[1]
     assert c_z1[5] == c_z2[5]
+
+
+def test_one_hot_encode_preserves_index():
+    """Encoded DataFrame must keep the original index so it can be safely joined
+    back to the source data after sub-sampling (regression test for #1372)."""
+    data = pd.DataFrame(
+        {"C": ["X", "Y", "Z", "X", "Y", "Z"], "N": [1, 2, 3, 4, 5, 6]},
+        index=[10, 20, 30, 40, 50, 60],  # Non-default index
+    )
+    df_encoded, encoder = one_hot_encode(data, drop_first=True)
+    assert list(df_encoded.index) == [10, 20, 30, 40, 50, 60], "Index must be preserved after encoding"
+
+    # Simulate data_subset_refuter sampling a subset of the rows.
+    data_subset = data.iloc[[1, 3, 5]]  # indices 20, 40, 60
+    df_encoded_subset, _ = one_hot_encode(data_subset, encoder=encoder, drop_first=True)
+    assert list(df_encoded_subset.index) == [20, 40, 60], "Index must be preserved for sub-sampled data"
+
+    # Verify that concat-based alignment works (the actual failure mode in #1372).
+    outcome_col = pd.Series([0.5, 0.7, 0.9], index=[20, 40, 60], name="outcome")
+    combined = pd.concat([df_encoded_subset, outcome_col], axis=1)
+    assert not combined.isna().any().any(), "No NaN values after concat — indices aligned correctly"
