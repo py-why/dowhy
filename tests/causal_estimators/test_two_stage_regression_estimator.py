@@ -4,6 +4,7 @@ import pytest
 from pytest import mark
 
 from dowhy import CausalModel
+from dowhy.causal_estimators.linear_regression_estimator import LinearRegressionEstimator
 from dowhy.causal_estimators.two_stage_regression_estimator import TwoStageRegressionEstimator
 from dowhy.causal_identifier import EstimandType
 
@@ -316,3 +317,86 @@ class TestTwoStageRegressionMediationNDE:
         nde_estimand = estimator._second_stage_model_nde._target_estimand
         assert nde_estimand.identifier_method == "backdoor"
         assert nde_estimand.backdoor_variables == estimand.mediation_second_stage_confounders
+
+
+class TestTwoStageRegressionPreinstantiatedEstimator:
+    """Regression tests for issue #1335: KeyError when a pre-instantiated
+    CausalEstimator is passed as first_stage_model or second_stage_model.
+
+    Previously, pre-instantiated estimators were used as-is, so their
+    _target_estimand still had identifier_method="mediation" and
+    default_backdoor_id=None.  When fit() called get_backdoor_variables() it
+    hit ``backdoor_variables[None]`` → KeyError: None.
+
+    The fix clones the estimator via get_new_estimator_object(modified_estimand)
+    so the cloned copy receives the correctly-prepared backdoor estimand.
+    """
+
+    def test_nie_with_preinstantiated_second_stage_model(self):
+        """NIE estimation must succeed when second_stage_model is a pre-instantiated estimator."""
+        df = _make_mediation_data()
+        model = CausalModel(data=df, treatment="X", outcome="Y", graph=_MEDIATION_GML)
+        estimand = model.identify_effect(
+            estimand_type=EstimandType.NONPARAMETRIC_NIE,
+            proceed_when_unidentifiable=True,
+        )
+        # Pre-instantiate both stage estimators (the pattern from issue #1335)
+        first_stage = LinearRegressionEstimator(identified_estimand=estimand)
+        second_stage = LinearRegressionEstimator(identified_estimand=estimand)
+        # This must not raise KeyError: None
+        estimate = model.estimate_effect(
+            identified_estimand=estimand,
+            method_name="mediation.two_stage_regression",
+            method_params={
+                "first_stage_model": first_stage,
+                "second_stage_model": second_stage,
+            },
+        )
+        assert estimate.value == pytest.approx(0.4, abs=0.1)
+
+    def test_preinstantiated_second_stage_model_gets_correct_estimand(self):
+        """The cloned second-stage model must have identifier_method='backdoor'."""
+        df = _make_mediation_data()
+        model = CausalModel(data=df, treatment="X", outcome="Y", graph=_MEDIATION_GML)
+        estimand = model.identify_effect(
+            estimand_type=EstimandType.NONPARAMETRIC_NIE,
+            proceed_when_unidentifiable=True,
+        )
+        second_stage = LinearRegressionEstimator(identified_estimand=estimand)
+        estimator = TwoStageRegressionEstimator(
+            identified_estimand=estimand,
+            second_stage_model=second_stage,
+        )
+        assert estimator._second_stage_model._target_estimand.identifier_method == "backdoor"
+
+    def test_preinstantiated_first_stage_model_gets_correct_estimand(self):
+        """The cloned first-stage model must have identifier_method='backdoor'."""
+        df = _make_mediation_data()
+        model = CausalModel(data=df, treatment="X", outcome="Y", graph=_MEDIATION_GML)
+        estimand = model.identify_effect(
+            estimand_type=EstimandType.NONPARAMETRIC_NIE,
+            proceed_when_unidentifiable=True,
+        )
+        first_stage = LinearRegressionEstimator(identified_estimand=estimand)
+        estimator = TwoStageRegressionEstimator(
+            identified_estimand=estimand,
+            first_stage_model=first_stage,
+        )
+        assert estimator._first_stage_model._target_estimand.identifier_method == "backdoor"
+
+    def test_caller_estimator_not_mutated(self):
+        """The caller-owned estimator instance must not be mutated by TwoStageRegressionEstimator."""
+        df = _make_mediation_data()
+        model = CausalModel(data=df, treatment="X", outcome="Y", graph=_MEDIATION_GML)
+        estimand = model.identify_effect(
+            estimand_type=EstimandType.NONPARAMETRIC_NIE,
+            proceed_when_unidentifiable=True,
+        )
+        second_stage = LinearRegressionEstimator(identified_estimand=estimand)
+        original_method = second_stage._target_estimand.identifier_method
+        TwoStageRegressionEstimator(
+            identified_estimand=estimand,
+            second_stage_model=second_stage,
+        )
+        # Caller's estimator must be unchanged
+        assert second_stage._target_estimand.identifier_method == original_method
