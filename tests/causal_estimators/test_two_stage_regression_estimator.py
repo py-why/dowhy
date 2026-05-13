@@ -124,9 +124,7 @@ class TestTwoStageRegressionEstimator(object):
                 target "X"
             ]
         ]
-        """.replace(
-            "\n", ""
-        )
+        """.replace("\n", "")
 
         N_SAMPLES = 10000
         # Generate the data
@@ -187,6 +185,7 @@ class TestTwoStageRegressionEstimator(object):
         See issue #1521 https://github.com/py-why/dowhy/issues/1521
         """
         import dowhy.datasets
+
         data = dowhy.datasets.linear_dataset(
             beta=10,
             num_common_causes=3,
@@ -207,6 +206,7 @@ class TestTwoStageRegressionEstimator(object):
                 identified_estimand=estimand,
                 method_name="iv.two_stage_regression",
             )
+
 
 def _make_mediation_data(n=2000, seed=42):
     """Generate linear mediation data with known NIE and NDE.
@@ -237,9 +237,7 @@ graph [
     edge [ source "X" target "Y" ]
     edge [ source "M" target "Y" ]
 ]
-""".replace(
-    "\n", " "
-)
+""".replace("\n", " ")
 
 
 class TestTwoStageRegressionMediationNIE:
