@@ -69,7 +69,10 @@ class DistanceMatchingEstimator(CausalEstimator):
             Default=1.
         :param distance_metric: Distance metric to use. Default="minkowski"
             that corresponds to Euclidean distance metric with p=2.
-        :param kwargs: (optional) Additional estimator-specific parameters
+        :param kwargs: (optional) Additional estimator-specific parameters. Metric-specific
+            parameters accepted by sklearn (p, V, VI, w) can be passed here; they are forwarded
+            to ``NearestNeighbors`` via its ``metric_params`` argument. For example, pass
+            ``V=np.cov(X.T)`` when using ``distance_metric="mahalanobis"``.
         """
         super().__init__(
             identified_estimand=identified_estimand,
@@ -213,7 +216,7 @@ class DistanceMatchingEstimator(CausalEstimator):
                     n_neighbors=self.num_matches_per_unit,
                     metric=self.distance_metric,
                     algorithm="ball_tree",
-                    **self.distance_metric_params,
+                    metric_params=self.distance_metric_params if self.distance_metric_params else None,
                 ).fit(control[self._observed_common_causes.columns].values)
                 distances, indices = control_neighbors.kneighbors(treated[self._observed_common_causes.columns].values)
                 self.logger.debug("distances:")
@@ -251,7 +254,7 @@ class DistanceMatchingEstimator(CausalEstimator):
                         n_neighbors=self.num_matches_per_unit,
                         metric=self.distance_metric,
                         algorithm="ball_tree",
-                        **self.distance_metric_params,
+                        metric_params=self.distance_metric_params if self.distance_metric_params else None,
                     ).fit(control[self._observed_common_causes.columns].values)
                     distances, indices = control_neighbors.kneighbors(
                         treated[self._observed_common_causes.columns].values
@@ -280,7 +283,7 @@ class DistanceMatchingEstimator(CausalEstimator):
                 n_neighbors=self.num_matches_per_unit,
                 metric=self.distance_metric,
                 algorithm="ball_tree",
-                **self.distance_metric_params,
+                metric_params=self.distance_metric_params if self.distance_metric_params else None,
             ).fit(treated[self._observed_common_causes.columns].values)
             distances, indices = treated_neighbors.kneighbors(control[self._observed_common_causes.columns].values)
 
