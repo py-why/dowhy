@@ -92,7 +92,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
         modified_target_estimand.backdoor_variables = self._target_estimand.mediation_first_stage_confounders
         if first_stage_model is not None:
             self._first_stage_model = (
-                first_stage_model
+                first_stage_model.get_new_estimator_object(modified_target_estimand)
                 if isinstance(first_stage_model, CausalEstimator)
                 else first_stage_model(
                     modified_target_estimand,
@@ -117,7 +117,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
         modified_target_estimand.backdoor_variables = self._target_estimand.mediation_second_stage_confounders
         if second_stage_model is not None:
             self._second_stage_model = (
-                second_stage_model
+                second_stage_model.get_new_estimator_object(modified_target_estimand)
                 if isinstance(second_stage_model, CausalEstimator)
                 else second_stage_model(
                     modified_target_estimand,
