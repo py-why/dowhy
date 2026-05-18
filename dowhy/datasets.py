@@ -86,6 +86,7 @@ def linear_dataset(
     stddev_treatment_noise=1,
     stddev_outcome_noise=0.01,
     one_hot_encode=False,
+    return_all_coefficients=False,
 ):
     """
     Generate a synthetic dataset with a known effect size.
@@ -126,6 +127,15 @@ def linear_dataset(
     :type stddev_outcome_noise: float
     :param one_hot_encode: defaults to False
     :type one_hot_encode: bool
+    :param return_all_coefficients: If True, the returned dictionary also includes the ground-truth
+        coefficients used to generate the dataset. Useful for benchmarking estimators against the
+        true data-generating process. Included keys are ``beta`` (treatment→outcome),
+        ``c1`` (common causes→treatment), ``c2`` (common causes→outcome),
+        ``ce`` (effect modifiers→outcome), ``cz`` (instruments→treatment),
+        ``cfd1`` (treatment→frontdoor variables), and ``cfd2`` (frontdoor→outcome).
+        Coefficients that were not generated (e.g. ``cz`` when ``num_instruments=0``) are ``None``.
+        Defaults to False.
+    :type return_all_coefficients: bool
 
     :returns: Dictionary with pandas dataFrame and few other metadata variables.
                         "df": pd.dataFrame
@@ -400,6 +410,14 @@ def linear_dataset(
         "gml_graph": gml_graph,
         "ate": ate,
     }
+    if return_all_coefficients:
+        ret_dict["beta"] = beta
+        ret_dict["c1"] = c1
+        ret_dict["c2"] = c2
+        ret_dict["ce"] = ce
+        ret_dict["cz"] = cz
+        ret_dict["cfd1"] = cfd1
+        ret_dict["cfd2"] = cfd2
     return ret_dict
 
 
