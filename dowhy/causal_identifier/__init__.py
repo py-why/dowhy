@@ -26,3 +26,4 @@ __all__ = [
     "construct_frontdoor_estimand",
     "construct_iv_estimand",
 ]
+from dowhy.causal_identifier.zid_identifier import ZIDIdentifier
