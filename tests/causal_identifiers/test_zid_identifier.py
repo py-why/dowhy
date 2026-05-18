@@ -7,15 +7,10 @@ Covers:
   - Integration via identify_effect_auto with surrogate_nodes parameter
 """
 
-import sys
-
 import networkx as nx
 import pytest
 
-sys.path.insert(
-    0,
-    "/Users/omarcamara/Desktop/Spring 2026/Research/causal-code/ananke-dev",
-)
+ananke = pytest.importorskip("ananke", reason="ananke-causal not installed; skipping z-ID tests")
 
 from dowhy.causal_identifier.auto_identifier import EstimandType, identify_effect_auto
 from dowhy.causal_identifier.zid_identifier import ZIDIdentifier
