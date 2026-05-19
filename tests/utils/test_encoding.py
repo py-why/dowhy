@@ -85,3 +85,34 @@ def test_one_hot_encode_consistent_with_new_data():
     c_z2 = df_encoded2["C_Z"]
     assert c_z1[2] == c_z2[1]
     assert c_z1[5] == c_z2[5]
+
+
+def test_one_hot_encode_preserves_index():
+    """Regression test for issue #1372: one_hot_encode must preserve the original DataFrame index.
+
+    When DataSubsetRefuter samples rows, the resulting DataFrame has a non-sequential index
+    (e.g. [2, 5, 8, ...]). Previously, one_hot_encode reset the index to 0-based, causing
+    index misalignment and IndexingError in DistanceMatchingEstimator.
+    """
+    data = {
+        "C": ["X", "Y", "Z", "X", "Y"],
+        "N": [10, 20, 30, 40, 50],
+    }
+    df = pd.DataFrame(data)
+
+    # Simulate sampling: take a non-contiguous subset retaining the original index.
+    df_sampled = df.iloc[[1, 3, 4]]  # index will be [1, 3, 4]
+    assert list(df_sampled.index) == [1, 3, 4]
+
+    df_encoded, _ = one_hot_encode(df_sampled, drop_first=False)
+
+    # The encoded result must retain the original non-sequential index.
+    assert list(df_encoded.index) == [1, 3, 4], (
+        f"Expected index [1, 3, 4] but got {list(df_encoded.index)}. "
+        "Index reset breaks boolean indexing when used with the original DataFrame."
+    )
+
+    # Verify that boolean indexing with the original sampled data works correctly.
+    mask = df_sampled["N"] > 25  # selects rows with N=30→idx3, N=50→idx4
+    filtered = df_encoded.loc[mask]
+    assert list(filtered.index) == [3, 4]
