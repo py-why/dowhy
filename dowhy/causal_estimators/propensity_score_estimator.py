@@ -123,18 +123,18 @@ class PropensityScoreEstimator(CausalEstimator):
             self._observed_common_causes = None
             error_msg = "No common causes/confounders present. Propensity score based methods are not applicable"
             self.logger.error(error_msg)
-            raise Exception(error_msg)
+            raise ValueError(error_msg)
 
         # Check if the treatment is one-dimensional
         if len(self._target_estimand.treatment_variable) > 1:
             error_msg = str(self.__class__) + "cannot handle more than one treatment variable"
-            raise Exception(error_msg)
+            raise ValueError(error_msg)
         # Checking if the treatment is binary
         treatment_values = data[self._target_estimand.treatment_variable[0]].astype(int).unique()
         if any([v not in [0, 1] for v in treatment_values]):
             error_msg = "Propensity score methods are applicable only for binary treatments"
             self.logger.error(error_msg)
-            raise Exception(error_msg)
+            raise ValueError(error_msg)
 
         if self.propensity_score_column not in data:
             if self.propensity_score_model is None:
