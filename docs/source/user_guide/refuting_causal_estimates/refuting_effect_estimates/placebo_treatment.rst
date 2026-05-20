@@ -11,27 +11,26 @@ outcome. The simulated distribution represents what effect estimates look like w
 by noise — this is the null world.
 
 **Expected outcome**: When the treatment is replaced by a random variable, any correct causal estimator
-should produce an effect close to zero. The p-value measures how likely it is that the original estimate
-would occur under the null hypothesis (no effect).
+should produce an effect close to zero. The p-value tests whether the simulated placebo-effect estimates
+are consistent with zero, i.e., whether the placebo distribution is centered around the null effect.
 
 Interpreting the p-value
 -------------------------
 
-* **p-value ≥ 0.05** ✅: The original estimate is significantly different from zero in the placebo
-  world — this is the expected result for a real causal effect. The estimator correctly finds no effect
-  when treatment is noise.
+* **p-value ≥ 0.05** ✅: The placebo-effect estimates are not significantly different from zero. This
+  is the expected result: when treatment is replaced by noise, the estimator should find no effect.
 
-* **p-value < 0.05** ⚠️: The estimate under the real treatment is not significantly different from
-  the placebo estimates. This may indicate that (a) the estimated causal effect is spurious, (b) the
-  estimator is not leveraging the true treatment variation, or (c) the sample size is too small to
-  reliably detect the effect.
+* **p-value < 0.05** ⚠️: The placebo-effect estimates are significantly different from zero (the
+  placebo distribution is not centered at zero). This may indicate that (a) the estimated causal effect
+  is spurious, (b) the estimator is not leveraging the true treatment variation, or (c) the sample size
+  is too small to reliably detect the effect.
 
 .. note::
 
-   The null hypothesis here is that the **original estimate equals the new effect** (under placebo
-   treatment). Because the true causal effect under a placebo should be zero, a non-significant p-value
-   means the original estimate is statistically indistinguishable from zero — which is bad news for
-   the claimed causal effect.
+   The significance test here is run against a dummy estimate fixed at **0**. So the null hypothesis
+   is that the placebo-treatment estimates are consistent with zero. A non-significant p-value means
+   the placebo distribution is compatible with zero, while a significant p-value means the placebo
+   estimates are systematically away from zero, which is a warning sign for the refutation.
 
 What to do if the test fails
 -----------------------------
