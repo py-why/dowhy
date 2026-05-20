@@ -164,6 +164,8 @@ def _refute_once(
         new_data = data.copy()
         for t, pname in zip(treatment_names, placebo_names):
             permuted_col = data[t].iloc[permuted_idx]
+            # Reset index so assignment is by position, not label alignment,
+            # while preserving the column's original dtype (e.g. CategoricalDtype).
             new_data[pname] = permuted_col.set_axis(data.index)
         if target_estimand.identifier_method.startswith("iv"):
             new_instruments_values = data[estimate.estimator.estimating_instrument_names].iloc[permuted_idx].values
