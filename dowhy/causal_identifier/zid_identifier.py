@@ -50,8 +50,8 @@ class ZIDIdentifier:
             from ananke.identification.idz import idz_id as _idz_id
         except ImportError:
             raise ImportError(
-                "ananke-causal is required for ZIDIdentifier. "
-                "Install it with: pip install ananke-causal"
+                "pyananke is required for ZIDIdentifier. "
+                "Install it with: pip install dowhy[zid]"
             )
 
         ananke_graph = self._convert_to_ananke(self.graph)
