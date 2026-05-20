@@ -400,6 +400,40 @@ class TestCausalModel(object):
         else:
             assert linear_estimate.conditional_estimates is not None
 
+    def test_estimate_conditional_effects_public_api(self):
+        """Test that CausalEstimate.estimate_conditional_effects() works correctly.
+
+        This exercises the public API method (as opposed to the internal _estimate_conditional_effects
+        called automatically during estimate_effect), ensuring the data argument is passed correctly.
+        """
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=2,
+            num_samples=200,
+            num_treatments=1,
+            treatment_is_binary=False,
+            num_effect_modifiers=1,
+        )
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+            test_significance=None,
+        )
+        identified_estimand = model.identify_effect()
+        linear_estimate = model.estimate_effect(
+            identified_estimand,
+            method_name="backdoor.linear_regression",
+            control_value=0,
+            treatment_value=1,
+            method_params={"need_conditional_estimates": False},
+        )
+        # Explicitly call the public API method — previously broken due to wrong argument order
+        cate = linear_estimate.estimate_conditional_effects()
+        assert cate is not None
+        assert len(cate) > 0
+
     @mark.parametrize(
         ["num_variables", "num_samples"],
         [

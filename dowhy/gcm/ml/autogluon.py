@@ -57,9 +57,9 @@ class _AutoGluonModel(PredictionModel):
         )
 
         if self._model_persistence_max_memory is not None:
-            self._auto_gluon_model.persist_models(max_memory=self._model_persistence_max_memory)
+            self._auto_gluon_model.persist(max_memory=self._model_persistence_max_memory)
         else:
-            self._auto_gluon_model.persist_models()
+            self._auto_gluon_model.persist()
 
     def predict(self, X: np.ndarray) -> np.ndarray:
         X = shape_into_2d(X)
