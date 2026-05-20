@@ -25,8 +25,8 @@ is compared against the **original estimate**; for **nullifying** refuters, it i
      - Estimate shifts; estimator may be mis-specified
    * - Placebo treatment
      - Effect goes to zero (nullifying)
-     - Real treatment has a reliably different effect from noise — supports causal claim
-     - Real estimate is indistinguishable from noise — effect may be spurious
+     - Placebo estimates remain near zero — consistent with no effect under placebo
+     - Placebo estimates differ from zero — possible spurious effect under placebo
    * - Dummy outcome
      - Effect goes to zero (nullifying)
      - No spurious effect found on random outcome — estimator is well-specified
