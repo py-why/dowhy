@@ -6,8 +6,10 @@ Effect refutations are of two kinds: negative control and sensitivity analysis.
 Quick-reference: p-value interpretation
 -----------------------------------------
 
-The table below summarises how to read the p-value for each refutation test. All tests share the same
-null hypothesis: **the true causal effect equals the new effect** obtained after modifying the data.
+The table below summarises how to read the p-value for each refutation test. The reference value used
+in the significance test depends on the refuter: for **invariant** refuters, the simulation distribution
+is compared against the **original estimate**; for **nullifying** refuters, it is compared against the
+**expected null or dummy effect** after modification (typically zero).
 
 .. list-table::
    :header-rows: 1
