@@ -17,8 +17,8 @@ is compared against the **original estimate**; for **nullifying** refuters, it i
 
    * - Refuter
      - Expected outcome
-     - p ≥ 0.05 (pass ✅)
-     - p < 0.05 (fail ⚠️)
+     - p ≥ 0.05 (pass)
+     - p < 0.05 (fail)
    * - Random common cause
      - Estimate is stable (invariant)
      - Estimate unchanged by random confounder — estimator is robust
