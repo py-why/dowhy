@@ -96,9 +96,9 @@ def _get_placebo_names(treatment_names: List[str]) -> List[str]:
 
 def _generate_random_placebo(data: pd.DataFrame, treatment_name: str, type_dict: Dict) -> pd.Series:
     """Generate a single random placebo column matching the dtype of *treatment_name*."""
-    dtype_name = type_dict[treatment_name].name
+    dtype = type_dict[treatment_name]
     n = data.shape[0]
-    if "float" in dtype_name:
+    if pd.api.types.is_float_dtype(dtype):
         logger.info(
             "Using a Normal Distribution with Mean:{} and Variance:{}".format(
                 DEFAULT_MEAN_OF_NORMAL,
@@ -109,7 +109,7 @@ def _generate_random_placebo(data: pd.DataFrame, treatment_name: str, type_dict:
             np.random.randn(n) * DEFAULT_STD_DEV_OF_NORMAL + DEFAULT_MEAN_OF_NORMAL,
             index=data.index,
         )
-    elif "bool" in dtype_name:
+    elif pd.api.types.is_bool_dtype(dtype):
         logger.info(
             "Using a Binomial Distribution with {} trials and {} probability of success".format(
                 DEFAULT_NUMBER_OF_TRIALS,
@@ -120,7 +120,7 @@ def _generate_random_placebo(data: pd.DataFrame, treatment_name: str, type_dict:
             np.random.binomial(DEFAULT_NUMBER_OF_TRIALS, DEFAULT_PROBABILITY_OF_BINOMIAL, n).astype(bool),
             index=data.index,
         )
-    elif "int" in dtype_name:
+    elif pd.api.types.is_integer_dtype(dtype):
         logger.info(
             "Using a Discrete Uniform Distribution lying between {} and {}".format(
                 data[treatment_name].min(), data[treatment_name].max()
@@ -130,11 +130,19 @@ def _generate_random_placebo(data: pd.DataFrame, treatment_name: str, type_dict:
             np.random.randint(low=data[treatment_name].min(), high=data[treatment_name].max() + 1, size=n),
             index=data.index,
         )
-    elif "category" in dtype_name:
-        categories = data[treatment_name].unique()
+    elif isinstance(dtype, pd.CategoricalDtype):
+        treatment = data[treatment_name]
+        categories = treatment.cat.categories
         logger.info("Using a Discrete Uniform Distribution with the following categories:{}".format(categories))
-        return pd.Series(np.random.choice(categories, size=n), index=data.index).astype("category")
-    raise ValueError("Unsupported treatment dtype '{}' for treatment '{}'.".format(dtype_name, treatment_name))
+        return pd.Series(
+            pd.Categorical(
+                np.random.choice(categories, size=n),
+                categories=categories,
+                ordered=treatment.cat.ordered,
+            ),
+            index=data.index,
+        )
+    raise ValueError("Unsupported treatment dtype '{}' for treatment '{}'.".format(dtype, treatment_name))
 
 
 def _refute_once(
@@ -153,11 +161,10 @@ def _refute_once(
             permuted_idx = np.random.choice(data.shape[0], size=data.shape[0], replace=False)
         else:
             permuted_idx = random_state.choice(data.shape[0], size=data.shape[0], replace=False)
-        permuted_values = data[treatment_names].iloc[permuted_idx].values
         new_data = data.copy()
-        for i, pname in enumerate(placebo_names):
-            col = permuted_values[:, i] if len(treatment_names) > 1 else permuted_values.ravel()
-            new_data[pname] = col
+        for t, pname in zip(treatment_names, placebo_names):
+            permuted_col = data[t].iloc[permuted_idx]
+            new_data[pname] = permuted_col.set_axis(data.index)
         if target_estimand.identifier_method.startswith("iv"):
             new_instruments_values = data[estimate.estimator.estimating_instrument_names].iloc[permuted_idx].values
             new_instruments_df = pd.DataFrame(
