@@ -189,9 +189,7 @@ class TestCausalModel(object):
         edge[
         source "Z0" 
         target "{0}"
-        ]]""".format(
-            data["treatment_name"][0], data["outcome_name"]
-        )
+        ]]""".format(data["treatment_name"][0], data["outcome_name"])
         print(gml_str)
         model = CausalModel(
             data=data["df"],
@@ -697,6 +695,46 @@ class TestCausalModel(object):
         assert (estimates[0].estimator) == model.get_estimator(methods[0])
         assert (estimates[1].estimator) == model.get_estimator(methods[1])
         assert (estimates[0].estimator) != model.get_estimator(methods[1])  # check not same object
+
+    def test_refute_estimate_raises_when_method_name_is_none(self):
+        """refute_estimate(method_name=None) must raise ValueError, not NameError."""
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=3,
+            num_samples=200,
+            treatment_is_binary=True,
+        )
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+        )
+        estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        estimate = model.estimate_effect(
+            estimand,
+            method_name="backdoor.linear_regression",
+        )
+        with pytest.raises(ValueError, match="method_name must be provided"):
+            model.refute_estimate(estimand, estimate, method_name=None)
+
+    def test_do_raises_when_method_name_is_none(self):
+        """do(method_name=None) must raise ValueError, not NameError."""
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=3,
+            num_samples=200,
+            treatment_is_binary=True,
+        )
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+        )
+        estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        with pytest.raises(ValueError, match="method_name must be provided"):
+            model.do(x=1, identified_estimand=estimand, method_name=None)
 
 
 if __name__ == "__main__":
