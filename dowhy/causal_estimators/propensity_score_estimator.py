@@ -127,7 +127,7 @@ class PropensityScoreEstimator(CausalEstimator):
 
         # Check if the treatment is one-dimensional
         if len(self._target_estimand.treatment_variable) > 1:
-            error_msg = str(self.__class__) + "cannot handle more than one treatment variable"
+            error_msg = self.__class__.__name__ + " cannot handle more than one treatment variable"
             raise ValueError(error_msg)
         # Checking if the treatment is binary
         treatment_values = data[self._target_estimand.treatment_variable[0]].astype(int).unique()
