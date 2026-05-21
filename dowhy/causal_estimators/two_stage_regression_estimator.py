@@ -172,7 +172,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
         self._set_effect_modifiers(data, effect_modifier_names)
 
         if len(self._target_estimand.treatment_variable) > 1:
-            error_msg = str(self.__class__) + "cannot handle more than one treatment variable"
+            error_msg = self.__class__.__name__ + " cannot handle more than one treatment variable"
             raise ValueError(error_msg)
 
         if self._target_estimand.identifier_method == "frontdoor":
