@@ -85,7 +85,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
         self.logger.info("INFO: Using Two Stage Regression Estimator")
         # Check if the treatment is one-dimensional
         if len(self._target_estimand.treatment_variable) > 1:
-            error_msg = str(self.__class__) + "cannot handle more than one treatment variable"
+            error_msg = f"{self.__class__.__name__} cannot handle more than one treatment variable"
             raise ValueError(error_msg)
         modified_target_estimand = copy.deepcopy(self._target_estimand)
         modified_target_estimand.identifier_method = "backdoor"
