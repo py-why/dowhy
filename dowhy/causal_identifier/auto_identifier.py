@@ -942,14 +942,16 @@ def identify_generalized_adjustment_set(
 
 
 def identify_mediation(graph: nx.DiGraph, action_nodes: List[str], outcome_nodes: List[str]):
-    """Find a valid mediator if it exists.
+    """Find all valid mediators if they exist.
 
-    Currently only supports a single variable mediator set.
+    Supports multi-variable mediator sets, including parallel mediators.
+    Each descendant of the treatment nodes (excluding outcome nodes) is checked individually;
+    all variables that lie on at least one directed path from treatment to outcome are collected
+    and returned as the mediator set.
     """
-    mediation_var = None
+    mediation_vars = []
     mediation_paths = get_all_directed_paths(graph, action_nodes, outcome_nodes)
     eligible_variables = get_descendants(graph, action_nodes) - set(outcome_nodes)
-    # For simplicity, assuming a one-variable mediation set
     for candidate_var in eligible_variables:
         is_valid_mediation = check_valid_mediation_set(
             graph,
@@ -960,9 +962,8 @@ def identify_mediation(graph: nx.DiGraph, action_nodes: List[str], outcome_nodes
         )
         logger.debug("Candidate mediation set: {0}, on_mediating_path: {1}".format(candidate_var, is_valid_mediation))
         if is_valid_mediation:
-            mediation_var = candidate_var
-            break
-    return parse_state(mediation_var)
+            mediation_vars.append(candidate_var)
+    return mediation_vars
 
 
 def identify_mediation_first_stage_confounders(
