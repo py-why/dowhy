@@ -401,13 +401,19 @@ class CausalModel:
 
         Priority: backdoor > iv > frontdoor.  Within backdoor, propensity-score
         stratification is used for binary treatments (≤2 unique values) and linear
-        regression for continuous treatments.
+        regression for continuous treatments. Multivariate treatments must specify
+        ``method_name`` explicitly.
 
         :param identified_estimand: Output of :meth:`identify_effect`.
         :raises ValueError: if no valid estimand is available for auto-selection.
         :returns: A method-name string suitable for :meth:`estimate_effect`.
         """
         estimands = identified_estimand.estimands or {}
+        if len(self._treatment) > 1:
+            raise ValueError(
+                "Could not automatically determine an estimation method for multivariate treatments. "
+                "Please specify method_name explicitly."
+            )
         if estimands.get("backdoor") is not None:
             treatment_col = self._treatment[0]
             if self._data[treatment_col].nunique() <= 2:
