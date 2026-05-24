@@ -24,9 +24,7 @@ class TestRandomCommonCauseRefuter:
     )
     def test_refutation_random_common_cause_binary(self, error_tolerance, estimator_method, num_samples):
         refuter_tester = SimpleRefuter(error_tolerance, estimator_method, "random_common_cause")
-        refuter_tester.binary_treatment_testsuite(
-            tests_to_run="atleast-one-common-cause", num_samples=num_samples
-        )
+        refuter_tester.binary_treatment_testsuite(tests_to_run="atleast-one-common-cause", num_samples=num_samples)
 
     @pytest.mark.parametrize(
         ["error_tolerance", "estimator_method", "num_samples"],
@@ -34,9 +32,7 @@ class TestRandomCommonCauseRefuter:
     )
     def test_refutation_random_common_cause_category(self, error_tolerance, estimator_method, num_samples):
         refuter_tester = SimpleRefuter(error_tolerance, estimator_method, "random_common_cause")
-        refuter_tester.categorical_treatment_testsuite(
-            tests_to_run="atleast-one-common-cause", num_samples=num_samples
-        )
+        refuter_tester.categorical_treatment_testsuite(tests_to_run="atleast-one-common-cause", num_samples=num_samples)
 
     def test_refutation_random_common_cause_refutation_type(self):
         """Test that the refutation type string is set correctly."""
