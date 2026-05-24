@@ -143,7 +143,7 @@ def conditional_MI(data=None, x=None, y=None, z=None):
     """
     X = data[x].astype(int)
     Y = data[y].astype(int)
-    t = list(z)
+    t = [z] if isinstance(z, str) else list(z)
     Z = data[t].astype(int)
     Z = Z.values.tolist()
     Z = list(data[t].itertuples(index=False, name=None))
