@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 from pytest import mark
 
@@ -212,6 +213,67 @@ class TestLinearRegressionEstimator(object):
         target_estimand.identifier_method = None
         estimator = LinearRegressionEstimator(identified_estimand=target_estimand)
         estimator.fit(data["df"])  # should not raise
+
+    def test_test_significance_returns_scalar_float_for_single_treatment(self):
+        """_test_significance should return a plain float p-value for a single treatment variable.
+
+        Regression test for https://github.com/py-why/dowhy/issues/1019 where the p-value
+        was returned as a 1-element numpy array (``array([0.])``) instead of a scalar float.
+        """
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=1,
+            num_instruments=0,
+            num_treatments=1,
+            num_samples=500,
+            treatment_is_binary=True,
+        )
+        target_estimand = identify_effect_auto(
+            build_graph_from_str(data["gml_graph"]),
+            observed_nodes=list(data["df"].columns),
+            action_nodes=data["treatment_name"],
+            outcome_nodes=data["outcome_name"],
+            estimand_type=EstimandType.NONPARAMETRIC_ATE,
+        )
+        target_estimand.set_identifier_method("backdoor")
+        estimator = LinearRegressionEstimator(identified_estimand=target_estimand, test_significance=True)
+        estimator.fit(data["df"])
+        ate_estimate = estimator.estimate_effect(data["df"], control_value=0, treatment_value=1)
+        signif = ate_estimate.test_stat_significance()
+        p_value = signif["p_value"]
+        assert isinstance(
+            p_value, float
+        ), f"Expected scalar float p-value for single treatment, got {type(p_value)}: {p_value!r}"
+        assert 0.0 <= p_value <= 1.0, f"p-value {p_value} is not in [0, 1]"
+
+    def test_test_significance_returns_array_for_multiple_treatments(self):
+        """_test_significance should return a numpy array of p-values for multiple treatment variables."""
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=1,
+            num_instruments=0,
+            num_treatments=2,
+            num_samples=500,
+            treatment_is_binary=True,
+        )
+        target_estimand = identify_effect_auto(
+            build_graph_from_str(data["gml_graph"]),
+            observed_nodes=list(data["df"].columns),
+            action_nodes=data["treatment_name"],
+            outcome_nodes=data["outcome_name"],
+            estimand_type=EstimandType.NONPARAMETRIC_ATE,
+        )
+        target_estimand.set_identifier_method("backdoor")
+        estimator = LinearRegressionEstimator(identified_estimand=target_estimand, test_significance=True)
+        estimator.fit(data["df"])
+        ate_estimate = estimator.estimate_effect(data["df"], control_value=0, treatment_value=1)
+        signif = ate_estimate.test_stat_significance()
+        p_value = signif["p_value"]
+        assert isinstance(
+            p_value, np.ndarray
+        ), f"Expected numpy array p-value for multiple treatments, got {type(p_value)}: {p_value!r}"
+        assert p_value.shape == (2,), f"Expected shape (2,), got {p_value.shape}"
+        assert np.all((p_value >= 0.0) & (p_value <= 1.0)), f"p-values {p_value} are not all in [0, 1]"
 
     @mark.parametrize("invalid_method", ["frontdoor", "iv", "mediation"])
     def test_invalid_identifier_method_raises(self, invalid_method):
