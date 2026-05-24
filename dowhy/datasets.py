@@ -372,19 +372,17 @@ def linear_dataset(
     data = pd.DataFrame(data, columns=col_names)
     # Specifying the correct dtypes
     if treatment_is_binary:
-        data = data.astype({tname: "bool" for tname in treatments}, copy=False)
+        data = data.astype({tname: "bool" for tname in treatments})
     elif treatment_is_category:
-        data = data.astype({tname: "category" for tname in treatments}, copy=False)
+        data = data.astype({tname: "category" for tname in treatments})
     if outcome_is_binary:
-        data = data.astype({outcome: "bool"}, copy=False)
+        data = data.astype({outcome: "bool"})
     if num_discrete_common_causes > 0 and not one_hot_encode:
-        data = data.astype({wname: "int64" for wname in common_causes[num_cont_common_causes:]}, copy=False)
-        data = data.astype({wname: "category" for wname in common_causes[num_cont_common_causes:]}, copy=False)
+        data = data.astype({wname: "int64" for wname in common_causes[num_cont_common_causes:]})
+        data = data.astype({wname: "category" for wname in common_causes[num_cont_common_causes:]})
     if num_discrete_effect_modifiers > 0 and not one_hot_encode:
-        data = data.astype({emodname: "int64" for emodname in effect_modifiers[num_cont_effect_modifiers:]}, copy=False)
-        data = data.astype(
-            {emodname: "category" for emodname in effect_modifiers[num_cont_effect_modifiers:]}, copy=False
-        )
+        data = data.astype({emodname: "int64" for emodname in effect_modifiers[num_cont_effect_modifiers:]})
+        data = data.astype({emodname: "category" for emodname in effect_modifiers[num_cont_effect_modifiers:]})
 
     # Now specifying the corresponding graph strings
     dot_graph = create_dot_graph(treatments, outcome, common_causes, instruments, effect_modifiers, frontdoor_variables)
@@ -451,9 +449,9 @@ def simple_iv_dataset(beta, num_samples, num_treatments=None, treatment_is_binar
 
     # Specifying the correct dtypes
     if treatment_is_binary:
-        data = data.astype({tname: "bool" for tname in treatments}, copy=False)
+        data = data.astype({tname: "bool" for tname in treatments})
     if outcome_is_binary:
-        data = data.astype({outcome: "bool"}, copy=False)
+        data = data.astype({outcome: "bool"})
 
     # Now specifying the corresponding graph strings
     dot_graph = create_dot_graph(treatments, outcome, common_causes, instruments)
@@ -943,14 +941,14 @@ def partially_linear_dataset(
     data = pd.DataFrame(data, columns=col_names)
     # Specifying the correct dtypes
     if treatment_is_binary:
-        data = data.astype({tname: "bool" for tname in treatments}, copy=False)
+        data = data.astype({tname: "bool" for tname in treatments})
     elif treatment_is_category:
-        data = data.astype({tname: "category" for tname in treatments}, copy=False)
+        data = data.astype({tname: "category" for tname in treatments})
     if outcome_is_binary:
-        data = data.astype({outcome: "bool"}, copy=False)
+        data = data.astype({outcome: "bool"})
     if num_discrete_common_causes > 0 and not one_hot_encode:
-        data = data.astype({wname: "int64" for wname in common_causes[num_cont_common_causes:]}, copy=False)
-        data = data.astype({wname: "category" for wname in common_causes[num_cont_common_causes:]}, copy=False)
+        data = data.astype({wname: "int64" for wname in common_causes[num_cont_common_causes:]})
+        data = data.astype({wname: "category" for wname in common_causes[num_cont_common_causes:]})
     dot_graph = create_dot_graph(treatments, outcome, common_causes, instruments=[])
     # Now writing the gml graph
     gml_graph = create_gml_graph(treatments, outcome, common_causes, instruments=[])
@@ -997,7 +995,7 @@ def lalonde_dataset() -> pd.DataFrame:
     treated = pd.read_csv(
         "https://www.nber.org/~rdehejia/data/nswre74_treated.txt", sep="\\s+", header=None, names=cols
     )
-    lalonde = pd.concat([control, treated], ignore_index=True).astype({"treat": "bool"}, copy=False)
+    lalonde = pd.concat([control, treated], ignore_index=True).astype({"treat": "bool"})
     lalonde["u74"] = np.where(lalonde["re74"] == 0, 1.0, 0.0)
     lalonde["u75"] = np.where(lalonde["re75"] == 0, 1.0, 0.0)
     return lalonde
@@ -1033,7 +1031,7 @@ def psid_dataset() -> pd.DataFrame:
     # DAMAGE.
     cols = ["treat", "age", "educ", "black", "hisp", "married", "nodegr", "re74", "re75", "re78"]
     psid = pd.read_csv("https://www.nber.org/~rdehejia/data/psid_controls.txt", sep="\\s+", header=None, names=cols)
-    psid = psid.astype({"treat": "bool"}, copy=False)
+    psid = psid.astype({"treat": "bool"})
     psid["u74"] = np.where(psid["re74"] == 0, 1.0, 0.0)
     psid["u75"] = np.where(psid["re75"] == 0, 1.0, 0.0)
     return psid
