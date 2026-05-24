@@ -206,10 +206,14 @@ def refute_placebo_treatment(
             )
 
     # For IV methods, the estimating_instrument_names should also be
-    # changed. Create a copy to avoid modifying original object
-    if isinstance(estimate, InstrumentalVariableEstimator):
+    # changed. Create a copy to avoid modifying original object.
+    # estimate is a CausalEstimate; the actual estimator is estimate.estimator.
+    if hasattr(estimate, "estimator") and isinstance(estimate.estimator, InstrumentalVariableEstimator):
         estimate = copy.deepcopy(estimate)
-        estimate.iv_instrument_name = ["placebo_" + s for s in parse_state(estimate.iv_instrument_name)]
+        if estimate.estimator.iv_instrument_name is not None:
+            estimate.estimator.iv_instrument_name = [
+                "placebo_" + s for s in parse_state(estimate.estimator.iv_instrument_name)
+            ]
 
     # We need to change the identified estimand
     # We make a copy as a safety measure, we don't want to change the
