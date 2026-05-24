@@ -7,6 +7,7 @@ from pytest import mark
 import dowhy
 import dowhy.datasets
 from dowhy import CausalModel
+from dowhy.causal_identifier.auto_identifier import identify_mediation
 from dowhy.graph import *
 from dowhy.utils.graph_operations import daggity_to_dot
 
@@ -125,3 +126,44 @@ class TestCausalGraph(object):
         assert has_directed_path(self.nx_graph, ["X0", "X1", "X2"], ["y", "v0"])
         assert not has_directed_path(self.nx_graph, [], ["y"])
         assert not has_directed_path(self.nx_graph, ["X0", "X1", "X2"], ["y", "v0", "Z0"])
+
+
+def test_identify_mediation_single_mediator():
+    """Regression: single mediator case still returns exactly one mediator."""
+    graph = nx.DiGraph([("X", "M"), ("M", "Y"), ("X", "Y")])
+    mediators = identify_mediation(graph, ["X"], ["Y"])
+    assert mediators == ["M"]
+
+
+def test_identify_mediation_parallel_mediators():
+    """identify_mediation returns all valid mediators, not just the first.
+
+    Regression test for https://github.com/py-why/dowhy/issues/1334
+    """
+    graph = nx.DiGraph([("D", "M1"), ("D", "M2"), ("D", "Y"), ("M1", "Y"), ("M2", "Y")])
+    mediators = identify_mediation(graph, ["D"], ["Y"])
+    assert set(mediators) == {"M1", "M2"}
+
+
+def test_identify_mediation_no_mediator():
+    """No mediator exists when there is only a direct path."""
+    graph = nx.DiGraph([("X", "Y")])
+    mediators = identify_mediation(graph, ["X"], ["Y"])
+    assert mediators == []
+
+
+def test_nie_with_parallel_mediators():
+    """End-to-end: NIE estimand includes all parallel mediators.
+
+    Regression test for https://github.com/py-why/dowhy/issues/1334
+    """
+    graph = nx.DiGraph([("D", "M1"), ("D", "M2"), ("D", "Y"), ("M1", "Y"), ("M2", "Y")])
+    vertices = ["D", "M1", "M2", "Y"]
+    model = CausalModel(
+        data=pd.DataFrame(columns=vertices),
+        graph=graph,
+        treatment="D",
+        outcome="Y",
+    )
+    estimand = model.identify_effect(estimand_type="nonparametric-nie")
+    assert set(estimand.get_mediator_variables()) == {"M1", "M2"}
