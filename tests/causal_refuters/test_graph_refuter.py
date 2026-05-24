@@ -55,4 +55,6 @@ class TestGraphRefuter:
         # Foo _|_ treatment | []  (no conditioning set)
         independence_constraints = [("Foo", "treatment", [])]
         result = refuter.refute_model(independence_constraints=independence_constraints)
-        assert result is not None
+        assert result.__class__.__name__.endswith("Refutation")
+        assert hasattr(result, "refutation_result")
+        assert result.refutation_result is not None
