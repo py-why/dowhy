@@ -258,7 +258,9 @@ class CausalModel:
     ):
         """Estimate the identified causal effect.
 
-        Currently requires an explicit method name to be specified. Method names follow the convention of identification method followed by the specific estimation method: "[backdoor/iv/frontdoor].estimation_method_name". For a list of supported methods, check out the :doc:`User Guide </user_guide/causal_tasks/estimating_causal_effects/index>`. Here are some examples.
+        Method names follow the convention of identification method followed by the specific estimation method:
+        "[backdoor/iv/frontdoor].estimation_method_name". For a list of supported methods, check out the
+        :doc:`User Guide </user_guide/causal_tasks/estimating_causal_effects/index>`. Here are some examples.
 
             * Propensity Score Matching: "backdoor.propensity_score_matching"
             * Propensity Score Stratification: "backdoor.propensity_score_stratification"
@@ -269,13 +271,25 @@ class CausalModel:
             * Regression Discontinuity: "iv.regression_discontinuity"
             * Two Stage Regression: "frontdoor.two_stage_regression"
 
-        In addition, you can directly call any of the EconML estimation methods. The convention is "[backdoor/iv].econml.path-to-estimator-class". For example, for the double machine learning estimator ("DML" class) that is located inside "dml" module of EconML, you can use the method name, "backdoor.econml.dml.DML". See :doc:`this demo notebook </example_notebooks/dowhy-conditional-treatment-effects>`.
+        In addition, you can directly call any of the EconML estimation methods. The convention is
+        "[backdoor/iv].econml.path-to-estimator-class". For example, for the double machine learning estimator
+        ("DML" class) that is located inside "dml" module of EconML, you can use the method name,
+        "backdoor.econml.dml.DML". See :doc:`this demo notebook </example_notebooks/dowhy-conditional-treatment-effects>`.
 
+        When ``method_name`` is omitted (``None``), a default is selected automatically:
+
+        * **Backdoor identified** – propensity score stratification (binary treatment) or linear regression
+          (continuous treatment).
+        * **IV identified** – instrumental variable estimator.
+        * **Frontdoor identified** – two-stage regression.
+
+        An ``INFO``-level log message records which method was chosen.
 
         :param identified_estimand: a probability expression
             that represents the effect to be estimated. Output of
             CausalModel.identify_effect method
-        :param method_name: name of the estimation method to be used.
+        :param method_name: name of the estimation method to be used.  When ``None``, a default
+            is chosen automatically based on the identified estimand (see above).
         :param control_value: Value of the treatment in the control group, for effect estimation.  If treatment is multi-variate, this can be a list.
         :param treatment_value: Value of the treatment in the treated group, for effect estimation. If treatment is multi-variate, this can be a list.
         :param test_significance: Binary flag on whether to additionally do a statistical signficance test for the estimate.
@@ -295,62 +309,78 @@ class CausalModel:
             effect_modifiers = self._graph.get_effect_modifiers(self._treatment, self._outcome)
 
         if method_name is None:
-            # TODO add propensity score as default backdoor method, iv as default iv method, add an informational message to show which method has been selected.
-            pass
-        else:
-            # TODO add dowhy as a prefix to all dowhy estimators
-            num_components = len(method_name.split("."))
-            str_arr = method_name.split(".", maxsplit=1)
-            identifier_name = str_arr[0]
-            estimator_name = str_arr[1]
-            # This is done as all dowhy estimators have two parts and external ones have two or more parts
-            if num_components > 2:
-                estimator_package = estimator_name.split(".")[0]
-                if estimator_package == "dowhy":  # For updated dowhy methods
-                    estimator_method = estimator_name.split(".", maxsplit=1)[
-                        1
-                    ]  # discard dowhy from the full package name
-                    causal_estimator_class = causal_estimators.get_class_object(estimator_method + "_estimator")
-                else:
-                    third_party_estimator_package = estimator_package
-                    causal_estimator_class = causal_estimators.get_class_object(
-                        third_party_estimator_package, estimator_name
-                    )
-                    if method_params is None:
-                        method_params = {}
-                    # Define the third-party estimation method to be used
-                    method_params[third_party_estimator_package + "_estimator"] = estimator_name
-            else:  # For older dowhy methods
-                self.logger.info(estimator_name)
-                # Process the dowhy estimators
-                causal_estimator_class = causal_estimators.get_class_object(estimator_name + "_estimator")
-
-            if method_params is not None and (num_components <= 2 or estimator_package == "dowhy"):
-                extra_args = method_params.get("init_params", {})
-            else:
-                extra_args = {}
-            if method_params is None:
-                method_params = {}
-
-            identified_estimand.set_identifier_method(identifier_name)
-
-            # If not fit_estimator, attempt to retrieve existing estimator.
-            # Keep original behaviour to create new estimator if none found.
-            causal_estimator = None
-            if not fit_estimator:
-                causal_estimator = self.get_estimator(method_name)
-
-            if causal_estimator is None:
-                causal_estimator = causal_estimator_class(
-                    identified_estimand,
-                    test_significance=test_significance,
-                    evaluate_effect_strength=evaluate_effect_strength,
-                    confidence_intervals=confidence_intervals,
-                    **method_params,
-                    **extra_args,
+            if identified_estimand.no_directed_path:
+                self.logger.warning(
+                    "No directed path from %s to %s. Causal effect is zero.", self._treatment, self._outcome
                 )
+                return CausalEstimate(
+                    None,
+                    None,
+                    None,
+                    0,
+                    identified_estimand,
+                    None,
+                    control_value=control_value,
+                    treatment_value=treatment_value,
+                )
+            method_name = self._select_default_method_name(identified_estimand)
+            self.logger.info(
+                "No method_name provided. Automatically using '%s'. "
+                "Pass method_name explicitly to suppress this message.",
+                method_name,
+            )
 
-                self._estimator_cache[method_name] = causal_estimator
+        # TODO add dowhy as a prefix to all dowhy estimators
+        num_components = len(method_name.split("."))
+        str_arr = method_name.split(".", maxsplit=1)
+        identifier_name = str_arr[0]
+        estimator_name = str_arr[1]
+        # This is done as all dowhy estimators have two parts and external ones have two or more parts
+        if num_components > 2:
+            estimator_package = estimator_name.split(".")[0]
+            if estimator_package == "dowhy":  # For updated dowhy methods
+                estimator_method = estimator_name.split(".", maxsplit=1)[1]  # discard dowhy from the full package name
+                causal_estimator_class = causal_estimators.get_class_object(estimator_method + "_estimator")
+            else:
+                third_party_estimator_package = estimator_package
+                causal_estimator_class = causal_estimators.get_class_object(
+                    third_party_estimator_package, estimator_name
+                )
+                if method_params is None:
+                    method_params = {}
+                # Define the third-party estimation method to be used
+                method_params[third_party_estimator_package + "_estimator"] = estimator_name
+        else:  # For older dowhy methods
+            self.logger.info(estimator_name)
+            # Process the dowhy estimators
+            causal_estimator_class = causal_estimators.get_class_object(estimator_name + "_estimator")
+
+        if method_params is not None and (num_components <= 2 or estimator_package == "dowhy"):
+            extra_args = method_params.get("init_params", {})
+        else:
+            extra_args = {}
+        if method_params is None:
+            method_params = {}
+
+        identified_estimand.set_identifier_method(identifier_name)
+
+        # If not fit_estimator, attempt to retrieve existing estimator.
+        # Keep original behaviour to create new estimator if none found.
+        causal_estimator = None
+        if not fit_estimator:
+            causal_estimator = self.get_estimator(method_name)
+
+        if causal_estimator is None:
+            causal_estimator = causal_estimator_class(
+                identified_estimand,
+                test_significance=test_significance,
+                evaluate_effect_strength=evaluate_effect_strength,
+                confidence_intervals=confidence_intervals,
+                **method_params,
+                **extra_args,
+            )
+
+            self._estimator_cache[method_name] = causal_estimator
 
         return estimate_effect(
             self._data,
@@ -364,6 +394,39 @@ class CausalModel:
             effect_modifiers,
             fit_estimator,
             method_params,
+        )
+
+    def _select_default_method_name(self, identified_estimand):
+        """Choose a default estimation method based on the identified estimand.
+
+        Priority: backdoor > iv > frontdoor.  Within backdoor, propensity-score
+        stratification is used for binary treatments (≤2 unique values) and linear
+        regression for continuous treatments. Multivariate treatments must specify
+        ``method_name`` explicitly.
+
+        :param identified_estimand: Output of :meth:`identify_effect`.
+        :raises ValueError: if no valid estimand is available for auto-selection.
+        :returns: A method-name string suitable for :meth:`estimate_effect`.
+        """
+        estimands = identified_estimand.estimands or {}
+        if len(self._treatment) > 1:
+            raise ValueError(
+                "Could not automatically determine an estimation method for multivariate treatments. "
+                "Please specify method_name explicitly."
+            )
+        if estimands.get("backdoor") is not None:
+            treatment_col = self._treatment[0]
+            if self._data[treatment_col].nunique() <= 2:
+                return "backdoor.propensity_score_stratification"
+            return "backdoor.linear_regression"
+        if estimands.get("iv") is not None:
+            return "iv.instrumental_variable"
+        if estimands.get("frontdoor") is not None:
+            return "frontdoor.two_stage_regression"
+        raise ValueError(
+            "Could not automatically determine an estimation method: no valid backdoor, "
+            "instrumental variable, or frontdoor estimand was identified. "
+            "Please specify method_name explicitly."
         )
 
     def do(self, x, identified_estimand, method_name=None, fit_estimator=True, method_params=None):

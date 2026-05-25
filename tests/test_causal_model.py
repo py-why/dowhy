@@ -698,6 +698,99 @@ class TestCausalModel(object):
         assert (estimates[1].estimator) == model.get_estimator(methods[1])
         assert (estimates[0].estimator) != model.get_estimator(methods[1])  # check not same object
 
+    def test_estimate_effect_default_method_binary_treatment(self):
+        """When method_name=None and treatment is binary, auto-selects propensity_score_stratification."""
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=2,
+            num_samples=500,
+            num_treatments=1,
+            treatment_is_binary=True,
+        )
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+            proceed_when_unidentifiable=True,
+        )
+        identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        # method_name=None should auto-select without raising an error
+        estimate = model.estimate_effect(identified_estimand, method_name=None, control_value=0, treatment_value=1)
+        assert estimate is not None
+        assert estimate.estimator.__class__.__name__ == "PropensityScoreStratificationEstimator"
+
+    def test_estimate_effect_default_method_continuous_treatment(self):
+        """When method_name=None and treatment is continuous, auto-selects linear_regression."""
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=2,
+            num_samples=500,
+            num_treatments=1,
+            treatment_is_binary=False,
+        )
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+            proceed_when_unidentifiable=True,
+        )
+        identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        estimate = model.estimate_effect(identified_estimand, method_name=None, control_value=0, treatment_value=1)
+        assert estimate is not None
+        assert estimate.estimator.__class__.__name__ == "LinearRegressionEstimator"
+
+    def test_estimate_effect_default_method_multivariate_treatment_requires_explicit_method_name(self):
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=2,
+            num_samples=500,
+            num_treatments=2,
+            treatment_is_binary=False,
+        )
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+            proceed_when_unidentifiable=True,
+        )
+        identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+
+        with pytest.raises(ValueError, match="method_name explicitly"):
+            model.estimate_effect(identified_estimand, method_name=None)
+
+    def test_estimate_effect_default_method_no_directed_path_returns_zero(self):
+        graph = nx.DiGraph([("T", "Y"), ("A", "Y"), ("A", "B")])
+        data = pd.DataFrame({"T": [0, 1, 0, 1], "B": [0, 1, 1, 0], "A": [0, 1, 0, 1], "Y": [1, 2, 1, 2]})
+        model = CausalModel(data=data, treatment=["T", "B"], outcome="Y", graph=graph)
+
+        identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        assert identified_estimand.no_directed_path
+
+        estimate = model.estimate_effect(identified_estimand, method_name=None)
+        assert estimate.value == 0
+
+    def test_estimate_effect_default_method_no_valid_estimand_raises(self):
+        """When method_name=None and no valid estimand exists, raises ValueError."""
+        import networkx as nx
+
+        # Graph with no valid adjustment set and no IV
+        graph = nx.DiGraph([("T", "Y")])
+        data = pd.DataFrame({"T": [0, 1, 0, 1, 0], "Y": [1, 2, 1, 3, 1]})
+        model = CausalModel(data=data, treatment="T", outcome="Y", graph=graph)
+        # Force an identified estimand where all strategies return None
+        identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        # If backdoor/iv/frontdoor all happen to be None, we expect ValueError.
+        # In a simple T->Y graph with no confounders, backdoor IS valid (empty set).
+        # We test the ValueError path by mocking the estimands.
+        identified_estimand.estimands["backdoor"] = None
+        identified_estimand.estimands["iv"] = None
+        identified_estimand.estimands["frontdoor"] = None
+        with pytest.raises(ValueError, match="method_name explicitly"):
+            model.estimate_effect(identified_estimand, method_name=None)
+
 
 if __name__ == "__main__":
     pytest.main([__file__])
