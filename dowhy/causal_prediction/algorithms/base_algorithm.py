@@ -28,7 +28,7 @@ class PredictionAlgorithm(pl.LightningModule):
         # Check if the optimizer is currently supported
         if self.optimizer not in ["Adam", "SGD"]:
             error_msg = self.optimizer + " is not implemented currently. Try Adam or SGD."
-            raise Exception(error_msg)
+            raise ValueError(error_msg)
 
     def training_step(self, train_batch, batch_idx):
         """

@@ -151,7 +151,7 @@ def _extract_noise_model_components(noise_eq: str) -> Tuple[str, dict]:
         parsed_args = _parse_args(args)
         return noise_model_name, parsed_args
     else:
-        raise Exception("Unable to recognise the format or function specified")
+        raise ValueError("Unable to recognise the format or function specified")
 
 
 def _extract_equation_components(equation: str) -> Tuple[str, str]:
@@ -185,7 +185,7 @@ def _add_undefined_nodes_info(causal_nodes_info: dict, present_nodes: list) -> N
 
 def _check_node_redundancy(causal_nodes_info: dict, node_name: str) -> None:
     if node_name in causal_nodes_info:
-        raise Exception(f"The node {node_name} is specified twice which is not allowed.")
+        raise ValueError(f"The node {node_name} is specified twice which is not allowed.")
 
 
 def _sanitize_input_expression(expression: str, banned_characters: list) -> None:

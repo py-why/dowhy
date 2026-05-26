@@ -20,7 +20,7 @@ def propensity_of_treatment_score(data, covariates, treatment, model="logistic",
 
 def state_propensity_score(data, covariates, treatments, variable_types=None):
     if len(set(covariates).intersection(treatments)) != 0:
-        raise Exception("Can't control for causal states. Remove treatment from covariates.")
+        raise ValueError("Can't control for causal states. Remove treatment from covariates.")
     log_propensities = {}
     for i, treatment in enumerate(treatments):
         if variable_types[treatment] in ["b"]:
@@ -36,7 +36,7 @@ def state_propensity_score(data, covariates, treatments, variable_types=None):
                 continuous_treatment_model(data.copy(), covariates + treatments[i + 1 :], treatment, variable_types)
             )
         else:
-            raise Exception(
+            raise ValueError(
                 "Variable type {} for variable {} is not a recognized format type.".format(
                     variable_types[treatment], treatment
                 )
@@ -104,7 +104,7 @@ def get_type_string(variables, variable_types):
         elif variable_types[variable] in ["c"]:
             var_types.append("c")
         else:
-            raise Exception(
+            raise ValueError(
                 "Variable type {} for variable {} not a recognized type.".format(variable_types[variable], variable)
             )
     return "".join(var_types)
