@@ -15,6 +15,7 @@ from dowhy.gcm.causal_models import (
     validate_causal_dag,
 )
 from dowhy.gcm.fitting_sampling import draw_samples
+from dowhy.gcm.util.general import set_random_seed
 from dowhy.graph import (
     DirectedGraph,
     get_ordered_predecessors,
@@ -29,6 +30,7 @@ def interventional_samples(
     interventions: Dict[Any, Callable[[np.ndarray], Union[float, np.ndarray]]],
     observed_data: Optional[pd.DataFrame] = None,
     num_samples_to_draw: Optional[int] = None,
+    random_seed: Optional[int] = None,
 ) -> pd.DataFrame:
     """Performs intervention on nodes in the causal graph.
 
@@ -40,8 +42,12 @@ def interventional_samples(
     :param observed_data: Optionally, data on which to perform interventions. If None are given, data is generated based
                           on the generative models.
     :param num_samples_to_draw: Sample size to draw from the interventional distribution.
+    :param random_seed: Optional seed for the random number generator to make results reproducible.
     :return: Samples from the interventional distribution.
     """
+    if random_seed is not None:
+        set_random_seed(random_seed)
+
     validate_causal_dag(causal_model.graph)
     for node in interventions:
         validate_node_in_graph(causal_model.graph, node)
@@ -107,6 +113,7 @@ def counterfactual_samples(
     interventions: Dict[Any, Callable[[np.ndarray], Union[float, np.ndarray]]],
     observed_data: Optional[pd.DataFrame] = None,
     noise_data: Optional[pd.DataFrame] = None,
+    random_seed: Optional[int] = None,
 ) -> pd.DataFrame:
     """Estimates counterfactual data for observed data if we were to perform specified interventions. This function
     implements the 3-step process for computing counterfactuals by Pearl (see https://ftp.cs.ucla.edu/pub/stat_ser/r485.pdf).
@@ -121,8 +128,12 @@ def counterfactual_samples(
     :param noise_data: Data of noise terms corresponding to nodes in the causal graph. If not provided,
                        these have to be estimated from observed data. Then we require causal models of nodes to be
                        invertible.
+    :param random_seed: Optional seed for the random number generator to make results reproducible.
     :return: Estimated counterfactual data.
     """
+    if random_seed is not None:
+        set_random_seed(random_seed)
+
     for node in interventions:
         validate_node_in_graph(causal_model.graph, node)
 
@@ -196,6 +207,7 @@ def average_causal_effect(
     interventions_reference: Dict[Any, Callable[[np.ndarray], Union[float, np.ndarray]]],
     observed_data: Optional[pd.DataFrame] = None,
     num_samples_to_draw: Optional[int] = None,
+    random_seed: Optional[int] = None,
 ) -> float:
     """Estimates the average causal effect (ACE) on the target of two different sets of interventions.
     The interventions can be specified through the parameters `interventions_alternative` and `interventions_reference`.
@@ -223,8 +235,11 @@ def average_causal_effect(
                           models.
     :param num_samples_to_draw: Number of samples drawn from the causal model for estimating ACE if no observed data is
                                 given.
+    :param random_seed: Optional seed for the random number generator to make results reproducible.
     :return: The estimated average causal effect (ACE).
     """
+    if random_seed is not None:
+        set_random_seed(random_seed)
     # For estimating the effect, we only need to consider the nodes that have a directed path to the target node, i.e.
     # all ancestors of the target.
     causal_model = ProbabilisticCausalModel(node_connected_subgraph_view(causal_model.graph, target_node))
