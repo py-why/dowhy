@@ -124,7 +124,9 @@ class TestTwoStageRegressionEstimator(object):
                 target "X"
             ]
         ]
-        """.replace("\n", "")
+        """.replace(
+            "\n", ""
+        )
 
         N_SAMPLES = 10000
         # Generate the data
@@ -207,7 +209,9 @@ graph [
     edge [ source "X" target "Y" ]
     edge [ source "M" target "Y" ]
 ]
-""".replace("\n", " ")
+""".replace(
+    "\n", " "
+)
 
 
 class TestTwoStageRegressionMediationNIE:
