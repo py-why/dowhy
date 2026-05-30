@@ -744,10 +744,10 @@ def estimate_effect(
         )
     # Check if estimator's target estimand is identified
     elif identified_estimand.estimands[identifier_name] is None:
-        error_msg = f"No valid identified estimand available for identifier '{identifier_name}'. Ensure the graph supports this identification method."
+        error_msg = f"No valid identified estimand for '{identifier_name}'. Ensure that the identification step succeeded for this estimator method (e.g. the graph must contain valid instruments for 'iv.instrumental_variable')."
         logger.error(error_msg)
         raise ValueError(error_msg)
-        
+
     if fit_estimator:
         estimator.fit(
             data=data,
