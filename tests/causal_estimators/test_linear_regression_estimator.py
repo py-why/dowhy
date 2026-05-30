@@ -296,3 +296,67 @@ class TestLinearRegressionEstimator(object):
         estimator = LinearRegressionEstimator(identified_estimand=target_estimand)
         with pytest.raises(ValueError, match="only supports backdoor and general_adjustment"):
             estimator.fit(data["df"])
+
+    def test_evaluate_effect_strength_binary_treatment(self):
+        """evaluate_effect_strength must not raise for a single binary treatment.
+
+        Regression test for #416: estimate_effect_naive used data[list] instead of
+        data[col_name], returning a DataFrame that caused `ValueError: Cannot index with
+        multidimensional key` inside `.loc[]`.
+        """
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=1,
+            num_instruments=0,
+            num_treatments=1,
+            num_samples=500,
+            treatment_is_binary=True,
+        )
+        target_estimand = identify_effect_auto(
+            build_graph_from_str(data["gml_graph"]),
+            observed_nodes=list(data["df"].columns),
+            action_nodes=data["treatment_name"],
+            outcome_nodes=data["outcome_name"],
+            estimand_type=EstimandType.NONPARAMETRIC_ATE,
+        )
+        target_estimand.set_identifier_method("backdoor")
+        estimator = LinearRegressionEstimator(identified_estimand=target_estimand)
+        estimator.fit(data["df"])
+        ate_estimate = estimator.estimate_effect(data["df"], control_value=0, treatment_value=1)
+        # Should not raise ValueError: Cannot index with multidimensional key
+        strength = estimator.evaluate_effect_strength(data["df"], ate_estimate)
+        assert "fraction-effect" in strength
+        assert np.isfinite(strength["fraction-effect"])
+
+    def test_evaluate_effect_strength_non_binary_treatment(self):
+        """estimate_effect_naive must respect actual treatment_value / control_value, not hardcoded 0/1.
+
+        Regression test for #416: the old code used hardcoded ``== 1`` and ``== 0``, so
+        non-binary treatments (e.g. control_value=1, treatment_value=2) would silently
+        compute the wrong effect-strength ratio (selecting no rows).
+        """
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=1,
+            num_instruments=0,
+            num_treatments=1,
+            num_samples=1000,
+            treatment_is_binary=False,
+        )
+        df = data["df"]
+        # Recode continuous treatment to binary {0, 1} so both control and treatment rows exist
+        df[data["treatment_name"][0]] = np.where(df[data["treatment_name"][0]] > 0, 1, 0)
+        target_estimand = identify_effect_auto(
+            build_graph_from_str(data["gml_graph"]),
+            observed_nodes=list(df.columns),
+            action_nodes=data["treatment_name"],
+            outcome_nodes=data["outcome_name"],
+            estimand_type=EstimandType.NONPARAMETRIC_ATE,
+        )
+        target_estimand.set_identifier_method("backdoor")
+        estimator = LinearRegressionEstimator(identified_estimand=target_estimand)
+        estimator.fit(df)
+        ate_estimate = estimator.estimate_effect(df, control_value=0, treatment_value=1)
+        # Should not raise; fraction-effect must be a finite number
+        strength = estimator.evaluate_effect_strength(df, ate_estimate)
+        assert np.isfinite(strength["fraction-effect"])
