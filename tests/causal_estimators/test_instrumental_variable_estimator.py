@@ -3,6 +3,8 @@ import itertools
 import pytest
 from pytest import mark
 
+import dowhy.datasets
+from dowhy import CausalModel
 from dowhy.causal_estimators.instrumental_variable_estimator import InstrumentalVariableEstimator
 
 from .base import SimpleEstimator
@@ -78,3 +80,28 @@ class TestInstrumentalVariableEstimator(object):
         cfg["num_instruments"] = 0
         with pytest.raises(ValueError):
             estimator_tester.average_treatment_effect_test(**cfg)
+
+    def test_estimate_effect_raises_when_iv_estimand_is_none(self):
+        """Regression test for #1551: estimate_effect() must raise ValueError
+        instead of silently returning CausalEstimate(value=None) when the
+        identified estimand for 'iv' is None (i.e. no instruments in the graph).
+        """
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=2,
+            num_instruments=0,
+            num_samples=500,
+            treatment_is_binary=True,
+        )
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["dot_graph"],
+        )
+        identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        assert identified_estimand.estimands.get("iv") is None, (
+            "Precondition: iv estimand must be None when num_instruments=0"
+        )
+        with pytest.raises(ValueError):
+            model.estimate_effect(identified_estimand, method_name="iv.instrumental_variable")

@@ -744,9 +744,10 @@ def estimate_effect(
         )
     # Check if estimator's target estimand is identified
     elif identified_estimand.estimands[identifier_name] is None:
-        logger.error("No valid identified estimand available.")
-        return CausalEstimate(
-            None, None, None, None, None, None, control_value=control_value, treatment_value=treatment_value
+        raise ValueError(
+            f"No valid identified estimand for '{identifier_name}'. "
+            "Ensure that the identification step succeeded for this estimator method "
+            "(e.g. the graph must contain valid instruments for 'iv.instrumental_variable')."
         )
 
     if fit_estimator:
