@@ -1,4 +1,4 @@
-from typing import Any, Callable, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import networkx as nx
 import numpy as np
@@ -19,28 +19,30 @@ def compute_data_from_noise(causal_model: StructuralCausalModel, noise_data: pd.
     validate_causal_dag(causal_model.graph)
 
     sorted_nodes = list(nx.topological_sort(causal_model.graph))
-    data = pd.DataFrame(np.empty((noise_data.shape[0], len(sorted_nodes))), columns=sorted_nodes)
+    data: Dict[Any, np.ndarray] = {}
 
     for node in sorted_nodes:
         if is_root_node(causal_model.graph, node):
             data[node] = noise_data[node].to_numpy().squeeze()
         else:
+            parents = get_ordered_predecessors(causal_model.graph, node)
             data[node] = (
                 causal_model.causal_mechanism(node)
                 .evaluate(
-                    data[get_ordered_predecessors(causal_model.graph, node)].to_numpy(), noise_data[node].to_numpy()
+                    np.column_stack([data[p] for p in parents]),
+                    noise_data[node].to_numpy(),
                 )
                 .squeeze()
             )
 
-    return data
+    return pd.DataFrame(data, columns=sorted_nodes)
 
 
 def compute_noise_from_data(causal_model: InvertibleStructuralCausalModel, observed_data: pd.DataFrame) -> pd.DataFrame:
     validate_causal_dag(causal_model.graph)
 
     sorted_noise = list(nx.topological_sort(causal_model.graph))
-    noise = pd.DataFrame(np.empty((observed_data.shape[0], len(sorted_noise))), columns=sorted_noise)
+    noise: Dict[Any, np.ndarray] = {}
 
     for node in sorted_noise:
         if is_root_node(causal_model.graph, node):
@@ -52,7 +54,7 @@ def compute_noise_from_data(causal_model: InvertibleStructuralCausalModel, obser
                 .squeeze()
             )
 
-    return noise
+    return pd.DataFrame(noise, columns=sorted_noise)
 
 
 def get_noise_dependent_function(
