@@ -67,7 +67,7 @@ def test_estimate_effect_raises_valueerror_for_missing_estimand():
         graph=data["dot_graph"],
     )
     estimand = model.identify_effect(proceed_when_unidentifiable=True)
-    with pytest.raises(ValueError, match="No valid identified estimand available"):
+    with pytest.raises(ValueError, match=r"No valid identified estimand for 'iv'"):
         model.estimate_effect(
             identified_estimand=estimand,
             method_name="iv.instrumental_variable",
