@@ -135,6 +135,65 @@ class TestDistanceMatchingEstimator:
         with pytest.raises(Exception, match="binary"):
             model.estimate_effect(estimand, method_name="backdoor.distance_matching", target_units="att")
 
+    def test_data_subset_refuter_with_categorical_columns(self):
+        """Regression test for Issue #1372.
+
+        DataSubsetRefuter samples a subset of the DataFrame, which changes the
+        index. When common causes contain categorical columns, one_hot_encode
+        must preserve the original index so that the encoded DataFrame aligns
+        with the subsetted treatment/outcome columns. Additionally,
+        estimate_effect() must re-encode the (subsetted) data rather than
+        reusing the stale encoded cache from fit().
+
+        Before the fix, this raised:
+            ValueError: Unalignable boolean Series provided as indexer
+        """
+        rng = np.random.default_rng(1372)
+        n = 400
+        # Create a categorical common cause
+        w_cat = pd.Categorical(rng.choice(["low", "mid", "high"], size=n))
+        w_num = rng.standard_normal(n)
+        treatment = ((w_num + (w_cat == "high").astype(int) + rng.standard_normal(n)) > 0).astype(int)
+        outcome = 5 * treatment + 2 * w_num + 3 * (w_cat == "high").astype(int) + rng.standard_normal(n)
+
+        df = pd.DataFrame({
+            "W_cat": w_cat,
+            "W_num": w_num,
+            "v0": treatment,
+            "y": outcome,
+        })
+
+        gml = (
+            'graph [directed 1 '
+            'node [id "W_cat" label "W_cat"] '
+            'node [id "W_num" label "W_num"] '
+            'node [id "v0" label "v0"] '
+            'node [id "y" label "y"] '
+            'edge [source "W_cat" target "v0"] edge [source "W_cat" target "y"] '
+            'edge [source "W_num" target "v0"] edge [source "W_num" target "y"] '
+            'edge [source "v0" target "y"]]'
+        )
+
+        model = CausalModel(data=df, treatment="v0", outcome="y", graph=gml)
+        estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        estimate = model.estimate_effect(
+            estimand,
+            method_name="backdoor.distance_matching",
+            target_units="att",
+        )
+
+        # The refutation must complete without raising ValueError
+        refutation = model.refute_estimate(
+            estimand,
+            estimate,
+            method_name="data_subset_refuter",
+            subset_fraction=0.8,
+            num_simulations=3,
+        )
+
+        assert refutation is not None
+        assert np.isfinite(refutation.new_effect), "Refuted effect should be finite"
+
     def test_average_treatment_effect_via_simple_estimator(self):
         """Smoke test using the shared SimpleEstimator harness."""
         tester = SimpleEstimator(error_tolerance=0.3, Estimator=DistanceMatchingEstimator)
