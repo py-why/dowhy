@@ -1,6 +1,6 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-53-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-54-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ## Contributors ✨
@@ -80,6 +80,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/haoyu-haoyu"><img src="https://avatars.githubusercontent.com/u/85037553?v=4?s=100" width="100px;" alt="haoyu-haoyu"/><br /><sub><b>haoyu-haoyu</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=haoyu-haoyu" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="http://kaushikrajan.me"><img src="https://avatars.githubusercontent.com/u/182360080?v=4?s=100" width="100px;" alt="Kaushik Rajan"/><br /><sub><b>Kaushik Rajan</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=kvr06-ai" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/immu4989"><img src="https://avatars.githubusercontent.com/u/19887503?v=4?s=100" width="100px;" alt="Imran Ahamed"/><br /><sub><b>Imran Ahamed</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=immu4989" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/abhiprd2000"><img src="https://avatars.githubusercontent.com/u/280053291?v=4?s=100" width="100px;" alt="Abhimanyu Prasad"/><br /><sub><b>Abhimanyu Prasad</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=abhiprd2000" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
