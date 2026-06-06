@@ -156,15 +156,17 @@ class TestDistanceMatchingEstimator:
         treatment = ((w_num + (w_cat == "high").astype(int) + rng.standard_normal(n)) > 0).astype(int)
         outcome = 5 * treatment + 2 * w_num + 3 * (w_cat == "high").astype(int) + rng.standard_normal(n)
 
-        df = pd.DataFrame({
-            "W_cat": w_cat,
-            "W_num": w_num,
-            "v0": treatment,
-            "y": outcome,
-        })
+        df = pd.DataFrame(
+            {
+                "W_cat": w_cat,
+                "W_num": w_num,
+                "v0": treatment,
+                "y": outcome,
+            }
+        )
 
         gml = (
-            'graph [directed 1 '
+            "graph [directed 1 "
             'node [id "W_cat" label "W_cat"] '
             'node [id "W_num" label "W_num"] '
             'node [id "v0" label "v0"] '
