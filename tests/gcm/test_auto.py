@@ -24,7 +24,7 @@ from dowhy.gcm import (
     draw_samples,
     fit,
 )
-from dowhy.gcm.auto import AssignmentQuality, assign_causal_mechanisms, has_linear_relationship
+from dowhy.gcm.auto import AssignmentQuality, AutoAssignmentSummary, assign_causal_mechanisms, has_linear_relationship
 
 
 def _generate_linear_regression_data(num_samples=1000):
@@ -304,6 +304,14 @@ def test_when_auto_called_from_main_namespace_returns_no_attribute_error():
     from dowhy import gcm
 
     _ = gcm.auto.AssignmentQuality.GOOD
+
+
+def test_when_assign_causal_mechanisms_then_returns_auto_assignment_summary():
+    causal_model = ProbabilisticCausalModel(nx.DiGraph([("X", "Y")]))
+    data = pd.DataFrame({"X": [1, 2, 3], "Y": [1, 2, 3]})
+    summary = assign_causal_mechanisms(causal_model, data)
+    assert isinstance(summary, AutoAssignmentSummary)
+    assert isinstance(str(summary), str)
 
 
 @mark.skip("Not running AutoGluon-based tests as part of CI yet.")
