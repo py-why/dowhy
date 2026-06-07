@@ -223,6 +223,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
                 self._instrumental_variables = None
                 error_msg = "No instrumental variable present. Two stage regression is not applicable"
                 self.logger.error(error_msg)
+                raise ValueError(error_msg)
 
         if self._target_estimand.identifier_method == "frontdoor":
             self._first_stage_model._target_estimand.outcome_variable = parse_state(self._frontdoor_variables_names)

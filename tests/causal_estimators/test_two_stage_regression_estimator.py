@@ -3,6 +3,7 @@ import pandas as pd
 import pytest
 from pytest import mark
 
+import dowhy.datasets
 from dowhy import CausalModel
 from dowhy.causal_estimators.two_stage_regression_estimator import TwoStageRegressionEstimator
 from dowhy.causal_identifier import EstimandType
@@ -178,6 +179,21 @@ class TestTwoStageRegressionEstimator(object):
                 ],
                 method_params={"num_simulations": 10, "num_null_simulations": 10},
             )
+
+    def test_iv_raises_valueerror_when_no_instruments(self):
+        """iv branch must raise ValueError when no instrumental variable is present."""
+        import dowhy.datasets
+
+        data = dowhy.datasets.linear_dataset(
+            beta=10, num_common_causes=3, num_instruments=2, num_samples=500, treatment_is_binary=True
+        )
+        model = CausalModel(
+            data=data["df"], treatment=data["treatment_name"], outcome=data["outcome_name"], graph=data["dot_graph"]
+        )
+        estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        estimand.instrumental_variables = []
+        with pytest.raises(ValueError, match="No instrumental variable present"):
+            model.estimate_effect(identified_estimand=estimand, method_name="iv.two_stage_regression")
 
 
 def _make_mediation_data(n=2000, seed=42):
