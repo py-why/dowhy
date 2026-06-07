@@ -83,3 +83,19 @@ class TestPropensityBalanceInterpreter:
         assert "std_mean_diff" in result.columns
         assert "sample" in result.columns
         assert set(result["sample"]).issuperset({"Unadjusted", "PropensityAdjusted"})
+
+    def test_interpreter_with_snake_case_method_name(self):
+        """Interpreter lookup should continue to support snake_case names."""
+        estimate, df = self._build_estimate("treatment", ["W0", "W1"])
+        result = estimate.interpret(method_name="propensity_balance_interpreter", data=df)
+        assert isinstance(result, pd.DataFrame)
+
+    def test_interpreter_with_multiple_method_names_returns_list(self):
+        """interpret() should return one result per requested interpreter method."""
+        estimate, df = self._build_estimate("treatment", ["W0", "W1"])
+        result = estimate.interpret(
+            method_name=["PropensityBalanceInterpreter", "propensity_balance_interpreter"], data=df
+        )
+        assert isinstance(result, list)
+        assert len(result) == 2
+        assert all(isinstance(item, pd.DataFrame) for item in result)

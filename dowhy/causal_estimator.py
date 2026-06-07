@@ -935,16 +935,20 @@ class CausalEstimate:
         :param method_name: Method used (string) or a list of methods. If None, then the default for the specific estimator is used.
         :param kwargs:: Optional parameters that are directly passed to the interpreter method.
 
-        :returns: None
+        :returns: Interpretation result (type depends on interpreter) for a single method, or a list of results for multiple methods.
 
         """
         if method_name is None:
             method_name = self.estimator.interpret_method
         method_name_arr = parse_state(method_name)
 
+        results = []
         for method in method_name_arr:
             interpreter = interpreters.get_class_object(method)
-            interpreter(self, **kwargs).interpret(self._data)
+            results.append(interpreter(self, **kwargs).interpret(self._data))
+        if len(results) == 1:
+            return results[0]
+        return results
 
     def __str__(self):
         s = "*** Causal Estimate ***\n"
