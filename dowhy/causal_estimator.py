@@ -763,10 +763,9 @@ def estimate_effect(
         )
     # Check if estimator's target estimand is identified
     elif identified_estimand.estimands[identifier_name] is None:
-        logger.error("No valid identified estimand available.")
-        return CausalEstimate(
-            None, None, None, None, None, None, control_value=control_value, treatment_value=treatment_value
-        )
+        error_msg = f"No valid identified estimand for '{identifier_name}'. Ensure that the identification step succeeded for this estimator method (e.g. the graph must contain valid instruments for 'iv.instrumental_variable')."
+        logger.error(error_msg)
+        raise ValueError(error_msg)
 
     if fit_estimator:
         estimator.fit(
@@ -936,16 +935,20 @@ class CausalEstimate:
         :param method_name: Method used (string) or a list of methods. If None, then the default for the specific estimator is used.
         :param kwargs:: Optional parameters that are directly passed to the interpreter method.
 
-        :returns: None
+        :returns: Interpretation result (type depends on interpreter) for a single method, or a list of results for multiple methods.
 
         """
         if method_name is None:
             method_name = self.estimator.interpret_method
         method_name_arr = parse_state(method_name)
 
+        results = []
         for method in method_name_arr:
             interpreter = interpreters.get_class_object(method)
-            interpreter(self, **kwargs).interpret(self._data)
+            results.append(interpreter(self, **kwargs).interpret(self._data))
+        if len(results) == 1:
+            return results[0]
+        return results
 
     def __str__(self):
         s = "*** Causal Estimate ***\n"
