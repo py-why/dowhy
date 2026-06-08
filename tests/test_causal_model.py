@@ -733,6 +733,11 @@ class TestCausalModel(object):
         )
         estimator_after_first_call = model.get_estimator(method)
 
+        def fail_if_refit(*args, **kwargs):
+            raise AssertionError("fit_estimator=False should not call fit on the cached estimator")
+
+        estimator_after_first_call.fit = fail_if_refit
+
         # Second call with fit_estimator=False must reuse the cached estimator.
         estimate2 = model.estimate_effect(
             identified_estimand,
