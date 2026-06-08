@@ -131,7 +131,7 @@ class CausalEstimator:
         if isinstance(self._random_state, np.random.RandomState):
             return self._random_state
         return np.random.RandomState(self._random_state)
-      
+
     def __getstate__(self):
         """Return picklable state, excluding the non-picklable logger (Python < 3.12)."""
         state = self.__dict__.copy()
