@@ -754,6 +754,48 @@ class TestCausalModel(object):
         # Linear regression is deterministic: both calls must yield the same estimate.
         assert estimate1.value == pytest.approx(estimate2.value)
 
+    def test_causal_model_do_regression(self):
+        """CausalModel.do() must work with regression estimators and method_params=None.
+
+        Previously, CausalModel.do() had three bugs:
+        1. method_params=None caused TypeError: argument after ** must be a mapping, not NoneType
+        2. fit() was called with (data, treatment, outcome) instead of (data,)
+        3. RegressionEstimator.fit() never stored self._data, so interventional_outcomes()
+           could not fall back to self._data when data_df=None.
+        """
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=2,
+            num_samples=300,
+            num_treatments=1,
+            treatment_is_binary=True,
+        )
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+            test_significance=None,
+        )
+        identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+
+        # Calling do() with method_params=None (the default) must not raise TypeError.
+        do_treated = model.do(
+            x=1,
+            identified_estimand=identified_estimand,
+            method_name="backdoor.linear_regression",
+        )
+        do_control = model.do(
+            x=0,
+            identified_estimand=identified_estimand,
+            method_name="backdoor.linear_regression",
+        )
+        # The do-operator result should be a scalar estimate.
+        assert isinstance(do_treated, float) or hasattr(do_treated, "__float__")
+        # The implied ATE should be close to beta=10.
+        implied_ate = float(do_treated) - float(do_control)
+        assert abs(implied_ate - 10) < 5, f"Implied ATE {implied_ate:.2f} far from expected beta=10"
+
 
 if __name__ == "__main__":
     pytest.main([__file__])
