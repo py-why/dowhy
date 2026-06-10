@@ -149,3 +149,18 @@ class TestDistanceMatchingEstimator:
             test_significance=[False],
             method_params={"num_simulations": 5, "num_null_simulations": 5},
         )
+
+    def test_custom_minkowski_p_param(self, binary_treatment_dataset):
+        """Passing p via distance_metric_params should route through _build_nearest_neighbors."""
+        data = binary_treatment_dataset
+        model = CausalModel(data=data, treatment="v0", outcome="y", graph=GML_SINGLE_CAUSE)
+        estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        # p=1 gives Manhattan distance; should still produce a finite estimate
+        estimate = model.estimate_effect(
+            estimand,
+            method_name="backdoor.distance_matching",
+            target_units="att",
+            method_params={"init_params": {"distance_metric": "minkowski", "p": 1}},
+        )
+        assert np.isfinite(estimate.value), "Estimate should be finite with custom p=1"
+        assert abs(estimate.value - 10) < 5.0, f"Estimate {estimate.value:.2f} too far from true effect 10"
