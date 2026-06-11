@@ -356,7 +356,7 @@ class TestLinearRegressionEstimator(object):
         target_estimand.set_identifier_method("backdoor")
         estimator = LinearRegressionEstimator(identified_estimand=target_estimand)
         estimator.fit(df)
-        ate_estimate = estimator.estimate_effect(df, control_value=0, treatment_value=1)
+        ate_estimate = estimator.estimate_effect(df, control_value=1, treatment_value=2)
         # Should not raise; fraction-effect must be a finite number
         strength = estimator.evaluate_effect_strength(df, ate_estimate)
         assert np.isfinite(strength["fraction-effect"])
