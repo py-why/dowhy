@@ -344,8 +344,8 @@ class TestLinearRegressionEstimator(object):
             treatment_is_binary=False,
         )
         df = data["df"]
-        # Recode continuous treatment to binary {0, 1} so both control and treatment rows exist
-        df[data["treatment_name"][0]] = np.where(df[data["treatment_name"][0]] > 0, 1, 0)
+        # Recode continuous treatment to {1, 2} so both control and treatment rows exist (non-standard values)
+        df[data["treatment_name"][0]] = np.where(df[data["treatment_name"][0]] > 0, 2, 1)
         target_estimand = identify_effect_auto(
             build_graph_from_str(data["gml_graph"]),
             observed_nodes=list(df.columns),
