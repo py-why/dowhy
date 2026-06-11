@@ -46,10 +46,24 @@ def one_hot_encode(data: pd.DataFrame, columns=None, drop_first: bool = False, e
             drop = "first"
         encoder = OneHotEncoder(drop=drop, sparse_output=False)  # NB sparse renamed to sparse_output in sklearn 1.2+
 
-        encoded_data = encoder.fit_transform(data_to_encode)
-
+        encode = encoder.fit_transform
     else:  # Use existing encoder
-        encoded_data = encoder.transform(data_to_encode)
+        encode = encoder.transform
+
+    # OneHotEncoder fails deep inside scikit-learn with a cryptic error (e.g.
+    # "unhashable type: 'numpy.ndarray'") when a categorical column holds
+    # non-scalar values such as lists, tuples, dicts or arrays. Surface a clear
+    # DoWhy-level message instead, leaving scikit-learn as the source of truth
+    # on what is encodable.
+    try:
+        encoded_data = encode(data_to_encode)
+    except TypeError as e:
+        raise TypeError(
+            "Failed to one-hot encode the categorical column(s) "
+            f"{list(data_to_encode.columns)}. They contain values that "
+            "scikit-learn cannot encode (e.g. lists, tuples, dicts or arrays). "
+            "Flatten or clean these columns to scalar values before estimation."
+        ) from e
 
     # Convert the encoded data to a DataFrame
     columns_encoded = encoder.get_feature_names_out(data_to_encode.columns)

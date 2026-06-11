@@ -1,6 +1,7 @@
 import networkx as nx
 import numpy as np
 import pandas as pd
+import pytest
 from _pytest.python_api import approx
 
 from dowhy.utils.encoding import one_hot_encode
@@ -85,3 +86,24 @@ def test_one_hot_encode_consistent_with_new_data():
     c_z2 = df_encoded2["C_Z"]
     assert c_z1[2] == c_z2[1]
     assert c_z1[5] == c_z2[5]
+
+
+@pytest.mark.parametrize(
+    "values",
+    [
+        [["a"], ["b"], ["a"], ["c"]],  # lists
+        [("a", 1), ("b", 2), ("a", 1), ("c", 3)],  # tuples
+        [{"a": 1}, {"b": 2}, {"a": 1}, {"c": 3}],  # dicts
+        [np.array([1]), np.array([2]), np.array([1]), np.array([3])],  # arrays
+    ],
+)
+def test_one_hot_encode_raises_clear_error_on_unhashable_columns(values):
+
+    # An object column holding non-scalar values (lists, tuples, dicts, arrays) makes
+    # scikit-learn fail with a cryptic error deep in its internals (e.g.
+    # "unhashable type: 'numpy.ndarray'"). DoWhy should surface a clear, actionable
+    # message instead of leaking the dependency crash. See issue #1578.
+    df = pd.DataFrame({"N": [1, 2, 3, 4], "C": values})
+
+    with pytest.raises(TypeError, match="Failed to one-hot encode"):
+        one_hot_encode(df)
