@@ -26,16 +26,18 @@ class PropensityBalanceInterpreter(VisualInterpreter):
             raise ValueError(error_msg)
 
     def interpret(self, data: pd.DataFrame):
-        """Balance plot that shows the change in standardized mean differences for each covariate after propensity score stratification."""
-        cols = (
-            self.estimator._observed_common_causes_names
-            + self.estimate._treatment_name
-            + ["strata", "propensity_score"]
-        )
-        df = data[cols]
+        """Balance plot showing standardized mean differences per covariate before/after propensity score stratification."""
+        cause_cols = self.estimator._observed_common_causes_names
+        id_cols = self.estimate._treatment_name + ["strata", "propensity_score"]
+        treatment_col = self.estimate._treatment_name[0]
+
+        # Reshape from wide to long so each row is (sample, common_cause_id, W_value).
+        # pd.melt works with arbitrary column names, unlike the prior pd.wide_to_long
+        # approach which required columns named "W0", "W1", etc.
         df_long = (
-            pd.wide_to_long(df.reset_index(), stubnames=["W"], i="index", j="common_cause_id")
+            data[cause_cols + id_cols]
             .reset_index()
+            .melt(id_vars=["index"] + id_cols, value_vars=cause_cols, var_name="common_cause_id", value_name="W")
             .astype({"W": "float64"})
         )
 
@@ -46,7 +48,9 @@ class PropensityBalanceInterpreter(VisualInterpreter):
         mean_diff = (
             mean_diff.groupby(["common_cause_id", "strata"]).transform(lambda x: x.max() - x.min()).reset_index()
         )
-        mean_diff = mean_diff.query("v0==True")
+        # Keep only one row per (common_cause_id, strata) — both treated/control rows carry
+        # the same transformed value; filter to the treated group using the actual treatment column.
+        mean_diff = mean_diff[mean_diff[treatment_col].astype(bool)]
         size_by_w_strata = (
             df_long.groupby(["common_cause_id", "strata"]).agg(size=("propensity_score", np.size)).reset_index()
         )
@@ -70,7 +74,7 @@ class PropensityBalanceInterpreter(VisualInterpreter):
         mean_diff_overall = (
             mean_diff_overall.groupby("common_cause_id").transform(lambda x: x.max() - x.min()).reset_index()
         )
-        mean_diff_overall = mean_diff_overall[mean_diff_overall[self.estimate._treatment_name[0]] == True]  # TODO
+        mean_diff_overall = mean_diff_overall[mean_diff_overall[treatment_col].astype(bool)]
         stddev_overall = df_long.groupby(["common_cause_id"]).agg(stddev=("W", np.std)).reset_index()
         mean_diff_overall = pd.merge(mean_diff_overall, stddev_overall, on=["common_cause_id"])
         mean_diff_overall["std_mean_diff"] = mean_diff_overall["mean_w"] / mean_diff_overall["stddev"]

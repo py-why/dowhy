@@ -736,6 +736,62 @@ class TestCausalModel(object):
         with pytest.raises(ValueError, match="method_name must be provided"):
             model.do(x=1, identified_estimand=estimand, method_name=None)
 
+    def test_fit_estimator_false_reuses_cached_estimator(self):
+        """Test that fit_estimator=False reuses the cached estimator without refitting.
+
+        After a first call with fit_estimator=True (the default), a subsequent call
+        with fit_estimator=False must:
+        - return the same estimator object from the cache (no re-instantiation)
+        - produce an identical estimate value for deterministic estimators
+        """
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=3,
+            num_samples=500,
+            num_treatments=1,
+            treatment_is_binary=True,
+        )
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+            proceed_when_unidentifiable=True,
+            test_significance=None,
+        )
+        identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        method = "backdoor.linear_regression"
+
+        # First call: fit the estimator and cache it.
+        estimate1 = model.estimate_effect(
+            identified_estimand,
+            method_name=method,
+            control_value=0,
+            treatment_value=1,
+        )
+        estimator_after_first_call = model.get_estimator(method)
+
+        def fail_if_refit(*args, **kwargs):
+            raise AssertionError("fit_estimator=False should not call fit on the cached estimator")
+
+        estimator_after_first_call.fit = fail_if_refit
+
+        # Second call with fit_estimator=False must reuse the cached estimator.
+        estimate2 = model.estimate_effect(
+            identified_estimand,
+            method_name=method,
+            control_value=0,
+            treatment_value=1,
+            fit_estimator=False,
+        )
+        estimator_after_second_call = model.get_estimator(method)
+
+        # Same object identity — no new estimator was created.
+        assert estimator_after_first_call is estimator_after_second_call
+
+        # Linear regression is deterministic: both calls must yield the same estimate.
+        assert estimate1.value == pytest.approx(estimate2.value)
+
 
 if __name__ == "__main__":
     pytest.main([__file__])
