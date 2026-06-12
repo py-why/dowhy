@@ -373,9 +373,9 @@ class CausalModel:
         :param identified_estimand: a probability expression
             that represents the effect to be estimated. Output of
             CausalModel.identify_effect method
-        :param method_name: (required) estimation method to be used. Supported methods include
-            'backdoor.linear_regression', 'backdoor.propensity_score_stratification', and
-            'iv.instrumental_variable'. See estimate_effect() for the full list.
+        :param method_name: (required) estimation method to be used, in "<identifier>.<estimator>" format.
+            Examples include 'backdoor.linear_regression', 'backdoor.propensity_score_stratification',
+            and 'iv.instrumental_variable'.
         :param fit_estimator: Boolean flag on whether to fit the estimator.
             Setting it to False is useful to compute the do-operation on new
             data using a previously fitted estimator.
@@ -390,7 +390,7 @@ class CausalModel:
                 "method_name must be provided. "
                 "Specify an estimation method such as 'backdoor.linear_regression', "
                 "'backdoor.propensity_score_stratification', or 'iv.instrumental_variable'. "
-                "See estimate_effect() for the full list of supported methods."
+                "Use the '<identifier>.<estimator>' format."
             )
         else:
             str_arr = method_name.split(".", maxsplit=1)
@@ -433,19 +433,20 @@ class CausalModel:
     def refute_estimate(self, estimand, estimate, method_name=None, show_progress_bar=False, **kwargs):
         """Refute an estimated causal effect.
 
-        method_name must be specified. Following refutation methods are supported.
+        method_name must be specified. Examples of refutation methods include:
             * Adding a randomly-generated confounder: "random_common_cause"
             * Adding a confounder that is associated with both treatment and outcome: "add_unobserved_common_cause"
             * Replacing the treatment with a placebo (random) variable): "placebo_treatment_refuter"
             * Removing a random subset of the data: "data_subset_refuter"
             * Bootstrap the data: "bootstrap_refuter"
             * Replace outcome with a dummy (random) variable: "dummy_outcome_refuter"
+        For available refuters, see modules under dowhy.causal_refuters.
 
         :param estimand: target estimand, an instance of the IdentifiedEstimand class
             (typically the output of identify_effect)
         :param estimate: estimate to be refuted, an instance of the CausalEstimate class
             (typically the output of estimate_effect)
-        :param method_name: (required) name of the refutation method. See the list above for supported values.
+        :param method_name: (required) name of the refutation method. See dowhy.causal_refuters for available values.
         :param show_progress_bar: Boolean flag on whether to show a progress bar
         :param kwargs: (optional) additional arguments passed directly to the refutation method. Can specify
             a random seed here to ensure reproducible results ('random_seed' parameter). For method-specific
@@ -460,10 +461,7 @@ class CausalModel:
         if method_name is None:
             raise ValueError(
                 "method_name must be provided. "
-                "Supported refutation methods are: "
-                "'random_common_cause', 'add_unobserved_common_cause', "
-                "'placebo_treatment_refuter', 'data_subset_refuter', "
-                "'bootstrap_refuter', 'dummy_outcome_refuter'."
+                "See the dowhy.causal_refuters package for available refutation methods."
             )
         else:
             refuter_class = causal_refuters.get_class_object(method_name)
