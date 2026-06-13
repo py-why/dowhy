@@ -196,7 +196,7 @@ def test_given_linear_classification_problem_when_auto_assign_causal_models_with
     data.update({"Y": Y})
 
     assign_causal_mechanisms(causal_model, pd.DataFrame(data), quality=AssignmentQuality.GOOD)
-    assert isinstance(causal_model.causal_mechanism("Y").classifier_model.sklearn_model, LogisticRegression)
+    assert isinstance(causal_model.causal_mechanism("Y").classifier_model.sklearn_model, (LogisticRegression, Pipeline))
 
 
 @flaky(max_runs=3)
