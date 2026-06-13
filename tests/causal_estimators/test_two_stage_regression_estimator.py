@@ -162,7 +162,7 @@ class TestTwoStageRegressionEstimator(object):
     )
     def test_frontdoor_num_variables_error(self, Estimator, num_treatments, num_frontdoor_variables):
         estimator_tester = SimpleEstimator(error_tolerance=0, Estimator=Estimator, identifier_method="frontdoor")
-        with pytest.raises((ValueError, Exception)):
+        with pytest.raises(ValueError):
             estimator_tester.average_treatment_effect_testsuite(
                 num_common_causes=[1, 1],
                 num_instruments=[0, 0],
