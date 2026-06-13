@@ -152,13 +152,13 @@ class DistanceMatchingEstimator(CausalEstimator):
 
         # Check if the treatment is one-dimensional
         if len(self._target_estimand.treatment_variable) > 1:
-            error_msg = str(self.__class__) + "cannot handle more than one treatment variable"
-            raise Exception(error_msg)
+            error_msg = "{} cannot handle more than one treatment variable".format(self.__class__.__name__)
+            raise ValueError(error_msg)
         # Checking if the treatment is binary
         if not data[self._target_estimand.treatment_variable[0]].isin([0, 1]).all():
             error_msg = "Distance Matching method is applicable only for binary treatments."
             self.logger.error(error_msg)
-            raise Exception(error_msg)
+            raise ValueError(error_msg)
 
         self.logger.debug("Adjustment set variables used:" + ",".join(self._target_estimand.get_adjustment_set()))
 
@@ -177,7 +177,7 @@ class DistanceMatchingEstimator(CausalEstimator):
             self._observed_common_causes = None
             error_msg = "No common causes/confounders present. Distance matching methods are not applicable"
             self.logger.error(error_msg)
-            raise Exception(error_msg)
+            raise ValueError(error_msg)
 
         self.symbolic_estimator = self.construct_symbolic_estimator(self._target_estimand)
         self.logger.info(self.symbolic_estimator)
@@ -196,9 +196,12 @@ class DistanceMatchingEstimator(CausalEstimator):
         self._target_units = target_units
         self._treatment_value = treatment_value
         self._control_value = control_value
+        # Encode new data based on fitted encoders
+        observed_common_causes = self._encode(data[self._observed_common_causes_names], "observed_common_causes")
+
         updated_df = pd.concat(
             [
-                self._observed_common_causes,
+                observed_common_causes,
                 data[[self._target_estimand.outcome_variable[0], self._target_estimand.treatment_variable[0]]],
             ],
             axis=1,
