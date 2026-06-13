@@ -179,9 +179,12 @@ class DistanceMatchingEstimator(CausalEstimator):
         self._target_units = target_units
         self._treatment_value = treatment_value
         self._control_value = control_value
+        # Encode new data based on fitted encoders
+        observed_common_causes = self._encode(data[self._observed_common_causes_names], "observed_common_causes")
+
         updated_df = pd.concat(
             [
-                self._observed_common_causes,
+                observed_common_causes,
                 data[[self._target_estimand.outcome_variable[0], self._target_estimand.treatment_variable[0]]],
             ],
             axis=1,
