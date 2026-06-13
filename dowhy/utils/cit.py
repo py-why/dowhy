@@ -141,14 +141,14 @@ def conditional_MI(data=None, x=None, y=None, z=None):
     """
     x_cols = [x] if isinstance(x, str) else list(x)
     y_cols = [y] if isinstance(y, str) else list(y)
-    t = list(z) if not isinstance(z, list) else z
-    # Use squeeze() to convert single-column DataFrames to Series so that
-    # iterating yields row values instead of column labels.
-    X = data[x_cols].astype(int).squeeze(axis=1)
-    Y = data[y_cols].astype(int).squeeze(axis=1)
-    Z = list(data[t].itertuples(index=False, name=None))
-    Hxz = entropy(map(lambda v: "%s/%s" % v, zip(X, Z)))  # Finding Joint entropy of X and Z
-    Hyz = entropy(map(lambda v: "%s/%s" % v, zip(Y, Z)))  # Finding Joint entropy of Y and Z
+    z_cols = [z] if isinstance(z, str) else list(z)
+    X = list(data[x_cols].astype(int).itertuples(index=False, name=None))
+    Y = list(data[y_cols].astype(int).itertuples(index=False, name=None))
+    Z = list(data[z_cols].itertuples(index=False, name=None))
+    Hxz = entropy(str(xv) + "/" + str(zv) for xv, zv in zip(X, Z))  # Finding Joint entropy of X and Z
+    Hyz = entropy(str(yv) + "/" + str(zv) for yv, zv in zip(Y, Z))  # Finding Joint entropy of Y and Z
     Hz = entropy(Z)  # Finding Entropy of Z
-    Hxyz = entropy(map(lambda v: "%s/%s/%s" % v, zip(X, Y, Z)))  # Finding Joint Entropy of X, Y and Z
+    Hxyz = entropy(
+        str(xv) + "/" + str(yv) + "/" + str(zv) for xv, yv, zv in zip(X, Y, Z)
+    )  # Finding Joint Entropy of X, Y and Z
     return Hxz + Hyz - Hxyz - Hz
