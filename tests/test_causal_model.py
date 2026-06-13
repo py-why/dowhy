@@ -1,4 +1,5 @@
 import networkx as nx
+import numpy as np
 import pandas as pd
 import pytest
 from flaky import flaky
@@ -763,6 +764,7 @@ class TestCausalModel(object):
         3. RegressionEstimator.fit() never stored self._data, so interventional_outcomes()
            could not fall back to self._data when data_df=None.
         """
+        np.random.seed(42)
         data = dowhy.datasets.linear_dataset(
             beta=10,
             num_common_causes=2,
@@ -790,11 +792,11 @@ class TestCausalModel(object):
             identified_estimand=identified_estimand,
             method_name="backdoor.linear_regression",
         )
-        # The do-operator result should be a scalar estimate.
-        assert isinstance(do_treated, float) or hasattr(do_treated, "__float__")
+        # Cast to float once — this also validates the result is scalar-like.
+        do_treated = float(do_treated)
+        do_control = float(do_control)
         # The implied ATE should be close to beta=10.
-        implied_ate = float(do_treated) - float(do_control)
-        assert abs(implied_ate - 10) < 5, f"Implied ATE {implied_ate:.2f} far from expected beta=10"
+        assert do_treated - do_control == pytest.approx(10, abs=5)
 
 
 if __name__ == "__main__":
