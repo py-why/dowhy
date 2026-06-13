@@ -14,7 +14,7 @@ class OrderedSet:
 
     def add(self, element):
         """
-        Function to add an element to do set if it does not exit.
+        Function to add an element to the set if it does not exist.
 
         :param element: element to be added.
         """
@@ -94,7 +94,7 @@ class OrderedSet:
 
     def __next__(self):
         element = self._iter
-        if not element:
+        if element is None:
             raise StopIteration
         self._iter = self._set[element]
         return element
