@@ -220,7 +220,7 @@ class DistanceMatchingEstimator(CausalEstimator):
                     n_neighbors=self.num_matches_per_unit,
                     metric=self.distance_metric,
                     algorithm="ball_tree",
-                    **self.distance_metric_params,
+                    metric_params=self.distance_metric_params,
                 ).fit(control[self._observed_common_causes.columns].values)
                 distances, indices = control_neighbors.kneighbors(treated[self._observed_common_causes.columns].values)
                 self.logger.debug("distances:")
@@ -260,7 +260,7 @@ class DistanceMatchingEstimator(CausalEstimator):
                         n_neighbors=self.num_matches_per_unit,
                         metric=self.distance_metric,
                         algorithm="ball_tree",
-                        **self.distance_metric_params,
+                        metric_params=self.distance_metric_params,
                     ).fit(group_control[self._observed_common_causes.columns].values)
                     distances, indices = control_neighbors.kneighbors(
                         group_treated[self._observed_common_causes.columns].values
@@ -296,7 +296,7 @@ class DistanceMatchingEstimator(CausalEstimator):
                 n_neighbors=self.num_matches_per_unit,
                 metric=self.distance_metric,
                 algorithm="ball_tree",
-                **self.distance_metric_params,
+                metric_params=self.distance_metric_params,
             ).fit(treated[self._observed_common_causes.columns].values)
             distances, indices = treated_neighbors.kneighbors(control[self._observed_common_causes.columns].values)
 

@@ -210,3 +210,26 @@ class TestDistanceMatchingEstimator:
             test_significance=[False],
             method_params={"num_simulations": 5, "num_null_simulations": 5},
         )
+
+    def test_distance_matching_with_mahalanobis_and_v_param(self, binary_treatment_dataset):
+        """Regression test for issue #1390: ensure V param is correctly passed as metric_params to NearestNeighbors."""
+        data = binary_treatment_dataset
+        model = CausalModel(data=data, treatment="v0", outcome="y", graph=GML_SINGLE_CAUSE)
+        estimand = model.identify_effect(proceed_when_unidentifiable=True)
+
+        # Calculate covariance matrix for W to use as V parameter
+        X = data[["W"]].values
+        V_matrix = np.cov(X.T)
+        if V_matrix.ndim == 0:
+            V_matrix = np.array([[V_matrix]])
+
+        estimate = model.estimate_effect(
+            estimand,
+            method_name="backdoor.distance_matching",
+            target_units="att",
+            method_params={
+                "distance_metric": "mahalanobis",
+                "V": V_matrix,
+            },
+        )
+        assert np.isfinite(estimate.value), "Estimate with Mahalanobis and V param should be finite."
