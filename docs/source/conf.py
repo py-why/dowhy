@@ -19,18 +19,27 @@ import os
 project = "DoWhy"
 copyright = "2022, PyWhy contributors"
 author = "PyWhy community"
-version = os.environ.get("CURRENT_VERSION")
+version = os.environ.get("CURRENT_VERSION", "main")
+
 
 # Version Information (for version-switcher)
-not_empty = lambda x: len(x) > 0
-to_tag_obj = lambda t: {"name": t, "url": f"/dowhy/{t}/index.html"}
-has_doc = lambda t: os.path.exists(f"../../dowhy-docs/{t}/index.html")
+def not_empty(value):
+    return len(value) > 0
 
-git_tags = reversed(list(filter(not_empty, os.environ.get("TAGS").split(","))))
+
+def to_tag_obj(tag):
+    return {"name": tag, "url": f"/dowhy/{tag}/index.html"}
+
+
+def has_doc(tag):
+    return os.path.exists(f"../../dowhy-docs/{tag}/index.html")
+
+
+git_tags = reversed(list(filter(not_empty, os.environ.get("TAGS", "").split(","))))
 doc_tags = list(filter(has_doc, git_tags))
 
 html_context = {
-    "current_version": {"name": os.environ.get("CURRENT_VERSION")},
+    "current_version": {"name": os.environ.get("CURRENT_VERSION", "main")},
     "versions": {
         "tags": list(map(to_tag_obj, doc_tags)),
         "branches": [{"name": "main"}],
