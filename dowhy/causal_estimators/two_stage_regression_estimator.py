@@ -85,8 +85,8 @@ class TwoStageRegressionEstimator(CausalEstimator):
         self.logger.info("INFO: Using Two Stage Regression Estimator")
         # Check if the treatment is one-dimensional
         if len(self._target_estimand.treatment_variable) > 1:
-            error_msg = str(self.__class__) + "cannot handle more than one treatment variable"
-            raise Exception(error_msg)
+            error_msg = f"{self.__class__.__name__} cannot handle more than one treatment variable"
+            raise ValueError(error_msg)
         modified_target_estimand = copy.deepcopy(self._target_estimand)
         modified_target_estimand.identifier_method = "backdoor"
         modified_target_estimand.backdoor_variables = self._target_estimand.mediation_first_stage_confounders
@@ -179,8 +179,8 @@ class TwoStageRegressionEstimator(CausalEstimator):
         self._set_effect_modifiers(data, effect_modifier_names)
 
         if len(self._target_estimand.treatment_variable) > 1:
-            error_msg = str(self.__class__) + "cannot handle more than one treatment variable"
-            raise Exception(error_msg)
+            error_msg = self.__class__.__name__ + " cannot handle more than one treatment variable"
+            raise ValueError(error_msg)
 
         if self._target_estimand.identifier_method == "frontdoor":
             self.logger.debug("Front-door variable used:" + ",".join(self._target_estimand.get_frontdoor_variables()))
