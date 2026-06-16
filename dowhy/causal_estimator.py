@@ -239,16 +239,47 @@ class CausalEstimator:
         return new_estimator
 
     def estimate_effect_naive(self, data: pd.DataFrame):
-        """
+        """Compute a naive (unadjusted) observational difference as a baseline for effect strength.
+
+        Estimates E[Y | T = treatment_value] - E[Y | T = control_value] from the raw data without
+        any causal adjustment. This is used internally by :meth:`evaluate_effect_strength` as the
+        denominator when computing the ``fraction-effect`` statistic.
+
         :param data: Pandas dataframe to estimate effect
+        :returns: CausalEstimate with the naive observational difference
         """
-        # TODO Only works for binary treatment
-        df_withtreatment = data.loc[data[self._target_estimand.treatment_variable] == 1]
-        df_notreatment = data.loc[data[self._target_estimand.treatment_variable] == 0]
-        est = np.mean(df_withtreatment[self._target_estimand.outcome_variable]) - np.mean(
-            df_notreatment[self._target_estimand.outcome_variable]
+        treatment_var = self._target_estimand.treatment_variable
+        outcome_var = self._target_estimand.outcome_variable
+
+        if len(treatment_var) == 1:
+            # Single treatment: index as a Series to get a 1-D boolean mask
+            treatment_col = data[treatment_var[0]]
+            mask_with = treatment_col == self._treatment_value
+            mask_without = treatment_col == self._control_value
+        else:
+            # Multiple treatments: broadcast scalar or per-treatment values and combine row-wise
+            t_val = self._treatment_value
+            c_val = self._control_value
+            if not isinstance(t_val, (list, tuple)):
+                t_val = [t_val] * len(treatment_var)
+            if not isinstance(c_val, (list, tuple)):
+                c_val = [c_val] * len(treatment_var)
+            mask_with = (data[treatment_var] == t_val).all(axis=1)
+            mask_without = (data[treatment_var] == c_val).all(axis=1)
+
+        df_withtreatment = data.loc[mask_with]
+        df_notreatment = data.loc[mask_without]
+        est = np.mean(df_withtreatment[outcome_var]) - np.mean(df_notreatment[outcome_var])
+        return CausalEstimate(
+            data,
+            None,
+            None,
+            est,
+            None,
+            None,
+            control_value=self._control_value,
+            treatment_value=self._treatment_value,
         )
-        return CausalEstimate(data, None, None, est, None, control_value=0, treatment_value=1)
 
     def _estimate_effect_fn(self, data_df):
         """Function used in conditional effect estimation. This function is to be overridden by each child estimator.

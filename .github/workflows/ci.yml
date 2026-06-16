@@ -75,7 +75,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         echo "installing poetry dependencies"
-        poetry install -E plotting -E pygraphviz
+        poetry install -E plotting -E pygraphviz -E econml
 
     - name: Lint
       run: poetry run poe lint
@@ -85,10 +85,6 @@ jobs:
 
     - name: Test
       run: poetry run poe test --splits 6 --group ${{ matrix.test-group }}
-
-    - name: Install EconML dependency
-      run: |
-        poetry install -E plotting -E pygraphviz -E econml
 
     - name: Test EconML based functionality
       run: poetry run poe test_econml
