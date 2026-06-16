@@ -1,0 +1,1692 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B139P18WHM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-B139P18WHM');
+    </script>
+    
+    <title>When Accuracy Lies: Causal Inference on a Chest X-Ray CNN &#8212; DoWhy  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=949a1ff5" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/jquery.js?v=5d32c60e"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=0c6e27e1"></script>
+    <script src="../_static/design-tabs.js?v=36754332"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'example_notebooks/gcm_chest_xray_causal_inference';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="DoWhy example on ihdp (Infant Health and Development Program) dataset" href="dowhy_ihdp_data_example.html" />
+    <link rel="prev" title="Causal attribution to sales growth and spend intervention" href="sales_attribution_intervention.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="main" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-light" alt="DoWhy  documentation - Home"/>
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-dark pst-js-only" alt="DoWhy  documentation - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="nb_index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing.html">
+    Contributing
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
+    dowhy package
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
+    Release notes
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item"><div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        main
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.9.1/index.html">v0.9.1</a></dd>
+            <dd><a href="/dowhy/v0.9/index.html">v0.9</a></dd>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.14/index.html">v0.14</a></dd>
+            <dd><a href="/dowhy/v0.13/index.html">v0.13</a></dd>
+            <dd><a href="/dowhy/v0.12/index.html">v0.12</a></dd>
+            <dd><a href="/dowhy/v0.11.1/index.html">v0.11.1</a></dd>
+            <dd><a href="/dowhy/v0.11/index.html">v0.11</a></dd>
+            <dd><a href="/dowhy/v0.10.1/index.html">v0.10.1</a></dd>
+            <dd><a href="/dowhy/v0.10/index.html">v0.10</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="nb_index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../dowhy.html">
+    dowhy package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../code_repo.html">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        main
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.9.1/index.html">v0.9.1</a></dd>
+            <dd><a href="/dowhy/v0.9/index.html">v0.9</a></dd>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.14/index.html">v0.14</a></dd>
+            <dd><a href="/dowhy/v0.13/index.html">v0.13</a></dd>
+            <dd><a href="/dowhy/v0.12/index.html">v0.12</a></dd>
+            <dd><a href="/dowhy/v0.11.1/index.html">v0.11.1</a></dd>
+            <dd><a href="/dowhy/v0.11/index.html">v0.11</a></dd>
+            <dd><a href="/dowhy/v0.10.1/index.html">v0.10.1</a></dd>
+            <dd><a href="/dowhy/v0.10/index.html">v0.10</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Introductory examples</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="dowhy_simple_example.html">Basic Example for Calculating the Causal Effect</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_basic_example.html">Basic Example for Graphical Causal Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_draw_samples.html">Basic Example for generating samples from a GCM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial-causalinference-machinelearning-using-dowhy-econml.html">Tutorial on Causal Inference and its Connections to Machine Learning (Using DoWhy+EconML)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_mediation_analysis.html">Mediation analysis with DoWhy: Direct and Indirect Effects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_refuter_notebook.html">Iterating over multiple refutation tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="do_sampler_demo.html">Do-sampler Introduction</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Real world-inspired examples</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="DoWhy-The%20Causal%20Story%20Behind%20Hotel%20Booking%20Cancellations.html">Exploring Causes of Hotel Booking Cancellations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_example_effect_of_memberrewards_program.html">Estimating the Effect of a Member Rewards Program</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_online_shop.html">Causal Attributions and Root-Cause Analysis in an Online Shop</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="gcm_rca_microservice_architecture.html">Finding the Root Cause of Elevated Latencies in a Microservice Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_401k_analysis.html">Impact of 401(k) eligibility on net financial assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_supply_chain_dist_change.html">Finding Root Causes of Changes in a Supply Chain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_icc.html">Estimating intrinsic causal influences in real-world examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_counterfactual_medical_dry_eyes.html">Counterfactual Analysis in a Medical Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_falsify_dag.html">Falsification of User-Given Directed Acyclic Graphs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="counterfactual_fairness_dowhy.html">Counterfactual Fairness</a></li>
+
+
+
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="sales_attribution_intervention.html">Causal attribution to sales growth and spend intervention</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">When Accuracy Lies: Causal Inference on a Chest X-Ray CNN</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples on benchmarks datasets</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="dowhy_ihdp_data_example.html">DoWhy example on ihdp (Infant Health and Development Program) dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_lalonde_example.html">DoWhy example on the Lalonde dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_refutation_testing.html">Applying refutation tests to the Lalonde and IHDP datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_401k_analysis.html">Impact of 401(k) eligibility on net financial assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prediction/dowhy_causal_prediction_demo.html">Demo for DoWhy Causal Prediction on MNIST</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lalonde_pandas_api.html">Lalonde Pandas API Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="counterfactual_fairness_dowhy.html">Counterfactual Fairness</a></li>
+
+
+
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="dowhy_twins_example.html">DoWhy example on Twins dataset</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Modeling and refuting causal assumptions</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="load_graph_example.html">Different ways to load an input graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_causal_discovery_example.html">Causal Discovery example</a></li>
+
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="gcm_falsify_dag.html">Falsification of User-Given Directed Acyclic Graphs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sensitivity_analysis_testing.html">Sensitivity Analysis for Regression Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sensitivity_analysis_nonparametric_estimators.html">Sensitivity analysis for non-parametric causal estimators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_refuter_notebook.html">Iterating over multiple refutation tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_refuter_assess_overlap.html">Assessing Support and Overlap with OverRule</a></li>
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="dowhy_ranking_methods.html">Ranking of estimation methods for a given dataset</a></li>
+
+
+<li class="toctree-l1"><a class="reference internal" href="dowhy_demo_dummy_outcome_refuter.html">A Simple Example on Creating a Custom Refutation Using User-Defined Outcome Functions</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Miscellaneous</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy-simple-iv-example.html">Simple example on using Instrumental Variables method for estimation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_interpreter.html">DoWhy: Interpreters for Causal Estimators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_mediation_analysis.html">Mediation analysis with DoWhy: Direct and Indirect Effects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_multiple_treatments.html">Estimating effect of multiple treatments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_efficient_backdoor_example.html">Finding optimal adjustment sets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="identifying_effects_using_id_algorithm.html">Identifying Effect using ID Algorithm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_optimize_backdoor_example.html">Example to demonstrate optimized backdoor variable search for Causal Identification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_generalized_covariate_adjustment_example.html">Generalized Adjustment Criterion Example Notebook</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_generalized_covariate_adjustment_estimation_example.html">Causal Effect Estimation with the Generalized Adjustment Criterion - Example Notebook</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_functional_api.html">Functional API Preview</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="nb_index.html" class="nav-link">Example notebooks</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">When Accuracy Lies: Causal Inference on a Chest X-Ray CNN</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="When-Accuracy-Lies:-Causal-Inference-on-a-Chest-X-Ray-CNN">
+<h1>When Accuracy Lies: Causal Inference on a Chest X-Ray CNN<a class="headerlink" href="#When-Accuracy-Lies:-Causal-Inference-on-a-Chest-X-Ray-CNN" title="Link to this heading">#</a></h1>
+<p><strong>A DoWhy contribution notebook</strong></p>
+<hr class="docutils" />
+<section id="The-Problem">
+<h2>The Problem<a class="headerlink" href="#The-Problem" title="Link to this heading">#</a></h2>
+<p>A radiologist AI model achieves AUC 0.719 on chest X-ray classification. Should you trust it?</p>
+<p>Predictive accuracy tells you <em>what</em> the model predicts. It doesn’t tell you <em>why</em>.</p>
+<p>A model can achieve good AUC by learning <strong>spurious correlations</strong> — patterns that happen to predict the label in the training data, but that have nothing to do with the underlying disease:</p>
+<ul class="simple">
+<li><p>Hospital A treats sicker patients <em>and</em> uses older scanners that produce darker images</p></li>
+<li><p>The model learns: dark image → sick patient</p></li>
+<li><p>Deployed at Hospital B (newer, brighter scanner, equally sick patients): AUC collapses</p></li>
+</ul>
+<p><strong>Causal inference reveals whether the model learned the right thing.</strong></p>
+<p>In this notebook we use the <a class="reference external" href="https://www.pywhy.org/dowhy">DoWhy GCM module</a> to:</p>
+<ol class="arabic simple">
+<li><p>Encode domain knowledge as a causal DAG</p></li>
+<li><p>Quantify how much of the model’s predictions come from legitimate clinical signals vs spurious scanner artefacts</p></li>
+<li><p>Simulate what happens if we swap the scanner (interventional analysis)</p></li>
+</ol>
+<p><strong>Core claim:</strong> <em>Good predictive accuracy ≠ correct causal reasoning.</em></p>
+<p>⚠️ <strong>Data download required before running this notebook.</strong> This notebook uses the NIH Chest X-ray Dataset. Download it from Kaggle and place Data_Entry_2017.csv and the image folders under data/nih_chest_xray/ relative to this notebook. Estimated download size: ~45 GB (full dataset) or use the 15k-image subset described in Cell 2.</p>
+<p>The following cell downloads the required files and the trained ResNet50 model for this study.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">urllib.request</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="n">HF_BASE</span> <span class="o">=</span> <span class="s2">&quot;https://huggingface.co/sanzits/dowhy-chest-xray-gcm/resolve/main&quot;</span>
+
+<span class="n">FILES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;data/processed/subset.csv&quot;</span><span class="p">:</span>       <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">HF_BASE</span><span class="si">}</span><span class="s2">/data/processed/subset.csv&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;data/processed/train.csv&quot;</span><span class="p">:</span>        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">HF_BASE</span><span class="si">}</span><span class="s2">/data/processed/train.csv&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;data/processed/val.csv&quot;</span><span class="p">:</span>          <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">HF_BASE</span><span class="si">}</span><span class="s2">/data/processed/val.csv&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;data/processed/test.csv&quot;</span><span class="p">:</span>         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">HF_BASE</span><span class="si">}</span><span class="s2">/data/processed/test.csv&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;data/features/features.csv&quot;</span><span class="p">:</span>      <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">HF_BASE</span><span class="si">}</span><span class="s2">/data/features/features.csv&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;models/resnet_infiltration.pt&quot;</span><span class="p">:</span>   <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">HF_BASE</span><span class="si">}</span><span class="s2">/models/resnet_infiltration.pt&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="k">for</span> <span class="n">local_path</span><span class="p">,</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">FILES</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">local_path</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">local_path</span><span class="p">),</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Downloading </span><span class="si">{</span><span class="n">local_path</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
+        <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlretrieve</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">local_path</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  ✓ done&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  ✓ </span><span class="si">{</span><span class="n">local_path</span><span class="si">}</span><span class="s2"> already exists&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">All files ready.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Downloading data/processed/subset.csv...
+  ✓ done
+Downloading data/processed/train.csv...
+  ✓ done
+Downloading data/processed/val.csv...
+  ✓ done
+Downloading data/processed/test.csv...
+  ✓ done
+Downloading data/features/features.csv...
+  ✓ done
+Downloading models/resnet_infiltration.pt...
+  ✓ done
+
+All files ready.
+</pre></div></div>
+</div>
+</section>
+<section id="Setup">
+<h2>Setup<a class="headerlink" href="#Setup" title="Link to this heading">#</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">networkx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nx</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torchvision</span><span class="w"> </span><span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">roc_auc_score</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">dowhy.gcm</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gcm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy.gcm</span><span class="w"> </span><span class="kn">import</span> <span class="n">arrow_strength</span>
+
+<span class="c1"># Paths — adjust BASE_DIR if running from a different location</span>
+<span class="n">BASE_DIR</span>     <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+<span class="n">PROCESSED</span>    <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">BASE_DIR</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="s1">&#39;processed&#39;</span><span class="p">)</span>
+<span class="n">FEATURES_CSV</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">BASE_DIR</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="s1">&#39;features&#39;</span><span class="p">,</span> <span class="s1">&#39;features.csv&#39;</span><span class="p">)</span>
+<span class="n">MODEL_PATH</span>   <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">BASE_DIR</span><span class="p">,</span> <span class="s1">&#39;models&#39;</span><span class="p">,</span> <span class="s1">&#39;resnet_infiltration.pt&#39;</span><span class="p">)</span>
+<span class="n">IMAGES_DIR</span>   <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">BASE_DIR</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="s1">&#39;images&#39;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;DoWhy version:&#39;</span><span class="p">,</span> <span class="nb">__import__</span><span class="p">(</span><span class="s1">&#39;dowhy&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;PyTorch version:&#39;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Paths OK:&#39;</span><span class="p">,</span> <span class="nb">all</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">[</span><span class="n">PROCESSED</span><span class="p">,</span> <span class="n">FEATURES_CSV</span><span class="p">,</span> <span class="n">MODEL_PATH</span><span class="p">]))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+DoWhy version: 0.14
+PyTorch version: 2.11.0
+Paths OK: True
+</pre></div></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="1.-Dataset-Overview">
+<h2>1. Dataset Overview<a class="headerlink" href="#1.-Dataset-Overview" title="Link to this heading">#</a></h2>
+<p>We use a <strong>15,000-image subset</strong> of the <a class="reference external" href="https://www.kaggle.com/datasets/nih-chest-xrays/data">NIH Chest X-ray Dataset</a> (112,120 images total).</p>
+<p><strong>Target label:</strong> Infiltration — a diffuse haziness in the lung fields. Visually subtle, often hard to distinguish from scanner artefacts. This makes it the ideal label for a confounding story.</p>
+<p><strong>Key metadata available:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">patient_age</span></code>, <code class="docutils literal notranslate"><span class="pre">patient_sex</span></code> — demographics</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">view_position</span></code> — PA (standard upright) vs AP (portable/bedside scanner)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">OriginalImagePixelSpacing</span></code> — physical mm per pixel; characteristic of scanner hardware</p></li>
+</ul>
+<p>The pixel spacing gives us a <strong>hospital proxy</strong>: different hospitals use different scanner models with different pixel spacings. We bin this into 4 groups (0–3).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">subset</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PROCESSED</span><span class="p">,</span> <span class="s1">&#39;subset.csv&#39;</span><span class="p">))</span>
+<span class="n">train</span>  <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PROCESSED</span><span class="p">,</span> <span class="s1">&#39;train.csv&#39;</span><span class="p">))</span>
+<span class="n">val</span>    <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PROCESSED</span><span class="p">,</span> <span class="s1">&#39;val.csv&#39;</span><span class="p">))</span>
+<span class="n">test</span>   <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PROCESSED</span><span class="p">,</span> <span class="s1">&#39;test.csv&#39;</span><span class="p">))</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Total images : </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">subset</span><span class="p">)</span><span class="si">:</span><span class="s1">,</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Train / Val / Test : </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">train</span><span class="p">)</span><span class="si">}</span><span class="s1"> / </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)</span><span class="si">}</span><span class="s1"> / </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">test</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Infiltration prevalence : </span><span class="si">{</span><span class="n">subset</span><span class="p">[</span><span class="s2">&quot;infiltration&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s1">.1%</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+
+<span class="c1"># Label distribution</span>
+<span class="n">subset</span><span class="p">[</span><span class="s1">&#39;infiltration&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;#3498db&#39;</span><span class="p">,</span> <span class="s1">&#39;#e74c3c&#39;</span><span class="p">],</span>
+    <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Infiltration label distribution&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="s1">&#39;No Infiltration&#39;</span><span class="p">,</span> <span class="s1">&#39;Infiltration&#39;</span><span class="p">],</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Count&#39;</span><span class="p">)</span>
+
+<span class="c1"># scanner_acquisition_group distribution</span>
+<span class="n">subset</span><span class="p">[</span><span class="s1">&#39;scanner_acquisition_group&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#95a5a6&#39;</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s1">&#39;scanner_acquisition_group </span><span class="se">\n</span><span class="s1">(binned by pixel spacing)&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Scanner Acquisition Group&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Count&#39;</span><span class="p">)</span>
+
+<span class="c1"># Age distribution by label</span>
+<span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">colour</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;#3498db&#39;</span><span class="p">,</span> <span class="s1">&#39;No Infiltration&#39;</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;#e74c3c&#39;</span><span class="p">,</span> <span class="s1">&#39;Infiltration&#39;</span><span class="p">)]:</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">subset</span><span class="p">[</span><span class="n">subset</span><span class="p">[</span><span class="s1">&#39;infiltration&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">label</span><span class="p">][</span><span class="s1">&#39;patient_age&#39;</span><span class="p">],</span>
+                 <span class="n">bins</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colour</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Age distribution by label&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Patient age&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Total images : 14,999
+Train / Val / Test : 10499 / 2250 / 2250
+Infiltration prevalence : 15.1%
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_chest_xray_causal_inference_7_1.png" src="../_images/example_notebooks_gcm_chest_xray_causal_inference_7_1.png" />
+</div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="2.-CNN-Training-—-ResNet50-Transfer-Learning">
+<h2>2. CNN Training — ResNet50 Transfer Learning<a class="headerlink" href="#2.-CNN-Training-—-ResNet50-Transfer-Learning" title="Link to this heading">#</a></h2>
+<p>We fine-tune a <strong>ResNet50</strong> pretrained on ImageNet:</p>
+<ul class="simple">
+<li><p>Freeze <code class="docutils literal notranslate"><span class="pre">layer1</span></code>, <code class="docutils literal notranslate"><span class="pre">layer2</span></code>, <code class="docutils literal notranslate"><span class="pre">layer3</span></code> — keep generic visual features</p></li>
+<li><p>Train <code class="docutils literal notranslate"><span class="pre">layer4</span></code> + the final classifier — adapt to X-ray domain</p></li>
+<li><p>Loss: <code class="docutils literal notranslate"><span class="pre">BCEWithLogitsLoss</span></code> with <code class="docutils literal notranslate"><span class="pre">pos_weight</span> <span class="pre">≈</span> <span class="pre">5</span></code> to handle the 16.6% positive rate</p></li>
+<li><p>Metric: <strong>AUC</strong> (not accuracy — accuracy is misleading under class imbalance)</p></li>
+</ul>
+<p>Training was done in <code class="docutils literal notranslate"><span class="pre">src/train.py</span></code>. We load the saved weights here.</p>
+<blockquote>
+<div><p><strong>Best Val AUC: 0.7198</strong> — achieved at epoch 3 of 10.</p>
+</div></blockquote>
+<p><strong>Full 10-epoch ResNet50 training: ~45–60 min on a GPU, ~4–6 hrs on CPU</strong></p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">load_model</span><span class="p">(</span><span class="n">model_path</span><span class="p">):</span>
+
+    <span class="c1"># where the model should run : Apple Silicon, NVIDIA GPU, or normal CPU</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s1">&#39;mps&#39;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">mps</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span>
+                          <span class="s1">&#39;cuda&#39;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s1">&#39;cpu&#39;</span><span class="p">)</span>
+    <span class="c1">#ResNet50 architecture creation with no pre-trained weights. 50 layers + image classification.</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">resnet50</span><span class="p">(</span><span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="c1">#Specification for Binary classification</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">fc</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">fc</span><span class="o">.</span><span class="n">in_features</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="c1">#loading weights of the pre-trained model</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">model_path</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="n">device</span><span class="p">))</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+    <span class="c1">#Put model into inference mode</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="n">device</span>
+
+<span class="n">model</span><span class="p">,</span> <span class="n">device</span> <span class="o">=</span> <span class="n">load_model</span><span class="p">(</span><span class="n">MODEL_PATH</span><span class="p">)</span>
+<span class="c1">#counts how many parameters are trainable.</span>
+<span class="n">trainable</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">()</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">requires_grad</span><span class="p">)</span>
+<span class="c1">#counts how total parametes</span>
+<span class="n">total</span>     <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Device         : </span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Total params   : </span><span class="si">{</span><span class="n">total</span><span class="si">:</span><span class="s1">,</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Trainable      : </span><span class="si">{</span><span class="n">trainable</span><span class="si">:</span><span class="s1">,</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="mi">100</span><span class="o">*</span><span class="n">trainable</span><span class="o">/</span><span class="n">total</span><span class="si">:</span><span class="s1">.1f</span><span class="si">}</span><span class="s1">% — layer4 + fc only)&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Best Val AUC   : 0.7198 (epoch 3/10)&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Device         : mps
+Total params   : 23,510,081
+Trainable      : 23,510,081 (100.0% — layer4 + fc only)
+Best Val AUC   : 0.7198 (epoch 3/10)
+</pre></div></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="3.-The-Correlation-Trap">
+<h2>3. The Correlation Trap<a class="headerlink" href="#3.-The-Correlation-Trap" title="Link to this heading">#</a></h2>
+<p>AUC 0.7198 looks reasonable. But <strong>why</strong> is the model making these predictions?</p>
+<p>Let’s look at the feature table extracted from our model and images. For each of the 4,999 images we have:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Feature</p></th>
+<th class="head"><p>Source</p></th>
+<th class="head"><p>Path</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">opacity_score</span></code></p></td>
+<td><p>ResNet50 avgpool layer</p></td>
+<td><p>Legitimate — visual lung signal</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">image_brightness</span></code></p></td>
+<td><p>Raw pixel mean</p></td>
+<td><p><strong>Spurious</strong> — scanner artefact</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">image_contrast</span></code></p></td>
+<td><p>Raw pixel std</p></td>
+<td><p><strong>Spurious</strong> — scanner artefact</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">model_prediction</span></code></p></td>
+<td><p>ResNet50 sigmoid output</p></td>
+<td><p>Outcome to explain</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>If <code class="docutils literal notranslate"><span class="pre">model_prediction</span></code> correlates with <code class="docutils literal notranslate"><span class="pre">image_brightness</span></code> <em>after controlling for true disease status</em>, that’s evidence of spurious learning.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">features</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">FEATURES_CSV</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Features shape:&#39;</span><span class="p">,</span> <span class="n">features</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Feature summary:&#39;</span><span class="p">)</span>
+<span class="n">features</span><span class="p">[[</span><span class="s1">&#39;image_brightness&#39;</span><span class="p">,</span><span class="s1">&#39;image_contrast&#39;</span><span class="p">,</span><span class="s1">&#39;opacity_score&#39;</span><span class="p">,</span><span class="s1">&#39;model_prediction&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Features shape: (14999, 11)
+
+Feature summary:
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>image_brightness</th>
+      <th>image_contrast</th>
+      <th>opacity_score</th>
+      <th>model_prediction</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>count</th>
+      <td>14999.000</td>
+      <td>14999.000</td>
+      <td>14999.000</td>
+      <td>14999.000</td>
+    </tr>
+    <tr>
+      <th>mean</th>
+      <td>134.412</td>
+      <td>57.494</td>
+      <td>0.336</td>
+      <td>0.441</td>
+    </tr>
+    <tr>
+      <th>std</th>
+      <td>24.459</td>
+      <td>11.060</td>
+      <td>0.076</td>
+      <td>0.233</td>
+    </tr>
+    <tr>
+      <th>min</th>
+      <td>38.746</td>
+      <td>8.425</td>
+      <td>0.192</td>
+      <td>0.014</td>
+    </tr>
+    <tr>
+      <th>25%</th>
+      <td>114.317</td>
+      <td>49.496</td>
+      <td>0.273</td>
+      <td>0.255</td>
+    </tr>
+    <tr>
+      <th>50%</th>
+      <td>131.090</td>
+      <td>58.377</td>
+      <td>0.322</td>
+      <td>0.432</td>
+    </tr>
+    <tr>
+      <th>75%</th>
+      <td>157.057</td>
+      <td>66.311</td>
+      <td>0.385</td>
+      <td>0.603</td>
+    </tr>
+    <tr>
+      <th>max</th>
+      <td>216.276</td>
+      <td>98.754</td>
+      <td>0.648</td>
+      <td>0.982</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+
+<span class="c1"># Mean prediction by hospital group — if spurious, should differ by group</span>
+<span class="n">pred_by_hospital</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;scanner_acquisition_group&#39;</span><span class="p">)[</span><span class="s1">&#39;model_prediction&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="n">bright_by_hospital</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;scanner_acquisition_group&#39;</span><span class="p">)[</span><span class="s1">&#39;image_brightness&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">pred_by_hospital</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">),</span> <span class="n">pred_by_hospital</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#e74c3c&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Mean model prediction</span><span class="se">\n</span><span class="s1">by hospital scanner group&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Hospital group&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Mean prediction probability&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">features</span><span class="p">[</span><span class="s1">&#39;infiltration&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;True prevalence&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">bright_by_hospital</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">),</span> <span class="n">bright_by_hospital</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#95a5a6&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Mean image brightness</span><span class="se">\n</span><span class="s1">by hospital scanner group&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Hospital group&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Mean pixel brightness (0-255)&#39;</span><span class="p">)</span>
+
+<span class="c1"># Scatter: brightness vs prediction, coloured by true label</span>
+<span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">colour</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;#3498db&#39;</span><span class="p">,</span> <span class="s1">&#39;No Infiltration&#39;</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;#e74c3c&#39;</span><span class="p">,</span> <span class="s1">&#39;Infiltration&#39;</span><span class="p">)]:</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">features</span><span class="p">[</span><span class="s1">&#39;infiltration&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">label</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">features</span><span class="p">[</span><span class="n">mask</span><span class="p">][</span><span class="s1">&#39;image_brightness&#39;</span><span class="p">],</span> <span class="n">features</span><span class="p">[</span><span class="n">mask</span><span class="p">][</span><span class="s1">&#39;model_prediction&#39;</span><span class="p">],</span>
+                    <span class="n">c</span><span class="o">=</span><span class="n">colour</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Image brightness (scanner artefact)&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Model prediction probability&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Brightness vs Prediction</span><span class="se">\n</span><span class="s1">(the spurious correlation)&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">markerscale</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="n">corr</span> <span class="o">=</span> <span class="n">features</span><span class="p">[</span><span class="s1">&#39;image_brightness&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">corr</span><span class="p">(</span><span class="n">features</span><span class="p">[</span><span class="s1">&#39;model_prediction&#39;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Pearson correlation (brightness vs prediction): </span><span class="si">{</span><span class="n">corr</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">This correlation exists even though brightness has no clinical meaning.&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The question DoWhy will answer: how much of this is causal vs coincidental?&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_chest_xray_causal_inference_13_0.png" src="../_images/example_notebooks_gcm_chest_xray_causal_inference_13_0.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Pearson correlation (brightness vs prediction): -0.558
+
+This correlation exists even though brightness has no clinical meaning.
+The question DoWhy will answer: how much of this is causal vs coincidental?
+</pre></div></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="4.-Causal-Graph-Construction">
+<h2>4. Causal Graph Construction<a class="headerlink" href="#4.-Causal-Graph-Construction" title="Link to this heading">#</a></h2>
+<p>We encode domain knowledge as a <strong>Directed Acyclic Graph (DAG)</strong>. Each edge is a causal claim — not just a correlation.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>patient_age  ────────────────────────────────────────────┐
+patient_sex  ────────────────────────────────────────────┤
+                                                          ▼
+infiltration ──→ opacity_score ──────────────→ model_prediction
+                                                           ▲
+scanner_acquisition_group ──→ image_brightness ────────────┘
+</pre></div>
+</div>
+<p><strong>Two causal paths to ``model_prediction``:</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Path</p></th>
+<th class="head"><p>Variables</p></th>
+<th class="head"><p>Verdict</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Legitimate</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">infiltration</span> <span class="pre">→</span> <span class="pre">opacity_score</span> <span class="pre">→</span> <span class="pre">model_prediction</span></code></p></td>
+<td><p>What we <strong>want</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p>Spurious</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">scanner_acquisition_group</span> <span class="pre">→</span> <span class="pre">image_brightness</span> <span class="pre">→</span> <span class="pre">model_prediction</span></code></p></td>
+<td><p>What we <strong>don’t want</strong></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Why these edges?</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">infiltration</span> <span class="pre">→</span> <span class="pre">opacity_score</span></code>: true disease causes diffuse lung haziness that ResNet’s feature extractor picks up</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">scanner_acquisition_group</span> <span class="pre">→</span> <span class="pre">image_brightness</span></code>: scanner hardware determines base brightness — independent of patient pathology</p></li>
+<li><p>Both feed into <code class="docutils literal notranslate"><span class="pre">model_prediction</span></code>: the CNN learned from both signals, but we can now separate their contributions</p></li>
+</ul>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">graph</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">([</span>
+    <span class="p">(</span><span class="s1">&#39;infiltration&#39;</span><span class="p">,</span>      <span class="s1">&#39;opacity_score&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;scanner_acquisition_group&#39;</span><span class="p">,</span> <span class="s1">&#39;image_brightness&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;opacity_score&#39;</span><span class="p">,</span>     <span class="s1">&#39;model_prediction&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;image_brightness&#39;</span><span class="p">,</span>  <span class="s1">&#39;model_prediction&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;patient_age&#39;</span><span class="p">,</span>       <span class="s1">&#39;model_prediction&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;patient_sex&#39;</span><span class="p">,</span>       <span class="s1">&#39;model_prediction&#39;</span><span class="p">),</span>
+<span class="p">])</span>
+
+<span class="n">pos</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;infiltration&#39;</span><span class="p">:</span>      <span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span>  <span class="mi">1</span><span class="p">),</span>
+    <span class="s1">&#39;opacity_score&#39;</span><span class="p">:</span>     <span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="s1">&#39;scanner_acquisition_group&#39;</span><span class="p">:</span> <span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+    <span class="s1">&#39;image_brightness&#39;</span><span class="p">:</span>  <span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+    <span class="s1">&#39;patient_age&#39;</span><span class="p">:</span>       <span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span>  <span class="mi">0</span><span class="p">),</span>
+    <span class="s1">&#39;patient_sex&#39;</span><span class="p">:</span>       <span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">),</span>
+    <span class="s1">&#39;model_prediction&#39;</span><span class="p">:</span>  <span class="p">(</span><span class="mf">1.5</span><span class="p">,</span>  <span class="mi">0</span><span class="p">),</span>
+<span class="p">}</span>
+
+<span class="n">node_colours</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;infiltration&#39;</span><span class="p">:</span>      <span class="s1">&#39;#2ecc71&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;opacity_score&#39;</span><span class="p">:</span>     <span class="s1">&#39;#27ae60&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;scanner_acquisition_group&#39;</span><span class="p">:</span> <span class="s1">&#39;#e74c3c&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;image_brightness&#39;</span><span class="p">:</span>  <span class="s1">&#39;#c0392b&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;patient_age&#39;</span><span class="p">:</span>       <span class="s1">&#39;#95a5a6&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;patient_sex&#39;</span><span class="p">:</span>       <span class="s1">&#39;#95a5a6&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;model_prediction&#39;</span><span class="p">:</span>  <span class="s1">&#39;#3498db&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">colours</span> <span class="o">=</span> <span class="p">[</span><span class="n">node_colours</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">()]</span>
+<span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">node_color</span><span class="o">=</span><span class="n">colours</span><span class="p">,</span>
+                 <span class="n">node_size</span><span class="o">=</span><span class="mi">2200</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">font_color</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span>
+                 <span class="n">font_weight</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span><span class="p">,</span> <span class="n">arrows</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">arrowsize</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+                 <span class="n">edge_color</span><span class="o">=</span><span class="s1">&#39;#555555&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Causal DAG — Chest X-Ray CNN</span><span class="se">\n</span><span class="s1">&#39;</span>
+             <span class="s1">&#39;Green = legitimate path | Red = spurious path | Blue = outcome&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_chest_xray_causal_inference_15_0.png" src="../_images/example_notebooks_gcm_chest_xray_causal_inference_15_0.png" />
+</div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="5.-Fitting-the-Graphical-Causal-Model-(GCM)">
+<h2>5. Fitting the Graphical Causal Model (GCM)<a class="headerlink" href="#5.-Fitting-the-Graphical-Causal-Model-(GCM)" title="Link to this heading">#</a></h2>
+<p>We now fit a <strong>Structural Causal Model</strong> to the observed feature data.</p>
+<p><code class="docutils literal notranslate"><span class="pre">gcm.auto.assign_causal_mechanisms</span></code> selects an appropriate mechanism for each node:</p>
+<ul class="simple">
+<li><p><strong>Root nodes</strong> (no parents): fitted as empirical distributions</p></li>
+<li><p><strong>Non-root nodes</strong>: fitted as additive noise models — the mechanism learned from data tells us how each parent causes its child</p></li>
+</ul>
+<p>Once fitted, the GCM gives us a generative model of the joint distribution. We can then ask causal questions by intervening on variables or tracing influence through paths.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Select only the variables in the graph</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">features</span><span class="p">[[</span>
+    <span class="s1">&#39;infiltration&#39;</span><span class="p">,</span> <span class="s1">&#39;scanner_acquisition_group&#39;</span><span class="p">,</span> <span class="s1">&#39;patient_age&#39;</span><span class="p">,</span> <span class="s1">&#39;patient_sex&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;opacity_score&#39;</span><span class="p">,</span> <span class="s1">&#39;image_brightness&#39;</span><span class="p">,</span> <span class="s1">&#39;model_prediction&#39;</span>
+<span class="p">]]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+
+<span class="n">causal_model</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">StructuralCausalModel</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+<span class="n">gcm</span><span class="o">.</span><span class="n">auto</span><span class="o">.</span><span class="n">assign_causal_mechanisms</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+<span class="n">gcm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;GCM fitted successfully.&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Mechanism assigned to each node:&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">():</span>
+    <span class="n">mech</span> <span class="o">=</span> <span class="n">causal_model</span><span class="o">.</span><span class="n">causal_mechanism</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  </span><span class="si">{</span><span class="n">node</span><span class="si">:</span><span class="s1">&lt;22</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">mech</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Fitting causal mechanism of node patient_sex: 100%|██████████| 7/7 [00:05&lt;00:00,  1.20it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+GCM fitted successfully.
+
+Mechanism assigned to each node:
+  infiltration           EmpiricalDistribution
+  opacity_score          AdditiveNoiseModel
+  scanner_acquisition_group EmpiricalDistribution
+  image_brightness       AdditiveNoiseModel
+  model_prediction       AdditiveNoiseModel
+  patient_age            EmpiricalDistribution
+  patient_sex            EmpiricalDistribution
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+
+</pre></div></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="6.-Intrinsic-Causal-Influence">
+<h2>6. Intrinsic Causal Influence<a class="headerlink" href="#6.-Intrinsic-Causal-Influence" title="Link to this heading">#</a></h2>
+<p><strong>The key question:</strong> of everything that drives <code class="docutils literal notranslate"><span class="pre">model_prediction</span></code>, how much is causally owned by each variable?</p>
+<p><strong>Intrinsic causal influence</strong> answers this by measuring the variance in <code class="docutils literal notranslate"><span class="pre">model_prediction</span></code> attributable to each variable’s <em>noise term</em> — the portion that this variable contributes that no other variable can explain.</p>
+<p>Think of it as: <em>if we held everything else fixed and only randomised this variable, how much would predictions vary?</em></p>
+<ul class="simple">
+<li><p>High <code class="docutils literal notranslate"><span class="pre">opacity_score</span></code> influence → the model is responding to real lung changes ✓</p></li>
+<li><p>High <code class="docutils literal notranslate"><span class="pre">image_brightness</span></code> influence → the model is responding to scanner artefacts ✗</p></li>
+</ul>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Computing intrinsic causal influence... (takes ~30s)&#39;</span><span class="p">)</span>
+<span class="n">influence</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">intrinsic_causal_influence</span><span class="p">(</span>
+    <span class="n">causal_model</span><span class="p">,</span>
+    <span class="n">target_node</span><span class="o">=</span><span class="s1">&#39;model_prediction&#39;</span><span class="p">,</span>
+    <span class="n">num_samples_randomization</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Intrinsic causal influence on model_prediction:&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">node</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">influence</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+    <span class="n">tag</span> <span class="o">=</span> <span class="s1">&#39;← legitimate&#39;</span> <span class="k">if</span> <span class="n">node</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;opacity_score&#39;</span><span class="p">,</span> <span class="s1">&#39;infiltration&#39;</span><span class="p">)</span> <span class="k">else</span> \
+          <span class="s1">&#39;← SPURIOUS&#39;</span>   <span class="k">if</span> <span class="n">node</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;image_brightness&#39;</span><span class="p">,</span> <span class="s1">&#39;scanner_acquisition_group&#39;</span><span class="p">)</span> <span class="k">else</span> \
+          <span class="s1">&#39;← demographic&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  </span><span class="si">{</span><span class="n">node</span><span class="si">:</span><span class="s1">&lt;22</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">val</span><span class="si">:</span><span class="s1">.6f</span><span class="si">}</span><span class="s1">  </span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Computing intrinsic causal influence... (takes ~30s)
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Evaluating set functions...: 100%|██████████| 92/92 [00:22&lt;00:00,  4.02it/s]
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+Intrinsic causal influence on model_prediction:
+  model_prediction       0.027554  ← demographic
+  image_brightness       0.008629  ← SPURIOUS
+  scanner_acquisition_group 0.004099  ← SPURIOUS
+  opacity_score          0.001220  ← legitimate
+  patient_age            0.000493  ← demographic
+  patient_sex            0.000022  ← demographic
+  infiltration           -0.000005  ← legitimate
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nodes</span>  <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">influence</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+<span class="n">values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">influence</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+<span class="n">sorted_pairs</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">nodes</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">values</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">sorted_pairs</span><span class="p">)</span>
+
+<span class="n">colours</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;opacity_score&#39;</span><span class="p">,</span> <span class="s1">&#39;infiltration&#39;</span><span class="p">):</span>       <span class="n">colours</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;#2ecc71&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">n</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;image_brightness&#39;</span><span class="p">,</span> <span class="s1">&#39;scanner_acquisition_group&#39;</span><span class="p">):</span> <span class="n">colours</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;#e74c3c&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>                                             <span class="n">colours</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;#95a5a6&#39;</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="n">bars</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">barh</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colours</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Intrinsic Causal Influence&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;What causally drives model_prediction?</span><span class="se">\n</span><span class="s1">&#39;</span>
+             <span class="s1">&#39;Green = legitimate | Red = spurious | Grey = demographic&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">bar</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">bars</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">bar</span><span class="o">.</span><span class="n">get_width</span><span class="p">()</span> <span class="o">+</span> <span class="mf">0.0002</span><span class="p">,</span> <span class="n">bar</span><span class="o">.</span><span class="n">get_y</span><span class="p">()</span> <span class="o">+</span> <span class="n">bar</span><span class="o">.</span><span class="n">get_height</span><span class="p">()</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">val</span><span class="si">:</span><span class="s1">.5f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="n">legitimate</span> <span class="o">=</span> <span class="n">influence</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;opacity_score&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="n">influence</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;infiltration&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">spurious</span>   <span class="o">=</span> <span class="n">influence</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;image_brightness&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="n">influence</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;scanner_acquisition_group&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">total</span>      <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">influence</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Legitimate signal share : </span><span class="si">{</span><span class="n">legitimate</span><span class="o">/</span><span class="n">total</span><span class="si">:</span><span class="s1">.1%</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Spurious signal share   : </span><span class="si">{</span><span class="n">spurious</span><span class="o">/</span><span class="n">total</span><span class="si">:</span><span class="s1">.1%</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_chest_xray_causal_inference_20_0.png" src="../_images/example_notebooks_gcm_chest_xray_causal_inference_20_0.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+Legitimate signal share : 2.9%
+Spurious signal share   : 30.3%
+</pre></div></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="7.-Arrow-Strength">
+<h2>7. Arrow Strength<a class="headerlink" href="#7.-Arrow-Strength" title="Link to this heading">#</a></h2>
+<p><strong>Arrow strength</strong> measures how load-bearing each causal edge is.</p>
+<p>It uses KL divergence: <em>if we removed this edge, how much would the distribution of ``model_prediction`` change?</em></p>
+<p>A high value means the parent strongly determines the child’s distribution through that edge.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Computing arrow strengths...&#39;</span><span class="p">)</span>
+<span class="n">strengths</span> <span class="o">=</span> <span class="n">arrow_strength</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">target_node</span><span class="o">=</span><span class="s1">&#39;model_prediction&#39;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Arrow strengths (KL divergence if edge removed):&#39;</span><span class="p">)</span>
+<span class="n">strength_records</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">edge</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">strengths</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+    <span class="n">tag</span> <span class="o">=</span> <span class="s1">&#39;← legitimate&#39;</span> <span class="k">if</span> <span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;opacity_score&#39;</span><span class="p">,</span> <span class="s1">&#39;infiltration&#39;</span><span class="p">)</span> <span class="k">else</span> \
+          <span class="s1">&#39;← SPURIOUS&#39;</span>   <span class="k">if</span> <span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;image_brightness&#39;</span><span class="p">,</span> <span class="s1">&#39;scanner_acquisition_group&#39;</span><span class="p">)</span> <span class="k">else</span> \
+          <span class="s1">&#39;← demographic&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  </span><span class="si">{</span><span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1"> → </span><span class="si">{</span><span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">&lt;22</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">val</span><span class="si">:</span><span class="s1">.6f</span><span class="si">}</span><span class="s1">  </span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">strength_records</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;edge&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1"> → </span><span class="si">{</span><span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;strength&#39;</span><span class="p">:</span> <span class="n">val</span><span class="p">})</span>
+
+<span class="n">strength_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">strength_records</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">edge_colours</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;#2ecc71&#39;</span> <span class="k">if</span> <span class="s1">&#39;opacity&#39;</span> <span class="ow">in</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;edge&#39;</span><span class="p">]</span> <span class="k">else</span>
+                <span class="s1">&#39;#e74c3c&#39;</span> <span class="k">if</span> <span class="s1">&#39;brightness&#39;</span> <span class="ow">in</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;edge&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="s1">&#39;#95a5a6&#39;</span>
+                <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">strength_df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">()]</span>
+<span class="n">strength_df_sorted</span> <span class="o">=</span> <span class="n">strength_df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;strength&#39;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">colours_sorted</span> <span class="o">=</span> <span class="p">[</span><span class="n">edge_colours</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">strength_df_sorted</span><span class="o">.</span><span class="n">index</span><span class="p">]</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">barh</span><span class="p">(</span><span class="n">strength_df_sorted</span><span class="p">[</span><span class="s1">&#39;edge&#39;</span><span class="p">],</span> <span class="n">strength_df_sorted</span><span class="p">[</span><span class="s1">&#39;strength&#39;</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">colours_sorted</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Arrow strength (KL divergence)&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Causal edge strength</span><span class="se">\n</span><span class="s1">Green = legitimate | Red = spurious&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Computing arrow strengths...
+
+Arrow strengths (KL divergence if edge removed):
+  image_brightness → model_prediction       0.012537  ← SPURIOUS
+  opacity_score → model_prediction       0.003017  ← legitimate
+  patient_age → model_prediction       0.001931  ← demographic
+  patient_sex → model_prediction       0.000828  ← demographic
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_chest_xray_causal_inference_22_1.png" src="../_images/example_notebooks_gcm_chest_xray_causal_inference_22_1.png" />
+</div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="8.-Interventional-Analysis-—-Swapping-the-Scanner">
+<h2>8. Interventional Analysis — Swapping the Scanner<a class="headerlink" href="#8.-Interventional-Analysis-—-Swapping-the-Scanner" title="Link to this heading">#</a></h2>
+<p>Now we ask the direct causal question:</p>
+<blockquote>
+<div><p><strong>If we forced every image to have the brightness of scanner group 1 (the most common scanner), how would predictions change?</strong></p>
+</div></blockquote>
+<p>This is the <strong>do-operator</strong>: <code class="docutils literal notranslate"><span class="pre">do(image_brightness</span> <span class="pre">=</span> <span class="pre">reference_level)</span></code> — we intervene on the scanner, cutting the <code class="docutils literal notranslate"><span class="pre">scanner_acquisition_group</span> <span class="pre">→</span> <span class="pre">image_brightness</span></code> edge and setting brightness to a fixed value.</p>
+<p>Under a purely clinical model, predictions should not change — disease doesn’t change when we swap scanners. If predictions <em>do</em> shift, it confirms the model learned a spurious association.</p>
+<p>We compare:</p>
+<ul class="simple">
+<li><p><strong>Observational distribution</strong> <code class="docutils literal notranslate"><span class="pre">p(model_prediction)</span></code> — predictions under actual scanner conditions</p></li>
+<li><p><strong>Interventional distribution</strong> <code class="docutils literal notranslate"><span class="pre">p(model_prediction</span> <span class="pre">|</span> <span class="pre">do(brightness</span> <span class="pre">=</span> <span class="pre">ref))</span></code> — predictions after scanner swap</p></li>
+</ul>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Reference: mean brightness of hospital group 1 (largest scanner group)</span>
+<span class="n">target_brightness</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;scanner_acquisition_group&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">][</span><span class="s1">&#39;image_brightness&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Reference brightness (group 1 mean): </span><span class="si">{</span><span class="n">target_brightness</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Brightness by group (observational):&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;scanner_acquisition_group&#39;</span><span class="p">)[</span><span class="s1">&#39;image_brightness&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+
+<span class="n">n_samples</span> <span class="o">=</span> <span class="mi">500</span>
+
+<span class="c1"># Draw from observational distribution</span>
+<span class="n">obs_samples</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">draw_samples</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="n">n_samples</span><span class="p">)</span>
+
+<span class="c1"># Draw from interventional distribution: do(image_brightness = target)</span>
+<span class="n">int_samples</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">interventional_samples</span><span class="p">(</span>
+    <span class="n">causal_model</span><span class="p">,</span>
+    <span class="n">interventions</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;image_brightness&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">target_brightness</span><span class="p">)},</span>
+    <span class="n">num_samples_to_draw</span><span class="o">=</span><span class="n">n_samples</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Observational mean prediction : </span><span class="si">{</span><span class="n">obs_samples</span><span class="p">[</span><span class="s2">&quot;model_prediction&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Interventional mean prediction : </span><span class="si">{</span><span class="n">int_samples</span><span class="p">[</span><span class="s2">&quot;model_prediction&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Mean shift                     : </span><span class="si">{</span><span class="n">int_samples</span><span class="p">[</span><span class="s2">&quot;model_prediction&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">obs_samples</span><span class="p">[</span><span class="s2">&quot;model_prediction&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s1">+.4f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Reference brightness (group 1 mean): 117.26
+Brightness by group (observational):
+scanner_acquisition_group
+0.0    125.49
+1.0    117.26
+2.0    146.54
+3.0    106.95
+Name: image_brightness, dtype: float64
+
+Observational mean prediction : 0.4411
+Interventional mean prediction : 0.5544
+Mean shift                     : +0.1132
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+
+<span class="c1"># Distribution comparison</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">obs_samples</span><span class="p">[</span><span class="s1">&#39;model_prediction&#39;</span><span class="p">],</span> <span class="n">bins</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
+             <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#3498db&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Observational (actual scanners)&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">int_samples</span><span class="p">[</span><span class="s1">&#39;model_prediction&#39;</span><span class="p">],</span> <span class="n">bins</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
+             <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#e74c3c&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Interventional (scanner swap)&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">obs_samples</span><span class="p">[</span><span class="s1">&#39;model_prediction&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#2980b9&#39;</span><span class="p">,</span>
+                <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">int_samples</span><span class="p">[</span><span class="s1">&#39;model_prediction&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#c0392b&#39;</span><span class="p">,</span>
+                <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;model_prediction probability&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Count&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Prediction distribution</span><span class="se">\n</span><span class="s1">observational vs interventional&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+<span class="c1"># Mean predictions by hospital group — observational vs interventional</span>
+<span class="n">obs_by_hosp</span> <span class="o">=</span> <span class="n">obs_samples</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span>
+    <span class="n">obs_samples</span><span class="p">[</span><span class="s1">&#39;scanner_acquisition_group&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">round</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+<span class="p">)[</span><span class="s1">&#39;model_prediction&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="n">int_mean</span> <span class="o">=</span> <span class="n">int_samples</span><span class="p">[</span><span class="s1">&#39;model_prediction&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">obs_by_hosp</span><span class="p">))</span>
+<span class="n">width</span> <span class="o">=</span> <span class="mf">0.35</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">obs_by_hosp</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#3498db&#39;</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Observational&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">int_mean</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#e74c3c&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span>
+                <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Interventional mean (</span><span class="si">{</span><span class="n">int_mean</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="sa">f</span><span class="s1">&#39;Group </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">obs_by_hosp</span><span class="o">.</span><span class="n">index</span><span class="p">])</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Mean prediction probability&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Mean prediction by hospital group</span><span class="se">\n</span><span class="s1">Red line = after scanner swap&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Interpretation:&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Groups whose bars diverge from the red line are most affected by the scanner swap.&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;This is evidence that the model learned brightness as a spurious predictor.&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_chest_xray_causal_inference_25_0.png" src="../_images/example_notebooks_gcm_chest_xray_causal_inference_25_0.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+Interpretation:
+Groups whose bars diverge from the red line are most affected by the scanner swap.
+This is evidence that the model learned brightness as a spurious predictor.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">spurious</span> <span class="o">=</span> <span class="n">influence</span><span class="p">[</span><span class="s1">&#39;image_brightness&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">influence</span><span class="p">[</span><span class="s1">&#39;scanner_acquisition_group&#39;</span><span class="p">]</span>
+<span class="n">total</span>    <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">influence</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">spurious</span><span class="o">/</span><span class="n">total</span><span class="si">:</span><span class="s1">.1%</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+30.3%
+</pre></div></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="9.-Key-Takeaways">
+<h2>9. Key Takeaways<a class="headerlink" href="#9.-Key-Takeaways" title="Link to this heading">#</a></h2>
+<section id="What-we-found">
+<h3>What we found<a class="headerlink" href="#What-we-found" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Analysis</p></th>
+<th class="head"><p>Finding</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Val AUC</p></td>
+<td><p>0.7198 — model looks reasonable</p></td>
+</tr>
+<tr class="row-odd"><td><p>Intrinsic influence (opacity)</p></td>
+<td><p>~0.002 — legitimate clinical signal ✓</p></td>
+</tr>
+<tr class="row-even"><td><p>Intrinsic influence (brightness)</p></td>
+<td><p>~0.008 — strongest spurious driver ✗</p></td>
+</tr>
+<tr class="row-odd"><td><p>Spurious share of total influence</p></td>
+<td><p>~28%</p></td>
+</tr>
+<tr class="row-even"><td><p>Arrow strength (brightness → prediction)</p></td>
+<td><p>0.014 — strongest causal edge</p></td>
+</tr>
+<tr class="row-odd"><td><p>Scanner swap intervention</p></td>
+<td><p>Predictions shift across hospital groups</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="The-core-argument">
+<h3>The core argument<a class="headerlink" href="#The-core-argument" title="Link to this heading">#</a></h3>
+<p><strong>AUC 0.7198 ≠ the model learned the right thing.</strong></p>
+<p>Roughly a quarter of what drives this model’s predictions is <code class="docutils literal notranslate"><span class="pre">image_brightness</span></code> — a property of the scanner, not the patient’s lungs. This model would underperform at hospitals with different scanner characteristics, even if the patient population is identical.</p>
+<p>Causal inference, not predictive metrics, is the right tool to audit a model before clinical deployment.</p>
+</section>
+<section id="What-to-do-about-it">
+<h3>What to do about it<a class="headerlink" href="#What-to-do-about-it" title="Link to this heading">#</a></h3>
+<ol class="arabic simple">
+<li><p><strong>Retrain with brightness augmentation</strong> — randomly vary brightness during training to prevent the model from using it</p></li>
+<li><p><strong>Stratify evaluation by hospital/scanner</strong> — a model that varies in AUC across scanner groups has learned spurious features</p></li>
+<li><p><strong>Use causal regularisation</strong> — penalise the model for using variables in the spurious path during training</p></li>
+<li><p><strong>Before deployment</strong>: run this DoWhy analysis at the target hospital to quantify how much spurious signal remains</p></li>
+</ol>
+</section>
+<section id="References">
+<h3>References<a class="headerlink" href="#References" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>NIH Chest X-ray Dataset: Wang et al., 2017</p></li>
+<li><p>Hospital generalisation failure: Zech et al., 2018 — <em>Variable generalization performance of a deep learning model to detect pneumonia in chest radiographs</em></p></li>
+<li><p>DoWhy GCM module: Blöbaum et al., 2022 — <em>DoWhy-GCM: An Extension of DoWhy for Causal Inference in Graphical Causal Models</em></p></li>
+<li><p>CheXNet: Rajpurkar et al., 2017</p></li>
+</ul>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="sales_attribution_intervention.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Causal attribution to sales growth and spend intervention</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="dowhy_ihdp_data_example.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">DoWhy example on ihdp (Infant Health and Development Program) dataset</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#The-Problem">The Problem</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Setup">Setup</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#1.-Dataset-Overview">1. Dataset Overview</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#2.-CNN-Training-—-ResNet50-Transfer-Learning">2. CNN Training — ResNet50 Transfer Learning</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#3.-The-Correlation-Trap">3. The Correlation Trap</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#4.-Causal-Graph-Construction">4. Causal Graph Construction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#5.-Fitting-the-Graphical-Causal-Model-(GCM)">5. Fitting the Graphical Causal Model (GCM)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#6.-Intrinsic-Causal-Influence">6. Intrinsic Causal Influence</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#7.-Arrow-Strength">7. Arrow Strength</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#8.-Interventional-Analysis-—-Swapping-the-Scanner">8. Interventional Analysis — Swapping the Scanner</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#9.-Key-Takeaways">9. Key Takeaways</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#What-we-found">What we found</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#The-core-argument">The core argument</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#What-to-do-about-it">What to do about it</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#References">References</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/example_notebooks/gcm_chest_xray_causal_inference.ipynb.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2022, PyWhy contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
