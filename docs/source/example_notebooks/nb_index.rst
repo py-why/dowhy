@@ -218,6 +218,14 @@ Real world-inspired examples
         | **Level:** Advanced
         | **Task:** Attribution to sales channels via GCM
 
+.. grid:: 2
+
+    .. grid-item-card:: :doc:`gcm_chest_xray_causal_inference`
+
+        +++
+        | **Level:** Advanced
+        | **Task:** Auditing CNN predictions for spurious correlations via GCM
+
 Examples on benchmark datasets
 -------------------------------
 
@@ -442,6 +450,7 @@ Miscellaneous
    gcm_falsify_dag
    counterfactual_fairness_dowhy
    sales_attribution_intervention
+   gcm_chest_xray_causal_inference
 
 .. toctree::
    :maxdepth: 1
