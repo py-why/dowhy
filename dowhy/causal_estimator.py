@@ -62,6 +62,7 @@ class CausalEstimator:
         confidence_level: float = DEFAULT_CONFIDENCE_LEVEL,
         need_conditional_estimates: Union[bool, str] = "auto",
         num_quantiles_to_discretize_cont_cols: int = NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS,
+        random_state: Optional[Union[int, np.random.RandomState]] = None,
         **_,
     ):
         """Initializes an estimator with data and names of relevant variables.
@@ -87,6 +88,9 @@ class CausalEstimator:
         :param num_quantiles_to_discretize_cont_cols: The number of quantiles
             into which a numeric effect modifier is split, to enable
             estimation of conditional treatment effect over it.
+        :param random_state: Seed or numpy RandomState used to make the
+            bootstrap confidence intervals and significance tests reproducible.
+            If None (default), results vary between runs.
         :param kwargs: (optional) Additional estimator-specific parameters
         :returns: an instance of the estimator class.
         """
@@ -113,7 +117,20 @@ class CausalEstimator:
         self._bootstrap_estimates = None
         self._bootstrap_null_estimates = None
 
+        self._random_state = random_state
+
         self._encoders = Encoders()
+
+    def _get_random_state(self):
+        """Return a numpy RandomState built from the estimator's random_state.
+
+        A RandomState instance is returned as-is; an int (or None) is used to
+        seed a new RandomState. None preserves the previous non-deterministic
+        behavior.
+        """
+        if isinstance(self._random_state, np.random.RandomState):
+            return self._random_state
+        return np.random.RandomState(self._random_state)
 
     def __getstate__(self):
         """Return picklable state, excluding the non-picklable logger (Python < 3.12)."""
@@ -222,16 +239,47 @@ class CausalEstimator:
         return new_estimator
 
     def estimate_effect_naive(self, data: pd.DataFrame):
-        """
+        """Compute a naive (unadjusted) observational difference as a baseline for effect strength.
+
+        Estimates E[Y | T = treatment_value] - E[Y | T = control_value] from the raw data without
+        any causal adjustment. This is used internally by :meth:`evaluate_effect_strength` as the
+        denominator when computing the ``fraction-effect`` statistic.
+
         :param data: Pandas dataframe to estimate effect
+        :returns: CausalEstimate with the naive observational difference
         """
-        # TODO Only works for binary treatment
-        df_withtreatment = data.loc[data[self._target_estimand.treatment_variable] == 1]
-        df_notreatment = data.loc[data[self._target_estimand.treatment_variable] == 0]
-        est = np.mean(df_withtreatment[self._target_estimand.outcome_variable]) - np.mean(
-            df_notreatment[self._target_estimand.outcome_variable]
+        treatment_var = self._target_estimand.treatment_variable
+        outcome_var = self._target_estimand.outcome_variable
+
+        if len(treatment_var) == 1:
+            # Single treatment: index as a Series to get a 1-D boolean mask
+            treatment_col = data[treatment_var[0]]
+            mask_with = treatment_col == self._treatment_value
+            mask_without = treatment_col == self._control_value
+        else:
+            # Multiple treatments: broadcast scalar or per-treatment values and combine row-wise
+            t_val = self._treatment_value
+            c_val = self._control_value
+            if not isinstance(t_val, (list, tuple)):
+                t_val = [t_val] * len(treatment_var)
+            if not isinstance(c_val, (list, tuple)):
+                c_val = [c_val] * len(treatment_var)
+            mask_with = (data[treatment_var] == t_val).all(axis=1)
+            mask_without = (data[treatment_var] == c_val).all(axis=1)
+
+        df_withtreatment = data.loc[mask_with]
+        df_notreatment = data.loc[mask_without]
+        est = np.mean(df_withtreatment[outcome_var]) - np.mean(df_notreatment[outcome_var])
+        return CausalEstimate(
+            data,
+            None,
+            None,
+            est,
+            None,
+            None,
+            control_value=self._control_value,
+            treatment_value=self._treatment_value,
         )
-        return CausalEstimate(data, None, None, est, None, control_value=0, treatment_value=1)
 
     def _estimate_effect_fn(self, data_df):
         """Function used in conditional effect estimation. This function is to be overridden by each child estimator.
@@ -285,10 +333,16 @@ class CausalEstimator:
         # Adding observed=True to avoid a FutureWarning in pandas (see #1316)
         by_effect_mods = data.groupby(effect_modifier_names, observed=True)
 
-        def cond_est_fn(x):
-            return self._do(self._treatment_value, x) - self._do(self._control_value, x)
-
-        conditional_estimates = by_effect_mods.apply(estimate_effect_fn)
+        # pandas >=2.2 emits a DeprecationWarning when the grouping columns are
+        # passed to the applied function unless include_groups is specified
+        # explicitly. We pass include_groups=True because estimators may access
+        # the effect-modifier columns (grouping columns) inside estimate_effect_fn
+        # for feature construction. Older pandas versions do not accept this
+        # keyword, so we fall back gracefully.
+        try:
+            conditional_estimates = by_effect_mods.apply(estimate_effect_fn, include_groups=True)
+        except TypeError:
+            conditional_estimates = by_effect_mods.apply(estimate_effect_fn)
         # Deleting the temporary categorical columns
         for em in effect_modifier_names:
             if em.startswith(prefix):
@@ -336,9 +390,11 @@ class CausalEstimator:
         self.logger.info("INFO: The sample size: {}".format(sample_size))
         self.logger.info("INFO: The number of simulations: {}".format(num_bootstrap_simulations))
 
+        random_state = self._get_random_state()
+
         # Perform the set number of simulations
         for index in range(num_bootstrap_simulations):
-            new_data = resample(data, n_samples=sample_size)
+            new_data = resample(data, n_samples=sample_size, random_state=random_state)
             new_estimator = self.get_new_estimator_object(
                 self._target_estimand,
                 # names of treatment and outcome
@@ -547,8 +603,9 @@ class CausalEstimator:
             null_estimates = np.zeros(num_null_simulations)
             new_estimand = copy.deepcopy(self._target_estimand)
             new_estimand.outcome_variable = ["dummy_outcome"]
+            random_state = self._get_random_state()
             for i in range(num_null_simulations):
-                new_outcome = np.random.permutation(data[self._target_estimand.outcome_variable])
+                new_outcome = random_state.permutation(data[self._target_estimand.outcome_variable])
                 new_data = data.assign(dummy_outcome=new_outcome)
                 new_estimator = self.get_new_estimator_object(
                     new_estimand,

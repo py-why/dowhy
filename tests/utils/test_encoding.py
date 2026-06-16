@@ -109,6 +109,16 @@ def test_one_hot_encode_all_numeric_returns_unchanged():
     assert encoder is None
 
 
+def test_one_hot_encode_nested_structures_raises_type_error():
+    """Ensure one_hot_encode throws a clear TypeError when an object column
+    contains non-primitive, unhashable, or nested data structures like dicts.
+    """
+    df = pd.DataFrame({"numeric_col": [1, 2, 3], "nested_col": [{"id": 1}, {"id": 2}, {"id": 3}]})
+
+    with pytest.raises(TypeError, match="categorical encoding failed during one-hot conversion"):
+        one_hot_encode(df, columns=["nested_col"])
+
+
 class TestEncoders:
     def _make_df(self):
         return pd.DataFrame({"C": ["x", "y", "z", "x"], "N": [1, 2, 3, 4]})
