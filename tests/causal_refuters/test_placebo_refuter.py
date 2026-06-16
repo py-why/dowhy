@@ -119,3 +119,51 @@ class TestPlaceboRefuter(object):
         assert (
             abs(ref_explicit.new_effect) < 5
         ), f"Placebo effect with implicit iv_instrument_name ({ref_implicit.new_effect:.2f}) is unexpectedly large"
+
+    @mark.parametrize("placebo_type", ["permute", "Random Data"])
+    def test_placebo_refuter_multiple_treatments(self, placebo_type):
+        """Regression test for #251: placebo_treatment_refuter must not raise
+        'Wrong number of items passed N, placement implies 1' when multiple treatments are used.
+        """
+        np.random.seed(42)
+        n_treatments = 3
+        data = dowhy.datasets.linear_dataset(
+            num_samples=500,
+            beta=10,
+            num_common_causes=0,
+            num_instruments=0,
+            num_effect_modifiers=0,
+            num_treatments=n_treatments,
+            treatment_is_binary=True,
+            outcome_is_binary=False,
+            num_discrete_common_causes=0,
+            num_discrete_effect_modifiers=0,
+            one_hot_encode=False,
+        )
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+        )
+        identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        estimate = model.estimate_effect(
+            identified_estimand,
+            method_name="backdoor.linear_regression",
+            control_value=[0] * n_treatments,
+            treatment_value=[0, 0, 1],
+            method_params={"need_conditional_estimates": False},
+        )
+        # Must not raise ValueError
+        result = model.refute_estimate(
+            identified_estimand,
+            estimate,
+            method_name="placebo_treatment_refuter",
+            placebo_type=placebo_type,
+            num_simulations=10,
+        )
+        # The placebo new_effect should be near zero (no real causal link after permutation/randomisation)
+        assert abs(result.new_effect) < abs(estimate.value), (
+            f"Placebo new_effect ({result.new_effect:.3f}) is unexpectedly close to the original "
+            f"estimate ({estimate.value:.3f}); the placebo is likely not severing the causal link."
+        )

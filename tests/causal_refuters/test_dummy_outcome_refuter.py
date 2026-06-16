@@ -323,3 +323,42 @@ class TestDummyOutcomeRefuter(object):
             error_tolerence, estimator_method, "dummy_outcome_refuter", transformations=transformations
         )
         refuter_tester.binary_treatment_testsuite(num_samples=num_samples, tests_to_run="atleast-one-common-cause")
+
+
+def _build_estimate():
+    import numpy as np
+    import pandas as pd
+
+    from dowhy import CausalModel
+
+    rng = np.random.RandomState(0)
+    n = 500
+    w = rng.normal(size=n)
+    v = (rng.uniform(size=n) < 1 / (1 + np.exp(-w))).astype(int)
+    y = 2 * v + w + rng.normal(size=n)
+    data = pd.DataFrame({"v0": v, "W0": w, "y": y})
+    model = CausalModel(data=data, treatment="v0", outcome="y", common_causes=["W0"])
+    identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+    estimate = model.estimate_effect(identified_estimand, method_name="backdoor.linear_regression")
+    return model, identified_estimand, estimate
+
+
+def _run_dummy_outcome_refuter(random_state):
+    model, identified_estimand, estimate = _build_estimate()
+    refutations = model.refute_estimate(
+        identified_estimand,
+        estimate,
+        method_name="dummy_outcome_refuter",
+        num_simulations=10,
+        transformation_list=[("permute", {"permute_fraction": 1}), ("noise", {"std_dev": 1})],
+        random_state=random_state,
+    )
+    return [refutation.new_effect for refutation in refutations]
+
+
+def test_dummy_outcome_refuter_is_reproducible_with_random_state():
+    assert _run_dummy_outcome_refuter(random_state=123) == _run_dummy_outcome_refuter(random_state=123)
+
+
+def test_dummy_outcome_refuter_differs_across_random_states():
+    assert _run_dummy_outcome_refuter(random_state=123) != _run_dummy_outcome_refuter(random_state=456)
