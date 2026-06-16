@@ -35,7 +35,7 @@ def one_hot_encode(data: pd.DataFrame, columns=None, drop_first: bool = False, e
 
     # Columns to keep in the result - not encoded.
     columns_to_keep = data.columns.difference(data_to_encode.columns)
-    df_columns_to_keep = data[columns_to_keep].reset_index(drop=True)
+    df_columns_to_keep = data[columns_to_keep]
 
     try:
         if encoder is None:  # Create new encoder
@@ -61,7 +61,7 @@ def one_hot_encode(data: pd.DataFrame, columns=None, drop_first: bool = False, e
 
     columns_encoded = encoder.get_feature_names_out(data_to_encode.columns)
 
-    df_encoded = pd.DataFrame(encoded_data, columns=columns_encoded).reset_index(drop=True)  # drop index from original
+    df_encoded = pd.DataFrame(encoded_data, columns=columns_encoded, index=data_to_encode.index)
 
     df_result = pd.concat([df_columns_to_keep, df_encoded], axis=1)
 
