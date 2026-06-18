@@ -1,4 +1,5 @@
 import networkx as nx
+import numpy as np
 import pandas as pd
 import pytest
 from flaky import flaky
@@ -753,6 +754,49 @@ class TestCausalModel(object):
 
         # Linear regression is deterministic: both calls must yield the same estimate.
         assert estimate1.value == pytest.approx(estimate2.value)
+
+    def test_causal_model_do_regression(self):
+        """CausalModel.do() must work with regression estimators and method_params=None.
+
+        Previously, CausalModel.do() had three bugs:
+        1. method_params=None caused TypeError: argument after ** must be a mapping, not NoneType
+        2. fit() was called with (data, treatment, outcome) instead of (data,)
+        3. RegressionEstimator.fit() never stored self._data, so interventional_outcomes()
+           could not fall back to self._data when data_df=None.
+        """
+        np.random.seed(42)
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=2,
+            num_samples=300,
+            num_treatments=1,
+            treatment_is_binary=True,
+        )
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+            test_significance=None,
+        )
+        identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+
+        # Calling do() with method_params=None (the default) must not raise TypeError.
+        do_treated = model.do(
+            x=1,
+            identified_estimand=identified_estimand,
+            method_name="backdoor.linear_regression",
+        )
+        do_control = model.do(
+            x=0,
+            identified_estimand=identified_estimand,
+            method_name="backdoor.linear_regression",
+        )
+        # Cast to float once — this also validates the result is scalar-like.
+        do_treated = float(do_treated)
+        do_control = float(do_control)
+        # The implied ATE should be close to beta=10.
+        assert do_treated - do_control == pytest.approx(10, abs=5)
 
 
 if __name__ == "__main__":
