@@ -370,6 +370,9 @@ def _include_confounders_effect(
     w_random = stdnorm.rvs(num_rows, random_state=random_state)
 
     if effect_on_t == "binary_flip":
+        for tname in treatment_name:
+            if pd.api.types.is_bool_dtype(new_data[tname]):
+                new_data[tname] = new_data[tname].astype(int)
         alpha = 2 * kappa_t - 1 if kappa_t >= 0.5 else 1 - 2 * kappa_t
         interval = stdnorm.interval(alpha)
         rel_interval = interval[0] if kappa_t >= 0.5 else interval[1]
@@ -392,6 +395,9 @@ def _include_confounders_effect(
         raise NotImplementedError("'" + effect_on_t + "' method not supported for confounders' effect on treatment")
 
     if effect_on_y == "binary_flip":
+        for yname in outcome_name:
+            if pd.api.types.is_bool_dtype(new_data[yname]):
+                new_data[yname] = new_data[yname].astype(int)
         alpha = 2 * kappa_y - 1 if kappa_y >= 0.5 else 1 - 2 * kappa_y
         interval = stdnorm.interval(alpha)
         rel_interval = interval[0] if kappa_y >= 0.5 else interval[1]

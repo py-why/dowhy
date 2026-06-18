@@ -405,15 +405,13 @@ class CausalModel:
                 # estimate_effect code. It is not advisable to use the
                 # estimator from this function to call estimate_effect
                 # with fit_estimator=False.
+                if method_params is None:
+                    method_params = {}
                 self.causal_estimator = causal_estimator_class(
                     identified_estimand,
                     **method_params,
                 )
-                self.causal_estimator.fit(
-                    self._data,
-                    self._treatment,
-                    self._outcome,
-                )
+                self.causal_estimator.fit(self._data)
             else:
                 # Estimator had been computed in a previous call
                 assert self.causal_estimator is not None
