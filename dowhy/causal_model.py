@@ -295,8 +295,12 @@ class CausalModel:
             effect_modifiers = self._graph.get_effect_modifiers(self._treatment, self._outcome)
 
         if method_name is None:
-            # TODO add propensity score as default backdoor method, iv as default iv method, add an informational message to show which method has been selected.
-            pass
+            raise ValueError(
+                "method_name must be provided. "
+                "Specify an estimation method such as 'backdoor.linear_regression', "
+                "'backdoor.propensity_score_stratification', or 'iv.instrumental_variable'. "
+                "Use the '<identifier>.<estimator>' format."
+            )
         else:
             # TODO add dowhy as a prefix to all dowhy estimators
             num_components = len(method_name.split("."))
