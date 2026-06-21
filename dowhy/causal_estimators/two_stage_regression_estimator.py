@@ -18,6 +18,12 @@ class TwoStageRegressionEstimator(CausalEstimator):
 
     Supports additional parameters as listed below.
 
+    **References**
+
+    Pearl, J. (1995). Causal diagrams for empirical research. *Biometrika*, 82(4), 669–688. https://doi.org/10.1093/biomet/82.4.669
+
+    Spirtes, P., Glymour, C., & Scheines, R. (2000). *Causation, Prediction, and Search* (2nd ed.). MIT Press.
+
     """
 
     # First stage statistical model

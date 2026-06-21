@@ -16,6 +16,14 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
 
     Supports additional parameters as listed below.
 
+    **References**
+
+    Rosenbaum, P. R., & Rubin, D. B. (1983). The central role of the propensity score in observational studies for causal effects. *Biometrika*, 70(1), 41–55. https://doi.org/10.1093/biomet/70.1.41
+
+    Robins, J. M., Hernán, M. A., & Brumback, B. (2000). Marginal structural models and causal inference in epidemiology. *Epidemiology*, 11(5), 550–560. https://doi.org/10.1097/00001648-200009000-00011
+
+    Hirano, K., Imbens, G. W., & Ridder, G. (2003). Efficient estimation of average treatment effects using the estimated propensity score. *Econometrica*, 71(4), 1161–1189. https://doi.org/10.1111/1468-0262.00442
+
     """
 
     def __init__(
