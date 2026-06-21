@@ -1,5 +1,6 @@
 import copy
 import logging
+import warnings
 from collections import namedtuple
 from typing import Dict, List, Optional, Union
 
@@ -770,6 +771,28 @@ class CausalEstimator:
         return s
 
 
+def _warn_if_nan_in_data(data: pd.DataFrame, treatment: List[str], outcome: List[str]) -> None:
+    """Emits a warning if any treatment or outcome columns contain NaN values.
+
+    NaN values are propagated silently by most estimators, producing a NaN estimate
+    with no diagnostic information. This helper surfaces the issue early so users can
+    resolve it before fitting.
+
+    :param data: DataFrame passed to estimate_effect.
+    :param treatment: List of treatment column names.
+    :param outcome: List of outcome column names.
+    """
+    columns_to_check = list(treatment) + list(outcome)
+    columns_with_nan = [col for col in columns_to_check if col in data.columns and data[col].isna().any()]
+    if columns_with_nan:
+        warnings.warn(
+            f"Data contains NaN values in column(s): {columns_with_nan}. "
+            "This may produce a NaN estimate. Consider calling data.dropna() before estimation.",
+            UserWarning,
+            stacklevel=4,
+        )
+
+
 def estimate_effect(
     data: pd.DataFrame,
     treatment: Union[str, List[str]],
@@ -823,6 +846,8 @@ def estimate_effect(
         error_msg = f"No valid identified estimand for '{identifier_name}'. Ensure that the identification step succeeded for this estimator method (e.g. the graph must contain valid instruments for 'iv.instrumental_variable')."
         logger.error(error_msg)
         raise ValueError(error_msg)
+
+    _warn_if_nan_in_data(data, treatment, outcome)
 
     if fit_estimator:
         estimator.fit(
