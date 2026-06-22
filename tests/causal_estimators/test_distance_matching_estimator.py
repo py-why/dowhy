@@ -233,3 +233,17 @@ class TestDistanceMatchingEstimator:
             },
         )
         assert np.isfinite(estimate.value), "Estimate with Mahalanobis and V param should be finite."
+
+    def test_distance_matching_with_custom_p_param(self, binary_treatment_dataset):
+        """Regression test: p passed via init_params should be routed as first-class NearestNeighbors arg, not metric_params."""
+        data = binary_treatment_dataset
+        model = CausalModel(data=data, treatment="v0", outcome="y", graph=GML_SINGLE_CAUSE)
+        estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        # p=1 gives Manhattan distance; if p were incorrectly placed in metric_params sklearn would ignore it
+        estimate = model.estimate_effect(
+            estimand,
+            method_name="backdoor.distance_matching",
+            target_units="att",
+            method_params={"init_params": {"distance_metric": "minkowski", "p": 1}},
+        )
+        assert np.isfinite(estimate.value), "Estimate should be finite with p=1 (Manhattan distance)"
