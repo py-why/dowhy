@@ -41,6 +41,7 @@ py310_dependent_notebooks = {
 #       most get tested by the documentation generation.
 ignore_notebooks = [
     "dowhy_causal_discovery_example.ipynb",  # This is being tested as part of documentation generation
+    "gcm_chest_xray_causal_inference.ipynb",  # Requires network download; flaky in CI due to HTTP 429
 ]
 
 # Adding the dowhy root folder to the python path so that jupyter notebooks
