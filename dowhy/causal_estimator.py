@@ -333,16 +333,14 @@ class CausalEstimator:
         # Adding observed=True to avoid a FutureWarning in pandas (see #1316)
         by_effect_mods = data.groupby(effect_modifier_names, observed=True)
 
-        # pandas >=2.2 emits a DeprecationWarning when the grouping columns are
-        # passed to the applied function unless include_groups is specified
-        # explicitly. We pass include_groups=True because estimators may access
-        # the effect-modifier columns (grouping columns) inside estimate_effect_fn
-        # for feature construction. Older pandas versions do not accept this
-        # keyword, so we fall back gracefully.
-        try:
-            conditional_estimates = by_effect_mods.apply(estimate_effect_fn, include_groups=True)
-        except TypeError:
-            conditional_estimates = by_effect_mods.apply(estimate_effect_fn)
+        # Some estimators access the effect-modifier (grouping) columns inside
+        # estimate_effect_fn for feature construction, so those columns must remain
+        # available. pandas >=3.0 no longer lets GroupBy.apply include the grouping
+        # columns (include_groups=True was removed). Iterating the groups keeps the
+        # grouping columns in each sub-frame across all pandas versions.
+        group_estimates = {group_key: estimate_effect_fn(group_df) for group_key, group_df in by_effect_mods}
+        conditional_estimates = pd.Series(group_estimates)
+        conditional_estimates.index.names = effect_modifier_names
         # Deleting the temporary categorical columns
         for em in effect_modifier_names:
             if em.startswith(prefix):
