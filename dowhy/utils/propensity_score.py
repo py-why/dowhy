@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
+from sklearn.multiclass import OneVsRestClassifier
 from sklearn.preprocessing import LabelEncoder
 from statsmodels.nonparametric.kernel_density import EstimatorSettings, KDEMultivariateConditional
 
@@ -58,7 +59,7 @@ def binary_treatment_model(data, covariates, treatment, variable_types):
 
 def categorical_treatment_model(data, covariates, treatment, variable_types):
     data, covariates = binarize_discrete(data, covariates, variable_types)
-    model = LogisticRegression(solver="lbfgs")
+    model = OneVsRestClassifier(LogisticRegression(solver="lbfgs"))
     data[treatment], encoder = discrete_to_integer(data[treatment])
     model = model.fit(data[covariates], data[treatment])
     scores = model.predict_proba(data[covariates])
