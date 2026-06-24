@@ -27,8 +27,7 @@ def _fmt(p_value, significance_level=None):
 def test_scalar_pvalue_significant():
     result = _fmt(0.03)
     assert "0.03" in result
-    assert "not significant" not in result
-    assert "significant" in result
+    assert "(significant at" in result
     assert "alpha=0.05" in result
     assert "H0" in result
 
@@ -43,7 +42,7 @@ def test_lower_bound_pvalue_uses_less_than():
     result = _fmt((0, 0.001))
     assert "p < 0.001" in result
     assert "[" not in result  # the old ambiguous "[0, 0.001]" form is gone
-    assert "significant" in result and "not significant" not in result
+    assert "(significant at" in result
 
 
 def test_upper_bound_pvalue_uses_greater_than():
@@ -53,15 +52,16 @@ def test_upper_bound_pvalue_uses_greater_than():
 
 
 def test_array_pvalue_reports_each_treatment():
+    # 0.01 is below alpha=0.05 (significant); 0.3 is above (not significant).
     result = _fmt(np.array([0.01, 0.3]))
     assert "0.01" in result and "0.3" in result
-    assert "significant" in result
+    assert "[significant, not significant]" in result
 
 
 def test_significance_level_is_independent_of_confidence_level():
     # The same p-value bound is significant at alpha=0.05 but inconclusive at
     # the stricter alpha=0.01 -- the verdict must follow significance_level only.
-    assert "significant" in _fmt((0, 0.02), significance_level=0.05)
+    assert "(significant at" in _fmt((0, 0.02), significance_level=0.05)
     assert "inconclusive" in _fmt((0, 0.02), significance_level=0.01)
 
 

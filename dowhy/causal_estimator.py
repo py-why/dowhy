@@ -791,11 +791,11 @@ class CausalEstimator:
         if isinstance(pval, tuple):
             low, high = pval
             if low == 0:
-                pval_str = "p < {:.2g}".format(high)
+                pval_str = "p < {:.3g}".format(high)
             elif high == 1:
-                pval_str = "p > {:.2g}".format(low)
+                pval_str = "p > {:.3g}".format(low)
             else:
-                pval_str = "{:.2g} < p < {:.2g}".format(low, high)
+                pval_str = "{:.3g} < p < {:.3g}".format(low, high)
             if high <= alpha:
                 conclusion = _conclusion(True)
             elif low >= alpha:
@@ -803,13 +803,13 @@ class CausalEstimator:
             else:
                 conclusion = "inconclusive (limited by the number of simulations)"
         elif isinstance(pval, np.ndarray):
-            pval_str = "[{}]".format(", ".join("{:.2g}".format(p) for p in pval))
+            pval_str = "[{}]".format(", ".join("{:.3g}".format(p) for p in pval))
             conclusion = "[{}]".format(", ".join(_conclusion(p <= alpha) for p in pval))
         else:
-            pval_str = "{:.2g}".format(pval)
+            pval_str = "{:.3g}".format(pval)
             conclusion = _conclusion(pval <= alpha)
 
-        return "{} ({} at alpha={:.2g}; H0: treatment has no causal effect on outcome)".format(
+        return "{} ({} at alpha={:.3g}; H0: treatment has no causal effect on outcome)".format(
             pval_str, conclusion, alpha
         )
 
