@@ -187,7 +187,20 @@ class Econml(CausalEstimator):
         estimator_data_args = {
             arg: named_data_args[arg] for arg in named_data_args.keys() if arg in estimator_named_args
         }
-        self.estimator.fit(**estimator_data_args, **kwargs)
+        try:
+            self.estimator.fit(**estimator_data_args, **kwargs)
+        except ValueError as exc:
+            if X is None and "X=None" in str(exc):
+                raise ValueError(
+                    str(exc) + "\n\nThis error typically occurs when the EconML estimator requires effect "
+                    "modifiers (X) but none were provided. Please specify `effect_modifiers` when "
+                    "constructing the CausalModel:\n\n"
+                    "    model = CausalModel(\n"
+                    "        data=..., treatment=..., outcome=...,\n"
+                    "        effect_modifiers=['col1', 'col2']  # variables for heterogeneous effects\n"
+                    "    )"
+                ) from exc
+            raise
 
         return self
 
