@@ -180,6 +180,10 @@ def identify_effect_auto(
     :returns:  target estimand, an instance of the IdentifiedEstimand class
     """
 
+    # Accept a CausalGraph wrapper by extracting the underlying nx.DiGraph
+    if hasattr(graph, "_graph") and isinstance(graph._graph, nx.DiGraph):
+        graph = graph._graph
+
     observed_nodes = parse_state(observed_nodes)
     action_nodes = parse_state(action_nodes)
     outcome_nodes = parse_state(outcome_nodes)

@@ -1,6 +1,7 @@
 import pytest
 
 from dowhy import identify_effect_id
+from dowhy.causal_graph import CausalGraph
 from dowhy.graph import build_graph_from_str
 
 
@@ -70,3 +71,17 @@ class TestIDIdentifier(object):
         identified_str = identified_estimand.__str__()
         gt_str = "Sum over {X1}:\n\tPredictor: P(X1,Y)"
         assert identified_str == gt_str
+
+    def test_id_identifier_accepts_causal_graph(self):
+        # Regression test for issue #1360: identify_effect_id should accept a
+        # CausalGraph object, not just a plain nx.DiGraph.
+        causal_graph = CausalGraph(
+            treatment_name="T",
+            outcome_name="Y",
+            observed_node_names=["T", "Y"],
+        )
+
+        result_from_causal_graph = identify_effect_id(causal_graph, action_nodes=["T"], outcome_nodes=["Y"])
+        result_from_digraph = identify_effect_id(causal_graph._graph, action_nodes=["T"], outcome_nodes=["Y"])
+
+        assert str(result_from_causal_graph) == str(result_from_digraph)
