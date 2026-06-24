@@ -699,6 +699,64 @@ class TestCausalModel(object):
         assert (estimates[1].estimator) == model.get_estimator(methods[1])
         assert (estimates[0].estimator) != model.get_estimator(methods[1])  # check not same object
 
+    def test_refute_estimate_raises_when_method_name_is_none(self):
+        """refute_estimate(method_name=None) must raise ValueError, not NameError."""
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=3,
+            num_samples=200,
+            treatment_is_binary=True,
+        )
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+        )
+        estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        estimate = model.estimate_effect(
+            estimand,
+            method_name="backdoor.linear_regression",
+        )
+        with pytest.raises(ValueError, match="method_name must be provided"):
+            model.refute_estimate(estimand, estimate, method_name=None)
+
+    def test_do_raises_when_method_name_is_none(self):
+        """do(method_name=None) must raise ValueError, not NameError."""
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=3,
+            num_samples=200,
+            treatment_is_binary=True,
+        )
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+        )
+        estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        with pytest.raises(ValueError, match="method_name must be provided"):
+            model.do(x=1, identified_estimand=estimand, method_name=None)
+
+    def test_estimate_effect_raises_when_method_name_is_none(self):
+        """estimate_effect(method_name=None) must raise ValueError, not UnboundLocalError."""
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=3,
+            num_samples=200,
+            treatment_is_binary=True,
+        )
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+        )
+        estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        with pytest.raises(ValueError, match="method_name must be provided"):
+            model.estimate_effect(estimand, method_name=None)
+
     def test_fit_estimator_false_reuses_cached_estimator(self):
         """Test that fit_estimator=False reuses the cached estimator without refitting.
 

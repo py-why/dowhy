@@ -295,8 +295,12 @@ class CausalModel:
             effect_modifiers = self._graph.get_effect_modifiers(self._treatment, self._outcome)
 
         if method_name is None:
-            # TODO add propensity score as default backdoor method, iv as default iv method, add an informational message to show which method has been selected.
-            pass
+            raise ValueError(
+                "method_name must be provided. "
+                "Specify an estimation method such as 'backdoor.linear_regression', "
+                "'backdoor.propensity_score_stratification', or 'iv.instrumental_variable'. "
+                "Use the '<identifier>.<estimator>' format."
+            )
         else:
             # TODO add dowhy as a prefix to all dowhy estimators
             num_components = len(method_name.split("."))
@@ -373,8 +377,9 @@ class CausalModel:
         :param identified_estimand: a probability expression
             that represents the effect to be estimated. Output of
             CausalModel.identify_effect method
-        :param method_name: any of the estimation method to be used. See docs
-            for estimate_effect method for a list of supported estimation methods.
+        :param method_name: (required) estimation method to be used, in "<identifier>.<estimator>" format.
+            Examples include 'backdoor.linear_regression', 'backdoor.propensity_score_stratification',
+            and 'iv.instrumental_variable'.
         :param fit_estimator: Boolean flag on whether to fit the estimator.
             Setting it to False is useful to compute the do-operation on new
             data using a previously fitted estimator.
@@ -385,7 +390,12 @@ class CausalModel:
 
         """
         if method_name is None:
-            pass
+            raise ValueError(
+                "method_name must be provided. "
+                "Specify an estimation method such as 'backdoor.linear_regression', "
+                "'backdoor.propensity_score_stratification', or 'iv.instrumental_variable'. "
+                "Use the '<identifier>.<estimator>' format."
+            )
         else:
             str_arr = method_name.split(".", maxsplit=1)
             identifier_name = str_arr[0]
@@ -425,17 +435,24 @@ class CausalModel:
     def refute_estimate(self, estimand, estimate, method_name=None, show_progress_bar=False, **kwargs):
         """Refute an estimated causal effect.
 
-        If method_name is provided, uses the provided method. In the future, we may support automatic selection of suitable refutation tests. Following refutation methods are supported.
+        method_name must be specified. Examples of refutation methods include:
             * Adding a randomly-generated confounder: "random_common_cause"
             * Adding a confounder that is associated with both treatment and outcome: "add_unobserved_common_cause"
             * Replacing the treatment with a placebo (random) variable): "placebo_treatment_refuter"
             * Removing a random subset of the data: "data_subset_refuter"
+            * Bootstrap the data: "bootstrap_refuter"
+            * Replace outcome with a dummy (random) variable: "dummy_outcome_refuter"
+        For available refuters, see modules under dowhy.causal_refuters.
 
-        :param estimand: target estimand, an instance of the IdentifiedEstimand class (typically, the output of identify_effect)
-        :param estimate: estimate to be refuted, an instance of the CausalEstimate class (typically, the output of estimate_effect)
-        :param method_name: name of the refutation method
+        :param estimand: target estimand, an instance of the IdentifiedEstimand class
+            (typically the output of identify_effect)
+        :param estimate: estimate to be refuted, an instance of the CausalEstimate class
+            (typically the output of estimate_effect)
+        :param method_name: (required) name of the refutation method. See dowhy.causal_refuters for available values.
         :param show_progress_bar: Boolean flag on whether to show a progress bar
-        :param kwargs:  (optional) additional arguments that are passed directly to the refutation method. Can specify a random seed here to ensure reproducible results ('random_seed' parameter). For method-specific parameters, consult the documentation for the specific method. All refutation methods are in the causal_refuters subpackage.
+        :param kwargs: (optional) additional arguments passed directly to the refutation method. Can specify
+            a random seed here to ensure reproducible results ('random_seed' parameter). For method-specific
+            parameters, consult the documentation for the specific method.
 
         :returns: an instance of the RefuteResult class
 
@@ -444,7 +461,10 @@ class CausalModel:
             self.logger.error("Aborting refutation! No estimate is provided.")
             raise ValueError("Aborting refutation! No valid estimate is provided.")
         if method_name is None:
-            pass
+            raise ValueError(
+                "method_name must be provided. "
+                "See the dowhy.causal_refuters package for available refutation methods."
+            )
         else:
             refuter_class = causal_refuters.get_class_object(method_name)
 
