@@ -376,3 +376,21 @@ def test_given_no_data_when_falsify_then_does_not_raise_error_but_cannot_evaluat
     assert not falsify_graph(nx.DiGraph([("X", "Y"), ("Y", "Z")]), pd.DataFrame({})).can_evaluate
 
     assert not falsify_graph(nx.DiGraph([("X", "Y"), ("Y", "Z")]), pd.DataFrame({"X": []})).can_evaluate
+
+
+def test_given_chain_dag_when_validate_pd_without_adjacent_only_then_tests_all_ancestor_pairs():
+    # X -> Y -> Z: ancestor pairs are (X,Y), (Y,Z), (X,Z) — 3 pairs
+    dag = nx.DiGraph([("X", "Y"), ("Y", "Z")])
+    rng = np.random.RandomState(0)
+    data = pd.DataFrame({"X": rng.normal(size=50), "Y": rng.normal(size=50), "Z": rng.normal(size=50)})
+    summary = validate_pd(dag, data, independence_test=lambda x, y: 1.0, n_pairs=-1)
+    assert summary[FalsifyConst.N_TESTS] == 3
+
+
+def test_given_chain_dag_when_validate_pd_with_adjacent_only_then_tests_only_direct_edges():
+    # X -> Y -> Z: direct edges (X,Y) and (Y,Z) — 2 pairs; X is NOT adjacent to Z
+    dag = nx.DiGraph([("X", "Y"), ("Y", "Z")])
+    rng = np.random.RandomState(0)
+    data = pd.DataFrame({"X": rng.normal(size=50), "Y": rng.normal(size=50), "Z": rng.normal(size=50)})
+    summary = validate_pd(dag, data, independence_test=lambda x, y: 1.0, adjacent_only=True, n_pairs=-1)
+    assert summary[FalsifyConst.N_TESTS] == 2
