@@ -278,3 +278,43 @@ def test_given_discrete_data_when_performing_interventions_then_returns_correct_
     assert np.all(samples["X"].to_numpy() == -2)
     assert np.median(samples["Y"].to_numpy()) == -1
     assert np.mean(samples["Z"].to_numpy()) == approx(-2, abs=0.05)
+
+
+def test_given_random_seed_when_draw_interventional_samples_then_results_are_reproducible():
+    causal_model, observations = _create_and_fit_simple_probabilistic_causal_model()
+
+    samples1 = interventional_samples(causal_model, {"X0": lambda x: 0}, num_samples_to_draw=100, random_seed=42)
+    samples2 = interventional_samples(causal_model, {"X0": lambda x: 0}, num_samples_to_draw=100, random_seed=42)
+    samples3 = interventional_samples(causal_model, {"X0": lambda x: 0}, num_samples_to_draw=100, random_seed=99)
+
+    np.testing.assert_array_equal(samples1.values, samples2.values)
+    assert not np.array_equal(samples1.values, samples3.values)
+
+
+def test_given_random_seed_when_draw_counterfactual_samples_then_results_are_reproducible():
+    causal_model, observations = _create_and_fit_simple_probabilistic_causal_model()
+    obs_subset = observations.iloc[:50]
+
+    # counterfactual_samples with observed_data + invertible SCM is fully deterministic
+    # (noise is recovered analytically), so the seed parameter must not break anything.
+    cf_no_seed = counterfactual_samples(causal_model, {"X0": lambda x: 0}, observed_data=obs_subset)
+    cf_with_seed = counterfactual_samples(causal_model, {"X0": lambda x: 0}, observed_data=obs_subset, random_seed=42)
+
+    np.testing.assert_array_equal(cf_no_seed.values, cf_with_seed.values)
+
+
+def test_given_random_seed_when_estimate_average_causal_effect_then_results_are_reproducible():
+    causal_model, _ = _create_and_fit_simple_probabilistic_causal_model()
+
+    ace1 = average_causal_effect(
+        causal_model, "X1", {"X0": lambda x: 1}, {"X0": lambda x: 0}, num_samples_to_draw=100, random_seed=42
+    )
+    ace2 = average_causal_effect(
+        causal_model, "X1", {"X0": lambda x: 1}, {"X0": lambda x: 0}, num_samples_to_draw=100, random_seed=42
+    )
+    ace3 = average_causal_effect(
+        causal_model, "X1", {"X0": lambda x: 1}, {"X0": lambda x: 0}, num_samples_to_draw=100, random_seed=99
+    )
+
+    assert ace1 == ace2
+    assert ace1 != ace3
