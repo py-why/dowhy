@@ -824,6 +824,19 @@ def estimate_effect(
         logger.error(error_msg)
         raise ValueError(error_msg)
 
+    # Warn if any NaN values are present in treatment or outcome columns
+    relevant_cols = [c for c in treatment + outcome if c in data.columns]
+    nan_cols = data[relevant_cols].isna().any()
+    nan_cols = nan_cols[nan_cols].index.tolist()
+    if nan_cols:
+        logger.warning(
+            "Data contains NaN values in column(s): %s. "
+            "This may produce a NaN estimate. "
+            "To address this, consider (1) understanding and correcting the source of missing values in the data "
+            "generation process, or (2) explicitly modelling the missingness as part of the causal analysis.",
+            nan_cols,
+        )
+
     if fit_estimator:
         estimator.fit(
             data=data,
