@@ -414,7 +414,7 @@ def refute_dummy_outcome(
     required_variables: Optional[Union[int, list, bool]] = None,
     min_data_point_threshold: float = MIN_DATA_POINT_THRESHOLD,
     bucket_size_scale_factor: float = DEFAULT_BUCKET_SCALE_FACTOR,
-    num_simulations: int = 100,
+    num_simulations: int = CausalRefuter.DEFAULT_NUM_SIMULATIONS,
     transformation_list: List = DEFAULT_TRANSFORMATION,
     test_fraction: List[TestFraction] = DEFAULT_TEST_FRACTION,
     unobserved_confounder_values: Optional[List] = DEFAULT_NEW_DATA_WITH_UNOBSERVED_CONFOUNDING,
