@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any, Callable, Collection, Dict, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -55,15 +55,29 @@ def anomaly_scores(
     num_samples_conditional: int = 10000,
     num_samples_unconditional: int = 10000,
     anomaly_scorer_factory: Callable[[], AnomalyScorer] = RescaledMedianCDFQuantileScorer,
+    nodes: Optional[Collection[Any]] = None,
 ) -> Dict[Any, np.ndarray]:
+    """Estimates the anomaly scores for each node in the causal graph (or a specified subset of nodes).
+
+    :param causal_model: The fitted ProbabilisticCausalModel.
+    :param anomaly_data: Anomalous observations for which anomaly scores are estimated.
+    :param num_samples_conditional: Number of samples to draw from the conditional distribution of non-root nodes.
+    :param num_samples_unconditional: Number of samples to draw from the unconditional distribution of root nodes.
+    :param anomaly_scorer_factory: A callable that returns an anomaly scorer instance.
+    :param nodes: Optional collection of node names to compute anomaly scores for. If None, scores are computed for
+                  all nodes in the causal graph. Limiting to a subset can significantly reduce computation time.
+    :return: A dictionary mapping each requested node name to its anomaly scores as a NumPy array.
+    """
     if isinstance(anomaly_data, pd.Series):
         anomaly_data = pd.DataFrame([anomaly_data])
 
     validate_causal_dag(causal_model.graph)
 
+    nodes_to_score = nodes if nodes is not None else causal_model.graph.nodes
+
     results = {}
     for node in tqdm(
-        causal_model.graph.nodes,
+        nodes_to_score,
         desc="Estimating conditional anomaly scores",
         position=0,
         leave=True,
