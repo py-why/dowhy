@@ -182,10 +182,10 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
 
         # sum weighted outcomes over all strata  (weight by treated population)
         weighted_outcomes = clipped.groupby("strata").agg(
-            {self._target_estimand.treatment_variable[0]: ["sum"], "dbar": ["sum"], "d_y": ["sum"], "dbar_y": ["sum"]}
+            {"d": ["sum"], "dbar": ["sum"], "d_y": ["sum"], "dbar_y": ["sum"]}
         )
         weighted_outcomes.columns = ["_".join(x) for x in weighted_outcomes.columns.to_numpy().ravel()]
-        treatment_sum_name = self._target_estimand.treatment_variable[0] + "_sum"
+        treatment_sum_name = "d_sum"
         control_sum_name = "dbar_sum"
 
         weighted_outcomes["d_y_mean"] = weighted_outcomes["d_y_sum"] / weighted_outcomes[treatment_sum_name]
@@ -239,16 +239,20 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
         # for each strata, count how many treated and control units there are
         # throw away strata that have insufficient treatment or control
 
-        data["dbar"] = 1 - data[self._target_estimand.treatment_variable[0]]  # 1-Treatment
-        data["d_y"] = (
-            data[self._target_estimand.treatment_variable[0]] * data[self._target_estimand.outcome_variable[0]]
-        )
-        data["dbar_y"] = data["dbar"] * data[self._target_estimand.outcome_variable[0]]
+        treatment_variable = self._target_estimand.treatment_variable[0]
+        outcome_variable = self._target_estimand.outcome_variable[0]
+        # Use binary indicators for treated/control based on the configured treatment_value
+        # and control_value, so non-binary treatments (e.g., treatment_value=2) are handled
+        # correctly instead of assuming treatment is always 0 or 1.
+        data["d"] = (data[treatment_variable] == self._treatment_value).astype(float)
+        data["dbar"] = (data[treatment_variable] == self._control_value).astype(float)
+        data["d_y"] = data["d"] * data[outcome_variable]
+        data["dbar_y"] = data["dbar"] * data[outcome_variable]
         stratified = data.groupby("strata")
         clipped = stratified.filter(
             lambda strata: min(
-                strata.loc[strata[self._target_estimand.treatment_variable[0]] == 1].shape[0],
-                strata.loc[strata[self._target_estimand.treatment_variable[0]] == 0].shape[0],
+                strata.loc[strata[treatment_variable] == self._treatment_value].shape[0],
+                strata.loc[strata[treatment_variable] == self._control_value].shape[0],
             )
             > clipping_threshold
         )
