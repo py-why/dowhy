@@ -255,6 +255,7 @@ class CausalModel:
         effect_modifiers=None,
         fit_estimator=True,
         method_params=None,
+        num_quantiles_to_discretize_cont_cols=None,
     ):
         """Estimate the identified causal effect.
 
@@ -286,6 +287,9 @@ class CausalModel:
         :param fit_estimator: Boolean flag on whether to fit the estimator.
             Setting it to False is useful to estimate the effect on new data using a previously fitted estimator.
         :param method_params: Dictionary containing any method-specific parameters. These are passed directly to the estimating method. See the docs for each estimation method for allowed method-specific params.
+        :param num_quantiles_to_discretize_cont_cols: The number of quantiles into which a numeric effect
+            modifier is split to enable conditional treatment effect estimation. If provided here, it is
+            applied as a default; a value in ``method_params`` takes precedence.
         :returns: An instance of the CausalEstimate class, containing the causal effect estimate
             and other method-dependent information
 
@@ -293,6 +297,10 @@ class CausalModel:
 
         if effect_modifiers is None:
             effect_modifiers = self._graph.get_effect_modifiers(self._treatment, self._outcome)
+
+        if num_quantiles_to_discretize_cont_cols is not None:
+            method_params = method_params or {}
+            method_params.setdefault("num_quantiles_to_discretize_cont_cols", num_quantiles_to_discretize_cont_cols)
 
         if method_name is None:
             raise ValueError(
