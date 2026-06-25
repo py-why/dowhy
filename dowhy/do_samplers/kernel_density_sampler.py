@@ -40,7 +40,7 @@ class KernelDensitySampler(DoSampler):
         )
 
     def _infer_variable_types(self):
-        raise Exception(
+        raise NotImplementedError(
             "Variable type inference not implemented. Specify variable_types={var_name: var_type}, "
             "where var_type is 'o', 'c', or 'd' for ordered, continuous, or discrete, respectively."
         )

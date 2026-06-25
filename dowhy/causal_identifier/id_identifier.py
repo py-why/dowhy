@@ -47,7 +47,7 @@ class IDExpression:
         elif return_type == "sum":
             return self._sum
         else:
-            raise Exception("Provide correct return type.")
+            raise ValueError("Provide correct return type. Must be 'prod' or 'sum'.")
 
     def _print_estimator(self, prefix, estimator: Union[Dict, "IDExpression"] = None, start: bool = False):
         """
@@ -126,7 +126,7 @@ def identify_effect_id(
     try:
         tsort_node_names = OrderedSet(list(nx.topological_sort(graph)))  # topological sorting of graph nodes
     except nx.NetworkXUnfeasible:
-        raise Exception("The graph must be a directed acyclic graph (DAG).")
+        raise ValueError("The graph must be a directed acyclic graph (DAG).")
 
     return __adjacency_matrix_identify_effect(
         adjacency_matrix,
