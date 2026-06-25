@@ -447,3 +447,50 @@ class TestEconMLEstimator:
         )
 
         assert np.array_equal(est1.cate_estimates, est2.cate_estimates)
+
+    def test_categorical_effect_modifiers(self):
+        """Regression test for #820: KeyError when effect modifiers contain categorical columns.
+
+        When effect modifiers include categorical (dtype='category') columns, they get
+        one-hot encoded internally. The EconML estimator should still receive the correct
+        encoded data without raising a KeyError.
+        """
+        np.random.seed(42)
+        n = 200
+        df = pd.DataFrame(
+            {
+                "x0": np.random.binomial(1, 0.5, size=n).astype("float"),
+                "x1": np.random.randn(n),
+                "x2": np.random.randint(3, size=n),
+                "x3": np.random.randn(n),
+            }
+        )
+        # Make x2 categorical -- this triggers one-hot encoding inside CausalEstimator
+        df = df.astype({"x2": "category"})
+
+        graph_str = """
+        digraph {
+            x0; x1; x2; x3;
+            x3 -> x0;
+            x3 -> x1;
+            x2 -> x1;
+            x0 -> x1;
+        }
+        """
+        model = CausalModel(data=df, treatment="x0", outcome="x1", graph=graph_str)
+        identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+
+        # Should not raise KeyError for categorical effect modifier x2
+        estimate = model.estimate_effect(
+            identified_estimand,
+            method_name="backdoor.econml.dml.DML",
+            method_params={
+                "init_params": {
+                    "model_y": GradientBoostingRegressor(),
+                    "model_t": GradientBoostingClassifier(),
+                    "discrete_treatment": True,
+                },
+                "fit_params": {},
+            },
+        )
+        assert estimate.value is not None
