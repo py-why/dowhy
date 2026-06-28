@@ -7,7 +7,6 @@ from itertools import combinations
 
 import dowhy.causal_estimators as causal_estimators
 import dowhy.causal_refuters as causal_refuters
-import dowhy.graph_learners as graph_learners
 from dowhy.causal_estimator import CausalEstimate, estimate_effect
 from dowhy.causal_graph import CausalGraph
 from dowhy.causal_identifier import AutoIdentifier, BackdoorAdjustment, IDIdentifier
@@ -41,7 +40,8 @@ class CausalModel:
         and outcome.
 
         At least one of graph, common_causes or instruments must be provided. If
-        none of these variables are provided, then learn_graph() can be used later.
+        none of these variables are provided, then learn_graph() (deprecated) can be used later,
+        or use causal-learn/dodiscover for discovery and pass the result as graph=.
 
         :param data: a pandas dataframe containing treatment, outcome and other variables.
         :param treatment: name of the treatment variable
@@ -98,7 +98,10 @@ class CausalModel:
                 )
             else:
                 self.logger.warning(
-                    "Relevant variables to build causal graph not provided. You may want to use the learn_graph() function to construct the causal graph."
+                    "Relevant variables to build causal graph not provided. "
+                    "Consider using causal-learn (https://github.com/py-why/causal-learn) "
+                    "or dodiscover (https://github.com/py-why/dodiscover) for causal discovery, "
+                    "then pass the resulting graph to CausalModel via the graph= parameter."
                 )
                 self._graph = CausalGraph(
                     self._treatment,
@@ -185,13 +188,30 @@ class CausalModel:
 
     def learn_graph(self, method_name="cdt.causality.graph.LiNGAM", *args, **kwargs):
         """
-        Learn causal graph from the data. This function takes the method name as input and initializes the
-        causal graph object using the learnt graph.
+        Learn causal graph from the data.
 
-        :param self: instance of the CausalModel class (or its subclass)
+        .. deprecated::
+            ``CausalModel.learn_graph()`` and the ``dowhy.graph_learners`` module are deprecated
+            and will be removed in a future major release. Please use the `causal-learn
+            <https://github.com/py-why/causal-learn>`_ or `dodiscover
+            <https://github.com/py-why/dodiscover>`_ libraries directly for causal discovery,
+            then pass the resulting graph to ``CausalModel`` via the ``graph`` parameter.
+
         :param method_name: Exact method name of the object to be imported from the concerned library.
         :returns: an instance of the CausalGraph class initialized with the learned graph.
         """
+        warnings.warn(
+            "CausalModel.learn_graph() and the dowhy.graph_learners module are deprecated and will "
+            "be removed in a future major release. "
+            "Please use causal-learn (https://github.com/py-why/causal-learn) or dodiscover "
+            "(https://github.com/py-why/dodiscover) for causal discovery, then pass the resulting "
+            "graph to CausalModel via the graph= parameter. "
+            "See https://github.com/py-why/dowhy/issues/1039 for context.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        import dowhy.graph_learners as graph_learners
+
         # Import causal discovery class
         str_arr = method_name.split(".", maxsplit=1)
         library_name = str_arr[0]
