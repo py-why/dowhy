@@ -856,6 +856,46 @@ class TestCausalModel(object):
         # The implied ATE should be close to beta=10.
         assert do_treated - do_control == pytest.approx(10, abs=5)
 
+    def test_repr_matches_str_for_key_result_objects(self):
+        """repr() should return the same text as str() for CausalEstimate, IdentifiedEstimand, and CausalRefutation."""
+        np.random.seed(42)
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=1,
+            num_samples=200,
+            num_treatments=1,
+            treatment_is_binary=True,
+        )
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+        )
+        identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        estimate = model.estimate_effect(
+            identified_estimand,
+            method_name="backdoor.linear_regression",
+        )
+
+        # IdentifiedEstimand
+        assert repr(identified_estimand) == str(identified_estimand)
+        assert "Estimand type" in repr(identified_estimand)
+
+        # CausalEstimate
+        assert repr(estimate) == str(estimate)
+        assert "Mean value" in repr(estimate)
+
+        # CausalRefutation
+        refutation = model.refute_estimate(
+            identified_estimand,
+            estimate,
+            method_name="placebo_treatment_refuter",
+            num_simulations=5,
+        )
+        assert repr(refutation) == str(refutation)
+        assert "Estimated effect" in repr(refutation)
+
 
 if __name__ == "__main__":
     pytest.main([__file__])
