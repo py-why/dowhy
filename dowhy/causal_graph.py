@@ -11,7 +11,7 @@ except ImportError:
     from networkx.algorithms.d_separation import d_separated
 
 from dowhy.gcm.causal_models import ProbabilisticCausalModel
-from dowhy.graph import has_directed_path
+from dowhy.graph import build_graph_from_str, has_directed_path
 from dowhy.utils.api import parse_state
 from dowhy.utils.graph_operations import daggity_to_dot
 from dowhy.utils.plotting import plot
@@ -65,41 +65,8 @@ class CausalGraph:
             self._graph = nx.DiGraph(graph)
         elif isinstance(graph, ProbabilisticCausalModel):
             self._graph = nx.DiGraph(graph.graph)
-        elif isinstance(graph, str) and re.match(r".*\.dot", graph):
-            # load dot file
-            try:
-                import pygraphviz as pgv
-
-                self._graph = nx.DiGraph(nx.drawing.nx_agraph.read_dot(graph))
-            except Exception as e:
-                self.logger.error("Pygraphviz cannot be loaded. " + str(e) + "\nTrying pydot...")
-                try:
-                    import pydot
-
-                    self._graph = nx.DiGraph(nx.drawing.nx_pydot.read_dot(graph))
-                except Exception as e:
-                    self.logger.error("Error: Pydot cannot be loaded. " + str(e))
-                    raise e
-        elif isinstance(graph, str) and re.match(r".*\.gml", graph):
-            self._graph = nx.DiGraph(nx.read_gml(graph))
-        elif isinstance(graph, str) and re.match(r".*graph\s*\{.*\}\s*", graph):
-            try:
-                import pygraphviz as pgv
-
-                self._graph = pgv.AGraph(graph, strict=True, directed=True)
-                self._graph = nx.drawing.nx_agraph.from_agraph(self._graph)
-            except Exception as e:
-                self.logger.error("Error: Pygraphviz cannot be loaded. " + str(e) + "\nTrying pydot ...")
-                try:
-                    import pydot
-
-                    P_list = pydot.graph_from_dot_data(graph)
-                    self._graph = nx.DiGraph(nx.drawing.nx_pydot.from_pydot(P_list[0]))
-                except Exception as e:
-                    self.logger.error("Error: Pydot cannot be loaded. " + str(e))
-                    raise e
-        elif isinstance(graph, str) and re.match(r".*graph\s*\[.*\]\s*", graph):
-            self._graph = nx.DiGraph(nx.parse_gml(graph))
+        elif isinstance(graph, str):
+            self._graph = build_graph_from_str(graph)
         else:
             error_msg = "Incorrect format: Please provide graph as a networkx DiGraph, GCM model, or as a string or text file in dot, gml format."
             self.logger.error(error_msg)
