@@ -192,7 +192,9 @@ class TestCausalModel(object):
         edge[
         source "Z0" 
         target "{0}"
-        ]]""".format(data["treatment_name"][0], data["outcome_name"])
+        ]]""".format(
+            data["treatment_name"][0], data["outcome_name"]
+        )
         print(gml_str)
         model = CausalModel(
             data=data["df"],
