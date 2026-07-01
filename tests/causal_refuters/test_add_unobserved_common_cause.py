@@ -628,3 +628,67 @@ class TestAddUnobservedCommonCauseRefuter(object):
             simulation_method="direct-simulation",
         )
         assert refute is not None
+
+
+def _make_unobserved_refuter_model():
+    import pandas as pd
+
+    rng = np.random.RandomState(0)
+    n = 500
+    w = rng.normal(size=n)
+    v = (rng.uniform(size=n) < 1 / (1 + np.exp(-w))).astype(int)
+    y = 2 * v + w + rng.normal(size=n)
+    df = pd.DataFrame({"v0": v, "W0": w, "y": y})
+    model = CausalModel(data=df, treatment="v0", outcome="y", common_causes=["W0"])
+    identified_estimand = model.identify_effect()
+    estimate = model.estimate_effect(identified_estimand, method_name="backdoor.propensity_score_weighting")
+    return model, identified_estimand, estimate
+
+
+def _run_unobserved_refuter(random_state):
+    model, identified_estimand, estimate = _make_unobserved_refuter_model()
+    refute = model.refute_estimate(
+        identified_estimand,
+        estimate,
+        method_name="add_unobserved_common_cause",
+        confounders_effect_on_treatment="binary_flip",
+        confounders_effect_on_outcome="linear",
+        effect_strength_on_treatment=0.01,
+        effect_strength_on_outcome=0.02,
+        random_state=random_state,
+    )
+    return refute.new_effect
+
+
+def test_add_unobserved_common_cause_is_reproducible_with_random_state():
+    assert _run_unobserved_refuter(random_state=123) == _run_unobserved_refuter(random_state=123)
+
+
+def test_add_unobserved_common_cause_differs_across_random_states():
+    assert _run_unobserved_refuter(random_state=123) != _run_unobserved_refuter(random_state=456)
+
+
+def test_add_unobserved_common_cause_binary_flip_with_bool_dtype():
+    import pandas as pd
+
+    rng = np.random.RandomState(0)
+    n = 400
+    w = rng.normal(size=n)
+    treatment = rng.uniform(size=n) < 1 / (1 + np.exp(-w))
+    outcome = rng.uniform(size=n) < 1 / (1 + np.exp(-(treatment.astype(int) + w)))
+    df = pd.DataFrame({"v0": treatment, "W0": w, "y": outcome})
+    assert df["v0"].dtype == bool and df["y"].dtype == bool
+
+    model = CausalModel(data=df, treatment="v0", outcome="y", common_causes=["W0"])
+    identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+    estimate = model.estimate_effect(identified_estimand, method_name="backdoor.linear_regression")
+    refute = model.refute_estimate(
+        identified_estimand,
+        estimate,
+        method_name="add_unobserved_common_cause",
+        confounders_effect_on_treatment="binary_flip",
+        confounders_effect_on_outcome="binary_flip",
+        effect_strength_on_treatment=0.5,
+        effect_strength_on_outcome=0.5,
+    )
+    assert np.isfinite(refute.new_effect)
