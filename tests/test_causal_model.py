@@ -1,3 +1,5 @@
+import warnings
+
 import networkx as nx
 import numpy as np
 import pandas as pd
@@ -190,9 +192,7 @@ class TestCausalModel(object):
         edge[
         source "Z0" 
         target "{0}"
-        ]]""".format(
-            data["treatment_name"][0], data["outcome_name"]
-        )
+        ]]""".format(data["treatment_name"][0], data["outcome_name"])
         print(gml_str)
         model = CausalModel(
             data=data["df"],
@@ -655,6 +655,45 @@ class TestCausalModel(object):
                 outcome="Z",
                 graph=nx.Graph([("X", "Y"), ("Y", "Z")]),
             )
+
+    def test_warn_when_treatment_not_in_data(self):
+        """CausalModel should emit a UserWarning when treatment variable is missing from the DataFrame."""
+        data = pd.DataFrame({"X": [0, 1], "Y": [1, 2]})
+        with pytest.warns(UserWarning, match="treatment variable"):
+            CausalModel(
+                data=data,
+                treatment="MISSING_TREATMENT",
+                outcome="Y",
+                common_causes=["X"],
+            )
+
+    def test_warn_when_outcome_not_in_data(self):
+        """CausalModel should emit a UserWarning when outcome variable is missing from the DataFrame."""
+        data = pd.DataFrame({"X": [0, 1], "Y": [1, 2]})
+        with pytest.warns(UserWarning, match="outcome variable"):
+            CausalModel(
+                data=data,
+                treatment="X",
+                outcome="MISSING_OUTCOME",
+                common_causes=[],
+            )
+
+    def test_no_warn_when_treatment_and_outcome_in_data(self):
+        """CausalModel should not emit a missing-variable UserWarning when all variables are present."""
+        data = pd.DataFrame({"X": [0, 1], "Y": [1, 2]})
+        # Collect only UserWarnings that mention "variable(s) were not found"
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            CausalModel(
+                data=data,
+                treatment="X",
+                outcome="Y",
+                common_causes=[],
+            )
+        missing_var_warnings = [
+            w for w in caught if issubclass(w.category, UserWarning) and "not found" in str(w.message)
+        ]
+        assert missing_var_warnings == [], f"Unexpected missing-variable warnings: {missing_var_warnings}"
 
     def test_causal_estimator_cache(self):
         """
