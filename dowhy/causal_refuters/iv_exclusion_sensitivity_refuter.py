@@ -14,6 +14,23 @@ class IvExclusionSensitivityRefuter(CausalRefuter):
     This uses a delta-method variance approximation. For multiple instruments,
     this implementation assumes independent priors (Covariance = 0 between the direct
     effects of different instruments).
+
+    Note: The delta-method expansion assumes the prior and first-stage estimates
+    are independent. For small samples, this assumption can be violated, so results
+    should be interpreted as approximate.
+
+    Raises a warning if the condition number of the instrument matrix (Z'Z) exceeds 1e4.
+
+    Example usage:
+
+    .. code-block:: python
+
+        result = model.refute_estimate(
+            estimate,
+            method_name="iv_exclusion_sensitivity_refuter",
+            gamma_prior_mean=0.5,
+            gamma_prior_var=0.01,
+        )
     """
 
     def __init__(self, *args, **kwargs):
@@ -43,6 +60,8 @@ class IvExclusionSensitivityRefuter(CausalRefuter):
         # 1. Intercept Handling: Explicit check on the raw data matrix
         # Note: We apply this to raw data to ensure the projection matrix P_Z
         # accurately reflects models fitted with an intercept.
+        # WARNING: This heuristic assumes constant-valued columns are intercepts.
+        # Users should not pass static constant indicator columns as instruments.
         has_intercept = any(np.allclose(Z[:, i], 1.0) for i in range(Z.shape[1]))
         if not has_intercept:
             Z = np.c_[np.ones(Z.shape[0]), Z]
