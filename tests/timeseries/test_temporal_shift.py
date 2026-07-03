@@ -137,6 +137,21 @@ class TestShiftColumnsByLagUsingUnrolledGraph(unittest.TestCase):
 
         assert_frame_equal(result_df, expected_df)
 
+    def test_shift_does_not_use_axis_kwarg(self):
+        """Regression test: pandas >= 3.0 removed the axis kwarg from Series.shift().
+        shift_columns_by_lag_using_unrolled_graph must not pass axis=0 to shift()."""
+        df = pd.DataFrame({"X": [10, 20, 30, 40, 50]})
+
+        unrolled_graph = nx.DiGraph()
+        unrolled_graph.add_nodes_from(["X_0", "X_-1", "X_-2"])
+
+        result_df = shift_columns_by_lag_using_unrolled_graph(df, unrolled_graph)
+
+        # X_0 → lag=0 (no shift), X_-1 → lag=1 (shift 1), X_-2 → lag=2 (shift 2)
+        assert list(result_df["X_0"]) == [10, 20, 30, 40, 50]
+        assert list(result_df["X_-1"]) == [0, 10, 20, 30, 40]
+        assert list(result_df["X_-2"]) == [0, 0, 10, 20, 30]
+
 
 if __name__ == "__main__":
     unittest.main()
