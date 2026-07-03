@@ -51,7 +51,6 @@ def test_estimate_effect_warns_on_nan_in_treatment_or_outcome():
     See issue #827 https://github.com/py-why/dowhy/issues/827
     """
     import numpy as np
-    import pandas as pd
 
     import dowhy.datasets
     from dowhy import CausalModel
