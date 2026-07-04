@@ -1,6 +1,7 @@
 import logging
 
 import numpy as np
+import pandas as pd
 
 from dowhy.causal_refuter import CausalRefutation, CausalRefuter
 from dowhy.utils.cit import conditional_MI, partial_corr
@@ -83,7 +84,7 @@ class GraphRefuter(CausalRefuter):
         binary_columns = []
         variable_type = dict()
         for node in all_nodes:
-            if self._data[node].dtype == np.int64 or self._data[node].dtype == np.int32:
+            if pd.api.types.is_integer_dtype(self._data[node]) or self._data[node].dtype == np.bool_:
                 discrete_columns.append(node)
                 variable_type[node] = "discrete"
                 if self._data[node].isin([0, 1]).all():
