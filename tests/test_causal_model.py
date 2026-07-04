@@ -886,6 +886,14 @@ class TestCausalModel(object):
         assert repr(estimate) == str(estimate)
         assert "Mean value" in repr(estimate)
 
+        # RealizedEstimand
+        from dowhy.causal_estimator import RealizedEstimand
+
+        realized_estimand = RealizedEstimand(identified_estimand, estimator_name="Test")
+        realized_estimand.update_estimand_expression(0)
+        realized_estimand.update_assumptions({})
+        assert repr(realized_estimand) == str(realized_estimand)
+        assert "Realized estimand" in repr(realized_estimand)
         # CausalRefutation
         refutation = model.refute_estimate(
             identified_estimand,
