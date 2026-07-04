@@ -86,6 +86,8 @@ class RegressionEstimator(CausalEstimator):
         """
         self.reset_encoders()  # Forget any existing encoders
 
+        self._data = data  # store for interventional_outcomes() fallback
+
         if self._target_estimand.identifier_method is not None and self._target_estimand.identifier_method not in [
             "backdoor",
             "general_adjustment",

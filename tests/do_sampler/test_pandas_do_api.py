@@ -245,3 +245,16 @@ class TestPandasDoAPI(object):
             variable_types=dict(x="c", y="c", a="c", b="c"),
         )
         print(dd)
+
+    def test_weighting_sampler_raises_value_error_out_of_bounds(self):
+        import pytest
+
+        df = pd.DataFrame({"x": [0, 0.5, 1], "y": [1, 0.5, 0], "a": [0, 0.5, 0], "b": [0.25, 0, 0]})
+        with pytest.raises(ValueError, match="The intervention value.*do not exactly match"):
+            df.causal.do(
+                x={"x": 2.0},
+                outcome="y",
+                common_causes=["a", "b"],
+                variable_types=dict(x="c", y="c", a="c", b="c"),
+                method="weighting",
+            )
