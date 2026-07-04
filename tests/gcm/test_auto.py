@@ -57,7 +57,7 @@ def _generate_non_linear_classification_data():
 
 def _generate_linear_multiclass_classification_data_with_mixed_features():
     """Generate multi-class classification data with mixed categorical and numerical features (linear relationship)."""
-    n_samples = 100
+    n_samples = 1000
 
     # Numerical features
     num_feat1 = np.random.normal(0, 1, n_samples)
