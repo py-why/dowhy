@@ -55,3 +55,22 @@ def test_variables_of_interest_initialized_when_estimator_missing():
     assert (
         refuter._variables_of_interest == []
     ), "_variables_of_interest should default to [] when estimator is not available"
+
+
+def test_choose_variables_with_empty_list():
+    """choose_variables() works correctly when _variables_of_interest is empty."""
+    estimand, est = _make_estimate_without_estimator()
+
+    refuter = CausalRefuter(
+        data=pd.DataFrame({"T": [0, 1], "Y": [0, 1], "W": [0, 1]}),
+        identified_estimand=estimand,
+        estimate=est,
+    )
+
+    # With required_variables=False, should return None (all variables, but none exist)
+    result = refuter.choose_variables(required_variables=False)
+    assert result is None
+
+    # With required_variables=True, should return empty list
+    result = refuter.choose_variables(required_variables=True)
+    assert result == []
