@@ -73,7 +73,9 @@ def test_estimate_effect_warns_on_nan_in_treatment_or_outcome():
         graph=data["dot_graph"],
     )
     estimand = model.identify_effect(proceed_when_unidentifiable=True)
-    with pytest.warns(UserWarning, match="NaN values"):
+    with pytest.warns(
+        UserWarning, match="Missing data can introduce bias if not handled appropriately for the causal model"
+    ):
         try:
             model.estimate_effect(
                 identified_estimand=estimand,

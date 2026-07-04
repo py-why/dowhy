@@ -831,7 +831,8 @@ def _warn_if_nan_in_data(data: pd.DataFrame, treatment: List[str], outcome: List
     if columns_with_nan:
         warnings.warn(
             f"Data contains NaN values in column(s): {columns_with_nan}. "
-            "This may produce a NaN estimate. Consider calling data.dropna() before estimation.",
+            "Missing data can introduce bias if not handled appropriately for the causal model. "
+            "Consult the missing-data literature (e.g., Mohan & Pearl 2021) before deciding how to proceed.",
             UserWarning,
             stacklevel=4,
         )
