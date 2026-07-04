@@ -172,6 +172,24 @@ class SimpleRefuter(object):
             res = True if (error < abs(ate_estimate.value) * self._error_tolerance) else False
             assert res
 
+        elif self.refuter_method == "random_common_cause":
+            ref = model.refute_estimate(
+                target_estimand, ate_estimate, method_name=self.refuter_method, num_simulations=20
+            )
+
+            error = abs(ref.new_effect - ate_estimate.value)
+
+            print(
+                "Error in the refuted estimate = {0} with tolerence {1}%. Estimated={2}, After Refutation={3}".format(
+                    error, self._error_tolerance * 100, ate_estimate.value, ref.new_effect
+                )
+            )
+
+            print(ref)
+
+            res = True if (error < abs(ate_estimate.value) * self._error_tolerance) else False
+            assert res
+
         elif self.refuter_method == "dummy_outcome_refuter":
             if self.transformations is None:
                 ref_list = model.refute_estimate(
