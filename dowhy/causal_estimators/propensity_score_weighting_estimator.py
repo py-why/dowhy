@@ -296,11 +296,12 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
         target = self._ipw_target_units
 
         if target is None or target == "ate" or isinstance(target, pd.DataFrame):
-            # All ATE schemes here are ratio estimators (Hajek form):
+            # ATE: all weighting schemes here are ratio estimators (Hajek form).
             # ATE = sum(T*Y*w1) / sum(T*w1) - sum((1-T)*Y*w0) / sum((1-T)*w0)
-            # For ips_weight: w1 = 1/e, w0 = 1/(1-e)
-            # For stabilized: the stabilization constant cancels in the ratio.
-            # The IF for a ratio estimator A/B is (1/B)*(a_i - (A/B)*b_i).
+            # The IF for a ratio A/B is (1/B)*(a_i - (A/B)*b_i).
+            #
+            # When target_units is a DataFrame we use the population ATE IF
+            # over all observations. Per-unit custom IF is not supported yet.
             sum_w1 = np.sum(T / e)
             sum_w0 = np.sum((1 - T) / (1 - e))
             mu1 = np.sum(T * Y / e) / sum_w1
@@ -312,16 +313,17 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
 
         elif target == "att":
             # ATT: E[Y1-Y0 | T=1]
-            # Treated arm is just the sample mean of Y among treated.
+            # Treated arm is the sample mean of Y among treated.
             # Control arm uses weights e/(1-e) to reweight controls.
-            # Both arms are ratio estimators.
+            # Both arms are ratio estimators, each with its own denominator.
             p = np.mean(T)
             sum_w0_att = np.sum((1 - T) * e / (1 - e))
             mu1_att = np.sum(T * Y) / np.sum(T)
             mu0_att = np.sum((1 - T) * e / (1 - e) * Y) / sum_w0_att
-            # IF from Lunceford & Davidian (2004), eq. 6
+            # Treated arm denominator is mean(T) = p.
+            # Control arm denominator is mean((1-T)*e/(1-e)), not p.
             if_treated = T * (Y - mu1_att) / p
-            if_control = (1 - T) * e / (1 - e) * (Y - mu0_att) / p
+            if_control = (1 - T) * e / (1 - e) * (Y - mu0_att) / (sum_w0_att / n)
             influence = if_treated - if_control
 
         elif target == "atc":
@@ -332,7 +334,9 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
             sum_w1_atc = np.sum(T * (1 - e) / e)
             mu1_atc = np.sum(T * (1 - e) / e * Y) / sum_w1_atc
             mu0_atc = np.sum((1 - T) * Y) / np.sum(1 - T)
-            if_treated = T * (1 - e) / e * (Y - mu1_atc) / p0
+            # Treated arm denominator is mean(T*(1-e)/e), not p0.
+            # Control arm denominator is mean(1-T) = p0.
+            if_treated = T * (1 - e) / e * (Y - mu1_atc) / (sum_w1_atc / n)
             if_control = (1 - T) * (Y - mu0_atc) / p0
             influence = if_treated - if_control
 
@@ -345,14 +349,20 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
         """Analytic standard error via the influence function.
 
         The variance of the IPW estimator is consistently estimated by
-        Var(IF)/n, where IF is the per-unit influence function. This avoids
-        the computational cost of bootstrapping while giving the same
-        large-sample coverage.
+        sum(IF^2)/n^2, where IF is the per-unit influence function. This
+        avoids the computational cost of bootstrapping while giving the
+        same large-sample coverage.
         """
+        if not hasattr(self, "_ipw_T"):
+            raise RuntimeError(
+                "estimate_effect() must be called before _estimate_std_error(). "
+                "Call model.estimate_effect(..., confidence_intervals=True) instead."
+            )
         influence = self._compute_influence_function()
         n = len(influence)
-        # The variance of the estimator is the sample variance of the IF
-        # divided by n (standard result for M-estimators / GMM).
+        # We use sum(IF^2)/n^2 rather than var(IF)/n. These are equivalent
+        # asymptotically because the IF has mean zero by construction.
+        # See Lunceford & Davidian (2004), section 2.3.
         var_hat = np.sum(influence ** 2) / (n ** 2)
         return np.sqrt(var_hat)
 
