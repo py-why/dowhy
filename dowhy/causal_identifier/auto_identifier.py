@@ -1076,8 +1076,8 @@ def construct_frontdoor_estimand(
 ):
     # TODO: support multivariate treatments better.
     expr = None
-    outcome_name = outcome_name[0]
-    sym_outcome = spstats.Normal(outcome_name, 0, 1)
+    outcome_name_str = outcome_name[0]
+    sym_outcome = spstats.Normal(outcome_name_str, 0, 1)
     sym_treatment_symbols = [spstats.Normal(t, 0, 1) for t in treatment_name]
     sym_treatment = sp.Array(sym_treatment_symbols)
     sym_frontdoor_symbols = [sp.Symbol(inst) for inst in frontdoor_variables_names]
@@ -1098,7 +1098,7 @@ def construct_frontdoor_estimand(
             "If U\N{RIGHTWARDS ARROW}{{{2}}} and U\N{RIGHTWARDS ARROW}{1}" " then P({1}|{2}, {0}, U) = P({1}|{2}, {0})"
         ).format(
             ",".join(treatment_name),
-            outcome_name,
+            outcome_name_str,
             ",".join(frontdoor_variables_names),
         ),
     }
@@ -1116,8 +1116,8 @@ def construct_mediation_estimand(
         EstimandType.NONPARAMETRIC_NDE,
         EstimandType.NONPARAMETRIC_NIE,
     ):
-        outcome_nodes = outcome_nodes[0]
-        sym_outcome = spstats.Normal(outcome_nodes, 0, 1)
+        outcome_node_str = outcome_nodes[0]
+        sym_outcome = spstats.Normal(outcome_node_str, 0, 1)
         sym_treatment_symbols = [spstats.Normal(t, 0, 1) for t in action_nodes]
         sym_treatment = sp.Array(sym_treatment_symbols)
         sym_mediators_symbols = [sp.Symbol(inst) for inst in mediator_nodes]
@@ -1125,7 +1125,7 @@ def construct_mediation_estimand(
         sym_outcome_derivative = sp.Derivative(sym_outcome, sym_mediators)
         sym_treatment_derivative = sp.Derivative(sym_mediators, sym_treatment)
         # For direct effect
-        num_expr_str = outcome_nodes
+        num_expr_str = outcome_node_str
         if len(mediator_nodes) > 0:
             num_expr_str += "|" + ",".join(mediator_nodes)
         sym_mu = sp.Symbol("mu")
@@ -1150,7 +1150,7 @@ def construct_mediation_estimand(
             "Second-stage-unconfoundedness": (
                 "If U\N{RIGHTWARDS ARROW}{{{2}}} and U\N{RIGHTWARDS ARROW}{1}"
                 " then P({1}|{2}, {0}, U) = P({1}|{2}, {0})"
-            ).format(",".join(action_nodes), outcome_nodes, ",".join(mediator_nodes)),
+            ).format(",".join(action_nodes), outcome_node_str, ",".join(mediator_nodes)),
         }
     else:
         raise ValueError(
