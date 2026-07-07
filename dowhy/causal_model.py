@@ -67,6 +67,12 @@ class CausalModel:
         self.logger = logging.getLogger(__name__)
         self._estimator_cache = {}
 
+        _warn_if_treatment_or_outcome_not_in_data(
+            treatment_names=self._treatment,
+            outcome_names=self._outcome,
+            data_variable_names=set(self._data.columns),
+        )
+
         if graph is None:
             self.logger.warning("Causal Graph not provided. DoWhy will construct a graph based on data inputs.")
             self._common_causes = parse_state(common_causes)
@@ -295,8 +301,12 @@ class CausalModel:
             effect_modifiers = self._graph.get_effect_modifiers(self._treatment, self._outcome)
 
         if method_name is None:
-            # TODO add propensity score as default backdoor method, iv as default iv method, add an informational message to show which method has been selected.
-            pass
+            raise ValueError(
+                "method_name must be provided. "
+                "Specify an estimation method such as 'backdoor.linear_regression', "
+                "'backdoor.propensity_score_stratification', or 'iv.instrumental_variable'. "
+                "Use the '<identifier>.<estimator>' format."
+            )
         else:
             # TODO add dowhy as a prefix to all dowhy estimators
             num_components = len(method_name.split("."))
@@ -625,3 +635,30 @@ def _warn_if_unused_data_variables(
             len(unused_data_variable_names),
             sorted(unused_data_variable_names),
         )
+
+
+def _warn_if_treatment_or_outcome_not_in_data(
+    treatment_names: typing.List[str],
+    outcome_names: typing.List[str],
+    data_variable_names: typing.Set[str],
+) -> None:
+    """Emit a UserWarning when any treatment or outcome variable is missing from the DataFrame.
+
+    A missing treatment or outcome most often indicates a typo in the variable name.  The warning
+    is emitted via :func:`warnings.warn` so that it is visible even when the logging level is not
+    configured, and so that users who turn warnings into errors (e.g. with ``-W error``) get an
+    early, actionable signal rather than a confusing downstream error.
+    """
+    missing_treatment = [t for t in treatment_names if t not in data_variable_names]
+    missing_outcome = [o for o in outcome_names if o not in data_variable_names]
+
+    for role, missing in (("treatment", missing_treatment), ("outcome", missing_outcome)):
+        if missing:
+            warnings.warn(
+                f"The following {role} variable(s) were not found as columns in the provided "
+                f"DataFrame: {missing}. "
+                "This may indicate a typo in the variable name. "
+                f"Available columns are: {sorted(data_variable_names)}.",
+                UserWarning,
+                stacklevel=4,
+            )
