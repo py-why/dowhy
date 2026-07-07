@@ -447,3 +447,43 @@ class TestEconMLEstimator:
         )
 
         assert np.array_equal(est1.cate_estimates, est2.cate_estimates)
+
+    def test_num_quantiles_parameter(self):
+        """Test that num_quantiles_to_discretize_cont_cols is forwarded to econml estimators.
+        Regression test for https://github.com/microsoft/dowhy/issues/767
+        """
+        data = datasets.linear_dataset(
+            10,
+            num_common_causes=4,
+            num_samples=500,
+            num_instruments=2,
+            num_effect_modifiers=2,
+            num_treatments=1,
+            treatment_is_binary=False,
+        )
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            effect_modifiers=data["effect_modifier_names"],
+            graph=data["gml_graph"],
+        )
+        identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        # Should not raise TypeError about unexpected keyword argument
+        estimate = model.estimate_effect(
+            identified_estimand,
+            method_name="backdoor.econml.dml.dml.LinearDML",
+            control_value=0,
+            treatment_value=1,
+            target_units="ate",
+            num_quantiles_to_discretize_cont_cols=6,
+            method_params={
+                "init_params": {
+                    "model_y": GradientBoostingRegressor(),
+                    "model_t": GradientBoostingRegressor(),
+                    "featurizer": PolynomialFeatures(degree=1, include_bias=True),
+                },
+                "fit_params": {},
+            },
+        )
+        assert estimate.ate is not None
