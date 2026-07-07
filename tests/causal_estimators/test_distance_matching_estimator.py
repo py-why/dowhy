@@ -234,16 +234,34 @@ class TestDistanceMatchingEstimator:
         )
         assert np.isfinite(estimate.value), "Estimate with Mahalanobis and V param should be finite."
 
-    def test_distance_matching_with_custom_p_param(self, binary_treatment_dataset):
-        """Regression test: p passed via init_params should be routed as first-class NearestNeighbors arg, not metric_params."""
-        data = binary_treatment_dataset
-        model = CausalModel(data=data, treatment="v0", outcome="y", graph=GML_SINGLE_CAUSE)
+    def test_distance_matching_with_custom_p_param(self):
+        """Regression test: custom p must change neighbor selection for Minkowski distance."""
+        data = pd.DataFrame(
+            {
+                "W1": [0.0, 1.5, 1.0],
+                "W2": [0.0, 0.0, 1.0],
+                "v0": [1, 0, 0],
+                "y": [10.0, 0.0, 0.0],
+            }
+        )
+        gml = """graph [directed 1 node [id "W1" label "W1"] node [id "W2" label "W2"] node [id "v0" label "v0"]
+        node [id "y" label "y"] edge [source "W1" target "v0"] edge [source "W1" target "y"]
+        edge [source "W2" target "v0"] edge [source "W2" target "y"] edge [source "v0" target "y"]]"""
+        model = CausalModel(data=data, treatment="v0", outcome="y", graph=gml)
         estimand = model.identify_effect(proceed_when_unidentifiable=True)
-        # p=1 gives Manhattan distance; if p were incorrectly placed in metric_params sklearn would ignore it
-        estimate = model.estimate_effect(
+
+        estimate_p1 = model.estimate_effect(
             estimand,
             method_name="backdoor.distance_matching",
             target_units="att",
             method_params={"init_params": {"distance_metric": "minkowski", "p": 1}},
         )
-        assert np.isfinite(estimate.value), "Estimate should be finite with p=1 (Manhattan distance)"
+        estimate_p2 = model.estimate_effect(
+            estimand,
+            method_name="backdoor.distance_matching",
+            target_units="att",
+            method_params={"init_params": {"distance_metric": "minkowski", "p": 2}},
+        )
+
+        assert estimate_p1.estimator.matched_indices_att[0] == [1]
+        assert estimate_p2.estimator.matched_indices_att[0] == [2]
