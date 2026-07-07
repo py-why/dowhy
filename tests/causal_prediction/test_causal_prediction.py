@@ -13,8 +13,9 @@ import pytest
 def gaussian_reg():
     """A Regularizer with gaussian kernel, E_conditioned=True, and gamma=1.0.
 
-    All torch-dependent tests that use this fixture are automatically skipped
-    when torch is not installed.
+    Tests that depend on this fixture are automatically skipped when torch is not
+    installed: pytest.importorskip raises pytest.skip.Exception (not ImportError),
+    which pytest interprets as a graceful skip rather than a test failure.
     """
     pytest.importorskip("torch")
     from dowhy.causal_prediction.algorithms.regularization import Regularizer
@@ -544,7 +545,11 @@ def test_compute_conditional_penalty_value_based_grouping():
     # Two independently-created zero-tensors: same value, different Python objects.
     gd_env0 = torch.zeros(n, 1, dtype=torch.float32)
     gd_env1 = torch.zeros(n, 1, dtype=torch.float32)
-    assert gd_env0.data_ptr() != gd_env1.data_ptr(), "Precondition: must be different objects"
+    assert gd_env0.data_ptr() != gd_env1.data_ptr(), (
+        "Test setup requires separate tensor objects to verify value-based grouping: "
+        "two tensors with the same value but different memory addresses simulate "
+        "group_data rows that come from different environments."
+    )
     group_data = torch.cat([gd_env0, gd_env1])
 
     # With value-based grouping all 2n samples fall into group 0.
@@ -814,7 +819,9 @@ def test_prediction_algorithm_accepts_adamw():
     from dowhy.causal_prediction.algorithms.base_algorithm import PredictionAlgorithm
 
     model = torch.nn.Linear(4, 2)
-    algo = PredictionAlgorithm(model, optimizer="AdamW", lr=1e-3, weight_decay=0.0, betas=(0.9, 0.999), momentum=0.9)
+    # momentum is a required constructor parameter for PredictionAlgorithm; it is only
+    # used by the SGD optimizer path and has no effect on AdamW.
+    algo = PredictionAlgorithm(model, optimizer="AdamW", lr=1e-3, weight_decay=0.0, betas=(0.9, 0.999), momentum=0.0)
 
     assert algo.optimizer == "AdamW"
 
