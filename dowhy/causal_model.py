@@ -261,6 +261,7 @@ class CausalModel:
         effect_modifiers=None,
         fit_estimator=True,
         method_params=None,
+        num_quantiles_to_discretize_cont_cols=None,
     ):
         """Estimate the identified causal effect.
 
@@ -292,6 +293,7 @@ class CausalModel:
         :param fit_estimator: Boolean flag on whether to fit the estimator.
             Setting it to False is useful to estimate the effect on new data using a previously fitted estimator.
         :param method_params: Dictionary containing any method-specific parameters. These are passed directly to the estimating method. See the docs for each estimation method for allowed method-specific params.
+        :param num_quantiles_to_discretize_cont_cols: (Experimental) For third-party econml estimators, this controls the number of quantiles used to discretize continuous effect modifiers. Defaults to 5 if not specified. Only used for econml-based methods.
         :returns: An instance of the CausalEstimate class, containing the causal effect estimate
             and other method-dependent information
 
@@ -330,6 +332,12 @@ class CausalModel:
                         method_params = {}
                     # Define the third-party estimation method to be used
                     method_params[third_party_estimator_package + "_estimator"] = estimator_name
+                    if num_quantiles_to_discretize_cont_cols is not None:
+                        if "init_params" not in method_params:
+                            method_params["init_params"] = {}
+                        method_params["init_params"]["num_quantiles_to_discretize_cont_cols"] = (
+                            num_quantiles_to_discretize_cont_cols
+                        )
             else:  # For older dowhy methods
                 self.logger.info(estimator_name)
                 # Process the dowhy estimators
