@@ -15,7 +15,7 @@ from dowhy.gcm.causal_models import (
     validate_causal_dag,
 )
 from dowhy.gcm.fitting_sampling import draw_samples
-from dowhy.gcm.util.general import set_random_seed
+from dowhy.gcm.util.general import temporary_seed
 from dowhy.graph import (
     DirectedGraph,
     get_ordered_predecessors,
@@ -43,11 +43,10 @@ def interventional_samples(
                           on the generative models.
     :param num_samples_to_draw: Sample size to draw from the interventional distribution.
     :param random_seed: Optional seed for the random number generator to make results reproducible.
+                        The global RNG state is saved before applying the seed and restored afterwards,
+                        so this call does not permanently mutate the caller's RNG state.
     :return: Samples from the interventional distribution.
     """
-    if random_seed is not None:
-        set_random_seed(random_seed)
-
     validate_causal_dag(causal_model.graph)
     for node in interventions:
         validate_node_in_graph(causal_model.graph, node)
@@ -57,10 +56,11 @@ def interventional_samples(
     if observed_data is not None and num_samples_to_draw is not None:
         raise ValueError("Either observed_samples or num_samples_to_draw need to be set, not both!")
 
-    if num_samples_to_draw is not None:
-        observed_data = draw_samples(causal_model, num_samples_to_draw)
+    with temporary_seed(random_seed):
+        if num_samples_to_draw is not None:
+            observed_data = draw_samples(causal_model, num_samples_to_draw)
 
-    return _interventional_samples(causal_model, observed_data, interventions)
+        return _interventional_samples(causal_model, observed_data, interventions)
 
 
 def _interventional_samples(
@@ -129,11 +129,10 @@ def counterfactual_samples(
                        these have to be estimated from observed data. Then we require causal models of nodes to be
                        invertible.
     :param random_seed: Optional seed for the random number generator to make results reproducible.
+                        The global RNG state is saved before applying the seed and restored afterwards,
+                        so this call does not permanently mutate the caller's RNG state.
     :return: Estimated counterfactual data.
     """
-    if random_seed is not None:
-        set_random_seed(random_seed)
-
     for node in interventions:
         validate_node_in_graph(causal_model.graph, node)
 
@@ -144,17 +143,18 @@ def counterfactual_samples(
     if observed_data is not None and noise_data is not None:
         raise ValueError("Either observed_data or noise_data can be given, not both!")
 
-    if noise_data is None and observed_data is not None:
-        if not isinstance(causal_model, InvertibleStructuralCausalModel):
-            raise ValueError(
-                "Since no noise_data is given, this has to be estimated from the given "
-                "observed_data. This can only be done with InvertibleStructuralCausalModel."
-            )
-        # Abduction: For invertible SCMs, we recover exact noise values from data.
-        noise_data = compute_noise_from_data(causal_model, observed_data)
+    with temporary_seed(random_seed):
+        if noise_data is None and observed_data is not None:
+            if not isinstance(causal_model, InvertibleStructuralCausalModel):
+                raise ValueError(
+                    "Since no noise_data is given, this has to be estimated from the given "
+                    "observed_data. This can only be done with InvertibleStructuralCausalModel."
+                )
+            # Abduction: For invertible SCMs, we recover exact noise values from data.
+            noise_data = compute_noise_from_data(causal_model, observed_data)
 
-    # Action + Prediction: Propagate the intervention downstream using recovered noise values.
-    return _counterfactual_samples(causal_model, interventions, noise_data)
+        # Action + Prediction: Propagate the intervention downstream using recovered noise values.
+        return _counterfactual_samples(causal_model, interventions, noise_data)
 
 
 def _counterfactual_samples(
@@ -236,10 +236,10 @@ def average_causal_effect(
     :param num_samples_to_draw: Number of samples drawn from the causal model for estimating ACE if no observed data is
                                 given.
     :param random_seed: Optional seed for the random number generator to make results reproducible.
+                        The global RNG state is saved before applying the seed and restored afterwards,
+                        so this call does not permanently mutate the caller's RNG state.
     :return: The estimated average causal effect (ACE).
     """
-    if random_seed is not None:
-        set_random_seed(random_seed)
     # For estimating the effect, we only need to consider the nodes that have a directed path to the target node, i.e.
     # all ancestors of the target.
     causal_model = ProbabilisticCausalModel(node_connected_subgraph_view(causal_model.graph, target_node))
@@ -255,32 +255,33 @@ def average_causal_effect(
     if observed_data is not None and num_samples_to_draw is not None:
         raise ValueError("Either observed_samples or num_samples_to_draw need to be set, not both!")
 
-    if num_samples_to_draw is not None:
-        observed_data = draw_samples(causal_model, num_samples_to_draw)
+    with temporary_seed(random_seed):
+        if num_samples_to_draw is not None:
+            observed_data = draw_samples(causal_model, num_samples_to_draw)
 
-    samples_from_target_alt = _interventional_samples(causal_model, observed_data, interventions_alternative)[
-        target_node
-    ].to_numpy()
-    samples_from_target_ref = _interventional_samples(causal_model, observed_data, interventions_reference)[
-        target_node
-    ].to_numpy()
+        samples_from_target_alt = _interventional_samples(causal_model, observed_data, interventions_alternative)[
+            target_node
+        ].to_numpy()
+        samples_from_target_ref = _interventional_samples(causal_model, observed_data, interventions_reference)[
+            target_node
+        ].to_numpy()
 
-    target_causal_model = causal_model.causal_mechanism(target_node)
-    if isinstance(target_causal_model, ClassifierFCM):
-        # The target node can be a continuous real-valued variable or a categorical variable with at most two classes
-        # (i.e. binary).
-        if observed_data[target_node].nunique() > 2:
-            raise ValueError(
-                "Cannot estimate average treatment effect of categorical data with more than 2 categories!"
-            )
+        target_causal_model = causal_model.causal_mechanism(target_node)
+        if isinstance(target_causal_model, ClassifierFCM):
+            # The target node can be a continuous real-valued variable or a categorical variable with at most two classes
+            # (i.e. binary).
+            if observed_data[target_node].nunique() > 2:
+                raise ValueError(
+                    "Cannot estimate average treatment effect of categorical data with more than 2 categories!"
+                )
 
-        class_names = target_causal_model.get_class_names(np.array([0, 1]))
-        samples_from_target_alt[samples_from_target_alt == class_names[0]] = 0
-        samples_from_target_alt[samples_from_target_alt == class_names[1]] = 1
-        samples_from_target_ref[samples_from_target_ref == class_names[0]] = 0
-        samples_from_target_ref[samples_from_target_ref == class_names[1]] = 1
+            class_names = target_causal_model.get_class_names(np.array([0, 1]))
+            samples_from_target_alt[samples_from_target_alt == class_names[0]] = 0
+            samples_from_target_alt[samples_from_target_alt == class_names[1]] = 1
+            samples_from_target_ref[samples_from_target_ref == class_names[0]] = 0
+            samples_from_target_ref[samples_from_target_ref == class_names[1]] = 1
 
-    return np.mean(samples_from_target_alt) - np.mean(samples_from_target_ref)
+        return np.mean(samples_from_target_alt) - np.mean(samples_from_target_ref)
 
 
 def _parent_samples_of(node: Any, scm: ProbabilisticCausalModel, samples: pd.DataFrame) -> np.ndarray:

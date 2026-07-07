@@ -1,5 +1,6 @@
 import random
-from typing import Dict, Optional, Union
+from contextlib import contextmanager
+from typing import Dict, Generator, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -46,6 +47,30 @@ def set_random_seed(random_seed: int) -> None:
     """
     np.random.seed(random_seed)
     random.seed(random_seed)
+
+
+@contextmanager
+def temporary_seed(seed: Optional[int]) -> Generator[None, None, None]:
+    """Context manager that temporarily sets random seeds and restores the prior RNG state on exit.
+
+    Unlike :func:`set_random_seed`, this context manager saves and restores both the NumPy and
+    Python ``random`` module states so that the caller's RNG state is not permanently mutated.
+    When *seed* is ``None`` the context manager is a no-op.
+
+    :param seed: Integer seed to apply inside the context, or ``None`` for no-op.
+    """
+    if seed is None:
+        yield
+        return
+    np_state = np.random.get_state()
+    random_state = random.getstate()
+    np.random.seed(seed)
+    random.seed(seed)
+    try:
+        yield
+    finally:
+        np.random.set_state(np_state)
+        random.setstate(random_state)
 
 
 def auto_fit_encoders(
