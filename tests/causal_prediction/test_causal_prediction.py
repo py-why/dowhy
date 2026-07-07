@@ -6,6 +6,43 @@ those packages are not installed.
 
 import pytest
 
+# ── shared fixtures ───────────────────────────────────────────────────────────
+
+
+@pytest.fixture
+def gaussian_reg():
+    """A Regularizer with gaussian kernel, E_conditioned=True, and gamma=1.0.
+
+    All torch-dependent tests that use this fixture are automatically skipped
+    when torch is not installed.
+    """
+    pytest.importorskip("torch")
+    from dowhy.causal_prediction.algorithms.regularization import Regularizer
+
+    return Regularizer(E_conditioned=True, ci_test="mmd", kernel_type="gaussian", gamma=1.0)
+
+
+@pytest.fixture
+def tiny_dataset_factory():
+    """Returns a factory class for small sequential integer datasets.
+
+    Compatible with split_dataset and torch DataLoader utilities.
+    """
+    torch = pytest.importorskip("torch")
+
+    class _TinyDataset(torch.utils.data.Dataset):
+        def __init__(self, n):
+            self.data = list(range(n))
+
+        def __len__(self):
+            return len(self.data)
+
+        def __getitem__(self, idx):
+            return self.data[idx]
+
+    return _TinyDataset
+
+
 # ── pure-Python tests (no torch / pytorch-lightning required) ─────────────────
 
 
@@ -195,44 +232,38 @@ def test_regularizer_mmd_zero_for_identical_inputs():
 # ── _split_by_attribute (new helper from PR #1371) ────────────────────────────
 
 
-def test_split_by_attribute_two_labels():
+def test_split_by_attribute_two_labels(gaussian_reg):
     """_split_by_attribute correctly splits features into two groups."""
-    torch = pytest.importorskip("torch")
-    from dowhy.causal_prediction.algorithms.regularization import Regularizer
+    import torch
 
-    reg = Regularizer(E_conditioned=True, ci_test="mmd", kernel_type="gaussian", gamma=1.0)
     features = torch.tensor([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0], [7.0, 8.0]])
     labels = torch.tensor([0, 1, 0, 1])
-    result = reg._split_by_attribute(features, labels)
+    result = gaussian_reg._split_by_attribute(features, labels)
 
     assert len(result) == 2
     assert result[0].tolist() == [[1.0, 2.0], [5.0, 6.0]]  # label == 0
     assert result[1].tolist() == [[3.0, 4.0], [7.0, 8.0]]  # label == 1
 
 
-def test_split_by_attribute_single_label_returns_full_tensor():
+def test_split_by_attribute_single_label_returns_full_tensor(gaussian_reg):
     """_split_by_attribute returns a one-element list when all labels are identical."""
-    torch = pytest.importorskip("torch")
-    from dowhy.causal_prediction.algorithms.regularization import Regularizer
+    import torch
 
-    reg = Regularizer(E_conditioned=True, ci_test="mmd", kernel_type="gaussian", gamma=1.0)
     features = torch.tensor([[1.0, 2.0], [3.0, 4.0]])
     labels = torch.tensor([0, 0])
-    result = reg._split_by_attribute(features, labels)
+    result = gaussian_reg._split_by_attribute(features, labels)
 
     assert len(result) == 1
     assert result[0].tolist() == features.tolist()
 
 
-def test_split_by_attribute_three_labels():
+def test_split_by_attribute_three_labels(gaussian_reg):
     """_split_by_attribute handles three distinct label values."""
-    torch = pytest.importorskip("torch")
-    from dowhy.causal_prediction.algorithms.regularization import Regularizer
+    import torch
 
-    reg = Regularizer(E_conditioned=True, ci_test="mmd", kernel_type="gaussian", gamma=1.0)
     features = torch.arange(6, dtype=torch.float32).reshape(6, 1)
     labels = torch.tensor([0, 1, 2, 0, 1, 2])
-    result = reg._split_by_attribute(features, labels)
+    result = gaussian_reg._split_by_attribute(features, labels)
 
     assert len(result) == 3
     # Each group should have 2 samples
@@ -243,23 +274,19 @@ def test_split_by_attribute_three_labels():
 # ── _optimized_mmd_penalty (new method from PR #1371) ────────────────────────
 
 
-def test_optimized_mmd_penalty_single_tensor_returns_zero():
+def test_optimized_mmd_penalty_single_tensor_returns_zero(gaussian_reg):
     """_optimized_mmd_penalty returns 0.0 for a single-tensor list (nothing to compare)."""
-    torch = pytest.importorskip("torch")
-    from dowhy.causal_prediction.algorithms.regularization import Regularizer
+    import torch
 
-    reg = Regularizer(E_conditioned=True, ci_test="mmd", kernel_type="gaussian", gamma=1.0)
-    result = reg._optimized_mmd_penalty([torch.randn(8, 4)])
+    result = gaussian_reg._optimized_mmd_penalty([torch.randn(8, 4)])
     assert result == 0.0
 
 
-def test_optimized_mmd_penalty_empty_tensors_skipped():
+def test_optimized_mmd_penalty_empty_tensors_skipped(gaussian_reg):
     """_optimized_mmd_penalty ignores zero-row tensors; returns 0.0 when nothing remains."""
-    torch = pytest.importorskip("torch")
-    from dowhy.causal_prediction.algorithms.regularization import Regularizer
+    import torch
 
-    reg = Regularizer(E_conditioned=True, ci_test="mmd", kernel_type="gaussian", gamma=1.0)
-    result = reg._optimized_mmd_penalty([torch.zeros(0, 4), torch.zeros(0, 4)])
+    result = gaussian_reg._optimized_mmd_penalty([torch.zeros(0, 4), torch.zeros(0, 4)])
     assert result == 0.0
 
 
@@ -269,6 +296,7 @@ def test_optimized_mmd_penalty_gaussian_matches_naive_two_tensors():
     from dowhy.causal_prediction.algorithms.regularization import Regularizer
 
     torch.manual_seed(7)
+    # Uses gamma=0.5 to exercise a different kernel bandwidth from the fixture default.
     reg = Regularizer(E_conditioned=True, ci_test="mmd", kernel_type="gaussian", gamma=0.5)
     t1, t2 = torch.randn(16, 4), torch.randn(16, 4)
 
@@ -278,17 +306,15 @@ def test_optimized_mmd_penalty_gaussian_matches_naive_two_tensors():
     assert optimized == pytest.approx(naive, rel=1e-4)
 
 
-def test_optimized_mmd_penalty_gaussian_matches_naive_three_tensors():
+def test_optimized_mmd_penalty_gaussian_matches_naive_three_tensors(gaussian_reg):
     """_optimized_mmd_penalty (gaussian) sums all pairwise MMDs correctly for three tensors."""
-    torch = pytest.importorskip("torch")
-    from dowhy.causal_prediction.algorithms.regularization import Regularizer
+    import torch
 
     torch.manual_seed(11)
-    reg = Regularizer(E_conditioned=True, ci_test="mmd", kernel_type="gaussian", gamma=1.0)
     t1, t2, t3 = torch.randn(12, 3), torch.randn(12, 3), torch.randn(12, 3)
 
-    optimized = float(reg._optimized_mmd_penalty([t1, t2, t3]))
-    naive = float(reg.mmd(t1, t2) + reg.mmd(t1, t3) + reg.mmd(t2, t3))
+    optimized = float(gaussian_reg._optimized_mmd_penalty([t1, t2, t3]))
+    naive = float(gaussian_reg.mmd(t1, t2) + gaussian_reg.mmd(t1, t3) + gaussian_reg.mmd(t2, t3))
 
     assert optimized == pytest.approx(naive, rel=1e-4)
 
@@ -347,26 +373,21 @@ def test_unconditional_reg_e_eq_a_true_e_conditioned_false():
     assert penalty > 0.0
 
 
-def test_unconditional_reg_e_eq_a_true_e_conditioned_true_returns_zero():
+def test_unconditional_reg_e_eq_a_true_e_conditioned_true_returns_zero(gaussian_reg):
     """unconditional_reg(E_eq_A=True, E_conditioned=True) applies no penalty (branch not taken)."""
-    torch = pytest.importorskip("torch")
-    from dowhy.causal_prediction.algorithms.regularization import Regularizer
+    import torch
 
-    reg = Regularizer(E_conditioned=True, ci_test="mmd", kernel_type="gaussian", gamma=1.0)
     classifs = [torch.randn(8, 4), torch.randn(8, 4)]
     attr_labels = [torch.zeros(8, dtype=torch.long)] * 2
 
-    penalty = float(reg.unconditional_reg(classifs, attr_labels, num_envs=2, E_eq_A=True))
+    penalty = float(gaussian_reg.unconditional_reg(classifs, attr_labels, num_envs=2, E_eq_A=True))
 
     assert penalty == pytest.approx(0.0)
 
 
-def test_unconditional_reg_e_conditioned_true_splits_within_env():
+def test_unconditional_reg_e_conditioned_true_splits_within_env(gaussian_reg):
     """unconditional_reg(E_conditioned=True, E_eq_A=False) penalizes within-env attr differences."""
-    torch = pytest.importorskip("torch")
-    from dowhy.causal_prediction.algorithms.regularization import Regularizer
-
-    reg = Regularizer(E_conditioned=True, ci_test="mmd", kernel_type="gaussian", gamma=1.0)
+    import torch
 
     # Each env has two attr values with clearly different feature distributions.
     n = 8
@@ -375,7 +396,7 @@ def test_unconditional_reg_e_conditioned_true_splits_within_env():
     c1 = c0.clone() + 0.1
     attr1 = attr0.clone()
 
-    penalty = float(reg.unconditional_reg([c0, c1], [attr0, attr1], num_envs=2, E_eq_A=False))
+    penalty = float(gaussian_reg.unconditional_reg([c0, c1], [attr0, attr1], num_envs=2, E_eq_A=False))
 
     assert penalty > 0.0
 
@@ -424,21 +445,23 @@ def test_unconditional_reg_not_e_conditioned_different_attrs_positive_penalty():
     assert penalty > 0.0
 
 
-def test_unconditional_reg_optimization_matches_naive_e_conditioned_true():
+def test_unconditional_reg_optimization_matches_naive_e_conditioned_true(gaussian_reg):
     """unconditional_reg: optimized and naive paths agree for E_conditioned=True."""
-    torch = pytest.importorskip("torch")
-    from dowhy.causal_prediction.algorithms.regularization import Regularizer
+    import torch
 
     torch.manual_seed(42)
-    reg = Regularizer(E_conditioned=True, ci_test="mmd", kernel_type="gaussian", gamma=1.0)
     n = 8
     c0 = torch.cat([torch.randn(n, 4), torch.randn(n, 4) + 3.0])
     attr0 = torch.cat([torch.zeros(n, dtype=torch.long), torch.ones(n, dtype=torch.long)])
     c1 = torch.cat([torch.randn(n, 4) + 1.0, torch.randn(n, 4) + 4.0])
     attr1 = attr0.clone()
 
-    naive = float(reg.unconditional_reg([c0, c1], [attr0, attr1], num_envs=2, E_eq_A=False, use_optimization=False))
-    optimized = float(reg.unconditional_reg([c0, c1], [attr0, attr1], num_envs=2, E_eq_A=False, use_optimization=True))
+    naive = float(
+        gaussian_reg.unconditional_reg([c0, c1], [attr0, attr1], num_envs=2, E_eq_A=False, use_optimization=False)
+    )
+    optimized = float(
+        gaussian_reg.unconditional_reg([c0, c1], [attr0, attr1], num_envs=2, E_eq_A=False, use_optimization=True)
+    )
 
     assert optimized == pytest.approx(naive, rel=1e-4)
 
@@ -464,36 +487,32 @@ def test_unconditional_reg_optimization_matches_naive_not_e_conditioned():
 # ── _compute_conditional_penalty ─────────────────────────────────────────────
 
 
-def test_compute_conditional_penalty_single_group_multiple_attrs():
+def test_compute_conditional_penalty_single_group_multiple_attrs(gaussian_reg):
     """_compute_conditional_penalty penalizes different attribute values within one group."""
-    torch = pytest.importorskip("torch")
-    from dowhy.causal_prediction.algorithms.regularization import Regularizer
+    import torch
 
-    reg = Regularizer(E_conditioned=True, ci_test="mmd", kernel_type="gaussian", gamma=1.0)
     n = 8
     # All samples belong to group 0; two attr values with clearly different features.
     features = torch.cat([torch.zeros(n, 4), torch.ones(n, 4) * 5.0])
     attributes = torch.cat([torch.zeros(n, dtype=torch.long), torch.ones(n, dtype=torch.long)])
     group_data = torch.zeros(2 * n, 1)  # single group
 
-    penalty = float(reg._compute_conditional_penalty(features, attributes, group_data, use_optimization=False))
+    penalty = float(gaussian_reg._compute_conditional_penalty(features, attributes, group_data, use_optimization=False))
 
     assert penalty > 0.0
 
 
-def test_compute_conditional_penalty_each_group_has_one_attr():
+def test_compute_conditional_penalty_each_group_has_one_attr(gaussian_reg):
     """_compute_conditional_penalty returns zero when every group contains only one attr value."""
-    torch = pytest.importorskip("torch")
-    from dowhy.causal_prediction.algorithms.regularization import Regularizer
+    import torch
 
-    reg = Regularizer(E_conditioned=True, ci_test="mmd", kernel_type="gaussian", gamma=1.0)
     n = 8
     # Group 0: all attr=0; Group 1: all attr=1 → no cross-attr MMD within any group.
     features = torch.randn(2 * n, 4)
     attributes = torch.cat([torch.zeros(n, dtype=torch.long), torch.ones(n, dtype=torch.long)])
     group_data = torch.cat([torch.zeros(n, 1), torch.ones(n, 1)])
 
-    penalty = float(reg._compute_conditional_penalty(features, attributes, group_data, use_optimization=False))
+    penalty = float(gaussian_reg._compute_conditional_penalty(features, attributes, group_data, use_optimization=False))
 
     assert penalty == pytest.approx(0.0, abs=1e-6)
 
@@ -535,20 +554,20 @@ def test_compute_conditional_penalty_value_based_grouping():
     assert penalty > 0.0
 
 
-def test_compute_conditional_penalty_optimization_matches_naive():
+def test_compute_conditional_penalty_optimization_matches_naive(gaussian_reg):
     """_compute_conditional_penalty: optimized path gives the same result as the naive path."""
-    torch = pytest.importorskip("torch")
-    from dowhy.causal_prediction.algorithms.regularization import Regularizer
+    import torch
 
     torch.manual_seed(99)
-    reg = Regularizer(E_conditioned=True, ci_test="mmd", kernel_type="gaussian", gamma=1.0)
     n = 8
     features = torch.cat([torch.randn(n, 4), torch.randn(n, 4) + 4.0] * 2)
     attributes = torch.tensor([0] * n + [1] * n + [0] * n + [1] * n, dtype=torch.long)
     group_data = torch.cat([torch.zeros(2 * n, 1), torch.ones(2 * n, 1)])
 
-    naive = float(reg._compute_conditional_penalty(features, attributes, group_data, use_optimization=False))
-    optimized = float(reg._compute_conditional_penalty(features, attributes, group_data, use_optimization=True))
+    naive = float(gaussian_reg._compute_conditional_penalty(features, attributes, group_data, use_optimization=False))
+    optimized = float(
+        gaussian_reg._compute_conditional_penalty(features, attributes, group_data, use_optimization=True)
+    )
 
     assert optimized == pytest.approx(naive, rel=1e-4)
 
@@ -556,19 +575,17 @@ def test_compute_conditional_penalty_optimization_matches_naive():
 # ── conditional_reg branches ──────────────────────────────────────────────────
 
 
-def test_conditional_reg_e_conditioned_true_penalizes_within_env():
+def test_conditional_reg_e_conditioned_true_penalizes_within_env(gaussian_reg):
     """conditional_reg(E_conditioned=True) applies per-environment conditional grouping."""
-    torch = pytest.importorskip("torch")
-    from dowhy.causal_prediction.algorithms.regularization import Regularizer
+    import torch
 
-    reg = Regularizer(E_conditioned=True, ci_test="mmd", kernel_type="gaussian", gamma=1.0)
     n = 8
     # Each env: within Y=0, attr=0→zeros and attr=1→fives (big MMD).
     c0 = torch.cat([torch.zeros(n, 4), torch.ones(n, 4) * 5.0] * 2)
     attr0 = torch.tensor([0] * n + [1] * n + [0] * n + [1] * n, dtype=torch.long)
     y0 = torch.tensor([0] * n + [0] * n + [1] * n + [1] * n, dtype=torch.long)
 
-    penalty = float(reg.conditional_reg([c0], [attr0], [[y0]], num_envs=1, E_eq_A=False))
+    penalty = float(gaussian_reg.conditional_reg([c0], [attr0], [[y0]], num_envs=1, E_eq_A=False))
 
     assert penalty > 0.0
 
@@ -625,20 +642,20 @@ def test_conditional_reg_returns_zero_when_group_has_single_attr():
     assert penalty == pytest.approx(0.0, abs=1e-6)
 
 
-def test_conditional_reg_optimization_matches_naive():
+def test_conditional_reg_optimization_matches_naive(gaussian_reg):
     """conditional_reg: optimized path gives the same result as the naive path."""
-    torch = pytest.importorskip("torch")
-    from dowhy.causal_prediction.algorithms.regularization import Regularizer
+    import torch
 
     torch.manual_seed(123)
-    reg = Regularizer(E_conditioned=True, ci_test="mmd", kernel_type="gaussian", gamma=1.0)
     n = 8
     c0 = torch.cat([torch.randn(n, 4), torch.randn(n, 4) + 3.0] * 2)
     attr0 = torch.tensor([0] * n + [1] * n + [0] * n + [1] * n, dtype=torch.long)
     y0 = torch.tensor([0] * n + [0] * n + [1] * n + [1] * n, dtype=torch.long)
 
-    naive = float(reg.conditional_reg([c0], [attr0], [[y0]], num_envs=1, E_eq_A=False, use_optimization=False))
-    optimized = float(reg.conditional_reg([c0], [attr0], [[y0]], num_envs=1, E_eq_A=False, use_optimization=True))
+    naive = float(gaussian_reg.conditional_reg([c0], [attr0], [[y0]], num_envs=1, E_eq_A=False, use_optimization=False))
+    optimized = float(
+        gaussian_reg.conditional_reg([c0], [attr0], [[y0]], num_envs=1, E_eq_A=False, use_optimization=True)
+    )
 
     assert optimized == pytest.approx(naive, rel=1e-4)
 
@@ -844,22 +861,11 @@ def test_erm_training_step_with_synthetic_data(monkeypatch):
 # ── dataloader utilities ──────────────────────────────────────────────────────
 
 
-def test_split_dataset_sizes():
+def test_split_dataset_sizes(tiny_dataset_factory):
     """split_dataset produces two complementary subsets of the requested sizes."""
-    torch = pytest.importorskip("torch")
     from dowhy.causal_prediction.dataloaders.misc import split_dataset
 
-    class _TinyDataset(torch.utils.data.Dataset):
-        def __init__(self, n):
-            self.data = list(range(n))
-
-        def __len__(self):
-            return len(self.data)
-
-        def __getitem__(self, idx):
-            return self.data[idx]
-
-    ds = _TinyDataset(20)
+    ds = tiny_dataset_factory(20)
     val, train = split_dataset(ds, n=5, seed=42)
 
     assert len(val) == 5
@@ -867,44 +873,22 @@ def test_split_dataset_sizes():
     assert len(val) + len(train) == len(ds)
 
 
-def test_split_dataset_is_reproducible():
+def test_split_dataset_is_reproducible(tiny_dataset_factory):
     """split_dataset produces the same split for the same seed."""
-    torch = pytest.importorskip("torch")
     from dowhy.causal_prediction.dataloaders.misc import split_dataset
 
-    class _TinyDataset(torch.utils.data.Dataset):
-        def __init__(self, n):
-            self.data = list(range(n))
-
-        def __len__(self):
-            return len(self.data)
-
-        def __getitem__(self, idx):
-            return self.data[idx]
-
-    ds = _TinyDataset(20)
+    ds = tiny_dataset_factory(20)
     val_a, _ = split_dataset(ds, n=5, seed=0)
     val_b, _ = split_dataset(ds, n=5, seed=0)
 
     assert [val_a[i] for i in range(len(val_a))] == [val_b[i] for i in range(len(val_b))]
 
 
-def test_split_dataset_different_seeds_differ():
+def test_split_dataset_different_seeds_differ(tiny_dataset_factory):
     """split_dataset produces different splits for different seeds (with high probability)."""
-    torch = pytest.importorskip("torch")
     from dowhy.causal_prediction.dataloaders.misc import split_dataset
 
-    class _TinyDataset(torch.utils.data.Dataset):
-        def __init__(self, n):
-            self.data = list(range(n))
-
-        def __len__(self):
-            return len(self.data)
-
-        def __getitem__(self, idx):
-            return self.data[idx]
-
-    ds = _TinyDataset(100)
+    ds = tiny_dataset_factory(100)
     val_0, _ = split_dataset(ds, n=10, seed=0)
     val_1, _ = split_dataset(ds, n=10, seed=1)
 
