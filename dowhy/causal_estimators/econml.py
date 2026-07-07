@@ -10,6 +10,19 @@ from dowhy.causal_estimator import CausalEstimate, CausalEstimator
 from dowhy.causal_identifier import IdentifiedEstimand
 from dowhy.utils.api import parse_state
 
+_ECONML_X_NONE_ERROR_SENTINEL = "does not support X=None"
+_ECONML_X_NONE_HELP_MESSAGE = "\n".join(
+    [
+        "This error typically occurs when the EconML estimator requires effect modifiers (X) but none were provided.",
+        "Please specify `effect_modifiers` when constructing the CausalModel:",
+        "",
+        "    model = CausalModel(",
+        "        data=..., treatment=..., outcome=...,",
+        "        effect_modifiers=['col1', 'col2']  # variables for heterogeneous effects",
+        "    )",
+    ]
+)
+
 
 class _EconmlEstimator(Protocol):
     def fit(self, *args, **kwargs): ...
@@ -190,15 +203,10 @@ class Econml(CausalEstimator):
         try:
             self.estimator.fit(**estimator_data_args, **kwargs)
         except ValueError as exc:
-            if X is None and "X=None" in str(exc):
+            error_message = exc.args[0] if exc.args and isinstance(exc.args[0], str) else str(exc)
+            if X is None and _ECONML_X_NONE_ERROR_SENTINEL in error_message:
                 raise ValueError(
-                    str(exc) + "\n\nThis error typically occurs when the EconML estimator requires effect "
-                    "modifiers (X) but none were provided. Please specify `effect_modifiers` when "
-                    "constructing the CausalModel:\n\n"
-                    "    model = CausalModel(\n"
-                    "        data=..., treatment=..., outcome=...,\n"
-                    "        effect_modifiers=['col1', 'col2']  # variables for heterogeneous effects\n"
-                    "    )"
+                    f"{_ECONML_X_NONE_HELP_MESSAGE}\n\nOriginal error from EconML: {error_message}"
                 ) from exc
             raise
 
