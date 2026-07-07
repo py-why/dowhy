@@ -16,9 +16,9 @@ class CACM(PredictionAlgorithm):
         momentum=0.9,
         kernel_type="gaussian",
         ci_test="mmd",
-        attr_types=[],
+        attr_types=None,
         E_conditioned=True,
-        E_eq_A=[],
+        E_eq_A=None,
         gamma=1e-6,
         lambda_causal=1.0,
         lambda_conf=1.0,
@@ -97,13 +97,13 @@ class CACM(PredictionAlgorithm):
         objective /= nmb
         loss = objective
 
-        if self.attr_types != []:
+        if self.attr_types is not None:
             for attr_type_idx, attr_type in enumerate(self.attr_types):
                 attribute_labels = [
                     ai for _, _, ai in minibatches
                 ]  # [(batch_size, num_attrs)_1, batch_size, num_attrs)_2, ..., (batch_size, num_attrs)_(num_environments)]
 
-                E_eq_A_attr = attr_type_idx in self.E_eq_A
+                E_eq_A_attr = False if self.E_eq_A is None else attr_type_idx in self.E_eq_A
 
                 # Acause regularization
                 if attr_type == "causal":
