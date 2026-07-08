@@ -915,7 +915,9 @@ def permute(
         outcome.columns = [outcome_name]
         return outcome[outcome_name].sample(frac=1, random_state=random_state).values
     elif permute_fraction < 1:
-        outcome = np.array(outcome)
+        outcome = np.asarray(outcome)
+        if not outcome.flags.writeable:
+            outcome = outcome.copy()
         permute_fraction /= 2  # We do this as every swap leads to two changes
         changes = np.where(rng.uniform(0, 1, outcome.shape[0]) <= permute_fraction)[
             0
