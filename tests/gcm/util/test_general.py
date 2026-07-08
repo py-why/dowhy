@@ -39,6 +39,20 @@ def test_given_categorical_data_when_evaluating_is_categorical_then_returns_expe
     assert not is_categorical(np.array([1, 2, 3]))
 
 
+def test_given_multi_column_categorical_with_nan_when_evaluating_is_categorical_then_raises_value_error():
+    # Regression test: previously, X = X[~nan_mask] was inside the loop, so on the second column
+    # iteration it applied the original-length nan_mask to the already-filtered (shorter) X,
+    # raising IndexError instead of the intended ValueError.
+    X = np.array([["a", "b"], ["c", "d"], [None, "f"]], dtype=object)
+    with pytest.raises(ValueError, match="categorical"):
+        is_categorical(X)
+
+
+def test_given_multi_column_all_categorical_no_nan_when_evaluating_is_categorical_then_returns_true():
+    X = np.array([["a", "b"], ["c", "d"], ["e", "f"]], dtype=object)
+    assert is_categorical(X)
+
+
 def test_given_categorical_data_when_evaluating_has_categorical_then_returns_expected_result():
     assert has_categorical(np.array([["A", 2, 3], ["B", 4, 5]]))
     assert has_categorical(
