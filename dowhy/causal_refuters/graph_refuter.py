@@ -2,11 +2,8 @@ import logging
 from math import log
 
 import numpy as np
-<<<<<<< HEAD
-from scipy.stats import chi2
-=======
 import pandas as pd
->>>>>>> origin/main
+from scipy.stats import chi2
 
 from dowhy.causal_refuter import CausalRefutation, CausalRefuter
 from dowhy.utils.cit import conditional_MI, partial_corr

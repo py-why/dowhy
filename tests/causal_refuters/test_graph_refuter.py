@@ -1,18 +1,12 @@
-<<<<<<< HEAD
-import numpy as np
-import pandas as pd
-import pytest
-=======
 """Tests for GraphRefuter, including non-int64/int32 dtype support."""
 
 import numpy as np
 import pandas as pd
->>>>>>> origin/main
+import pytest
 
 from dowhy.causal_refuters.graph_refuter import GraphRefuter
 
 
-<<<<<<< HEAD
 class TestGraphRefuterCMI:
     """Focused unit tests for the conditional_mutual_information method of GraphRefuter."""
 
@@ -82,7 +76,8 @@ class TestGraphRefuterCMI:
         p_value, result = refuter._results[key]
         assert p_value == 1.0, "Degenerate (constant) variable should give p_value=1.0"
         assert result is True
-=======
+
+
 class TestGraphRefuterDtypeDetection:
     """Tests that GraphRefuter correctly classifies all integer/bool dtypes as discrete."""
 
@@ -157,4 +152,3 @@ class TestGraphRefuterDtypeDetection:
         refuter = GraphRefuter(data=df)
         refuter.refute_model(independence_constraints=[("x", "y", ("z",))])
         assert len(refuter._results) > 0
->>>>>>> origin/main
