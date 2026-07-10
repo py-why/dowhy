@@ -9,9 +9,9 @@ The frontdoor criterion applies when:
 * Direct backdoor adjustment is impossible — there is unobserved confounding between
   treatment *X* and outcome *Y*.
 * One or more **mediator** variables *M* lie on *every* directed path from *X* to *Y*.
-* *M* is not directly affected by the hidden confounder (i.e., the *X* → *M* path is
-  unconfounded), and *Y* is only affected by *M* through *X* (i.e., every backdoor path
-  from *M* to *Y* is blocked by *X*).
+* *M* is not directly affected by the hidden confounder (i.e., all backdoor paths from
+  *X* to *M* are blocked), and all backdoor paths from *M* to *Y* are blocked by
+  conditioning on *X*.
 
 A classic example is the effect of smoking (X) on cancer (Y) where tar deposits (M)
 mediate the effect and the direct X → Y path passes entirely through M.
@@ -51,7 +51,7 @@ automatically:
 ...     graph=graph,
 ...     observed_node_names=["X", "M", "Y"],   # U is latent
 ... )
->>> identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+>>> identified_estimand = model.identify_effect()
 >>> print(identified_estimand)
 
 Or equivalently using the functional API:

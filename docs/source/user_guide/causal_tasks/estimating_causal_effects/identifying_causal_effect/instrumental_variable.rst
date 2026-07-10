@@ -11,7 +11,7 @@ The instrumental variable (IV) criterion applies when:
 
   1. **Relevance** — *Z* is correlated with (causes) *X*.
   2. **Exclusion restriction** — *Z* affects *Y* only through *X* (no direct path
-     from *Z* to *Y*, and *Z* is not correlated with any confounder of *X* → *Y*).
+     from *Z* to *Y*).
   3. **Independence** — *Z* is independent of all hidden confounders of *X* → *Y*.
 
 Classic examples include using distance-to-college as an instrument for years of
@@ -21,8 +21,9 @@ service (effect on earnings).
 How it works
 ------------
 
-Under the IV assumptions, the Local Average Treatment Effect (LATE / CACE) can be
-identified via the Wald estimator:
+Under the IV assumptions, with the additional conditions of a binary treatment and
+instrument and a monotonicity (no-defiers) assumption, the Local Average Treatment
+Effect (LATE / CACE) can be identified via the Wald estimator:
 
 .. math::
 
