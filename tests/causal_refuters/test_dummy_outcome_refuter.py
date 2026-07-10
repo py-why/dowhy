@@ -1,4 +1,9 @@
+import numpy as np
+import pandas as pd
+import pytest
 from pytest import mark
+
+from dowhy.causal_refuters.dummy_outcome_refuter import preprocess_data_by_treatment
 
 from .base import SimpleRefuter
 
@@ -362,3 +367,78 @@ def test_dummy_outcome_refuter_is_reproducible_with_random_state():
 
 def test_dummy_outcome_refuter_differs_across_random_states():
     assert _run_dummy_outcome_refuter(random_state=123) != _run_dummy_outcome_refuter(random_state=456)
+
+
+# ---------------------------------------------------------------------------
+# Regression tests for preprocess_data_by_treatment
+# ---------------------------------------------------------------------------
+
+
+def _make_df(treatment_series, n=200):
+    """Build a minimal DataFrame with a treatment column and outcome."""
+    rng = np.random.RandomState(0)
+    return pd.DataFrame(
+        {
+            "treatment": treatment_series,
+            "outcome": rng.normal(size=n),
+            "covariate": rng.normal(size=n),
+        }
+    )
+
+
+def test_preprocess_data_by_treatment_categorical_no_keyerror():
+    """Regression: categorical treatment branch must NOT raise KeyError.
+
+    Prior to the fix, the categorical branch mistakenly called
+    ``data.groupby("bins")`` (overwriting the valid groupby with one that
+    referenced a non-existent column), causing a guaranteed KeyError.
+    """
+    rng = np.random.RandomState(42)
+    n = 200
+    raw = rng.choice(["A", "B", "C"], size=n)
+    treatment = pd.Categorical(raw, categories=["A", "B", "C"])
+    df = _make_df(treatment, n=n)
+
+    groups = preprocess_data_by_treatment(
+        data=df,
+        treatment_name=["treatment"],
+        unobserved_confounder_values=None,
+        bucket_size_scale_factor=0.5,
+        chosen_variables=["covariate"],
+    )
+    group_keys = [k for k, _ in groups]
+    assert set(group_keys) == {"A", "B", "C"}
+
+
+def test_preprocess_data_by_treatment_continuous_observed_true():
+    """Regression: pd.cut creates a Categorical 'bins' column; groupby must
+    use observed=True so that empty bin categories are not included."""
+    rng = np.random.RandomState(0)
+    n = 100
+    treatment = pd.Series(rng.uniform(0, 10, size=n))
+    df = _make_df(treatment, n=n)
+
+    # Should not raise and should return at least one group
+    groups = preprocess_data_by_treatment(
+        data=df,
+        treatment_name=["treatment"],
+        unobserved_confounder_values=None,
+        bucket_size_scale_factor=0.5,
+        chosen_variables=["covariate"],
+    )
+    assert len(list(groups)) > 0
+
+
+def test_preprocess_data_by_treatment_multiple_treatments_raises():
+    """preprocess_data_by_treatment must raise ValueError for >1 treatments."""
+    rng = np.random.RandomState(0)
+    n = 50
+    df = pd.DataFrame({"t1": rng.randint(0, 2, size=n), "t2": rng.randint(0, 2, size=n), "outcome": rng.normal(size=n)})
+    with pytest.raises(ValueError, match="single treatment"):
+        preprocess_data_by_treatment(
+            data=df,
+            treatment_name=["t1", "t2"],
+            unobserved_confounder_values=None,
+            bucket_size_scale_factor=0.5,
+            chosen_variables=[],
+        )
