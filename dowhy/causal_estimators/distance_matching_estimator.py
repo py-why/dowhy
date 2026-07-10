@@ -155,8 +155,10 @@ class DistanceMatchingEstimator(CausalEstimator):
             error_msg = "{} cannot handle more than one treatment variable".format(self.__class__.__name__)
             raise ValueError(error_msg)
         # Checking if the treatment is binary
-        if not data[self._target_estimand.treatment_variable[0]].isin([0, 1]).all():
-            error_msg = "Distance Matching method is applicable only for binary treatments."
+        treatment_var = self._target_estimand.treatment_variable[0]
+        treatment_values = data[treatment_var].astype(int).unique()
+        if not (len(treatment_values) == 2 and set(treatment_values).issubset({0, 1})):
+            error_msg = "Distance Matching method is applicable only for binary treatments (0 and 1)."
             self.logger.error(error_msg)
             raise ValueError(error_msg)
 
