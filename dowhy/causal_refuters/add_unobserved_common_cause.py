@@ -70,6 +70,7 @@ class AddUnobservedCommonCause(CausalRefuter):
         :param num_splits: number of splits for cross validation. (default = 5). (relevant only for non-parametric-partial-R2 simulation method)
         :param shuffle_data : shuffle data or not before splitting into folds (default = False). (relevant only for non-parametric-partial-R2 simulation method)
         :param shuffle_random_seed: seed for randomly shuffling data. (relevant only for non-parametric-partial-R2 simulation method)
+        :param random_state: int or numpy.random.RandomState used to make the simulated confounder reproducible. If None (default), results vary between runs. (relevant only for direct-simulation method)
         :param alpha_s_estimator_param_list: list of dictionaries with parameters for finding alpha_s. (relevant only for non-parametric-partial-R2 simulation method)
         :param g_s_estimator_list: list of estimator objects for finding g_s. These objects should have fit() and predict() functions implemented. (relevant only for non-parametric-partial-R2 simulation method)
         :param g_s_estimator_param_list: list of dictionaries with parameters for tuning respective estimators in "g_s_estimator_list". The order of the dictionaries in the list should be consistent with the estimator objects order in "g_s_estimator_list". (relevant only for non-parametric-partial-R2 simulation method)
@@ -121,6 +122,7 @@ class AddUnobservedCommonCause(CausalRefuter):
         self.num_splits = kwargs["num_splits"] if "num_splits" in kwargs else 5
         self.shuffle_data = kwargs["shuffle_data"] if "shuffle_data" in kwargs else False
         self.shuffle_random_seed = kwargs["shuffle_random_seed"] if "shuffle_random_seed" in kwargs else None
+        self._random_state = kwargs["random_state"] if "random_state" in kwargs else None
         self.alpha_s_estimator_param_list = (
             kwargs["alpha_s_estimator_param_list"] if "alpha_s_estimator_param_list" in kwargs else None
         )
@@ -187,6 +189,7 @@ class AddUnobservedCommonCause(CausalRefuter):
                 show_progress_bar,
                 self._n_jobs,
                 self._verbose,
+                self._random_state,
             )
             refute.add_refuter(self)
             return refute
@@ -203,6 +206,7 @@ class AddUnobservedCommonCause(CausalRefuter):
             self._variables_of_interest,
             convergence_threshold,
             c_star_max,
+            self._random_state,
         )
 
 
@@ -348,6 +352,7 @@ def _include_confounders_effect(
     effect_on_y: str,
     outcome_name: str,
     kappa_y: float,
+    random_state: Optional[np.random.RandomState] = None,
 ):
     """
     This function deals with the change in the value of the data due to the effect of the unobserved confounder.
@@ -362,9 +367,12 @@ def _include_confounders_effect(
     """
     num_rows = data.shape[0]
     stdnorm = scipy.stats.norm()
-    w_random = stdnorm.rvs(num_rows)
+    w_random = stdnorm.rvs(num_rows, random_state=random_state)
 
     if effect_on_t == "binary_flip":
+        for tname in treatment_name:
+            if pd.api.types.is_bool_dtype(new_data[tname]):
+                new_data[tname] = new_data[tname].astype(int)
         alpha = 2 * kappa_t - 1 if kappa_t >= 0.5 else 1 - 2 * kappa_t
         interval = stdnorm.interval(alpha)
         rel_interval = interval[0] if kappa_t >= 0.5 else interval[1]
@@ -387,6 +395,9 @@ def _include_confounders_effect(
         raise NotImplementedError("'" + effect_on_t + "' method not supported for confounders' effect on treatment")
 
     if effect_on_y == "binary_flip":
+        for yname in outcome_name:
+            if pd.api.types.is_bool_dtype(new_data[yname]):
+                new_data[yname] = new_data[yname].astype(int)
         alpha = 2 * kappa_y - 1 if kappa_y >= 0.5 else 1 - 2 * kappa_y
         interval = stdnorm.interval(alpha)
         rel_interval = interval[0] if kappa_y >= 0.5 else interval[1]
@@ -417,6 +428,7 @@ def include_simulated_confounder(
     variables_of_interest: List,
     convergence_threshold: float = DEFAULT_CONVERGENCE_THRESHOLD,
     c_star_max: int = DEFAULT_C_STAR_MAX,
+    random_state: Optional[Union[int, np.random.RandomState]] = None,
 ):
     """
     This function simulates an unobserved confounder based on the data using the following steps:
@@ -444,11 +456,16 @@ def include_simulated_confounder(
         :type int
     :param convergence_threshold: The threshold to check the plateauing of the correlation while selecting a c_star. It defaults to 0.1 in the code if not specified by the user
         :type float
+    :param random_state: int or numpy.random.RandomState used to make the simulated confounder reproducible. If None (default), results vary between runs.
+        :type int, RandomState, optional
 
     :returns: The simulated values of the unobserved confounder based on the data
         :type pandas.core.series.Series
 
     """
+
+    if isinstance(random_state, int):
+        random_state = np.random.RandomState(seed=random_state)
 
     # Obtaining the list of observed variables
     required_variables = True
@@ -509,7 +526,7 @@ def include_simulated_confounder(
     for i in range(0, int(c_star_max), step):
         c1 = math.sqrt(i)
         c2 = c1
-        final_U = _generate_confounder_from_residuals(c1, c2, d_y, d_t, X)
+        final_U = _generate_confounder_from_residuals(c1, c2, d_y, d_t, X, random_state=random_state)
         current_simulated_confounder = final_U
         outcome_values = data[outcome_name[0]]
         correlation_y = current_simulated_confounder.corr(outcome_values)
@@ -548,7 +565,7 @@ def include_simulated_confounder(
     while i <= threshold:
         c2 = i
         c1 = c_star / c2
-        final_U = _generate_confounder_from_residuals(c1, c2, d_y, d_t, X)
+        final_U = _generate_confounder_from_residuals(c1, c2, d_y, d_t, X, random_state=random_state)
 
         current_simulated_confounder = final_U
         outcome_values = data[outcome_name[0]]
@@ -583,12 +600,12 @@ def include_simulated_confounder(
         c2 = math.sqrt(c_star_max/additional_condition)
         c1 = c_star_max/c2"""
 
-    final_U = _generate_confounder_from_residuals(c1_final, c2_final, d_y, d_t, X)
+    final_U = _generate_confounder_from_residuals(c1_final, c2_final, d_y, d_t, X, random_state=random_state)
 
     return final_U
 
 
-def _generate_confounder_from_residuals(c1, c2, d_y, d_t, X):
+def _generate_confounder_from_residuals(c1, c2, d_y, d_t, X, random_state: Optional[np.random.RandomState] = None):
     """
     This function takes the residuals from the treatment and outcome model and their coefficients and simulates the intermediate random variable U by taking
     the row wise normal distribution corresponding to each residual value and then debiasing the intermediate variable to get the final variable.
@@ -606,12 +623,14 @@ def _generate_confounder_from_residuals(c1, c2, d_y, d_t, X):
     :type pandas.core.series.Series
 
     """
+    rng = np.random if random_state is None else random_state
+
     U = []
 
     for j in range(len(d_t)):
         simulated_variable_mean = c1 * d_y[j] + c2 * d_t[j]
         simulated_variable_stddev = 1
-        U.append(np.random.normal(simulated_variable_mean, simulated_variable_stddev, 1))
+        U.append(rng.normal(simulated_variable_mean, simulated_variable_stddev, 1))
 
     U = np.array(U)
     model = sm.OLS(U, X)
@@ -796,6 +815,7 @@ def _simulate_confounders_effect_once(
     confounders_effect_on_outcome: str,
     kappa_t_value: float,
     kappa_y_value: float,
+    random_state: Optional[np.random.RandomState] = None,
 ) -> float:
     """Execute one simulation with specific kappa_t and kappa_y values."""
     new_data = _include_confounders_effect(
@@ -807,6 +827,7 @@ def _simulate_confounders_effect_once(
         confounders_effect_on_outcome,
         outcome_name,
         kappa_y_value,
+        random_state=random_state,
     )
     new_estimator = estimate.estimator.get_new_estimator_object(target_estimand)
     new_estimator.fit(
@@ -839,6 +860,7 @@ def sensitivity_simulation(
     show_progress_bar=False,
     n_jobs: int = 1,
     verbose: int = 0,
+    random_state: Optional[Union[int, np.random.RandomState]] = None,
     **_,
 ) -> CausalRefutation:
     """
@@ -858,6 +880,7 @@ def sensitivity_simulation(
     :param frac_strength_treatment: float: This parameter decides the effect strength of the simulated confounder as a fraction of the effect strength of observed confounders on treatment. Defaults to 1.
     :param frac_strength_outcome: float: This parameter decides the effect strength of the simulated confounder as a fraction of the effect strength of observed confounders on outcome. Defaults to 1.
     :param plotmethod: string: Type of plot to be shown. If None, no plot is generated. This parameter is used only only when more than one treatment confounder effect values or outcome confounder effect values are provided. Default is "colormesh". Supported values are "contour", "colormesh" when more than one value is provided for both confounder effect value parameters; "line" when provided for only one of them.
+    :param random_state: int or numpy.random.RandomState used to make the simulated confounder reproducible. If None (default), results vary between runs.
 
     :return: CausalRefuter: An object that contains the estimated effect and a new effect and the name of the refutation used.
     """
@@ -869,6 +892,9 @@ def sensitivity_simulation(
         kappa_y = _infer_default_kappa_y(
             data, target_estimand, outcome_name, confounders_effect_on_outcome, frac_strength_outcome
         )
+
+    if isinstance(random_state, int):
+        random_state = np.random.RandomState(seed=random_state)
 
     if not isinstance(kappa_t, (list, np.ndarray)) and not isinstance(
         kappa_y, (list, np.ndarray)
@@ -883,6 +909,7 @@ def sensitivity_simulation(
             confounders_effect_on_outcome,
             outcome_name,
             kappa_y,
+            random_state=random_state,
         )
         new_estimator = estimate.estimator.get_new_estimator_object(target_estimand)
         new_estimator.fit(
@@ -933,6 +960,7 @@ def sensitivity_simulation(
                     confounders_effect_on_outcome,
                     kappa_t_val,
                     kappa_y_val,
+                    random_state,
                 )
                 for i, j, kappa_t_val, kappa_y_val in tqdm(
                     param_combinations,
@@ -989,7 +1017,7 @@ def sensitivity_simulation(
             return refute
 
         elif isinstance(kappa_t, (list, np.ndarray)):
-            outcomes = np.random.rand(len(kappa_t))
+            outcomes = np.zeros(len(kappa_t))
             orig_data = copy.deepcopy(data)
 
             for i in tqdm(
@@ -1007,6 +1035,7 @@ def sensitivity_simulation(
                     confounders_effect_on_outcome,
                     outcome_name,
                     kappa_y,
+                    random_state=random_state,
                 )
                 new_estimator = estimate.estimator.get_new_estimator_object(target_estimand)
                 new_estimator.fit(
@@ -1047,7 +1076,7 @@ def sensitivity_simulation(
             return refute
 
         elif isinstance(kappa_y, (list, np.ndarray)):
-            outcomes = np.random.rand(len(kappa_y))
+            outcomes = np.zeros(len(kappa_y))
             orig_data = copy.deepcopy(data)
 
             for i in tqdm(
@@ -1065,6 +1094,7 @@ def sensitivity_simulation(
                     confounders_effect_on_outcome,
                     outcome_name,
                     kappa_y[i],
+                    random_state=random_state,
                 )
                 new_estimator = estimate.estimator.get_new_estimator_object(target_estimand)
                 new_estimator.fit(

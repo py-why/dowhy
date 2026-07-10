@@ -1,4 +1,7 @@
+import warnings
+
 import networkx as nx
+import numpy as np
 import pandas as pd
 import pytest
 from flaky import flaky
@@ -655,6 +658,45 @@ class TestCausalModel(object):
                 graph=nx.Graph([("X", "Y"), ("Y", "Z")]),
             )
 
+    def test_warn_when_treatment_not_in_data(self):
+        """CausalModel should emit a UserWarning when treatment variable is missing from the DataFrame."""
+        data = pd.DataFrame({"X": [0, 1], "Y": [1, 2]})
+        with pytest.warns(UserWarning, match="treatment variable"):
+            CausalModel(
+                data=data,
+                treatment="MISSING_TREATMENT",
+                outcome="Y",
+                common_causes=["X"],
+            )
+
+    def test_warn_when_outcome_not_in_data(self):
+        """CausalModel should emit a UserWarning when outcome variable is missing from the DataFrame."""
+        data = pd.DataFrame({"X": [0, 1], "Y": [1, 2]})
+        with pytest.warns(UserWarning, match="outcome variable"):
+            CausalModel(
+                data=data,
+                treatment="X",
+                outcome="MISSING_OUTCOME",
+                common_causes=[],
+            )
+
+    def test_no_warn_when_treatment_and_outcome_in_data(self):
+        """CausalModel should not emit a missing-variable UserWarning when all variables are present."""
+        data = pd.DataFrame({"X": [0, 1], "Y": [1, 2]})
+        # Collect only UserWarnings that mention "variable(s) were not found"
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            CausalModel(
+                data=data,
+                treatment="X",
+                outcome="Y",
+                common_causes=[],
+            )
+        missing_var_warnings = [
+            w for w in caught if issubclass(w.category, UserWarning) and "not found" in str(w.message)
+        ]
+        assert missing_var_warnings == [], f"Unexpected missing-variable warnings: {missing_var_warnings}"
+
     def test_causal_estimator_cache(self):
         """
         Tests that CausalEstimator objects can be consistently retrieved from CausalEstimate and CausalModel objects.
@@ -697,6 +739,163 @@ class TestCausalModel(object):
         assert (estimates[0].estimator) == model.get_estimator(methods[0])
         assert (estimates[1].estimator) == model.get_estimator(methods[1])
         assert (estimates[0].estimator) != model.get_estimator(methods[1])  # check not same object
+
+    def test_refute_estimate_raises_when_method_name_is_none(self):
+        """refute_estimate(method_name=None) must raise ValueError, not NameError."""
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=3,
+            num_samples=200,
+            treatment_is_binary=True,
+        )
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+        )
+        estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        estimate = model.estimate_effect(
+            estimand,
+            method_name="backdoor.linear_regression",
+        )
+        with pytest.raises(ValueError, match="method_name must be provided"):
+            model.refute_estimate(estimand, estimate, method_name=None)
+
+    def test_do_raises_when_method_name_is_none(self):
+        """do(method_name=None) must raise ValueError, not NameError."""
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=3,
+            num_samples=200,
+            treatment_is_binary=True,
+        )
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+        )
+        estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        with pytest.raises(ValueError, match="method_name must be provided"):
+            model.do(x=1, identified_estimand=estimand, method_name=None)
+
+    def test_estimate_effect_raises_when_method_name_is_none(self):
+        """estimate_effect(method_name=None) must raise ValueError, not UnboundLocalError."""
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=3,
+            num_samples=200,
+            treatment_is_binary=True,
+        )
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+        )
+        estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        with pytest.raises(ValueError, match="method_name must be provided"):
+            model.estimate_effect(estimand, method_name=None)
+
+    def test_fit_estimator_false_reuses_cached_estimator(self):
+        """Test that fit_estimator=False reuses the cached estimator without refitting.
+
+        After a first call with fit_estimator=True (the default), a subsequent call
+        with fit_estimator=False must:
+        - return the same estimator object from the cache (no re-instantiation)
+        - produce an identical estimate value for deterministic estimators
+        """
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=3,
+            num_samples=500,
+            num_treatments=1,
+            treatment_is_binary=True,
+        )
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+            proceed_when_unidentifiable=True,
+            test_significance=None,
+        )
+        identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        method = "backdoor.linear_regression"
+
+        # First call: fit the estimator and cache it.
+        estimate1 = model.estimate_effect(
+            identified_estimand,
+            method_name=method,
+            control_value=0,
+            treatment_value=1,
+        )
+        estimator_after_first_call = model.get_estimator(method)
+
+        def fail_if_refit(*args, **kwargs):
+            raise AssertionError("fit_estimator=False should not call fit on the cached estimator")
+
+        estimator_after_first_call.fit = fail_if_refit
+
+        # Second call with fit_estimator=False must reuse the cached estimator.
+        estimate2 = model.estimate_effect(
+            identified_estimand,
+            method_name=method,
+            control_value=0,
+            treatment_value=1,
+            fit_estimator=False,
+        )
+        estimator_after_second_call = model.get_estimator(method)
+
+        # Same object identity — no new estimator was created.
+        assert estimator_after_first_call is estimator_after_second_call
+
+        # Linear regression is deterministic: both calls must yield the same estimate.
+        assert estimate1.value == pytest.approx(estimate2.value)
+
+    def test_causal_model_do_regression(self):
+        """CausalModel.do() must work with regression estimators and method_params=None.
+
+        Previously, CausalModel.do() had three bugs:
+        1. method_params=None caused TypeError: argument after ** must be a mapping, not NoneType
+        2. fit() was called with (data, treatment, outcome) instead of (data,)
+        3. RegressionEstimator.fit() never stored self._data, so interventional_outcomes()
+           could not fall back to self._data when data_df=None.
+        """
+        np.random.seed(42)
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=2,
+            num_samples=300,
+            num_treatments=1,
+            treatment_is_binary=True,
+        )
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+            test_significance=None,
+        )
+        identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+
+        # Calling do() with method_params=None (the default) must not raise TypeError.
+        do_treated = model.do(
+            x=1,
+            identified_estimand=identified_estimand,
+            method_name="backdoor.linear_regression",
+        )
+        do_control = model.do(
+            x=0,
+            identified_estimand=identified_estimand,
+            method_name="backdoor.linear_regression",
+        )
+        # Cast to float once — this also validates the result is scalar-like.
+        do_treated = float(do_treated)
+        do_control = float(do_control)
+        # The implied ATE should be close to beta=10.
+        assert do_treated - do_control == pytest.approx(10, abs=5)
 
 
 if __name__ == "__main__":

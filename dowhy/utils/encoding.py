@@ -22,7 +22,6 @@ def one_hot_encode(data: pd.DataFrame, columns=None, drop_first: bool = False, e
     :return: DataFrame, OneHotEncoder
     """
 
-    # Determine columns being encoded
     if columns is None:
         dtypes_to_encode = ["object", "string", "category"]
         data_to_encode = data.select_dtypes(include=dtypes_to_encode)
@@ -31,32 +30,39 @@ def one_hot_encode(data: pd.DataFrame, columns=None, drop_first: bool = False, e
     else:
         data_to_encode = data[columns]
 
-    # If all columns are already numerical, there may be nothing to encode.
-    # In this case, return original data.
     if len(data_to_encode.columns) == 0:
-        return data, encoder  # Encoder may be None
+        return data, encoder
 
     # Columns to keep in the result - not encoded.
     columns_to_keep = data.columns.difference(data_to_encode.columns)
-    df_columns_to_keep = data[columns_to_keep].reset_index(drop=True)
+    df_columns_to_keep = data[columns_to_keep]
 
-    if encoder is None:  # Create new encoder
-        drop = None
-        if drop_first:
-            drop = "first"
-        encoder = OneHotEncoder(drop=drop, sparse_output=False)  # NB sparse renamed to sparse_output in sklearn 1.2+
+    try:
+        if encoder is None:  # Create new encoder
+            drop = None
+            if drop_first:
+                drop = "first"
+            encoder = OneHotEncoder(
+                drop=drop, sparse_output=False
+            )  # NB sparse renamed to sparse_output in sklearn 1.2+
 
-        encoded_data = encoder.fit_transform(data_to_encode)
+            encoded_data = encoder.fit_transform(data_to_encode)
 
-    else:  # Use existing encoder
-        encoded_data = encoder.transform(data_to_encode)
+        else:  # Use existing encoder
+            encoded_data = encoder.transform(data_to_encode)
 
-    # Convert the encoded data to a DataFrame
+    except Exception as e:
+        raise TypeError(
+            f"DoWhy's categorical encoding failed during one-hot conversion. This typically happens "
+            f"when columns selected for encoding contain complex, nested, mixed, or unhashable data structures "
+            f"(such as dicts, lists, sets, unaligned tuples, or enums) that the underlying encoder cannot process. "
+            f"Encoder error detail: {str(e)}"
+        ) from e
+
     columns_encoded = encoder.get_feature_names_out(data_to_encode.columns)
 
-    df_encoded = pd.DataFrame(encoded_data, columns=columns_encoded).reset_index(drop=True)  # drop index from original
+    df_encoded = pd.DataFrame(encoded_data, columns=columns_encoded, index=data_to_encode.index)
 
-    # Concatenate the encoded DataFrame with the original non-categorical columns
     df_result = pd.concat([df_columns_to_keep, df_encoded], axis=1)
 
     return df_result, encoder

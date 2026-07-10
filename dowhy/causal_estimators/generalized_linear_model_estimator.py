@@ -15,6 +15,12 @@ class GeneralizedLinearModelEstimator(RegressionEstimator):
     Implementation uses statsmodels.api.GLM.
     Needs an additional parameter, "glm_family" to be specified in method_params. The value of this parameter can be any valid statsmodels.api families object. For example, to use logistic regression, specify "glm_family" as statsmodels.api.families.Binomial().
 
+    **References**
+
+    Nelder, J. A., & Wedderburn, R. W. M. (1972). Generalized linear models. *Journal of the Royal Statistical Society: Series A*, 135(3), 370–384. https://doi.org/10.2307/2344614
+
+    McCullagh, P., & Nelder, J. A. (1989). *Generalized Linear Models* (2nd ed.). Chapman & Hall.
+
     """
 
     def __init__(
