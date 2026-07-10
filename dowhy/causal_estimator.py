@@ -1079,6 +1079,8 @@ class CausalEstimate:
             # s += "Variance in outcome explained by treatment: {}\n".format(self.effect_strength["r-squared"])
         return s
 
+    __repr__ = __str__
+
 
 class RealizedEstimand(object):
     def __init__(self, identified_estimand, estimator_name):
@@ -1107,3 +1109,5 @@ class RealizedEstimand(object):
             s += "Estimand assumption {0}, {1}: {2}\n".format(j, ass_name, ass_str)
             j += 1
         return s
+
+    __repr__ = __str__
