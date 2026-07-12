@@ -12,7 +12,7 @@ December 5 2022
 
 * Preview for the new functional API (see `notebook <https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/dowhy_functional_api.ipynb>`_). The new API (in experimental stage) allows for a modular use of the different functionalities and includes separate fit and estimate methods for causal estimators. Please leave your feedback here. The old DoWhy API based on CausalModel should work as before.  (@andresmor-ms)
 
-* Faster, better sensitivity analyses. 
+* Faster, better sensitivity analyses.
     * Many refutations now support joblib for parallel processing and show a progress bar (@astoeffelbauer, @yemaedahrav).
     * Non-linear sensitivity analysis [`Chernozhukov, Cinelli, Newey, Sharma & Syrgkanis (2021) <https://arxiv.org/abs/2112.13398>`_, `example notebook <https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/sensitivity_analysis_nonparametric_estimators.ipynb>`_] (@anusha0409)
     * E-value sensitivity analysis [`Ding & Vanderweele (2016) <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4820664/>`, `example notebook <https://github.com/py-why/dowhy/blob/main/docs/source/example_notebooks/sensitivity_analysis_testing.ipynb>`_] (@jlgleason)
@@ -31,7 +31,7 @@ December 5 2022
 
 * New PyData theme for documentation with new homepage, Getting started guide, revised User Guide and examples page (@petergtz)
 
-* A `contributing guide <https://github.com/py-why/dowhy/blob/main/docs/source/contributing/contributing-code.rst>`_ and simplified instructions for new contributors (@MichaelMarien) 
+* A `contributing guide <https://github.com/py-why/dowhy/blob/main/docs/source/contributing/contributing-code.rst>`_ and simplified instructions for new contributors (@MichaelMarien)
 
 * Streamlined dev environment using Poetry for managing dependencies and project builds (@darthtrevino)
 

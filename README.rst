@@ -111,7 +111,7 @@ If you prefer to use the latest dev version, your dependency management tool wil
 
 **Requirements**
 
-DoWhy requires a few dependencies. 
+DoWhy requires a few dependencies.
 Details on specific versions can be found in `pyproject.toml <./pyproject.toml>`_, under the `tool.poetry.dependencies` section.
 
 If you face any problems, try installing dependencies manually.
