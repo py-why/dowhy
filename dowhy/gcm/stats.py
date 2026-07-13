@@ -190,11 +190,10 @@ def marginal_expectation(
         # Vectorised: broadcast each baseline row across its n_f feature-sample rows in one numpy operation,
         # replacing the per-sample Python loop that previously did this assignment one row at a time.
         if len(baseline_feature_indices) > 0:
-            inputs[:, baseline_feature_indices] = np.repeat(
-                baseline_samples[offset : offset + adjusted_batch_size, :][:, baseline_feature_indices],
-                n_f,
-                axis=0,
-            )
+            inputs_batched = inputs.reshape(adjusted_batch_size, n_f, -1)
+            inputs_batched[:, :, baseline_feature_indices] = baseline_samples[
+                offset : offset + adjusted_batch_size, baseline_feature_indices
+            ][:, None, :]
 
         # After creating the (potentially large) input data matrix, we can evaluate the prediction method.
         predictions = np.array(prediction_method(inputs))
