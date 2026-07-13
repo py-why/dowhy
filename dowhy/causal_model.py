@@ -553,7 +553,10 @@ class CausalModel:
         where X and Y are considered as singleton sets currently
         Z can have multiple variables
         :param k: number of covariates in set Z
-        :param independence_test: dictionary containing methods to test conditional independece in data
+        :param independence_test: dictionary containing methods to test conditional independence in data.
+            Supported keys are ``"test_for_continuous"`` (default: ``"partial_correlation"``) and
+            ``"test_for_discrete"`` (default: ``"conditional_mutual_information"``).  Both keys are
+            optional; omitting a key falls back to the corresponding default.
         :param independence_constraints: list of implications to be test input by the user in the format
             [(x,y,(z1,z2)),
             (x,y, (z3,))
@@ -561,8 +564,8 @@ class CausalModel:
         : returns: an instance of GraphRefuter class
         """
         if independence_test is not None:
-            test_for_continuous = independence_test["test_for_continuous"]
-            test_for_discrete = independence_test["test_for_discrete"]
+            test_for_continuous = independence_test.get("test_for_continuous", "partial_correlation")
+            test_for_discrete = independence_test.get("test_for_discrete", "conditional_mutual_information")
             refuter = GraphRefuter(
                 data=self._data, method_name_continuous=test_for_continuous, method_name_discrete=test_for_discrete
             )
