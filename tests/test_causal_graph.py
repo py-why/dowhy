@@ -117,6 +117,19 @@ class TestCausalGraph(object):
         )
         assert res1.edges == res2.edges
 
+    def test_build_graph_tuple_instruments(self):
+        """Regression test: build_graph with tuple instrument_nodes should route each
+        instrument to its specified treatment, not raise ValueError."""
+        g = build_graph(
+            action_nodes=["T1", "T2"],
+            outcome_nodes=["Y"],
+            instrument_nodes=[("Z1", "T1"), ("Z2", "T2")],
+        )
+        assert ("Z1", "T1") in g.edges
+        assert ("Z2", "T2") in g.edges
+        assert ("Z1", "T2") not in g.edges
+        assert ("Z2", "T1") not in g.edges
+
     def test_build_graph_from_str(self):
         build_graph_from_str(self.daggity_file)
         build_graph_from_str(self.graph_str)
