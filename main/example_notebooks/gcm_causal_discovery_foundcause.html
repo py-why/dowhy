@@ -1,0 +1,1483 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B139P18WHM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-B139P18WHM');
+    </script>
+    
+    <title>Root Cause Analysis with an Unknown Causal Graph and a Hidden Confounder Using a Foundational Causal Discovery Model &#8212; DoWhy  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=949a1ff5" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/jquery.js?v=5d32c60e"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=0c6e27e1"></script>
+    <script src="../_static/design-tabs.js?v=36754332"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'example_notebooks/gcm_causal_discovery_foundcause';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="When Accuracy Lies: Causal Inference on a Chest X-Ray CNN" href="gcm_chest_xray_causal_inference.html" />
+    <link rel="prev" title="Causal attribution to sales growth and spend intervention" href="sales_attribution_intervention.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="main" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-light" alt="DoWhy  documentation - Home"/>
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-dark pst-js-only" alt="DoWhy  documentation - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="nb_index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing.html">
+    Contributing
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
+    dowhy package
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
+    Release notes
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item"><div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        main
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.9.1/index.html">v0.9.1</a></dd>
+            <dd><a href="/dowhy/v0.9/index.html">v0.9</a></dd>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.14/index.html">v0.14</a></dd>
+            <dd><a href="/dowhy/v0.13/index.html">v0.13</a></dd>
+            <dd><a href="/dowhy/v0.12/index.html">v0.12</a></dd>
+            <dd><a href="/dowhy/v0.11.1/index.html">v0.11.1</a></dd>
+            <dd><a href="/dowhy/v0.11/index.html">v0.11</a></dd>
+            <dd><a href="/dowhy/v0.10.1/index.html">v0.10.1</a></dd>
+            <dd><a href="/dowhy/v0.10/index.html">v0.10</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="nb_index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../dowhy.html">
+    dowhy package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../code_repo.html">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        main
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.9.1/index.html">v0.9.1</a></dd>
+            <dd><a href="/dowhy/v0.9/index.html">v0.9</a></dd>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.14/index.html">v0.14</a></dd>
+            <dd><a href="/dowhy/v0.13/index.html">v0.13</a></dd>
+            <dd><a href="/dowhy/v0.12/index.html">v0.12</a></dd>
+            <dd><a href="/dowhy/v0.11.1/index.html">v0.11.1</a></dd>
+            <dd><a href="/dowhy/v0.11/index.html">v0.11</a></dd>
+            <dd><a href="/dowhy/v0.10.1/index.html">v0.10.1</a></dd>
+            <dd><a href="/dowhy/v0.10/index.html">v0.10</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Introductory examples</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="dowhy_simple_example.html">Basic Example for Calculating the Causal Effect</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_basic_example.html">Basic Example for Graphical Causal Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_draw_samples.html">Basic Example for generating samples from a GCM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial-causalinference-machinelearning-using-dowhy-econml.html">Tutorial on Causal Inference and its Connections to Machine Learning (Using DoWhy+EconML)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_mediation_analysis.html">Mediation analysis with DoWhy: Direct and Indirect Effects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_refuter_notebook.html">Iterating over multiple refutation tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="do_sampler_demo.html">Do-sampler Introduction</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Real world-inspired examples</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="DoWhy-The%20Causal%20Story%20Behind%20Hotel%20Booking%20Cancellations.html">Exploring Causes of Hotel Booking Cancellations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_example_effect_of_memberrewards_program.html">Estimating the Effect of a Member Rewards Program</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_online_shop.html">Causal Attributions and Root-Cause Analysis in an Online Shop</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="gcm_rca_microservice_architecture.html">Finding the Root Cause of Elevated Latencies in a Microservice Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_401k_analysis.html">Impact of 401(k) eligibility on net financial assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_supply_chain_dist_change.html">Finding Root Causes of Changes in a Supply Chain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_icc.html">Estimating intrinsic causal influences in real-world examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_counterfactual_medical_dry_eyes.html">Counterfactual Analysis in a Medical Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_falsify_dag.html">Falsification of User-Given Directed Acyclic Graphs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="counterfactual_fairness_dowhy.html">Counterfactual Fairness</a></li>
+
+
+
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="sales_attribution_intervention.html">Causal attribution to sales growth and spend intervention</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Root Cause Analysis with an Unknown Causal Graph and a Hidden Confounder Using a Foundational Causal Discovery Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_chest_xray_causal_inference.html">When Accuracy Lies: Causal Inference on a Chest X-Ray CNN</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples on benchmarks datasets</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="dowhy_ihdp_data_example.html">DoWhy example on ihdp (Infant Health and Development Program) dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_lalonde_example.html">DoWhy example on the Lalonde dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_refutation_testing.html">Applying refutation tests to the Lalonde and IHDP datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_401k_analysis.html">Impact of 401(k) eligibility on net financial assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prediction/dowhy_causal_prediction_demo.html">Demo for DoWhy Causal Prediction on MNIST</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lalonde_pandas_api.html">Lalonde Pandas API Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="counterfactual_fairness_dowhy.html">Counterfactual Fairness</a></li>
+
+
+
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="dowhy_twins_example.html">DoWhy example on Twins dataset</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Modeling and refuting causal assumptions</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="load_graph_example.html">Different ways to load an input graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_causal_discovery_example.html">Causal Discovery example</a></li>
+
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="gcm_falsify_dag.html">Falsification of User-Given Directed Acyclic Graphs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sensitivity_analysis_testing.html">Sensitivity Analysis for Regression Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sensitivity_analysis_nonparametric_estimators.html">Sensitivity analysis for non-parametric causal estimators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_refuter_notebook.html">Iterating over multiple refutation tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_refuter_assess_overlap.html">Assessing Support and Overlap with OverRule</a></li>
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="dowhy_ranking_methods.html">Ranking of estimation methods for a given dataset</a></li>
+
+
+<li class="toctree-l1"><a class="reference internal" href="dowhy_demo_dummy_outcome_refuter.html">A Simple Example on Creating a Custom Refutation Using User-Defined Outcome Functions</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Miscellaneous</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy-simple-iv-example.html">Simple example on using Instrumental Variables method for estimation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_interpreter.html">DoWhy: Interpreters for Causal Estimators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_mediation_analysis.html">Mediation analysis with DoWhy: Direct and Indirect Effects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_multiple_treatments.html">Estimating effect of multiple treatments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_efficient_backdoor_example.html">Finding optimal adjustment sets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="identifying_effects_using_id_algorithm.html">Identifying Effect using ID Algorithm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_optimize_backdoor_example.html">Example to demonstrate optimized backdoor variable search for Causal Identification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_generalized_covariate_adjustment_example.html">Generalized Adjustment Criterion Example Notebook</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_generalized_covariate_adjustment_estimation_example.html">Causal Effect Estimation with the Generalized Adjustment Criterion - Example Notebook</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_functional_api.html">Functional API Preview</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="nb_index.html" class="nav-link">Example notebooks</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Root Cause Analysis with an Unknown Causal Graph and a Hidden Confounder Using a Foundational Causal Discovery Model</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Root-Cause-Analysis-with-an-Unknown-Causal-Graph-and-a-Hidden-Confounder-Using-a-Foundational-Causal-Discovery-Model">
+<h1>Root Cause Analysis with an Unknown Causal Graph and a Hidden Confounder Using a Foundational Causal Discovery Model<a class="headerlink" href="#Root-Cause-Analysis-with-an-Unknown-Causal-Graph-and-a-Hidden-Confounder-Using-a-Foundational-Causal-Discovery-Model" title="Link to this heading">#</a></h1>
+<p>Every graphical causal model (GCM) analysis starts the same way: <em>“First, define your causal graph.”</em> But what if the causal graph is unknown?</p>
+<p>This notebook demonstrates that a plain CSV of observed data can be sufficient: we infer the causal graph directly from the data, learn the data generating process on top of it (the GCM) and then run the causal analyses. No prior knowledge about the system’s structure is required.</p>
+<p>We look at a synthetic scenario of a <strong>bottling line</strong> in a beverage plant. The line streams nine sensor readings: mixer speed and temperature, product viscosity, line speed, fill pressure, fill level, seal integrity, defect rate and throughput. The sensors were added ad hoc over years and we assume there is no maintained wiring diagram of how the stages influence each other.</p>
+<p>Instead of defining the graph by hand, we can use causal discovery methods to infer it from observational data alone. This is a notoriously hard problem. Observational data by itself does not uniquely determine a causal graph, so ‘classical’ discovery algorithms (see <a class="reference external" href="https://github.com/py-why/causal-learn">causal-learn</a> for a broad collection) have to rely on specific and often strong assumptions about the data generating process, such as linear relationships, additive noise or particular
+distribution families. In practice, we rarely know whether these assumptions hold for our data, which makes it unclear which algorithm to trust. Causal discovery foundation models take a different route: they are trained on vast amounts of synthetic data covering a wide variety of generating processes and learn to map a dataset directly to its causal graph. Rather than committing to one fixed set of assumptions, such a model has seen many kinds of causal mechanisms during training. Here, we use
+<a class="reference external" href="https://github.com/amazon-science/foundcause">FoundCause</a>, a pretrained foundation model for causal discovery that predicts the causal graph from raw observational data in a single forward pass (see the related paper <a class="reference external" href="https://arxiv.org/abs/2606.17516">Blöbaum, Balasubramanian &amp; Kasiviswanathan, 2026</a> for details). To make the scenario more challenging and realistic, our example even contains a <em>hidden confounder</em>: a variable that influences several sensors but is itself not part of the
+recorded data. As we will see, the GCM-based analyses remain robust in its presence. We use DoWhy’s GCM module on the <em>discovered</em> graph to answer real production questions:</p>
+<ol class="arabic simple">
+<li><p><strong>Discover</strong> the causal graph of the line from sensor data alone and evaluate it against the ground truth (which we know in this notebook).</p></li>
+<li><p><strong>Falsify</strong>: test the discovered graph against the data with <code class="docutils literal notranslate"><span class="pre">falsify_graph</span></code> before trusting it.</p></li>
+<li><p><strong>Root cause analysis</strong>: attribute a sudden defect-rate spike to the responsible upstream sensor.</p></li>
+<li><p><strong>Distribution change</strong>: explain why throughput <em>dropped</em> after operations increased the line speed.</p></li>
+</ol>
+<p>Because the data is simulated from a ground-truth structural causal model (built with DoWhy’s own random SCM generator), we can honestly verify every answer.</p>
+<p><strong>A note of caution.</strong> Causal discovery produces a <em>hypothesis</em> about the causal structure, not a verified ground truth. FoundCause assumes i.i.d. observational data and, like every causal discovery method, can still get edges wrong, most often their <em>orientation</em> (the paper reports that adjacency detection stays reliable while orientation accuracy drops as the number of variables grows). It was trained on graphs with 2 to 50 variables, and it is unclear how well it generalizes beyond that
+range. Always treat the discovered graph as a starting point to be validated, which we do below in Step 2 with <code class="docutils literal notranslate"><span class="pre">falsify_graph</span></code>, and sanity-check it against domain knowledge before trusting any downstream result.</p>
+<p>⚠️ <strong>Model download required.</strong> This notebook uses the FoundCause inference code and its pretrained weights (<strong>~1.6 GB</strong>), which are downloaded from the official GitHub release the first time the notebook is executed. Both files are cached in a <code class="docutils literal notranslate"><span class="pre">foundcause_model</span></code> folder next to this notebook, so subsequent runs load them from disk. FoundCause runs on <a class="reference external" href="https://pytorch.org/">PyTorch</a> (install with <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">torch</span></code> if it is not already available). Inference runs on CPU (no GPU required);
+the discovery step takes about 30 seconds per run on a laptop.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">hashlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">urllib.request</span>
+
+<span class="n">FOUNDCAUSE_DIR</span> <span class="o">=</span> <span class="s2">&quot;foundcause_model&quot;</span>
+<span class="n">FILES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;foundcause.py&quot;</span><span class="p">:</span> <span class="p">(</span>
+        <span class="s2">&quot;https://raw.githubusercontent.com/amazon-science/foundcause/v1.0/foundcause.py&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;43f2be8680cc90790a0322b6774b6969505f454f271c597ce418f935448ed663&quot;</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="s2">&quot;checkpoint.pt&quot;</span><span class="p">:</span> <span class="p">(</span>
+        <span class="s2">&quot;https://github.com/amazon-science/foundcause/releases/download/v1.0/checkpoint.pt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;a24b6b4b5fd0d380361d4a0699b2ec993a6aa2da91f90bb384a383e01f55cb17&quot;</span><span class="p">,</span>
+    <span class="p">),</span>
+<span class="p">}</span>
+
+<span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">FOUNDCAUSE_DIR</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">filename</span><span class="p">,</span> <span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">sha256</span><span class="p">)</span> <span class="ow">in</span> <span class="n">FILES</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">FOUNDCAUSE_DIR</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Downloading </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2"> ...&quot;</span><span class="p">)</span>
+        <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlretrieve</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+    <span class="n">digest</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">()</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="nb">iter</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">),</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+            <span class="n">digest</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+    <span class="n">digest</span> <span class="o">=</span> <span class="n">digest</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">digest</span> <span class="o">!=</span> <span class="n">sha256</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;SHA-256 mismatch for </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">; deleted the file, please re-run this cell.&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">: OK&quot;</span><span class="p">)</span>
+
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">FOUNDCAUSE_DIR</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Downloading foundcause.py ...
+foundcause.py: OK
+Downloading checkpoint.pt ...
+checkpoint.pt: OK
+</pre></div></div>
+</div>
+<section id="Step-1:-Simulate-the-bottling-line">
+<h2>Step 1: Simulate the bottling line<a class="headerlink" href="#Step-1:-Simulate-the-bottling-line" title="Link to this heading">#</a></h2>
+<p>We first need a plant to analyze. We define the <em>true</em> causal structure of the line (the causal graph nobody at the plant knows) and let DoWhy’s random SCM generator (<code class="docutils literal notranslate"><span class="pre">dowhy.gcm.data_generator</span></code>) assign a random causal mechanism to every node. This gives us a ground truth to grade the discovery against later.</p>
+<p>The line works as follows: a <strong>mixer</strong> (speed, temperature) determines the product <strong>viscosity</strong>. Viscosity and the <strong>line speed</strong> drive the <strong>fill pressure</strong>, which in turn determines the <strong>fill level</strong> of each bottle. The sealing station’s <strong>seal integrity</strong> and the fill level determine the <strong>defect rate</strong>. Defects together with line speed determine the final <strong>throughput</strong>.</p>
+<p>There is one more variable: <strong>ambient humidity</strong> affects both viscosity and seal integrity. Crucially, the plant has <em>no humidity sensor</em>, so this variable exists physically but is not logged. This makes it a <strong>hidden confounder</strong>: it influences two of the recorded sensors while being unobserved itself. Keep it in mind when we look at the discovered graph.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">networkx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nx</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy</span><span class="w"> </span><span class="kn">import</span> <span class="n">gcm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy.gcm.util.general</span><span class="w"> </span><span class="kn">import</span> <span class="n">set_random_seed</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">bar_plot</span><span class="p">,</span> <span class="n">plot</span>
+
+<span class="n">set_random_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">causal_graph_true</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">(</span><span class="s2">&quot;mixer_speed&quot;</span><span class="p">,</span> <span class="s2">&quot;viscosity&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;mixer_temperature&quot;</span><span class="p">,</span> <span class="s2">&quot;viscosity&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;ambient_humidity&quot;</span><span class="p">,</span> <span class="s2">&quot;viscosity&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;ambient_humidity&quot;</span><span class="p">,</span> <span class="s2">&quot;seal_integrity&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;viscosity&quot;</span><span class="p">,</span> <span class="s2">&quot;fill_pressure&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;line_speed&quot;</span><span class="p">,</span> <span class="s2">&quot;fill_pressure&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;fill_pressure&quot;</span><span class="p">,</span> <span class="s2">&quot;fill_level&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;line_speed&quot;</span><span class="p">,</span> <span class="s2">&quot;fill_level&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;fill_level&quot;</span><span class="p">,</span> <span class="s2">&quot;defect_rate&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;seal_integrity&quot;</span><span class="p">,</span> <span class="s2">&quot;defect_rate&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;defect_rate&quot;</span><span class="p">,</span> <span class="s2">&quot;throughput&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;line_speed&quot;</span><span class="p">,</span> <span class="s2">&quot;throughput&quot;</span><span class="p">),</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">causal_graph_true</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_causal_discovery_foundcause_4_0.png" src="../_images/example_notebooks_gcm_causal_discovery_foundcause_4_0.png" />
+</div>
+</div>
+<p>Now we assign random causal mechanisms to this graph and draw observational samples. Two generator settings are adjusted for this scenario: <code class="docutils literal notranslate"><span class="pre">prob_discretised=0</span></code> (the sensor readings are continuous) and <code class="docutils literal notranslate"><span class="pre">prob_non_additive_noise=0</span></code> (keeps the ground truth an additive noise model to simplify the overall setting here). Everything else, such as which nodes get linear vs. neural network mechanisms and the noise distributions, is up to the generator.</p>
+<p>One variable is special: the line speed is not a free-floating measurement but an operator-selected <em>set-point</em>, so we replace its root distribution with a discrete one taking five levels. The generator produces standardized values, so we map each column to realistic engineering units (RPM, °C, cP, bar, mL, N, defects per 10k bottles, units/hour) to make the dataset look like an actual production export.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">stats</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy.gcm</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScipyDistribution</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy.gcm.data_generator</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataGeneratorConfig</span><span class="p">,</span> <span class="n">assign_random_fcms</span>
+
+<span class="n">scm_ground_truth</span> <span class="o">=</span> <span class="n">assign_random_fcms</span><span class="p">(</span>
+    <span class="n">causal_graph_true</span><span class="p">,</span>
+    <span class="n">DataGeneratorConfig</span><span class="p">(</span>
+        <span class="n">prob_discretised</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">prob_non_additive_noise</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">prob_linear_mechanism</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">prob_clipped_positive</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">prob_clipped_negative</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+
+<span class="c1"># line_speed is an operator-selected set-point: one of five discrete levels</span>
+<span class="n">scm_ground_truth</span><span class="o">.</span><span class="n">set_causal_mechanism</span><span class="p">(</span><span class="s2">&quot;line_speed&quot;</span><span class="p">,</span> <span class="n">ScipyDistribution</span><span class="p">(</span><span class="n">stats</span><span class="o">.</span><span class="n">randint</span><span class="p">,</span> <span class="n">low</span><span class="o">=-</span><span class="mi">2</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span>
+
+<span class="c1"># offset and scale per column: standardized simulator output -&gt; engineering units</span>
+<span class="n">ENGINEERING_UNITS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;mixer_speed&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mf">120.0</span><span class="p">,</span> <span class="mf">12.0</span><span class="p">),</span>  <span class="c1"># RPM</span>
+    <span class="s2">&quot;mixer_temperature&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mf">78.0</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">),</span>  <span class="c1"># deg C</span>
+    <span class="s2">&quot;ambient_humidity&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mf">55.0</span><span class="p">,</span> <span class="mf">8.0</span><span class="p">),</span>  <span class="c1"># % relative humidity</span>
+    <span class="s2">&quot;line_speed&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mf">220.0</span><span class="p">,</span> <span class="mf">20.0</span><span class="p">),</span>  <span class="c1"># bottles/min, set-points 180/200/220/240/260</span>
+    <span class="s2">&quot;viscosity&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mf">350.0</span><span class="p">,</span> <span class="mf">45.0</span><span class="p">),</span>  <span class="c1"># centipoise</span>
+    <span class="s2">&quot;fill_pressure&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mf">2.8</span><span class="p">,</span> <span class="mf">0.35</span><span class="p">),</span>  <span class="c1"># bar</span>
+    <span class="s2">&quot;fill_level&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mf">500.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">),</span>  <span class="c1"># mL</span>
+    <span class="s2">&quot;seal_integrity&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mf">55.0</span><span class="p">,</span> <span class="mf">7.0</span><span class="p">),</span>  <span class="c1"># N (seal peel force)</span>
+    <span class="s2">&quot;defect_rate&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mf">50.0</span><span class="p">,</span> <span class="mf">12.0</span><span class="p">),</span>  <span class="c1"># defects per 10k bottles</span>
+    <span class="s2">&quot;throughput&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mf">12600.0</span><span class="p">,</span> <span class="mf">900.0</span><span class="p">),</span>  <span class="c1"># units/hour</span>
+<span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">to_engineering_units</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">column</span><span class="p">,</span> <span class="p">(</span><span class="n">offset</span><span class="p">,</span> <span class="n">scale</span><span class="p">)</span> <span class="ow">in</span> <span class="n">ENGINEERING_UNITS</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">df</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="n">offset</span> <span class="o">+</span> <span class="n">scale</span> <span class="o">*</span> <span class="n">df</span><span class="p">[</span><span class="n">column</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">df</span>
+
+
+<span class="n">full_plant_data</span> <span class="o">=</span> <span class="n">to_engineering_units</span><span class="p">(</span><span class="n">gcm</span><span class="o">.</span><span class="n">draw_samples</span><span class="p">(</span><span class="n">scm_ground_truth</span><span class="p">,</span> <span class="mi">2000</span><span class="p">))</span>
+
+<span class="c1"># The plant has no humidity sensor: the logged data does not contain this column!</span>
+<span class="n">sensor_data</span> <span class="o">=</span> <span class="n">full_plant_data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;ambient_humidity&quot;</span><span class="p">])</span>
+<span class="n">sensor_data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mixer_speed</th>
+      <th>mixer_temperature</th>
+      <th>line_speed</th>
+      <th>viscosity</th>
+      <th>seal_integrity</th>
+      <th>fill_pressure</th>
+      <th>fill_level</th>
+      <th>defect_rate</th>
+      <th>throughput</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>116.867980</td>
+      <td>78.892194</td>
+      <td>180.0</td>
+      <td>357.285662</td>
+      <td>51.900159</td>
+      <td>3.067862</td>
+      <td>504.893093</td>
+      <td>41.097644</td>
+      <td>13921.087928</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>117.252561</td>
+      <td>80.514292</td>
+      <td>180.0</td>
+      <td>381.689183</td>
+      <td>47.309436</td>
+      <td>3.034114</td>
+      <td>505.603533</td>
+      <td>55.119948</td>
+      <td>13144.673325</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>130.733961</td>
+      <td>78.061188</td>
+      <td>180.0</td>
+      <td>354.826741</td>
+      <td>51.863390</td>
+      <td>3.031115</td>
+      <td>505.085935</td>
+      <td>46.514953</td>
+      <td>13564.054101</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>129.330948</td>
+      <td>79.109797</td>
+      <td>260.0</td>
+      <td>334.043557</td>
+      <td>60.704776</td>
+      <td>2.526425</td>
+      <td>494.317042</td>
+      <td>52.638996</td>
+      <td>11789.818855</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>112.324039</td>
+      <td>79.665473</td>
+      <td>220.0</td>
+      <td>335.089970</td>
+      <td>59.163353</td>
+      <td>2.624241</td>
+      <td>500.932726</td>
+      <td>45.692243</td>
+      <td>12736.843368</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sensor_data</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span><span class="o">.</span><span class="n">loc</span><span class="p">[[</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;std&quot;</span><span class="p">,</span> <span class="s2">&quot;min&quot;</span><span class="p">,</span> <span class="s2">&quot;max&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>std</th>
+      <th>min</th>
+      <th>max</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>mixer_speed</th>
+      <td>120.0</td>
+      <td>12.1</td>
+      <td>79.0</td>
+      <td>164.0</td>
+    </tr>
+    <tr>
+      <th>mixer_temperature</th>
+      <td>78.1</td>
+      <td>3.3</td>
+      <td>67.2</td>
+      <td>90.3</td>
+    </tr>
+    <tr>
+      <th>line_speed</th>
+      <td>219.9</td>
+      <td>28.7</td>
+      <td>180.0</td>
+      <td>260.0</td>
+    </tr>
+    <tr>
+      <th>viscosity</th>
+      <td>339.1</td>
+      <td>14.4</td>
+      <td>303.5</td>
+      <td>395.4</td>
+    </tr>
+    <tr>
+      <th>seal_integrity</th>
+      <td>54.9</td>
+      <td>3.9</td>
+      <td>42.5</td>
+      <td>68.0</td>
+    </tr>
+    <tr>
+      <th>fill_pressure</th>
+      <td>2.8</td>
+      <td>0.3</td>
+      <td>2.5</td>
+      <td>3.2</td>
+    </tr>
+    <tr>
+      <th>fill_level</th>
+      <td>500.0</td>
+      <td>3.5</td>
+      <td>493.5</td>
+      <td>506.2</td>
+    </tr>
+    <tr>
+      <th>defect_rate</th>
+      <td>50.3</td>
+      <td>10.0</td>
+      <td>23.0</td>
+      <td>84.7</td>
+    </tr>
+    <tr>
+      <th>throughput</th>
+      <td>12588.4</td>
+      <td>993.0</td>
+      <td>9810.9</td>
+      <td>15007.8</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Finally, we generate the data for two events that we will investigate later in the notebook, both created from the ground-truth SCM via interventions:</p>
+<ul class="simple">
+<li><p><strong>A quality incident</strong>: the sealing unit degrades and its seal force drops by four standard deviations. We will see this as a defect-rate spike and root-cause it in Step 5.</p></li>
+<li><p><strong>A process change</strong>: operations raises the line-speed set-point by one level. We will analyze its surprising effect on throughput in Step 6.</p></li>
+</ul>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dowhy.gcm.whatif</span><span class="w"> </span><span class="kn">import</span> <span class="n">interventional_samples</span>
+
+<span class="c1"># quality incident: the sealing unit degrades (seal force drops by 4 standard deviations)</span>
+<span class="n">seal_drop</span> <span class="o">=</span> <span class="mf">4.0</span> <span class="o">*</span> <span class="n">sensor_data</span><span class="p">[</span><span class="s2">&quot;seal_integrity&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">()</span> <span class="o">/</span> <span class="n">ENGINEERING_UNITS</span><span class="p">[</span><span class="s2">&quot;seal_integrity&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">incident_data</span> <span class="o">=</span> <span class="n">to_engineering_units</span><span class="p">(</span>
+    <span class="n">interventional_samples</span><span class="p">(</span>
+        <span class="n">scm_ground_truth</span><span class="p">,</span>
+        <span class="p">{</span><span class="s2">&quot;seal_integrity&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">-</span> <span class="n">seal_drop</span><span class="p">},</span>
+        <span class="n">num_samples_to_draw</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="p">)</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;ambient_humidity&quot;</span><span class="p">])</span>
+
+<span class="c1"># process change: line-speed set-point raised by one level (+20 bottles/min),</span>
+<span class="c1"># clamped so it stays within the five available set-points (up to 260 bottles/min)</span>
+<span class="n">data_after_speedup</span> <span class="o">=</span> <span class="n">to_engineering_units</span><span class="p">(</span>
+    <span class="n">interventional_samples</span><span class="p">(</span>
+        <span class="n">scm_ground_truth</span><span class="p">,</span>
+        <span class="p">{</span><span class="s2">&quot;line_speed&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)},</span>
+        <span class="n">num_samples_to_draw</span><span class="o">=</span><span class="mi">3000</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="p">)</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;ambient_humidity&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<p>The ground truth has now served its purpose. From here on, everything works exclusively with the exported data: the historical <code class="docutils literal notranslate"><span class="pre">sensor_data</span></code>, the three <code class="docutils literal notranslate"><span class="pre">incident_data</span></code> snapshots and the <code class="docutils literal notranslate"><span class="pre">data_after_speedup</span></code> export. We pretend to have no knowledge of the graph or the mechanisms that generated them.</p>
+</section>
+<section id="Step-2:-Discover-the-causal-graph-with-FoundCause">
+<h2>Step 2: Discover the causal graph with FoundCause<a class="headerlink" href="#Step-2:-Discover-the-causal-graph-with-FoundCause" title="Link to this heading">#</a></h2>
+<p>FoundCause is a ~139M-parameter transformer trained entirely on synthetic data to map a dataset (samples × variables) directly to a causal graph: no per-dataset training, no independence tests to configure, just a forward pass. Keep the assumptions and limits from the note in the introduction in mind.</p>
+<p>We load the pretrained checkpoint and wrap the model’s <code class="docutils literal notranslate"><span class="pre">predict</span></code> function into a small helper that returns the discovered graph as a <code class="docutils literal notranslate"><span class="pre">networkx.DiGraph</span></code>. Since FoundCause does not guarantee acyclicity, we apply the greedy DAG post-processing from the official repository (<code class="docutils literal notranslate"><span class="pre">predict.py</span></code>), which inserts edges in order of decreasing probability while skipping any edge that would create a cycle. A DAG is exactly what <code class="docutils literal notranslate"><span class="pre">dowhy.gcm</span></code> needs downstream.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">foundcause</span><span class="w"> </span><span class="kn">import</span> <span class="n">CausalDiscoveryTransformer</span><span class="p">,</span> <span class="n">ModelConfig</span><span class="p">,</span> <span class="n">predict</span>
+
+<span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+<span class="n">foundcause_model</span> <span class="o">=</span> <span class="n">CausalDiscoveryTransformer</span><span class="p">(</span><span class="n">ModelConfig</span><span class="p">())</span>
+<span class="n">checkpoint</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">FOUNDCAUSE_DIR</span><span class="p">,</span> <span class="s2">&quot;checkpoint.pt&quot;</span><span class="p">),</span> <span class="n">map_location</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="kc">False</span>
+<span class="p">)</span>
+<span class="n">state</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_orig_mod.&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">):</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">checkpoint</span><span class="p">[</span><span class="s2">&quot;model_state_dict&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+<span class="n">foundcause_model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">foundcause_model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;FoundCause model loaded.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+FoundCause model loaded.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">enforce_dag</span><span class="p">(</span><span class="n">edge_probabilities</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Greedy DAG post-processing from the official FoundCause predict.py: add edges in</span>
+<span class="sd">    descending probability order, skipping any that would create a cycle.&quot;&quot;&quot;</span>
+    <span class="n">num_nodes</span> <span class="o">=</span> <span class="n">edge_probabilities</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="n">edge_probabilities</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_nodes</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_nodes</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">j</span> <span class="ow">and</span> <span class="n">edge_probabilities</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">threshold</span>
+    <span class="p">]</span>
+    <span class="n">candidates</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
+    <span class="n">graph</span><span class="o">.</span><span class="n">add_nodes_from</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">num_nodes</span><span class="p">))</span>
+    <span class="n">adjacency</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">edge_probabilities</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">nx</span><span class="o">.</span><span class="n">has_path</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="n">graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+        <span class="n">adjacency</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="k">return</span> <span class="n">adjacency</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">discover_graph</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run FoundCause on a DataFrame and return the discovered DAG.&quot;&quot;&quot;</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">variable_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">predict</span><span class="p">(</span><span class="n">foundcause_model</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
+    <span class="n">adjacency</span> <span class="o">=</span> <span class="n">enforce_dag</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;probabilities&quot;</span><span class="p">],</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;threshold&quot;</span><span class="p">])</span>
+
+    <span class="n">discovered</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
+    <span class="n">discovered</span><span class="o">.</span><span class="n">add_nodes_from</span><span class="p">(</span><span class="n">variable_names</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">source</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">variable_names</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">target</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">variable_names</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">adjacency</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]:</span>
+                <span class="n">discovered</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">discovered</span>
+
+
+<span class="n">causal_graph_discovered</span> <span class="o">=</span> <span class="n">discover_graph</span><span class="p">(</span><span class="n">sensor_data</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">causal_graph_discovered</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_causal_discovery_foundcause_13_0.png" src="../_images/example_notebooks_gcm_causal_discovery_foundcause_13_0.png" />
+</div>
+</div>
+<p>⚠️ <strong>The discovered graph is a hypothesis, not ground truth.</strong> FoundCause does not guarantee correctness (or even acyclicity, which is why we post-process into a DAG above). It tends to recover the skeleton (which variables are connected) more reliably than the exact edge directions. Before relying on it, validate the graph, ideally by combining the falsification test in the next step with domain expertise.</p>
+<p>That is the entire discovery step: within a few seconds, we recovered a causal graph from the observed data with a single function call on the raw sensor DataFrame. The result is not perfect though. Since we know the true graph in this notebook, we can grade it.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">true_edges</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span>
+    <span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span> <span class="k">for</span> <span class="n">source</span><span class="p">,</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">causal_graph_true</span><span class="o">.</span><span class="n">edges</span> <span class="k">if</span> <span class="s2">&quot;ambient_humidity&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="n">discovered_edges</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">causal_graph_discovered</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
+
+<span class="n">correct</span> <span class="o">=</span> <span class="n">discovered_edges</span> <span class="o">&amp;</span> <span class="n">true_edges</span>
+<span class="n">extra</span> <span class="o">=</span> <span class="n">discovered_edges</span> <span class="o">-</span> <span class="n">true_edges</span>
+<span class="n">missed</span> <span class="o">=</span> <span class="n">true_edges</span> <span class="o">-</span> <span class="n">discovered_edges</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;True edges among logged sensors: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">true_edges</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Recovered: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">correct</span><span class="p">)</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">true_edges</span><span class="p">)</span><span class="si">}</span><span class="s2"> (recall </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">correct</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">true_edges</span><span class="p">)</span><span class="si">:</span><span class="s2">.0%</span><span class="si">}</span><span class="s2">, &quot;</span>
+      <span class="sa">f</span><span class="s2">&quot;precision </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">correct</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">discovered_edges</span><span class="p">)</span><span class="si">:</span><span class="s2">.0%</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Missed edges: </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">missed</span><span class="p">)</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">missed</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;none&#39;</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Extra edges:&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">source</span><span class="p">,</span> <span class="n">target</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">extra</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">source</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+True edges among logged sensors: 10
+Recovered: 10/10 (recall 100%, precision 77%)
+
+Missed edges: none
+Extra edges:
+  fill_level -&gt; throughput
+  line_speed -&gt; defect_rate
+  seal_integrity -&gt; viscosity
+</pre></div></div>
+</div>
+<p>FoundCause recovered <strong>every true edge</strong> of the production line, with none missed and none pointing in the wrong direction. It added a few edges that are not part of the true graph, mostly “shortcuts” along strong causal pathways (e.g. <code class="docutils literal notranslate"><span class="pre">fill_pressure</span> <span class="pre">-&gt;</span> <span class="pre">throughput</span></code> parallels the true path through <code class="docutils literal notranslate"><span class="pre">fill_level</span></code> and <code class="docutils literal notranslate"><span class="pre">defect_rate</span></code>). As long as such additional edges are not wrongly directed but reflect the causal order, this is usually fine, which is the case here. Since we fit a causal
+mechanism for each node given its parents, a superfluous parent simply ends up contributing (close to) nothing to the fitted mechanism; the mechanism learns which parents actually matter. Missing or reversed edges are more harmful, because they remove or distort causal pathways that no amount of fitting can recover.</p>
+<p>The edge between <code class="docutils literal notranslate"><span class="pre">seal_integrity</span></code> and <code class="docutils literal notranslate"><span class="pre">viscosity</span></code> deserves a remark. Physically, the sealing station cannot influence the viscosity of the liquid; this dependence is induced by the <strong>hidden confounder</strong>, since ambient humidity affects both variables but is not logged. We keep the graph as it is. As the following analyses show, the GCM-based methods remain robust against this artifact of the hidden confounder.</p>
+</section>
+<section id="Step-3:-Falsify-the-discovered-graph-before-trusting-it">
+<h2>Step 3: Falsify the discovered graph before trusting it<a class="headerlink" href="#Step-3:-Falsify-the-discovered-graph-before-trusting-it" title="Link to this heading">#</a></h2>
+<p>A discovered graph should not be taken on faith, especially not for production decisions. DoWhy provides a permutation-based falsification test (<a class="reference external" href="https://arxiv.org/abs/2305.09565">Eulig et al., 2023</a>) that checks whether the given DAG explains the conditional-independence structure of the data significantly better than random graphs over the same nodes.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dowhy.gcm.falsify</span><span class="w"> </span><span class="kn">import</span> <span class="n">falsify_graph</span>
+
+<span class="n">falsification_result</span> <span class="o">=</span> <span class="n">falsify_graph</span><span class="p">(</span><span class="n">causal_graph_discovered</span><span class="p">,</span> <span class="n">sensor_data</span><span class="p">,</span> <span class="n">n_permutations</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">plot_histogram</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">falsification_result</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/home/runner/.cache/pypoetry/virtualenvs/dowhy-n6DJFijf-py3.9/lib/python3.9/site-packages/joblib/externals/loky/process_executor.py:782: UserWarning: A worker stopped while some jobs were given to the executor. This can be caused by a too short worker timeout or by a memory leak.
+  warnings.warn(
+Test permutations of given graph: 100%|██████████| 20/20 [16:18&lt;00:00, 48.90s/it]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_causal_discovery_foundcause_19_1.png" src="../_images/example_notebooks_gcm_causal_discovery_foundcause_19_1.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
++-------------------------------------------------------------------------------------------------------+
+|                                         Falsification Summary                                         |
++-------------------------------------------------------------------------------------------------------+
+| The given DAG is informative because 0 / 20 of the permutations lie in the Markov                     |
+| equivalence class of the given DAG (p-value: 0.00).                                                   |
+| The given DAG violates 2/30 LMCs and is better than 100.0% of the permuted DAGs (p-value: 0.00).      |
+| Based on the provided significance level (0.05) and because the DAG is informative,                   |
+| we do not reject the DAG.                                                                             |
++-------------------------------------------------------------------------------------------------------+
+</pre></div></div>
+</div>
+<p>The test does <strong>not reject</strong> the discovered DAG: it is informative (no random permutation of it entails the same independencies) and violates far fewer local Markov conditions than random graphs. We now have a machine-discovered, data-validated causal graph obtained without manually defining a single edge and can proceed to actual causal queries.</p>
+</section>
+<section id="Step-4:-Fit-a-GCM-on-the-discovered-graph">
+<h2>Step 4: Fit a GCM on the discovered graph<a class="headerlink" href="#Step-4:-Fit-a-GCM-on-the-discovered-graph" title="Link to this heading">#</a></h2>
+<p>We fit an invertible structural causal model on the discovered graph, letting DoWhy pick a suitable causal mechanism for every node automatically. This learns the data generating process from the sensor CSV alone.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">scm_discovered</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">InvertibleStructuralCausalModel</span><span class="p">(</span><span class="n">causal_graph_discovered</span><span class="p">)</span>
+<span class="n">summary</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">auto</span><span class="o">.</span><span class="n">assign_causal_mechanisms</span><span class="p">(</span><span class="n">scm_discovered</span><span class="p">,</span> <span class="n">sensor_data</span><span class="p">)</span>
+<span class="n">gcm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">scm_discovered</span><span class="p">,</span> <span class="n">sensor_data</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Fitting causal mechanism of node throughput: 100%|██████████| 9/9 [00:00&lt;00:00, 22.87it/s]
+</pre></div></div>
+</div>
+</section>
+<section id="Step-5:-Root-cause-analysis-of-a-defect-rate-spike">
+<h2>Step 5: Root cause analysis of a defect-rate spike<a class="headerlink" href="#Step-5:-Root-cause-analysis-of-a-defect-rate-spike" title="Link to this heading">#</a></h2>
+<p>Recall the quality incident we generated in Step 1: the sealing unit degraded and its seal force dropped by four standard deviations. On the quality dashboard, this materializes as three production snapshots with a defect rate far above normal. The plant team sees only these sensor readings:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">comparison</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="p">{</span><span class="s2">&quot;incident (mean of 3)&quot;</span><span class="p">:</span> <span class="n">incident_data</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="s2">&quot;normal (mean)&quot;</span><span class="p">:</span> <span class="n">sensor_data</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">1</span><span class="p">)}</span>
+<span class="p">)</span>
+<span class="n">comparison</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>incident (mean of 3)</th>
+      <th>normal (mean)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>mixer_speed</th>
+      <td>130.9</td>
+      <td>120.0</td>
+    </tr>
+    <tr>
+      <th>mixer_temperature</th>
+      <td>77.9</td>
+      <td>78.1</td>
+    </tr>
+    <tr>
+      <th>line_speed</th>
+      <td>226.7</td>
+      <td>219.9</td>
+    </tr>
+    <tr>
+      <th>viscosity</th>
+      <td>349.1</td>
+      <td>339.1</td>
+    </tr>
+    <tr>
+      <th>seal_integrity</th>
+      <td>36.4</td>
+      <td>54.9</td>
+    </tr>
+    <tr>
+      <th>fill_pressure</th>
+      <td>2.8</td>
+      <td>2.8</td>
+    </tr>
+    <tr>
+      <th>fill_level</th>
+      <td>498.9</td>
+      <td>500.0</td>
+    </tr>
+    <tr>
+      <th>defect_rate</th>
+      <td>86.8</td>
+      <td>50.3</td>
+    </tr>
+    <tr>
+      <th>throughput</th>
+      <td>10319.1</td>
+      <td>12588.4</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Which part of the line is responsible for the elevated defect rate? We answer this with <code class="docutils literal notranslate"><span class="pre">attribute_anomalies</span></code>. Note that everything used in this analysis is learned from data: the causal graph came from FoundCause and the causal mechanisms were fitted on the sensor CSV. The ground-truth SCM played no role beyond generating the data.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">attributions</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">attribute_anomalies</span><span class="p">(</span><span class="n">scm_discovered</span><span class="p">,</span> <span class="s2">&quot;defect_rate&quot;</span><span class="p">,</span> <span class="n">anomaly_samples</span><span class="o">=</span><span class="n">incident_data</span><span class="p">)</span>
+
+<span class="n">bar_plot</span><span class="p">({</span><span class="n">node</span><span class="p">:</span> <span class="n">scores</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="k">for</span> <span class="n">node</span><span class="p">,</span> <span class="n">scores</span> <span class="ow">in</span> <span class="n">attributions</span><span class="o">.</span><span class="n">items</span><span class="p">()},</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Anomaly attribution score&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Evaluating set functions...: 100%|██████████| 120/120 [00:15&lt;00:00,  7.86it/s]
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_causal_discovery_foundcause_26_1.png" src="../_images/example_notebooks_gcm_causal_discovery_foundcause_26_1.png" />
+</div>
+</div>
+<p>The attribution correctly identifies <strong>``seal_integrity``</strong> as the dominant root cause of the defect spike: the sealing unit, exactly where we injected the degradation.</p>
+</section>
+<section id="Step-6:-Distribution-change:-why-did-the-line-speed-up-backfire?">
+<h2>Step 6: Distribution change: why did the line speed-up backfire?<a class="headerlink" href="#Step-6:-Distribution-change:-why-did-the-line-speed-up-backfire?" title="Link to this heading">#</a></h2>
+<p>Now to the second event from Step 1: operations raised the line-speed set-point by one level to catch up with demand. Counterintuitively, throughput <em>dropped</em>. Management wants to know what changed in the system.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;line_speed:  </span><span class="si">{</span><span class="n">sensor_data</span><span class="p">[</span><span class="s1">&#39;line_speed&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">data_after_speedup</span><span class="p">[</span><span class="s1">&#39;line_speed&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> bottles/min&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;throughput:  </span><span class="si">{</span><span class="n">sensor_data</span><span class="p">[</span><span class="s1">&#39;throughput&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">data_after_speedup</span><span class="p">[</span><span class="s1">&#39;throughput&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> units/hour&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+line_speed:  220 -&gt; 236 bottles/min
+throughput:  12588 -&gt; 12109 units/hour
+</pre></div></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">distribution_change</span></code> compares the historical export against the new one and attributes the change in the throughput distribution to the nodes whose causal mechanisms actually changed between the two datasets. Again, this analysis runs entirely on the discovered graph and the observed data.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">change_attributions</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">distribution_change</span><span class="p">(</span>
+    <span class="n">gcm</span><span class="o">.</span><span class="n">ProbabilisticCausalModel</span><span class="p">(</span><span class="n">causal_graph_discovered</span><span class="p">),</span> <span class="n">sensor_data</span><span class="p">,</span> <span class="n">data_after_speedup</span><span class="p">,</span> <span class="s2">&quot;throughput&quot;</span>
+<span class="p">)</span>
+
+<span class="n">bar_plot</span><span class="p">(</span><span class="n">change_attributions</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Change attribution score&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Evaluating set functions...: 100%|██████████| 155/155 [00:05&lt;00:00, 27.23it/s]
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_causal_discovery_foundcause_31_1.png" src="../_images/example_notebooks_gcm_causal_discovery_foundcause_31_1.png" />
+</div>
+</div>
+<p>The analysis attributes the throughput change to the <strong>``line_speed``</strong> mechanism (the set-point change) and not to any downstream mechanism. In other words: nothing on the line is broken; the speed-up itself backfired. The discovered graph explains why: <code class="docutils literal notranslate"><span class="pre">line_speed</span></code> raises <code class="docutils literal notranslate"><span class="pre">defect_rate</span></code> (via the fill dynamics) and the additional defects more than offset the faster line.</p>
+</section>
+<section id="Conclusion">
+<h2>Conclusion<a class="headerlink" href="#Conclusion" title="Link to this heading">#</a></h2>
+<p>All we started with was a CSV export of sensor readings. From that single artifact, we inferred the causal graph with a foundation model, learned the data generating process on top of it and answered real production questions: graph falsification, root cause analysis and distribution-change attribution, <strong>without manually defining a single causal edge</strong>. Because we simulated the plant with DoWhy’s random SCM generator, every answer could be verified against ground truth, including robustness of
+the analyses to a hidden confounder.</p>
+<p>A few notes:</p>
+<ul class="simple">
+<li><p><strong>Discovery is not perfect.</strong> FoundCause recovered all true edges here but added extra ones. The fitted causal mechanisms are fairly robust to superfluous parents, but you should still validate a discovered graph with <code class="docutils literal notranslate"><span class="pre">falsify_graph</span></code>, with domain experts, or both, before making decisions with it.</p></li>
+<li><p><strong>Hidden confounders matter.</strong> An unlogged common cause showed up as a physically impossible edge in the discovered graph. The downstream analyses were robust to it here, but treat such artifacts as a signal to look for missing variables, not as noise.</p></li>
+<li><p><strong>Foundation models are not the only option.</strong> If more details about the data generation process are known, certain causal discovery algorithms that explicitly exploit these asymmetries could be a better fit. For example, if the relationships are known to be linear with non-Gaussian noise, or to follow an additive noise model, algorithms tailored to exactly these assumptions (see <a class="reference external" href="https://github.com/py-why/causal-learn">causal-learn</a> for a broad collection of such algorithms) can use that
+knowledge in ways a general-purpose model cannot. A foundation model like <a class="reference external" href="https://github.com/amazon-science/foundcause">FoundCause</a> (<a class="reference external" href="https://arxiv.org/abs/2606.17516">Blöbaum, Balasubramanian &amp; Kasiviswanathan, 2026</a>) shines when such knowledge is not available.</p></li>
+<li><p><strong>Seeds.</strong> This notebook fixes the random seed once at the beginning for reproducibility. Different seeds might lead to slightly different results due to the strong randomness in the data generation process.</p></li>
+</ul>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="sales_attribution_intervention.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Causal attribution to sales growth and spend intervention</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="gcm_chest_xray_causal_inference.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">When Accuracy Lies: Causal Inference on a Chest X-Ray CNN</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Step-1:-Simulate-the-bottling-line">Step 1: Simulate the bottling line</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Step-2:-Discover-the-causal-graph-with-FoundCause">Step 2: Discover the causal graph with FoundCause</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Step-3:-Falsify-the-discovered-graph-before-trusting-it">Step 3: Falsify the discovered graph before trusting it</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Step-4:-Fit-a-GCM-on-the-discovered-graph">Step 4: Fit a GCM on the discovered graph</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Step-5:-Root-cause-analysis-of-a-defect-rate-spike">Step 5: Root cause analysis of a defect-rate spike</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Step-6:-Distribution-change:-why-did-the-line-speed-up-backfire?">Step 6: Distribution change: why did the line speed-up backfire?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Conclusion">Conclusion</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/example_notebooks/gcm_causal_discovery_foundcause.ipynb.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2022, PyWhy contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
