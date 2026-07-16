@@ -566,12 +566,12 @@ def find_best_model(
                 y_true = Y[test_indices[:max_samples_per_split]]
 
                 if is_classification_problem:
-                    # For classification, use probabilities for log loss calculation
+                    # For classification, use probabilities for log loss calculation. The probability columns follow the
+                    # classes the model was trained on (model_instance.classes), which can be a superset of the classes
+                    # present in the test fold. Pass these classes explicitly to log_loss via `labels` so it does not
+                    # infer a mismatching number of classes from y_true (which would raise a ValueError).
                     y_pred_proba = model_instance.predict_probabilities(X[test_indices[:max_samples_per_split]])
-                    # Convert string labels to label indices for log_loss
-                    label_to_idx = {label: idx for idx, label in enumerate(unique_test_labels)}
-                    y_true_indices = np.array([label_to_idx[label] for label in y_true.flatten()])
-                    average_result.append(metric(y_true_indices, y_pred_proba))
+                    average_result.append(metric(y_true.flatten(), y_pred_proba, labels=model_instance.classes))
                 else:
                     y_pred = model_instance.predict(X[test_indices[:max_samples_per_split]])
                     average_result.append(metric(y_true, y_pred))
