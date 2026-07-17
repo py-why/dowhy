@@ -415,7 +415,7 @@ def select_model(
         try:
             from dowhy.gcm.ml.autogluon import AutoGluonClassifier, AutoGluonRegressor
 
-            if is_categorical(Y):
+            if y_is_categorical:
                 return AutoGluonClassifier(), []
             else:
                 return AutoGluonRegressor(), []
@@ -443,7 +443,10 @@ def select_model(
     else:
         raise ValueError("Invalid model selection quality.")
 
-    if not x_has_nans and auto_apply_encoders(X, auto_fit_encoders(X)).shape[1] <= 5:
+    # One-hot encoding can only expand columns, so skip the expensive encoder fit when
+    # the raw feature count already exceeds the threshold. Use shape_into_2d to handle
+    # 1D inputs that may be passed from callers such as generalised_cov_measure.
+    if not x_has_nans and shape_into_2d(X).shape[1] <= 5 and auto_apply_encoders(X, auto_fit_encoders(X)).shape[1] <= 5:
         # Avoid too many features
         list_of_regressor += [create_polynom_regressor]
         list_of_classifier += [partial(create_polynom_logistic_regression_classifier, max_iter=10000)]
