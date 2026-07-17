@@ -296,3 +296,36 @@ def test_given_discrete_data_when_performing_interventions_then_returns_correct_
     assert np.all(samples["X"].to_numpy() == -2)
     assert np.median(samples["Y"].to_numpy()) == -1
     assert np.mean(samples["Z"].to_numpy()) == approx(-2, abs=0.05)
+
+
+def test_interventional_samples_with_random_seed_is_reproducible():
+    causal_model = ProbabilisticCausalModel(nx.DiGraph([("X", "Y")]))
+    causal_model.set_causal_mechanism("X", EmpiricalDistribution())
+    causal_model.set_causal_mechanism("Y", AdditiveNoiseModel(prediction_model=create_linear_regressor()))
+    rng = np.random.default_rng(0)
+    data = pd.DataFrame({"X": rng.normal(0, 1, 500)})
+    data["Y"] = 2 * data["X"] + rng.normal(0, 0.1, 500)
+    fit(causal_model, data)
+
+    result1 = interventional_samples(causal_model, {"X": lambda x: 1.0}, num_samples_to_draw=100, random_seed=42)
+    result2 = interventional_samples(causal_model, {"X": lambda x: 1.0}, num_samples_to_draw=100, random_seed=42)
+    np.testing.assert_array_equal(result1.to_numpy(), result2.to_numpy())
+
+    result_alt_seed = interventional_samples(
+        causal_model, {"X": lambda x: 1.0}, num_samples_to_draw=100, random_seed=99
+    )
+    assert not np.array_equal(result1["Y"].to_numpy(), result_alt_seed["Y"].to_numpy())
+
+
+def test_counterfactual_samples_with_random_seed_is_reproducible():
+    causal_model = InvertibleStructuralCausalModel(nx.DiGraph([("X", "Y")]))
+    causal_model.set_causal_mechanism("X", EmpiricalDistribution())
+    causal_model.set_causal_mechanism("Y", AdditiveNoiseModel(prediction_model=create_linear_regressor()))
+    rng = np.random.default_rng(1)
+    data = pd.DataFrame({"X": rng.normal(0, 1, 200)})
+    data["Y"] = 2 * data["X"] + rng.normal(0, 0.1, 200)
+    fit(causal_model, data)
+
+    result1 = counterfactual_samples(causal_model, {"X": lambda x: 0.0}, observed_data=data, random_seed=42)
+    result2 = counterfactual_samples(causal_model, {"X": lambda x: 0.0}, observed_data=data, random_seed=42)
+    np.testing.assert_array_equal(result1.to_numpy(), result2.to_numpy())
