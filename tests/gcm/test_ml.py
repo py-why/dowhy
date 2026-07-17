@@ -2,10 +2,11 @@ import numpy as np
 import pytest
 from flaky import flaky
 from pytest import approx
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LinearRegression, LogisticRegression
 
 from dowhy.gcm.ml import (
     SklearnClassificationModel,
+    SklearnRegressionModel,
     create_linear_regressor,
     create_linear_regressor_with_given_parameters,
     create_logistic_regression_classifier,
@@ -101,3 +102,13 @@ def test_when_predict_with_linear_regressor_with_given_parameters_then_returns_e
     assert mdl.predict(np.array([0])) == approx(4)
     assert mdl.predict(np.array([1])) == approx(6)
     assert mdl.predict(np.array([0, 1, 2, 3])) == approx([4, 6, 8, 10])
+
+
+def test_given_factory_functions_when_creating_models_then_return_expected_types():
+    regressor = create_linear_regressor()
+    assert isinstance(regressor, SklearnRegressionModel)
+    assert isinstance(regressor.sklearn_model, LinearRegression)
+
+    classifier = create_logistic_regression_classifier()
+    assert isinstance(classifier, SklearnClassificationModel)
+    assert isinstance(classifier.sklearn_model, LogisticRegression)
