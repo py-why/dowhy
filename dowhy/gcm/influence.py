@@ -148,7 +148,7 @@ def arrow_strength_of_model(
             delayed(parallel_job)(subset, int(random_seed)) for subset, random_seed in zip(input_subsets, random_seeds)
         )
 
-    if np.any(results == np.inf):
+    if np.any(np.array(results) == np.inf):
         _logger.warning(
             "At least one arrow strength is infinite. This typically happens if the causal models are "
             "deterministic, i.e. there is no noise or it is extremely small."

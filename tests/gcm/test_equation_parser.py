@@ -1,10 +1,12 @@
 import networkx as nx
 import numpy as np
 import pandas as pd
+import pytest
 from flaky import flaky
 
 from dowhy.gcm import (
     AdditiveNoiseModel,
+    BayesianGaussianMixtureDistribution,
     EmpiricalDistribution,
     ProbabilisticCausalModel,
     create_causal_model_from_equations,
@@ -79,6 +81,19 @@ def test_known_causal_model_node_is_correctly_identified():
     list_of_nodes_from_graph = set(causal_model.graph.nodes)
     assert list_of_nodes.issubset(list_of_nodes_from_graph) and list_of_nodes_from_graph.issubset(list_of_nodes)
     assert isinstance(causal_model.causal_mechanism("C"), ConditionalStochasticModel)
+
+
+def test_given_bayesiangaussianmixture_keyword_then_assigns_bayesian_gaussian_mixture_distribution():
+    # Regression: the 'bayesiangaussianmixture' keyword used to be mapped to EmpiricalDistribution (a copy-paste bug),
+    # which silently bootstrap-resamples training rows instead of generating novel samples from the fitted mixture.
+    causal_model = create_causal_model_from_equations("X = bayesiangaussianmixture()")
+    assert isinstance(causal_model.causal_mechanism("X"), BayesianGaussianMixtureDistribution)
+
+
+def test_given_positional_distribution_argument_then_raises_informative_error():
+    # Regression: positional scipy shape arguments (e.g. t(3)) used to crash with an IndexError inside the arg parser.
+    with pytest.raises(ValueError, match="keyword"):
+        create_causal_model_from_equations("X = t(3)")
 
 
 def _generate_data():

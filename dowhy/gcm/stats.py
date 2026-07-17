@@ -64,7 +64,7 @@ def merge_p_values_quantile(
              p_values / quantile.
     """
 
-    if quantile <= 0 or abs(quantile - 1) >= 1:
+    if quantile <= 0 or quantile > 1:
         raise ValueError("The given quantile is %f, but it needs to be on (0, 1]!" % quantile)
 
     p_values = np.array(p_values)

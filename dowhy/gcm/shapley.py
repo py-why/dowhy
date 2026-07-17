@@ -536,25 +536,29 @@ def _create_subsets_and_weights_approximation(
     all_subsets = [np.zeros(num_players), np.ones(num_players)]
     weights = {tuple(all_subsets[0]): high_weight, tuple(all_subsets[1]): high_weight}
 
-    probabilities_of_subset_length = np.zeros(num_players + 1)
-    for i in range(1, num_players):
-        probabilities_of_subset_length[i] = (num_players - 1) / (i * (num_players - i))
+    # With a single player there are no intermediate subset lengths to sample (only the empty and full sets exist, both
+    # already covered above). The length-probability vector would then sum to 0 and produce NaN sampling probabilities,
+    # so we skip the sampling loop; the two fixed subsets already determine the Shapley value.
+    if num_players > 1:
+        probabilities_of_subset_length = np.zeros(num_players + 1)
+        for i in range(1, num_players):
+            probabilities_of_subset_length[i] = (num_players - 1) / (i * (num_players - i))
 
-    probabilities_of_subset_length = probabilities_of_subset_length / np.sum(probabilities_of_subset_length)
+        probabilities_of_subset_length = probabilities_of_subset_length / np.sum(probabilities_of_subset_length)
 
-    for i in range(num_subset_samples):
-        subset_as_tuple = _convert_list_of_indices_to_binary_vector_as_tuple(
-            np.random.choice(
-                num_players, np.random.choice(num_players + 1, 1, p=probabilities_of_subset_length), replace=False
-            ),
-            num_players,
-        )
+        for i in range(num_subset_samples):
+            subset_as_tuple = _convert_list_of_indices_to_binary_vector_as_tuple(
+                np.random.choice(
+                    num_players, np.random.choice(num_players + 1, 1, p=probabilities_of_subset_length), replace=False
+                ),
+                num_players,
+            )
 
-        if subset_as_tuple not in weights:
-            weights[subset_as_tuple] = 0
-            all_subsets.append(np.array(subset_as_tuple))
+            if subset_as_tuple not in weights:
+                weights[subset_as_tuple] = 0
+                all_subsets.append(np.array(subset_as_tuple))
 
-        weights[subset_as_tuple] += 1
+            weights[subset_as_tuple] += 1
 
     weights = np.array([weights[tuple(x)] for x in all_subsets])
 
