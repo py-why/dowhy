@@ -80,3 +80,23 @@ class TestGraphRefuterDtypeDetection:
         refuter = GraphRefuter(data=df)
         refuter.refute_model(independence_constraints=[("x", "y", ("z",))])
         assert len(refuter._results) > 0
+
+    def test_multi_char_column_names_no_keyerror(self):
+        """GraphRefuter must not raise KeyError for multi-character column names.
+
+        Regression test for https://github.com/py-why/dowhy/issues/949.
+        conditional_MI previously called list(x) on a column-name string, which
+        iterates over its characters ('Foo' -> ['F','o','o']) causing a KeyError.
+        """
+        rng = np.random.default_rng(0)
+        n = 200
+        confound = rng.integers(0, 3, size=n)
+        treatment = ((confound + rng.integers(0, 2, size=n)) % 3).astype(np.int64)
+        outcome = ((confound + rng.integers(0, 2, size=n)) % 3).astype(np.int64)
+        confounder = confound.astype(np.int64)
+        df = pd.DataFrame({"treatment": treatment, "outcome": outcome, "confounder": confounder})
+
+        refuter = GraphRefuter(data=df)
+        # treatment _||_ outcome | confounder -- all discrete, multi-char column names
+        refuter.refute_model(independence_constraints=[("treatment", "outcome", ("confounder",))])
+        assert len(refuter._results) > 0
