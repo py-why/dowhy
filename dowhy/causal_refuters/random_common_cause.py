@@ -86,7 +86,7 @@ def refute_random_common_cause(
     data: pd.DataFrame,
     target_estimand: IdentifiedEstimand,
     estimate: CausalEstimate,
-    num_simulations: int = 100,
+    num_simulations: int = CausalRefuter.DEFAULT_NUM_SIMULATIONS,
     random_state: Optional[Union[int, np.random.RandomState]] = None,
     show_progress_bar: bool = False,
     n_jobs: int = 1,

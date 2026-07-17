@@ -31,8 +31,10 @@ class CausalRefuter:
 
     """
 
-    # Default value for the number of simulations to be conducted
-    DEFAULT_NUM_SIMULATIONS = 100
+    # Default value for the number of simulations to be conducted.
+    # 399 is the minimum recommended by https://www.econstor.eu/bitstream/10419/67820/1/587473266.pdf
+    # for a nominal 5 % bootstrap test to have adequate power.
+    DEFAULT_NUM_SIMULATIONS = 399
     PROGRESS_BAR_COLOR = "green"
 
     def __init__(self, data, identified_estimand, estimate, **kwargs):
@@ -221,10 +223,8 @@ def test_significance(
     if test_type == SignificanceTestType.AUTO:
         num_simulations = len(simulations)
         if num_simulations >= 100:  # Bootstrapping
-            logger.info(
-                "Making use of Bootstrap as we have more than 100 examples.\n \
-            Note: The greater the number of examples, the more accurate are the confidence estimates"
-            )
+            logger.info("Making use of Bootstrap as we have more than 100 examples.\n \
+            Note: The greater the number of examples, the more accurate are the confidence estimates")
 
             # Perform Bootstrap Significance Test with the original estimate and the set of refutations
             p_value = perform_bootstrap_test(estimate, simulations)
@@ -250,12 +250,8 @@ def test_significance(
         p_value = perform_bootstrap_test(estimate, simulations)
 
     elif test_type == SignificanceTestType.NORMAL:
-        logger.info(
-            "Performing Normal Test with {} samples\n \
-        Note: We assume that the underlying distribution is Normal.".format(
-                len(simulations)
-            )
-        )
+        logger.info("Performing Normal Test with {} samples\n \
+        Note: We assume that the underlying distribution is Normal.".format(len(simulations)))
 
         # Perform Normal Tests of Significance with the original estimate and the set of refutations
         p_value = perform_normal_distribution_test(estimate, simulations)
