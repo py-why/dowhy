@@ -194,7 +194,7 @@ class Econml(CausalEstimator):
     def _get_econml_class_object(self, module_method_name, *args, **kwargs):
         # from https://www.bnmetrics.com/blog/factory-pattern-in-python3-simple-version
         try:
-            (module_name, _, class_name) = module_method_name.rpartition(".")
+            module_name, _, class_name = module_method_name.rpartition(".")
             estimator_module = import_module(module_name)
             estimator_class = getattr(estimator_module, class_name)
 
@@ -233,7 +233,7 @@ class Econml(CausalEstimator):
         X_test = X
         if X is not None:
             if type(target_units) is pd.DataFrame:
-                X_test = target_units
+                X_test = self._encode(target_units[self._effect_modifier_names], "effect_modifiers")
             elif callable(target_units):
                 filtered_rows = data.where(target_units)
                 boolean_criterion = np.array(filtered_rows.notnull().iloc[:, 0])
@@ -289,7 +289,8 @@ class Econml(CausalEstimator):
         return expr
 
     def shap_values(self, df: pd.DataFrame, *args, **kwargs):
-        return self.estimator.shap_values(df[self._effect_modifier_names].values, *args, **kwargs)
+        em_encoded = self._encode(df[self._effect_modifier_names], "effect_modifiers")
+        return self.estimator.shap_values(em_encoded.values, *args, **kwargs)
 
     def apply_multitreatment(self, df: pd.DataFrame, fun: Callable, *args, **kwargs):
         ests = []
@@ -316,7 +317,7 @@ class Econml(CausalEstimator):
         """
         Pointwise estimated treatment effect,
         output shape n_units x n_treatment_values (not counting control)
-        :param df: Features of the units to evaluate
+        :param df: Features of the units to evaluate (already encoded effect modifiers)
         :param args: passed through to the underlying estimator
         :param kwargs: passed through to the underlying estimator
         """
@@ -324,8 +325,7 @@ class Econml(CausalEstimator):
         def effect_fun(filtered_df, T0, T1, *args, **kwargs):
             return self.estimator.effect(filtered_df, T0=T0, T1=T1, *args, **kwargs)
 
-        Xdf = df[self._effect_modifier_names] if df is not None else df
-        return self.apply_multitreatment(Xdf, effect_fun, *args, **kwargs)
+        return self.apply_multitreatment(df, effect_fun, *args, **kwargs)
 
     def effect_interval(self, df: pd.DataFrame, *args, **kwargs) -> np.ndarray:
         """
@@ -340,8 +340,7 @@ class Econml(CausalEstimator):
                 filtered_df, T0=T0, T1=T1, alpha=1 - self.confidence_level, *args, **kwargs
             )
 
-        Xdf = df[self._effect_modifier_names] if df is not None else df
-        return self.apply_multitreatment(Xdf, effect_interval_fun, *args, **kwargs)
+        return self.apply_multitreatment(df, effect_interval_fun, *args, **kwargs)
 
     def effect_inference(self, df: pd.DataFrame, *args, **kwargs):
         """
@@ -354,8 +353,7 @@ class Econml(CausalEstimator):
         def effect_inference_fun(filtered_df, T0, T1, *args, **kwargs):
             return self.estimator.effect_inference(filtered_df, T0=T0, T1=T1, *args, **kwargs)
 
-        Xdf = df[self._effect_modifier_names] if df is not None else df
-        return self.apply_multitreatment(Xdf, effect_inference_fun, *args, **kwargs)
+        return self.apply_multitreatment(df, effect_inference_fun, *args, **kwargs)
 
     def effect_tt(self, df: pd.DataFrame, treatment_value, *args, **kwargs):
         """
@@ -365,8 +363,8 @@ class Econml(CausalEstimator):
         :param args: passed through to estimator.effect()
         :param kwargs: passed through to estimator.effect()
         """
-
-        eff = self.effect(df[self._effect_modifier_names], *args, **kwargs).reshape((len(df), len(treatment_value)))
+        em_encoded = self._encode(df[self._effect_modifier_names], "effect_modifiers")
+        eff = self.effect(em_encoded, *args, **kwargs).reshape((len(df), len(treatment_value)))
 
         out = np.zeros(len(df))
         treatment_value = parse_state(treatment_value)
