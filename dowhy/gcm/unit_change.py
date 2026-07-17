@@ -19,6 +19,11 @@ class LinearPredictionModel:
     def coefficients(self) -> np.ndarray:
         pass
 
+    @property
+    @abstractmethod
+    def intercept(self) -> float:
+        pass
+
 
 class SklearnLinearRegressionModel(SklearnRegressionModel, LinearPredictionModel):
     def __init__(self, sklearn_mdl: LinearModel) -> None:
@@ -28,6 +33,11 @@ class SklearnLinearRegressionModel(SklearnRegressionModel, LinearPredictionModel
     def coefficients(self) -> np.ndarray:
         check_is_fitted(self.sklearn_model)
         return self.sklearn_model.coef_
+
+    @property
+    def intercept(self) -> float:
+        check_is_fitted(self.sklearn_model)
+        return self.sklearn_model.intercept_
 
 
 def unit_change(
@@ -138,6 +148,10 @@ def unit_change_linear(
 
     contribution_input = 0.5 * np.einsum("ij,ki->ki", coeffs_total.reshape(-1, 1), input_diff)
     contribution_mechanism = 0.5 * np.einsum("ij,ki->k", coeffs_diff.reshape(-1, 1), input_total)
+    # The change in the mechanism f also includes the change of the intercept (a constant offset), which is fully
+    # attributable to the mechanism. Omitting it makes the attributions not sum to the true output change when the
+    # background and foreground mechanisms have different intercepts (e.g. fit with the default fit_intercept=True).
+    contribution_mechanism = contribution_mechanism + (foreground_mechanism.intercept - background_mechanism.intercept)
     contribution_df = pd.DataFrame(contribution_input, columns=input_column_names)
     contribution_df["f"] = contribution_mechanism  # TODO: Handle the case where 'f' is an input column name
     return contribution_df
