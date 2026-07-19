@@ -1,3 +1,5 @@
+import warnings
+
 import networkx as nx
 import numpy as np
 import pandas as pd
@@ -656,6 +658,45 @@ class TestCausalModel(object):
                 graph=nx.Graph([("X", "Y"), ("Y", "Z")]),
             )
 
+    def test_warn_when_treatment_not_in_data(self):
+        """CausalModel should emit a UserWarning when treatment variable is missing from the DataFrame."""
+        data = pd.DataFrame({"X": [0, 1], "Y": [1, 2]})
+        with pytest.warns(UserWarning, match="treatment variable"):
+            CausalModel(
+                data=data,
+                treatment="MISSING_TREATMENT",
+                outcome="Y",
+                common_causes=["X"],
+            )
+
+    def test_warn_when_outcome_not_in_data(self):
+        """CausalModel should emit a UserWarning when outcome variable is missing from the DataFrame."""
+        data = pd.DataFrame({"X": [0, 1], "Y": [1, 2]})
+        with pytest.warns(UserWarning, match="outcome variable"):
+            CausalModel(
+                data=data,
+                treatment="X",
+                outcome="MISSING_OUTCOME",
+                common_causes=[],
+            )
+
+    def test_no_warn_when_treatment_and_outcome_in_data(self):
+        """CausalModel should not emit a missing-variable UserWarning when all variables are present."""
+        data = pd.DataFrame({"X": [0, 1], "Y": [1, 2]})
+        # Collect only UserWarnings that mention "variable(s) were not found"
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            CausalModel(
+                data=data,
+                treatment="X",
+                outcome="Y",
+                common_causes=[],
+            )
+        missing_var_warnings = [
+            w for w in caught if issubclass(w.category, UserWarning) and "not found" in str(w.message)
+        ]
+        assert missing_var_warnings == [], f"Unexpected missing-variable warnings: {missing_var_warnings}"
+
     def test_causal_estimator_cache(self):
         """
         Tests that CausalEstimator objects can be consistently retrieved from CausalEstimate and CausalModel objects.
@@ -855,6 +896,54 @@ class TestCausalModel(object):
         do_control = float(do_control)
         # The implied ATE should be close to beta=10.
         assert do_treated - do_control == pytest.approx(10, abs=5)
+
+    def test_repr_matches_str_for_key_result_objects(self):
+        """repr() should return the same text as str() for CausalEstimate, IdentifiedEstimand, and CausalRefutation."""
+        np.random.seed(42)
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=1,
+            num_samples=200,
+            num_treatments=1,
+            treatment_is_binary=True,
+        )
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+        )
+        identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        estimate = model.estimate_effect(
+            identified_estimand,
+            method_name="backdoor.linear_regression",
+        )
+
+        # IdentifiedEstimand
+        assert repr(identified_estimand) == str(identified_estimand)
+        assert "Estimand type" in repr(identified_estimand)
+
+        # CausalEstimate
+        assert repr(estimate) == str(estimate)
+        assert "Mean value" in repr(estimate)
+
+        # RealizedEstimand
+        from dowhy.causal_estimator import RealizedEstimand
+
+        realized_estimand = RealizedEstimand(identified_estimand, estimator_name="Test")
+        realized_estimand.update_estimand_expression(0)
+        realized_estimand.update_assumptions({})
+        assert repr(realized_estimand) == str(realized_estimand)
+        assert "Realized estimand" in repr(realized_estimand)
+        # CausalRefutation
+        refutation = model.refute_estimate(
+            identified_estimand,
+            estimate,
+            method_name="placebo_treatment_refuter",
+            num_simulations=5,
+        )
+        assert repr(refutation) == str(refutation)
+        assert "Estimated effect" in repr(refutation)
 
 
 if __name__ == "__main__":

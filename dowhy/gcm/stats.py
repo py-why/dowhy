@@ -64,7 +64,7 @@ def merge_p_values_quantile(
              p_values / quantile.
     """
 
-    if quantile <= 0 or abs(quantile - 1) >= 1:
+    if quantile <= 0 or quantile > 1:
         raise ValueError("The given quantile is %f, but it needs to be on (0, 1]!" % quantile)
 
     p_values = np.array(p_values)
@@ -174,6 +174,7 @@ def marginal_expectation(
     # baseline_noise_samples.shape[0] * feature_samples.shape[0]. Here, we reduce it to
     # batch_size * feature_samples.shape[0]. If the batch_size would be set 1, then each baseline_noise_samples is
     # evaluated one by one in a for-loop.
+    n_f = feature_samples.shape[0]
     inputs = np.tile(feature_samples, (batch_size, 1))
     for offset in range(0, baseline_samples.shape[0], batch_size):
         # Each batch consist of at most batch_size * feature_samples.shape[0] many samples. If there are multiple
@@ -182,34 +183,32 @@ def marginal_expectation(
             # If the batch size would be larger than the remaining amount of samples, it is reduced to only include the
             # remaining baseline_noise_samples.
             adjusted_batch_size = baseline_samples.shape[0] - offset
-            inputs = inputs[: adjusted_batch_size * feature_samples.shape[0]]
+            inputs = inputs[: adjusted_batch_size * n_f]
         else:
             adjusted_batch_size = batch_size
 
-        for index in range(adjusted_batch_size):
-            # The inputs consist of batch_size many copies of feature_samples. Here, we set the columns of the features
-            # in baseline_feature_indices to their respective values in baseline_noise_samples.
-            inputs[
-                index * feature_samples.shape[0] : (index + 1) * feature_samples.shape[0], baseline_feature_indices
-            ] = baseline_samples[offset + index, baseline_feature_indices]
+        # Vectorised: broadcast each baseline row across its n_f feature-sample rows in one numpy operation,
+        # replacing the per-sample Python loop that previously did this assignment one row at a time.
+        if len(baseline_feature_indices) > 0:
+            inputs_batched = inputs.reshape(adjusted_batch_size, n_f, -1)
+            inputs_batched[:, :, baseline_feature_indices] = baseline_samples[
+                offset : offset + adjusted_batch_size, baseline_feature_indices
+            ][:, None, :]
 
         # After creating the (potentially large) input data matrix, we can evaluate the prediction method.
         predictions = np.array(prediction_method(inputs))
 
-        for index in range(adjusted_batch_size):
-            # Here, offset + index now indicates the sample index in baseline_noise_samples.
-            if return_averaged_results:
-                # This would average all prediction results obtained for the 'offset + index'-th sample in
-                # baseline_noise_samples. This is, y^(offset + index) = E[Y | do(x^(offset + index)_s)].
-                result[offset + index] = np.mean(
-                    predictions[index * feature_samples.shape[0] : (index + 1) * feature_samples.shape[0]], axis=0
-                )
-            else:
-                # This would return all prediction results obtained for the 'offset + index'-th sample in
-                # baseline_noise_samples, i.e. the results are not averaged.
-                result[offset + index] = predictions[
-                    index * feature_samples.shape[0] : (index + 1) * feature_samples.shape[0]
-                ]
+        # Vectorised aggregation: reshape into (adjusted_batch_size, n_f, ...) and reduce in one numpy call,
+        # replacing the per-sample Python loop that previously sliced and averaged one sample at a time.
+        extra_dims = predictions.shape[1:]
+        pred_batched = predictions.reshape((adjusted_batch_size, n_f) + extra_dims)
+
+        if return_averaged_results:
+            # y^i = E[Y | do(x^i_s)]: average over the n_f feature-sample rows for each baseline sample.
+            result[offset : offset + adjusted_batch_size] = list(pred_batched.mean(axis=1))
+        else:
+            # Return all n_f prediction rows for each baseline sample (no averaging).
+            result[offset : offset + adjusted_batch_size] = list(pred_batched)
 
     return np.array(result)
 

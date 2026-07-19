@@ -1,5 +1,6 @@
 import copy
 import logging
+import warnings
 from collections import namedtuple
 from typing import Dict, List, Optional, Union
 
@@ -36,6 +37,8 @@ class CausalEstimator:
     DEFAULT_SAMPLE_SIZE_FRACTION = 1
     # The default Confidence Level
     DEFAULT_CONFIDENCE_LEVEL = 0.95
+    # The default significance level (alpha) for the statistical significance test
+    DEFAULT_SIGNIFICANCE_LEVEL = 0.05
     # Number of quantiles to discretize continuous columns, for applying groupby
     NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS = 5
     # Prefix to add to temporary categorical variables created after discretization
@@ -60,6 +63,7 @@ class CausalEstimator:
         num_simulations: int = DEFAULT_NUMBER_OF_SIMULATIONS_CI,
         sample_size_fraction: int = DEFAULT_SAMPLE_SIZE_FRACTION,
         confidence_level: float = DEFAULT_CONFIDENCE_LEVEL,
+        significance_level: float = DEFAULT_SIGNIFICANCE_LEVEL,
         need_conditional_estimates: Union[bool, str] = "auto",
         num_quantiles_to_discretize_cont_cols: int = NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS,
         random_state: Optional[Union[int, np.random.RandomState]] = None,
@@ -82,6 +86,10 @@ class CausalEstimator:
             estimator
         :param confidence_level: The confidence level of the confidence
             interval estimate
+        :param significance_level: The significance level (alpha) used to decide
+            whether the estimate is statistically significant when test_significance
+            is enabled. Defaults to 0.05. This is independent of confidence_level,
+            which controls the width of confidence intervals.
         :param need_conditional_estimates: Boolean flag indicating whether
             conditional estimates should be computed. Defaults to True if
             there are effect modifiers in the graph
@@ -110,6 +118,7 @@ class CausalEstimator:
         self.num_simulations = num_simulations
         self.sample_size_fraction = sample_size_fraction
         self.confidence_level = confidence_level
+        self.significance_level = significance_level
         self.num_quantiles_to_discretize_cont_cols = num_quantiles_to_discretize_cont_cols
         # Estimate conditional estimates by default
         self.need_conditional_estimates = need_conditional_estimates
@@ -333,16 +342,14 @@ class CausalEstimator:
         # Adding observed=True to avoid a FutureWarning in pandas (see #1316)
         by_effect_mods = data.groupby(effect_modifier_names, observed=True)
 
-        # pandas >=2.2 emits a DeprecationWarning when the grouping columns are
-        # passed to the applied function unless include_groups is specified
-        # explicitly. We pass include_groups=True because estimators may access
-        # the effect-modifier columns (grouping columns) inside estimate_effect_fn
-        # for feature construction. Older pandas versions do not accept this
-        # keyword, so we fall back gracefully.
-        try:
-            conditional_estimates = by_effect_mods.apply(estimate_effect_fn, include_groups=True)
-        except TypeError:
-            conditional_estimates = by_effect_mods.apply(estimate_effect_fn)
+        # Some estimators access the effect-modifier (grouping) columns inside
+        # estimate_effect_fn for feature construction, so those columns must remain
+        # available. pandas >=3.0 no longer lets GroupBy.apply include the grouping
+        # columns (include_groups=True was removed). Iterating the groups keeps the
+        # grouping columns in each sub-frame across all pandas versions.
+        group_estimates = {group_key: estimate_effect_fn(group_df) for group_key, group_df in by_effect_mods}
+        conditional_estimates = pd.Series(group_estimates)
+        conditional_estimates.index.names = effect_modifier_names
         # Deleting the temporary categorical columns
         for em in effect_modifier_names:
             if em.startswith(prefix):
@@ -761,13 +768,72 @@ class CausalEstimator:
         return s
 
     def signif_results_tostr(self, signif_results):
-        s = ""
+        """Format the significance test result as a human-readable string.
+
+        The p-value is reported as a single number, except when the estimate is
+        more extreme than every bootstrap null sample, in which case the exact
+        value cannot be determined from a finite number of simulations and a
+        bound is reported instead (``p < x`` or ``p > x``). A conclusion is added
+        based on ``significance_level`` (alpha): "significant", "not significant",
+        or "inconclusive" when the bound straddles alpha.
+
+        :param signif_results: dict with key ``p_value`` (float, 2-tuple bound, or
+            numpy array for multiple treatments).
+        :returns: formatted string with the p-value and the significance conclusion.
+        """
+        alpha = self.significance_level
         pval = signif_results["p_value"]
-        if type(pval) is tuple:
-            s += "[{0}, {1}]".format(pval[0], pval[1])
+
+        def _conclusion(is_significant):
+            return "significant" if is_significant else "not significant"
+
+        if isinstance(pval, tuple):
+            low, high = pval
+            if low == 0:
+                pval_str = "p < {:.3g}".format(high)
+            elif high == 1:
+                pval_str = "p > {:.3g}".format(low)
+            else:
+                pval_str = "{:.3g} < p < {:.3g}".format(low, high)
+            if high <= alpha:
+                conclusion = _conclusion(True)
+            elif low >= alpha:
+                conclusion = _conclusion(False)
+            else:
+                conclusion = "inconclusive (limited by the number of simulations)"
+        elif isinstance(pval, np.ndarray):
+            pval_str = "[{}]".format(", ".join("{:.3g}".format(p) for p in pval))
+            conclusion = "[{}]".format(", ".join(_conclusion(p <= alpha) for p in pval))
         else:
-            s += "{0}".format(pval)
-        return s
+            pval_str = "{:.3g}".format(pval)
+            conclusion = _conclusion(pval <= alpha)
+
+        return "{} ({} at alpha={:.3g}; H0: treatment has no causal effect on outcome)".format(
+            pval_str, conclusion, alpha
+        )
+
+
+def _warn_if_nan_in_data(data: pd.DataFrame, treatment: List[str], outcome: List[str]) -> None:
+    """Emits a warning if any treatment or outcome columns contain NaN values.
+
+    NaN values are propagated silently by most estimators, producing a NaN estimate
+    with no diagnostic information. This helper surfaces the issue early so users can
+    resolve it before fitting.
+
+    :param data: DataFrame passed to estimate_effect.
+    :param treatment: List of treatment column names.
+    :param outcome: List of outcome column names.
+    """
+    columns_to_check = list(treatment) + list(outcome)
+    columns_with_nan = [col for col in columns_to_check if col in data.columns and data[col].isna().any()]
+    if columns_with_nan:
+        warnings.warn(
+            f"Data contains NaN values in column(s): {columns_with_nan}. "
+            "Missing data can introduce bias if not handled appropriately for the causal model. "
+            "Consult the missing-data literature (e.g., Mohan & Pearl 2021) before deciding how to proceed.",
+            UserWarning,
+            stacklevel=4,
+        )
 
 
 def estimate_effect(
@@ -823,6 +889,8 @@ def estimate_effect(
         error_msg = f"No valid identified estimand for '{identifier_name}'. Ensure that the identification step succeeded for this estimator method (e.g. the graph must contain valid instruments for 'iv.instrumental_variable')."
         logger.error(error_msg)
         raise ValueError(error_msg)
+
+    _warn_if_nan_in_data(data, treatment, outcome)
 
     if fit_estimator:
         estimator.fit(
@@ -1037,6 +1105,8 @@ class CausalEstimate:
             # s += "Variance in outcome explained by treatment: {}\n".format(self.effect_strength["r-squared"])
         return s
 
+    __repr__ = __str__
+
 
 class RealizedEstimand(object):
     def __init__(self, identified_estimand, estimator_name):
@@ -1065,3 +1135,5 @@ class RealizedEstimand(object):
             s += "Estimand assumption {0}, {1}: {2}\n".format(j, ass_name, ass_str)
             j += 1
         return s
+
+    __repr__ = __str__
