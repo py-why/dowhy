@@ -1,6 +1,7 @@
 import logging
 
 import numpy as np
+import pandas as pd
 
 from dowhy.causal_refuter import CausalRefutation, CausalRefuter
 from dowhy.utils.cit import conditional_MI, partial_corr
@@ -57,7 +58,7 @@ class GraphRefuter(CausalRefuter):
 
     def conditional_mutual_information(self, x=None, y=None, z=None):
         cmi_val = conditional_MI(data=self._data, x=x, y=y, z=list(z))
-        key = (x, y) + (z,)
+        key = (x, y) + (tuple(z) if isinstance(z, list) else (z,))
         if cmi_val <= 0.05:
             self._true_implications.append([x, y, z])
             self._results[key] = [cmi_val, True]
@@ -83,7 +84,7 @@ class GraphRefuter(CausalRefuter):
         binary_columns = []
         variable_type = dict()
         for node in all_nodes:
-            if self._data[node].dtype == np.int64 or self._data[node].dtype == np.int32:
+            if pd.api.types.is_integer_dtype(self._data[node]) or self._data[node].dtype == np.bool_:
                 discrete_columns.append(node)
                 variable_type[node] = "discrete"
                 if self._data[node].isin([0, 1]).all():
