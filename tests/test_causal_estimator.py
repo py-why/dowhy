@@ -1,4 +1,5 @@
 import unittest
+import warnings
 
 import pytest
 
@@ -42,3 +43,102 @@ class TestCausalEstimator(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def test_estimate_effect_warns_on_nan_in_treatment_or_outcome():
+    """estimate_effect() must emit a UserWarning when treatment or outcome columns contain NaN.
+
+    See issue #827 https://github.com/py-why/dowhy/issues/827
+    """
+    import numpy as np
+
+    import dowhy.datasets
+    from dowhy import CausalModel
+
+    data = dowhy.datasets.linear_dataset(
+        beta=10,
+        num_common_causes=2,
+        num_instruments=0,
+        num_samples=500,
+        treatment_is_binary=False,
+    )
+    df = data["df"].copy()
+    # Introduce NaN into the outcome column (float, so NaN is valid)
+    df.iloc[0, df.columns.get_loc(data["outcome_name"][0])] = np.nan
+
+    model = CausalModel(
+        data=df,
+        treatment=data["treatment_name"],
+        outcome=data["outcome_name"],
+        graph=data["dot_graph"],
+    )
+    estimand = model.identify_effect(proceed_when_unidentifiable=True)
+    with pytest.warns(
+        UserWarning, match="Missing data can introduce bias if not handled appropriately for the causal model"
+    ):
+        try:
+            model.estimate_effect(
+                identified_estimand=estimand,
+                method_name="backdoor.linear_regression",
+            )
+        except Exception:
+            pass  # We only care that the warning is emitted
+
+
+def test_estimate_effect_no_warning_when_no_nan():
+    """estimate_effect() must not emit a NaN warning when data is clean."""
+    import dowhy.datasets
+    from dowhy import CausalModel
+
+    data = dowhy.datasets.linear_dataset(
+        beta=10,
+        num_common_causes=2,
+        num_instruments=0,
+        num_samples=500,
+        treatment_is_binary=True,
+    )
+    model = CausalModel(
+        data=data["df"],
+        treatment=data["treatment_name"],
+        outcome=data["outcome_name"],
+        graph=data["dot_graph"],
+    )
+    estimand = model.identify_effect(proceed_when_unidentifiable=True)
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        model.estimate_effect(
+            identified_estimand=estimand,
+            method_name="backdoor.linear_regression",
+        )
+    nan_warnings = [x for x in w if "NaN values" in str(x.message)]
+    assert len(nan_warnings) == 0, "Unexpected NaN warning emitted for clean data"
+
+
+def test_estimate_effect_raises_valueerror_for_missing_estimand():
+    """estimate_effect() must raise ValueError when no valid estimand is identified.
+
+    Previously, it silently returned None, giving users no indication of failure.
+    See issue #1551 https://github.com/py-why/dowhy/issues/1551
+    """
+    import dowhy.datasets
+    from dowhy import CausalModel
+
+    data = dowhy.datasets.linear_dataset(
+        beta=10,
+        num_common_causes=3,
+        num_instruments=0,
+        num_samples=500,
+        treatment_is_binary=True,
+    )
+    model = CausalModel(
+        data=data["df"],
+        treatment=data["treatment_name"],
+        outcome=data["outcome_name"],
+        graph=data["dot_graph"],
+    )
+    estimand = model.identify_effect(proceed_when_unidentifiable=True)
+    with pytest.raises(ValueError, match=r"No valid identified estimand for 'iv'"):
+        model.estimate_effect(
+            identified_estimand=estimand,
+            method_name="iv.instrumental_variable",
+        )

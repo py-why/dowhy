@@ -221,6 +221,18 @@ def test_given_specific_random_seed_when_estimate_shapley_values_with_early_stop
     assert shapley_values_1 == approx(shapley_values_2, abs=0)
 
 
+def test_given_single_player_when_estimate_shapley_values_with_subset_sampling_then_does_not_raise():
+    # Regression: with a single player the subset-length probability vector summed to 0 and produced NaN sampling
+    # probabilities, crashing np.random.choice. The single Shapley value equals f({0}) - f({}).
+    shapley_values = estimate_shapley_values(
+        lambda subset: float(np.sum(subset) * 5.0),
+        1,
+        ShapleyConfig(approximation_method=ShapleyApproximationMethods.SUBSET_SAMPLING, n_jobs=1),
+    )
+
+    assert shapley_values == approx([5.0], abs=1e-9)
+
+
 def _generate_data(num_vars):
     return np.random.normal(0, 1, (1000, num_vars)), np.random.choice(20, num_vars) - 10
 
