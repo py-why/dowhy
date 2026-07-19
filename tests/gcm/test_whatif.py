@@ -206,6 +206,24 @@ def test_when_estimate_counterfactual_with_observed_and_noise_data_then_raise_er
         )
 
 
+def test_given_categorical_node_when_estimate_counterfactual_from_observed_data_then_raises_informative_error():
+    # The noise of a categorical (ClassifierFCM) node cannot be recovered from data (the mechanism is not invertible),
+    # so counterfactuals from observed_data must fail with a clear message rather than a leaked AttributeError.
+    import networkx as nx
+
+    from dowhy.gcm import InvertibleStructuralCausalModel, auto, fit
+
+    np.random.seed(0)
+    data = pd.DataFrame({"X": np.random.normal(0, 1, 500)})
+    data["Y"] = np.where(data["X"] < 0, "lo", "hi")
+    causal_model = InvertibleStructuralCausalModel(nx.DiGraph([("X", "Y")]))
+    auto.assign_causal_mechanisms(causal_model, data)
+    fit(causal_model, data)
+
+    with pytest.raises(ValueError, match="not invertible"):
+        counterfactual_samples(causal_model, {"X": lambda x: 2.0}, observed_data=data)
+
+
 @flaky(max_runs=3)
 def test_given_continuous_target_when_estimate_average_causal_effect_then_return_expected_result():
     T = np.random.choice(2, 1000, replace=True)

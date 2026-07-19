@@ -203,6 +203,9 @@ class DummyOutcomeRefuter(CausalRefuter):
 
     :param verbose: The verbosity level: if non zero, progress messages are printed. Above 50, the output is sent to stdout. The frequency of the messages increases with the verbosity level. If it more than 10, all iterations are reported. The default is 0.
     :type verbose: int, optional
+
+    :param random_state: The seed value to be added if we wish to repeat the same random behavior. If we want to repeat the same behavior we push the same seed in the psuedo-random generator.
+    :type random_state: int, RandomState, optional
     """
 
     def __init__(self, *args, **kwargs):
@@ -218,6 +221,7 @@ class DummyOutcomeRefuter(CausalRefuter):
             "unobserved_confounder_values", DEFAULT_NEW_DATA_WITH_UNOBSERVED_CONFOUNDING
         )
         self._required_variables = kwargs.pop("required_variables", True)
+        self._random_state = kwargs.pop("random_state", None)
 
         if self._required_variables is False:
             raise ValueError("The value of required_variables cannot be False")
@@ -244,6 +248,7 @@ class DummyOutcomeRefuter(CausalRefuter):
             show_progress_bar=show_progress_bar,
             n_jobs=self._n_jobs,
             verbose=self._verbose,
+            random_state=self._random_state,
         )
         for refute in refutes:
             refute.add_refuter(self)
@@ -267,6 +272,7 @@ def _refute_once(
     identified_estimand=None,
     chosen_variables=None,
     estimator_present=None,
+    random_state: Optional[np.random.RandomState] = None,
 ):
     """Execute one iteration of the dummy outcome refutation."""
     estimates = []
@@ -291,12 +297,18 @@ def _refute_once(
 
         # Get the final outcome, after running through all the values in the transformation list
         outcome_validation = process_data(
-            outcome_name, X_train, outcome_train, X_validation, outcome_validation, transformation_list
+            outcome_name,
+            X_train,
+            outcome_train,
+            X_validation,
+            outcome_validation,
+            transformation_list,
+            random_state=random_state,
         )
 
         # Get true causal effect (should be computed once and passed in)
         true_effect = true_causal_effect(validation_df[treatment_name[0]])
-        outcome_validation += true_effect
+        outcome_validation = outcome_validation + true_effect
 
         new_data = validation_df.assign(dummy_outcome=outcome_validation)
 
@@ -324,7 +336,9 @@ def _refute_once(
             test_fraction = len(groups) * test_fraction
 
         for key_train, _ in groups:
-            base_train = groups.get_group(key_train).sample(frac=test_fraction[group_count].base)
+            base_train = groups.get_group(key_train).sample(
+                frac=test_fraction[group_count].base, random_state=random_state
+            )
             train_set = set([tuple(line) for line in base_train.values])
             total_set = set([tuple(line) for line in groups.get_group(key_train).values])
             base_validation = pd.DataFrame(list(total_set.difference(train_set)), columns=base_train.columns)
@@ -339,7 +353,11 @@ def _refute_once(
 
             for key_validation, _ in groups:
                 if key_validation != key_train:
-                    validation_df.append(groups.get_group(key_validation).sample(frac=test_fraction[group_count].other))
+                    validation_df.append(
+                        groups.get_group(key_validation).sample(
+                            frac=test_fraction[group_count].other, random_state=random_state
+                        )
+                    )
 
             validation_df = pd.concat(validation_df)
             X_validation_df = validation_df[chosen_variables]
@@ -352,14 +370,20 @@ def _refute_once(
                 transformation_list_temp = DEFAULT_TRANSFORMATION
 
             outcome_validation = process_data(
-                outcome_name, X_train, outcome_train, X_validation, outcome_validation, transformation_list_temp
+                outcome_name,
+                X_train,
+                outcome_train,
+                X_validation,
+                outcome_validation,
+                transformation_list_temp,
+                random_state=random_state,
             )
 
             # Get true causal effect for this group
             true_effect = true_causal_effect(validation_df[treatment_name[0]])
 
             # Add h(t) to f(W) to get the dummy outcome
-            outcome_validation += true_effect
+            outcome_validation = outcome_validation + true_effect
 
             new_data = validation_df.assign(dummy_outcome=outcome_validation)
             new_estimator = estimate.estimator.get_new_estimator_object(identified_estimand)
@@ -398,6 +422,7 @@ def refute_dummy_outcome(
     show_progress_bar=False,
     n_jobs: int = 1,
     verbose: int = 0,
+    random_state: Optional[Union[int, np.random.RandomState]] = None,
     **_,
 ) -> List[CausalRefutation]:
     """Refute an estimate by replacing the outcome with a simulated variable
@@ -558,6 +583,7 @@ def refute_dummy_outcome(
 
     :param n_jobs: The maximum number of concurrently running jobs. If -1 all CPUs are used. If 1 is given, no parallel computing code is used at all (this is the default).
     :param verbose: The verbosity level: if non zero, progress messages are printed. Above 50, the output is sent to stdout. The frequency of the messages increases with the verbosity level. If it more than 10, all iterations are reported. The default is 0.
+    :param random_state: The seed value to be added if we wish to repeat the same random behavior. If we want to repeat the same behavior we push the same seed in the psuedo-random generator.
 
     """
 
@@ -596,6 +622,9 @@ def refute_dummy_outcome(
     if estimator_present == False and test_fraction != DEFAULT_TEST_FRACTION:
         logger.warning("'test_fraction' is not applicable as there is no base treatment value.")
 
+    if isinstance(random_state, int):
+        random_state = np.random.RandomState(seed=random_state)
+
     # Run simulations in parallel
     simulation_results = Parallel(n_jobs=n_jobs, verbose=verbose)(
         delayed(_refute_once)(
@@ -615,6 +644,7 @@ def refute_dummy_outcome(
             identified_estimand,
             chosen_variables,
             estimator_present,
+            random_state,
         )
         for _ in tqdm(
             range(num_simulations),
@@ -702,6 +732,7 @@ def process_data(
     X_validation: np.ndarray,
     outcome_validation: np.ndarray,
     transformation_list: List,
+    random_state: Optional[np.random.RandomState] = None,
 ):
     """
     We process the data by first training the estimators in the transformation_list on ``X_train`` and ``outcome_train``.
@@ -736,12 +767,12 @@ def process_data(
             outcome_validation = estimator(X_validation)
         elif action == "noise":
             if X_train is not None:
-                outcome_train = noise(outcome_train, **func_args)
-            outcome_validation = noise(outcome_validation, **func_args)
+                outcome_train = noise(outcome_train, **func_args, random_state=random_state)
+            outcome_validation = noise(outcome_validation, **func_args, random_state=random_state)
         elif action == "permute":
             if X_train is not None:
-                outcome_train = permute(outcome_name, outcome_train, **func_args)
-            outcome_validation = permute(outcome_name, outcome_validation, **func_args)
+                outcome_train = permute(outcome_name, outcome_train, **func_args, random_state=random_state)
+            outcome_validation = permute(outcome_name, outcome_validation, **func_args, random_state=random_state)
         elif action == "zero":
             if X_train is not None:
                 outcome_train = np.zeros(outcome_train.shape)
@@ -860,7 +891,12 @@ def _get_regressor_object(action: str, **func_args):
         raise ValueError("The function: {} is not supported by dowhy at the moment.".format(action))
 
 
-def permute(outcome_name: str, outcome: np.ndarray, permute_fraction: float):
+def permute(
+    outcome_name: str,
+    outcome: np.ndarray,
+    permute_fraction: float,
+    random_state: Optional[np.random.RandomState] = None,
+):
     """
     If the permute_fraction is 1, we permute all the values in the outcome.
     Otherwise we make use of the Fisher Yates shuffle.
@@ -870,20 +906,26 @@ def permute(outcome_name: str, outcome: np.ndarray, permute_fraction: float):
         The outcome variable to be permuted.
     :param 'permute_fraction': float [0, 1]
         The fraction of rows permuted.
+    :param 'random_state': int, RandomState, optional
+        Seed or random number generator for reproducible permutations.
     """
+    rng = np.random if random_state is None else random_state
     if permute_fraction == 1:
         outcome = pd.DataFrame(outcome)
         outcome.columns = [outcome_name]
-        return outcome[outcome_name].sample(frac=1).values
+        return outcome[outcome_name].sample(frac=1, random_state=random_state).values
     elif permute_fraction < 1:
+        outcome = np.asarray(outcome)
+        if not outcome.flags.writeable:
+            outcome = outcome.copy()
         permute_fraction /= 2  # We do this as every swap leads to two changes
-        changes = np.where(np.random.uniform(0, 1, outcome.shape[0]) <= permute_fraction)[
+        changes = np.where(rng.uniform(0, 1, outcome.shape[0]) <= permute_fraction)[
             0
         ]  # As this is tuple containing a single element (array[...])
         num_rows = outcome.shape[0]
         for change in changes:
             if change + 1 < num_rows:
-                index = np.random.randint(change + 1, num_rows)
+                index = rng.randint(change + 1, num_rows)
                 temp = outcome[change]
                 outcome[change] = outcome[index]
                 outcome[index] = temp
@@ -892,7 +934,7 @@ def permute(outcome_name: str, outcome: np.ndarray, permute_fraction: float):
         raise ValueError("The value of permute_fraction is {}. Which is greater than 1.".format(permute_fraction))
 
 
-def noise(outcome: np.ndarray, std_dev: float):
+def noise(outcome: np.ndarray, std_dev: float, random_state: Optional[np.random.RandomState] = None):
     """
     Add white noise with mean 0 and standard deviation = std_dev
 
@@ -900,7 +942,10 @@ def noise(outcome: np.ndarray, std_dev: float):
         The outcome variable, to which the white noise is added.
     :param 'std_dev': float
         The standard deviation of the white noise.
+    :param 'random_state': int, RandomState, optional
+        Seed or random number generator for reproducible noise.
 
     :returns: outcome with added noise
     """
-    return outcome + np.random.normal(scale=std_dev, size=outcome.shape[0])
+    rng = np.random if random_state is None else random_state
+    return outcome + rng.normal(scale=std_dev, size=outcome.shape[0])
