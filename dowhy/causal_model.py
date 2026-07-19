@@ -7,7 +7,6 @@ from itertools import combinations
 
 import dowhy.causal_estimators as causal_estimators
 import dowhy.causal_refuters as causal_refuters
-import dowhy.graph_learners as graph_learners
 from dowhy.causal_estimator import CausalEstimate, estimate_effect
 from dowhy.causal_graph import CausalGraph
 from dowhy.causal_identifier import AutoIdentifier, BackdoorAdjustment, IDIdentifier
@@ -41,7 +40,8 @@ class CausalModel:
         and outcome.
 
         At least one of graph, common_causes or instruments must be provided. If
-        none of these variables are provided, then learn_graph() can be used later.
+        none of these variables are provided, then learn_graph() (deprecated) can be used later,
+        or use causal-learn/dodiscover for discovery and pass the result as graph=.
 
         :param data: a pandas dataframe containing treatment, outcome and other variables.
         :param treatment: name of the treatment variable
@@ -66,6 +66,12 @@ class CausalModel:
         self._missing_nodes_as_confounders = missing_nodes_as_confounders
         self.logger = logging.getLogger(__name__)
         self._estimator_cache = {}
+
+        _warn_if_treatment_or_outcome_not_in_data(
+            treatment_names=self._treatment,
+            outcome_names=self._outcome,
+            data_variable_names=set(self._data.columns),
+        )
 
         if graph is None:
             self.logger.warning("Causal Graph not provided. DoWhy will construct a graph based on data inputs.")
@@ -98,7 +104,10 @@ class CausalModel:
                 )
             else:
                 self.logger.warning(
-                    "Relevant variables to build causal graph not provided. You may want to use the learn_graph() function to construct the causal graph."
+                    "Relevant variables to build causal graph not provided. "
+                    "Consider using causal-learn (https://github.com/py-why/causal-learn) "
+                    "or dodiscover (https://github.com/py-why/dodiscover) for causal discovery, "
+                    "then pass the resulting graph to CausalModel via the graph= parameter."
                 )
                 self._graph = CausalGraph(
                     self._treatment,
@@ -185,13 +194,30 @@ class CausalModel:
 
     def learn_graph(self, method_name="cdt.causality.graph.LiNGAM", *args, **kwargs):
         """
-        Learn causal graph from the data. This function takes the method name as input and initializes the
-        causal graph object using the learnt graph.
+        Learn causal graph from the data.
 
-        :param self: instance of the CausalModel class (or its subclass)
+        .. deprecated::
+            ``CausalModel.learn_graph()`` and the ``dowhy.graph_learners`` module are deprecated
+            and will be removed in a future major release. Please use the `causal-learn
+            <https://github.com/py-why/causal-learn>`_ or `dodiscover
+            <https://github.com/py-why/dodiscover>`_ libraries directly for causal discovery,
+            then pass the resulting graph to ``CausalModel`` via the ``graph`` parameter.
+
         :param method_name: Exact method name of the object to be imported from the concerned library.
         :returns: an instance of the CausalGraph class initialized with the learned graph.
         """
+        warnings.warn(
+            "CausalModel.learn_graph() and the dowhy.graph_learners module are deprecated and will "
+            "be removed in a future major release. "
+            "Please use causal-learn (https://github.com/py-why/causal-learn) or dodiscover "
+            "(https://github.com/py-why/dodiscover) for causal discovery, then pass the resulting "
+            "graph to CausalModel via the graph= parameter. "
+            "See https://github.com/py-why/dowhy/issues/1039 for context.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        import dowhy.graph_learners as graph_learners
+
         # Import causal discovery class
         str_arr = method_name.split(".", maxsplit=1)
         library_name = str_arr[0]
@@ -295,8 +321,12 @@ class CausalModel:
             effect_modifiers = self._graph.get_effect_modifiers(self._treatment, self._outcome)
 
         if method_name is None:
-            # TODO add propensity score as default backdoor method, iv as default iv method, add an informational message to show which method has been selected.
-            pass
+            raise ValueError(
+                "method_name must be provided. "
+                "Specify an estimation method such as 'backdoor.linear_regression', "
+                "'backdoor.propensity_score_stratification', or 'iv.instrumental_variable'. "
+                "Use the '<identifier>.<estimator>' format."
+            )
         else:
             # TODO add dowhy as a prefix to all dowhy estimators
             num_components = len(method_name.split("."))
@@ -373,8 +403,9 @@ class CausalModel:
         :param identified_estimand: a probability expression
             that represents the effect to be estimated. Output of
             CausalModel.identify_effect method
-        :param method_name: any of the estimation method to be used. See docs
-            for estimate_effect method for a list of supported estimation methods.
+        :param method_name: (required) estimation method to be used, in "<identifier>.<estimator>" format.
+            Examples include 'backdoor.linear_regression', 'backdoor.propensity_score_stratification',
+            and 'iv.instrumental_variable'.
         :param fit_estimator: Boolean flag on whether to fit the estimator.
             Setting it to False is useful to compute the do-operation on new
             data using a previously fitted estimator.
@@ -385,7 +416,12 @@ class CausalModel:
 
         """
         if method_name is None:
-            pass
+            raise ValueError(
+                "method_name must be provided. "
+                "Specify an estimation method such as 'backdoor.linear_regression', "
+                "'backdoor.propensity_score_stratification', or 'iv.instrumental_variable'. "
+                "Use the '<identifier>.<estimator>' format."
+            )
         else:
             str_arr = method_name.split(".", maxsplit=1)
             identifier_name = str_arr[0]
@@ -405,15 +441,13 @@ class CausalModel:
                 # estimate_effect code. It is not advisable to use the
                 # estimator from this function to call estimate_effect
                 # with fit_estimator=False.
+                if method_params is None:
+                    method_params = {}
                 self.causal_estimator = causal_estimator_class(
                     identified_estimand,
                     **method_params,
                 )
-                self.causal_estimator.fit(
-                    self._data,
-                    self._treatment,
-                    self._outcome,
-                )
+                self.causal_estimator.fit(self._data)
             else:
                 # Estimator had been computed in a previous call
                 assert self.causal_estimator is not None
@@ -427,17 +461,24 @@ class CausalModel:
     def refute_estimate(self, estimand, estimate, method_name=None, show_progress_bar=False, **kwargs):
         """Refute an estimated causal effect.
 
-        If method_name is provided, uses the provided method. In the future, we may support automatic selection of suitable refutation tests. Following refutation methods are supported.
+        method_name must be specified. Examples of refutation methods include:
             * Adding a randomly-generated confounder: "random_common_cause"
             * Adding a confounder that is associated with both treatment and outcome: "add_unobserved_common_cause"
             * Replacing the treatment with a placebo (random) variable): "placebo_treatment_refuter"
             * Removing a random subset of the data: "data_subset_refuter"
+            * Bootstrap the data: "bootstrap_refuter"
+            * Replace outcome with a dummy (random) variable: "dummy_outcome_refuter"
+        For available refuters, see modules under dowhy.causal_refuters.
 
-        :param estimand: target estimand, an instance of the IdentifiedEstimand class (typically, the output of identify_effect)
-        :param estimate: estimate to be refuted, an instance of the CausalEstimate class (typically, the output of estimate_effect)
-        :param method_name: name of the refutation method
+        :param estimand: target estimand, an instance of the IdentifiedEstimand class
+            (typically the output of identify_effect)
+        :param estimate: estimate to be refuted, an instance of the CausalEstimate class
+            (typically the output of estimate_effect)
+        :param method_name: (required) name of the refutation method. See dowhy.causal_refuters for available values.
         :param show_progress_bar: Boolean flag on whether to show a progress bar
-        :param kwargs:  (optional) additional arguments that are passed directly to the refutation method. Can specify a random seed here to ensure reproducible results ('random_seed' parameter). For method-specific parameters, consult the documentation for the specific method. All refutation methods are in the causal_refuters subpackage.
+        :param kwargs: (optional) additional arguments passed directly to the refutation method. Can specify
+            a random seed here to ensure reproducible results ('random_seed' parameter). For method-specific
+            parameters, consult the documentation for the specific method.
 
         :returns: an instance of the RefuteResult class
 
@@ -446,7 +487,10 @@ class CausalModel:
             self.logger.error("Aborting refutation! No estimate is provided.")
             raise ValueError("Aborting refutation! No valid estimate is provided.")
         if method_name is None:
-            pass
+            raise ValueError(
+                "method_name must be provided. "
+                "See the dowhy.causal_refuters package for available refutation methods."
+            )
         else:
             refuter_class = causal_refuters.get_class_object(method_name)
 
@@ -611,3 +655,30 @@ def _warn_if_unused_data_variables(
             len(unused_data_variable_names),
             sorted(unused_data_variable_names),
         )
+
+
+def _warn_if_treatment_or_outcome_not_in_data(
+    treatment_names: typing.List[str],
+    outcome_names: typing.List[str],
+    data_variable_names: typing.Set[str],
+) -> None:
+    """Emit a UserWarning when any treatment or outcome variable is missing from the DataFrame.
+
+    A missing treatment or outcome most often indicates a typo in the variable name.  The warning
+    is emitted via :func:`warnings.warn` so that it is visible even when the logging level is not
+    configured, and so that users who turn warnings into errors (e.g. with ``-W error``) get an
+    early, actionable signal rather than a confusing downstream error.
+    """
+    missing_treatment = [t for t in treatment_names if t not in data_variable_names]
+    missing_outcome = [o for o in outcome_names if o not in data_variable_names]
+
+    for role, missing in (("treatment", missing_treatment), ("outcome", missing_outcome)):
+        if missing:
+            warnings.warn(
+                f"The following {role} variable(s) were not found as columns in the provided "
+                f"DataFrame: {missing}. "
+                "This may indicate a typo in the variable name. "
+                f"Available columns are: {sorted(data_variable_names)}.",
+                UserWarning,
+                stacklevel=4,
+            )
