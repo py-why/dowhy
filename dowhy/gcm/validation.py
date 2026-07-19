@@ -70,7 +70,7 @@ def refute_causal_structure(
 
         validation_summary[node] = dict(local_markov_test=lmc_test_result, edge_dependence_test=edge_dependence_result)
 
-    if fdr_control_method is None:
+    if fdr_control_method is None or len(all_p_values) == 0:
         successes = np.array(all_p_values) <= significance_level
         adjusted_p_values = np.empty(len(successes))
         adjusted_p_values[:] = np.nan

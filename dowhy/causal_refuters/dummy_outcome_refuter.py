@@ -308,7 +308,7 @@ def _refute_once(
 
         # Get true causal effect (should be computed once and passed in)
         true_effect = true_causal_effect(validation_df[treatment_name[0]])
-        outcome_validation += true_effect
+        outcome_validation = outcome_validation + true_effect
 
         new_data = validation_df.assign(dummy_outcome=outcome_validation)
 
@@ -383,7 +383,7 @@ def _refute_once(
             true_effect = true_causal_effect(validation_df[treatment_name[0]])
 
             # Add h(t) to f(W) to get the dummy outcome
-            outcome_validation += true_effect
+            outcome_validation = outcome_validation + true_effect
 
             new_data = validation_df.assign(dummy_outcome=outcome_validation)
             new_estimator = estimate.estimator.get_new_estimator_object(identified_estimand)
@@ -915,6 +915,9 @@ def permute(
         outcome.columns = [outcome_name]
         return outcome[outcome_name].sample(frac=1, random_state=random_state).values
     elif permute_fraction < 1:
+        outcome = np.asarray(outcome)
+        if not outcome.flags.writeable:
+            outcome = outcome.copy()
         permute_fraction /= 2  # We do this as every swap leads to two changes
         changes = np.where(rng.uniform(0, 1, outcome.shape[0]) <= permute_fraction)[
             0

@@ -4,6 +4,7 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 
+from dowhy.gcm.causal_mechanisms import InvertibleFunctionalCausalModel
 from dowhy.gcm.causal_models import (
     InvertibleStructuralCausalModel,
     ProbabilisticCausalModel,
@@ -48,11 +49,19 @@ def compute_noise_from_data(causal_model: InvertibleStructuralCausalModel, obser
         if is_root_node(causal_model.graph, node):
             noise[node] = observed_data[node].to_numpy().squeeze()
         else:
-            noise[node] = (
-                causal_model.causal_mechanism(node)
-                .estimate_noise(observed_data[node].to_numpy(), _parent_samples_of(node, causal_model, observed_data))
-                .squeeze()
-            )
+            causal_mechanism = causal_model.causal_mechanism(node)
+            if not isinstance(causal_mechanism, InvertibleFunctionalCausalModel):
+                raise ValueError(
+                    "Cannot recover the noise for node '%s' from observed data because its causal mechanism (%s) is "
+                    "not invertible. Recovering noise from data (abduction) is only supported for invertible "
+                    "mechanisms such as PostNonlinearModel/AdditiveNoiseModel. This typically happens for categorical "
+                    "nodes, whose ClassifierFCM mechanism is not invertible. To compute counterfactuals for such a "
+                    "model, pass the noise values explicitly via the 'noise_data' argument instead of 'observed_data'."
+                    % (node, causal_mechanism.__class__.__name__)
+                )
+            noise[node] = causal_mechanism.estimate_noise(
+                observed_data[node].to_numpy(), _parent_samples_of(node, causal_model, observed_data)
+            ).squeeze()
 
     return pd.DataFrame(noise, columns=sorted_noise)
 

@@ -209,6 +209,15 @@ Real world-inspired examples
 
 .. grid:: 2
 
+    .. grid-item-card:: :doc:`gcm_causal_discovery_foundcause`
+
+        .. image:: ../_static/gcm-foundcause-discovered-graph.png
+            :height: 120px
+            :align: center
+        +++
+        | **Level:** Advanced
+        | **Task:** Causal discovery with a foundation model and root cause analysis via GCM
+
     .. grid-item-card:: :doc:`gcm_mta_incrementality_time_decay`
 
         .. image:: ../_static/gcm_mta_incrementality_time_decay.png
@@ -450,6 +459,7 @@ Miscellaneous
    gcm_falsify_dag
    counterfactual_fairness_dowhy
    sales_attribution_intervention
+   gcm_causal_discovery_foundcause
    gcm_chest_xray_causal_inference
 
 .. toctree::

@@ -52,4 +52,5 @@ def test_given_parameterized_estimation_func_when_confidence_interval_then_can_u
     median, interval = confidence_intervals(bootstrap_sampling(parameterized_counter, "A"), num_bootstrap_resamples=20)
 
     assert median["A"] == pytest.approx(10.5)
-    assert np.allclose(interval["A"], [1.95, 19.05])
+    # Default confidence_level=0.95 -> two-sided 2.5th/97.5th percentiles of the results 1..20.
+    assert np.allclose(interval["A"], [1.475, 19.525])
