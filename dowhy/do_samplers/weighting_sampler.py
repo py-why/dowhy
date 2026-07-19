@@ -47,6 +47,16 @@ class WeightingSampler(DoSampler):
         if not self.keep_original_treatment:
             for treatment, value in x.items():
                 to_sample = to_sample[to_sample[treatment] == value]
+
+        if len(to_sample) == 0:
+            raise ValueError(
+                "The intervention value(s) provided do not exactly match any observed "
+                "data points in the treatment column. The 'weighting' do-sampler relies on "
+                "exact matches (typically for discrete treatments). For continuous treatments "
+                "or interventions outside the observed distribution, consider using a different "
+                "sampling method or parametric model."
+            )
+
         self._df = to_sample
 
     def disrupt_causes(self):

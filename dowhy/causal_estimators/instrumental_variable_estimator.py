@@ -18,6 +18,14 @@ class InstrumentalVariableEstimator(CausalEstimator):
 
     Supports additional parameters as listed below.
 
+    **References**
+
+    Wright, P. G. (1928). *The Tariff on Animal and Vegetable Oils*. Macmillan.
+
+    Angrist, J. D., Imbens, G. W., & Rubin, D. B. (1996). Identification of causal effects using instrumental variables. *Journal of the American Statistical Association*, 91(434), 444–455. https://doi.org/10.1080/01621459.1996.10476902
+
+    Angrist, J. D., & Pischke, J.-S. (2009). *Mostly Harmless Econometrics: An Empiricist's Companion*. Princeton University Press.
+
     """
 
     def __init__(

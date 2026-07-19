@@ -26,8 +26,8 @@ class PredictionAlgorithm(pl.LightningModule):
         self.momentum = momentum
 
         # Check if the optimizer is currently supported
-        if self.optimizer not in ["Adam", "SGD"]:
-            error_msg = self.optimizer + " is not implemented currently. Try Adam or SGD."
+        if self.optimizer not in ["Adam", "AdamW", "SGD"]:
+            error_msg = self.optimizer + " is not implemented currently. Try Adam, AdamW or SGD."
             raise Exception(error_msg)
 
     def training_step(self, train_batch, batch_idx):
@@ -87,6 +87,10 @@ class PredictionAlgorithm(pl.LightningModule):
         """
         if self.optimizer == "Adam":
             optimizer = torch.optim.Adam(
+                self.parameters(), lr=self.lr, weight_decay=self.weight_decay, betas=self.betas
+            )
+        elif self.optimizer == "AdamW":
+            optimizer = torch.optim.AdamW(
                 self.parameters(), lr=self.lr, weight_decay=self.weight_decay, betas=self.betas
             )
         elif self.optimizer == "SGD":

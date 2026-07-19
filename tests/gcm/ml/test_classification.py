@@ -65,3 +65,19 @@ def test_given_svc_model_then_supports_predict_probabilities():
     mdl = create_support_vector_classifier()
     mdl.fit(np.random.normal(0, 1, 100), np.random.choice(2, 100).astype(str))
     mdl.predict_probabilities(np.random.normal(0, 1, 10))
+
+
+def test_given_weighted_classification_model_when_clone_then_clone_type_is_weighted_and_supports_sample_weight():
+    from sklearn.linear_model import LogisticRegression
+
+    from dowhy.gcm.ml.classification import SklearnClassificationModelWeighted
+
+    model = SklearnClassificationModelWeighted(LogisticRegression())
+    cloned = model.clone()
+
+    assert type(cloned).__name__ == "SklearnClassificationModelWeighted"
+
+    X = np.random.normal(size=(20, 2))
+    y = np.array(["a", "b"] * 10)
+    # Must not raise TypeError about unexpected keyword argument 'sample_weight'.
+    cloned.fit(X, y, sample_weight=np.ones(20))

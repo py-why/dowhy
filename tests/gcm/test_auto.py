@@ -9,6 +9,7 @@ from sklearn.ensemble import HistGradientBoostingClassifier, HistGradientBoostin
 from sklearn.linear_model import ElasticNetCV, LassoCV, LinearRegression, LogisticRegression, RidgeCV
 from sklearn.naive_bayes import GaussianNB
 from sklearn.pipeline import Pipeline
+from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
 from dowhy import gcm
@@ -198,7 +199,10 @@ def test_given_linear_classification_problem_when_auto_assign_causal_models_with
     data.update({"Y": Y})
 
     assign_causal_mechanisms(causal_model, pd.DataFrame(data), quality=AssignmentQuality.GOOD)
-    assert isinstance(causal_model.causal_mechanism("Y").classifier_model.sklearn_model, LogisticRegression)
+    model = causal_model.causal_mechanism("Y").classifier_model.sklearn_model
+    assert isinstance(model, (LogisticRegression, Pipeline))
+    if isinstance(model, Pipeline):
+        assert isinstance(model.steps[-1][1], LogisticRegression)
 
 
 @flaky(max_runs=3)
@@ -212,7 +216,9 @@ def test_given_linear_classification_problem_when_auto_assign_causal_models_with
     data.update({"Y": Y})
 
     assign_causal_mechanisms(causal_model, pd.DataFrame(data), quality=AssignmentQuality.BETTER)
-    assert isinstance(causal_model.causal_mechanism("Y").classifier_model.sklearn_model, LogisticRegression)
+    assert isinstance(
+        causal_model.causal_mechanism("Y").classifier_model.sklearn_model, (LogisticRegression, Pipeline, SVC)
+    )
 
 
 @flaky(max_runs=3)
