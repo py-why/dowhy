@@ -94,8 +94,18 @@ def _get_placebo_names(treatment_names: List[str]) -> List[str]:
     return ["placebo_" + t for t in treatment_names]
 
 
-def _generate_random_placebo(data: pd.DataFrame, treatment_name: str, type_dict: Dict) -> pd.Series:
-    """Generate a single random placebo column matching the dtype of *treatment_name*."""
+def _generate_random_placebo(data: pd.DataFrame, treatment_name: str, type_dict: Dict, rng=None) -> pd.Series:
+    """Generate a single random placebo column matching the dtype of *treatment_name*.
+
+    :param rng: Optional ``numpy.random.RandomState`` instance.  When provided, all draws
+        use this seeded generator so that results are reproducible; when ``None`` the global
+        ``numpy.random`` module functions are used (non-reproducible).
+    """
+    _randn = rng.randn if rng is not None else np.random.randn
+    _binomial = rng.binomial if rng is not None else np.random.binomial
+    _randint = rng.randint if rng is not None else np.random.randint
+    _choice = rng.choice if rng is not None else np.random.choice
+
     dtype = type_dict[treatment_name]
     n = data.shape[0]
     if pd.api.types.is_float_dtype(dtype):
@@ -106,7 +116,7 @@ def _generate_random_placebo(data: pd.DataFrame, treatment_name: str, type_dict:
             )
         )
         return pd.Series(
-            np.random.randn(n) * DEFAULT_STD_DEV_OF_NORMAL + DEFAULT_MEAN_OF_NORMAL,
+            _randn(n) * DEFAULT_STD_DEV_OF_NORMAL + DEFAULT_MEAN_OF_NORMAL,
             index=data.index,
         )
     elif pd.api.types.is_bool_dtype(dtype):
@@ -117,7 +127,7 @@ def _generate_random_placebo(data: pd.DataFrame, treatment_name: str, type_dict:
             )
         )
         return pd.Series(
-            np.random.binomial(DEFAULT_NUMBER_OF_TRIALS, DEFAULT_PROBABILITY_OF_BINOMIAL, n).astype(bool),
+            _binomial(DEFAULT_NUMBER_OF_TRIALS, DEFAULT_PROBABILITY_OF_BINOMIAL, n).astype(bool),
             index=data.index,
         )
     elif pd.api.types.is_integer_dtype(dtype):
@@ -127,7 +137,7 @@ def _generate_random_placebo(data: pd.DataFrame, treatment_name: str, type_dict:
             )
         )
         return pd.Series(
-            np.random.randint(low=data[treatment_name].min(), high=data[treatment_name].max() + 1, size=n),
+            _randint(low=data[treatment_name].min(), high=data[treatment_name].max() + 1, size=n),
             index=data.index,
         )
     elif isinstance(dtype, pd.CategoricalDtype):
@@ -136,7 +146,7 @@ def _generate_random_placebo(data: pd.DataFrame, treatment_name: str, type_dict:
         logger.info("Using a Discrete Uniform Distribution with the following categories:{}".format(categories))
         return pd.Series(
             pd.Categorical(
-                np.random.choice(categories, size=n),
+                _choice(categories, size=n),
                 categories=categories,
                 ordered=treatment.cat.ordered,
             ),
@@ -152,15 +162,16 @@ def _refute_once(
     treatment_names: List[str],
     type_dict: Dict,
     placebo_type: PlaceboType = PlaceboType.DEFAULT,
-    random_state: Optional[np.random.RandomState] = None,
+    seed: Optional[int] = None,
 ):
     placebo_names = _get_placebo_names(treatment_names)
+    rng = np.random.RandomState(seed) if seed is not None else None
 
     if placebo_type == PlaceboType.PERMUTE:
-        if random_state is None:
+        if rng is None:
             permuted_idx = np.random.choice(data.shape[0], size=data.shape[0], replace=False)
         else:
-            permuted_idx = random_state.choice(data.shape[0], size=data.shape[0], replace=False)
+            permuted_idx = rng.choice(data.shape[0], size=data.shape[0], replace=False)
         new_data = data.copy()
         for t, pname in zip(treatment_names, placebo_names):
             permuted_col = data[t].iloc[permuted_idx]
@@ -176,7 +187,7 @@ def _refute_once(
     else:
         new_data = data.copy()
         for t, pname in zip(treatment_names, placebo_names):
-            new_data[pname] = _generate_random_placebo(data, t, type_dict)
+            new_data[pname] = _generate_random_placebo(data, t, type_dict, rng=rng)
 
     if target_estimand.identifier_method.startswith("iv"):
         new_data = pd.concat((new_data, new_instruments_df), axis=1)
@@ -226,6 +237,15 @@ def refute_placebo_treatment(
     if isinstance(random_state, int):
         random_state = np.random.RandomState(random_state)
 
+    # Derive one independent integer seed per simulation so that each call to _refute_once
+    # draws *different* random data even when workers run in parallel (joblib pickles the
+    # argument at submission time, so a shared RandomState would produce identical data in
+    # every worker).
+    if random_state is None:
+        per_sim_seeds: list = [None] * num_simulations
+    else:
+        per_sim_seeds = [int(random_state.randint(0, 2**31 - 1)) for _ in range(num_simulations)]
+
     # only permute is supported for iv methods
     if target_estimand.identifier_method.startswith("iv"):
         if placebo_type != PlaceboType.PERMUTE:
@@ -263,11 +283,9 @@ def refute_placebo_treatment(
 
     # Run refutation in parallel
     sample_estimates = Parallel(n_jobs=n_jobs, verbose=verbose)(
-        delayed(_refute_once)(
-            data, identified_estimand, estimate, treatment_names, type_dict, placebo_type, random_state
-        )
-        for _ in tqdm(
-            range(num_simulations),
+        delayed(_refute_once)(data, identified_estimand, estimate, treatment_names, type_dict, placebo_type, seed)
+        for seed in tqdm(
+            per_sim_seeds,
             disable=not show_progress_bar,
             colour=CausalRefuter.PROGRESS_BAR_COLOR,
             desc="Refuting Estimates: ",
