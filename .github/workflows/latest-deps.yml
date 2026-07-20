@@ -1,6 +1,6 @@
-# Tests DoWhy against the latest released pandas / scikit-learn / numpy / scipy,
-# rather than the pinned versions in poetry.lock. This catches breakages that a
-# fresh `pip install dowhy` user would hit but the locked CI cannot (see #1665).
+# Tests DoWhy against the latest released pandas / scikit-learn / numpy / scipy /
+# statsmodels, rather than the pinned versions in poetry.lock. This catches breakages
+# that a fresh `pip install dowhy` user would hit but the locked CI cannot (see #1665).
 name: Latest Dependencies
 
 on:
@@ -36,7 +36,8 @@ jobs:
 
       - name: Install graphviz
         run: |
-          sudo apt install graphviz libgraphviz-dev graphviz-dev pkg-config
+          sudo apt-get update
+          sudo apt-get install -y graphviz libgraphviz-dev graphviz-dev pkg-config
 
       - name: Install dependencies
         run: |
@@ -44,10 +45,10 @@ jobs:
           echo "installing poetry dependencies"
           poetry install -E plotting -E pydot -E pygraphviz
 
-      - name: Upgrade to latest pandas / scikit-learn / numpy / scipy
+      - name: Upgrade to latest pandas / scikit-learn / numpy / scipy / statsmodels
         run: |
-          poetry run pip install --upgrade pandas scikit-learn numpy scipy
-          poetry run python -c "import pandas, sklearn, numpy, scipy; print('pandas', pandas.__version__); print('scikit-learn', sklearn.__version__); print('numpy', numpy.__version__); print('scipy', scipy.__version__)"
+          poetry run python -m pip install --upgrade pandas scikit-learn numpy scipy statsmodels
+          poetry run python -c "import pandas, sklearn, numpy, scipy, statsmodels; print('pandas', pandas.__version__); print('scikit-learn', sklearn.__version__); print('numpy', numpy.__version__); print('scipy', scipy.__version__); print('statsmodels', statsmodels.__version__)"
 
       - name: Test
         run: poetry run poe test_no_notebooks
