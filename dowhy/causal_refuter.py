@@ -148,7 +148,10 @@ def choose_variables(required_variables: Union[bool, int, list], variables_of_in
 def perform_bootstrap_test(estimate, simulations: List):
     # This calculates a two-sided percentile p-value
     # See footnotes in https://journals.sagepub.com/doi/full/10.1177/2515245920911881
-    half_p_value = np.mean([(x > estimate.value) + 0.5 * (x == estimate.value) for x in simulations])
+    # Reduce to scalar: some estimators (e.g. EconML with discrete_outcome=True) return
+    # array-valued estimates; np.mean collapses them to a single comparable float.
+    estimate_value = float(np.mean(estimate.value))
+    half_p_value = np.mean([(x > estimate_value) + 0.5 * (x == estimate_value) for x in simulations])
     return 2 * min(half_p_value, 1 - half_p_value)
 
 
@@ -169,7 +172,9 @@ def perform_normal_distribution_test(estimate, simulations: List):
         return 1.0
 
     # Get the Z Score [(val - mean)/ std_dev ]
-    z_score = (estimate.value - mean_refute_values) / std_dev_refute_values
+    # Reduce to scalar: some estimators return array-valued estimates; np.mean collapses them.
+    estimate_scalar = float(np.mean(estimate.value))
+    z_score = (estimate_scalar - mean_refute_values) / std_dev_refute_values
 
     if z_score > 0:  # Right Tail
         p_value = 1 - st.norm.cdf(z_score)
@@ -221,10 +226,8 @@ def test_significance(
     if test_type == SignificanceTestType.AUTO:
         num_simulations = len(simulations)
         if num_simulations >= 100:  # Bootstrapping
-            logger.info(
-                "Making use of Bootstrap as we have more than 100 examples.\n \
-            Note: The greater the number of examples, the more accurate are the confidence estimates"
-            )
+            logger.info("Making use of Bootstrap as we have more than 100 examples.\n \
+            Note: The greater the number of examples, the more accurate are the confidence estimates")
 
             # Perform Bootstrap Significance Test with the original estimate and the set of refutations
             p_value = perform_bootstrap_test(estimate, simulations)
@@ -250,12 +253,8 @@ def test_significance(
         p_value = perform_bootstrap_test(estimate, simulations)
 
     elif test_type == SignificanceTestType.NORMAL:
-        logger.info(
-            "Performing Normal Test with {} samples\n \
-        Note: We assume that the underlying distribution is Normal.".format(
-                len(simulations)
-            )
-        )
+        logger.info("Performing Normal Test with {} samples\n \
+        Note: We assume that the underlying distribution is Normal.".format(len(simulations)))
 
         # Perform Normal Tests of Significance with the original estimate and the set of refutations
         p_value = perform_normal_distribution_test(estimate, simulations)
