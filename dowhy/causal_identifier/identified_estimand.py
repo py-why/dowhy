@@ -114,9 +114,12 @@ class IdentifiedEstimand:
             instrumental_variables=copy.deepcopy(self.instrumental_variables),
             frontdoor_variables=copy.deepcopy(self.frontdoor_variables),
             mediator_variables=copy.deepcopy(self.mediator_variables),
+            mediation_first_stage_confounders=copy.deepcopy(self.mediation_first_stage_confounders),
+            mediation_second_stage_confounders=copy.deepcopy(self.mediation_second_stage_confounders),
             default_backdoor_id=copy.deepcopy(self.default_backdoor_id),
             default_adjustment_set_id=copy.deepcopy(self.default_adjustment_set_id),
             identifier_method=copy.deepcopy(self.identifier_method),
+            no_directed_path=self.no_directed_path,
         )
 
     def __str__(self, only_target_estimand: bool = False, show_all_backdoor_sets: bool = False):
