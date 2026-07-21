@@ -128,6 +128,18 @@ def test_given_fdr_bh_when_refuting_causal_structure_then_return_correct_adjuste
     )
 
 
+def test_given_graph_without_edges_when_refuting_causal_structure_with_fdr_bh_then_does_not_raise():
+    # A graph with only isolated/root nodes produces no testable edges/LMCs, i.e. an empty p-value list. With the
+    # default fdr_control_method='fdr_bh' this must not raise a ZeroDivisionError from multipletests on an empty list.
+    edgeless_dag = nx.DiGraph()
+    edgeless_dag.add_nodes_from(["A", "B"])
+    data = pd.DataFrame(data=dict(A=np.random.normal(size=50), B=np.random.normal(size=50)))
+
+    rejection_result, _ = refute_causal_structure(edgeless_dag, data, fdr_control_method="fdr_bh")
+
+    assert rejection_result == RejectionResult.NOT_REJECTED
+
+
 def test_when_using_refute_causal_structure_without_fdrc_then_nans_for_adjusted_p_values_are_returned():
     fork_dag = nx.DiGraph([("Z", "X"), ("Z", "Y")])
     Z = np.random.normal(size=500)

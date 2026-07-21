@@ -61,7 +61,7 @@ class SklearnClassificationModelWeighted(SklearnRegressionModelWeighted, Classif
         return self._sklearn_mdl.classes_
 
     def clone(self):
-        return SklearnClassificationModel(sklearn_mdl=sklearn.clone(self._sklearn_mdl))
+        return SklearnClassificationModelWeighted(sklearn_mdl=sklearn.clone(self._sklearn_mdl))
 
 
 def create_random_forest_classifier(**kwargs) -> SklearnClassificationModel:

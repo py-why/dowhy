@@ -98,7 +98,6 @@ _LIST_OF_CLASSIFIER_SUPPORTING_MISSING_DATA_BETTER = _LIST_OF_CLASSIFIER_SUPPORT
 class AssignmentQuality(Enum):
     GOOD = auto()
     BETTER = auto()
-    BEST = auto()
 
 
 class AutoAssignmentSummary:
@@ -262,9 +261,6 @@ def assign_causal_mechanisms(
         - Gaussian Naive Bayes Classifier
         - Ada Boost Classifier
 
-    With "BEST" quality:
-    An auto ML model based on AutoGluon (optional dependency, needs to be installed).
-
     :param causal_model: The causal model to whose nodes to assign causal models.
     :param based_on: Jointly sampled data corresponding to the nodes of the given graph.
     :param quality: AssignmentQuality for the automatic model selection and model accuracy. This changes the type of
@@ -280,13 +276,6 @@ def assign_causal_mechanisms(
             Model training speed: Fast
             Model inference speed: Fast
             Model accuracy: Good
-        - AssignmentQuality.BEST: Uses an AutoGluon (auto ML) model with default settings defined by the AutoGluon
-            wrapper. While the model selection itself is fast, the training and inference speed can be significantly
-            slower than in the other options. NOTE: This requires the optional autogluon.tabular dependency.
-            Model selection speed: Instant
-            Model training speed: Slow
-            Model inference speed: Slow-Medium
-            Model accuracy: Best
     :param override_models: If set to True, existing mechanism assignments are replaced with automatically selected
                             ones. If set to False, the assigned mechanisms are only validated with respect to the graph
                             structure.
@@ -411,20 +400,7 @@ def select_model(
 
     x_has_nans = pd.isna(X).any().any()
 
-    if model_selection_quality == AssignmentQuality.BEST:
-        try:
-            from dowhy.gcm.ml.autogluon import AutoGluonClassifier, AutoGluonRegressor
-
-            if is_categorical(Y):
-                return AutoGluonClassifier(), []
-            else:
-                return AutoGluonRegressor(), []
-        except ImportError:
-            raise RuntimeError(
-                "AutoGluon module not found! For the BEST auto assign quality, consider installing the "
-                "optional AutoGluon dependency."
-            )
-    elif model_selection_quality == AssignmentQuality.GOOD:
+    if model_selection_quality == AssignmentQuality.GOOD:
         if x_has_nans:
             list_of_regressor = list(_LIST_OF_REGRESSOR_SUPPORTING_MISSING_DATA_GOOD)
             list_of_classifier = list(_LIST_OF_CLASSIFIER_SUPPORTING_MISSING_DATA_GOOD)
@@ -566,12 +542,12 @@ def find_best_model(
                 y_true = Y[test_indices[:max_samples_per_split]]
 
                 if is_classification_problem:
-                    # For classification, use probabilities for log loss calculation
+                    # For classification, use probabilities for log loss calculation. The probability columns follow the
+                    # classes the model was trained on (model_instance.classes), which can be a superset of the classes
+                    # present in the test fold. Pass these classes explicitly to log_loss via `labels` so it does not
+                    # infer a mismatching number of classes from y_true (which would raise a ValueError).
                     y_pred_proba = model_instance.predict_probabilities(X[test_indices[:max_samples_per_split]])
-                    # Convert string labels to label indices for log_loss
-                    label_to_idx = {label: idx for idx, label in enumerate(unique_test_labels)}
-                    y_true_indices = np.array([label_to_idx[label] for label in y_true.flatten()])
-                    average_result.append(metric(y_true_indices, y_pred_proba))
+                    average_result.append(metric(y_true.flatten(), y_pred_proba, labels=model_instance.classes))
                 else:
                     y_pred = model_instance.predict(X[test_indices[:max_samples_per_split]])
                     average_result.append(metric(y_true, y_pred))
