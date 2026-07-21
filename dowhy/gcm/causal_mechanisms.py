@@ -229,7 +229,7 @@ class DiscreteAdditiveNoiseModel(AdditiveNoiseModel):
             raise ValueError("Cannot fit a discrete ANM to non-discrete target values!")
 
         X, Y = shape_into_2d(X, Y)
-        Y = Y.astype(np.int32)
+        Y = Y.astype(np.int64)
 
         self._prediction_model.fit(X=X, Y=Y)
         self._noise_model.fit(Y - self._rounded_prediction(X))
@@ -252,7 +252,7 @@ class DiscreteAdditiveNoiseModel(AdditiveNoiseModel):
         return target_samples - self._rounded_prediction(parent_samples)
 
     def _rounded_prediction(self, X: np.ndarray) -> np.ndarray:
-        return np.round(self._prediction_model.predict(X).astype(float)).astype(np.int32)
+        return np.round(self._prediction_model.predict(X).astype(float)).astype(np.int64)
 
     def clone(self):
         return DiscreteAdditiveNoiseModel(

@@ -192,11 +192,15 @@ def generate_random_dag(num_roots: int, num_children: int, edge_density: float =
     children = ["X" + str(i + num_roots) for i in range(num_children)]
     for child in children:
         all_nodes = list(graph.nodes)
+        graph.add_node(child)
+        # If there are no preceding nodes yet (e.g. num_roots == 0 and this is the first child), the node simply becomes
+        # a root; adding parents would otherwise sample from an empty set and raise.
+        if not all_nodes:
+            continue
         max_parents = len(all_nodes)
         n_parents = 1 + int(np.round(edge_density * (max_parents - 1)))
         n_parents = max(1, min(n_parents, max_parents))
         parents = np.random.choice(all_nodes, n_parents, replace=False)
-        graph.add_node(child)
         for p in parents:
             graph.add_edge(p, child)
 
@@ -497,7 +501,10 @@ def _create_noise_model(config: DataGeneratorConfig) -> StochasticModel:
         if np.random.random() < 0.5:
             return ScipyDistribution(stats.norm, loc=0, scale=std)
         else:
-            return ScipyDistribution(stats.uniform, loc=-std, scale=2 * std)
+            # A uniform distribution on [-h, h] has standard deviation h / sqrt(3). To make its standard deviation
+            # equal to `std` (as documented for noise_std_range), the half-width must be std * sqrt(3).
+            half_width = std * np.sqrt(3)
+            return ScipyDistribution(stats.uniform, loc=-half_width, scale=2 * half_width)
     else:
         mixture = _random_mixture(config, center=0.0)
         scale = np.random.uniform(lo, hi)

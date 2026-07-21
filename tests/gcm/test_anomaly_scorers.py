@@ -21,6 +21,20 @@ def test_given_simple_toy_data_when_using_MedianDeviationScorer_then_returns_exp
     assert anomaly_scorer.score(np.array([0.8, 1.7])).reshape(-1) == approx(np.array([0.2, 1]), abs=0.1)
 
 
+def test_given_data_with_zero_median_absolute_deviation_when_using_MedianDeviationScorer_then_returns_finite_scores():
+    # The median absolute deviation is 0 when a strict majority of the samples share the same value. Dividing by it
+    # would otherwise produce nan (for a point equal to the median) or inf (for any other point).
+    anomaly_scorer = MedianDeviationScorer()
+    anomaly_scorer.fit(np.array([1.0, 1.0, 1.0, 2.0, 3.0]))
+
+    scores = anomaly_scorer.score(np.array([1.0, 5.0]))
+
+    assert np.all(np.isfinite(scores))
+    # A point equal to the median has zero deviation and must score 0; a far-away point must score higher.
+    assert scores.reshape(-1)[0] == approx(0.0)
+    assert scores.reshape(-1)[1] > scores.reshape(-1)[0]
+
+
 def test_given_data_with_nans_when_using_median_quantile_scorer_with_nan_support_then_returns_expected_scores():
     training_data = np.array([1, 2, 3, 4, 5, 6, 7, 8, np.nan, np.nan])
 
