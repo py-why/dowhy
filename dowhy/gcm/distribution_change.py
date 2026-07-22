@@ -317,8 +317,16 @@ def _estimate_marginal_distribution_change(
     shapley_config: Optional[ShapleyConfig],
     graph_factory: Callable[[Any], DirectedGraph],
 ) -> Dict[Any, float]:
-    old_causal_models = [causal_model_old.causal_mechanism(x) for x in sorted(causal_model_old.graph.nodes)]
-    new_causal_models = [causal_model_new.causal_mechanism(x) for x in sorted(causal_model_new.graph.nodes)]
+    # Pre-compute sorted node list and per-node parent lists once. The graph structure
+    # does not change between Shapley set-function calls (only mechanisms are swapped),
+    # so recomputing these inside the closure on every call is wasteful.  For n nodes
+    # and an approximate Shapley estimator with p permutations, this saves O(p·n·log n)
+    # sort operations and O(p·E) predecessor look-ups.
+    nodes_sorted = sorted(causal_model_old.graph.nodes)
+    parents_during_fit = {node: get_ordered_predecessors(causal_model_old.graph, node) for node in nodes_sorted}
+
+    old_causal_models = [causal_model_old.causal_mechanism(x) for x in nodes_sorted]
+    new_causal_models = [causal_model_new.causal_mechanism(x) for x in nodes_sorted]
 
     target_samples_old = draw_samples(causal_model_old, num_samples)[target_node].to_numpy()
 
@@ -327,16 +335,15 @@ def _estimate_marginal_distribution_change(
             return 0
 
         causal_model = ProbabilisticCausalModel(graph_factory(causal_model_old.graph))
-        nodes = sorted(list(causal_model.graph.nodes))
 
         for i in range(len(old_causal_models)):
             if subset[i] == 1:
-                causal_model.set_causal_mechanism(nodes[i], new_causal_models[i])
+                causal_model.set_causal_mechanism(nodes_sorted[i], new_causal_models[i])
             else:
-                causal_model.set_causal_mechanism(nodes[i], old_causal_models[i])
+                causal_model.set_causal_mechanism(nodes_sorted[i], old_causal_models[i])
 
         for node in causal_model.graph.nodes:
-            causal_model.graph.nodes[node][PARENTS_DURING_FIT] = get_ordered_predecessors(causal_model.graph, node)
+            causal_model.graph.nodes[node][PARENTS_DURING_FIT] = parents_during_fit[node]
 
         target_samples_new = draw_samples(causal_model, num_samples)[target_node].to_numpy()
 
@@ -344,7 +351,7 @@ def _estimate_marginal_distribution_change(
 
     attributions = estimate_shapley_values(attribution_set_function, len(old_causal_models), shapley_config)
 
-    return {x: attributions[i] for i, x in enumerate(sorted(causal_model_old.graph.nodes))}
+    return {x: attributions[i] for i, x in enumerate(nodes_sorted)}
 
 
 def estimate_distribution_change_scores(
