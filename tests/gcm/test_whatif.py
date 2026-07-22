@@ -296,3 +296,33 @@ def test_given_discrete_data_when_performing_interventions_then_returns_correct_
     assert np.all(samples["X"].to_numpy() == -2)
     assert np.median(samples["Y"].to_numpy()) == -1
     assert np.mean(samples["Z"].to_numpy()) == approx(-2, abs=0.05)
+
+
+def test_given_chain_graph_when_get_nodes_affected_by_intervention_then_returns_descendants_and_target():
+    from dowhy.gcm.whatif import _get_nodes_affected_by_intervention
+
+    # X0 -> X1 -> X2 -> X3; intervening on X1 should affect X1, X2, X3 (not X0)
+    graph = nx.DiGraph([("X0", "X1"), ("X1", "X2"), ("X2", "X3")])
+    affected = _get_nodes_affected_by_intervention(graph, ["X1"])
+    assert set(affected) == {"X1", "X2", "X3"}
+    # Result should be in topological order
+    assert affected.index("X1") < affected.index("X2") < affected.index("X3")
+
+
+def test_given_multiple_interventions_when_get_nodes_affected_by_intervention_then_returns_union_of_descendants():
+    from dowhy.gcm.whatif import _get_nodes_affected_by_intervention
+
+    # X0 -> X1 -> X3; X2 -> X3; intervening on X0 and X2 should affect X0, X1, X2, X3
+    graph = nx.DiGraph([("X0", "X1"), ("X1", "X3"), ("X2", "X3")])
+    affected = _get_nodes_affected_by_intervention(graph, ["X0", "X2"])
+    assert set(affected) == {"X0", "X1", "X2", "X3"}
+
+
+def test_given_source_node_intervention_when_get_nodes_affected_by_intervention_then_excludes_non_descendants():
+    from dowhy.gcm.whatif import _get_nodes_affected_by_intervention
+
+    # X0 -> X1 -> X2; X3 -> X2; intervening on X0 should NOT affect X3
+    graph = nx.DiGraph([("X0", "X1"), ("X1", "X2"), ("X3", "X2")])
+    affected = _get_nodes_affected_by_intervention(graph, ["X0"])
+    assert set(affected) == {"X0", "X1", "X2"}
+    assert "X3" not in affected
