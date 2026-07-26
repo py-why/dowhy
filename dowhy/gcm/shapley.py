@@ -6,7 +6,6 @@ from enum import Enum
 from typing import Callable, Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
-import scipy
 from joblib import Parallel, delayed
 from scipy.special import comb
 from scipy.stats._qmc import Halton
@@ -473,52 +472,26 @@ def _create_subsets_and_weights_exact(num_players: int, high_weight: float) -> T
     :return: A tuple, where the first entry is a numpy array with all subsets and the second entry is an array with the
              corresponding weights to each subset.
     """
-    all_subsets = []
+    # Generate all 2^num_players binary subset vectors in one vectorised operation using bit manipulation.
+    # Row i of all_subsets is the binary representation of i, giving every possible subset.
+    n_subsets = 2**num_players
+    all_subsets = (np.arange(n_subsets, dtype=np.int32)[:, None] >> np.arange(num_players, dtype=np.int32)) & 1
 
-    num_iterations = int(np.ceil(num_players / 2))
+    # Compute subset sizes (number of active players) for every row at once.
+    subset_sizes = all_subsets.sum(axis=1)
 
-    for i in range(num_iterations):
-        # Create all (unique) subsets)
-        all_subsets.extend(
-            np.array(
-                [np.bincount(combs, minlength=num_players) for combs in itertools.combinations(range(num_players), i)]
-            )
-        )
+    # Full and empty subsets get a 'high' weight to approximate equality constraints.
+    is_boundary = (subset_sizes == 0) | (subset_sizes == num_players)
 
-        all_subsets.extend(
-            np.array(
-                [
-                    np.bincount(combs, minlength=num_players)
-                    for combs in itertools.combinations(range(num_players), num_players - i)
-                ]
-            )
-        )
+    # For non-boundary rows the Shapley weight formula is:
+    #   (num_players - 1) / (binom(num_players, k) * k * (num_players - k))
+    # Use dummy values of 1 for boundary rows to avoid division by zero; they are overwritten below.
+    safe_sizes = np.where(is_boundary, 1, subset_sizes)
+    safe_complements = np.where(is_boundary, 1, num_players - subset_sizes)
+    weights = (num_players - 1) / (comb(num_players, subset_sizes, exact=False) * safe_sizes * safe_complements)
+    weights[is_boundary] = high_weight
 
-        if i == num_iterations - 1 and num_players % 2 == 0:
-            all_subsets.extend(
-                np.array(
-                    [
-                        np.bincount(combs, minlength=num_players)
-                        for combs in itertools.combinations(range(num_players), i + 1)
-                    ]
-                )
-            )
-
-    weights = np.zeros(len(all_subsets))
-
-    for i, subset in enumerate(all_subsets):
-        subset_size = np.sum(subset)
-        if subset_size == num_players or subset_size == 0:
-            # Assigning a 'high' weight, since this resembles "infinity".
-            weights[i] = high_weight
-        else:
-            # The weight for a subset with a specific length (see paper mentioned in the docstring for more
-            # information).
-            weights[i] = (num_players - 1) / (
-                scipy.special.binom(num_players, subset_size) * subset_size * (num_players - subset_size)
-            )
-
-    return np.array(all_subsets, dtype=np.int32), weights.astype(float)
+    return all_subsets, weights
 
 
 def _create_subsets_and_weights_approximation(
@@ -540,10 +513,9 @@ def _create_subsets_and_weights_approximation(
     # already covered above). The length-probability vector would then sum to 0 and produce NaN sampling probabilities,
     # so we skip the sampling loop; the two fixed subsets already determine the Shapley value.
     if num_players > 1:
+        i_vals = np.arange(1, num_players)
         probabilities_of_subset_length = np.zeros(num_players + 1)
-        for i in range(1, num_players):
-            probabilities_of_subset_length[i] = (num_players - 1) / (i * (num_players - i))
-
+        probabilities_of_subset_length[1:num_players] = (num_players - 1) / (i_vals * (num_players - i_vals))
         probabilities_of_subset_length = probabilities_of_subset_length / np.sum(probabilities_of_subset_length)
 
         for i in range(num_subset_samples):
