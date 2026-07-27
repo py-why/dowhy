@@ -2,7 +2,7 @@ import numpy as np
 from pytest import approx
 
 from dowhy.gcm import MedianCDFQuantileScorer, MedianDeviationScorer, RescaledMedianCDFQuantileScorer
-from dowhy.gcm.anomaly_scorers import RankBasedAnomalyScorer
+from dowhy.gcm.anomaly_scorers import MeanDeviationScorer, RankBasedAnomalyScorer
 
 
 def test_given_simple_toy_data_when_using_MedianCDFQuantileScorer_then_returns_expected_scores():
@@ -71,3 +71,25 @@ def test_when_using_ranked_based_anomaly_scorer_then_returns_expected_scores():
     scorer.fit(training_data)
 
     assert scorer.score(np.array([1, np.nan])) == approx([-np.log(2 * 1 / 5), -np.log(1)])
+
+
+def test_given_simple_toy_data_when_using_MeanDeviationScorer_then_returns_expected_scores():
+    anomaly_scorer = MeanDeviationScorer()
+    anomaly_scorer.fit(np.array([0.0, 1.0, 2.0, 3.0, 4.0]))
+    scores = anomaly_scorer.score(np.array([2.0, 4.0]))
+    # mean=2, std=sqrt(2); score(2)=0, score(4)=|4-2|/sqrt(2)=sqrt(2)
+    assert scores.reshape(-1)[0] == approx(0.0, abs=1e-6)
+    assert scores.reshape(-1)[1] == approx(np.sqrt(2), abs=1e-6)
+
+
+def test_given_constant_data_when_using_MeanDeviationScorer_then_returns_finite_scores():
+    # std == 0 for constant data; dividing by it would produce nan (for the mean) or inf (for any other point).
+    anomaly_scorer = MeanDeviationScorer()
+    anomaly_scorer.fit(np.array([3.0, 3.0, 3.0, 3.0]))
+
+    scores = anomaly_scorer.score(np.array([3.0, 10.0]))
+
+    assert np.all(np.isfinite(scores))
+    # A point equal to the mean has zero deviation and must score 0; a far-away point must score higher.
+    assert scores.reshape(-1)[0] == approx(0.0)
+    assert scores.reshape(-1)[1] > scores.reshape(-1)[0]
