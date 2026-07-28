@@ -40,26 +40,46 @@ class MedianCDFQuantileScorer(AnomalyScorer):
 
     def __init__(self):
         self._distribution_samples = None
+        self._sorted_non_nan_samples = None
+        self._num_nan_train = 0
 
     def fit(self, X: np.ndarray) -> None:
         if (X.ndim == 2 and X.shape[1] > 1) or X.ndim > 2:
             raise ValueError("The MedianCDFQuantileScorer currently only supports one-dimensional data!")
 
         self._distribution_samples = X.reshape(-1).astype(float)
+        non_nan_mask = ~np.isnan(self._distribution_samples)
+        self._sorted_non_nan_samples = np.sort(self._distribution_samples[non_nan_mask])
+        self._num_nan_train = int(np.sum(~non_nan_mask))
 
     def score(self, X: np.ndarray) -> np.ndarray:
         if self._distribution_samples is None:
             raise ValueError("Scorer has not been fitted!")
 
-        X = shape_into_2d(X.astype(float))
+        x_flat = shape_into_2d(X.astype(float)).ravel()
+        n_train = self._distribution_samples.shape[0]
+        n_sorted = self._sorted_non_nan_samples.shape[0]
 
-        equal_samples = np.sum(np.isclose(X, self._distribution_samples, rtol=0, atol=0, equal_nan=True), axis=1) + 1
-        greater_samples = np.sum(X > self._distribution_samples, axis=1) + equal_samples / 2
-        smaller_samples = np.sum(X < self._distribution_samples, axis=1) + equal_samples / 2
+        x_is_nan = np.isnan(x_flat)
+        # Replace NaN placeholders with 0.0 so searchsorted doesn't receive NaN inputs;
+        # results for NaN positions are overridden below.
+        x_for_search = np.where(x_is_nan, 0.0, x_flat)
 
-        return 1 - 2 * np.amin(np.vstack([greater_samples, smaller_samples]), axis=0) / (
-            self._distribution_samples.shape[0] + 1
-        )
+        # O(n_test * log(n_train)) rank computation via binary search on pre-sorted training data,
+        # replacing the previous O(n_test * n_train) broadcasting approach.
+        n_less = np.searchsorted(self._sorted_non_nan_samples, x_for_search, side="left")
+        n_greater = n_sorted - np.searchsorted(self._sorted_non_nan_samples, x_for_search, side="right")
+        n_equal = np.where(x_is_nan, self._num_nan_train, n_sorted - n_less - n_greater)
+
+        # NaN test points are only equal to NaN training points; no strict < or > relationships.
+        n_less_final = np.where(x_is_nan, 0, n_less)
+        n_greater_final = np.where(x_is_nan, 0, n_greater)
+
+        equal_samples = n_equal + 1
+        greater_samples = n_greater_final + equal_samples / 2
+        smaller_samples = n_less_final + equal_samples / 2
+
+        return 1 - 2 * np.minimum(greater_samples, smaller_samples) / (n_train + 1)
 
 
 class RescaledMedianCDFQuantileScorer(AnomalyScorer):
@@ -124,37 +144,53 @@ class RankBasedAnomalyScorer(AnomalyScorer):
 
     def __init__(self):
         self._distribution_samples = None
+        self._sorted_non_nan_samples = None
+        self._num_nan_train = 0
 
     def fit(self, X: np.ndarray) -> None:
         if (X.ndim == 2 and X.shape[1] > 1) or X.ndim > 2:
             raise ValueError("The RankBasedAnomalyScorer currently only supports one-dimensional data!")
 
-        self._distribution_samples = X.reshape(-1)
+        self._distribution_samples = X.reshape(-1).astype(float)
+        non_nan_mask = ~np.isnan(self._distribution_samples)
+        self._sorted_non_nan_samples = np.sort(self._distribution_samples[non_nan_mask])
+        self._num_nan_train = int(np.sum(~non_nan_mask))
 
     def score(self, X: np.ndarray) -> np.ndarray:
         if self._distribution_samples is None:
             raise ValueError("Scorer has not been fitted!")
 
-        X = shape_into_2d(X)
+        x_flat = shape_into_2d(X.astype(float)).ravel()
+        n_train = self._distribution_samples.shape[0]
+        n_sorted = self._sorted_non_nan_samples.shape[0]
 
-        # Compute rank of every single test point in the union of the training and the respective test point.
+        x_is_nan = np.isnan(x_flat)
+        # Replace NaN placeholders with 0.0 so searchsorted doesn't receive NaN inputs;
+        # results for NaN positions are overridden below.
+        x_for_search = np.where(x_is_nan, 0.0, x_flat)
+
+        # O(n_test * log(n_train)) rank computation via binary search on pre-sorted training data,
+        # replacing the previous O(n_test * n_train) broadcasting approach.
+        n_less = np.searchsorted(self._sorted_non_nan_samples, x_for_search, side="left")
+        n_greater = n_sorted - np.searchsorted(self._sorted_non_nan_samples, x_for_search, side="right")
+        n_equal = np.where(x_is_nan, self._num_nan_train, n_sorted - n_less - n_greater)
+
+        # NaN test points are only equal to NaN training points; no strict < or > relationships.
+        n_less_final = np.where(x_is_nan, 0, n_less)
+        n_greater_final = np.where(x_is_nan, 0, n_greater)
+
+        # Compute rank of every single test point in the union of training and the respective test point.
         # + 1 here to count the test sample itself.
-        equal_samples = np.sum(np.isclose(X, self._distribution_samples, rtol=0, atol=0, equal_nan=True), axis=1) + 1
-        ranks_from_above = np.sum(X > self._distribution_samples, axis=1) + equal_samples
-        ranks_from_below = np.sum(X < self._distribution_samples, axis=1) + equal_samples
+        equal_samples = n_equal + 1
+        ranks_from_above = n_greater_final + equal_samples
+        ranks_from_below = n_less_final + equal_samples
 
         # The probability to get at most rank k from above is k divided by the total number of samples. Similar for
         # the case of below. Therefore, to get at most rank k either from above or below is
         # min(2*k/total_num_samples, 1). We then get a p-value for exchangeability:
-        p_values = np.amin(
-            np.vstack(
-                [
-                    2 * ranks_from_above / (self._distribution_samples.shape[0] + 1),
-                    2 * ranks_from_below / (self._distribution_samples.shape[0] + 1),
-                    np.ones(X.shape[0]),
-                ]
-            ),
-            axis=0,
+        p_values = np.minimum(
+            1.0,
+            2 * np.minimum(ranks_from_above, ranks_from_below) / (n_train + 1),
         )
 
         return -np.log(p_values)
