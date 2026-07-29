@@ -814,7 +814,10 @@ def preprocess_data_by_treatment(
 
     :returns: ``pandas.core.groupby.generic.DataFrameGroupBy``
     """
-    assert len(treatment_name) == 1, "At present, DoWhy supports a simgle treatment variable"
+    if len(treatment_name) != 1:
+        raise ValueError("At present, DoWhy supports a single treatment variable")
+
+    data = data.copy()
 
     if unobserved_confounder_values is not None:
         data["simulated"] = unobserved_confounder_values
@@ -824,23 +827,21 @@ def preprocess_data_by_treatment(
     variable_type = data[treatment_variable_name].dtypes
 
     if bool == variable_type:
-        groups = data.groupby(treatment_variable_name)
+        groups = data.groupby(treatment_variable_name, observed=True)
         return groups
     # We use string arguments to account for both 32 and 64 bit varaibles
     elif "float" in variable_type.name or "int" in variable_type.name:
         # action for continuous variables
-        data = data
         std_dev = data[treatment_variable_name].std()
-        num_bins = (data.max() - data.min()) / (bucket_size_scale_factor * std_dev)
+        t_range = data[treatment_variable_name].max() - data[treatment_variable_name].min()
+        num_bins = max(1, int(t_range / (bucket_size_scale_factor * std_dev)))
         data["bins"] = pd.cut(data[treatment_variable_name], num_bins)
-        groups = data.groupby("bins")
-        data.drop("bins", axis=1, inplace=True)
+        groups = data.groupby("bins", observed=True)
         return groups
 
-    elif "categorical" in variable_type.name:
+    elif "categor" in variable_type.name:
         # Action for categorical variables
-        groups = data.groupby(treatment_variable_name)
-        groups = data.groupby("bins")
+        groups = data.groupby(treatment_variable_name, observed=True)
         return groups
     else:
         raise ValueError("Passed {}. Expected bool, float, int or categorical.".format(variable_type.name))
