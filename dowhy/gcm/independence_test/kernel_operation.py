@@ -54,7 +54,7 @@ def apply_delta_kernel(X: np.ndarray) -> np.ndarray:
     :return: The outcome of the delta-kernel, a binary distance matrix.
     """
     X = shape_into_2d(X)
-    return np.array(list(map(lambda value: value == X, X))).reshape(X.shape[0], X.shape[0]).astype(float)
+    return np.all(X[:, None, :] == X[None, :, :], axis=2).astype(float)
 
 
 def approximate_rbf_kernel_features(
