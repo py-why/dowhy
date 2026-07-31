@@ -1,13 +1,14 @@
 """The gcm sub-package provides features built on top of graphical causal model (GCM) based inference."""
 
 from . import auto, config, divergence, ml, shapley, stats, uncertainty, util
-from .anomaly import anomaly_scores, attribute_anomalies
+from .anomaly import anomaly_scores, attribute_anomalies, conditional_anomaly_scores
 from .anomaly_scorers import (
     InverseDensityScorer,
     ITAnomalyScorer,
     MeanDeviationScorer,
     MedianCDFQuantileScorer,
     MedianDeviationScorer,
+    RankBasedAnomalyScorer,
     RescaledMedianCDFQuantileScorer,
 )
 from .causal_mechanisms import AdditiveNoiseModel, ClassifierFCM, DiscreteAdditiveNoiseModel, PostNonlinearModel
@@ -26,7 +27,12 @@ from .independence_test import (
     kernel_based,
     regression_based,
 )
-from .influence import arrow_strength, intrinsic_causal_influence
+from .influence import (
+    arrow_strength,
+    arrow_strength_of_model,
+    intrinsic_causal_influence,
+    intrinsic_causal_influence_sample,
+)
 from .ml import ClassificationModel, PredictionModel
 from .model_evaluation import evaluate_causal_model
 from .stochastic_models import BayesianGaussianMixtureDistribution, EmpiricalDistribution, ScipyDistribution
