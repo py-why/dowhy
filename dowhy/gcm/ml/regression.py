@@ -65,6 +65,9 @@ class SklearnRegressionModelWeighted(SklearnRegressionModel):
 
         self._sklearn_mdl.fit(X=X, y=Y.squeeze(), sample_weight=sample_weight)
 
+    def clone(self):
+        return SklearnRegressionModelWeighted(sklearn_mdl=sklearn.clone(self._sklearn_mdl))
+
 
 class LinearRegressionWithFixedParameter(PredictionModel):
     def __init__(self, coefficients: np.ndarray, intercept: float):
