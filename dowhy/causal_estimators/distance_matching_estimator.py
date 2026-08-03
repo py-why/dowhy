@@ -249,7 +249,7 @@ class DistanceMatchingEstimator(CausalEstimator):
                 for i in range(numtreatedunits):
                     self.matched_indices_att[treated_df_index[i]] = control.iloc[indices[i]].index.tolist()
             else:
-                grouped = updated_df.groupby(self.exact_match_cols)
+                grouped = updated_df.groupby(self.exact_match_cols, observed=True)
                 att = 0
                 total_treated_matched = 0
                 self.matched_indices_att = {}
