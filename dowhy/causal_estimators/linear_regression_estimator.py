@@ -1,6 +1,7 @@
 import itertools
 from typing import List, Optional, Union
 
+import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 
@@ -111,16 +112,51 @@ class LinearRegressionEstimator(RegressionEstimator):
         model = sm.OLS(data[self._target_estimand.outcome_variable[0]], features).fit()
         return (features, model)
 
+    def _delta_method_std_error(self) -> float:
+        """Compute the SE of the ATE via the delta method when effect modifiers are present.
+
+        The ATE is a linear combination of the OLS coefficients::
+
+            ATE = gradient @ beta,  where gradient = mean(X_t1 - X_t0, axis=0)
+
+        By the delta method::
+
+            Var(ATE) = gradient @ cov_params @ gradient
+
+        This is exact for linear models and avoids the computational cost of bootstrapping.
+
+        See: Gelman & Hill, *Data Analysis Using Regression and Multilevel/Hierarchical
+        Models*, Chapter 9 (delta method for linear combinations of regression coefficients).
+        """
+        data = self._data
+        t_var = self._target_estimand.treatment_variable
+
+        data_t1 = data.copy()
+        data_t1[t_var] = self._treatment_value
+        data_t1[t_var] = data_t1[t_var].astype(data[t_var].dtypes)
+
+        data_t0 = data.copy()
+        data_t0[t_var] = self._control_value
+        data_t0[t_var] = data_t0[t_var].astype(data[t_var].dtypes)
+
+        X_t1 = self._build_features(data_t1)
+        X_t0 = self._build_features(data_t0)
+
+        gradient = np.mean(X_t1 - X_t0, axis=0)
+        cov = self.model.cov_params().to_numpy()
+        var_ate = float(gradient @ cov @ gradient)
+        return np.sqrt(max(var_ate, 0.0))
+
     def _estimate_confidence_intervals(self, confidence_level, method=None):
         if self._effect_modifier_names:
-            # The average treatment effect is a combination of different
-            # regression coefficients. Complicated to compute the confidence
-            # interval analytically. For example, if y=a + b1.t + b2.tx, then
-            # the average treatment effect is b1+b2.mean(x).
-            # Refer Gelman, Hill. ARM Book. Chapter 9
-            # http://www.stat.columbia.edu/~gelman/arm/chap9.pdf
-            # TODO: Looking for contributions
-            raise NotImplementedError
+            # Delta method: ATE = gradient @ beta, Var(ATE) = gradient @ Sigma @ gradient
+            # Refer: Gelman & Hill, ARM, Chapter 9
+            from scipy.stats import norm as scipy_norm
+
+            se = self._delta_method_std_error()
+            ate = self._do(self._treatment_value, self._data) - self._do(self._control_value, self._data)
+            z = scipy_norm.ppf((1 + confidence_level) / 2)
+            return np.array([[ate - z * se, ate + z * se]])
         else:
             conf_ints = self.model.conf_int(alpha=1 - confidence_level)
             # For a linear regression model, the causal effect of a variable is equal to the coefficient corresponding to the
@@ -132,7 +168,8 @@ class LinearRegressionEstimator(RegressionEstimator):
 
     def _estimate_std_error(self, method=None):
         if self._effect_modifier_names:
-            raise NotImplementedError
+            # Delta method SE for ATE when effect modifiers are present.
+            return np.array([self._delta_method_std_error()])
         else:
             std_error = self.model.bse[1 : (len(self._target_estimand.treatment_variable) + 1)]
 
