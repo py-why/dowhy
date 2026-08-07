@@ -71,4 +71,3 @@ class TestConstructEstimands:
         assumptions = estimand["assumptions"]
         assert "behavior" in assumptions["Mediation"]
         assert "b,e,h,a,v,i,o,r" not in assumptions["Mediation"]
-
