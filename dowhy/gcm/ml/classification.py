@@ -31,7 +31,7 @@ from dowhy.gcm.util.general import auto_apply_encoders, shape_into_2d
 
 class ClassificationModel(PredictionModel):
     @abstractmethod
-    def predict_probabilities(self, X: np.array) -> np.ndarray:
+    def predict_probabilities(self, X: np.ndarray) -> np.ndarray:
         raise NotImplementedError
 
     @property
@@ -41,7 +41,7 @@ class ClassificationModel(PredictionModel):
 
 
 class SklearnClassificationModel(SklearnRegressionModel, ClassificationModel):
-    def predict_probabilities(self, X: np.array) -> np.ndarray:
+    def predict_probabilities(self, X: np.ndarray) -> np.ndarray:
         return shape_into_2d(self._sklearn_mdl.predict_proba(auto_apply_encoders(X, self._encoders)))
 
     @property
@@ -53,7 +53,7 @@ class SklearnClassificationModel(SklearnRegressionModel, ClassificationModel):
 
 
 class SklearnClassificationModelWeighted(SklearnRegressionModelWeighted, ClassificationModel):
-    def predict_probabilities(self, X: np.array) -> np.ndarray:
+    def predict_probabilities(self, X: np.ndarray) -> np.ndarray:
         return shape_into_2d(self._sklearn_mdl.predict_proba(auto_apply_encoders(X, self._encoders)))
 
     @property
