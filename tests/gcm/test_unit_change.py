@@ -52,6 +52,52 @@ def test_given_fitted_linear_mechanisms_with_output_change_when_evaluate_unit_ch
 
 
 @flaky(max_runs=5)
+def test_given_linear_mechanisms_with_different_intercepts_when_evaluate_unit_change_linear_then_attributions_sum_to_output_change():
+    # When the mechanisms are fit with intercepts (the sklearn default), the mechanism ('f') attribution must include
+    # the intercept difference. Otherwise the per-row attributions do not sum to the true output change.
+    num_rows = 100
+    A1 = np.random.normal(size=num_rows)
+    B1 = np.random.normal(size=num_rows)
+    C1 = 2 * A1 + 3 * B1 + 5.0
+
+    A2 = np.random.normal(size=num_rows)
+    B2 = np.random.normal(size=num_rows)
+    C2 = 3 * A2 + 2 * B2 - 2.0
+
+    background_df = pd.DataFrame(data=dict(A=A1, B=B1))
+    foreground_df = pd.DataFrame(data=dict(A=A2, B=B2))
+
+    background_mechanism = SklearnLinearRegressionModel(
+        LinearRegression(fit_intercept=True).fit(np.column_stack((A1, B1)), C1)
+    )
+    foreground_mechanism = SklearnLinearRegressionModel(
+        LinearRegression(fit_intercept=True).fit(np.column_stack((A2, B2)), C2)
+    )
+
+    contributions = unit_change_linear(
+        background_mechanism, background_df, foreground_mechanism, foreground_df, ["A", "B"]
+    )
+
+    true_output_change = (
+        foreground_mechanism.predict(foreground_df[["A", "B"]].to_numpy()).flatten()
+        - background_mechanism.predict(background_df[["A", "B"]].to_numpy()).flatten()
+    )
+
+    np.testing.assert_array_almost_equal(contributions.sum(axis=1).to_numpy(), true_output_change, decimal=5)
+
+    # The linear method must also agree with the (correct) nonlinear Shapley counterpart.
+    nonlinear_contributions = unit_change_nonlinear(
+        background_mechanism,
+        background_df,
+        foreground_mechanism,
+        foreground_df,
+        ["A", "B"],
+        shapley_config=ShapleyConfig(n_jobs=1),
+    )
+    np.testing.assert_array_almost_equal(contributions, nonlinear_contributions, decimal=1)
+
+
+@flaky(max_runs=5)
 def test_given_fitted_linear_mechanisms_with_output_change_when_evaluate_unit_change_linear_and_nonlinear_methods_then_attributions_are_consistent():
     num_rows = 100
     A1 = np.random.normal(size=num_rows)

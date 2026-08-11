@@ -363,7 +363,7 @@ def evaluate_causal_model(
     evaluation_result = CausalModelEvaluationResult()
 
     if max_num_samples >= 0 and max_num_samples < data.shape[0]:
-        data = data[np.random.choice(data.shape[0], data.shape[0], replace=False)]
+        data = data.iloc[np.random.choice(data.shape[0], max_num_samples, replace=False)]
 
     if evaluate_causal_mechanisms:
         evaluation_result.mechanism_performances = _evaluate_model_performances(
@@ -659,9 +659,11 @@ def _estimate_conditional_expectations(
             for _ in range(num_samples_conditional_samples):
                 all_draws.append(causal_mechanism.draw_samples(parent_samples).reshape(-1))
 
+            # scipy>=1.9 returns a 1-D mode array of shape (num_test_samples,) (keepdims defaults to False), i.e. one
+            # most-frequent value per test sample. Return the whole array rather than only the first sample's mode.
             modes, _ = mode(np.array(all_draws), axis=0)
 
-            return np.array(modes[0].tolist())
+            return np.asarray(modes).reshape(-1)
 
 
 def nmse(y_true: np.ndarray, y_pred: np.ndarray, squared: bool = False) -> float:

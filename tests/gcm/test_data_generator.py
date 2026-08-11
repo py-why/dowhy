@@ -1,6 +1,7 @@
 import networkx as nx
 import numpy as np
 import pandas as pd
+import pytest
 
 from dowhy.gcm.causal_mechanisms import AdditiveNoiseModel
 from dowhy.gcm.causal_models import StructuralCausalModel
@@ -41,6 +42,27 @@ def test_generate_random_scm_returns_structural_causal_model():
     scm = generate_random_scm(3, 4)
     assert isinstance(scm, StructuralCausalModel)
     assert scm.graph.number_of_nodes() == 7
+
+
+def test_generate_random_dag_with_zero_roots_does_not_raise():
+    # Regression: with num_roots=0 the first child had no candidate parents, so np.random.choice on an empty node list
+    # raised. It should instead become a root node.
+    np.random.seed(0)
+    dag = generate_random_dag(0, 3)
+    assert dag.number_of_nodes() == 3
+    assert nx.is_directed_acyclic_graph(dag)
+
+
+def test_unimodal_uniform_noise_has_requested_standard_deviation():
+    # Regression: the uniform noise branch used loc=-std, scale=2*std, giving an actual standard deviation of
+    # std/sqrt(3). It must honor noise_std_range as the standard deviation, matching the Gaussian branch.
+    from dowhy.gcm.data_generator import _create_noise_model
+
+    np.random.seed(0)
+    cfg = DataGeneratorConfig(noise_std_range=(0.15, 0.15), prob_unimodal_noise=1.0)
+    empirical_stds = [_create_noise_model(cfg).draw_samples(20000).std() for _ in range(40)]
+    # Averaging over both the Gaussian and uniform branches, the empirical std should track the requested 0.15.
+    assert np.mean(empirical_stds) == pytest.approx(0.15, abs=0.02)
 
 
 def test_generate_random_scm_values_are_bounded():

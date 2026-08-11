@@ -242,6 +242,10 @@ class MedianDeviationScorer(AnomalyScorer):
     def fit(self, X: np.ndarray) -> None:
         self._median = np.median(X)
         self._mad = mad(X)
+        # The median absolute deviation can be 0 (e.g. constant data or when a strict majority of the samples share the
+        # same value). Fall back to a small constant to avoid dividing by zero, which would silently produce nan/inf.
+        if self._mad == 0:
+            self._mad = EPS
 
     def score(self, X: np.ndarray) -> np.ndarray:
         if self._median is None or self._mad is None:

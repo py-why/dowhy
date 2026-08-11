@@ -120,4 +120,8 @@ def _estimate_percentile_bounds(X: np.ndarray, quantile: float) -> np.ndarray:
     if X.ndim > 1:
         raise ValueError("Estimate bounds currently only supports one dimensional inputs!")
 
-    return np.array([np.percentile(X, (1 - quantile) * 100), np.percentile(X, quantile * 100)])
+    # Two-sided percentile bootstrap interval: to cover a `quantile` fraction of the mass, the lower/upper bounds are
+    # the (1 - quantile) / 2 and 1 - (1 - quantile) / 2 percentiles. E.g. for quantile=0.95 this yields the 2.5th and
+    # 97.5th percentiles.
+    lower = (1 - quantile) / 2
+    return np.array([np.percentile(X, lower * 100), np.percentile(X, (1 - lower) * 100)])

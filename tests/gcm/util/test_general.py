@@ -39,6 +39,14 @@ def test_given_categorical_data_when_evaluating_is_categorical_then_returns_expe
     assert not is_categorical(np.array([1, 2, 3]))
 
 
+def test_given_multi_column_categorical_with_nan_when_evaluating_is_categorical_then_raises_informative_error():
+    # Regression test: multi-column input with NaN used to crash with IndexError because the NaN mask was applied
+    # repeatedly inside the loop, shrinking the array while the mask stayed at the original length.
+    X = np.array([["a", "p"], ["b", np.nan], ["c", "r"], ["a", "p"]], dtype=object)
+    with pytest.raises(ValueError, match="categorical and has missing data"):
+        is_categorical(X)
+
+
 def test_given_categorical_data_when_evaluating_has_categorical_then_returns_expected_result():
     assert has_categorical(np.array([["A", 2, 3], ["B", 4, 5]]))
     assert has_categorical(

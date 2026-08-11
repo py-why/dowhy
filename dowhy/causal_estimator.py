@@ -1,5 +1,6 @@
 import copy
 import logging
+import warnings
 from collections import namedtuple
 from typing import Dict, List, Optional, Union
 
@@ -341,16 +342,14 @@ class CausalEstimator:
         # Adding observed=True to avoid a FutureWarning in pandas (see #1316)
         by_effect_mods = data.groupby(effect_modifier_names, observed=True)
 
-        # pandas >=2.2 emits a DeprecationWarning when the grouping columns are
-        # passed to the applied function unless include_groups is specified
-        # explicitly. We pass include_groups=True because estimators may access
-        # the effect-modifier columns (grouping columns) inside estimate_effect_fn
-        # for feature construction. Older pandas versions do not accept this
-        # keyword, so we fall back gracefully.
-        try:
-            conditional_estimates = by_effect_mods.apply(estimate_effect_fn, include_groups=True)
-        except TypeError:
-            conditional_estimates = by_effect_mods.apply(estimate_effect_fn)
+        # Some estimators access the effect-modifier (grouping) columns inside
+        # estimate_effect_fn for feature construction, so those columns must remain
+        # available. pandas >=3.0 no longer lets GroupBy.apply include the grouping
+        # columns (include_groups=True was removed). Iterating the groups keeps the
+        # grouping columns in each sub-frame across all pandas versions.
+        group_estimates = {group_key: estimate_effect_fn(group_df) for group_key, group_df in by_effect_mods}
+        conditional_estimates = pd.Series(group_estimates)
+        conditional_estimates.index.names = effect_modifier_names
         # Deleting the temporary categorical columns
         for em in effect_modifier_names:
             if em.startswith(prefix):
@@ -814,6 +813,29 @@ class CausalEstimator:
         )
 
 
+def _warn_if_nan_in_data(data: pd.DataFrame, treatment: List[str], outcome: List[str]) -> None:
+    """Emits a warning if any treatment or outcome columns contain NaN values.
+
+    NaN values are propagated silently by most estimators, producing a NaN estimate
+    with no diagnostic information. This helper surfaces the issue early so users can
+    resolve it before fitting.
+
+    :param data: DataFrame passed to estimate_effect.
+    :param treatment: List of treatment column names.
+    :param outcome: List of outcome column names.
+    """
+    columns_to_check = list(treatment) + list(outcome)
+    columns_with_nan = [col for col in columns_to_check if col in data.columns and data[col].isna().any()]
+    if columns_with_nan:
+        warnings.warn(
+            f"Data contains NaN values in column(s): {columns_with_nan}. "
+            "Missing data can introduce bias if not handled appropriately for the causal model. "
+            "Consult the missing-data literature (e.g., Mohan & Pearl 2021) before deciding how to proceed.",
+            UserWarning,
+            stacklevel=4,
+        )
+
+
 def estimate_effect(
     data: pd.DataFrame,
     treatment: Union[str, List[str]],
@@ -867,6 +889,8 @@ def estimate_effect(
         error_msg = f"No valid identified estimand for '{identifier_name}'. Ensure that the identification step succeeded for this estimator method (e.g. the graph must contain valid instruments for 'iv.instrumental_variable')."
         logger.error(error_msg)
         raise ValueError(error_msg)
+
+    _warn_if_nan_in_data(data, treatment, outcome)
 
     if fit_estimator:
         estimator.fit(
@@ -1081,6 +1105,8 @@ class CausalEstimate:
             # s += "Variance in outcome explained by treatment: {}\n".format(self.effect_strength["r-squared"])
         return s
 
+    __repr__ = __str__
+
 
 class RealizedEstimand(object):
     def __init__(self, identified_estimand, estimator_name):
@@ -1109,3 +1135,5 @@ class RealizedEstimand(object):
             s += "Estimand assumption {0}, {1}: {2}\n".format(j, ass_name, ass_str)
             j += 1
         return s
+
+    __repr__ = __str__
