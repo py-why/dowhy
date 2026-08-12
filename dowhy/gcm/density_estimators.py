@@ -23,8 +23,10 @@ class GaussianMixtureDensityEstimator(DensityEstimator):
         if self._num_components is None:
             self._num_components = int(np.ceil(np.sqrt(X.shape[0] / 2)))
 
+        # sklearn >= 1.9 computes log-likelihoods differently for integer vs. float inputs;
+        # always convert to float64 to get consistent, correct density estimates.
         self._gmm_model = BayesianGaussianMixture(n_components=self._num_components, covariance_type="full").fit(
-            shape_into_2d(X)
+            shape_into_2d(X).astype(float)
         )
 
     def density(self, X: np.ndarray) -> np.ndarray:
@@ -32,7 +34,7 @@ class GaussianMixtureDensityEstimator(DensityEstimator):
             raise RuntimeError("%s has not been fitted!" % self.__class__.__name__)
 
         # Note, the output of score_samples are log values.
-        return np.exp(self._gmm_model.score_samples(shape_into_2d(X)))
+        return np.exp(self._gmm_model.score_samples(shape_into_2d(X).astype(float)))
 
 
 class KernelDensityEstimator1D(DensityEstimator):
@@ -42,7 +44,7 @@ class KernelDensityEstimator1D(DensityEstimator):
         self._kde_model = None
 
     def fit(self, X: np.ndarray) -> None:
-        X = shape_into_2d(X)
+        X = shape_into_2d(X).astype(float)
         self._validate_data(X)
 
         bandwidth = np.std(X) * np.power(4 / 3 / X.shape[0], 1 / 5)
@@ -57,7 +59,7 @@ class KernelDensityEstimator1D(DensityEstimator):
         if self._kde_model is None:
             raise RuntimeError("%s has not been fitted!" % self.__class__.__name__)
 
-        X = shape_into_2d(X)
+        X = shape_into_2d(X).astype(float)
         self._validate_data(X)
 
         # Note, the output of score_samples are log values.
