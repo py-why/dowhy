@@ -3,12 +3,8 @@ from typing import Any
 
 import numpy as np
 import sklearn
-from packaging import version
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import PolynomialFeatures
-
-if version.parse(sklearn.__version__) < version.parse("1.0"):
-    from sklearn.experimental import enable_hist_gradient_boosting  # noqa
 
 from sklearn.ensemble import (
     AdaBoostRegressor,
