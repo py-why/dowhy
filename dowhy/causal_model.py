@@ -355,9 +355,9 @@ class CausalModel:
                     if num_quantiles_to_discretize_cont_cols is not None:
                         if "init_params" not in method_params:
                             method_params["init_params"] = {}
-                        method_params["init_params"]["num_quantiles_to_discretize_cont_cols"] = (
-                            num_quantiles_to_discretize_cont_cols
-                        )
+                        method_params["init_params"][
+                            "num_quantiles_to_discretize_cont_cols"
+                        ] = num_quantiles_to_discretize_cont_cols
             else:  # For older dowhy methods
                 self.logger.info(estimator_name)
                 # Process the dowhy estimators
