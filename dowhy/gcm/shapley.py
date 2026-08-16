@@ -9,7 +9,7 @@ import numpy as np
 import scipy
 from joblib import Parallel, delayed
 from scipy.special import comb
-from scipy.stats._qmc import Halton
+from scipy.stats.qmc import Halton
 from sklearn.linear_model import LinearRegression
 from tqdm import tqdm
 
