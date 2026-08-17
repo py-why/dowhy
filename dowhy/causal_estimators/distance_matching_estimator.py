@@ -174,7 +174,7 @@ class DistanceMatchingEstimator(CausalEstimator):
         data: pd.DataFrame,
         treatment_value: Any = 1,
         control_value: Any = 0,
-        target_units=None,
+        target_units: str = "ate",
         **_,
     ):
         # this assumes a binary treatment regime
@@ -209,7 +209,9 @@ class DistanceMatchingEstimator(CausalEstimator):
             fit_att = True
             fit_atc = True
         else:
-            raise ValueError("Target units string value not supported")
+            raise ValueError(
+                f"target_units='{target_units}' is not supported. " "Supported values are 'ate', 'att', and 'atc'."
+            )
 
         # Save the full treated/control DataFrames before any groupby loops that may rebind these names.
         treated_all = treated
