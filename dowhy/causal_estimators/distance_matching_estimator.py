@@ -206,6 +206,10 @@ class DistanceMatchingEstimator(CausalEstimator):
         else:
             raise ValueError("Target units string value not supported")
 
+        # Save the full treated/control DataFrames before any groupby loops that may rebind these names.
+        treated_all = treated
+        control_all = control
+
         if fit_att:
             # estimate ATT on treated by summing over difference between matched neighbors
             if self.exact_match_cols is None:
@@ -213,7 +217,7 @@ class DistanceMatchingEstimator(CausalEstimator):
                     n_neighbors=self.num_matches_per_unit,
                     metric=self.distance_metric,
                     algorithm="ball_tree",
-                    **self.distance_metric_params,
+                    metric_params=self.distance_metric_params,
                 ).fit(control[self._observed_common_causes.columns].values)
                 distances, indices = control_neighbors.kneighbors(treated[self._observed_common_causes.columns].values)
                 self.logger.debug("distances:")
@@ -242,32 +246,39 @@ class DistanceMatchingEstimator(CausalEstimator):
             else:
                 grouped = updated_df.groupby(self.exact_match_cols)
                 att = 0
+                total_treated_matched = 0
+                self.matched_indices_att = {}
                 for name, group in grouped:
-                    treated = group.loc[group[self._target_estimand.treatment_variable[0]] == 1]
-                    control = group.loc[group[self._target_estimand.treatment_variable[0]] == 0]
-                    if treated.shape[0] == 0:
+                    group_treated = group.loc[group[self._target_estimand.treatment_variable[0]] == 1]
+                    group_control = group.loc[group[self._target_estimand.treatment_variable[0]] == 0]
+                    if group_treated.shape[0] == 0 or group_control.shape[0] == 0:
                         continue
                     control_neighbors = NearestNeighbors(
                         n_neighbors=self.num_matches_per_unit,
                         metric=self.distance_metric,
                         algorithm="ball_tree",
-                        **self.distance_metric_params,
-                    ).fit(control[self._observed_common_causes.columns].values)
+                        metric_params=self.distance_metric_params,
+                    ).fit(group_control[self._observed_common_causes.columns].values)
                     distances, indices = control_neighbors.kneighbors(
-                        treated[self._observed_common_causes.columns].values
+                        group_treated[self._observed_common_causes.columns].values
                     )
                     self.logger.debug("distances:")
                     self.logger.debug(distances)
 
-                    for i in range(numtreatedunits):
-                        treated_outcome = treated.iloc[i][self._target_estimand.outcome_variable[0]].item()
+                    num_group_treated = group_treated.shape[0]
+                    group_treated_index = group_treated.index.tolist()
+                    for i in range(num_group_treated):
+                        treated_outcome = group_treated.iloc[i][self._target_estimand.outcome_variable[0]].item()
                         control_outcome = np.mean(
-                            control.iloc[indices[i]][self._target_estimand.outcome_variable[0]].values
+                            group_control.iloc[indices[i]][self._target_estimand.outcome_variable[0]].values
                         )
                         att += treated_outcome - control_outcome
-                        # self.matched_indices_att[treated_df_index[i]] = control.iloc[indices[i]].index.tolist()
+                        matched_ctrl_idx = group_control.iloc[indices[i]].index.tolist()
+                        self.matched_indices_att[group_treated_index[i]] = matched_ctrl_idx
+                    total_treated_matched += num_group_treated
 
-                att /= numtreatedunits
+                if total_treated_matched > 0:
+                    att /= total_treated_matched
 
                 if target_units == "att":
                     est = att
@@ -275,12 +286,14 @@ class DistanceMatchingEstimator(CausalEstimator):
                     est = att * numtreatedunits
 
         if fit_atc:
-            # Now computing ATC
+            # Now computing ATC using the full treated/control DataFrames (not group-level subsets).
+            treated = treated_all
+            control = control_all
             treated_neighbors = NearestNeighbors(
                 n_neighbors=self.num_matches_per_unit,
                 metric=self.distance_metric,
                 algorithm="ball_tree",
-                **self.distance_metric_params,
+                metric_params=self.distance_metric_params,
             ).fit(treated[self._observed_common_causes.columns].values)
             distances, indices = treated_neighbors.kneighbors(control[self._observed_common_causes.columns].values)
 

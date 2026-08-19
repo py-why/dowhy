@@ -83,6 +83,68 @@ class PlaceboTreatmentRefuter(CausalRefuter):
         return refute
 
 
+def _get_placebo_names(treatment_names: List[str]) -> List[str]:
+    """Return placebo column name(s) for the given treatment name(s).
+
+    Single-treatment case uses ``"placebo"`` for backward compatibility;
+    multi-treatment case prefixes each name with ``"placebo_"``.
+    """
+    if len(treatment_names) == 1:
+        return ["placebo"]
+    return ["placebo_" + t for t in treatment_names]
+
+
+def _generate_random_placebo(data: pd.DataFrame, treatment_name: str, type_dict: Dict) -> pd.Series:
+    """Generate a single random placebo column matching the dtype of *treatment_name*."""
+    dtype = type_dict[treatment_name]
+    n = data.shape[0]
+    if pd.api.types.is_float_dtype(dtype):
+        logger.info(
+            "Using a Normal Distribution with Mean:{} and Variance:{}".format(
+                DEFAULT_MEAN_OF_NORMAL,
+                DEFAULT_STD_DEV_OF_NORMAL,
+            )
+        )
+        return pd.Series(
+            np.random.randn(n) * DEFAULT_STD_DEV_OF_NORMAL + DEFAULT_MEAN_OF_NORMAL,
+            index=data.index,
+        )
+    elif pd.api.types.is_bool_dtype(dtype):
+        logger.info(
+            "Using a Binomial Distribution with {} trials and {} probability of success".format(
+                DEFAULT_NUMBER_OF_TRIALS,
+                DEFAULT_PROBABILITY_OF_BINOMIAL,
+            )
+        )
+        return pd.Series(
+            np.random.binomial(DEFAULT_NUMBER_OF_TRIALS, DEFAULT_PROBABILITY_OF_BINOMIAL, n).astype(bool),
+            index=data.index,
+        )
+    elif pd.api.types.is_integer_dtype(dtype):
+        logger.info(
+            "Using a Discrete Uniform Distribution lying between {} and {}".format(
+                data[treatment_name].min(), data[treatment_name].max()
+            )
+        )
+        return pd.Series(
+            np.random.randint(low=data[treatment_name].min(), high=data[treatment_name].max() + 1, size=n),
+            index=data.index,
+        )
+    elif isinstance(dtype, pd.CategoricalDtype):
+        treatment = data[treatment_name]
+        categories = treatment.cat.categories
+        logger.info("Using a Discrete Uniform Distribution with the following categories:{}".format(categories))
+        return pd.Series(
+            pd.Categorical(
+                np.random.choice(categories, size=n),
+                categories=categories,
+                ordered=treatment.cat.ordered,
+            ),
+            index=data.index,
+        )
+    raise ValueError("Unsupported treatment dtype '{}' for treatment '{}'.".format(dtype, treatment_name))
+
+
 def _refute_once(
     data: pd.DataFrame,
     target_estimand: IdentifiedEstimand,
@@ -92,14 +154,19 @@ def _refute_once(
     placebo_type: PlaceboType = PlaceboType.DEFAULT,
     random_state: Optional[np.random.RandomState] = None,
 ):
+    placebo_names = _get_placebo_names(treatment_names)
+
     if placebo_type == PlaceboType.PERMUTE:
-        permuted_idx = None
         if random_state is None:
             permuted_idx = np.random.choice(data.shape[0], size=data.shape[0], replace=False)
-
         else:
             permuted_idx = random_state.choice(data.shape[0], size=data.shape[0], replace=False)
-        new_treatment = data[treatment_names].iloc[permuted_idx].values
+        new_data = data.copy()
+        for t, pname in zip(treatment_names, placebo_names):
+            permuted_col = data[t].iloc[permuted_idx]
+            # Reset index so assignment is by position, not label alignment,
+            # while preserving the column's original dtype (e.g. CategoricalDtype).
+            new_data[pname] = permuted_col.set_axis(data.index)
         if target_estimand.identifier_method.startswith("iv"):
             new_instruments_values = data[estimate.estimator.estimating_instrument_names].iloc[permuted_idx].values
             new_instruments_df = pd.DataFrame(
@@ -107,46 +174,10 @@ def _refute_once(
                 columns=["placebo_" + s for s in data[estimate.estimator.estimating_instrument_names].columns],
             )
     else:
-        if "float" in type_dict[treatment_names[0]].name:
-            logger.info(
-                "Using a Normal Distribution with Mean:{} and Variance:{}".format(
-                    DEFAULT_MEAN_OF_NORMAL,
-                    DEFAULT_STD_DEV_OF_NORMAL,
-                )
-            )
-            new_treatment = np.random.randn(data.shape[0]) * DEFAULT_STD_DEV_OF_NORMAL + DEFAULT_MEAN_OF_NORMAL
+        new_data = data.copy()
+        for t, pname in zip(treatment_names, placebo_names):
+            new_data[pname] = _generate_random_placebo(data, t, type_dict)
 
-        elif "bool" in type_dict[treatment_names[0]].name:
-            logger.info(
-                "Using a Binomial Distribution with {} trials and {} probability of success".format(
-                    DEFAULT_NUMBER_OF_TRIALS,
-                    DEFAULT_PROBABILITY_OF_BINOMIAL,
-                )
-            )
-            new_treatment = np.random.binomial(
-                DEFAULT_NUMBER_OF_TRIALS,
-                DEFAULT_PROBABILITY_OF_BINOMIAL,
-                data.shape[0],
-            ).astype(bool)
-
-        elif "int" in type_dict[treatment_names[0]].name:
-            logger.info(
-                "Using a Discrete Uniform Distribution lying between {} and {}".format(
-                    data[treatment_names[0]].min(), data[treatment_names[0]].max()
-                )
-            )
-            new_treatment = np.random.randint(
-                low=data[treatment_names[0]].min(), high=data[treatment_names[0]].max() + 1, size=data.shape[0]
-            )
-
-        elif "category" in type_dict[treatment_names[0]].name:
-            categories = data[treatment_names[0]].unique()
-            logger.info("Using a Discrete Uniform Distribution with the following categories:{}".format(categories))
-            sample = np.random.choice(categories, size=data.shape[0])
-            new_treatment = pd.Series(sample, index=data.index).astype("category")
-
-    # Create a new column in the data by the name of placebo
-    new_data = data.assign(placebo=new_treatment)
     if target_estimand.identifier_method.startswith("iv"):
         new_data = pd.concat((new_data, new_instruments_df), axis=1)
     # Sanity check the data
@@ -219,7 +250,7 @@ def refute_placebo_treatment(
     # We make a copy as a safety measure, we don't want to change the
     # original DataFrame
     identified_estimand = copy.deepcopy(target_estimand)
-    identified_estimand.treatment_variable = ["placebo"]
+    identified_estimand.treatment_variable = _get_placebo_names(treatment_names)
 
     if target_estimand.identifier_method.startswith("iv"):
         identified_estimand.instrumental_variables = [

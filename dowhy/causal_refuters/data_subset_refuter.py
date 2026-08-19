@@ -25,7 +25,9 @@ class DataSubsetRefuter(CausalRefuter):
     :param num_simulations: The number of simulations to be run, which is ``CausalRefuter.DEFAULT_NUM_SIMULATIONS`` by default
     :type num_simulations: int, optional
 
-    :param random_state: The seed value to be added if we wish to repeat the same random behavior. If we with to repeat the same behavior we push the same seed in the psuedo-random generator
+    :param random_state: The seed value to be added if we wish to repeat the same random behavior. If an integer,
+        each simulation draws a distinct subset using seeds derived from this base seed so the overall refutation is
+        reproducible while individual simulations still differ.
     :type random_state: int, RandomState, optional
 
     :param n_jobs: The maximum number of concurrently running jobs. If -1 all CPUs are used. If 1 is given, no parallel computing code is used at all (this is the default).
@@ -68,6 +70,7 @@ def _refute_once(
     subset_fraction: float,
     random_state: Optional[Union[int, np.random.RandomState]],
 ):
+    # random_state here is either None or an integer derived from the caller's RNG.
     if random_state is None:
         new_data = data.sample(frac=subset_fraction)
     else:
@@ -107,7 +110,10 @@ def refute_data_subset(
     :param estimate: CausalEstimate: Estimate to run the refutation
     :param subset_fraction: Fraction of the data to be used for re-estimation, which is ``DataSubsetRefuter.DEFAULT_SUBSET_FRACTION`` by default.
     :param num_simulations: The number of simulations to be run, ``CausalRefuter.DEFAULT_NUM_SIMULATIONS`` by default
-    :param random_state: The seed value to be added if we wish to repeat the same random behavior. For this purpose, we repeat the same seed in the psuedo-random generator.
+    :param random_state: The seed value to be added if we wish to repeat the same random behavior. If an integer,
+        each simulation draws a distinct subset using seeds derived from this base seed, so the overall refutation
+        is reproducible while individual simulations still differ. Pass a ``numpy.random.RandomState`` to provide
+        a pre-seeded generator.
     :param n_jobs: The maximum number of concurrently running jobs. If -1 all CPUs are used. If 1 is given, no parallel computing code is used at all (this is the default).
     :param verbose: The verbosity level: if non zero, progress messages are printed. Above 50, the output is sent to stdout. The frequency of the messages increases with the verbosity level. If it more than 10, all iterations are reported. The default is 0.
     """
@@ -118,11 +124,19 @@ def refute_data_subset(
         )
     )
 
+    # Derive one independent integer seed per simulation so that each call to _refute_once
+    # draws a *different* subset even when the caller fixes random_state for reproducibility.
+    if random_state is None:
+        per_sim_seeds: list = [None] * num_simulations
+    else:
+        rng = np.random.RandomState(random_state) if isinstance(random_state, int) else random_state
+        per_sim_seeds = [int(rng.randint(0, 2**31 - 1)) for _ in range(num_simulations)]
+
     # Run refutation in parallel
     sample_estimates = Parallel(n_jobs=n_jobs, verbose=verbose)(
-        delayed(_refute_once)(data, target_estimand, estimate, subset_fraction, random_state)
-        for _ in tqdm(
-            range(num_simulations),
+        delayed(_refute_once)(data, target_estimand, estimate, subset_fraction, seed)
+        for seed in tqdm(
+            per_sim_seeds,
             colour=CausalRefuter.PROGRESS_BAR_COLOR,
             disable=not show_progress_bar,
             desc="Refuting Estimates: ",

@@ -91,17 +91,21 @@ class TwoStageRegressionEstimator(CausalEstimator):
         modified_target_estimand.identifier_method = "backdoor"
         modified_target_estimand.backdoor_variables = self._target_estimand.mediation_first_stage_confounders
         if first_stage_model is not None:
-            self._first_stage_model = (
-                first_stage_model
-                if isinstance(first_stage_model, CausalEstimator)
-                else first_stage_model(
+            if isinstance(first_stage_model, CausalEstimator):
+                self._first_stage_model = first_stage_model.get_new_estimator_object(
+                    modified_target_estimand,
+                    test_significance=self._significance_test,
+                    evaluate_effect_strength=self._effect_strength_eval,
+                    confidence_intervals=self._confidence_intervals,
+                )
+            else:
+                self._first_stage_model = first_stage_model(
                     modified_target_estimand,
                     test_significance=self._significance_test,
                     evaluate_effect_strength=self._effect_strength_eval,
                     confidence_intervals=self._confidence_intervals,
                     **kwargs,
                 )
-            )
         else:
             self._first_stage_model = self.__class__.DEFAULT_FIRST_STAGE_MODEL(
                 modified_target_estimand,
@@ -116,17 +120,21 @@ class TwoStageRegressionEstimator(CausalEstimator):
         modified_target_estimand.identifier_method = "backdoor"
         modified_target_estimand.backdoor_variables = self._target_estimand.mediation_second_stage_confounders
         if second_stage_model is not None:
-            self._second_stage_model = (
-                second_stage_model
-                if isinstance(second_stage_model, CausalEstimator)
-                else second_stage_model(
+            if isinstance(second_stage_model, CausalEstimator):
+                self._second_stage_model = second_stage_model.get_new_estimator_object(
+                    modified_target_estimand,
+                    test_significance=self._significance_test,
+                    evaluate_effect_strength=self._effect_strength_eval,
+                    confidence_intervals=self._confidence_intervals,
+                )
+            else:
+                self._second_stage_model = second_stage_model(
                     modified_target_estimand,
                     test_significance=self._significance_test,
                     evaluate_effect_strength=self._effect_strength_eval,
                     confidence_intervals=self._confidence_intervals,
                     **kwargs,
                 )
-            )
         else:
             self._second_stage_model = self.__class__.DEFAULT_SECOND_STAGE_MODEL(
                 modified_target_estimand,
@@ -141,12 +149,11 @@ class TwoStageRegressionEstimator(CausalEstimator):
             nde_target_estimand = copy.deepcopy(self._target_estimand)
             nde_target_estimand.identifier_method = "backdoor"
             nde_target_estimand.backdoor_variables = self._target_estimand.mediation_second_stage_confounders
-            self._second_stage_model_nde = type(self._second_stage_model)(
+            self._second_stage_model_nde = self._second_stage_model.get_new_estimator_object(
                 nde_target_estimand,
                 test_significance=self._significance_test,
                 evaluate_effect_strength=self._effect_strength_eval,
                 confidence_intervals=self._confidence_intervals,
-                **kwargs,
             )
 
     def fit(
@@ -216,6 +223,7 @@ class TwoStageRegressionEstimator(CausalEstimator):
                 self._instrumental_variables = None
                 error_msg = "No instrumental variable present. Two stage regression is not applicable"
                 self.logger.error(error_msg)
+                raise ValueError(error_msg)
 
         if self._target_estimand.identifier_method == "frontdoor":
             self._first_stage_model._target_estimand.outcome_variable = parse_state(self._frontdoor_variables_names)

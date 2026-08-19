@@ -366,6 +366,27 @@ TEST_GRAPH_SOLUTIONS = {
         maximal_adjustment_sets=[{"W"}],
         direct_maximal_adjustment_sets=[{"W", "M"}],
     ),
+    # Treatment node must be named "X" and outcome "Y" to match the convention
+    # hardcoded in IdentificationTestGraphSolution (base.py) and all parametrized
+    # backdoor tests. The graph encodes D->Y, D->M1->Y, D->M2->Y from issue #1334
+    # — here renamed to X->Y, X->M1->Y, X->M2->Y for fixture compatibility.
+    "parallel-mediators": dict(
+        graph_str="""graph[directed 1 node[id "X" label "X"]
+                node[id "Y" label "Y"]
+                node[id "M1" label "M1"]
+                node[id "M2" label "M2"]
+                edge[source "X" target "Y"]
+                edge[source "X" target "M1"]
+                edge[source "X" target "M2"]
+                edge[source "M1" target "Y"]
+                edge[source "M2" target "Y"]]
+                """,
+        observed_variables=["X", "Y", "M1", "M2"],
+        biased_sets=[{"M1"}, {"M2"}, {"M1", "M2"}],
+        minimal_adjustment_sets=[set()],
+        maximal_adjustment_sets=[set()],
+        direct_maximal_adjustment_sets=[{"M1", "M2"}],
+    ),
     "mediator-with-conf": dict(
         graph_str="""graph[directed 1 node[id "X" label "X"]
                 node[id "Y" label "Y"]

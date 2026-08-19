@@ -85,3 +85,18 @@ def test_one_hot_encode_consistent_with_new_data():
     c_z2 = df_encoded2["C_Z"]
     assert c_z1[2] == c_z2[1]
     assert c_z1[5] == c_z2[5]
+
+
+def test_one_hot_encode_nested_structures_raises_type_error():
+    """Ensure one_hot_encode throws a clear TypeError when an object column
+    contains non-primitive, unhashable, or nested data structures like dicts.
+    """
+    import pandas as pd
+    import pytest
+
+    from dowhy.utils.encoding import one_hot_encode
+
+    df = pd.DataFrame({"numeric_col": [1, 2, 3], "nested_col": [{"id": 1}, {"id": 2}, {"id": 3}]})
+
+    with pytest.raises(TypeError, match="categorical encoding failed during one-hot conversion"):
+        one_hot_encode(df, columns=["nested_col"])

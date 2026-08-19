@@ -1,6 +1,6 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-51-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-56-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ## Contributors ✨
@@ -73,11 +73,16 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/emmanuel-ferdman"><img src="https://avatars.githubusercontent.com/u/35470921?v=4?s=100" width="100px;" alt="Emmanuel Ferdman"/><br /><sub><b>Emmanuel Ferdman</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=emmanuel-ferdman" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/JPZ4-5"><img src="https://avatars.githubusercontent.com/u/103734362?v=4?s=100" width="100px;" alt="JPZ4-5"/><br /><sub><b>JPZ4-5</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=JPZ4-5" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://www.linkedin.com/in/ghiles-meddour/"><img src="https://avatars.githubusercontent.com/u/88532760?v=4?s=100" width="100px;" alt="Ghiles Meddour"/><br /><sub><b>Ghiles Meddour</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=ghilesmeddour" title="Code">💻</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/toroleapinc"><img src="https://avatars.githubusercontent.com/u/88481784?v=4?s=100" width="100px;" alt="edvatar"/><br /><sub><b>edvatar</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=toroleapinc" title="Documentation">📖</a><a href="https://github.com/py-why/dowhy/commits?author=toroleapinc" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/toroleapinc"><img src="https://avatars.githubusercontent.com/u/88481784?v=4?s=100" width="100px;" alt="edvatar"/><br /><sub><b>edvatar</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=toroleapinc" title="Documentation">📖</a> <a href="https://github.com/py-why/dowhy/commits?author=toroleapinc" title="Code">💻</a></td>
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/kevinchiv"><img src="https://avatars.githubusercontent.com/u/20054278?v=4?s=100" width="100px;" alt="Kevin Chiv"/><br /><sub><b>Kevin Chiv</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=kevinchiv" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/haoyu-haoyu"><img src="https://avatars.githubusercontent.com/u/85037553?v=4?s=100" width="100px;" alt="haoyu-haoyu"/><br /><sub><b>haoyu-haoyu</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=haoyu-haoyu" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://kaushikrajan.me"><img src="https://avatars.githubusercontent.com/u/182360080?v=4?s=100" width="100px;" alt="Kaushik Rajan"/><br /><sub><b>Kaushik Rajan</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=kvr06-ai" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/immu4989"><img src="https://avatars.githubusercontent.com/u/19887503?v=4?s=100" width="100px;" alt="Imran Ahamed"/><br /><sub><b>Imran Ahamed</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=immu4989" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/abhiprd2000"><img src="https://avatars.githubusercontent.com/u/280053291?v=4?s=100" width="100px;" alt="Abhimanyu Prasad"/><br /><sub><b>Abhimanyu Prasad</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=abhiprd2000" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://tasfinmahmud.github.io"><img src="https://avatars.githubusercontent.com/u/88986939?v=4?s=100" width="100px;" alt="Tasfin Mahmud"/><br /><sub><b>Tasfin Mahmud</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=TasfinMahmud" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://www.linkedin.com/in/joanie-hayoun-‍chung-2b4b03223"><img src="https://avatars.githubusercontent.com/u/155081908?v=4?s=100" width="100px;" alt="Joanie Hayoun Chung"/><br /><sub><b>Joanie Hayoun Chung</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=jchung02" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
