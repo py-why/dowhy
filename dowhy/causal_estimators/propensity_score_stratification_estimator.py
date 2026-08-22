@@ -154,6 +154,8 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
                         data,
                         num_strata,
                         self.clipping_threshold,
+                        treatment_value,
+                        control_value,
                     )
                 except ValueError:
                     self.logger.info(
@@ -184,14 +186,18 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
                 data,
                 self.num_strata,
                 self.clipping_threshold,
+                treatment_value,
+                control_value,
             )
 
         # sum weighted outcomes over all strata  (weight by treated population)
+        # Use the indicator column "d" (1 = treated, 0 otherwise) so the sum gives
+        # the count of treated/control units regardless of the actual treatment encoding.
         weighted_outcomes = clipped.groupby("strata").agg(
-            {self._target_estimand.treatment_variable[0]: ["sum"], "dbar": ["sum"], "d_y": ["sum"], "dbar_y": ["sum"]}
+            {"d": ["sum"], "dbar": ["sum"], "d_y": ["sum"], "dbar_y": ["sum"]}
         )
         weighted_outcomes.columns = ["_".join(x) for x in weighted_outcomes.columns.to_numpy().ravel()]
-        treatment_sum_name = self._target_estimand.treatment_variable[0] + "_sum"
+        treatment_sum_name = "d_sum"
         control_sum_name = "dbar_sum"
 
         weighted_outcomes["d_y_mean"] = weighted_outcomes["d_y_sum"] / weighted_outcomes[treatment_sum_name]
@@ -237,7 +243,7 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
         estimate.add_estimator(self)
         return estimate
 
-    def _get_strata(self, data: pd.DataFrame, num_strata, clipping_threshold):
+    def _get_strata(self, data: pd.DataFrame, num_strata, clipping_threshold, treatment_value=1, control_value=0):
         # sort the dataframe by propensity score
         # create a column 'strata' for each element that marks what strata it belongs to
         num_rows = data[self._target_estimand.outcome_variable[0]].shape[0]
@@ -245,16 +251,20 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
         # for each strata, count how many treated and control units there are
         # throw away strata that have insufficient treatment or control
 
-        data["dbar"] = 1 - data[self._target_estimand.treatment_variable[0]]  # 1-Treatment
-        data["d_y"] = (
-            data[self._target_estimand.treatment_variable[0]] * data[self._target_estimand.outcome_variable[0]]
-        )
-        data["dbar_y"] = data["dbar"] * data[self._target_estimand.outcome_variable[0]]
+        treatment_col = data[self._target_estimand.treatment_variable[0]]
+        outcome_col = data[self._target_estimand.outcome_variable[0]]
+        # Use indicator variables so the estimator works for any binary treatment encoding,
+        # not just {0, 1}. "d" = 1 iff the unit received treatment_value; "dbar" = 1 iff
+        # it received control_value.
+        data["d"] = (treatment_col == treatment_value).astype(int)
+        data["dbar"] = (treatment_col == control_value).astype(int)
+        data["d_y"] = data["d"] * outcome_col
+        data["dbar_y"] = data["dbar"] * outcome_col
         stratified = data.groupby("strata")
         clipped = stratified.filter(
             lambda strata: min(
-                strata.loc[strata[self._target_estimand.treatment_variable[0]] == 1].shape[0],
-                strata.loc[strata[self._target_estimand.treatment_variable[0]] == 0].shape[0],
+                strata.loc[strata[self._target_estimand.treatment_variable[0]] == treatment_value].shape[0],
+                strata.loc[strata[self._target_estimand.treatment_variable[0]] == control_value].shape[0],
             )
             > clipping_threshold
         )

@@ -129,9 +129,9 @@ class PropensityScoreEstimator(CausalEstimator):
         if len(self._target_estimand.treatment_variable) > 1:
             error_msg = self.__class__.__name__ + " cannot handle more than one treatment variable"
             raise ValueError(error_msg)
-        # Checking if the treatment is binary
-        treatment_values = data[self._target_estimand.treatment_variable[0]].astype(int).unique()
-        if any([v not in [0, 1] for v in treatment_values]):
+        # Checking if the treatment is binary (exactly 2 distinct values are allowed)
+        treatment_values = data[self._target_estimand.treatment_variable[0]].unique()
+        if len(treatment_values) != 2:
             error_msg = "Propensity score methods are applicable only for binary treatments"
             self.logger.error(error_msg)
             raise ValueError(error_msg)
