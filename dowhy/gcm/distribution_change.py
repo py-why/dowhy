@@ -492,21 +492,27 @@ def _estimate_distribution_change_score(
 
     result = 0
     run = 0
+    old_average = None
     for joint_parent_sample in joint_parent_samples:
-        old_result = result
-
         samples = np.tile(joint_parent_sample, (num_joint_samples, 1))
         result += difference_estimation_func(
             causal_model_original.draw_samples(samples), causal_model_new.draw_samples(samples)
         )
 
         run += 1
-        if old_result != 0 and (1 - result / old_result) <= early_stopping_percentage:
-            # If the relative change of the score is less than the given threshold, we stop the estimation early.
-            _logger.info(
-                "Early stopping: Result only changed by %f percent and a threshold of %f is set."
-                % (1 - result / old_result, early_stopping_percentage)
-            )
-            break
+        # Track the running average of the score (result / run). Stop early once the average has converged, i.e. the
+        # relative change of the running average between consecutive iterations falls below the threshold. Comparing the
+        # cumulative sum instead would be wrong: it is monotonically increasing for non-negative difference estimates
+        # and would trigger on the second iteration.
+        current_average = result / run
+        if old_average is not None and old_average != 0:
+            relative_change = abs(1 - current_average / old_average)
+            if relative_change <= early_stopping_percentage:
+                _logger.info(
+                    "Early stopping: The running average only changed by %f percent and a threshold of %f is set."
+                    % (relative_change, early_stopping_percentage)
+                )
+                break
+        old_average = current_average
 
     return result / run

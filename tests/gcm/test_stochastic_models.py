@@ -21,6 +21,30 @@ def test_when_drawing_samples_from_unfitted_bayesian_gaussian_mixture_distributi
         approximated_data_distribution_model.draw_samples(5)
 
 
+@flaky(max_runs=3)
+def test_given_two_independent_multimodal_variables_when_drawing_samples_then_they_are_not_spuriously_correlated():
+    # sklearn's GaussianMixture.sample returns samples grouped by mixture component (not i.i.d. shuffled). If the samples
+    # are returned in that order, two independently drawn multimodal variables end up sorted the same way and appear
+    # almost perfectly correlated. draw_samples must shuffle to avoid this.
+    def multimodal_data(num_samples):
+        return np.concatenate(
+            [
+                np.random.normal(-5, 0.5, num_samples // 2),
+                np.random.normal(5, 0.5, num_samples - num_samples // 2),
+            ]
+        )
+
+    distribution_a = BayesianGaussianMixtureDistribution()
+    distribution_a.fit(multimodal_data(2000))
+    distribution_b = BayesianGaussianMixtureDistribution()
+    distribution_b.fit(multimodal_data(2000))
+
+    samples_a = distribution_a.draw_samples(2000).reshape(-1)
+    samples_b = distribution_b.draw_samples(2000).reshape(-1)
+
+    assert np.corrcoef(samples_a, samples_b)[0, 1] == approx(0, abs=0.15)
+
+
 def test_when_creating_scipy_distribution_with_fixed_parameters_then_it_should_return_the_correct_parameter_values():
     distribution = ScipyDistribution(stats.norm, loc=0, scale=1)
 

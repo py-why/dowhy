@@ -36,7 +36,12 @@ def apply_rbf_kernel_with_adaptive_precision(X: np.ndarray) -> np.ndarray:
 
     result = np.ones((X.shape[0], X.shape[0]))
     for i in range(X.shape[1]):
-        distance_matrix = euclidean_distances(X, squared=True)
+        distance_matrix = euclidean_distances(X[:, i].reshape(-1, 1), squared=True)
+        # A constant column (or a single sample) has all-zero pairwise distances. Its RBF kernel is then exp(0) = 1
+        # everywhere, i.e. the all-ones matrix, which is the identity for the element-wise product below. Skipping it
+        # also avoids computing the median over an empty set of positive distances in _median_based_precision (NaN).
+        if not np.any(distance_matrix > 0):
+            continue
         result *= np.exp(-_median_based_precision(distance_matrix) * distance_matrix)
 
     return result
@@ -80,10 +85,12 @@ def approximate_delta_kernel_features(X: np.ndarray, num_random_components: int)
     :param num_random_components: Number of components D for the approximated kernel map.
     :return: A NxD approximated RBF kernel map, where N is the number of samples in X and D the number of components.
     """
-    X = shape_into_2d(X)
+    # Copy to avoid mutating the caller's array in place, since shape_into_2d returns the same object for 2D inputs.
+    X = shape_into_2d(X).copy()
 
     def delta_function(x, y) -> float:
-        return float(x == y)
+        # x and y are (possibly multidimensional) samples; the delta kernel is 1 only if all entries match.
+        return float(np.array_equal(x, y))
 
     for i, unique_element in enumerate(np.unique(X)):
         X[X == unique_element] = i

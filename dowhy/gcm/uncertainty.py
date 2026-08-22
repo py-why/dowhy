@@ -23,13 +23,21 @@ def estimate_entropy_using_discretization(X: np.ndarray, bin_width: float = 1) -
 
     max_value = np.max(X)
     min_value = np.min(X)
-    number_of_bins = max(1, int((max_value - min_value) / bin_width))
     num_samples = X.shape[0]
+
+    if max_value == min_value:
+        # All values are identical, i.e. the discretization has a single populated bin and the entropy is 0.
+        return 0.0
+
+    # Number of bins of (approximately) the requested width needed to cover the data range. np.ceil ensures that a range
+    # smaller than bin_width still yields at least one full bin and, more importantly, that ranges between one and two
+    # bin widths are not collapsed into a single bin.
+    number_of_bins = max(1, int(np.ceil((max_value - min_value) / bin_width)))
+    # np.linspace(min, max, n) returns n edge points, i.e. n - 1 bins. To obtain `number_of_bins` bins we need
+    # number_of_bins + 1 edges.
+    bin_edges = np.linspace(min_value, max_value, number_of_bins + 1)
     return -np.sum(
-        [
-            (i / num_samples * np.log(i / num_samples)) if i > 0 else 0
-            for i in np.histogram(X, bins=np.linspace(min_value, max_value, number_of_bins).reshape(-1))[0]
-        ]
+        [(i / num_samples * np.log(i / num_samples)) if i > 0 else 0 for i in np.histogram(X, bins=bin_edges)[0]]
     )
 
 
