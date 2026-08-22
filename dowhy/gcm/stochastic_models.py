@@ -248,7 +248,13 @@ class BayesianGaussianMixtureDistribution(StochasticModel):
         if self._gmm_model is None:
             raise RuntimeError("%s has not been fitted!" % self.__class__.__name__)
 
-        return shape_into_2d(self._gmm_model.sample(num_samples)[0])
+        # sklearn's GaussianMixture.sample draws all samples of a component consecutively, i.e. the returned array is
+        # ordered by mixture component. Shuffle to restore i.i.d. ordering; otherwise independently drawn columns of
+        # different nodes would appear spuriously correlated (both sorted the same way).
+        samples = self._gmm_model.sample(num_samples)[0]
+        np.random.shuffle(samples)
+
+        return shape_into_2d(samples)
 
     def __str__(self) -> str:
         return "Gaussian Mixture Distribution"

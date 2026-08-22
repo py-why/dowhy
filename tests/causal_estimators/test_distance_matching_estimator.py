@@ -233,3 +233,30 @@ class TestDistanceMatchingEstimator:
             },
         )
         assert np.isfinite(estimate.value), "Estimate with Mahalanobis and V param should be finite."
+
+    def test_binary_treatment_int_dtype_issue772(self):
+        """Regression test for Issue #772.
+
+        DistanceMatchingEstimator should accept binary treatment encoded as int
+        (0/1) without raising "binary treatments" ValueError.
+        """
+        rng = np.random.default_rng(772)
+        n = 500
+        w = rng.standard_normal(n)
+        # Explicitly keep as int dtype (not bool, not float)
+        treatment = ((w + rng.standard_normal(n) > 0)).astype(int)
+        outcome = 10 * treatment + 2 * w + rng.standard_normal(n)
+        data = pd.DataFrame({"W": w, "v0": treatment, "y": outcome})
+
+        # Verify dtype is int
+        assert data["v0"].dtype in [np.int64, np.int32, int], f"Treatment dtype is {data['v0'].dtype}, expected int"
+
+        model = CausalModel(data=data, treatment="v0", outcome="y", graph=GML_SINGLE_CAUSE)
+        estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        # This should NOT raise
+        estimate = model.estimate_effect(
+            estimand,
+            method_name="backdoor.distance_matching",
+            target_units="ate",
+        )
+        assert np.isfinite(estimate.value), "Estimate should be finite"

@@ -5,7 +5,12 @@ import pytest
 from flaky import flaky
 from pytest import approx
 
-from dowhy.gcm.shapley import ShapleyApproximationMethods, ShapleyConfig, estimate_shapley_values
+from dowhy.gcm.shapley import (
+    ShapleyApproximationMethods,
+    ShapleyConfig,
+    _weighted_least_squares_coefficients,
+    estimate_shapley_values,
+)
 from dowhy.gcm.stats import permute_features
 from dowhy.gcm.util.general import means_difference
 
@@ -221,6 +226,18 @@ def test_given_specific_random_seed_when_estimate_shapley_values_with_early_stop
     assert shapley_values_1 == approx(shapley_values_2, abs=0)
 
 
+def test_given_single_player_when_estimate_shapley_values_with_subset_sampling_then_does_not_raise():
+    # Regression: with a single player the subset-length probability vector summed to 0 and produced NaN sampling
+    # probabilities, crashing np.random.choice. The single Shapley value equals f({0}) - f({}).
+    shapley_values = estimate_shapley_values(
+        lambda subset: float(np.sum(subset) * 5.0),
+        1,
+        ShapleyConfig(approximation_method=ShapleyApproximationMethods.SUBSET_SAMPLING, n_jobs=1),
+    )
+
+    assert shapley_values == approx([5.0], abs=1e-9)
+
+
 def _generate_data(num_vars):
     return np.random.normal(0, 1, (1000, num_vars)), np.random.choice(20, num_vars) - 10
 
@@ -233,3 +250,38 @@ def _set_function_for_aggregated_feature_attribution(subset, X, model, evaluate_
         return means_difference(model(tmp), X[0])
     else:
         return np.array([means_difference(model(tmp), x) for x in X])
+
+
+def test_given_single_and_multi_output_targets_when_solving_weighted_least_squares_then_returns_expected_coefficients():
+    num_subsets = 200
+    num_players = 6
+    rng = np.random.RandomState(0)
+
+    all_subsets = (rng.uniform(size=(num_subsets, num_players)) < 0.5).astype(float)
+    all_subsets[0] = 0.0
+    all_subsets[1] = 1.0
+    # The full and empty subsets act as equality constraints and carry an extreme weight.
+    weights = np.ones(num_subsets)
+    weights[0] = weights[1] = 10**20
+
+    single_output_coefficients = rng.normal(size=num_players)
+    second_output_coefficients = rng.normal(size=num_players)
+    intercept = 3.0
+
+    estimated = _weighted_least_squares_coefficients(
+        all_subsets, all_subsets @ single_output_coefficients + intercept, weights
+    )
+    assert estimated.shape == (num_players,)
+    assert estimated == approx(single_output_coefficients, abs=1e-8)
+
+    multi_output_targets = np.column_stack(
+        [
+            all_subsets @ single_output_coefficients + intercept,
+            all_subsets @ second_output_coefficients - intercept,
+        ]
+    )
+    estimated_multi_output = _weighted_least_squares_coefficients(all_subsets, multi_output_targets, weights)
+    # Matches the (n_outputs, n_features) layout of LinearRegression.coef_
+    assert estimated_multi_output.shape == (2, num_players)
+    assert estimated_multi_output[0] == approx(single_output_coefficients, abs=1e-8)
+    assert estimated_multi_output[1] == approx(second_output_coefficients, abs=1e-8)

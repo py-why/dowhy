@@ -17,6 +17,12 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
 
     Supports additional parameters as listed below.
 
+    **References**
+
+    Rosenbaum, P. R., & Rubin, D. B. (1983). The central role of the propensity score in observational studies for causal effects. *Biometrika*, 70(1), 41–55. https://doi.org/10.1093/biomet/70.1.41
+
+    Stuart, E. A. (2010). Matching methods for causal inference: A review and a look forward. *Statistical Science*, 25(1), 1–21. https://doi.org/10.1214/09-STS313
+
     """
 
     def __init__(

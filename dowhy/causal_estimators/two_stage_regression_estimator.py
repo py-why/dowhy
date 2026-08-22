@@ -18,6 +18,12 @@ class TwoStageRegressionEstimator(CausalEstimator):
 
     Supports additional parameters as listed below.
 
+    **References**
+
+    Angrist, J. D., Imbens, G. W., & Rubin, D. B. (1996). Identification of causal effects using instrumental variables. *Journal of the American Statistical Association*, 91(434), 444–455. https://doi.org/10.1080/01621459.1996.10476902
+
+    Pearl, J. (2009). *Causality: Models, Reasoning, and Inference* (2nd ed.). Cambridge University Press.
+
     """
 
     # First stage statistical model

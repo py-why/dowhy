@@ -54,12 +54,13 @@ class ConfounderDistributionInterpreter(VisualInterpreter):
         Plot of the treated vs untreated.
         """
 
-        ax.bar(labels - width / 2, not_treated_counts, width, label="Untreated")
-        ax.bar(labels + width / 2, treated_counts, width, label="Treated")
+        positions = np.arange(len(labels))
+        ax.bar(positions - width / 2, not_treated_counts, width, label="Untreated")
+        ax.bar(positions + width / 2, treated_counts, width, label="Treated")
         ax.set_xlabel(var_name)
         ax.set_ylabel("Count")
         ax.set_title(title, fontsize=font_size)
-        ax.set_xticks(labels)
+        ax.set_xticks(positions)
         ax.set_xticklabels(labels)
         ax.legend()
 
@@ -94,13 +95,12 @@ class ConfounderDistributionInterpreter(VisualInterpreter):
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=self.fig_size)
         iterable = zip([barplot_df_before, barplot_df_after], [ax1, ax2], [title1, title2])
         for plot_df, ax, title in iterable:
-            aggregated_not_treated = plot_df[plot_df[treated] == False].reset_index()
-            aggregated_treated = plot_df[plot_df[treated] == True].reset_index()
+            pivoted = plot_df.pivot_table(index=self.var_name, columns=treated, values="count", fill_value=0)
+            control_col, treated_col = pivoted.columns.min(), pivoted.columns.max()
 
-            labels = aggregated_not_treated[self.var_name].astype("float")
-            not_treated_counts = aggregated_not_treated["count"]
-
-            treated_counts = aggregated_treated["count"]
+            labels = pivoted.index.astype(str).tolist()
+            not_treated_counts = pivoted[control_col].to_numpy()
+            treated_counts = pivoted[treated_col].to_numpy()
             self.discrete_dist_plot(
                 labels, not_treated_counts, treated_counts, ax, title, self.var_name, self.font_size
             )

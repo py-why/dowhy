@@ -16,6 +16,12 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
 
     Supports additional parameters as listed below.
 
+    **References**
+
+    Rosenbaum, P. R., & Rubin, D. B. (1984). Reducing bias in observational studies using subclassification on the propensity score. *Journal of the American Statistical Association*, 79(387), 516–524. https://doi.org/10.1080/01621459.1984.10478078
+
+    Lunceford, J. K., & Davidian, M. (2004). Stratification and weighting via the propensity score in estimation of causal treatment effects: a comparative study. *Statistics in Medicine*, 23(19), 2937–2960. https://doi.org/10.1002/sim.1903
+
     """
 
     def __init__(

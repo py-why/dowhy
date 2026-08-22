@@ -159,3 +159,6 @@ class IdentifiedEstimand:
                     j += 1
             i += 1
         return s
+
+    def __repr__(self):
+        return self.__str__()

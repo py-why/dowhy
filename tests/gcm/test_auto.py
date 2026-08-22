@@ -4,7 +4,6 @@ import pandas as pd
 import pytest
 from _pytest.python_api import approx
 from flaky import flaky
-from pytest import mark
 from sklearn.ensemble import HistGradientBoostingClassifier, HistGradientBoostingRegressor
 from sklearn.linear_model import ElasticNetCV, LassoCV, LinearRegression, LogisticRegression, RidgeCV
 from sklearn.naive_bayes import GaussianNB
@@ -307,21 +306,6 @@ def test_when_auto_called_from_main_namespace_returns_no_attribute_error():
     from dowhy import gcm
 
     _ = gcm.auto.AssignmentQuality.GOOD
-
-
-@mark.skip("Not running AutoGluon-based tests as part of CI yet.")
-def test_when_using_best_quality_then_returns_auto_gluon_model():
-    from dowhy.gcm.ml import AutoGluonClassifier, AutoGluonRegressor
-
-    causal_model = ProbabilisticCausalModel(nx.DiGraph([("X", "Y")]))
-
-    assign_causal_mechanisms(causal_model, pd.DataFrame({"X": [1], "Y": [1]}), quality=AssignmentQuality.BEST)
-    assert isinstance(causal_model.causal_mechanism("Y").prediction_model, AutoGluonRegressor)
-
-    assign_causal_mechanisms(
-        causal_model, pd.DataFrame({"X": [1], "Y": ["Class 1"]}), quality=AssignmentQuality.BEST, override_models=True
-    )
-    assert isinstance(causal_model.causal_mechanism("Y").classifier_model, AutoGluonClassifier)
 
 
 @flaky(max_runs=3)
