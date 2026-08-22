@@ -162,6 +162,7 @@ def identify_effect_auto(
     optimize_backdoor: bool = False,
     costs: Optional[List] = None,
     generalized_adjustment: GeneralizedAdjustment = GeneralizedAdjustment.GENERALIZED_ADJUSTMENT_DEFAULT,
+    surrogate_nodes: Optional[List[str]] = None,
 ) -> IdentifiedEstimand:
     """Main method that returns an identified estimand (if one exists).
 
@@ -205,6 +206,7 @@ def identify_effect_auto(
             costs,
             conditional_node_names,
             generalized_adjustment,
+            surrogate_nodes=surrogate_nodes,
         )
     elif estimand_type == EstimandType.NONPARAMETRIC_NDE:
         return identify_nde_effect(
@@ -240,6 +242,7 @@ def identify_ate_effect(
     costs: List,
     conditional_node_names: List[str] = None,
     generalized_adjustment: GeneralizedAdjustment = GeneralizedAdjustment.GENERALIZED_ADJUSTMENT_DEFAULT,
+    surrogate_nodes: Optional[List[str]] = None,
 ):
     estimands_dict = {}
     mediation_first_stage_confounders = None
@@ -337,6 +340,23 @@ def identify_ate_effect(
         logger.warning(
             f"Generalized covariate adjustment identification is not supported for the detected Python version: {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}."
         )
+    ### 5. Z-IDENTIFIABILITY (SURROGATE EXPERIMENTS)
+    if surrogate_nodes:
+        try:
+            from dowhy.causal_identifier.zid_identifier import ZIDIdentifier
+            _zid = ZIDIdentifier(graph, action_nodes, outcome_nodes, surrogate_nodes)
+            _zid_estimand = _zid.identify_effect()
+            estimands_dict["zid"] = _zid_estimand
+            logger.info("z-ID succeeded via surrogate nodes: " + str(surrogate_nodes))
+        except ImportError:
+            logger.warning("ZIDIdentifier not available; skipping z-ID step.")
+            estimands_dict["zid"] = None
+        except Exception as _e:
+            logger.debug("z-ID did not succeed: " + str(_e))
+            estimands_dict["zid"] = None
+    else:
+        estimands_dict["zid"] = None
+
     # Finally returning the estimand object
     estimand = IdentifiedEstimand(
         None,
