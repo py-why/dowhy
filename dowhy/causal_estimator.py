@@ -331,6 +331,10 @@ class CausalEstimator:
             )
         # Making a copy since we are going to be changing effect modifier names
         effect_modifier_names = effect_modifier_names.copy()
+        # Work on a copy so that adding temp discretization columns never mutates
+        # the caller's DataFrame (avoids hard-to-debug state corruption when the
+        # estimator is reused or when pandas Copy-on-Write raises errors).
+        data = data.copy()
         prefix = CausalEstimator.TEMP_CAT_COLUMN_PREFIX
         # For every numeric effect modifier, adding a temp categorical column
         for i in range(len(effect_modifier_names)):
@@ -350,10 +354,6 @@ class CausalEstimator:
         group_estimates = {group_key: estimate_effect_fn(group_df) for group_key, group_df in by_effect_mods}
         conditional_estimates = pd.Series(group_estimates)
         conditional_estimates.index.names = effect_modifier_names
-        # Deleting the temporary categorical columns
-        for em in effect_modifier_names:
-            if em.startswith(prefix):
-                data.pop(em)
         return conditional_estimates
 
     def _do(self, x, data_df=None):
