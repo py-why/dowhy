@@ -197,7 +197,8 @@ class ThetaC:
         if np.min(p) < self.warn_th or np.max(p) > 1 - self.warn_th:
             warnings.warn(
                 f"min P(T = 1 | X) = {np.min(p) :.2f}, max P(T = 1 | X) = {np.max(p) :.2f}, indicating low overlap. \n"
-                + "Consider increasing the regularization for the classificator or using method = 'regression'."
+                + "Consider increasing the regularization for the classificator or using method = 'regression'.",
+                stacklevel=2,
             )
 
     def _get_alphas(

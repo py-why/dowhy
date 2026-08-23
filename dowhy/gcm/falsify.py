@@ -856,14 +856,14 @@ def _compute_p_value(
     # Test if we have data for X and Y
     for node in [X, Y]:
         if not node in data.columns:
-            warnings.warn(f"WARN: Couldn't find data for node {node}. Skip this test.")
+            warnings.warn(f"WARN: Couldn't find data for node {node}. Skip this test.", stacklevel=2)
             return
 
     if Z:
         # Test if we have data for Z
         for node in Z:
             if not node in data.columns:
-                warnings.warn(f"WARN: Couldn't find data for node {node}. Skip this test.")
+                warnings.warn(f"WARN: Couldn't find data for node {node}. Skip this test.", stacklevel=2)
                 return
         p_value = conditional_independence_test(data[X].values, data[Y].values, data[Z].values)
     else:
