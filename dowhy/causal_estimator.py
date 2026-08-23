@@ -17,6 +17,23 @@ from dowhy.utils.encoding import Encoders
 logger = logging.getLogger(__name__)
 
 
+def _discretize_numeric_effect_modifier(values: pd.Series, num_quantiles: int) -> pd.Series:
+    """Discretize numeric effect-modifier values without losing a constant observed group."""
+    # qcut produces an all-NA categorical for a constant column, which drops its only observed group.
+    if values.nunique(dropna=True) <= 1:
+        return values.astype("category")
+    return pd.qcut(values, num_quantiles, duplicates="drop")
+
+
+def _create_conditional_estimates(group_keys, group_estimates, effect_modifier_names) -> pd.Series:
+    """Create a correctly shaped result index, including when there are no observed groups."""
+    if len(effect_modifier_names) == 1:
+        group_index = pd.Index(group_keys, name=effect_modifier_names[0])
+    else:
+        group_index = pd.MultiIndex.from_tuples(group_keys, names=effect_modifier_names)
+    return pd.Series(group_estimates, index=group_index)
+
+
 class CausalEstimator:
     """Base class for an estimator of causal effect.
 
@@ -336,20 +353,26 @@ class CausalEstimator:
         for i in range(len(effect_modifier_names)):
             em = effect_modifier_names[i]
             if pd.api.types.is_numeric_dtype(data[em].dtypes):
-                data[prefix + str(em)] = pd.qcut(data[em], num_quantiles, duplicates="drop")
-                effect_modifier_names[i] = prefix + str(em)
+                categorical_em = prefix + str(em)
+                data[categorical_em] = _discretize_numeric_effect_modifier(data[em], num_quantiles)
+                effect_modifier_names[i] = categorical_em
         # Grouping by effect modifiers and computing effect separately
         # Adding observed=True to avoid a FutureWarning in pandas (see #1316)
-        by_effect_mods = data.groupby(effect_modifier_names, observed=True)
+        groupby_columns = effect_modifier_names[0] if len(effect_modifier_names) == 1 else effect_modifier_names
+        by_effect_mods = data.groupby(groupby_columns, observed=True)
 
         # Some estimators access the effect-modifier (grouping) columns inside
         # estimate_effect_fn for feature construction, so those columns must remain
         # available. pandas >=3.0 no longer lets GroupBy.apply include the grouping
         # columns (include_groups=True was removed). Iterating the groups keeps the
         # grouping columns in each sub-frame across all pandas versions.
-        group_estimates = {group_key: estimate_effect_fn(group_df) for group_key, group_df in by_effect_mods}
-        conditional_estimates = pd.Series(group_estimates)
-        conditional_estimates.index.names = effect_modifier_names
+        group_keys = []
+        group_estimates = []
+        for group_key, group_df in by_effect_mods:
+            group_keys.append(group_key)
+            group_estimates.append(estimate_effect_fn(group_df))
+
+        conditional_estimates = _create_conditional_estimates(group_keys, group_estimates, effect_modifier_names)
         # Deleting the temporary categorical columns
         for em in effect_modifier_names:
             if em.startswith(prefix):
