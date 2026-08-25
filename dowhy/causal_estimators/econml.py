@@ -50,9 +50,27 @@ class Econml(CausalEstimator):
         :param identified_estimand: probability expression
             representing the target identified estimand to estimate.
         :param econml_estimator: Instance of an econml estimator class.
-        :param test_significance: Binary flag or a string indicating whether to test significance and by which method. All estimators support test_significance="bootstrap" that estimates a p-value for the obtained estimate using the bootstrap method. Individual estimators can override this to support custom testing methods. The bootstrap method supports an optional parameter, num_null_simulations. If False, no testing is done. If True, significance of the estimate is tested using the custom method if available, otherwise by bootstrap.
+        :param test_significance: Binary flag or a string indicating whether
+            to test significance and by which method. All estimators support
+            test_significance="bootstrap" that estimates a p-value for the
+            obtained estimate using the bootstrap method. Individual estimators
+            can override this to support custom testing methods. The bootstrap
+            method supports an optional parameter, num_null_simulations. If
+            False, no testing is done. If True, significance of the estimate
+            is tested using the custom method if available, otherwise by
+            bootstrap.
         :param evaluate_effect_strength: (Experimental) whether to evaluate the strength of effect
-        :param confidence_intervals: Binary flag or a string indicating whether the confidence intervals should be computed and which method should be used. All methods support estimation of confidence intervals using the bootstrap method by using the parameter confidence_intervals="bootstrap". The bootstrap method takes in two arguments (num_simulations and sample_size_fraction) that can be optionally specified in the params dictionary. Estimators may also override this to implement their own confidence interval method. If this parameter is False, no confidence intervals are computed. If True, confidence intervals are computed by the estimator's specific method if available, otherwise through bootstrap
+        :param confidence_intervals: Binary flag or a string indicating whether
+            confidence intervals should be computed and which method should be
+            used. All methods support estimation of confidence intervals using
+            the bootstrap method by using the parameter
+            confidence_intervals="bootstrap". The bootstrap method takes in two
+            arguments (num_simulations and sample_size_fraction) that can be
+            optionally specified in the params dictionary. Estimators may also
+            override this to implement their own confidence interval method.
+            If this parameter is False, no confidence intervals are computed.
+            If True, confidence intervals are computed by the estimator's
+            specific method if available, otherwise through bootstrap.
         :param num_null_simulations: The number of simulations for testing the
             statistical significance of the estimator
         :param num_simulations: The number of simulations for finding the
@@ -87,7 +105,9 @@ class Econml(CausalEstimator):
 
         if isinstance(econml_estimator, str):
             warn(
-                "Using a string to specify the value for econml_estimator is now deprecated, please provide an instance of a econml object",
+                "Using a string to specify the value for econml_estimator is "
+                "now deprecated, please provide an instance of a econml "
+                "object",
                 DeprecationWarning,
                 stacklevel=2,
             )
@@ -135,7 +155,9 @@ class Econml(CausalEstimator):
             w_diff_x = [w for w in self._observed_common_causes_names if w not in effect_modifier_names]
             if len(w_diff_x) > 0:
                 self.logger.warning(
-                    "Concatenating common_causes and effect_modifiers and providing a single list of variables to metalearner estimator method, "
+                    "Concatenating common_causes and effect_modifiers and "
+                    "providing a single list of variables to metalearner "
+                    "estimator method, "
                     + self.estimator.__class__.__name__
                     + ". EconML metalearners accept a single X argument."
                 )
@@ -200,7 +222,8 @@ class Econml(CausalEstimator):
 
         except (AttributeError, AssertionError, ImportError):
             raise ImportError(
-                "Error loading {}.{}. Double-check the method name and ensure that all econml dependencies are installed.".format(
+                "Error loading {}.{}. Double-check the method name and ensure "
+                "that all econml dependencies are installed.".format(
                     module_name, class_name
                 )
             )
@@ -215,12 +238,15 @@ class Econml(CausalEstimator):
         **_,
     ):
         """
-        data: dataframe containing the data on which treatment effect is to be estimated.
+        data: dataframe containing the data on which treatment effect
+            is to be estimated.
         treatment_value: value of the treatment variable for which the effect is to be estimated. It can be (optionally) a sequence for different values of the treatment variable.
         control_value: value of the treatment variable that denotes its absence (usually 0)
-        target_units: The units for which the treatment effect should be estimated.
-                     It can be a DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.
-                     It can also be a lambda function that can be used as an index for the data (pandas DataFrame) to select the required rows.
+        target_units: The units for which the treatment effect should be
+            estimated. It can be a DataFrame that contains values of the
+            effect_modifiers and effect will be estimated only for this new
+            data. It can also be a lambda function that can be used as an
+            index for the data (pandas DataFrame) to select the required rows.
         """
         self._target_units = target_units
         self._treatment_value = treatment_value
