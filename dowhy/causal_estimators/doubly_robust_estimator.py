@@ -129,9 +129,6 @@ class DoublyRobustEstimator(CausalEstimator):
         if self._target_estimand.identifier_method not in ["backdoor", "general_adjustment"]:
             error_msg = str(self.__class__) + " only supports covariate adjustment identifiers"
             raise ValueError(error_msg)
-        if effect_modifier_names and (len(effect_modifier_names) > 0):
-            # TODO: Add support for effect modifiers in the Doubly Robust Estimator
-            raise NotImplementedError("Effect Modifiers not supported yet for " + str(self.__class__))
 
         # Fit the models
         self._set_effect_modifiers(data, effect_modifier_names)
@@ -146,6 +143,7 @@ class DoublyRobustEstimator(CausalEstimator):
         control_value: Union[float, int] = 0,
         treatment_value: Union[float, int] = 1,
         target_units: Union[str, pd.DataFrame] = "ate",
+        need_conditional_estimates: Optional[Union[bool, str]] = None,
         **kwargs,
     ):
         """
@@ -160,16 +158,27 @@ class DoublyRobustEstimator(CausalEstimator):
         :param control_value: value associated with not receiving the treatment. Default=0
         :param treatment_value: value associated with receiving the treatment. Default=1
         :param target_units: (Experimental) The units for which the treatment effect should be estimated. Eventually, this can be of three types. (1) a string for common specifications of target units (namely, "ate", "att" and "atc"), (2) a lambda function that can be used as an index for the data (pandas DataFrame), or (3) a new DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data. Currently, only "ate" is supported.
+        :param need_conditional_estimates: Boolean flag indicating whether conditional effects should
+            be computed over effect modifiers. Defaults to the value set during initialization.
         """
         if target_units != "ate":
             raise NotImplementedError("ATE is the only target unit supported for " + str(self.__class__))
 
+        if need_conditional_estimates is None:
+            need_conditional_estimates = self.need_conditional_estimates
+
         self._treatment_value = treatment_value
         self._control_value = control_value
-        self._target_units = "ate"  # TODO: add support for other target units
+        self._target_units = "ate"
         effect_estimate = self._do(treatment_value, treatment_value, data) - self._do(
             control_value, treatment_value, data
         )
+
+        conditional_effect_estimates = None
+        if need_conditional_estimates:
+            conditional_effect_estimates = self._estimate_conditional_effects(
+                data, self._estimate_effect_fn, effect_modifier_names=self._effect_modifier_names
+            )
 
         estimate = CausalEstimate(
             data=data,
@@ -178,11 +187,17 @@ class DoublyRobustEstimator(CausalEstimator):
             estimate=effect_estimate,
             control_value=control_value,
             treatment_value=treatment_value,
+            conditional_estimates=conditional_effect_estimates,
             target_estimand=self._target_estimand,
             realized_estimand_expr=self.symbolic_estimator,
         )
         estimate.add_estimator(self)
         return estimate
+
+    def _estimate_effect_fn(self, data_df: pd.DataFrame) -> float:
+        """Function used in conditional effect estimation."""
+        est = self.estimate_effect(data=data_df, need_conditional_estimates=False)
+        return est.value
 
     def _do(
         self,

@@ -1,7 +1,11 @@
+import numpy as np
+import pandas as pd
 import pytest
 from pytest import mark
 
+from dowhy import EstimandType, identify_effect_auto
 from dowhy.causal_estimators.doubly_robust_estimator import DoublyRobustEstimator
+from dowhy.graph import build_graph_from_str
 
 from .base import SimpleEstimator
 
@@ -115,3 +119,51 @@ class TestDoublyRobustEstimator(object):
                 test_significance=[False],
                 method_params={"num_simulations": 10, "num_null_simulations": 10},
             )
+
+    def test_conditional_treatment_effect_with_effect_modifiers(self):
+        """DoublyRobustEstimator should produce a per-group CATE when effect modifiers are present."""
+        rng = np.random.default_rng(42)
+        n = 2000
+
+        # X: confounder, V: continuous effect modifier
+        X = rng.standard_normal(n)
+        V = rng.standard_normal(n)
+        T = (rng.standard_normal(n) + X > 0).astype(int)
+        # True effect heterogeneity: CATE = 5 + 2*V
+        Y = 5 * T + 2 * V * T + X + rng.standard_normal(n)
+
+        df = pd.DataFrame({"X": X, "V": V, "T": T, "Y": Y})
+
+        gml_graph = """
+        graph [
+          directed 1
+          node [id "X" label "X"]
+          node [id "V" label "V"]
+          node [id "T" label "T"]
+          node [id "Y" label "Y"]
+          edge [source "X" target "T"]
+          edge [source "X" target "Y"]
+          edge [source "T" target "Y"]
+          edge [source "V" target "Y"]
+        ]
+        """
+        target_estimand = identify_effect_auto(
+            build_graph_from_str(gml_graph),
+            observed_nodes=list(df.columns),
+            action_nodes=["T"],
+            outcome_nodes=["Y"],
+            estimand_type=EstimandType.NONPARAMETRIC_ATE,
+        )
+        target_estimand.set_identifier_method("backdoor")
+
+        estimator = DoublyRobustEstimator(identified_estimand=target_estimand)
+        estimator.fit(df, effect_modifier_names=["V"])
+
+        result = estimator.estimate_effect(df, control_value=0, treatment_value=1, target_units="ate")
+
+        # ATE should be close to E[5 + 2*V] = 5 (since E[V] = 0)
+        assert abs(result.value - 5.0) < 0.5, f"ATE estimate {result.value:.3f} too far from 5.0"
+
+        # Conditional estimates should be a non-empty Series
+        assert result.conditional_estimates is not None
+        assert len(result.conditional_estimates) > 0
