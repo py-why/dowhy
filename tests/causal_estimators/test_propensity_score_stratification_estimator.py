@@ -1,7 +1,6 @@
-from pytest import mark
-
 import numpy as np
 import pandas as pd
+from pytest import mark
 
 from dowhy import EstimandType, identify_effect_auto
 from dowhy.causal_estimators.propensity_score_stratification_estimator import PropensityScoreStratificationEstimator
