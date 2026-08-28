@@ -77,4 +77,5 @@ def test_conditional_effects_all_missing_multiple_effect_modifiers_returns_empty
 
     assert conditional_estimates.empty
     assert isinstance(conditional_estimates.index, pd.MultiIndex)
-    assert conditional_estimates.index.names == ["__categorical__modifier_a", "__categorical__modifier_b"]
+    prefix = CausalEstimator.TEMP_CAT_COLUMN_PREFIX
+    assert conditional_estimates.index.names == [f"{prefix}modifier_a", f"{prefix}modifier_b"]
