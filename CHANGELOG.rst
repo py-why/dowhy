@@ -102,9 +102,13 @@ Bug Fixes
   Fixed crashes due to removed ``include_groups`` parameter, read-only array permute,
   deprecated ``GroupBy.apply`` warning, and categorical confounder handling.
 
-* **scikit-learn ≥ 1.7 compatibility**
-  (`#1611 <https://github.com/py-why/dowhy/pull/1611>`_):
-  Fixed crash in ``categorical_treatment_model`` due to removed ``multi_class`` parameter.
+* **scikit-learn ≥ 1.7 and 1.9 compatibility**
+  (`#1611 <https://github.com/py-why/dowhy/pull/1611>`_,
+  `#1699 <https://github.com/py-why/dowhy/pull/1699>`_):
+  Fixed crash in ``categorical_treatment_model`` due to removed ``multi_class`` parameter (1.7);
+  replaced ``LinearRegression``-based weighted least squares in Shapley estimation with an
+  explicit ``np.linalg.lstsq`` solve to restore numerical stability broken by 1.9's solver
+  changes (closes :issue:`1698`).
 
 * **NumPy ≥ 2.4 compatibility**
   (`#1394 <https://github.com/py-why/dowhy/pull/1394>`_,
