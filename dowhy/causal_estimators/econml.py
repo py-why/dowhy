@@ -223,9 +223,7 @@ class Econml(CausalEstimator):
         except (AttributeError, AssertionError, ImportError):
             raise ImportError(
                 "Error loading {}.{}. Double-check the method name and ensure "
-                "that all econml dependencies are installed.".format(
-                    module_name, class_name
-                )
+                "that all econml dependencies are installed.".format(module_name, class_name)
             )
         return estimator_class
 

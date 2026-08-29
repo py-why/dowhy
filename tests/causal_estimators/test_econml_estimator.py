@@ -488,9 +488,7 @@ class TestEconMLEstimator:
                     "init_params": {
                         "model_y": GradientBoostingRegressor(),
                         "model_t": GradientBoostingRegressor(),
-                        "featurizer": PolynomialFeatures(
-                            degree=1, include_bias=True
-                        ),
+                        "featurizer": PolynomialFeatures(degree=1, include_bias=True),
                     },
                     "fit_params": {},
                 },
@@ -498,7 +496,5 @@ class TestEconMLEstimator:
             assert estimate.ate is not None
         except TypeError as e:
             if "num_quantiles_to_discretize_cont_cols" in str(e):
-                pytest.skip(
-                    f"LinearDML does not support num_quantiles_to_discretize_cont_cols: {e}"
-                )
+                pytest.skip(f"LinearDML does not support num_quantiles_to_discretize_cont_cols: {e}")
             raise
