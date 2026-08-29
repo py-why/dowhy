@@ -296,3 +296,48 @@ def test_given_discrete_data_when_performing_interventions_then_returns_correct_
     assert np.all(samples["X"].to_numpy() == -2)
     assert np.median(samples["Y"].to_numpy()) == -1
     assert np.mean(samples["Z"].to_numpy()) == approx(-2, abs=0.05)
+
+
+def test_given_random_seed_when_draw_interventional_samples_then_results_are_reproducible():
+    causal_model, _ = _create_and_fit_simple_probabilistic_causal_model()
+
+    samples_a = interventional_samples(causal_model, {"X0": lambda x: 0}, num_samples_to_draw=50, random_seed=42)
+    samples_b = interventional_samples(causal_model, {"X0": lambda x: 0}, num_samples_to_draw=50, random_seed=42)
+    samples_c = interventional_samples(causal_model, {"X0": lambda x: 0}, num_samples_to_draw=50, random_seed=99)
+
+    pd.testing.assert_frame_equal(samples_a, samples_b)
+    assert not samples_a["X1"].equals(samples_c["X1"]), "Different seeds should produce different samples"
+
+
+def test_given_random_seed_when_draw_counterfactual_samples_then_results_are_reproducible():
+    causal_model, observations = _create_and_fit_simple_probabilistic_causal_model()
+    observed_subset = observations.iloc[:20].copy()
+
+    cf_a = counterfactual_samples(causal_model, {"X0": lambda x: 0}, observed_data=observed_subset, random_seed=42)
+    cf_b = counterfactual_samples(causal_model, {"X0": lambda x: 0}, observed_data=observed_subset, random_seed=42)
+
+    pd.testing.assert_frame_equal(cf_a, cf_b)
+
+
+def test_given_random_seed_when_estimate_average_causal_effect_then_results_are_reproducible():
+    T = np.random.default_rng(0).choice(2, 500, replace=True)
+    X = np.random.default_rng(1).normal(0, 0.1, 500) + T
+    Y = X + np.random.default_rng(2).normal(0, 0.1, 500)
+
+    data = pd.DataFrame(dict(T=T, X=X, Y=Y))
+    causal_model = ProbabilisticCausalModel(nx.DiGraph([("T", "X"), ("X", "Y")]))
+    auto.assign_causal_mechanisms(causal_model, data, auto.AssignmentQuality.GOOD)
+    fit(causal_model, data)
+
+    ace_a = average_causal_effect(
+        causal_model, "Y", {"T": lambda x: 1}, {"T": lambda x: 0}, num_samples_to_draw=200, random_seed=42
+    )
+    ace_b = average_causal_effect(
+        causal_model, "Y", {"T": lambda x: 1}, {"T": lambda x: 0}, num_samples_to_draw=200, random_seed=42
+    )
+    ace_c = average_causal_effect(
+        causal_model, "Y", {"T": lambda x: 1}, {"T": lambda x: 0}, num_samples_to_draw=200, random_seed=99
+    )
+
+    assert ace_a == ace_b
+    assert ace_a != ace_c
