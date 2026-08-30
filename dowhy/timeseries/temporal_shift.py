@@ -1,3 +1,4 @@
+import warnings
 from collections import deque
 from typing import List, Optional, Tuple
 
@@ -97,6 +98,10 @@ def shift_columns_by_lag_using_unrolled_graph(df: pd.DataFrame, unrolled_graph: 
                     new_column_name = f"{base_node}_{-lag}"
                     new_df[new_column_name] = df[base_node].shift(lag, fill_value=0)
             except ValueError:
-                print(f"Warning: Cannot extract lag from node name {node}. Expected format 'baseNode_lag'")
+                warnings.warn(
+                    f"Cannot extract lag from node name {node}. Expected format 'baseNode_lag'",
+                    UserWarning,
+                    stacklevel=2,
+                )
 
     return new_df
