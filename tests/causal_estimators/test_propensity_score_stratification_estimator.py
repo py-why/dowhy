@@ -134,3 +134,6 @@ def test_pss_non_zero_one_treatment_encoding():
     estimate = estimator.estimate_effect(df, treatment_value=2, control_value=1, target_units="ate")
 
     assert np.isfinite(estimate.value), f"Expected a finite estimate, got {estimate.value}"
+    # The data-generating process uses ATE = 3.0 (Y = 3.0 * (T==2) + noise), so the
+    # estimate should be close to 3.0 (within 1.0 given typical PSS variance at n=2000).
+    assert abs(estimate.value - 3.0) < 1.0, f"Expected estimate near 3.0, got {estimate.value}"
