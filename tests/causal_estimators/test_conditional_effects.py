@@ -79,3 +79,37 @@ def test_conditional_effects_all_missing_multiple_effect_modifiers_returns_empty
     assert isinstance(conditional_estimates.index, pd.MultiIndex)
     prefix = CausalEstimator.TEMP_CAT_COLUMN_PREFIX
     assert conditional_estimates.index.names == [f"{prefix}modifier_a", f"{prefix}modifier_b"]
+
+
+def test_conditional_effects_does_not_mutate_input_dataframe():
+    """_estimate_conditional_effects must not add/remove columns on the caller's DataFrame.
+
+    The function discretizes numeric effect modifiers into temporary categorical
+    columns before grouping. Without ``data = data.copy()`` those columns would
+    be added in-place and the manual cleanup at the end would permanently corrupt
+    the caller's DataFrame if any exception occurred mid-way.
+    """
+    data = dowhy.datasets.linear_dataset(
+        beta=10,
+        num_common_causes=3,
+        num_effect_modifiers=2,
+        num_samples=500,
+        treatment_is_binary=True,
+    )
+    df = data["df"]
+    cols_before = set(df.columns)
+
+    model = CausalModel(
+        data=df,
+        treatment=data["treatment_name"],
+        outcome=data["outcome_name"],
+        graph=data["gml_graph"],
+    )
+    identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+    model.estimate_effect(identified_estimand, method_name="backdoor.linear_regression")
+
+    assert set(df.columns) == cols_before, (
+        f"_estimate_conditional_effects mutated the input DataFrame: "
+        f"added columns {set(df.columns) - cols_before}, "
+        f"removed columns {cols_before - set(df.columns)}"
+    )
