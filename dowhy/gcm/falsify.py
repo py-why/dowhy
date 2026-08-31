@@ -242,11 +242,15 @@ def validate_pd(
     if p_values_memory is None:
         p_values_memory = _PValuesMemory()
 
-    pairs = [(ancestor, node) for node in causal_graph.nodes for ancestor in nx.ancestors(causal_graph, node)]
     if adjacent_only:
-        pairs = [
-            (ancestor, node) for (ancestor, node) in pairs if ancestor in get_ordered_predecessors(causal_graph, node)
-        ]
+        # Direct edges only — no need to enumerate all ancestors first.
+        pairs = list(causal_graph.edges())
+    else:
+        # transitive_closure_dag adds an edge (u, v) for every pair where u can reach v,
+        # i.e. u is an ancestor of v.  A single graph traversal replaces N separate
+        # nx.ancestors() calls, cutting Python-function overhead from O(N) to O(1).
+        tc = nx.transitive_closure_dag(causal_graph)
+        pairs = list(tc.edges())
 
     if n_pairs < 0:
         n_pairs = len(pairs)
