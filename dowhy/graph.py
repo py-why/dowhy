@@ -69,10 +69,14 @@ def get_ordered_predecessors(causal_graph: DirectedGraph, node: Any) -> List[Any
 
 
 def node_connected_subgraph_view(g: DirectedGraph, node: Any) -> Any:
-    """Returns a view of the provided graph g that contains only nodes connected to the node passed in"""
-    # can't use nx.node_connected_component, because it doesn't work with DiGraphs.
-    # Hence, a manual loop:
-    return nx.induced_subgraph(g, [n for n in g.nodes if nx.has_path(g, n, node)])
+    """Returns a view of the provided graph g that contains only nodes connected to the node passed in.
+
+    A node is "connected" to the target if there is a directed path from that node to the target,
+    i.e. the target is included together with all of its ancestors.
+    """
+    # nx.ancestors(g, node) returns all nodes from which `node` is reachable via directed edges,
+    # which is O(V+E).  The original loop calling nx.has_path for each node was O(V*(V+E)).
+    return nx.induced_subgraph(g, nx.ancestors(g, node) | {node})
 
 
 def validate_acyclic(causal_graph: DirectedGraph) -> None:

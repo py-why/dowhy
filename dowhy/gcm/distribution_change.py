@@ -445,8 +445,9 @@ def _check_significant_mechanism_change(
             parents_org_data = None
             parents_new_data = None
         else:
-            parents_org_data = old_data[get_ordered_predecessors(graph, node)].to_numpy()
-            parents_new_data = new_data[get_ordered_predecessors(graph, node)].to_numpy()
+            parent_nodes = get_ordered_predecessors(graph, node)
+            parents_org_data = old_data[parent_nodes].to_numpy()
+            parents_new_data = new_data[parent_nodes].to_numpy()
 
         all_p_values.append(
             mechanism_change_test(

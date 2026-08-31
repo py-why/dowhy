@@ -61,3 +61,35 @@ def test_when_set_and_get_causal_model_then_the_set_model_is_returned():
     causal_model.set_causal_mechanism("X0", mdl)
 
     assert causal_model.causal_mechanism("X0") == mdl
+
+
+def test_given_dag_with_disconnected_node_when_node_connected_subgraph_view_then_excludes_disconnected_node():
+    """node_connected_subgraph_view should return only ancestors of the target node (and the node itself)."""
+    from dowhy.graph import node_connected_subgraph_view
+
+    # X0 -> X1 -> X2; D is disconnected
+    g = nx.DiGraph([("X0", "X1"), ("X1", "X2")])
+    g.add_node("D")
+
+    sub = node_connected_subgraph_view(g, "X2")
+    assert set(sub.nodes) == {"X0", "X1", "X2"}
+    assert "D" not in sub.nodes
+
+
+def test_given_dag_when_node_connected_subgraph_view_on_root_then_returns_only_root():
+    """For a root node with no ancestors, the view contains only that node."""
+    from dowhy.graph import node_connected_subgraph_view
+
+    g = nx.DiGraph([("X0", "X1"), ("X1", "X2")])
+    sub = node_connected_subgraph_view(g, "X0")
+    assert set(sub.nodes) == {"X0"}
+
+
+def test_given_dag_when_node_connected_subgraph_view_then_preserves_edges():
+    """Edges within the connected subgraph should be preserved."""
+    from dowhy.graph import node_connected_subgraph_view
+
+    g = nx.DiGraph([("A", "B"), ("B", "C"), ("A", "C"), ("D", "E")])
+    sub = node_connected_subgraph_view(g, "C")
+    assert set(sub.nodes) == {"A", "B", "C"}
+    assert set(sub.edges) == {("A", "B"), ("B", "C"), ("A", "C")}
