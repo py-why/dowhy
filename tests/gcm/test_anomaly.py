@@ -339,3 +339,27 @@ def _create_pcm_and_outlier_observation():
     fit(pcm, original_observations)
 
     return pcm, outlier_observation
+
+
+def test_given_node_filter_when_estimate_anomaly_scores_then_only_returns_requested_nodes():
+    """anomaly_scores(nodes=...) should compute and return scores only for the specified nodes."""
+    pcm, outlier_observation = _create_pcm_and_outlier_observation()
+
+    # Request scores for a subset of nodes
+    requested = ["X0", "X1"]
+    scores = anomaly_scores(pcm, outlier_observation, anomaly_scorer_factory=MedianCDFQuantileScorer, nodes=requested)
+
+    assert set(scores.keys()) == set(requested)
+
+
+def test_given_none_nodes_when_estimate_anomaly_scores_then_returns_all_nodes():
+    """anomaly_scores(nodes=None) should behave identically to not passing nodes (all nodes)."""
+    pcm, outlier_observation = _create_pcm_and_outlier_observation()
+
+    scores_default = anomaly_scores(pcm, outlier_observation, anomaly_scorer_factory=MedianCDFQuantileScorer)
+    scores_explicit_none = anomaly_scores(
+        pcm, outlier_observation, anomaly_scorer_factory=MedianCDFQuantileScorer, nodes=None
+    )
+
+    assert set(scores_default.keys()) == set(scores_explicit_none.keys())
+
