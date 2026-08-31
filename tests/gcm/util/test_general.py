@@ -14,12 +14,16 @@ from dowhy.gcm.util.general import (
     auto_fit_encoders,
     fit_catboost_encoders,
     fit_one_hot_encoders,
+    geometric_median,
     has_categorical,
     is_categorical,
     is_discrete,
+    means_difference,
     set_random_seed,
     setdiff2d,
     shape_into_2d,
+    variance_of_deviations,
+    variance_of_matching_values,
 )
 
 
@@ -227,3 +231,55 @@ def test_given_non_discrete_data_when_calling_is_discrete_then_returns_false():
     assert not is_discrete(np.array([0, -4, 5, 10, 1.0000000001, 0.000000001, 10**-15, 99.9, 40.5]))
     assert not is_discrete(np.array([10**-15]))
     assert not is_discrete(np.array([0, -4, 5, 10, 1.0000000001, 0.000000001, 10**-15, 99.9, 40.5]).reshape(-1, 1))
+
+
+def test_when_calling_means_difference_then_returns_mean_of_first_minus_mean_of_second():
+    a = np.array([1.0, 2.0, 3.0])
+    b = np.array([0.5, 1.0, 1.5])
+    # mean(a) = 2.0, mean(b) = 1.0
+    assert means_difference(a, b) == approx(1.0)
+
+
+def test_when_calling_means_difference_with_equal_arrays_then_returns_zero():
+    a = np.array([3.0, 5.0, 7.0])
+    assert means_difference(a, a) == approx(0.0)
+
+
+def test_when_calling_variance_of_deviations_then_returns_negative_variance_of_residuals():
+    randomized = np.array([1.0, 2.0, 3.0])
+    baseline = np.array([0.5, 1.0, 1.5])
+    # deviations = [0.5, 1.0, 1.5], var = 1/6 ≈ 0.1667 (ddof=0)
+    expected = -np.var(randomized - baseline)
+    assert variance_of_deviations(randomized, baseline) == approx(expected)
+
+
+def test_when_calling_variance_of_deviations_with_equal_arrays_then_returns_zero():
+    a = np.array([1.0, 2.0, 3.0])
+    assert variance_of_deviations(a, a) == approx(0.0)
+
+
+def test_when_calling_variance_of_matching_values_then_returns_negative_variance_of_equality_mask():
+    randomized = np.array([1, 2, 1])
+    baseline = np.array([1, 3, 1])
+    # matches = [True, False, True] → [1, 0, 1], var = 2/9
+    expected = -np.var((randomized == baseline))
+    assert variance_of_matching_values(randomized, baseline) == approx(expected)
+
+
+def test_when_calling_variance_of_matching_values_with_identical_arrays_then_returns_zero():
+    a = np.array([1, 2, 3])
+    assert variance_of_matching_values(a, a) == approx(0.0)
+
+
+def test_when_calling_geometric_median_on_symmetric_points_then_returns_centroid():
+    # Four symmetric points around the origin — geometric median is the origin.
+    points = np.array([[1.0, 0.0], [0.0, 1.0], [-1.0, 0.0], [0.0, -1.0]])
+    result = geometric_median(points)
+    assert result == approx(np.array([0.0, 0.0]), abs=1e-4)
+
+
+def test_when_calling_geometric_median_on_collinear_points_then_returns_interior_point():
+    # Collinear: geometric median of [-1, 0, 0, 1] is 0.
+    points = np.array([[-1.0], [0.0], [0.0], [1.0]])
+    result = geometric_median(points)
+    assert result == approx(np.array([0.0]), abs=1e-4)
