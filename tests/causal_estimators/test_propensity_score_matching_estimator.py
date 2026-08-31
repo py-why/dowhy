@@ -132,3 +132,7 @@ def test_psm_non_zero_one_treatment_encoding():
     estimate = estimator.estimate_effect(df, treatment_value=2, control_value=1, target_units="ate")
 
     assert np.isfinite(estimate.value), f"Expected a finite estimate, got {estimate.value}"
+    assert estimate.value > 0, f"Expected a positive estimate for treatment_value=2 vs control_value=1, got {estimate.value}"
+    assert np.isclose(
+        estimate.value, 3.0, atol=1.0
+    ), f"Expected estimate near the true effect size 3.0, got {estimate.value}"
