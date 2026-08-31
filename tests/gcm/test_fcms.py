@@ -277,6 +277,22 @@ def test_given_discrete_target_data_when_fit_discrete_additive_noise_model_then_
     )
 
 
+def test_given_linear_data_when_fit_causal_graph_in_parallel_then_learns_correct_coefficients():
+    """Verify that fit() with n_jobs>1 (threading) produces equivalent results to serial fitting."""
+    scm = ProbabilisticCausalModel(nx.DiGraph([("X0", "X1"), ("X0", "X2"), ("X1", "X2")]))
+    scm.set_causal_mechanism("X0", ScipyDistribution(stats.norm, loc=0, scale=1))
+    scm.set_causal_mechanism("X1", AdditiveNoiseModel(prediction_model=create_linear_regressor()))
+    scm.set_causal_mechanism("X2", AdditiveNoiseModel(prediction_model=create_linear_regressor()))
+
+    X0 = scm.causal_mechanism("X0").draw_samples(1000).squeeze()
+    X1 = X0 * 2 + 1 + np.random.normal(0, 0.1, 1000)
+    test_data = pd.DataFrame({"X0": X0, "X1": X1, "X2": X0 * 3 + X1 * 0.5 + np.random.normal(0, 0.1, 1000)})
+    fit(scm, test_data, n_jobs=2)
+
+    assert scm.causal_mechanism("X1").prediction_model.sklearn_model.coef_ == approx(np.array([2]), abs=0.05)
+    assert scm.causal_mechanism("X1").prediction_model.sklearn_model.intercept_ == approx(1, abs=0.05)
+
+
 def _generate_data_with_categorical_input():
     X0 = np.random.normal(0, 1, 1000)
     X1 = np.random.choice(3, 1000).astype(str)
