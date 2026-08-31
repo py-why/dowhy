@@ -144,6 +144,14 @@ class InstrumentalVariableEstimator(CausalEstimator):
             instrument = self._estimating_instruments.iloc[:, 0]
             self.logger.debug("Instrument Variable values: {0}".format(instrument))
             num_unique_values = len(np.unique(instrument))
+            if num_unique_values < 2:
+                raise ValueError(
+                    "Instrument variable '{}' must have at least 2 distinct values for IV estimation, "
+                    "but only {} unique value was found. A constant instrument has no statistical "
+                    "variation and cannot identify the causal effect.".format(
+                        self.estimating_instrument_names[0], num_unique_values
+                    )
+                )
             instrument_is_binary = num_unique_values <= 2
             if instrument_is_binary:
                 # Obtain estimate by Wald Estimator
