@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from typing import List, Optional
 
 import numpy as np
+import pandas as pd
 
 from dowhy.gcm.ml import ClassificationModel, PredictionModel
 from dowhy.gcm.ml.regression import InvertibleFunction, SklearnRegressionModel
@@ -269,6 +270,20 @@ class ProbabilityEstimatorModel(ABC):
     def estimate_probabilities(self, parent_samples: np.ndarray) -> np.ndarray:
         raise NotImplementedError
 
+    def estimate_probabilities_dataframe(self, parent_samples: pd.DataFrame) -> np.ndarray:
+        """Returns class probabilities for the given parent samples, automatically reordering columns
+        to match the order used during fitting.
+
+        Requires that the underlying classifier was fitted via :meth:`ClassifierFCM.fit_dataframe`.
+
+        :param parent_samples: DataFrame of parent node samples. Column names must match those used
+            during fitting.
+        :return: A nxd numpy matrix of class probabilities.
+        :raises ValueError: If the underlying classifier was not fitted with ``fit_dataframe`` or
+            required columns are missing.
+        """
+        raise NotImplementedError
+
 
 class ClassifierFCM(FunctionalCausalModel, ProbabilityEstimatorModel):
     """Represents the categorical functional causal model of the form
@@ -317,6 +332,13 @@ class ClassifierFCM(FunctionalCausalModel, ProbabilityEstimatorModel):
     def estimate_probabilities(self, parent_samples: np.ndarray) -> np.ndarray:
         """Returns the class probabilities for the given parent_samples.
 
+        .. note::
+            The columns of ``parent_samples`` **must** be provided in the same order used during
+            fitting (i.e. the order returned by :func:`~dowhy.graph.get_ordered_predecessors`).
+            Passing columns in a different order silently produces incorrect probabilities.
+            Use :meth:`estimate_probabilities_dataframe` for column-name-safe inference when
+            fitting was performed via :meth:`fit_dataframe`.
+
         :param parent_samples: Samples from inputs X.
         :return: A nxd numpy matrix with class probabilities for each sample, where n is the number of samples and d
                  the number of classes. Here, array entry A[i][j] corresponds to the i-th sample indicating the
@@ -337,6 +359,32 @@ class ClassifierFCM(FunctionalCausalModel, ProbabilityEstimatorModel):
             raise ValueError("The target data needs to be categorical in the form of strings!")
 
         self._classifier_model.fit(X=X, Y=Y)
+
+    def fit_dataframe(self, X: pd.DataFrame, Y: np.ndarray) -> None:
+        """Fits the underlying classification model using a DataFrame, storing column names.
+
+        Use this instead of :meth:`fit` when you need :meth:`estimate_probabilities_dataframe`
+        to automatically reorder columns during inference.
+
+        :param X: Feature DataFrame whose columns are the parent node names in fitting order.
+        :param Y: Target labels.
+        """
+        Y = shape_into_2d(Y)
+        if not is_categorical(Y):
+            raise ValueError("The target data needs to be categorical in the form of strings!")
+        self._classifier_model.fit_dataframe(X=X, Y=Y)
+
+    def estimate_probabilities_dataframe(self, parent_samples: pd.DataFrame) -> np.ndarray:
+        """Returns class probabilities, automatically reordering DataFrame columns to match the fitting order.
+
+        Requires that this model was previously fitted via :meth:`fit_dataframe`.
+
+        :param parent_samples: DataFrame of parent node samples. Column names must match those seen
+            during fitting. Extra columns are allowed and will be ignored.
+        :return: A nxd numpy matrix of class probabilities.
+        :raises ValueError: If :meth:`fit_dataframe` was not called or required columns are missing.
+        """
+        return self._classifier_model.predict_probabilities_dataframe(parent_samples)
 
     def clone(self):
         return ClassifierFCM(classifier_model=self._classifier_model.clone())

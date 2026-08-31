@@ -2,6 +2,7 @@ from abc import abstractmethod
 from typing import List
 
 import numpy as np
+import pandas as pd
 import sklearn
 from packaging import version
 from sklearn.pipeline import make_pipeline
@@ -38,6 +39,42 @@ class ClassificationModel(PredictionModel):
     @abstractmethod
     def classes(self) -> List[str]:
         raise NotImplementedError
+
+    def fit_dataframe(self, X: pd.DataFrame, Y: np.ndarray) -> None:
+        """Fits the model using a pandas DataFrame, storing column names for column-order-safe inference.
+
+        By default converts X to a NumPy array and delegates to :meth:`fit`. Override in subclasses that
+        need to retain the original pandas schema (e.g. wrappers for AutoML frameworks).
+
+        :param X: Feature DataFrame whose columns are the parent node names in fitting order.
+        :param Y: Target labels.
+        """
+        self._feature_names = list(X.columns)
+        self.fit(X.to_numpy(), Y)
+
+    def predict_probabilities_dataframe(self, X: pd.DataFrame) -> np.ndarray:
+        """Returns class probabilities, automatically reordering DataFrame columns to match the fitting order.
+
+        This is a safer alternative to :meth:`predict_probabilities` when the caller cannot guarantee
+        that columns are provided in the same order as during fitting.  Requires that the model was
+        previously fitted via :meth:`fit_dataframe`.
+
+        :param X: Feature DataFrame containing at least the columns seen during fitting.
+        :return: A nxd numpy matrix of class probabilities.
+        :raises ValueError: If the model was not fitted with ``fit_dataframe`` or required columns are missing.
+        """
+        if not hasattr(self, "_feature_names"):
+            raise ValueError(
+                "This model was not fitted with fit_dataframe(). "
+                "Call fit_dataframe() first to enable column-name-aware inference."
+            )
+        missing = set(self._feature_names) - set(X.columns)
+        if missing:
+            raise ValueError(
+                f"DataFrame is missing columns that were present during fitting: {missing}. "
+                f"Expected columns (in order): {self._feature_names}."
+            )
+        return self.predict_probabilities(X[self._feature_names].to_numpy())
 
 
 class SklearnClassificationModel(SklearnRegressionModel, ClassificationModel):
