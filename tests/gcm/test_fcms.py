@@ -29,6 +29,7 @@ from dowhy.gcm.ml import (
     create_linear_regressor_with_given_parameters,
     create_logistic_regression_classifier,
 )
+from dowhy.gcm.ml.prediction_model import PredictionModel
 from dowhy.gcm.ml.regression import (
     InvertibleExponentialFunction,
     InvertibleIdentityFunction,
@@ -295,3 +296,113 @@ def _generate_data_with_categorical_input():
         X2.append(tmp_value)
 
     return pd.DataFrame({"X0": X0, "X1": X1, "X2": X2})
+
+
+# ── fit_dataframe tests ─────────────────────────────────────────────────────
+
+
+class _DataFrameCapturingRegressor(PredictionModel):
+    """Minimal PredictionModel that records what fit_dataframe received."""
+
+    def __init__(self):
+        self.received_X = None
+        self.received_Y = None
+        self._coef = None
+
+    def fit(self, X: np.ndarray, Y: np.ndarray) -> None:
+        self._coef = np.linalg.lstsq(X, Y.ravel(), rcond=None)[0]
+
+    def fit_dataframe(self, X: pd.DataFrame, Y: pd.Series) -> None:
+        self.received_X = X
+        self.received_Y = Y
+        self.fit(X.to_numpy(), Y.to_numpy())
+
+    def predict(self, X: np.ndarray) -> np.ndarray:
+        return (X @ self._coef).reshape(-1, 1)
+
+    def clone(self):
+        return _DataFrameCapturingRegressor()
+
+
+def test_fit_causal_model_of_target_passes_dataframe_to_additive_noise_model():
+    """fit_causal_model_of_target should call fit_dataframe with the original DataFrame slice."""
+    capturing_model = _DataFrameCapturingRegressor()
+    scm = ProbabilisticCausalModel(nx.DiGraph([("A", "B"), ("C", "B")]))
+    scm.set_causal_mechanism("A", EmpiricalDistribution())
+    scm.set_causal_mechanism("C", EmpiricalDistribution())
+    scm.set_causal_mechanism("B", AdditiveNoiseModel(prediction_model=capturing_model))
+
+    data = pd.DataFrame(
+        {
+            "A": pd.array([1.0, 2.0, 3.0], dtype="float32"),
+            "C": pd.array([4.0, 5.0, 6.0], dtype="float32"),
+            "B": pd.array([5.0, 7.0, 9.0], dtype="float32"),
+        }
+    )
+    fit(scm, data)
+
+    assert capturing_model.received_X is not None, "fit_dataframe was never called"
+    assert isinstance(capturing_model.received_X, pd.DataFrame)
+    assert list(capturing_model.received_X.dtypes) == [np.dtype("float32"), np.dtype("float32")]
+    assert isinstance(capturing_model.received_Y, pd.Series)
+
+
+def test_fit_causal_model_of_target_passes_dataframe_to_classifier_fcm():
+    """ClassifierFCM.fit_dataframe should forward the DataFrame to the underlying classifier."""
+    from dowhy.gcm.ml.classification import SklearnClassificationModel
+
+    # A wrapper around a standard sklearn classifier that records what fit_dataframe receives.
+    class _CapturingClassifier(SklearnClassificationModel):
+        def __init__(self):
+            from sklearn.linear_model import LogisticRegression
+
+            super().__init__(LogisticRegression(max_iter=1000))
+            self.received_X = None
+            self.received_Y = None
+
+        def fit_dataframe(self, X: pd.DataFrame, Y: pd.Series) -> None:
+            self.received_X = X
+            self.received_Y = Y
+            super().fit_dataframe(X, Y)
+
+        def clone(self):
+            return _CapturingClassifier()
+
+    capturing_classifier = _CapturingClassifier()
+    scm = ProbabilisticCausalModel(nx.DiGraph([("X", "Y")]))
+    scm.set_causal_mechanism("X", EmpiricalDistribution())
+    scm.set_causal_mechanism("Y", ClassifierFCM(classifier_model=capturing_classifier))
+
+    rng = np.random.default_rng(0)
+    x_vals = rng.standard_normal(200).astype("float32")
+    y_vals = np.where(x_vals > 0, "pos", "neg")
+    data = pd.DataFrame({"X": x_vals, "Y": y_vals})
+    fit(scm, data)
+
+    assert capturing_classifier.received_X is not None, "fit_dataframe was never called on classifier"
+    assert isinstance(capturing_classifier.received_X, pd.DataFrame)
+    assert capturing_classifier.received_X.dtypes["X"] == np.dtype("float32")
+
+
+def test_fit_dataframe_default_on_prediction_model_calls_fit_with_numpy():
+    """PredictionModel.fit_dataframe default implementation should call fit() with numpy arrays."""
+
+    class _NumpyCapturingModel(PredictionModel):
+        def __init__(self):
+            self.fit_called_with_numpy = False
+
+        def fit(self, X: np.ndarray, Y: np.ndarray) -> None:
+            self.fit_called_with_numpy = isinstance(X, np.ndarray) and isinstance(Y, np.ndarray)
+
+        def predict(self, X: np.ndarray) -> np.ndarray:
+            return X
+
+        def clone(self):
+            return _NumpyCapturingModel()
+
+    model = _NumpyCapturingModel()
+    X_df = pd.DataFrame({"a": [1.0, 2.0], "b": [3.0, 4.0]})
+    Y_s = pd.Series([0.0, 1.0])
+    model.fit_dataframe(X_df, Y_s)
+
+    assert model.fit_called_with_numpy
