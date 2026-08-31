@@ -362,3 +362,61 @@ def test_dummy_outcome_refuter_is_reproducible_with_random_state():
 
 def test_dummy_outcome_refuter_differs_across_random_states():
     assert _run_dummy_outcome_refuter(random_state=123) != _run_dummy_outcome_refuter(random_state=456)
+
+
+def test_preprocess_data_by_treatment_categorical_treatment():
+    """Regression test: categorical treatment must not raise KeyError.
+
+    Previously the categorical branch in ``preprocess_data_by_treatment`` contained two consecutive
+    groupby assignments; the second referenced a non-existent ``"bins"`` column, so any call with
+    a Categorical-dtype treatment raised ``KeyError``.
+    """
+    import numpy as np
+    import pandas as pd
+
+    from dowhy.causal_refuters.dummy_outcome_refuter import preprocess_data_by_treatment
+
+    rng = np.random.RandomState(42)
+    n = 100
+    treatment = pd.Categorical(rng.choice(["A", "B", "C"], size=n))
+    w = rng.normal(size=n)
+    y = w + rng.normal(size=n)
+    data = pd.DataFrame({"v0": treatment, "W0": w, "y": y})
+
+    # This must not raise KeyError; it used to raise because of the stale `groupby("bins")` line.
+    groups = preprocess_data_by_treatment(
+        data=data.copy(),
+        treatment_name=["v0"],
+        unobserved_confounder_values=None,
+        bucket_size_scale_factor=1.0,
+        chosen_variables=["v0", "W0", "y"],
+    )
+    group_keys = sorted(groups.groups.keys())
+    assert group_keys == ["A", "B", "C"]
+
+
+def test_preprocess_data_by_treatment_continuous_observed_groupby():
+    """Regression test: continuous treatment binning must use ``observed=True`` for pandas 3.x compat."""
+    import numpy as np
+    import pandas as pd
+
+    from dowhy.causal_refuters.dummy_outcome_refuter import preprocess_data_by_treatment
+
+    rng = np.random.RandomState(0)
+    n = 100
+    v = rng.uniform(0, 10, size=n)
+    y = v + rng.normal(size=n)
+    data = pd.DataFrame({"v0": v, "y": y})
+
+    # Must not raise FutureWarning about observed= with pandas >= 2.2
+    import warnings
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", FutureWarning)
+        preprocess_data_by_treatment(
+            data=data.copy(),
+            treatment_name=["v0"],
+            unobserved_confounder_values=None,
+            bucket_size_scale_factor=1.0,
+            chosen_variables=["v0", "y"],
+        )
