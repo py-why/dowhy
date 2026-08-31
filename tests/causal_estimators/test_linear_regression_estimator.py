@@ -360,3 +360,98 @@ class TestLinearRegressionEstimator(object):
         # Should not raise; fraction-effect must be a finite number
         strength = estimator.evaluate_effect_strength(df, ate_estimate)
         assert np.isfinite(strength["fraction-effect"])
+
+    # -------------------------------------------------------------------------
+    # Tests for delta-method CI/SE with effect modifiers (issue #336)
+    # -------------------------------------------------------------------------
+
+    def _make_estimator_with_effect_modifiers(self, num_effect_modifiers=1, num_samples=2000):
+        """Helper: return (df, estimator) for a linear dataset with effect modifiers."""
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=1,
+            num_instruments=0,
+            num_treatments=1,
+            num_effect_modifiers=num_effect_modifiers,
+            num_samples=num_samples,
+            treatment_is_binary=True,
+        )
+        target_estimand = identify_effect_auto(
+            build_graph_from_str(data["gml_graph"]),
+            observed_nodes=list(data["df"].columns),
+            action_nodes=data["treatment_name"],
+            outcome_nodes=data["outcome_name"],
+            estimand_type=EstimandType.NONPARAMETRIC_ATE,
+        )
+        target_estimand.set_identifier_method("backdoor")
+        effect_modifier_names = data["effect_modifier_names"]
+        estimator = LinearRegressionEstimator(
+            identified_estimand=target_estimand,
+            confidence_intervals=True,
+        )
+        estimator.fit(data["df"], effect_modifier_names=effect_modifier_names)
+        return data["df"], estimator, data["effect_modifier_names"]
+
+    def test_delta_method_ci_does_not_raise_with_effect_modifiers(self):
+        """_estimate_confidence_intervals must not raise NotImplementedError when effect modifiers are present.
+
+        Regression test for issue #336: the method previously raised NotImplementedError.
+        """
+        df, estimator, em_names = self._make_estimator_with_effect_modifiers()
+        ate_estimate = estimator.estimate_effect(df, control_value=0, treatment_value=1)
+        # Must not raise; CI should be retrieved without bootstrapping
+        ci = ate_estimate.get_confidence_intervals()
+        assert ci is not None, "CI should not be None when confidence_intervals=True"
+
+    def test_delta_method_ci_shape_with_one_effect_modifier(self):
+        """CI array returned for the effect-modifier case must have shape (1, 2)."""
+        df, estimator, em_names = self._make_estimator_with_effect_modifiers(num_effect_modifiers=1)
+        ate_estimate = estimator.estimate_effect(df, control_value=0, treatment_value=1)
+        ci = ate_estimate.get_confidence_intervals()
+        ci_arr = np.array(ci)
+        assert ci_arr.shape == (1, 2), f"Expected shape (1, 2), got {ci_arr.shape}"
+
+    def test_delta_method_ci_finite_and_ordered(self):
+        """CI bounds must be finite and lower < upper."""
+        df, estimator, em_names = self._make_estimator_with_effect_modifiers()
+        ate_estimate = estimator.estimate_effect(df, control_value=0, treatment_value=1)
+        ci = np.array(ate_estimate.get_confidence_intervals())
+        assert np.all(np.isfinite(ci)), f"CI contains non-finite values: {ci}"
+        assert ci[0, 0] < ci[0, 1], f"Lower bound {ci[0, 0]} not less than upper bound {ci[0, 1]}"
+
+    def test_delta_method_ci_contains_true_ate(self):
+        """The 95% delta-method CI should contain the point estimate and be centred on it."""
+        df, estimator, em_names = self._make_estimator_with_effect_modifiers(num_samples=5000)
+        ate_estimate = estimator.estimate_effect(df, control_value=0, treatment_value=1)
+        ci = np.array(ate_estimate.get_confidence_intervals())
+        point_estimate = ate_estimate.value
+        # The CI is always centred on the ATE point estimate
+        assert (
+            ci[0, 0] <= point_estimate <= ci[0, 1]
+        ), f"Point estimate ({point_estimate:.4f}) not contained in CI [{ci[0, 0]:.4f}, {ci[0, 1]:.4f}]"
+        # With n=5000 and a low-noise linear DGP the CI should be narrow but not degenerate
+        ci_width = ci[0, 1] - ci[0, 0]
+        assert (
+            0 < ci_width < point_estimate
+        ), f"CI width {ci_width:.6f} is implausible for estimate {point_estimate:.4f}"
+
+    def test_delta_method_se_does_not_raise_with_effect_modifiers(self):
+        """_estimate_std_error must not raise NotImplementedError when effect modifiers are present.
+
+        Regression test for issue #336.
+        """
+        df, estimator, em_names = self._make_estimator_with_effect_modifiers()
+        ate_estimate = estimator.estimate_effect(df, control_value=0, treatment_value=1)
+        se = ate_estimate.get_standard_error()
+        assert se is not None
+        assert np.isfinite(se).all(), f"SE contains non-finite values: {se}"
+        assert (np.array(se) > 0).all(), f"SE must be positive, got {se}"
+
+    def test_delta_method_ci_with_multiple_effect_modifiers(self):
+        """Delta-method CI must work when there are multiple effect modifiers."""
+        df, estimator, em_names = self._make_estimator_with_effect_modifiers(num_effect_modifiers=2)
+        ate_estimate = estimator.estimate_effect(df, control_value=0, treatment_value=1)
+        ci = np.array(ate_estimate.get_confidence_intervals())
+        assert ci.shape == (1, 2)
+        assert np.all(np.isfinite(ci))
+        assert ci[0, 0] < ci[0, 1]
