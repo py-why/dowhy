@@ -4,7 +4,7 @@ Installation
 Installing with pip
 -------------------
 
-DoWhy support Python 3.6+. To install, you can use pip or conda. 
+DoWhy supports Python 3.9–3.13. To install, you can use pip or conda.
 
 **Latest Release**
 
@@ -23,16 +23,16 @@ the repository.
     
     pip install -e .
 
-**Requirements**
+**Compatibility**
 
-If you face any problems, try installing dependencies manually.
+DoWhy is regularly tested on:
 
-.. code:: shell
-    
-    pip install -r requirements.txt
+- Python 3.9, 3.10, 3.11, 3.12, and 3.13
+- pandas ≥ 1.0 (including pandas 3.x)
+- scikit-learn ≥ 1.0 (including scikit-learn 1.7 and 1.8)
+- numpy ≥ 2.0
 
 Optionally, if you wish to input graphs in the dot format, then install pydot (or pygraphviz).
-
 
 For better-looking graphs, you can optionally install pygraphviz. To proceed,
 first install graphviz and then pygraphviz (on Ubuntu and Ubuntu WSL).
