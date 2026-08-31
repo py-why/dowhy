@@ -35,3 +35,4 @@ from .validation import RejectionResult, refute_causal_structure, refute_inverti
 from .whatif import average_causal_effect, counterfactual_samples, interventional_samples
 
 from .equation_parser import create_causal_model_from_equations  # isort:skip
+from dowhy.utils.plotting import bar_plot, plot, plot_adjacency_matrix  # isort:skip
