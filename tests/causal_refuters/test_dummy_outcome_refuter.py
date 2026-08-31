@@ -362,3 +362,52 @@ def test_dummy_outcome_refuter_is_reproducible_with_random_state():
 
 def test_dummy_outcome_refuter_differs_across_random_states():
     assert _run_dummy_outcome_refuter(random_state=123) != _run_dummy_outcome_refuter(random_state=456)
+
+
+# Unit tests for preprocess_data_by_treatment
+def test_preprocess_data_by_treatment_multiple_treatments_raises():
+    import numpy as np
+    import pandas as pd
+    import pytest
+
+    from dowhy.causal_refuters.dummy_outcome_refuter import preprocess_data_by_treatment
+
+    data = pd.DataFrame({"t1": [0, 1], "t2": [1, 0], "y": [1.0, 2.0]})
+    with pytest.raises(ValueError, match="single treatment"):
+        preprocess_data_by_treatment(data, ["t1", "t2"], None, 1.0, ["t1", "t2"])
+
+
+def test_preprocess_data_by_treatment_continuous_treatment():
+    import numpy as np
+    import pandas as pd
+
+    from dowhy.causal_refuters.dummy_outcome_refuter import preprocess_data_by_treatment
+
+    rng = np.random.RandomState(42)
+    n = 200
+    treatment = rng.normal(size=n)
+    data = pd.DataFrame({"t": treatment, "y": treatment * 2 + rng.normal(size=n)})
+    original_cols = set(data.columns)
+    groups = preprocess_data_by_treatment(data, ["t"], None, 1.0, ["t"])
+    # Function should return non-empty groups
+    assert groups.ngroups > 0
+    # Input DataFrame should NOT be mutated (copy is made internally)
+    assert set(data.columns) == original_cols
+
+
+def test_preprocess_data_by_treatment_categorical_treatment():
+    import numpy as np
+    import pandas as pd
+
+    from dowhy.causal_refuters.dummy_outcome_refuter import preprocess_data_by_treatment
+
+    rng = np.random.RandomState(0)
+    n = 100
+    data = pd.DataFrame(
+        {
+            "t": pd.Categorical(rng.choice(["a", "b", "c"], size=n)),
+            "y": rng.normal(size=n),
+        }
+    )
+    groups = preprocess_data_by_treatment(data, ["t"], None, 1.0, ["t"])
+    assert groups.ngroups == 3
