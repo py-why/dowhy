@@ -338,8 +338,8 @@ class TestAddUnobservedCommonCauseRefuter(object):
             method_name=estimator_method,
             method_params={
                 "init_params": {
-                    "model_y": GradientBoostingRegressor(),
-                    "model_t": GradientBoostingRegressor(),
+                    "model_y": GradientBoostingRegressor(random_state=42),
+                    "model_t": GradientBoostingRegressor(random_state=42),
                 },
                 "fit_params": {
                     "cache_values": True,
@@ -426,8 +426,8 @@ class TestAddUnobservedCommonCauseRefuter(object):
             method_name=estimator_method,
             method_params={
                 "init_params": {
-                    "model_y": GradientBoostingRegressor(),
-                    "model_t": GradientBoostingRegressor(),
+                    "model_y": GradientBoostingRegressor(random_state=42),
+                    "model_t": GradientBoostingRegressor(random_state=42),
                     "linear_first_stages": False,
                 },
                 "fit_params": {

@@ -106,8 +106,8 @@ class TestCausalInferenceDiscoveryBook(object):
                         method_name="backdoor.econml.dml.DML",
                         method_params={
                             "init_params": {
-                                "model_y": GradientBoostingRegressor(),
-                                "model_t": GradientBoostingRegressor(),
+                                "model_y": GradientBoostingRegressor(random_state=42),
+                                "model_t": GradientBoostingRegressor(random_state=42),
                                 "model_final": LassoCV(fit_intercept=False),
                             },
                             "fit_params": {},
