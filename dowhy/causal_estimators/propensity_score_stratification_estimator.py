@@ -249,7 +249,9 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
         # sort the dataframe by propensity score
         # create a column 'strata' for each element that marks what strata it belongs to
         num_rows = data[self._target_estimand.outcome_variable[0]].shape[0]
-        data["__dowhy_strata__"] = ((data[self.propensity_score_column].rank(ascending=True) / num_rows) * num_strata).round(0)
+        data["__dowhy_strata__"] = (
+            (data[self.propensity_score_column].rank(ascending=True) / num_rows) * num_strata
+        ).round(0)
         # for each strata, count how many treated and control units there are
         # throw away strata that have insufficient treatment or control
 
