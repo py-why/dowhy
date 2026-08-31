@@ -98,8 +98,10 @@ def test_psm_non_zero_one_treatment_encoding():
     """Regression test: PSM must use treatment_value/control_value, not hardcoded 0/1.
 
     When treatment is encoded as {1, 2} instead of {0, 1}, the old implementation
-    would silently produce NaN because `data[treatment] == 1` selected the *control*
-    group and `data[treatment] == 0` returned an empty DataFrame.
+    misinterpreted the treatment labels: `data[treatment] == 1` selected the
+    control group, while `data[treatment] == 0` returned an empty DataFrame.
+    Depending on the downstream code path, that could yield an invalid estimate or
+    raise when fitting on the empty subset.
     """
     rng = np.random.default_rng(42)
     n = 500
