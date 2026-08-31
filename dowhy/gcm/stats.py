@@ -43,9 +43,13 @@ def merge_p_values_average(p_values: Union[np.ndarray, List[float]], randomizati
 
     K = len(p_values)
 
-    return min(
-        1.0, float(np.min([2 * np.mean(p_values[:m]) / (2 - (K * u / m)) for m in range(1, K + 1) if (K * u / m) < 2]))
-    )
+    # Vectorised computation: replace the O(K^2) list comprehension over m with cumulative sums.
+    # np.mean(p_values[:m]) == cumsum[m-1] / m; the filter (K * u / m) < 2 is applied as a boolean mask.
+    m_vals = np.arange(1, K + 1)
+    ku_over_m = K * u / m_vals
+    mask = ku_over_m < 2
+    cum_means = np.cumsum(p_values)[m_vals[mask] - 1] / m_vals[mask]
+    return min(1.0, float(np.min(2 * cum_means / (2 - ku_over_m[mask]))))
 
 
 def merge_p_values_quantile(
