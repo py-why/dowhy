@@ -40,7 +40,7 @@ class SklearnRegressionModel(PredictionModel):
 
         self._sklearn_mdl.fit(X=X, y=Y.squeeze())
 
-    def predict(self, X: np.array) -> np.ndarray:
+    def predict(self, X: np.ndarray) -> np.ndarray:
         return shape_into_2d(self._sklearn_mdl.predict(auto_apply_encoders(X, self._encoders)))
 
     @property
