@@ -1,10 +1,23 @@
 import pytest
 
 from dowhy import identify_effect_id
+from dowhy.causal_graph import CausalGraph
 from dowhy.graph import build_graph_from_str
 
 
 class TestIDIdentifier(object):
+    def test_id_identifier_accepts_causal_graph(self):
+        """Regression test for issue #1360: identify_effect_id should accept a CausalGraph
+        wrapper, not just a plain nx.DiGraph."""
+        causal_graph = CausalGraph(
+            treatment_name="T",
+            outcome_name="Y",
+            graph="digraph{T->Y;}",
+        )
+        identified_estimand = identify_effect_id(causal_graph, action_nodes=["T"], outcome_nodes=["Y"])
+        identified_str = identified_estimand.__str__()
+        assert identified_str == "Predictor: P(Y|T)"
+
     def test_1(self):
         identified_estimand = identify_effect_id(
             build_graph_from_str("digraph{T->Y;}"), action_nodes=["T"], outcome_nodes=["Y"]
