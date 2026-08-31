@@ -645,23 +645,23 @@ def _estimate_conditional_expectations(
     elif isinstance(causal_mechanism, ClassifierFCM):
         return causal_mechanism.classifier_model.predict(parent_samples).reshape(-1)
     else:
-        if not categorical:
-            # Estimate the conditional expectation E[Y | x] by generating multiple samples for Y|x and average them.
-            y_preds = np.zeros(parent_samples.shape[0])
-            for _ in range(num_samples_conditional_samples):
-                y_preds += causal_mechanism.draw_samples(parent_samples).reshape(-1)
+        # Draw all samples in a single batched call by tiling parent_samples N times.
+        # np.tile repeats the rows of parent_samples N times: [X; X; ...; X] with shape [n*N, features].
+        # draw_samples then generates one stochastic sample per row (independently), so we obtain N
+        # independent draws for each of the n parent samples.  Reshaping to [N, n] groups them correctly.
+        tiled = np.tile(parent_samples, (num_samples_conditional_samples, 1))
+        all_draws = causal_mechanism.draw_samples(tiled).reshape(num_samples_conditional_samples, -1)
 
-            return y_preds / num_samples_conditional_samples
+        if not categorical:
+            # Estimate E[Y | x] as the mean over the N sampled values for each x.
+            return np.mean(all_draws, axis=0)
         else:
             # Since these are categorical values, we just need to look for the most frequent element after we drew
             # multiple samples for each input.
-            all_draws = []
-            for _ in range(num_samples_conditional_samples):
-                all_draws.append(causal_mechanism.draw_samples(parent_samples).reshape(-1))
 
             # scipy>=1.9 returns a 1-D mode array of shape (num_test_samples,) (keepdims defaults to False), i.e. one
             # most-frequent value per test sample. Return the whole array rather than only the first sample's mode.
-            modes, _ = mode(np.array(all_draws), axis=0)
+            modes, _ = mode(all_draws, axis=0)
 
             return np.asarray(modes).reshape(-1)
 
