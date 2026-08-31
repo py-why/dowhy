@@ -67,15 +67,16 @@ class EfficientBackdoor:
         :returns ancestors: set
             The set of nodes that are ancestors of nodes in nodes.
         """
-        ancestors = set()
-
-        for node in nodes:
-            ancestors_node = nx.ancestors(self.graph, node)
-            ancestors = ancestors.union(ancestors_node)
-
-        ancestors = ancestors.union(set(nodes))
-
-        return ancestors
+        # Multi-source reverse BFS: O(V+E) instead of O(k*(V+E)) for k nodes
+        visited = set(nodes)
+        queue = list(visited)
+        while queue:
+            node = queue.pop()
+            for pred in self.graph.predecessors(node):
+                if pred not in visited:
+                    visited.add(pred)
+                    queue.append(pred)
+        return visited
 
     def backdoor_graph(self, G):
         """Method to compute the proper back-door graph associated with
@@ -125,12 +126,17 @@ class EfficientBackdoor:
         :returns forbidden: set
             The forbidden set.
         """
-        forbidden = set()
-
-        for node in self.causal_vertices():
-            forbidden = forbidden.union(nx.descendants(self.graph, node).union({node}))
-
-        return forbidden.union({self.treatment_name})
+        causal_verts = self.causal_vertices()
+        # Multi-source forward BFS: O(V+E) instead of O(k*(V+E)) for k causal vertices
+        visited = set(causal_verts)
+        queue = list(causal_verts)
+        while queue:
+            node = queue.pop()
+            for succ in self.graph.successors(node):
+                if succ not in visited:
+                    visited.add(succ)
+                    queue.append(succ)
+        return visited | {self.treatment_name}
 
     def ignore(self):
         """Method to compute the set of ignorable vertices with respect to
