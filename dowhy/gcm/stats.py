@@ -43,9 +43,19 @@ def merge_p_values_average(p_values: Union[np.ndarray, List[float]], randomizati
 
     K = len(p_values)
 
-    return min(
-        1.0, float(np.min([2 * np.mean(p_values[:m]) / (2 - (K * u / m)) for m in range(1, K + 1) if (K * u / m) < 2]))
-    )
+    # Vectorised O(K) computation using cumulative sums.
+    # The original list comprehension recomputed np.mean(p_values[:m]) from scratch for each m,
+    # giving O(K²) total work.  Using np.cumsum we compute all prefix means in O(K).
+    m_arr = np.arange(1, K + 1, dtype=float)
+    # condition: K*u/m < 2  ⟺  m > K*u/2
+    mask = (K * u) < (2 * m_arr)
+    if not np.any(mask):
+        return 1.0
+    m_valid = m_arr[mask]
+    prefix_sums = np.cumsum(p_values)
+    means = prefix_sums[mask] / m_valid
+    values = 2 * means / (2 - (K * u / m_valid))
+    return min(1.0, float(np.min(values)))
 
 
 def merge_p_values_quantile(
