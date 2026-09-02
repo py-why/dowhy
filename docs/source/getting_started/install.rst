@@ -4,7 +4,7 @@ Installation
 Installing with pip
 -------------------
 
-DoWhy support Python 3.6+. To install, you can use pip or conda. 
+DoWhy requires Python 3.9 or later. To install, you can use pip or conda.
 
 **Latest Release**
 
@@ -16,26 +16,27 @@ Install the latest `release <https://pypi.org/project/dowhy/>`__ using pip.
    
 **Development Version**
 
-If you prefer the latest dev version, clone this repository and run the following command from the top-most folder of
-the repository.
+If you prefer the latest dev version, clone this repository and install with `Poetry <https://python-poetry.org/>`__:
 
 .. code:: shell
-    
-    pip install -e .
 
-**Requirements**
+    git clone https://github.com/py-why/dowhy
+    cd dowhy
+    pip install --upgrade pip
+    pip install poetry
+    poetry install -E "plotting"
 
-If you face any problems, try installing dependencies manually.
+This installs DoWhy in editable mode together with all development dependencies.
+
+Optionally, if you wish to input graphs in the dot format, then install pydot or pygraphviz:
 
 .. code:: shell
-    
-    pip install -r requirements.txt
 
-Optionally, if you wish to input graphs in the dot format, then install pydot (or pygraphviz).
-
+    poetry install -E "pydot"
+    poetry install -E "pygraphviz"
 
 For better-looking graphs, you can optionally install pygraphviz. To proceed,
-first install graphviz and then pygraphviz (on Ubuntu and Ubuntu WSL).
+first install graphviz system libraries and then pygraphviz (on Ubuntu and Ubuntu WSL).
 
 .. note::
     Installing pygraphviz can cause problems on some platforms.
@@ -46,9 +47,7 @@ first install graphviz and then pygraphviz (on Ubuntu and Ubuntu WSL).
 .. code:: shell
 
     sudo apt install graphviz libgraphviz-dev graphviz-dev pkg-config
-    pip install --global-option=build_ext \
-    --global-option="-I/usr/local/include/graphviz/" \
-    --global-option="-L/usr/local/lib/graphviz" pygraphviz
+    pip install pygraphviz
 
 Installing with Conda
 ---------------------
@@ -59,7 +58,7 @@ Install the latest `release <https://anaconda.org/conda-forge/dowhy>`__ using co
 
    conda install -c conda-forge dowhy
 
-If you face "Solving environment" problems with conda, then try :code:`conda update --all` and then install dowhy. If that does not work, then use :code:`conda config --set channel_priority false` and try to install again. If the problem persists, please add your issue `here <https://github.com/microsoft/dowhy/issues/197>`_.
+If you face "Solving environment" problems with conda, then try :code:`conda update --all` and then install dowhy. If that does not work, then use :code:`conda config --set channel_priority false` and try to install again. If the problem persists, please add your issue `here <https://github.com/py-why/dowhy/issues>`_.
 
 
 Installing on Azure Machine Learning
@@ -79,34 +78,16 @@ Or::
 
 **Getting the dev version**
 
-a. Open a new terminal window - it will open pointing to your user folder
+Clone the repository and install in development mode::
 
-b. Create a new folder (if you wish - this is not really necessary)::
+    %pip install git+https://github.com/py-why/dowhy.git
 
-    mkdir pywhy   
+Or install from a local clone::
 
-c. To be really pedantic, ensure it is fully 'activated'::
+    %pip install -e /path/to/dowhy
 
-    chmod 777 pywhy
-
-d. Get the full path by::
-
-    cd pywhy
-    pwd
-
-e. Copy that path you will need it later.
-
-f. Clone the repository::
-
-    git clone https://github.com/py-why/dowhy
-
-g. Now open a python notebook and create a new python code cell. Type::
-
-    %pip install -e <path from step d.>
-
-h. To test the installation::
+To test the installation::
 
     import dowhy
-    
 
 This should run with no errors.
