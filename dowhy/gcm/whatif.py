@@ -87,19 +87,14 @@ def _interventional_samples(
 
 
 def _get_nodes_affected_by_intervention(causal_graph: DirectedGraph, target_nodes: Iterable[Any]) -> List[Any]:
-    result = []
-
-    for node in nx.topological_sort(causal_graph):
-        if node in target_nodes:
-            result.append(node)
-            continue
-
-        for target_node in target_nodes:
-            if target_node in nx.ancestors(causal_graph, source=node):
-                result.append(node)
-                break
-
-    return result
+    # Collect the set of nodes that are either an intervention target or a descendant of one.
+    # Using nx.descendants per target node is O(K*(V+E)) vs the previous O(N*K*(V+E)) approach
+    # that called nx.ancestors for every (node, target_node) pair.
+    target_nodes_set = {node for node in target_nodes if node in causal_graph}
+    affected = set(target_nodes_set)
+    for target_node in target_nodes_set:
+        affected.update(nx.descendants(causal_graph, target_node))
+    return [node for node in nx.topological_sort(causal_graph) if node in affected]
 
 
 def counterfactual_samples(
