@@ -35,7 +35,9 @@ def stochastically_convert_to_three_level_categorical(x):
     return choice([0, 1, 2], p=[0.8 * (1 - p), 0.8 * p, 0.2])
 
 
-def convert_to_categorical(arr, num_vars, num_discrete_vars, quantiles=[0.25, 0.5, 0.75], one_hot_encode=False):
+def convert_to_categorical(arr, num_vars, num_discrete_vars, quantiles=None, one_hot_encode=False):
+    if quantiles is None:
+        quantiles = [0.25, 0.5, 0.75]
     arr_with_dummy = arr.copy()
     # Below loop assumes that the last indices of W are alwawys converted to discrete
     for arr_index in range(num_vars - num_discrete_vars, num_vars):
@@ -471,7 +473,11 @@ def simple_iv_dataset(beta, num_samples, num_treatments=None, treatment_is_binar
     return ret_dict
 
 
-def create_dot_graph(treatments, outcome, common_causes, instruments, effect_modifiers=[], frontdoor_variables=[]):
+def create_dot_graph(treatments, outcome, common_causes, instruments, effect_modifiers=None, frontdoor_variables=None):
+    if effect_modifiers is None:
+        effect_modifiers = []
+    if frontdoor_variables is None:
+        frontdoor_variables = []
     dot_graph = "digraph {"
     for currt in treatments:
         if len(frontdoor_variables) == 0:
@@ -490,7 +496,11 @@ def create_dot_graph(treatments, outcome, common_causes, instruments, effect_mod
     return dot_graph
 
 
-def create_gml_graph(treatments, outcome, common_causes, instruments, effect_modifiers=[], frontdoor_variables=[]):
+def create_gml_graph(treatments, outcome, common_causes, instruments, effect_modifiers=None, frontdoor_variables=None):
+    if effect_modifiers is None:
+        effect_modifiers = []
+    if frontdoor_variables is None:
+        frontdoor_variables = []
     gml_graph = ("graph[directed 1" 'node[ id "{0}" label "{0}"]').format(outcome)
 
     gml_graph += " ".join(['node[ id "{0}" label "{0}"]'.format(v) for v in common_causes])
