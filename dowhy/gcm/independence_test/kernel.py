@@ -2,7 +2,6 @@ from typing import Callable, List, Optional, Union
 
 import numpy as np
 import scipy
-from causallearn.utils.KCI.KCI import KCI_CInd, KCI_UInd
 from joblib import Parallel, delayed
 from sklearn.preprocessing import scale
 
@@ -64,6 +63,14 @@ def kernel_based(
 
     if "est_width" not in kwargs:
         kwargs["est_width"] = "median"
+
+    try:
+        from causallearn.utils.KCI.KCI import KCI_CInd, KCI_UInd
+    except ImportError:
+        raise ImportError(
+            "Could not import causallearn. The kernel_based independence test requires causallearn. "
+            "Please install it with: pip install causallearn"
+        )
 
     def evaluate_kernel_test_on_samples(
         X: np.ndarray, Y: np.ndarray, Z: np.ndarray, parallel_random_seed: int
