@@ -235,6 +235,16 @@ Real world-inspired examples
         | **Level:** Advanced
         | **Task:** Auditing CNN predictions for spurious correlations via GCM
 
+    .. grid-item-card:: :doc:`gcm_unit_change`
+
+        .. image:: ../_static/gcm-unit-change.png
+            :height: 120px
+            :align: center
+
+        +++
+        | **Level:** Advanced
+        | **Task:** Separating changed conditions from an ETA model update
+
 Examples on benchmark datasets
 -------------------------------
 
@@ -461,6 +471,7 @@ Miscellaneous
    sales_attribution_intervention
    gcm_causal_discovery_foundcause
    gcm_chest_xray_causal_inference
+   gcm_unit_change
 
 .. toctree::
    :maxdepth: 1
