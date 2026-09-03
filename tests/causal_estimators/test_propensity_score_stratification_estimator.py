@@ -137,3 +137,50 @@ def test_pss_non_zero_one_treatment_encoding():
     # The data-generating process uses ATE = 3.0 (Y = 3.0 * (T==2) + noise), so the
     # estimate should be close to 3.0 (within 1.0 given typical PSS variance at n=2000).
     assert abs(estimate.value - 3.0) < 1.0, f"Expected estimate near 3.0, got {estimate.value}"
+
+
+def test_pss_does_not_mutate_input_dataframe():
+    """_get_strata must not add internal __dowhy_*__ columns to the caller's DataFrame.
+
+    The old implementation added 'strata', 'dbar', 'd_y', 'dbar_y' (and later
+    '__dowhy_*__' namespaced variants) directly to the passed-in DataFrame.  After
+    adding ``data = data.copy()`` to ``_get_strata`` those columns must no longer
+    appear on the original frame.
+    """
+    rng = np.random.default_rng(0)
+    n = 500
+    X = rng.standard_normal(n)
+    ps = 1 / (1 + np.exp(-X))
+    T = (rng.random(n) < ps).astype(int)
+    Y = 2.0 * T + 0.5 * X + rng.standard_normal(n)
+
+    df = pd.DataFrame({"X": X, "T": T, "Y": Y})
+    cols_before = set(df.columns)
+
+    gml = """graph [
+        directed 1
+        node [id "T" label "T"]
+        node [id "X" label "X"]
+        node [id "Y" label "Y"]
+        edge [source "X" target "T"]
+        edge [source "X" target "Y"]
+        edge [source "T" target "Y"]
+    ]"""
+    graph = build_graph_from_str(gml)
+    estimand = identify_effect_auto(
+        graph,
+        observed_nodes=["T", "X", "Y"],
+        action_nodes=["T"],
+        outcome_nodes=["Y"],
+        estimand_type=EstimandType.NONPARAMETRIC_ATE,
+    )
+
+    estimator = PropensityScoreStratificationEstimator(identified_estimand=estimand)
+    estimator.fit(df)
+    estimator.estimate_effect(df, treatment_value=1, control_value=0, target_units="ate")
+
+    # _get_strata must not leak its internal __dowhy_*__ or legacy (strata, dbar, d_y,
+    # dbar_y) bookkeeping columns back onto the caller's DataFrame.
+    internal_cols = {"strata", "dbar", "d_y", "dbar_y"} | {c for c in df.columns if c.startswith("__dowhy_")}
+    leaked = internal_cols & set(df.columns)
+    assert not leaked, f"_get_strata leaked internal columns onto the caller's DataFrame: {leaked}"

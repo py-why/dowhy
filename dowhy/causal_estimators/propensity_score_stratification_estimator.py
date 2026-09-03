@@ -246,6 +246,9 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
         return estimate
 
     def _get_strata(self, data: pd.DataFrame, num_strata, clipping_threshold, treatment_value=1, control_value=0):
+        # Work on a local copy so the temporary __dowhy_*__ columns never leak back to the
+        # caller's DataFrame (important for estimator reuse and pandas Copy-on-Write compat).
+        data = data.copy()
         # sort the dataframe by propensity score
         # create a column 'strata' for each element that marks what strata it belongs to
         num_rows = data[self._target_estimand.outcome_variable[0]].shape[0]
