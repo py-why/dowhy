@@ -1,0 +1,63 @@
+# Tests DoWhy against the latest released pandas / scikit-learn / numpy / scipy /
+# statsmodels, rather than the pinned versions in poetry.lock. This catches breakages
+# that a fresh `pip install dowhy` user would hit but the locked CI cannot (see #1665).
+name: Latest Dependencies
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # weekly, Mondays 06:00 UTC
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/latest-deps.yml"
+
+jobs:
+  test-latest-deps:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.13"]
+        poetry-version: [2.1.3]
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Poetry ${{ matrix.poetry-version }}
+        uses: abatilo/actions-poetry@v4.0.0
+        with:
+          poetry-version: ${{ matrix.poetry-version }}
+
+      - name: Install graphviz
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y graphviz libgraphviz-dev graphviz-dev pkg-config
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          echo "installing poetry dependencies"
+          poetry install -E plotting -E pydot -E pygraphviz
+
+      - name: Upgrade to latest pandas / scikit-learn / numpy / scipy / statsmodels
+        run: |
+          poetry run python -m pip install --upgrade pandas scikit-learn numpy scipy statsmodels
+          poetry run python -c "import pandas, sklearn, numpy, scipy, statsmodels; print('pandas', pandas.__version__); print('scikit-learn', sklearn.__version__); print('numpy', numpy.__version__); print('scipy', scipy.__version__); print('statsmodels', statsmodels.__version__)"
+
+      - name: Test
+        run: poetry run poe test_no_notebooks
+
+      - name: Notify Discord
+        if: failure() && github.ref == 'refs/heads/main'
+        uses: th0th/notify-discord@v0.4.1
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_JOB_NAME: Latest Dependencies Tests Failed
+          GITHUB_JOB_STATUS: ${{ job.status }}
