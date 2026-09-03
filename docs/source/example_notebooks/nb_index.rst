@@ -235,6 +235,15 @@ Real world-inspired examples
         | **Level:** Advanced
         | **Task:** Auditing CNN predictions for spurious correlations via GCM
 
+    .. grid-item-card:: :doc:`gcm_f1_driver_vs_car`
+
+        .. image:: ../_static/gcm_f1_driver_vs_car.png
+            :height: 120px
+            :align: center
+        +++
+        | **Level:** Advanced
+        | **Task:** Intervention, counterfactual and intrinsic causal influence via GCM
+
 Examples on benchmark datasets
 -------------------------------
 
@@ -455,6 +464,7 @@ Miscellaneous
    gcm_401k_analysis
    gcm_supply_chain_dist_change
    gcm_icc
+   gcm_f1_driver_vs_car
    gcm_counterfactual_medical_dry_eyes
    gcm_falsify_dag
    counterfactual_fairness_dowhy
