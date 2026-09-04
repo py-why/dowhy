@@ -4,15 +4,17 @@ import numpy as np
 import pytest
 from pytest import mark
 
-import dowhy.datasets
-from dowhy import CausalModel
-from dowhy.causal_estimators.tabpfn_estimator import TabpfnEstimator
+# TabPFN and PyTorch must be available for this test module to be collected.
+# importorskip must come before importing the estimator itself because
+# tabpfn_estimator.py has a runtime dependency on torch at import time.
+pytest.importorskip("tabpfn")
+pytest.importorskip("torch")
 
-from .base import SimpleEstimator
+import dowhy.datasets  # noqa: E402
+from dowhy import CausalModel  # noqa: E402
+from dowhy.causal_estimators.tabpfn_estimator import TabpfnEstimator  # noqa: E402
 
-# TabPFN and PyTorch are required for this test
-tabpfn = pytest.importorskip("tabpfn")
-torch = pytest.importorskip("torch")
+from .base import SimpleEstimator  # noqa: E402
 
 
 @mark.usefixtures("fixed_seed")
