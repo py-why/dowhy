@@ -88,3 +88,56 @@ class TestPropensityScoreWeightingEstimator(object):
             ],
             method_params={"num_simulations": 1, "num_null_simulations": 1},
         )
+
+
+def test_psw_non_zero_one_treatment_encoding():
+    """Regression test: PSW must use a binary indicator, not raw data[treatment].
+
+    When treatment is encoded as {1, 2}, the old code used ``data[T] / ps`` directly in
+    weight formulas, giving wrong results because the formula assumes T ∈ {0, 1}.
+    """
+    import numpy as np
+    import pandas as pd
+
+    from dowhy import CausalModel
+
+    rng = np.random.default_rng(42)
+    n = 1000
+    X = rng.standard_normal(n)
+    T = rng.choice([1, 2], size=n)
+    Y = 3.0 * (T == 2) + 0.5 * X + rng.standard_normal(n)
+    df = pd.DataFrame({"X": X, "T": T, "Y": Y})
+
+    model = CausalModel(data=df, treatment=["T"], outcome="Y", common_causes=["X"])
+    estimand = model.identify_effect(proceed_when_unidentifiable=True)
+    estimate = model.estimate_effect(
+        estimand, method_name="backdoor.propensity_score_weighting", treatment_value=2, control_value=1
+    )
+
+    assert np.isfinite(estimate.value)
+    assert abs(estimate.value - 3.0) < 1.5, f"Expected estimate near 3.0, got {estimate.value}"
+
+
+def test_psw_string_treatment_encoding():
+    """PSW must accept string-valued binary treatment columns."""
+    import numpy as np
+    import pandas as pd
+
+    from dowhy import CausalModel
+
+    rng = np.random.default_rng(1)
+    n = 1000
+    X = rng.standard_normal(n)
+    T_int = rng.choice([0, 1], size=n)
+    T = np.where(T_int == 1, "treated", "control")
+    Y = 3.0 * T_int + 0.5 * X + rng.standard_normal(n)
+    df = pd.DataFrame({"X": X, "T": T, "Y": Y})
+
+    model = CausalModel(data=df, treatment=["T"], outcome="Y", common_causes=["X"])
+    estimand = model.identify_effect(proceed_when_unidentifiable=True)
+    estimate = model.estimate_effect(
+        estimand, method_name="backdoor.propensity_score_weighting", treatment_value="treated", control_value="control"
+    )
+
+    assert np.isfinite(estimate.value)
+    assert abs(estimate.value - 3.0) < 1.5, f"Expected estimate near 3.0, got {estimate.value}"
