@@ -1,7 +1,14 @@
 import numpy as np
 from pytest import approx
 
-from dowhy.gcm import MedianCDFQuantileScorer, MedianDeviationScorer, RescaledMedianCDFQuantileScorer
+from dowhy.gcm import (
+    ITAnomalyScorer,
+    InverseDensityScorer,
+    MeanDeviationScorer,
+    MedianCDFQuantileScorer,
+    MedianDeviationScorer,
+    RescaledMedianCDFQuantileScorer,
+)
 from dowhy.gcm.anomaly_scorers import RankBasedAnomalyScorer
 
 
@@ -71,3 +78,28 @@ def test_when_using_ranked_based_anomaly_scorer_then_returns_expected_scores():
     scorer.fit(training_data)
 
     assert scorer.score(np.array([1, np.nan])) == approx([-np.log(2 * 1 / 5), -np.log(1)])
+
+
+def test_given_training_data_when_using_MeanDeviationScorer_then_extreme_outlier_scores_higher():
+    scorer = MeanDeviationScorer()
+    scorer.fit(np.array([0.0, 1.0, 2.0, 3.0, 4.0]))
+    scores = scorer.score(np.array([2.0, 100.0]))
+    assert scores.reshape(-1)[0] == approx(0.0, abs=0.01)
+    assert scores.reshape(-1)[1] > scores.reshape(-1)[0]
+
+
+def test_given_training_data_when_using_ITAnomalyScorer_then_extreme_outlier_scores_higher():
+    scorer = ITAnomalyScorer(MedianCDFQuantileScorer())
+    scorer.fit(np.arange(100, dtype=float))
+    normal_score = scorer.score(np.array([50.0]))
+    outlier_score = scorer.score(np.array([1e6]))
+    assert outlier_score[0] > normal_score[0]
+
+
+def test_given_training_data_when_using_InverseDensityScorer_then_outlier_scores_higher():
+    rng = np.random.RandomState(0)
+    scorer = InverseDensityScorer()
+    scorer.fit(rng.normal(0, 1, 300).reshape(-1, 1))
+    typical_score = scorer.score(np.array([[0.0]]))
+    outlier_score = scorer.score(np.array([[10.0]]))
+    assert outlier_score[0] > typical_score[0]
