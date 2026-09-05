@@ -3,9 +3,6 @@ from typing import Any
 
 import numpy as np
 import sklearn
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import PolynomialFeatures
-
 from sklearn.ensemble import (
     AdaBoostRegressor,
     ExtraTreesRegressor,
@@ -15,6 +12,8 @@ from sklearn.ensemble import (
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.linear_model import ElasticNetCV, LassoCV, LassoLarsIC, LinearRegression, RidgeCV
 from sklearn.neighbors import KNeighborsRegressor
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import PolynomialFeatures
 from sklearn.svm import SVR
 
 from dowhy.gcm.ml.prediction_model import PredictionModel
