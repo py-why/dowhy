@@ -360,3 +360,33 @@ class TestLinearRegressionEstimator(object):
         # Should not raise; fraction-effect must be a finite number
         strength = estimator.evaluate_effect_strength(df, ate_estimate)
         assert np.isfinite(strength["fraction-effect"])
+
+    def test_predict_before_fit_raises_helpful_error(self):
+        """predict() called without a prior fit() must raise ValueError, not TypeError.
+
+        Before this fix, the fallback inside predict() called
+        ``self._build_model()`` with no arguments, which raised
+        ``TypeError: _build_model() missing 1 required positional argument: 'data'``.
+        The fix initialises ``self._data = None`` and raises an explicit,
+        actionable ValueError so users understand they must call fit() first.
+        """
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=1,
+            num_instruments=0,
+            num_treatments=1,
+            num_samples=500,
+            treatment_is_binary=True,
+        )
+        target_estimand = identify_effect_auto(
+            build_graph_from_str(data["gml_graph"]),
+            observed_nodes=list(data["df"].columns),
+            action_nodes=data["treatment_name"],
+            outcome_nodes=data["outcome_name"],
+            estimand_type=EstimandType.NONPARAMETRIC_ATE,
+        )
+        target_estimand.set_identifier_method("backdoor")
+        estimator = LinearRegressionEstimator(identified_estimand=target_estimand)
+        # Do NOT call fit() — the estimator is unfitted
+        with pytest.raises(ValueError, match="fit\\(\\)"):
+            estimator.predict(data["df"])
