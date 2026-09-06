@@ -1,5 +1,5 @@
 """
-Regression test for conditional effect estimation across effect modifiers.
+Regression tests for conditional effect estimation across effect modifiers.
 
 `_estimate_conditional_effects` previously called
 `groupby(...).apply(fn, include_groups=True)`, which raises
@@ -12,6 +12,12 @@ Constant numeric effect modifiers are also covered. Quantile discretization
 cannot create bins for a constant column, but it should still produce the one
 observed conditional-effect group instead of crashing while constructing the
 result index.
+
+Categorical common causes (confounders) are also covered. When effect modifier
+strata are formed by groupby, some strata may not contain all categorical levels
+of a confounder. The `Encoders` class must reuse the encoder fitted on the full
+dataset so that feature dimensions remain consistent across strata (regression
+test for https://github.com/py-why/dowhy/issues/401).
 """
 
 import numpy as np
@@ -79,3 +85,46 @@ def test_conditional_effects_all_missing_multiple_effect_modifiers_returns_empty
     assert isinstance(conditional_estimates.index, pd.MultiIndex)
     prefix = CausalEstimator.TEMP_CAT_COLUMN_PREFIX
     assert conditional_estimates.index.names == [f"{prefix}modifier_a", f"{prefix}modifier_b"]
+
+
+def test_categorical_common_cause_consistent_encoding():
+    """Regression test for https://github.com/py-why/dowhy/issues/401.
+
+    When effect modifier strata are formed by groupby, some strata may not
+    contain all categorical levels of a confounder. The encoder must be fitted
+    on the full dataset and reused for each stratum so that feature dimensions
+    are consistent with the fitted regression model, avoiding a shape mismatch.
+
+    The categorical confounder has three levels (A, B, C), level C is rare
+    (4 % of rows) so it will be absent from many effect-modifier strata.
+    """
+    rng = np.random.default_rng(0)
+    n = 2000
+    # C is deliberately rare so it will be absent from some strata
+    cat_cause = rng.choice(["A", "B", "C"], size=n, p=[0.48, 0.48, 0.04])
+    treatment = rng.integers(0, 2, size=n)
+    effect_modifier = rng.standard_normal(n)
+    outcome = 2.0 * treatment + (cat_cause == "B").astype(float) + 0.5 * effect_modifier + rng.standard_normal(n) * 0.1
+
+    df = pd.DataFrame({"W0": cat_cause, "v0": treatment, "y": outcome, "X0": effect_modifier})
+
+    model = CausalModel(
+        data=df,
+        treatment=["v0"],
+        outcome="y",
+        common_causes=["W0"],
+        effect_modifiers=["X0"],
+    )
+    identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+    estimate = model.estimate_effect(identified_estimand, method_name="backdoor.linear_regression")
+
+    # The estimate must succeed without raising a shape-mismatch ValueError
+    assert estimate.conditional_estimates is not None
+    assert isinstance(estimate.conditional_estimates, pd.Series)
+    assert len(estimate.conditional_estimates) > 0
+    assert np.all(np.isfinite(estimate.conditional_estimates.values))
+    # ATE should be near the true effect of 2.0 (with some tolerance)
+    assert abs(estimate.value - 2.0) < 0.5
+
+    # The caller's DataFrame must not be mutated (no __categorical__ columns)
+    assert list(df.columns) == ["W0", "v0", "y", "X0"]
