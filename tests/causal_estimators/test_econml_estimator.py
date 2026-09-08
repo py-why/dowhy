@@ -447,3 +447,42 @@ class TestEconMLEstimator:
         )
 
         assert np.array_equal(est1.cate_estimates, est2.cate_estimates)
+
+    def test_categorical_effect_modifier_no_keyerror(self):
+        """Regression test for https://github.com/py-why/dowhy/issues/1805.
+
+        When an effect modifier is a pandas Categorical column, DoWhy one-hot encodes it
+        internally.  Before this fix the encoded column names (e.g. ``sex_2.0``) were stored in
+        ``_effect_modifiers`` while ``_effect_modifier_names`` still held the original name
+        (``sex``), causing a KeyError in ``Econml.effect()`` when it tried to select the original
+        column from the already-encoded DataFrame.
+        """
+        np.random.seed(42)
+        n = 300
+        sex = pd.Categorical(np.random.choice([1.0, 2.0], size=n))
+        W = np.random.normal(size=n)
+        T = np.random.binomial(1, 0.5, size=n)
+        Y = T * 2.0 + W + (sex.codes * 0.5) + np.random.normal(size=n)
+
+        df = pd.DataFrame({"sex": sex, "W": W, "T": T, "Y": Y})
+
+        model = CausalModel(
+            data=df,
+            treatment="T",
+            outcome="Y",
+            effect_modifiers=["sex"],
+            common_causes=["W"],
+        )
+        estimand = model.identify_effect(proceed_when_unidentifiable=True)
+
+        # Should not raise KeyError
+        estimate = model.estimate_effect(
+            estimand,
+            method_name="backdoor.econml.dml.LinearDML",
+            control_value=0,
+            treatment_value=1,
+            confidence_intervals=False,
+            method_params={"init_params": {"random_state": 0}, "fit_params": {}},
+        )
+        assert estimate.value is not None
+        assert np.isfinite(estimate.value)
