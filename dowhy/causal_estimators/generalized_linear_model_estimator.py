@@ -86,12 +86,19 @@ class GeneralizedLinearModelEstimator(RegressionEstimator):
             **kwargs,
         )
         self.logger.info("INFO: Using Generalized Linear Model Estimator")
-        if glm_family is not None:
-            self.family = glm_family
-        else:
+        if glm_family is None:
             raise ValueError(
-                "Need to specify the family for the generalized linear model. Provide a 'glm_family' parameter in method_params, such as statsmodels.api.families.Binomial() for logistic regression."
+                "Need to specify the family for the generalized linear model. "
+                "Provide a 'glm_family' parameter in method_params, such as "
+                "statsmodels.api.families.Binomial() for logistic regression."
             )
+        if isinstance(glm_family, str):
+            raise TypeError(
+                f"'glm_family' must be a statsmodels family instance (e.g., "
+                f"statsmodels.api.families.Gaussian()), not the string {glm_family!r}. "
+                f"Common families: Binomial(), Gaussian(), Poisson(), Gamma()."
+            )
+        self.family = glm_family
         self.predict_score = predict_score
 
     def fit(
