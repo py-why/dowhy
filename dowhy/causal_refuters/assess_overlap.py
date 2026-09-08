@@ -63,7 +63,7 @@ class AssessOverlap(CausalRefuter):
         :returns: object of class OverruleAnalyzer
         """
         if show_progress_bar:
-            warnings.warn("No progress bar is available for OverRule")
+            warnings.warn("No progress bar is available for OverRule", stacklevel=2)
 
         return assess_support_and_overlap_overrule(
             data=self._data,
