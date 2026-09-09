@@ -154,6 +154,8 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
                         data,
                         num_strata,
                         self.clipping_threshold,
+                        treatment_value,
+                        control_value,
                     )
                 except ValueError:
                     self.logger.info(
@@ -163,7 +165,7 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
                     num_strata = num_strata // 2
                     continue
 
-                num_ret_strata = clipped.groupby(["strata"]).count().reset_index()
+                num_ret_strata = clipped.groupby(["__dowhy_strata__"]).count().reset_index()
                 # At least 50% of the strata should be included in the analysis
                 if num_ret_strata.shape[0] >= 0.5 * num_strata:
                     break  # success
@@ -184,18 +186,24 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
                 data,
                 self.num_strata,
                 self.clipping_threshold,
+                treatment_value,
+                control_value,
             )
 
         # sum weighted outcomes over all strata  (weight by treated population)
-        weighted_outcomes = clipped.groupby("strata").agg(
-            {self._target_estimand.treatment_variable[0]: ["sum"], "dbar": ["sum"], "d_y": ["sum"], "dbar_y": ["sum"]}
+        # Use the __dowhy_d__/__dowhy_dbar__ indicator columns from _get_strata so the
+        # sum gives the count of treated/control units regardless of the actual encoding.
+        weighted_outcomes = clipped.groupby("__dowhy_strata__").agg(
+            n_treated=("__dowhy_d__", "sum"),
+            n_control=("__dowhy_dbar__", "sum"),
+            sum_d_y=("__dowhy_d_y__", "sum"),
+            sum_dbar_y=("__dowhy_dbar_y__", "sum"),
         )
-        weighted_outcomes.columns = ["_".join(x) for x in weighted_outcomes.columns.to_numpy().ravel()]
-        treatment_sum_name = self._target_estimand.treatment_variable[0] + "_sum"
-        control_sum_name = "dbar_sum"
+        treatment_sum_name = "n_treated"
+        control_sum_name = "n_control"
 
-        weighted_outcomes["d_y_mean"] = weighted_outcomes["d_y_sum"] / weighted_outcomes[treatment_sum_name]
-        weighted_outcomes["dbar_y_mean"] = weighted_outcomes["dbar_y_sum"] / weighted_outcomes["dbar_sum"]
+        weighted_outcomes["d_y_mean"] = weighted_outcomes["sum_d_y"] / weighted_outcomes[treatment_sum_name]
+        weighted_outcomes["dbar_y_mean"] = weighted_outcomes["sum_dbar_y"] / weighted_outcomes[control_sum_name]
         weighted_outcomes["effect"] = weighted_outcomes["d_y_mean"] - weighted_outcomes["dbar_y_mean"]
         total_treatment_population = weighted_outcomes[treatment_sum_name].sum()
         total_control_population = weighted_outcomes[control_sum_name].sum()
@@ -237,31 +245,36 @@ class PropensityScoreStratificationEstimator(PropensityScoreEstimator):
         estimate.add_estimator(self)
         return estimate
 
-    def _get_strata(self, data: pd.DataFrame, num_strata, clipping_threshold):
+    def _get_strata(self, data: pd.DataFrame, num_strata, clipping_threshold, treatment_value=1, control_value=0):
+        # Work on a local copy so the __dowhy_*__ columns never leak back to the caller's
+        # DataFrame (important for estimator reuse and pandas Copy-on-Write compatibility).
+        data = data.copy()
         # sort the dataframe by propensity score
-        # create a column 'strata' for each element that marks what strata it belongs to
+        # create a column '__dowhy_strata__' for each element that marks what strata it belongs to
         num_rows = data[self._target_estimand.outcome_variable[0]].shape[0]
-        data["strata"] = ((data[self.propensity_score_column].rank(ascending=True) / num_rows) * num_strata).round(0)
+        data["__dowhy_strata__"] = (
+            (data[self.propensity_score_column].rank(ascending=True) / num_rows) * num_strata
+        ).round(0)
         # for each strata, count how many treated and control units there are
         # throw away strata that have insufficient treatment or control
 
-        data["dbar"] = 1 - data[self._target_estimand.treatment_variable[0]]  # 1-Treatment
-        data["d_y"] = (
-            data[self._target_estimand.treatment_variable[0]] * data[self._target_estimand.outcome_variable[0]]
-        )
-        data["dbar_y"] = data["dbar"] * data[self._target_estimand.outcome_variable[0]]
-        stratified = data.groupby("strata")
+        treatment_col = data[self._target_estimand.treatment_variable[0]]
+        outcome_col = data[self._target_estimand.outcome_variable[0]]
+        # Use namespaced indicator columns to avoid clashing with user-provided columns.
+        # "__dowhy_d__" = 1 iff the unit received treatment_value; "__dowhy_dbar__" = 1
+        # iff it received control_value.
+        data["__dowhy_d__"] = (treatment_col == treatment_value).astype(int)
+        data["__dowhy_dbar__"] = (treatment_col == control_value).astype(int)
+        data["__dowhy_d_y__"] = data["__dowhy_d__"] * outcome_col
+        data["__dowhy_dbar_y__"] = data["__dowhy_dbar__"] * outcome_col
+        stratified = data.groupby("__dowhy_strata__")
         clipped = stratified.filter(
-            lambda strata: min(
-                strata.loc[strata[self._target_estimand.treatment_variable[0]] == 1].shape[0],
-                strata.loc[strata[self._target_estimand.treatment_variable[0]] == 0].shape[0],
-            )
-            > clipping_threshold
+            lambda strata: min(strata["__dowhy_d__"].sum(), strata["__dowhy_dbar__"].sum()) > clipping_threshold
         )
         self.logger.debug(
             "After using clipping_threshold={0}, here are the number of data points in each strata:\n {1}".format(
                 clipping_threshold,
-                clipped.groupby(["strata", self._target_estimand.treatment_variable[0]])[
+                clipped.groupby(["__dowhy_strata__", self._target_estimand.treatment_variable[0]])[
                     self._target_estimand.outcome_variable
                 ].count(),
             )
