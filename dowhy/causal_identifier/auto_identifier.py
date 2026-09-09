@@ -220,7 +220,7 @@ def identify_effect_auto(
         )
     else:
         raise ValueError(
-            "Estimand type is not supported. Use either {0}, {1}, or {2}.".format(
+            "Estimand type is not supported. Use either {0}, {1}, {2}, or {3}.".format(
                 EstimandType.NONPARAMETRIC_ATE,
                 EstimandType.NONPARAMETRIC_CDE,
                 EstimandType.NONPARAMETRIC_NDE,
