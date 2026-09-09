@@ -146,6 +146,7 @@ class Econml(CausalEstimator):
                 self._effect_modifiers = data[effect_modifier_names]
                 self._effect_modifiers = self._encode(self._effect_modifiers, "effect_modifiers")
                 self._effect_modifier_names = effect_modifier_names
+                self._effect_modifier_names_encoded = list(self._effect_modifiers.columns)
             self.logger.debug("Effect modifiers: " + ",".join(effect_modifier_names))
         if self._observed_common_causes_names:
             self._observed_common_causes = data[self._observed_common_causes_names]
@@ -194,7 +195,7 @@ class Econml(CausalEstimator):
     def _get_econml_class_object(self, module_method_name, *args, **kwargs):
         # from https://www.bnmetrics.com/blog/factory-pattern-in-python3-simple-version
         try:
-            (module_name, _, class_name) = module_method_name.rpartition(".")
+            module_name, _, class_name = module_method_name.rpartition(".")
             estimator_module = import_module(module_name)
             estimator_class = getattr(estimator_module, class_name)
 
@@ -233,7 +234,8 @@ class Econml(CausalEstimator):
         X_test = X
         if X is not None:
             if type(target_units) is pd.DataFrame:
-                X_test = target_units
+                # target_units has original (pre-encoding) column names; encode for EconML
+                X_test = self._encode(target_units[self._effect_modifier_names], "effect_modifiers")
             elif callable(target_units):
                 filtered_rows = data.where(target_units)
                 boolean_criterion = np.array(filtered_rows.notnull().iloc[:, 0])
@@ -276,6 +278,23 @@ class Econml(CausalEstimator):
     def _do(self, x, data_df=None):
         raise NotImplementedError
 
+    def _select_encoded_effect_modifiers(self, df: Optional[pd.DataFrame]) -> Optional[pd.DataFrame]:
+        """Return effect modifier columns from df, applying one-hot encoding if needed.
+
+        `df` may contain either the original column names (e.g. from user-provided data) or
+        the post-encoding column names (e.g. from self._effect_modifiers passed internally).
+        This helper always returns a DataFrame whose columns match the encoded names used when
+        the EconML estimator was fitted.
+        """
+        if df is None:
+            return df
+        encoded_names = getattr(self, "_effect_modifier_names_encoded", None) or self._effect_modifier_names
+        if all(n in df.columns for n in encoded_names):
+            # df already contains encoded columns (e.g. self._effect_modifiers)
+            return df[encoded_names]
+        # df has original column names; encode using the fitted encoder
+        return self._encode(df[self._effect_modifier_names], "effect_modifiers")
+
     def construct_symbolic_estimator(self, estimand):
         expr = "b: " + ", ".join(estimand.outcome_variable) + "~"
         # TODO -- fix: we are actually conditioning on positive treatment (d=1)
@@ -289,7 +308,7 @@ class Econml(CausalEstimator):
         return expr
 
     def shap_values(self, df: pd.DataFrame, *args, **kwargs):
-        return self.estimator.shap_values(df[self._effect_modifier_names].values, *args, **kwargs)
+        return self.estimator.shap_values(self._select_encoded_effect_modifiers(df).values, *args, **kwargs)
 
     def apply_multitreatment(self, df: pd.DataFrame, fun: Callable, *args, **kwargs):
         ests = []
@@ -324,7 +343,7 @@ class Econml(CausalEstimator):
         def effect_fun(filtered_df, T0, T1, *args, **kwargs):
             return self.estimator.effect(filtered_df, T0=T0, T1=T1, *args, **kwargs)
 
-        Xdf = df[self._effect_modifier_names] if df is not None else df
+        Xdf = self._select_encoded_effect_modifiers(df)
         return self.apply_multitreatment(Xdf, effect_fun, *args, **kwargs)
 
     def effect_interval(self, df: pd.DataFrame, *args, **kwargs) -> np.ndarray:
@@ -340,7 +359,7 @@ class Econml(CausalEstimator):
                 filtered_df, T0=T0, T1=T1, alpha=1 - self.confidence_level, *args, **kwargs
             )
 
-        Xdf = df[self._effect_modifier_names] if df is not None else df
+        Xdf = self._select_encoded_effect_modifiers(df)
         return self.apply_multitreatment(Xdf, effect_interval_fun, *args, **kwargs)
 
     def effect_inference(self, df: pd.DataFrame, *args, **kwargs):
@@ -354,19 +373,21 @@ class Econml(CausalEstimator):
         def effect_inference_fun(filtered_df, T0, T1, *args, **kwargs):
             return self.estimator.effect_inference(filtered_df, T0=T0, T1=T1, *args, **kwargs)
 
-        Xdf = df[self._effect_modifier_names] if df is not None else df
+        Xdf = self._select_encoded_effect_modifiers(df)
         return self.apply_multitreatment(Xdf, effect_inference_fun, *args, **kwargs)
 
     def effect_tt(self, df: pd.DataFrame, treatment_value, *args, **kwargs):
         """
         Effect of the actual treatment that was applied to each unit
         ("effect of Treatment on the Treated")
-        :param df: Features of the units to evaluate
+        :param df: Features of the units to evaluate (full DataFrame with original column names)
         :param args: passed through to estimator.effect()
         :param kwargs: passed through to estimator.effect()
         """
 
-        eff = self.effect(df[self._effect_modifier_names], *args, **kwargs).reshape((len(df), len(treatment_value)))
+        eff = self.effect(self._select_encoded_effect_modifiers(df), *args, **kwargs).reshape(
+            (len(df), len(treatment_value))
+        )
 
         out = np.zeros(len(df))
         treatment_value = parse_state(treatment_value)
