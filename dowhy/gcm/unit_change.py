@@ -104,8 +104,10 @@ def unit_change_nonlinear(
     :param input_column_names: The names of the input (features) columns in both dataframes.
     :param shapley_config: The configuration for calculating Shapley values.
     :return: A pandas dataframe with attributions to each cause for the change in each output row of provided dataframes.
+             The mechanism contribution is stored in the column named ``"f"``.
     """
     _check_if_input_columns_exist(background_df, foreground_df, input_column_names)
+    _check_no_reserved_column_name(input_column_names)
 
     def payoff(player_indicator: List[int]) -> np.ndarray:
         """The last cell in the binary vector represents the player 'mechanism'."""
@@ -137,8 +139,10 @@ def unit_change_linear(
     :param foreground_df: The foreground data.
     :param input_column_names: The names of the input columns in both dataframes.
     :return: A pandas dataframe with attributions to each cause for the change in each output row of provided dataframes.
+             The mechanism contribution is stored in the column named ``"f"``.
     """
     _check_if_input_columns_exist(background_df, foreground_df, input_column_names)
+    _check_no_reserved_column_name(input_column_names)
 
     coeffs_total = background_mechanism.coefficients + foreground_mechanism.coefficients  # p x 1
     coeffs_diff = foreground_mechanism.coefficients - background_mechanism.coefficients  # p x 1
@@ -153,7 +157,7 @@ def unit_change_linear(
     # background and foreground mechanisms have different intercepts (e.g. fit with the default fit_intercept=True).
     contribution_mechanism = contribution_mechanism + (foreground_mechanism.intercept - background_mechanism.intercept)
     contribution_df = pd.DataFrame(contribution_input, columns=input_column_names)
-    contribution_df["f"] = contribution_mechanism  # TODO: Handle the case where 'f' is an input column name
+    contribution_df["f"] = contribution_mechanism
     return contribution_df
 
 
@@ -218,3 +222,11 @@ def _check_if_input_columns_exist(
         set(foreground_df.columns).intersection(input_column_names)
     ) == len(input_column_names):
         raise ValueError("Input column names not found in either the background or the foreground data.")
+
+
+def _check_no_reserved_column_name(input_column_names: List[str]) -> None:
+    if "f" in input_column_names:
+        raise ValueError(
+            "The column name 'f' is reserved for the mechanism contribution in the output DataFrame. "
+            "Please rename the input column named 'f' to a different name before calling this function."
+        )
