@@ -34,24 +34,30 @@ class EfficientBackdoor:
             A list with variables that are used to determine treatment. If none are
             provided, it is assumed that the intervention sets the treatment to a constant.
         """
-        assert (
-            len(action_nodes) == 1
-        ), "The methods for computing efficient backdoor sets are only valid for one dimensional treatments"
-        assert (
-            len(outcome_nodes) == 1
-        ), "The methods for computing efficient backdoor sets are only valid for one dimensional outcomes"
+        if len(action_nodes) != 1:
+            raise ValueError(
+                "The methods for computing efficient backdoor sets are only valid for one dimensional treatments, "
+                f"but got {len(action_nodes)} treatment nodes: {action_nodes}"
+            )
+        if len(outcome_nodes) != 1:
+            raise ValueError(
+                "The methods for computing efficient backdoor sets are only valid for one dimensional outcomes, "
+                f"but got {len(outcome_nodes)} outcome nodes: {outcome_nodes}"
+            )
         self.graph = graph
         if costs is None:
             # If no costs are passed, use uniform costs
             costs = [(node, {"cost": 1}) for node in self.graph.nodes]
-        assert all([tup["cost"] > 0 for _, tup in costs]), "All costs must be positive"
+        non_positive = [(node, tup["cost"]) for node, tup in costs if tup["cost"] <= 0]
+        if non_positive:
+            raise ValueError(f"All costs must be positive, but got non-positive cost(s): {non_positive}")
         self.graph.add_nodes_from(costs)
         self.observed_nodes = set([node for node in self.graph.nodes if node in set(observed_nodes)])
         if conditional_node_names is None:
             conditional_node_names = []
-        assert set(conditional_node_names).issubset(
-            self.observed_nodes
-        ), "Some conditional variables are not marked as observed"
+        non_observed = set(conditional_node_names) - self.observed_nodes
+        if non_observed:
+            raise ValueError(f"Some conditional variables are not marked as observed: {non_observed}")
         self.conditional_node_names = conditional_node_names
 
         self.treatment_name = action_nodes[0]
