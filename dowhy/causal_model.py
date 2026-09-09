@@ -621,7 +621,9 @@ def _warn_if_unobserved_graph_variables(
         warnings.warn(
             f"{num_unobserved_graph_variables} variables are assumed "
             "unobserved because they are not in the dataset. "
-            "Configure the logging level to `logging.WARNING` or higher for additional details."
+            "Configure the logging level to `logging.WARNING` or higher for additional details.",
+            UserWarning,
+            stacklevel=4,
         )
         logger.warning(
             "The graph defines %d variables. %d were found in the dataset "
