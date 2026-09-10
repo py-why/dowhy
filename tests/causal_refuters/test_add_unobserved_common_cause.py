@@ -302,6 +302,69 @@ class TestAddUnobservedCommonCauseRefuter(object):
         assert refute2.stats["robustness_value"] >= rvalue_threshold and refute2.stats["robustness_value"] <= 1
         assert mock_fig.call_count > 0  # we patched figure plotting call to avoid drawing plots during tests
 
+    def test_linear_sensitivity_no_benchmark_does_not_crash(self):
+        """Regression test: linear-partial-R2 without benchmark_common_causes must not raise TypeError.
+
+        Previously `compute_bias_adjusted(None, None)` was called unconditionally and crashed
+        with `TypeError: unsupported operand type(s) for *: 'NoneType' and 'NoneType'`.
+        """
+        np.random.seed(42)
+        data = dowhy.datasets.linear_dataset(beta=2, num_common_causes=3, num_samples=300)
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+            test_significance=None,
+        )
+        estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        estimate = model.estimate_effect(estimand, method_name="backdoor.linear_regression")
+        refuter = model.refute_estimate(
+            estimand,
+            estimate,
+            method_name="add_unobserved_common_cause",
+            simulation_method="linear-partial-R2",
+            effect_fraction_on_treatment=0.5,
+            plot_estimate=False,
+        )
+        assert refuter.r2tu_w is None
+        assert refuter.r2yu_tw is None
+        assert refuter.benchmarking_results.empty
+        assert "robustness_value" in refuter.stats
+
+    def test_linear_sensitivity_scalar_frac_with_benchmark(self):
+        """Regression test: linear-partial-R2 with scalar effect_fraction_on_treatment must not raise TypeError.
+
+        Previously `any(val >= 1 for val in self.r2tu_w)` crashed with
+        `TypeError: 'numpy.float64' object is not iterable` when effect_fraction_on_treatment
+        was a scalar instead of a list.
+        """
+        np.random.seed(42)
+        data = dowhy.datasets.linear_dataset(beta=2, num_common_causes=3, num_samples=300)
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+            test_significance=None,
+        )
+        estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        estimate = model.estimate_effect(estimand, method_name="backdoor.linear_regression")
+        refuter = model.refute_estimate(
+            estimand,
+            estimate,
+            method_name="add_unobserved_common_cause",
+            simulation_method="linear-partial-R2",
+            effect_fraction_on_treatment=1.0,  # scalar, not a list
+            benchmark_common_causes=data["common_causes_names"][:1],
+            plot_estimate=False,
+        )
+        assert refuter.r2tu_w is not None
+        assert refuter.r2yu_tw is not None
+        assert not refuter.benchmarking_results.empty
+        assert all(0 <= v <= 1 for v in refuter.benchmarking_results["r2tu_w"])
+        assert all(0 <= v <= 1 for v in refuter.benchmarking_results["r2yu_tw"])
+
     @pytest.mark.econml
     @pytest.mark.parametrize(
         ["estimator_method", "effect_fraction_on_treatment", "benchmark_common_causes", "simulation_method"],
