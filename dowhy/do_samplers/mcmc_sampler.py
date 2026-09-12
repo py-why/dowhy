@@ -87,7 +87,7 @@ class McmcSampler(DoSampler):
                 elif g.nodes()[node]["variable_type"] == "b":
                     g.nodes()[node]["variable"] = pm.Bernoulli("{}".format(node), logit_p=mu, observed=df[node])
                 else:
-                    raise Exception("Unrecognized variable type: {}".format(g.nodes()[node]["variable_type"]))
+                    raise ValueError("Unrecognized variable type: {}".format(g.nodes()[node]["variable_type"]))
         return g
 
     def fit_causal_model(self, g, df, data_types, initialization_trace=None):
@@ -99,7 +99,7 @@ class McmcSampler(DoSampler):
                 g = self.build_bayesian_network(g, df)
                 trace = pm.sample(1000, tune=1000)
         else:
-            raise Exception("Graph is not a DAG!")
+            raise ValueError("Graph is not a DAG!")
         return g, trace
 
     def sample_prior_causal_model(self, g, df, data_types, initialization_trace):
@@ -111,7 +111,7 @@ class McmcSampler(DoSampler):
                 g = self.build_bayesian_network(g, df)
                 trace = pm.sample_prior_predictive(1)
         else:
-            raise Exception("Graph is not a DAG!")
+            raise ValueError("Graph is not a DAG!")
         return g, trace
 
     def do_x_surgery(self, g, x):
