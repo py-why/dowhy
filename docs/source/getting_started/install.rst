@@ -4,7 +4,8 @@ Installation
 Installing with pip
 -------------------
 
-DoWhy requires Python 3.9 through 3.13. To install, you can use pip or conda.
+DoWhy requires Python 3.9 through 3.13. To install, you can use pip or conda.
+
 
 **Latest Release**
 
@@ -77,7 +78,7 @@ Or::
     %pip install --force-reinstall --no-cache-dir dowhy
 
 **Getting the dev version**
-
+Install the latest development version directly from GitHub::
 Clone the repository and install in development mode::
 
     %pip install git+https://github.com/py-why/dowhy.git
