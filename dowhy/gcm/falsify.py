@@ -9,8 +9,6 @@ from inspect import getfullargspec
 from itertools import permutations
 from typing import Any, Callable, Dict, FrozenSet, List, Optional, Set, Tuple, Union
 
-import matplotlib.colors as mcolors
-import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 import pandas as pd
@@ -30,7 +28,6 @@ from dowhy.gcm.util.general import set_random_seed
 from dowhy.graph import DirectedGraph, get_ordered_predecessors
 
 VIOLATION_COLOR = "red"
-COLORS = list(mcolors.TABLEAU_COLORS.values())
 
 
 class FalsifyConst(Enum):
@@ -700,6 +697,13 @@ def apply_suggestions(
 
 
 def plot_evaluation_results(evaluation_result, figsize=(8, 3), bins=None, title="", savepath="", display=True):
+    try:
+        import matplotlib.colors as mcolors
+        import matplotlib.pyplot as plt
+    except ImportError:
+        raise ImportError("matplotlib is required for plotting. Install it with: pip install 'dowhy[plotting]'")
+
+    colors = list(mcolors.TABLEAU_COLORS.values())
     fig, ax = plt.subplots(figsize=figsize)
 
     # Plot histograms
@@ -713,7 +717,7 @@ def plot_evaluation_results(evaluation_result, figsize=(8, 3), bins=None, title=
         labels.append(f"Violations of {FALSIFY_METHODS[m]} of permuted DAGs")
         p_values += f"p-value {FALSIFY_METHODS[m]} = {m_summary[FalsifyConst.P_VALUE]:.2f}\n"
 
-    ax.hist(data, color=COLORS[: len(evaluation_summary)], bins=bins, alpha=0.5, label=labels, edgecolor="k")
+    ax.hist(data, color=colors[: len(evaluation_summary)], bins=bins, alpha=0.5, label=labels, edgecolor="k")
 
     # Plot given violations
     for i, (m, m_summary) in enumerate(evaluation_summary.items()):
@@ -722,7 +726,7 @@ def plot_evaluation_results(evaluation_result, figsize=(8, 3), bins=None, title=
             [m_summary[FalsifyConst.F_GIVEN_VIOLATIONS]] * 2,
             [0, ylim],
             "--",
-            c=COLORS[i],
+            c=colors[i],
             label=f"Violations of {FALSIFY_METHODS[m]} of given DAG",
         )
         ax.set_ylim([0, ylim])
