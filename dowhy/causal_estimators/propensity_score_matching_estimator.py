@@ -121,9 +121,9 @@ class PropensityScoreMatchingEstimator(PropensityScoreEstimator):
         if self.propensity_score_column not in data:
             self.estimate_propensity_score_column(data)
 
-        # this assumes a binary treatment regime
-        treated = data.loc[data[self._target_estimand.treatment_variable[0]] == 1]
-        control = data.loc[data[self._target_estimand.treatment_variable[0]] == 0]
+        # Split data into treated and control using the caller-supplied values
+        treated = data.loc[data[self._target_estimand.treatment_variable[0]] == treatment_value]
+        control = data.loc[data[self._target_estimand.treatment_variable[0]] == control_value]
 
         # TODO remove neighbors that are more than a given radius apart
 
