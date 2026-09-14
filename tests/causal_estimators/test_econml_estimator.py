@@ -457,12 +457,12 @@ class TestEconMLEstimator:
         (``sex``), causing a KeyError in ``Econml.effect()`` when it tried to select the original
         column from the already-encoded DataFrame.
         """
-        np.random.seed(42)
+        rng = np.random.default_rng(42)
         n = 300
-        sex = pd.Categorical(np.random.choice([1.0, 2.0], size=n))
-        W = np.random.normal(size=n)
-        T = np.random.binomial(1, 0.5, size=n)
-        Y = T * 2.0 + W + (sex.codes * 0.5) + np.random.normal(size=n)
+        sex = pd.Categorical(rng.choice([1.0, 2.0], size=n))
+        W = rng.normal(size=n)
+        T = rng.binomial(1, 0.5, size=n)
+        Y = T * 2.0 + W + (sex.codes * 0.5) + rng.normal(size=n)
 
         df = pd.DataFrame({"sex": sex, "W": W, "T": T, "Y": Y})
 

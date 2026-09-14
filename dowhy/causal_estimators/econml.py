@@ -233,9 +233,9 @@ class Econml(CausalEstimator):
 
         X_test = X
         if X is not None:
-            if type(target_units) is pd.DataFrame:
-                # target_units has original (pre-encoding) column names; encode for EconML
-                X_test = self._encode(target_units[self._effect_modifier_names], "effect_modifiers")
+            if isinstance(target_units, pd.DataFrame):
+                # target_units may have original (pre-encoding) or already-encoded column names
+                X_test = self._select_encoded_effect_modifiers(target_units)
             elif callable(target_units):
                 filtered_rows = data.where(target_units)
                 boolean_criterion = np.array(filtered_rows.notnull().iloc[:, 0])
@@ -288,7 +288,9 @@ class Econml(CausalEstimator):
         """
         if df is None:
             return df
-        encoded_names = getattr(self, "_effect_modifier_names_encoded", None) or self._effect_modifier_names
+        encoded_names = getattr(self, "_effect_modifier_names_encoded", None)
+        if encoded_names is None:
+            encoded_names = self._effect_modifier_names
         if all(n in df.columns for n in encoded_names):
             # df already contains encoded columns (e.g. self._effect_modifiers)
             return df[encoded_names]
@@ -380,7 +382,9 @@ class Econml(CausalEstimator):
         """
         Effect of the actual treatment that was applied to each unit
         ("effect of Treatment on the Treated")
-        :param df: Features of the units to evaluate (full DataFrame with original column names)
+        :param df: Full DataFrame of the units to evaluate. Effect modifier columns may be given
+            either with their original (pre-encoding) names or with their encoded names; it must
+            also contain the treatment column.
         :param args: passed through to estimator.effect()
         :param kwargs: passed through to estimator.effect()
         """
