@@ -217,11 +217,15 @@ class CausalEstimator:
             if len(self._effect_modifier_names) > 0:
                 self._effect_modifiers = data[self._effect_modifier_names]
                 self._effect_modifiers = self._encode(self._effect_modifiers, "effect_modifiers")
+                # Track the post-encoding column names (may differ when categorical columns are one-hot encoded)
+                self._effect_modifier_names_encoded = list(self._effect_modifiers.columns)
                 self.logger.debug("Effect modifiers: " + ",".join(self._effect_modifier_names))
             else:
                 self._effect_modifier_names = []
+                self._effect_modifier_names_encoded = []
         else:
             self._effect_modifier_names = []
+            self._effect_modifier_names_encoded = []
 
         self.need_conditional_estimates = (
             self.need_conditional_estimates
