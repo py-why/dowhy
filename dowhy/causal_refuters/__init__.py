@@ -10,6 +10,7 @@ from dowhy.causal_refuters.add_unobserved_common_cause import (
 from dowhy.causal_refuters.bootstrap_refuter import BootstrapRefuter, refute_bootstrap
 from dowhy.causal_refuters.data_subset_refuter import DataSubsetRefuter, refute_data_subset
 from dowhy.causal_refuters.dummy_outcome_refuter import DummyOutcomeRefuter, refute_dummy_outcome
+from dowhy.causal_refuters.iv_exclusion_sensitivity_refuter import IvExclusionSensitivityRefuter
 from dowhy.causal_refuters.placebo_treatment_refuter import PlaceboTreatmentRefuter, refute_placebo_treatment
 from dowhy.causal_refuters.random_common_cause import RandomCommonCause, refute_random_common_cause
 from dowhy.causal_refuters.refute_estimate import refute_estimate
@@ -45,4 +46,5 @@ __all__ = [
     "sensitivity_e_value",
     "refute_dummy_outcome",
     "refute_estimate",
+    "IvExclusionSensitivityRefuter",
 ]
