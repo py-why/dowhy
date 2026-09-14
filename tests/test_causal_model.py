@@ -192,9 +192,7 @@ class TestCausalModel(object):
         edge[
         source "Z0" 
         target "{0}"
-        ]]""".format(
-            data["treatment_name"][0], data["outcome_name"]
-        )
+        ]]""".format(data["treatment_name"][0], data["outcome_name"])
         print(gml_str)
         model = CausalModel(
             data=data["df"],
@@ -740,6 +738,60 @@ class TestCausalModel(object):
         assert (estimates[1].estimator) == model.get_estimator(methods[1])
         assert (estimates[0].estimator) != model.get_estimator(methods[1])  # check not same object
 
+    def test_estimate_effect_shorthand_params(self):
+        """Test that num_quantiles_to_discretize_cont_cols and sample_size_fraction can be passed
+        directly to estimate_effect() as keyword arguments (issues #767 and #1035)."""
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=2,
+            num_samples=200,
+            num_treatments=1,
+            treatment_is_binary=True,
+            num_effect_modifiers=1,
+        )
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+            test_significance=None,
+        )
+        identified_estimand = model.identify_effect()
+
+        # Passing num_quantiles_to_discretize_cont_cols directly must not raise TypeError
+        estimate = model.estimate_effect(
+            identified_estimand,
+            method_name="backdoor.linear_regression",
+            control_value=0,
+            treatment_value=1,
+            num_quantiles_to_discretize_cont_cols=3,
+        )
+        assert estimate is not None
+        # The estimator should honour the custom quantile count
+        assert estimate.estimator.num_quantiles_to_discretize_cont_cols == 3
+
+        # Passing sample_size_fraction directly must not raise TypeError
+        estimate2 = model.estimate_effect(
+            identified_estimand,
+            method_name="backdoor.linear_regression",
+            control_value=0,
+            treatment_value=1,
+            sample_size_fraction=0.8,
+        )
+        assert estimate2 is not None
+        assert estimate2.estimator.sample_size_fraction == 0.8
+
+        # method_params values take priority over shorthand params
+        estimate3 = model.estimate_effect(
+            identified_estimand,
+            method_name="backdoor.linear_regression",
+            control_value=0,
+            treatment_value=1,
+            num_quantiles_to_discretize_cont_cols=3,
+            method_params={"num_quantiles_to_discretize_cont_cols": 7},
+        )
+        assert estimate3.estimator.num_quantiles_to_discretize_cont_cols == 7
+
     def test_refute_estimate_raises_when_method_name_is_none(self):
         """refute_estimate(method_name=None) must raise ValueError, not NameError."""
         data = dowhy.datasets.linear_dataset(
@@ -944,6 +996,60 @@ class TestCausalModel(object):
         )
         assert repr(refutation) == str(refutation)
         assert "Estimated effect" in repr(refutation)
+
+    def test_estimate_effect_shorthand_params(self):
+        """Test that num_quantiles_to_discretize_cont_cols and sample_size_fraction can be passed
+        directly to estimate_effect() as keyword arguments (issues #767 and #1035)."""
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=2,
+            num_samples=200,
+            num_treatments=1,
+            treatment_is_binary=True,
+            num_effect_modifiers=1,
+        )
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+            test_significance=None,
+        )
+        identified_estimand = model.identify_effect()
+
+        # Passing num_quantiles_to_discretize_cont_cols directly must not raise TypeError
+        estimate = model.estimate_effect(
+            identified_estimand,
+            method_name="backdoor.linear_regression",
+            control_value=0,
+            treatment_value=1,
+            num_quantiles_to_discretize_cont_cols=3,
+        )
+        assert estimate is not None
+        # The estimator should honour the custom quantile count
+        assert estimate.estimator.num_quantiles_to_discretize_cont_cols == 3
+
+        # Passing sample_size_fraction directly must not raise TypeError
+        estimate2 = model.estimate_effect(
+            identified_estimand,
+            method_name="backdoor.linear_regression",
+            control_value=0,
+            treatment_value=1,
+            sample_size_fraction=0.8,
+        )
+        assert estimate2 is not None
+        assert estimate2.estimator.sample_size_fraction == 0.8
+
+        # method_params values take priority over shorthand params
+        estimate3 = model.estimate_effect(
+            identified_estimand,
+            method_name="backdoor.linear_regression",
+            control_value=0,
+            treatment_value=1,
+            num_quantiles_to_discretize_cont_cols=3,
+            method_params={"num_quantiles_to_discretize_cont_cols": 7},
+        )
+        assert estimate3.estimator.num_quantiles_to_discretize_cont_cols == 7
 
 
 if __name__ == "__main__":
