@@ -10,7 +10,6 @@ import scipy
 from joblib import Parallel, delayed
 from scipy.special import comb
 from scipy.stats._qmc import Halton
-from sklearn.linear_model import LinearRegression
 from tqdm import tqdm
 
 import dowhy.gcm.config as config
@@ -231,7 +230,31 @@ def _approximate_shapley_values_via_least_squares_regression(
             )
         )
 
-    return LinearRegression().fit(all_subsets, np.array(set_function_results), sample_weight=weights).coef_
+    return _weighted_least_squares_coefficients(all_subsets, np.array(set_function_results), weights)
+
+
+def _weighted_least_squares_coefficients(
+    all_subsets: np.ndarray, set_function_results: np.ndarray, weights: np.ndarray
+) -> np.ndarray:
+    """Solves the weighted least squares problem (with intercept) and returns the coefficients.
+
+    The weights span many orders of magnitude (the full and empty subsets get weight 10**20 to
+    approximate equality constraints), which makes the system extremely ill-conditioned. Solving
+    it explicitly via lstsq on the square-root-weighted system keeps the solution stable and
+    independent of solver changes in third-party libraries.
+    """
+    sqrt_weights = np.sqrt(weights)
+    # Center predictors and targets by their weighted means (this implicitly handles the
+    # intercept and keeps the system well-behaved despite the extreme weights).
+    subsets_mean = np.average(all_subsets, axis=0, weights=weights)
+    targets_mean = np.average(set_function_results, axis=0, weights=weights)
+    centered_subsets = (all_subsets - subsets_mean) * sqrt_weights[:, np.newaxis]
+    if set_function_results.ndim == 1:
+        centered_targets = (set_function_results - targets_mean) * sqrt_weights
+    else:
+        centered_targets = (set_function_results - targets_mean) * sqrt_weights[:, np.newaxis]
+    coefficients = np.linalg.lstsq(centered_subsets, centered_targets, rcond=None)[0]
+    return coefficients if set_function_results.ndim == 1 else coefficients.T
 
 
 def _approximate_shapley_values_via_permutation_sampling(
