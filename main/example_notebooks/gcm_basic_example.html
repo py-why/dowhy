@@ -443,6 +443,7 @@
 <li class="toctree-l1"><a class="reference internal" href="sales_attribution_intervention.html">Causal attribution to sales growth and spend intervention</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gcm_causal_discovery_foundcause.html">Root Cause Analysis with an Unknown Causal Graph and a Hidden Confounder Using a Foundational Causal Discovery Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gcm_chest_xray_causal_inference.html">When Accuracy Lies: Causal Inference on a Chest X-Ray CNN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_unit_change.html">Why Did This Delivery Forecast Jump? Separating Changed Conditions from a Model Update</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples on benchmarks datasets</span></p>
 <ul class="nav bd-sidenav">
@@ -630,33 +631,33 @@
   <tbody>
     <tr>
       <th>0</th>
-      <td>0.758041</td>
-      <td>1.701096</td>
-      <td>4.496444</td>
+      <td>1.469437</td>
+      <td>2.923840</td>
+      <td>8.956336</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>-1.121734</td>
-      <td>-2.209661</td>
-      <td>-6.347583</td>
+      <td>1.152226</td>
+      <td>2.578952</td>
+      <td>8.281429</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>0.133354</td>
-      <td>0.703617</td>
-      <td>2.597525</td>
+      <td>-0.095471</td>
+      <td>0.642003</td>
+      <td>2.137774</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>0.455474</td>
-      <td>0.387118</td>
-      <td>1.085753</td>
+      <td>0.106682</td>
+      <td>-1.585927</td>
+      <td>-5.809160</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>-1.528278</td>
-      <td>-3.457454</td>
-      <td>-10.974650</td>
+      <td>-0.226594</td>
+      <td>-0.088420</td>
+      <td>-2.130308</td>
     </tr>
   </tbody>
 </table>
@@ -712,19 +713,19 @@ Node X is a root node. Therefore, assigning &#39;Empirical Distribution&#39; to 
 Node Y is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using LinearRegression&#39; to the node.
 This represents the causal relationship as Y := f(X) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
-LinearRegression: 0.9418005004188688
+LinearRegression: 0.954521083087104
 Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 0.9422831460240844
-HistGradientBoostingRegressor: 1.037160240761378
+                (&#39;linearregression&#39;, LinearRegression)]): 0.9576666432751049
+HistGradientBoostingRegressor: 1.079149616065504
 
 --- Node: Z
-Node Z is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using Pipeline&#39; to the node.
+Node Z is a non-root node with continuous data. Assigning &#39;AdditiveNoiseModel using LinearRegression&#39; to the node.
 This represents the causal relationship as Z := f(Y) + N.
 For the model selection, the following models were evaluated on the mean squared error (MSE) metric:
+LinearRegression: 1.0594724955882724
 Pipeline(steps=[(&#39;polynomialfeatures&#39;, PolynomialFeatures(include_bias=False)),
-                (&#39;linearregression&#39;, LinearRegression)]): 1.047221672669321
-LinearRegression: 1.047473351355721
-HistGradientBoostingRegressor: 1.4356777805507808
+                (&#39;linearregression&#39;, LinearRegression)]): 1.0624404822589735
+HistGradientBoostingRegressor: 1.3841987237799858
 
 ===Note===
 Note, based on the selected auto assignment quality, the set of evaluated models changes.
@@ -761,7 +762,7 @@ For more insights toward the quality of the fitted graphical causal model, consi
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Fitting causal mechanism of node Z: 100%|██████████| 3/3 [00:00&lt;00:00, 410.27it/s]
+Fitting causal mechanism of node Z: 100%|██████████| 3/3 [00:00&lt;00:00, 398.36it/s]
 </pre></div></div>
 </div>
 <p>Fitting means, we learn the generative models of the variables in the SCM according to the data.</p>
@@ -779,8 +780,8 @@ Fitting causal mechanism of node Z: 100%|██████████| 3/3 [00
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Evaluating causal mechanisms...: 100%|██████████| 3/3 [00:00&lt;00:00, 3189.58it/s]
-Test permutations of given graph: 100%|██████████| 6/6 [00:00&lt;00:00, 18.63it/s]
+Evaluating causal mechanisms...: 100%|██████████| 3/3 [00:00&lt;00:00, 3468.28it/s]
+Test permutations of given graph: 100%|██████████| 6/6 [00:00&lt;00:00, 19.92it/s]
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -809,21 +810,21 @@ NOTE: Every metric focuses on different aspects and they might not consistently 
 We will mostly utilize the CRPS for comparing and interpreting the performance of the mechanisms, since this captures the most important properties for the causal model.
 
 --- Node X
-- The KL divergence between generated and observed distribution is 0.013655020156500308.
+- The KL divergence between generated and observed distribution is 0.09831185290870789.
 The estimated KL divergence indicates an overall very good representation of the data distribution.
 
 --- Node Y
-- The MSE is 0.942141558461311.
-- The NMSE is 0.4467637624219827.
-- The R2 coefficient is 0.7997885214531066.
-- The normalized CRPS is 0.2556196032236109.
+- The MSE is 0.9585663211197989.
+- The NMSE is 0.43242869233073333.
+- The R2 coefficient is 0.8125410163323881.
+- The normalized CRPS is 0.24635847774611047.
 The estimated CRPS indicates a good model performance.
 
 --- Node Z
-- The MSE is 1.0459742584246485.
-- The NMSE is 0.1555898764589697.
-- The R2 coefficient is 0.9755695174329977.
-- The normalized CRPS is 0.08896607864276743.
+- The MSE is 1.0571718161710206.
+- The NMSE is 0.14942889958943867.
+- The R2 coefficient is 0.9775619623113551.
+- The normalized CRPS is 0.08523434934834159.
 The estimated CRPS indicates a very good model performance.
 
 ==== Evaluation of Invertible Functional Causal Model Assumption ====
@@ -913,33 +914,33 @@ All these evaluations give some insight into the goodness of the causal model, b
   <tbody>
     <tr>
       <th>0</th>
-      <td>0.058529</td>
+      <td>-0.338016</td>
       <td>2.34</td>
-      <td>6.437373</td>
+      <td>6.107190</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>-0.742034</td>
+      <td>-0.829794</td>
       <td>2.34</td>
-      <td>6.404105</td>
+      <td>5.117112</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>0.922378</td>
+      <td>0.142990</td>
       <td>2.34</td>
-      <td>7.056429</td>
+      <td>4.954380</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>-0.163989</td>
+      <td>1.447736</td>
       <td>2.34</td>
-      <td>6.619439</td>
+      <td>6.879035</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>-0.213905</td>
+      <td>-0.390432</td>
       <td>2.34</td>
-      <td>8.010839</td>
+      <td>6.349333</td>
     </tr>
   </tbody>
 </table>

@@ -1,0 +1,1312 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B139P18WHM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-B139P18WHM');
+    </script>
+    
+    <title>Why Did This Delivery Forecast Jump? Separating Changed Conditions from a Model Update &#8212; DoWhy  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=949a1ff5" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/jquery.js?v=5d32c60e"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=0c6e27e1"></script>
+    <script src="../_static/design-tabs.js?v=36754332"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'example_notebooks/gcm_unit_change';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="DoWhy example on ihdp (Infant Health and Development Program) dataset" href="dowhy_ihdp_data_example.html" />
+    <link rel="prev" title="When Accuracy Lies: Causal Inference on a Chest X-Ray CNN" href="gcm_chest_xray_causal_inference.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="main" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-light" alt="DoWhy  documentation - Home"/>
+    <img src="../_static/dowhy-logo-small.png" class="logo__image only-dark pst-js-only" alt="DoWhy  documentation - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="nb_index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing.html">
+    Contributing
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../dowhy.html">
+    dowhy package
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../code_repo.html">
+    Release notes
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item"><div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        main
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.9.1/index.html">v0.9.1</a></dd>
+            <dd><a href="/dowhy/v0.9/index.html">v0.9</a></dd>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.14/index.html">v0.14</a></dd>
+            <dd><a href="/dowhy/v0.13/index.html">v0.13</a></dd>
+            <dd><a href="/dowhy/v0.12/index.html">v0.12</a></dd>
+            <dd><a href="/dowhy/v0.11.1/index.html">v0.11.1</a></dd>
+            <dd><a href="/dowhy/v0.11/index.html">v0.11</a></dd>
+            <dd><a href="/dowhy/v0.10.1/index.html">v0.10.1</a></dd>
+            <dd><a href="/dowhy/v0.10/index.html">v0.10</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide/index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="nb_index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../dowhy.html">
+    dowhy package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../code_repo.html">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        main
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.9.1/index.html">v0.9.1</a></dd>
+            <dd><a href="/dowhy/v0.9/index.html">v0.9</a></dd>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.14/index.html">v0.14</a></dd>
+            <dd><a href="/dowhy/v0.13/index.html">v0.13</a></dd>
+            <dd><a href="/dowhy/v0.12/index.html">v0.12</a></dd>
+            <dd><a href="/dowhy/v0.11.1/index.html">v0.11.1</a></dd>
+            <dd><a href="/dowhy/v0.11/index.html">v0.11</a></dd>
+            <dd><a href="/dowhy/v0.10.1/index.html">v0.10.1</a></dd>
+            <dd><a href="/dowhy/v0.10/index.html">v0.10</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Introductory examples</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="dowhy_simple_example.html">Basic Example for Calculating the Causal Effect</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_basic_example.html">Basic Example for Graphical Causal Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_draw_samples.html">Basic Example for generating samples from a GCM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_confounder_example.html">Confounding Example: Finding causal effects from observed data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy-conditional-treatment-effects.html">Conditional Average Treatment Effects (CATE) with DoWhy and EconML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial-causalinference-machinelearning-using-dowhy-econml.html">Tutorial on Causal Inference and its Connections to Machine Learning (Using DoWhy+EconML)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_mediation_analysis.html">Mediation analysis with DoWhy: Direct and Indirect Effects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_refuter_notebook.html">Iterating over multiple refutation tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="do_sampler_demo.html">Do-sampler Introduction</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Real world-inspired examples</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="DoWhy-The%20Causal%20Story%20Behind%20Hotel%20Booking%20Cancellations.html">Exploring Causes of Hotel Booking Cancellations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_example_effect_of_memberrewards_program.html">Estimating the Effect of a Member Rewards Program</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_online_shop.html">Causal Attributions and Root-Cause Analysis in an Online Shop</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="gcm_rca_microservice_architecture.html">Finding the Root Cause of Elevated Latencies in a Microservice Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_401k_analysis.html">Impact of 401(k) eligibility on net financial assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_supply_chain_dist_change.html">Finding Root Causes of Changes in a Supply Chain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_icc.html">Estimating intrinsic causal influences in real-world examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_counterfactual_medical_dry_eyes.html">Counterfactual Analysis in a Medical Case</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_falsify_dag.html">Falsification of User-Given Directed Acyclic Graphs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="counterfactual_fairness_dowhy.html">Counterfactual Fairness</a></li>
+
+
+
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="sales_attribution_intervention.html">Causal attribution to sales growth and spend intervention</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_causal_discovery_foundcause.html">Root Cause Analysis with an Unknown Causal Graph and a Hidden Confounder Using a Foundational Causal Discovery Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_chest_xray_causal_inference.html">When Accuracy Lies: Causal Inference on a Chest X-Ray CNN</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Why Did This Delivery Forecast Jump? Separating Changed Conditions from a Model Update</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Examples on benchmarks datasets</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="dowhy_ihdp_data_example.html">DoWhy example on ihdp (Infant Health and Development Program) dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_lalonde_example.html">DoWhy example on the Lalonde dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_refutation_testing.html">Applying refutation tests to the Lalonde and IHDP datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gcm_401k_analysis.html">Impact of 401(k) eligibility on net financial assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prediction/dowhy_causal_prediction_demo.html">Demo for DoWhy Causal Prediction on MNIST</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lalonde_pandas_api.html">Lalonde Pandas API Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="counterfactual_fairness_dowhy.html">Counterfactual Fairness</a></li>
+
+
+
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="dowhy_twins_example.html">DoWhy example on Twins dataset</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Modeling and refuting causal assumptions</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="load_graph_example.html">Different ways to load an input graph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_causal_discovery_example.html">Causal Discovery example</a></li>
+
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="gcm_falsify_dag.html">Falsification of User-Given Directed Acyclic Graphs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sensitivity_analysis_testing.html">Sensitivity Analysis for Regression Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sensitivity_analysis_nonparametric_estimators.html">Sensitivity analysis for non-parametric causal estimators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_refuter_notebook.html">Iterating over multiple refutation tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_refuter_assess_overlap.html">Assessing Support and Overlap with OverRule</a></li>
+
+
+
+<li class="toctree-l1"><a class="reference internal" href="dowhy_ranking_methods.html">Ranking of estimation methods for a given dataset</a></li>
+
+
+<li class="toctree-l1"><a class="reference internal" href="dowhy_demo_dummy_outcome_refuter.html">A Simple Example on Creating a Custom Refutation Using User-Defined Outcome Functions</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Miscellaneous</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="dowhy_estimation_methods.html">DoWhy: Different estimation methods for causal inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy-simple-iv-example.html">Simple example on using Instrumental Variables method for estimation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_interpreter.html">DoWhy: Interpreters for Causal Estimators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_mediation_analysis.html">Mediation analysis with DoWhy: Direct and Indirect Effects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_multiple_treatments.html">Estimating effect of multiple treatments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_efficient_backdoor_example.html">Finding optimal adjustment sets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="identifying_effects_using_id_algorithm.html">Identifying Effect using ID Algorithm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_optimize_backdoor_example.html">Example to demonstrate optimized backdoor variable search for Causal Identification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_generalized_covariate_adjustment_example.html">Generalized Adjustment Criterion Example Notebook</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_generalized_covariate_adjustment_estimation_example.html">Causal Effect Estimation with the Generalized Adjustment Criterion - Example Notebook</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dowhy_functional_api.html">Functional API Preview</a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="dowhy_causal_api.html">Demo for the DoWhy causal API</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="nb_index.html" class="nav-link">Example notebooks</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Why Did This Delivery Forecast Jump? Separating Changed Conditions from a Model Update</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Why-Did-This-Delivery-Forecast-Jump?-Separating-Changed-Conditions-from-a-Model-Update">
+<h1>Why Did This Delivery Forecast Jump? Separating Changed Conditions from a Model Update<a class="headerlink" href="#Why-Did-This-Delivery-Forecast-Jump?-Separating-Changed-Conditions-from-a-Model-Update" title="Link to this heading">#</a></h1>
+<p>At 09:00, ETA model v1 predicts <strong>28.5 minutes remaining</strong> for delivery <strong>DEL-042</strong>. Fifteen minutes later, model v2 predicts <strong>54.8 minutes remaining</strong> for the same delivery, even though the courier is now 2 km closer! Congestion worsened, three stops were added, rain began, and by 09:15 the platform’s new model was active.</p>
+<p>This raises an attribution question: <strong>How much of the 26.3-minute increase came from each changed condition, and how much came from the model update?</strong></p>
+<p>We will use <code class="docutils literal notranslate"><span class="pre">dowhy.gcm.unit_change</span></code> to build an order-independent attribution that exactly reconstructs the forecast change, first for DEL-042 and then across a batch of deliveries.</p>
+<style>
+.jp-RenderedHTMLCommon table,
+.jp-OutputArea-output table,
+.nboutput .output_area table {
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+.jp-RenderedImage img,
+.jp-OutputArea-output img,
+.nboutput .output_area img {
+    display: block;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+.unit-change-diagram {
+    display: flex;
+    justify-content: center;
+    margin: 1rem 0;
+}
+.unit-change-diagram pre {
+    display: inline-block;
+    margin: 0;
+    text-align: left;
+}
+</style><section id="What-exactly-are-we-explaining?">
+<h2>What exactly are we explaining?<a class="headerlink" href="#What-exactly-are-we-explaining?" title="Link to this heading">#</a></h2>
+<p>DEL-042 is one statistical unit observed in two contexts. DoWhy calls the earlier context the <strong>background</strong> and the later context the <strong>foreground</strong>:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"></th>
+<th class="head"><p>Background</p></th>
+<th class="head"><p>Foreground</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Snapshot</p></td>
+<td><p>09:00</p></td>
+<td><p>09:15</p></td>
+</tr>
+<tr class="row-odd"><td><p>Delivery state</p></td>
+<td><p>x09:00</p></td>
+<td><p>x09:15</p></td>
+</tr>
+<tr class="row-even"><td><p>Prediction mechanism</p></td>
+<td><p>fv1</p></td>
+<td><p>fv2</p></td>
+</tr>
+<tr class="row-odd"><td><p>Forecast</p></td>
+<td><p>fv1(x09:00) = 28.5</p></td>
+<td><p>fv2(x09:15) = 54.8</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Two things changed between these endpoints: the input vector <span class="math notranslate nohighlight">\(x\)</span> <strong>and</strong> the prediction function <span class="math notranslate nohighlight">\(f\)</span>. Their endpoint contrast is <span class="math notranslate nohighlight">\(f_{v2}(x_{09:15}) - f_{v1}(x_{09:00}) = 26.3\)</span> minutes. Subtraction gives the total, but it cannot tell us how much to assign to remaining distance, congestion, stops, rain, or the model update. We want five contributions that sum back to 26.3 minutes exactly.</p>
+<p>Typical feature-attribution explanations hold the prediction mechanism fixed. Here, replacing the mechanism is itself one of the possible explanations. This is the setting studied in <a class="reference external" href="https://arxiv.org/abs/2206.12986">Explaining the root causes of unit-level changes</a> by Budhathoki, Michailidis, and Janzing, which uses counterfactual Shapley values to account for changes in both inputs and the function mapping them to an output.</p>
+<p>The target here is the change in the platform’s <strong>forecast</strong>, not the effect of intervening on traffic or weather on actual delivery time.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">dowhy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dowhy</span><span class="w"> </span><span class="kn">import</span> <span class="n">gcm</span>
+
+<span class="n">SEED</span> <span class="o">=</span> <span class="mi">2026</span>
+<span class="n">dowhy</span><span class="o">.</span><span class="n">enable_notebook_rendering</span><span class="p">()</span>
+<span class="n">gcm</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">disable_progress_bars</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="1.-Pair-the-background-and-foreground-delivery-states">
+<h2>1. Pair the background and foreground delivery states<a class="headerlink" href="#1.-Pair-the-background-and-foreground-delivery-states" title="Link to this heading">#</a></h2>
+<p>Both contexts must describe the same unit with the same ordered feature schema. In production, these values would normally come from two logged prediction snapshots. We hand-construct one pair here so every contribution is transparent and exactly checkable; <code class="docutils literal notranslate"><span class="pre">unit_change</span></code> does not require synthetic data.</p>
+<p>Between 09:00 and 09:15, the courier travels 2 km, but congestion increases by 12 minutes, three stops are added, and rain intensity rises from 0 to 0.8.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">FEATURES</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;remaining_km&quot;</span><span class="p">,</span> <span class="s2">&quot;congestion_minutes&quot;</span><span class="p">,</span> <span class="s2">&quot;stops_ahead&quot;</span><span class="p">,</span> <span class="s2">&quot;rain_intensity&quot;</span><span class="p">]</span>
+<span class="n">FEATURE_LABELS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;remaining_km&quot;</span><span class="p">:</span> <span class="s2">&quot;Remaining distance&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;congestion_minutes&quot;</span><span class="p">:</span> <span class="s2">&quot;Congestion&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;stops_ahead&quot;</span><span class="p">:</span> <span class="s2">&quot;Stops ahead&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;rain_intensity&quot;</span><span class="p">:</span> <span class="s2">&quot;Rain intensity&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;f&quot;</span><span class="p">:</span> <span class="s2">&quot;ETA mechanism&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">delivery_id</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">([</span><span class="s2">&quot;DEL-042&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;delivery_id&quot;</span><span class="p">)</span>
+<span class="n">snapshot_0900</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([[</span><span class="mf">6.5</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]],</span> <span class="n">columns</span><span class="o">=</span><span class="n">FEATURES</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">delivery_id</span><span class="p">)</span>
+<span class="n">snapshot_0915</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([[</span><span class="mf">4.5</span><span class="p">,</span> <span class="mf">16.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">]],</span> <span class="n">columns</span><span class="o">=</span><span class="n">FEATURES</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">delivery_id</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<section id="Specify-the-two-prediction-mechanisms">
+<h3>Specify the two prediction mechanisms<a class="headerlink" href="#Specify-the-two-prediction-mechanisms" title="Link to this heading">#</a></h3>
+<p>To focus on attribution rather than model estimation, we specify two fixed, known linear mechanisms. Version 2 lowers the baseline and distance weight while responding more strongly to congestion, stops, and rain:</p>
+<div class="math notranslate nohighlight">
+\[f_{v1}(x) = 8 + 2.2d + 0.8c + 3.0s + 6.0r\]</div>
+<div class="math notranslate nohighlight">
+\[f_{v2}(x) = 5 + 2.0d + 1.1c + 3.8s + 10.0r.\]</div>
+<p>Here <span class="math notranslate nohighlight">\(d\)</span> is remaining distance, <span class="math notranslate nohighlight">\(c\)</span> is expected congestion delay, <span class="math notranslate nohighlight">\(s\)</span> is the number of stops ahead, and <span class="math notranslate nohighlight">\(r\)</span> is rain intensity. The same <code class="docutils literal notranslate"><span class="pre">unit_change</span></code> API also accepts nonlinear DoWhy <code class="docutils literal notranslate"><span class="pre">PredictionModel</span></code> implementations.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">COEFFICIENTS_V1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">2.2</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">])</span>
+<span class="n">COEFFICIENTS_V2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">,</span> <span class="mf">3.8</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">])</span>
+<span class="n">INTERCEPT_V1</span> <span class="o">=</span> <span class="mf">8.0</span>
+<span class="n">INTERCEPT_V2</span> <span class="o">=</span> <span class="mf">5.0</span>
+
+<span class="n">eta_v1</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">ml</span><span class="o">.</span><span class="n">create_linear_regressor_with_given_parameters</span><span class="p">(</span><span class="n">COEFFICIENTS_V1</span><span class="p">,</span> <span class="n">INTERCEPT_V1</span><span class="p">)</span>
+<span class="n">eta_v2</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">ml</span><span class="o">.</span><span class="n">create_linear_regressor_with_given_parameters</span><span class="p">(</span><span class="n">COEFFICIENTS_V2</span><span class="p">,</span> <span class="n">INTERCEPT_V2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">eta_0900</span> <span class="o">=</span> <span class="n">eta_v1</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">snapshot_0900</span><span class="p">[</span><span class="n">FEATURES</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">())</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+<span class="n">eta_0915</span> <span class="o">=</span> <span class="n">eta_v2</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">snapshot_0915</span><span class="p">[</span><span class="n">FEATURES</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">())</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+<span class="n">eta_delta</span> <span class="o">=</span> <span class="n">eta_0915</span> <span class="o">-</span> <span class="n">eta_0900</span>
+
+<span class="n">paired_snapshots</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+    <span class="p">[</span><span class="n">snapshot_0900</span><span class="p">,</span> <span class="n">snapshot_0915</span><span class="p">],</span>
+    <span class="n">keys</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;09:00&quot;</span><span class="p">,</span> <span class="s2">&quot;09:15&quot;</span><span class="p">],</span>
+    <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Snapshot&quot;</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="n">paired_snapshots</span><span class="p">[</span><span class="s2">&quot;ETA model&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;v1&quot;</span><span class="p">,</span> <span class="s2">&quot;v2&quot;</span><span class="p">]</span>
+<span class="n">paired_snapshots</span><span class="p">[</span><span class="s2">&quot;Forecast (minutes remaining)&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">eta_0900</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">eta_0915</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+<span class="n">paired_snapshots</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">FEATURE_LABELS</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">FEATURES</span><span class="p">})</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th>Remaining distance</th>
+      <th>Congestion</th>
+      <th>Stops ahead</th>
+      <th>Rain intensity</th>
+      <th>ETA model</th>
+      <th>Forecast (minutes remaining)</th>
+    </tr>
+    <tr>
+      <th>Snapshot</th>
+      <th>delivery_id</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>09:00</th>
+      <th>DEL-042</th>
+      <td>6.5</td>
+      <td>4.0</td>
+      <td>1.0</td>
+      <td>0.0</td>
+      <td>v1</td>
+      <td>28.5</td>
+    </tr>
+    <tr>
+      <th>09:15</th>
+      <th>DEL-042</th>
+      <td>4.5</td>
+      <td>16.0</td>
+      <td>4.0</td>
+      <td>0.8</td>
+      <td>v2</td>
+      <td>54.8</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</section>
+</section>
+<section id="2.-Why-ordinary-subtraction-is-not-enough">
+<h2>2. Why ordinary subtraction is not enough<a class="headerlink" href="#2.-Why-ordinary-subtraction-is-not-enough" title="Link to this heading">#</a></h2>
+<p>Subtracting the endpoint forecasts gives 26.3 minutes, but it does not allocate that difference. We could first substitute the 09:15 delivery conditions into v1 and then switch to v2. Or we could switch models at the 09:00 conditions and only then substitute the new conditions:</p>
+<div class="unit-change-diagram"><pre>
+                        change conditions
+        f_v1(x_09:00) --------------------> f_v1(x_09:15)
+             |                                  |
+switch to v2 |                                  | switch to v2
+             v                                  v
+        f_v2(x_09:00) --------------------> f_v2(x_09:15)
+                        change conditions
+</pre></div><p>Because v1 and v2 weight the inputs differently, the two paths assign different amounts to changed conditions and the model update. Both start at 28.5 and end at 54.8; the endpoint comparison does not privilege either path.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">predict_one</span><span class="p">(</span><span class="n">mechanism</span><span class="p">,</span> <span class="n">row</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">mechanism</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">FEATURES</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">())</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+
+
+<span class="n">eta_v1_at_0900</span> <span class="o">=</span> <span class="n">predict_one</span><span class="p">(</span><span class="n">eta_v1</span><span class="p">,</span> <span class="n">snapshot_0900</span><span class="p">)</span>
+<span class="n">eta_v1_at_0915</span> <span class="o">=</span> <span class="n">predict_one</span><span class="p">(</span><span class="n">eta_v1</span><span class="p">,</span> <span class="n">snapshot_0915</span><span class="p">)</span>
+<span class="n">eta_v2_at_0900</span> <span class="o">=</span> <span class="n">predict_one</span><span class="p">(</span><span class="n">eta_v2</span><span class="p">,</span> <span class="n">snapshot_0900</span><span class="p">)</span>
+<span class="n">eta_v2_at_0915</span> <span class="o">=</span> <span class="n">predict_one</span><span class="p">(</span><span class="n">eta_v2</span><span class="p">,</span> <span class="n">snapshot_0915</span><span class="p">)</span>
+
+<span class="n">sequential_accounting</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;Changed delivery conditions&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="n">eta_v1_at_0915</span> <span class="o">-</span> <span class="n">eta_v1_at_0900</span><span class="p">,</span>
+            <span class="n">eta_v2_at_0915</span> <span class="o">-</span> <span class="n">eta_v2_at_0900</span><span class="p">,</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;Changed ETA mechanism&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="n">eta_v2_at_0915</span> <span class="o">-</span> <span class="n">eta_v1_at_0915</span><span class="p">,</span>
+            <span class="n">eta_v2_at_0900</span> <span class="o">-</span> <span class="n">eta_v1_at_0900</span><span class="p">,</span>
+        <span class="p">],</span>
+    <span class="p">},</span>
+    <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Conditions first&quot;</span><span class="p">,</span> <span class="s2">&quot;Mechanism first&quot;</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="n">sequential_accounting</span><span class="p">[</span><span class="s2">&quot;Total change&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sequential_accounting</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="3.-Replace-path-dependence-with-Shapley-accounting">
+<h2>3. Replace path dependence with Shapley accounting<a class="headerlink" href="#3.-Replace-path-dependence-with-Shapley-accounting" title="Link to this heading">#</a></h2>
+<p>The two paths show why we need an allocation rule. If delivery conditions change first, conditions receive <strong>19.0 minutes</strong> and the model update <strong>7.3</strong>. If the model changes first, conditions receive <strong>28.6 minutes</strong> and the update <strong>−2.3</strong>.</p>
+<p>Shapley accounting does not choose one path. It averages a contributor’s marginal effect across every possible replacement order. Temporarily treating all delivery conditions as one contributor gives</p>
+<div class="math notranslate nohighlight">
+\[\phi_{conditions} = \frac{19.0 + 28.6}{2} = 23.8,
+\qquad
+\phi_{model} = \frac{7.3 - 2.3}{2} = 2.5.\]</div>
+<p><code class="docutils literal notranslate"><span class="pre">gcm.unit_change</span></code> performs the finer calculation directly. Its five players are remaining distance, congestion, stops, rain, and the model itself. Imagine replacing them from old to new one at a time: a player’s increment can depend on what has already been replaced, so the exact Shapley value averages that increment conceptually over all <span class="math notranslate nohighlight">\(5! = 120\)</span> orders.</p>
+<p>We request exact Shapley values and one worker to keep the example serial. <code class="docutils literal notranslate"><span class="pre">unit_change</span></code> pairs rows by position and returns a fresh index, so we validate the pairing and restore the delivery ID explicitly. Its mechanism contribution is named <code class="docutils literal notranslate"><span class="pre">f</span></code>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">shapley_config</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">shapley</span><span class="o">.</span><span class="n">ShapleyConfig</span><span class="p">(</span>
+    <span class="n">approximation_method</span><span class="o">=</span><span class="n">gcm</span><span class="o">.</span><span class="n">shapley</span><span class="o">.</span><span class="n">ShapleyApproximationMethods</span><span class="o">.</span><span class="n">EXACT</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="k">assert</span> <span class="n">snapshot_0900</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">snapshot_0915</span><span class="o">.</span><span class="n">index</span><span class="p">),</span> <span class="s2">&quot;Snapshot rows must be paired in the same order.&quot;</span>
+
+<span class="n">attributions</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">unit_change</span><span class="p">(</span>
+    <span class="n">background_df</span><span class="o">=</span><span class="n">snapshot_0900</span><span class="p">,</span>
+    <span class="n">foreground_df</span><span class="o">=</span><span class="n">snapshot_0915</span><span class="p">,</span>
+    <span class="n">input_column_names</span><span class="o">=</span><span class="n">FEATURES</span><span class="p">,</span>
+    <span class="n">background_mechanism</span><span class="o">=</span><span class="n">eta_v1</span><span class="p">,</span>
+    <span class="n">foreground_mechanism</span><span class="o">=</span><span class="n">eta_v2</span><span class="p">,</span>
+    <span class="n">shapley_config</span><span class="o">=</span><span class="n">shapley_config</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="c1"># unit_change returns a fresh index; restore the validated delivery ID.</span>
+<span class="n">attributions</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">snapshot_0900</span><span class="o">.</span><span class="n">index</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">expected_attributions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">4.2</span><span class="p">,</span> <span class="mf">11.4</span><span class="p">,</span> <span class="mf">10.2</span><span class="p">,</span> <span class="mf">6.4</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">])</span>
+<span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_allclose</span><span class="p">(</span><span class="n">attributions</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;DEL-042&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span> <span class="n">expected_attributions</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">)</span>
+<span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_allclose</span><span class="p">(</span><span class="n">attributions</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span> <span class="n">eta_delta</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">accounting_comparison</span> <span class="o">=</span> <span class="n">sequential_accounting</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="s2">&quot;Total change&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
+    <span class="n">columns</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;Changed delivery conditions&quot;</span><span class="p">:</span> <span class="s2">&quot;Delivery conditions&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Changed ETA mechanism&quot;</span><span class="p">:</span> <span class="s2">&quot;Model update&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+<span class="n">accounting_comparison</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;DoWhy / Shapley&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">attributions</span><span class="p">[</span><span class="n">FEATURES</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+    <span class="n">attributions</span><span class="p">[</span><span class="s2">&quot;f&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+<span class="p">]</span>
+<span class="n">accounting_comparison</span><span class="p">[</span><span class="s2">&quot;Total&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">accounting_comparison</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">accounting_comparison</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">accounting_comparison</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Delivery conditions</th>
+      <th>Model update</th>
+      <th>Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Conditions first</th>
+      <td>19.0</td>
+      <td>7.3</td>
+      <td>26.3</td>
+    </tr>
+    <tr>
+      <th>Mechanism first</th>
+      <td>28.6</td>
+      <td>-2.3</td>
+      <td>26.3</td>
+    </tr>
+    <tr>
+      <th>DoWhy / Shapley</th>
+      <td>23.8</td>
+      <td>2.5</td>
+      <td>26.3</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>The grouped average above is intuition, not an extra grouping step inside <code class="docutils literal notranslate"><span class="pre">unit_change</span></code>. When both the background and foreground mechanisms are linear and additive, the four input attributions sum to <strong>23.8 minutes</strong>, and the attribution to input <span class="math notranslate nohighlight">\(j\)</span> is</p>
+<div class="math notranslate nohighlight">
+\[\phi_j = \frac{\beta_{v1,j} + \beta_{v2,j}}{2}(x_{09:15,j} - x_{09:00,j}),\]</div>
+<p>while the mechanism contribution is</p>
+<div class="math notranslate nohighlight">
+\[\phi_f = (\beta_{v2} - \beta_{v1})^\top \frac{x_{09:00} + x_{09:15}}{2} + (b_{v2} - b_{v1}).\]</div>
+<p>These equations provide an analytical check for this example. The <code class="docutils literal notranslate"><span class="pre">unit_change</span></code> call above uses the general counterfactual implementation, which also works with nonlinear DoWhy prediction mechanisms.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.colors</span><span class="w"> </span><span class="kn">import</span> <span class="n">TwoSlopeNorm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.patches</span><span class="w"> </span><span class="kn">import</span> <span class="n">Patch</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;figure.figsize&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">),</span>
+        <span class="s2">&quot;font.size&quot;</span><span class="p">:</span> <span class="mi">11</span><span class="p">,</span>
+        <span class="s2">&quot;axes.titleweight&quot;</span><span class="p">:</span> <span class="s2">&quot;bold&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;axes.spines.top&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">&quot;axes.spines.right&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">&quot;axes.grid&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">&quot;grid.alpha&quot;</span><span class="p">:</span> <span class="mf">0.18</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_attribution_waterfall</span><span class="p">(</span><span class="n">start_value</span><span class="p">,</span> <span class="n">contributions</span><span class="p">,</span> <span class="n">end_value</span><span class="p">):</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;09:00</span><span class="se">\n</span><span class="s2">old ETA&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Distance</span><span class="se">\n</span><span class="s2">traveled&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Congestion&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Stops</span><span class="se">\n</span><span class="s2">added&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Rain&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Model</span><span class="se">\n</span><span class="s2">update&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;09:15</span><span class="se">\n</span><span class="s2">new ETA&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">contributions</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+    <span class="n">cumulative</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">start_value</span><span class="p">,</span> <span class="n">start_value</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">values</span><span class="p">)]</span>
+    <span class="n">colors</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;#7C3AED&quot;</span> <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;f&quot;</span> <span class="k">else</span> <span class="s2">&quot;#F05A47&quot;</span> <span class="k">if</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="s2">&quot;#2A9D8F&quot;</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">contributions</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+    <span class="p">]</span>
+
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">start_value</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#173F5F&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.72</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">position</span><span class="p">,</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">color</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">colors</span><span class="p">),</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">previous</span> <span class="o">=</span> <span class="n">cumulative</span><span class="p">[</span><span class="n">position</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">bottom</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">previous</span><span class="p">,</span> <span class="n">previous</span> <span class="o">+</span> <span class="n">value</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">position</span> <span class="o">-</span> <span class="mf">0.64</span><span class="p">,</span> <span class="n">position</span> <span class="o">-</span> <span class="mf">0.36</span><span class="p">],</span> <span class="p">[</span><span class="n">previous</span><span class="p">,</span> <span class="n">previous</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#7A8793&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="nb">abs</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">bottom</span><span class="o">=</span><span class="n">bottom</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.72</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+            <span class="n">position</span><span class="p">,</span>
+            <span class="n">bottom</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">value</span><span class="si">:</span><span class="s2">+.1f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">ha</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span>
+            <span class="n">va</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span>
+            <span class="n">fontweight</span><span class="o">=</span><span class="s2">&quot;bold&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="n">final_position</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">final_position</span> <span class="o">-</span> <span class="mf">0.64</span><span class="p">,</span> <span class="n">final_position</span> <span class="o">-</span> <span class="mf">0.36</span><span class="p">],</span>
+        <span class="p">[</span><span class="n">end_value</span><span class="p">,</span> <span class="n">end_value</span><span class="p">],</span>
+        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#7A8793&quot;</span><span class="p">,</span>
+        <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">final_position</span><span class="p">,</span> <span class="n">end_value</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#173F5F&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.72</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">start_value</span> <span class="o">+</span> <span class="mf">0.9</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">start_value</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s2">&quot;bold&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">final_position</span><span class="p">,</span> <span class="n">end_value</span> <span class="o">+</span> <span class="mf">0.9</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">end_value</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s2">&quot;bold&quot;</span><span class="p">)</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">final_position</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">labels</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Predicted minutes remaining&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;DEL-042: why did the ETA jump by 26.3 minutes?&quot;</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span>
+        <span class="n">handles</span><span class="o">=</span><span class="p">[</span>
+            <span class="n">Patch</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;#F05A47&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Input increased ETA&quot;</span><span class="p">),</span>
+            <span class="n">Patch</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;#2A9D8F&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Input decreased ETA&quot;</span><span class="p">),</span>
+            <span class="n">Patch</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;#7C3AED&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Mechanism change&quot;</span><span class="p">),</span>
+        <span class="p">],</span>
+        <span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">ncol</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+        <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;upper left&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.18</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+
+<span class="n">plot_attribution_waterfall</span><span class="p">(</span><span class="n">eta_0900</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">attributions</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;DEL-042&quot;</span><span class="p">],</span> <span class="n">eta_0915</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_unit_change_15_0.png" src="../_images/example_notebooks_gcm_unit_change_15_0.png" />
+</div>
+</div>
+<p>The courier’s progress reduced the forecast by 4.2 minutes, but worsening congestion, extra stops, and rain added 28 minutes. The model update received a +2.5-minute attribution for this delivery.</p>
+</section>
+<section id="4.-Same-model-update,-different-deliveries">
+<h2>4. Same model update, different deliveries<a class="headerlink" href="#4.-Same-model-update,-different-deliveries" title="Link to this heading">#</a></h2>
+<p>Does one model update receive the same attribution for every delivery? Not necessarily. For this update, changed coefficients interact with each delivery’s own before-and-after inputs, so the mechanism contribution varies across units. A batched <code class="docutils literal notranslate"><span class="pre">unit_change</span></code> call reveals where changed conditions and the update reinforce or offset one another, detail that one rollout-wide average would hide.</p>
+<p>We construct 120 paired deliveries to demonstrate the batched API and retain DEL-042 as the anchor case. This remains a collection of unit-level explanations, not a distribution-change analysis.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n_deliveries</span> <span class="o">=</span> <span class="mi">120</span>
+<span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">SEED</span><span class="p">)</span>
+<span class="n">fleet_ids</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;DEL-</span><span class="si">{</span><span class="n">number</span><span class="si">:</span><span class="s2">03d</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">number</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_deliveries</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;delivery_id&quot;</span><span class="p">)</span>
+
+<span class="n">fleet_0900</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;remaining_km&quot;</span><span class="p">:</span> <span class="n">rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">12.0</span><span class="p">,</span> <span class="n">n_deliveries</span><span class="p">),</span>
+        <span class="s2">&quot;congestion_minutes&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">gamma</span><span class="p">(</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="n">n_deliveries</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">18</span><span class="p">),</span>
+        <span class="s2">&quot;stops_ahead&quot;</span><span class="p">:</span> <span class="n">rng</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">n_deliveries</span><span class="p">),</span>
+        <span class="s2">&quot;rain_intensity&quot;</span><span class="p">:</span> <span class="n">rng</span><span class="o">.</span><span class="n">beta</span><span class="p">(</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">,</span> <span class="n">n_deliveries</span><span class="p">),</span>
+    <span class="p">},</span>
+    <span class="n">index</span><span class="o">=</span><span class="n">fleet_ids</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">fleet_changes</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;remaining_km&quot;</span><span class="p">:</span> <span class="o">-</span><span class="n">rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="n">n_deliveries</span><span class="p">),</span>
+        <span class="s2">&quot;congestion_minutes&quot;</span><span class="p">:</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mf">2.5</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="n">n_deliveries</span><span class="p">),</span>
+        <span class="s2">&quot;stops_ahead&quot;</span><span class="p">:</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">n_deliveries</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="p">[</span><span class="mf">0.15</span><span class="p">,</span> <span class="mf">0.40</span><span class="p">,</span> <span class="mf">0.30</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">]),</span>
+        <span class="s2">&quot;rain_intensity&quot;</span><span class="p">:</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mf">0.10</span><span class="p">,</span> <span class="mf">0.22</span><span class="p">,</span> <span class="n">n_deliveries</span><span class="p">),</span>
+    <span class="p">},</span>
+    <span class="n">index</span><span class="o">=</span><span class="n">fleet_ids</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">fleet_0915</span> <span class="o">=</span> <span class="p">(</span><span class="n">fleet_0900</span> <span class="o">+</span> <span class="n">fleet_changes</span><span class="p">)</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span>
+    <span class="n">lower</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="mf">0.4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="n">FEATURES</span><span class="p">),</span>
+    <span class="n">upper</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="n">FEATURES</span><span class="p">),</span>
+    <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">fleet_0900</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;DEL-042&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">snapshot_0900</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;DEL-042&quot;</span><span class="p">]</span>
+<span class="n">fleet_0915</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;DEL-042&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">snapshot_0915</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;DEL-042&quot;</span><span class="p">]</span>
+<span class="k">assert</span> <span class="n">fleet_0900</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">fleet_0915</span><span class="o">.</span><span class="n">index</span><span class="p">),</span> <span class="s2">&quot;Snapshot rows must be paired in the same order.&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fleet_attributions</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">unit_change</span><span class="p">(</span>
+    <span class="n">background_df</span><span class="o">=</span><span class="n">fleet_0900</span><span class="p">,</span>
+    <span class="n">foreground_df</span><span class="o">=</span><span class="n">fleet_0915</span><span class="p">,</span>
+    <span class="n">input_column_names</span><span class="o">=</span><span class="n">FEATURES</span><span class="p">,</span>
+    <span class="n">background_mechanism</span><span class="o">=</span><span class="n">eta_v1</span><span class="p">,</span>
+    <span class="n">foreground_mechanism</span><span class="o">=</span><span class="n">eta_v2</span><span class="p">,</span>
+    <span class="n">shapley_config</span><span class="o">=</span><span class="n">shapley_config</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">fleet_attributions</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">fleet_0900</span><span class="o">.</span><span class="n">index</span>
+
+<span class="n">fleet_eta_0900</span> <span class="o">=</span> <span class="n">eta_v1</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">fleet_0900</span><span class="p">[</span><span class="n">FEATURES</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">())</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+<span class="n">fleet_eta_0915</span> <span class="o">=</span> <span class="n">eta_v2</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">fleet_0915</span><span class="p">[</span><span class="n">FEATURES</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">())</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+<span class="n">fleet_eta_delta</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">fleet_eta_0915</span> <span class="o">-</span> <span class="n">fleet_eta_0900</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">fleet_0900</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+<span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_allclose</span><span class="p">(</span><span class="n">fleet_attributions</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">fleet_eta_delta</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">)</span>
+
+<span class="n">fleet_results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;Changed delivery conditions&quot;</span><span class="p">:</span> <span class="n">fleet_attributions</span><span class="p">[</span><span class="n">FEATURES</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+        <span class="s2">&quot;Changed ETA mechanism&quot;</span><span class="p">:</span> <span class="n">fleet_attributions</span><span class="p">[</span><span class="s2">&quot;f&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;Total ETA change&quot;</span><span class="p">:</span> <span class="n">fleet_eta_delta</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">input_change</span> <span class="o">=</span> <span class="n">fleet_results</span><span class="p">[</span><span class="s2">&quot;Changed delivery conditions&quot;</span><span class="p">]</span>
+<span class="n">mechanism_change</span> <span class="o">=</span> <span class="n">fleet_results</span><span class="p">[</span><span class="s2">&quot;Changed ETA mechanism&quot;</span><span class="p">]</span>
+<span class="n">total_change</span> <span class="o">=</span> <span class="n">fleet_results</span><span class="p">[</span><span class="s2">&quot;Total ETA change&quot;</span><span class="p">]</span>
+<span class="n">color_bound</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">total_change</span><span class="p">))</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">9.5</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+<span class="n">points</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="n">input_change</span><span class="p">,</span>
+    <span class="n">mechanism_change</span><span class="p">,</span>
+    <span class="n">c</span><span class="o">=</span><span class="n">total_change</span><span class="p">,</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;coolwarm&quot;</span><span class="p">,</span>
+    <span class="n">norm</span><span class="o">=</span><span class="n">TwoSlopeNorm</span><span class="p">(</span><span class="n">vmin</span><span class="o">=-</span><span class="n">color_bound</span><span class="p">,</span> <span class="n">vcenter</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">color_bound</span><span class="p">),</span>
+    <span class="n">s</span><span class="o">=</span><span class="mi">55</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="mf">0.78</span><span class="p">,</span>
+    <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span>
+    <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">x_limits</span> <span class="o">=</span> <span class="p">(</span><span class="n">input_change</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span> <span class="n">input_change</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">y_limits</span> <span class="o">=</span> <span class="p">(</span><span class="n">mechanism_change</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">-</span> <span class="mf">1.5</span><span class="p">,</span> <span class="n">mechanism_change</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="mf">1.5</span><span class="p">)</span>
+<span class="n">boundary_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">x_limits</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="n">y_limits</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">min</span><span class="p">(</span><span class="n">x_limits</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="n">y_limits</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">boundary_x</span><span class="p">,</span> <span class="o">-</span><span class="n">boundary_x</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#555555&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#AAB2B8&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#AAB2B8&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">highlighted</span> <span class="o">=</span> <span class="n">fleet_results</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;DEL-042&quot;</span><span class="p">]</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="n">highlighted</span><span class="p">[</span><span class="s2">&quot;Changed delivery conditions&quot;</span><span class="p">],</span>
+    <span class="n">highlighted</span><span class="p">[</span><span class="s2">&quot;Changed ETA mechanism&quot;</span><span class="p">],</span>
+    <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;*&quot;</span><span class="p">,</span>
+    <span class="n">s</span><span class="o">=</span><span class="mi">320</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#FFD166&quot;</span><span class="p">,</span>
+    <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;#173F5F&quot;</span><span class="p">,</span>
+    <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span>
+    <span class="n">zorder</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span>
+    <span class="s2">&quot;DEL-042&quot;</span><span class="p">,</span>
+    <span class="p">(</span><span class="n">highlighted</span><span class="p">[</span><span class="s2">&quot;Changed delivery conditions&quot;</span><span class="p">],</span> <span class="n">highlighted</span><span class="p">[</span><span class="s2">&quot;Changed ETA mechanism&quot;</span><span class="p">]),</span>
+    <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">12</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+    <span class="n">textcoords</span><span class="o">=</span><span class="s2">&quot;offset points&quot;</span><span class="p">,</span>
+    <span class="n">ha</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">,</span>
+    <span class="n">fontweight</span><span class="o">=</span><span class="s2">&quot;bold&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlim</span><span class="o">=</span><span class="n">x_limits</span><span class="p">,</span> <span class="n">ylim</span><span class="o">=</span><span class="n">y_limits</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Changed-conditions attribution (minutes)&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Model-update attribution (minutes)&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Same model update, different deliveries&quot;</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span>
+    <span class="s2">&quot;no net ETA change&quot;</span><span class="p">,</span>
+    <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">3.5</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">),</span>
+    <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="mf">2.5</span><span class="p">,</span> <span class="mf">6.2</span><span class="p">),</span>
+    <span class="n">arrowprops</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;arrowstyle&quot;</span><span class="p">:</span> <span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;#555555&quot;</span><span class="p">},</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#555555&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mf">0.02</span><span class="p">)</span><span class="o">.</span><span class="n">set_label</span><span class="p">(</span><span class="s2">&quot;Total ETA change (minutes)&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.12</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_gcm_unit_change_20_0.png" src="../_images/example_notebooks_gcm_unit_change_20_0.png" />
+</div>
+</div>
+<p>Each point is one paired delivery explanation. Its vertical position changes even though every delivery receives the same v1-to-v2 update, because the model change is evaluated at that delivery’s inputs. The diagonal marks zero net forecast change; points in the upper-left or lower-right are cases where changed conditions and the model update push in opposite directions.</p>
+</section>
+<section id="Takeaway">
+<h2>Takeaway<a class="headerlink" href="#Takeaway" title="Link to this heading">#</a></h2>
+<p>When both a unit’s inputs and its prediction mechanism change, a two-step explanation depends on whether we replace the inputs or the model first. <code class="docutils literal notranslate"><span class="pre">gcm.unit_change</span></code> treats every changed input and the mechanism as contributors in one Shapley game, producing an order-independent attribution that exactly reconstructs the prediction change.</p>
+<p>For DEL-042, that turns a puzzling forecast jump into a concrete account: progress reduced the forecast by 4.2 minutes, worsening conditions added 28.0, and the model update received a 2.5-minute attribution. Across paired batches, the model attribution can differ by unit because the update is evaluated alongside each unit’s inputs.</p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="gcm_chest_xray_causal_inference.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">When Accuracy Lies: Causal Inference on a Chest X-Ray CNN</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="dowhy_ihdp_data_example.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">DoWhy example on ihdp (Infant Health and Development Program) dataset</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#What-exactly-are-we-explaining?">What exactly are we explaining?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#1.-Pair-the-background-and-foreground-delivery-states">1. Pair the background and foreground delivery states</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Specify-the-two-prediction-mechanisms">Specify the two prediction mechanisms</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#2.-Why-ordinary-subtraction-is-not-enough">2. Why ordinary subtraction is not enough</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#3.-Replace-path-dependence-with-Shapley-accounting">3. Replace path dependence with Shapley accounting</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#4.-Same-model-update,-different-deliveries">4. Same model update, different deliveries</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Takeaway">Takeaway</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/example_notebooks/gcm_unit_change.ipynb.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2022, PyWhy contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
