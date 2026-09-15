@@ -13,6 +13,8 @@ from dowhy import CausalModel, datasets
 
 econml = pytest.importorskip("econml")
 
+pytestmark = pytest.mark.econml
+
 
 class TestEconMLEstimator:
     """Smoke tests for the integration with EconML estimators
