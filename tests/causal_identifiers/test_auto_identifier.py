@@ -71,3 +71,5 @@ class TestConstructEstimands:
         assumptions = estimand["assumptions"]
         assert "behavior" in assumptions["Mediation"]
         assert "b,e,h,a,v,i,o,r" not in assumptions["Mediation"]
+        assert "behavior" in assumptions["Second-stage-unconfoundedness"]
+        assert "b,e,h,a,v,i,o,r" not in assumptions["Second-stage-unconfoundedness"]
