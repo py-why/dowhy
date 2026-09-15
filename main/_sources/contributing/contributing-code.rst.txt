@@ -30,22 +30,20 @@ The following steps allow you to contribute code to DoWhy.
    .. note::
       Installing pygraphviz can cause problems on some platforms.
       One way that works for most Linux distributions is to
-      first install graphviz and then pygraphviz as shown below.
+      first install graphviz system packages and then install pygraphviz as shown below.
       Otherwise, please consult the documentation of `pygraphviz <https://pygraphviz.github.io/documentation/stable/install.html>`_.
 
    .. code:: shell
 
        sudo apt install graphviz libgraphviz-dev graphviz-dev pkg-config
-       pip install --global-option=build_ext \
-       --global-option="-I/usr/local/include/graphviz/" \
-       --global-option="-L/usr/local/lib/graphviz" pygraphviz
+       pip install pygraphviz
 
 #. (optional) add dowhy as an upstream remote to keep your
    fork up-to-date with DoWhy's main branch.
 
    .. code:: shell
 
-      git remote add upstream http://www.github.com/py-why/dowhy
+      git remote add upstream https://github.com/py-why/dowhy
 
    You are now ready to make changes to the code base locally.
 
@@ -133,7 +131,7 @@ Pull request checklist
 
       git rebase --signoff HEAD^^^
 
-#. (advanced) Poetry fixes its dependecies and their version with a poetry.lock file. Poetry's dependencies should be updated regularly by maintainers via
+#. (advanced) Poetry fixes its dependencies and their version with a poetry.lock file. Poetry's dependencies should be updated regularly by maintainers via
 
    .. code:: shell
 
