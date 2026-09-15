@@ -159,11 +159,18 @@ class TestDoublyRobustEstimator(object):
         estimator = DoublyRobustEstimator(identified_estimand=target_estimand)
         estimator.fit(df, effect_modifier_names=["V"])
 
-        result = estimator.estimate_effect(df, control_value=0, treatment_value=1, target_units="ate")
+        result = estimator.estimate_effect(df, control_value=1, treatment_value=0, target_units="ate")
 
-        # ATE should be close to E[5 + 2*V] = 5 (since E[V] = 0)
-        assert abs(result.value - 5.0) < 0.5, f"ATE estimate {result.value:.3f} too far from 5.0"
+        # ATE should be close to E[-5 - 2*V] = -5 (since E[V] = 0)
+        assert abs(result.value + 5.0) < 0.5, f"ATE estimate {result.value:.3f} too far from -5.0"
 
         # Conditional estimates should be a non-empty Series
         assert result.conditional_estimates is not None
         assert len(result.conditional_estimates) > 0
+        assert abs(result.conditional_estimates.mean() + 5.0) < 0.5
+        assert estimator._control_value == 1
+        assert estimator._treatment_value == 0
+
+        estimator.fit(df)
+        result = estimator.estimate_effect(df, need_conditional_estimates="auto")
+        assert result.conditional_estimates is None

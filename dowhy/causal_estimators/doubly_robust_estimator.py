@@ -166,6 +166,8 @@ class DoublyRobustEstimator(CausalEstimator):
 
         if need_conditional_estimates is None:
             need_conditional_estimates = self.need_conditional_estimates
+        if need_conditional_estimates == "auto":
+            need_conditional_estimates = bool(self._effect_modifier_names)
 
         self._treatment_value = treatment_value
         self._control_value = control_value
@@ -196,8 +198,9 @@ class DoublyRobustEstimator(CausalEstimator):
 
     def _estimate_effect_fn(self, data_df: pd.DataFrame) -> float:
         """Function used in conditional effect estimation."""
-        est = self.estimate_effect(data=data_df, need_conditional_estimates=False)
-        return est.value
+        return self._do(self._treatment_value, self._treatment_value, data_df) - self._do(
+            self._control_value, self._treatment_value, data_df
+        )
 
     def _do(
         self,
