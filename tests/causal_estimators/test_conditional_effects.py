@@ -96,7 +96,10 @@ def test_categorical_common_cause_consistent_encoding():
     are consistent with the fitted regression model, avoiding a shape mismatch.
 
     The categorical confounder has three levels (A, B, C), level C is rare
-    (4 % of rows) so it will be absent from many effect-modifier strata.
+    (4 % of rows) so it will be absent from many effect-modifier strata. To make
+    this deterministic, rows with level C are confined to the top quantile bin
+    of the effect modifier, so at least one of the other quantile bins is
+    guaranteed to lack level C.
     """
     rng = np.random.default_rng(0)
     n = 2000
@@ -104,9 +107,20 @@ def test_categorical_common_cause_consistent_encoding():
     cat_cause = rng.choice(["A", "B", "C"], size=n, p=[0.48, 0.48, 0.04])
     treatment = rng.integers(0, 2, size=n)
     effect_modifier = rng.standard_normal(n)
+    # Confine C rows to the top of the effect-modifier range so that they fall
+    # into a single quantile bin, guaranteeing at least one other bin has no C.
+    is_c = cat_cause == "C"
+    effect_modifier[is_c] = effect_modifier[is_c].max() + 10 + rng.standard_normal(is_c.sum()) * 0.01
     outcome = 2.0 * treatment + (cat_cause == "B").astype(float) + 0.5 * effect_modifier + rng.standard_normal(n) * 0.1
 
     df = pd.DataFrame({"W0": cat_cause, "v0": treatment, "y": outcome, "X0": effect_modifier})
+
+    # Pre-check: with the default number of quantile bins, at least one
+    # effect-modifier stratum must not contain level C.
+    num_quantiles = CausalEstimator.NUM_QUANTILES_TO_DISCRETIZE_CONT_COLS
+    bins = pd.qcut(df["X0"], num_quantiles, duplicates="drop")
+    levels_per_bin = df.groupby(bins, observed=True)["W0"].apply(lambda s: set(s.unique()))
+    assert any("C" not in levels for levels in levels_per_bin), "Test setup invalid: C present in every stratum"
 
     model = CausalModel(
         data=df,
@@ -126,5 +140,7 @@ def test_categorical_common_cause_consistent_encoding():
     # ATE should be near the true effect of 2.0 (with some tolerance)
     assert abs(estimate.value - 2.0) < 0.5
 
-    # The caller's DataFrame must not be mutated (no __categorical__ columns)
-    assert list(df.columns) == ["W0", "v0", "y", "X0"]
+    # The caller's DataFrame must not be mutated: no temporary categorical
+    # columns leaked in, and the original column set is unchanged.
+    assert set(df.columns) == {"W0", "v0", "y", "X0"}
+    assert not any(col.startswith(CausalEstimator.TEMP_CAT_COLUMN_PREFIX) for col in df.columns)
