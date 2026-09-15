@@ -9,7 +9,6 @@ from joblib import Parallel, delayed
 from tqdm.auto import tqdm
 
 from dowhy.causal_estimator import CausalEstimate
-from dowhy.causal_estimators.econml import Econml
 from dowhy.causal_estimators.instrumental_variable_estimator import InstrumentalVariableEstimator
 from dowhy.causal_identifier.identified_estimand import IdentifiedEstimand
 from dowhy.causal_refuter import CausalRefutation, CausalRefuter, test_significance
