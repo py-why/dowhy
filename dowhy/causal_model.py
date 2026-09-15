@@ -227,7 +227,7 @@ class CausalModel:
         graph = model.learn_graph()
 
         # Initialize causal graph object
-        self.init_graph(graph=graph)
+        self.init_graph(graph=graph, identify_vars=False)
 
         return self._graph
 
