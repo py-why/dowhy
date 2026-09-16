@@ -86,8 +86,6 @@ def test_auto_identifier_and_id_identifier_conform_to_causal_identifier_protocol
     """AutoIdentifier and IDIdentifier both implement the CausalIdentifier Protocol."""
     from typing import runtime_checkable
 
-    import pytest
-
     from dowhy.causal_identifier import AutoIdentifier, CausalIdentifier, IDIdentifier
 
     # Make it runtime-checkable to allow isinstance checks
