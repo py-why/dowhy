@@ -129,9 +129,9 @@ class PropensityScoreEstimator(CausalEstimator):
         if len(self._target_estimand.treatment_variable) > 1:
             error_msg = self.__class__.__name__ + " cannot handle more than one treatment variable"
             raise ValueError(error_msg)
-        # Checking if the treatment is binary
-        treatment_values = data[self._target_estimand.treatment_variable[0]].astype(int).unique()
-        if any([v not in [0, 1] for v in treatment_values]):
+        # Checking if the treatment is binary (exactly two distinct non-null values, any type)
+        treatment_values = data[self._target_estimand.treatment_variable[0]].dropna().unique()
+        if len(treatment_values) != 2:
             error_msg = "Propensity score methods are applicable only for binary treatments"
             self.logger.error(error_msg)
             raise ValueError(error_msg)
@@ -152,11 +152,20 @@ class PropensityScoreEstimator(CausalEstimator):
 
     def estimate_propensity_score_column(self, data):
         try:
-            data[self.propensity_score_column] = self.propensity_score_model.predict_proba(
-                self._observed_common_causes
-            )[:, 1]
+            proba = self.propensity_score_model.predict_proba(self._observed_common_causes)
         except NotFittedError:
             raise NotFittedError("Please fit the propensity score model before calling predict_proba")
+        # Determine which column of predict_proba corresponds to the treatment class.
+        # LogisticRegression.classes_ is sorted, so class index 1 is not always the
+        # treatment class when treatment labels are not {0, 1}.
+        treatment_value = getattr(self, "_treatment_value", None)
+        col_idx = 1  # default: second class (works for {0, 1} encoding)
+        if treatment_value is not None and hasattr(self.propensity_score_model, "classes_"):
+            classes = self.propensity_score_model.classes_
+            match = np.where(classes == treatment_value)[0]
+            if len(match) == 1:
+                col_idx = int(match[0])
+        data[self.propensity_score_column] = proba[:, col_idx]
 
     def construct_symbolic_estimator(self, estimand):
         """
