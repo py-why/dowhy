@@ -60,12 +60,13 @@ def _refute_once(
     data: pd.DataFrame,
     target_estimand: IdentifiedEstimand,
     estimate: CausalEstimate,
-    random_state: Optional[np.random.RandomState] = None,
+    seed: Optional[int] = None,
 ):
-    if random_state is None:
+    if seed is None:
         new_data = data.assign(w_random=np.random.randn(data.shape[0]))
     else:
-        new_data = data.assign(w_random=random_state.normal(size=data.shape[0]))
+        rng = np.random.RandomState(seed)
+        new_data = data.assign(w_random=rng.normal(size=data.shape[0]))
 
     new_estimator = estimate.estimator.get_new_estimator_object(target_estimand)
     new_estimator.fit(
@@ -115,11 +116,20 @@ def refute_random_common_cause(
     if isinstance(random_state, int):
         random_state = np.random.RandomState(seed=random_state)
 
+    # Derive one independent integer seed per simulation so that each call to _refute_once
+    # draws *different* random noise even when workers run in parallel (joblib pickles the
+    # argument at submission time, so a shared RandomState would produce identical data in
+    # every worker).
+    if random_state is None:
+        per_sim_seeds: list = [None] * num_simulations
+    else:
+        per_sim_seeds = [int(random_state.randint(0, 2**31 - 1)) for _ in range(num_simulations)]
+
     # Run refutation in parallel
     sample_estimates = Parallel(n_jobs=n_jobs, verbose=verbose)(
-        delayed(_refute_once)(data, identified_estimand, estimate, random_state)
-        for _ in tqdm(
-            range(num_simulations),
+        delayed(_refute_once)(data, identified_estimand, estimate, seed)
+        for seed in tqdm(
+            per_sim_seeds,
             colour=CausalRefuter.PROGRESS_BAR_COLOR,
             disable=not show_progress_bar,
             desc="Refuting Estimates: ",

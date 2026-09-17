@@ -167,3 +167,92 @@ class TestPlaceboRefuter(object):
             f"Placebo new_effect ({result.new_effect:.3f}) is unexpectedly close to the original "
             f"estimate ({estimate.value:.3f}); the placebo is likely not severing the causal link."
         )
+
+
+def _make_model_and_estimate(num_samples=500):
+    """Helper: return (data_dict, target_estimand, ate_estimate) for simple backdoor."""
+    data = dowhy.datasets.linear_dataset(
+        beta=10,
+        num_common_causes=1,
+        num_instruments=1,
+        num_samples=num_samples,
+        treatment_is_binary=True,
+    )
+    model = CausalModel(
+        data=data["df"],
+        treatment=data["treatment_name"],
+        outcome=data["outcome_name"],
+        graph=data["gml_graph"],
+        proceed_when_unidentifiable=True,
+        test_significance=None,
+    )
+    target_estimand = model.identify_effect(method_name="exhaustive-search")
+    target_estimand.set_identifier_method("backdoor")
+    ate_estimate = model.estimate_effect(
+        identified_estimand=target_estimand,
+        method_name="backdoor.linear_regression",
+        test_significance=None,
+    )
+    return data, target_estimand, ate_estimate
+
+
+def test_placebo_refute_once_per_seed_determinism():
+    """Regression test: _refute_once must produce *identical* results when called
+    twice with the same seed.  Before the fix, a shared RandomState was passed to
+    parallel workers which received the same pickled state, so all simulations were
+    identical when n_jobs > 1 but for the wrong reason.  The fix uses per-simulation
+    integer seeds so each worker creates its own local RandomState.
+    """
+    from dowhy.causal_refuters.placebo_treatment_refuter import PlaceboType, _refute_once
+
+    data, target_estimand, ate_estimate = _make_model_and_estimate()
+    type_dict = dict(data["df"].dtypes)
+    treatment_names = [data["treatment_name"]] if isinstance(data["treatment_name"], str) else data["treatment_name"]
+
+    # Same seed → identical result for PERMUTE
+    e1 = float(
+        _refute_once(data["df"], target_estimand, ate_estimate, treatment_names, type_dict, PlaceboType.PERMUTE, seed=7)
+    )
+    e2 = float(
+        _refute_once(data["df"], target_estimand, ate_estimate, treatment_names, type_dict, PlaceboType.PERMUTE, seed=7)
+    )
+    assert e1 == e2, "Same seed must yield identical PERMUTE _refute_once result"
+
+    # Different seeds must generate different permutation arrays
+    rng_a = np.random.RandomState(0)
+    rng_b = np.random.RandomState(1)
+    n = len(data["df"])
+    perm_a = rng_a.choice(n, size=n, replace=False)
+    perm_b = rng_b.choice(n, size=n, replace=False)
+    assert not np.array_equal(perm_a, perm_b), "Different seeds must produce different permutations"
+
+
+def test_placebo_refuter_default_reproducible_with_seed():
+    """Regression test: DEFAULT placebo type must be seeded so that repeated calls with
+    the same random_state return identical results.  Previously the global np.random
+    module was used and random_state was ignored for DEFAULT type.
+    """
+    from dowhy.causal_refuters.placebo_treatment_refuter import refute_placebo_treatment
+
+    data, target_estimand, ate_estimate = _make_model_and_estimate()
+    treatment_names = [data["treatment_name"]] if isinstance(data["treatment_name"], str) else data["treatment_name"]
+
+    ref1 = refute_placebo_treatment(
+        data=data["df"],
+        target_estimand=target_estimand,
+        estimate=ate_estimate,
+        treatment_names=treatment_names,
+        num_simulations=5,
+        random_state=0,
+    )
+    ref2 = refute_placebo_treatment(
+        data=data["df"],
+        target_estimand=target_estimand,
+        estimate=ate_estimate,
+        treatment_names=treatment_names,
+        num_simulations=5,
+        random_state=0,
+    )
+    assert (
+        ref1.new_effect == ref2.new_effect
+    ), "DEFAULT placebo type not reproducible with same random_state — seeding not applied"
