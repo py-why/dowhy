@@ -1,3 +1,4 @@
+import pytest
 import statsmodels.api as sm
 from pytest import mark
 
@@ -123,4 +124,42 @@ class TestGeneralizedLinearModelEstimator(object):
                 "glm_family": sm.families.Binomial(),
                 "predict_score": True,
             },
+        )
+
+
+def test_glm_family_none_raises_value_error():
+    """Passing glm_family=None must raise ValueError with a helpful message."""
+    import numpy as np
+    import pandas as pd
+
+    from dowhy import CausalModel
+
+    rng = np.random.default_rng(0)
+    n = 100
+    df = pd.DataFrame({"t": rng.integers(0, 2, n), "y": rng.normal(size=n)})
+    model = CausalModel(data=df, treatment="t", outcome="y", common_causes=[])
+    estimand = model.identify_effect(proceed_when_unidentifiable=True)
+
+    with pytest.raises(ValueError, match="glm_family"):
+        model.estimate_effect(estimand, method_name="backdoor.generalized_linear_model")
+
+
+def test_glm_family_string_raises_type_error():
+    """Passing a string for glm_family must raise TypeError with a hint about sm.families."""
+    import numpy as np
+    import pandas as pd
+
+    from dowhy import CausalModel
+
+    rng = np.random.default_rng(0)
+    n = 100
+    df = pd.DataFrame({"t": rng.integers(0, 2, n), "y": rng.normal(size=n)})
+    model = CausalModel(data=df, treatment="t", outcome="y", common_causes=[])
+    estimand = model.identify_effect(proceed_when_unidentifiable=True)
+
+    with pytest.raises(TypeError, match="statsmodels"):
+        model.estimate_effect(
+            estimand,
+            method_name="backdoor.generalized_linear_model",
+            method_params={"glm_family": "Gaussian"},
         )

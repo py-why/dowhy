@@ -23,9 +23,10 @@ def get_class_object(method_name, *args, **kwargs):
 
         refuter_module = import_module("." + module_name, package="dowhy.causal_refuters")
         refuter_class = getattr(refuter_module, class_name)
-        assert issubclass(refuter_class, CausalRefuter)
+        if not issubclass(refuter_class, CausalRefuter):
+            raise TypeError("Causal refuter class must inherit from CausalRefuter")
 
-    except (AttributeError, AssertionError, ImportError):
+    except (AttributeError, ImportError):
         raise ImportError("{} is not an existing causal refuter.".format(method_name))
     return refuter_class
 

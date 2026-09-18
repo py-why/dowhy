@@ -22,8 +22,9 @@ def get_class_object(method_name, *args, **kwargs):
 
         interpreter_module = import_module("." + module_name, package="dowhy.interpreters")
         interpreter_class = getattr(interpreter_module, class_name)
-        assert issubclass(interpreter_class, Interpreter)
+        if not issubclass(interpreter_class, Interpreter):
+            raise TypeError("Interpreter class must inherit from Interpreter")
 
-    except (AttributeError, AssertionError, ImportError):
+    except (AttributeError, ImportError):
         raise ImportError("{} is not an existing interpreter.".format(method_name))
     return interpreter_class

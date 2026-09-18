@@ -814,7 +814,8 @@ def preprocess_data_by_treatment(
 
     :returns: ``pandas.core.groupby.generic.DataFrameGroupBy``
     """
-    assert len(treatment_name) == 1, "At present, DoWhy supports a simgle treatment variable"
+    if len(treatment_name) != 1:
+        raise NotImplementedError("At present, DoWhy supports a single treatment variable")
 
     if unobserved_confounder_values is not None:
         data["simulated"] = unobserved_confounder_values

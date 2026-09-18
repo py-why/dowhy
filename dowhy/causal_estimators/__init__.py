@@ -12,17 +12,19 @@ def get_class_object(method_name, estimator_name=None, *args, **kwargs):
 
         estimator_module = import_module("." + module_name, package="dowhy.causal_estimators")
         estimator_class = getattr(estimator_module, class_name)
-        assert issubclass(estimator_class, CausalEstimator)
+        if not issubclass(estimator_class, CausalEstimator):
+            raise TypeError("Causal estimator class must inherit from CausalEstimator")
 
-    except (AttributeError, AssertionError, ImportError):
+    except (AttributeError, ImportError):
         # Handle externally provided estimator classes
         try:
             module_name = ".".join(estimator_name.split(".")[:-1])
             classname = estimator_name.split(".")[-1]
             estimator_class = getattr(import_module(module_name), classname)
-            assert issubclass(estimator_class, CausalEstimator)
+            if not issubclass(estimator_class, CausalEstimator):
+                raise TypeError("Causal estimator class must inherit from CausalEstimator")
 
-        except (AttributeError, AssertionError, ImportError):
+        except (AttributeError, ImportError):
             est_name = method_name if estimator_name is None else estimator_name
             raise ImportError("{} is not an existing causal estimator.".format(est_name))
 
