@@ -120,7 +120,7 @@ def refute_data_subset(
 
     logger.info(
         "Refutation over {} simulated datasets of size {} each".format(
-            subset_fraction, subset_fraction * len(data.index)
+            num_simulations, subset_fraction * len(data.index)
         )
     )
 
