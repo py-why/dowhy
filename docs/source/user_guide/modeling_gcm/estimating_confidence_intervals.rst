@@ -133,8 +133,8 @@ Runtime cost versus confidence
 ------------------------------
 
 In certain scenarios it is prohibitely expensive to re-train causal graphs multiple times. E.g. when
-using AutoGluon as prediction models for the additive noise model, a single ``fit`` execution can
-quickly go into hours. Bootstrapping with 20 resamples will then quickly go into days depending
+using computationally heavy prediction models for the additive noise model, a single ``fit`` execution
+can quickly go into hours. Bootstrapping with 20 resamples will then quickly go into days depending
 on how much we can parallelize.
 
 For that reason, sometimes the tradeoff is to only bootstrap on the causal query, not on the
@@ -166,9 +166,9 @@ comes from three sources:
 
 - Variance of the "optimal" parameters for a model, i.e. running ``fit`` twice with the
   same/slightly different data can yield two different models (becomes even worse when there is a
-  stochastic element in the fit process of the prediction models as well). For instance, training an
-  AutoGluon model twice on even exactly the same data would return two different models with
-  slightly different performance.
+  stochastic element in the fit process of the prediction models as well). For instance, training a
+  model with a stochastic fitting procedure twice on even exactly the same data would return two
+  different models with slightly different performance.
 - Approximations in our algorithms. For instance, when estimating distribution change with 6+
   upstream nodes, we will only approximate the Shapley values (the approximation has a stochastic
   factor). Therefore, running distribution change twice with exactly the same input and generated
