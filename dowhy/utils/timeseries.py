@@ -181,7 +181,8 @@ def create_graph_from_networkx_array(array: np.ndarray, var_names: list) -> nx.D
     :rtype: nx.DiGraph
     """
     n = array.shape[0]  # Number of variables
-    assert n == array.shape[1], "The array must be square."
+    if n != array.shape[1]:
+        raise ValueError("The array must be square.")
     tau = array.shape[2]  # Number of time lags
 
     # Initialize a directed graph

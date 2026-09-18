@@ -450,7 +450,8 @@ class CausalModel:
                 self.causal_estimator.fit(self._data)
             else:
                 # Estimator had been computed in a previous call
-                assert self.causal_estimator is not None
+                if self.causal_estimator is None:
+                    raise RuntimeError("Causal estimator is required but was not initialized")
             try:
                 estimate = self.causal_estimator.do(x)
             except NotImplementedError:
