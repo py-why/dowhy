@@ -227,7 +227,7 @@ class CausalModel:
         graph = model.learn_graph()
 
         # Initialize causal graph object
-        self.init_graph(graph=graph)
+        self.init_graph(graph=graph, identify_vars=False)
 
         return self._graph
 
@@ -470,7 +470,8 @@ class CausalModel:
                 self.causal_estimator.fit(self._data)
             else:
                 # Estimator had been computed in a previous call
-                assert self.causal_estimator is not None
+                if self.causal_estimator is None:
+                    raise RuntimeError("Causal estimator is required but was not initialized")
             try:
                 estimate = self.causal_estimator.do(x)
             except NotImplementedError:
@@ -641,7 +642,8 @@ def _warn_if_unobserved_graph_variables(
         warnings.warn(
             f"{num_unobserved_graph_variables} variables are assumed "
             "unobserved because they are not in the dataset. "
-            "Configure the logging level to `logging.WARNING` or higher for additional details."
+            "Configure the logging level to `logging.WARNING` or higher for additional details.",
+            stacklevel=3,
         )
         logger.warning(
             "The graph defines %d variables. %d were found in the dataset "
