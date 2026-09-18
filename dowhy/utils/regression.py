@@ -42,8 +42,8 @@ def create_polynomial_function(max_degree):
     polynomial_function = []
     for degree in range(max_degree + 1):
 
-        def poly_term(x):
-            return x[:, [0]] ** degree
+        def poly_term(x, _degree=degree):
+            return x[:, [0]] ** _degree
 
         polynomial_function.append(poly_term)
     return polynomial_function
