@@ -55,15 +55,36 @@ def anomaly_scores(
     num_samples_conditional: int = 10000,
     num_samples_unconditional: int = 10000,
     anomaly_scorer_factory: Callable[[], AnomalyScorer] = RescaledMedianCDFQuantileScorer,
+    nodes: Optional[list] = None,
 ) -> Dict[Any, np.ndarray]:
+    """Estimates the anomaly scores for each node in the causal graph (or for the specified subset of nodes).
+
+    For root nodes the score is based on the marginal distribution; for non-root nodes it is conditioned on the
+    observed parent values (conditional anomaly score).
+
+    :param causal_model: A fitted ProbabilisticCausalModel.
+    :param anomaly_data: Observations for which the anomaly scores should be estimated. Can be a DataFrame or Series.
+    :param num_samples_conditional: Number of samples drawn from the conditional distribution of each non-root node
+                                    to fit the anomaly scorer. More samples yield more accurate results.
+    :param num_samples_unconditional: Number of samples drawn from the marginal distribution of each root node
+                                      to fit the anomaly scorer.
+    :param anomaly_scorer_factory: A callable returning a fresh AnomalyScorer instance for each node.
+    :param nodes: An optional list of node names for which anomaly scores should be computed. If ``None`` (default),
+                  scores are computed for every node in the graph. Providing a subset avoids unnecessary computation
+                  when only certain nodes are of interest.
+    :return: A dict mapping each (requested) node name to a numpy array of anomaly scores, one per row in
+             anomaly_data.
+    """
     if isinstance(anomaly_data, pd.Series):
         anomaly_data = pd.DataFrame([anomaly_data])
 
     validate_causal_dag(causal_model.graph)
 
+    nodes_to_score = list(causal_model.graph.nodes) if nodes is None else list(nodes)
+
     results = {}
     for node in tqdm(
-        causal_model.graph.nodes,
+        nodes_to_score,
         desc="Estimating conditional anomaly scores",
         position=0,
         leave=True,
