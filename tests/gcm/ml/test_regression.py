@@ -1,8 +1,9 @@
 import numpy as np
 from _pytest.python_api import approx
 from flaky import flaky
+from sklearn.linear_model import LinearRegression
 
-from dowhy.gcm.ml.regression import create_polynom_regressor, create_random_forest_regressor
+from dowhy.gcm.ml.regression import SklearnRegressionModelWeighted, create_polynom_regressor, create_random_forest_regressor
 
 
 @flaky(max_runs=3)
@@ -55,3 +56,14 @@ def test_given_categorical_training_data_with_many_categories_when_fit_regressio
     mdl.fit(X_training, Y_training)
 
     assert np.mean((mdl.predict(X_test).reshape(-1) - Y_test) ** 2) < 0.1
+
+
+def test_given_weighted_regression_model_when_clone_then_clone_type_is_weighted_and_supports_sample_weight():
+    X = np.random.normal(0, 1, (20, 2))
+    Y = np.random.normal(0, 1, 20)
+    model = SklearnRegressionModelWeighted(LinearRegression())
+    cloned = model.clone()
+    assert type(cloned).__name__ == "SklearnRegressionModelWeighted"
+    # The cloned model must accept sample_weight in fit() — this would raise TypeError on SklearnRegressionModel
+    cloned.fit(X, Y, sample_weight=np.ones(20))
+    assert cloned.predict(X).shape[0] == 20
