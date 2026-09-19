@@ -5,7 +5,7 @@ from pytest import mark
 import dowhy.datasets
 from dowhy.causal_estimators.generalized_linear_model_estimator import GeneralizedLinearModelEstimator
 
-from .base import SimpleEstimator, TestGraphObject, example_graph
+from .base import SimpleEstimator, GraphObject, example_graph
 
 
 @mark.usefixtures("fixed_seed")
@@ -105,7 +105,7 @@ class TestGeneralizedLinearModelEstimator(object):
             },
         )
 
-    def test_general_adjustment_estimation_on_example_graphs(self, example_graph: TestGraphObject):
+    def test_general_adjustment_estimation_on_example_graphs(self, example_graph: GraphObject):
         data = dowhy.datasets.linear_dataset_from_graph(
             example_graph.graph,
             example_graph.action_nodes,
