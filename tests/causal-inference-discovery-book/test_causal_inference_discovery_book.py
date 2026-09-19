@@ -49,6 +49,7 @@ class GPSMemorySCM:
 
 @mark.usefixtures("fixed_seed")
 class TestCausalInferenceDiscoveryBook(object):
+    @mark.econml
     def test_dowhy_chapter_8(self):
         """
         This test was taken from Chapter 8 of the book, 'Causal Inference and Discovery in Python'
