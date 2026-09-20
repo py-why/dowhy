@@ -74,6 +74,7 @@ def test_given_simple_gaussian_data_when_attribute_anomaly_scores_with_it_score_
 
 @flaky(max_runs=3)
 def test_given_simple_gaussian_data_when_attribute_anomaly_scores_with_feature_relevance_then_returns_qualitatively_correct_results():
+    np.random.seed(0)  # Fix seed to avoid CI failures from test-ordering-dependent RNG state
     X0 = np.random.normal(0, 1, 5000)
     X1 = np.random.normal(0, 1, 5000)
     X2 = np.random.normal(0, 1, 5000)
