@@ -7,7 +7,7 @@ from dowhy import EstimandType, identify_effect_auto
 from dowhy.causal_estimators.linear_regression_estimator import LinearRegressionEstimator
 from dowhy.graph import build_graph_from_str
 
-from .base import SimpleEstimator, TestGraphObject, example_graph
+from .base import SimpleEstimator, GraphObject, example_graph
 
 
 @mark.usefixtures("fixed_seed")
@@ -179,7 +179,7 @@ class TestLinearRegressionEstimator(object):
             method_params={"num_simulations": 10, "num_null_simulations": 10},
         )
 
-    def test_general_adjustment_estimation_on_example_graphs(self, example_graph: TestGraphObject):
+    def test_general_adjustment_estimation_on_example_graphs(self, example_graph: GraphObject):
         data = dowhy.datasets.linear_dataset_from_graph(
             example_graph.graph,
             example_graph.action_nodes,
