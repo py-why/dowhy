@@ -35,3 +35,27 @@ from .validation import RejectionResult, refute_causal_structure, refute_inverti
 from .whatif import average_causal_effect, counterfactual_samples, interventional_samples
 
 from .equation_parser import create_causal_model_from_equations  # isort:skip
+
+
+def _load_plotting_function(function_name):
+    try:
+        from dowhy.utils import plotting
+    except ImportError as error:
+        raise ImportError(
+            "Plotting functions require optional plotting dependencies. "
+            "Install DoWhy with the plotting extra to use them."
+        ) from error
+
+    return getattr(plotting, function_name)
+
+
+def plot(*args, **kwargs):
+    return _load_plotting_function("plot")(*args, **kwargs)
+
+
+def plot_adjacency_matrix(*args, **kwargs):
+    return _load_plotting_function("plot_adjacency_matrix")(*args, **kwargs)
+
+
+def bar_plot(*args, **kwargs):
+    return _load_plotting_function("bar_plot")(*args, **kwargs)
