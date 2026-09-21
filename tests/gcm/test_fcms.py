@@ -295,3 +295,45 @@ def _generate_data_with_categorical_input():
         X2.append(tmp_value)
 
     return pd.DataFrame({"X0": X0, "X1": X1, "X2": X2})
+
+
+def test_when_fit_classifier_fcm_with_dataframe_then_estimate_probabilities_dataframe_works():
+    """estimate_probabilities_dataframe should reorder columns to match fit order."""
+    mdl = ClassifierFCM(classifier_model=create_logistic_regression_classifier())
+
+    X0 = np.random.normal(0, 1, 500)
+    Y = (X0 > 0).astype(str)
+    X = pd.DataFrame({"A": X0, "B": np.random.normal(0, 1, 500)})
+
+    mdl.fit_dataframe(X, Y)
+
+    # Provide columns in reverse order — should give same result as original order
+    probs_orig = mdl.estimate_probabilities_dataframe(X[["A", "B"]])
+    probs_reordered = mdl.estimate_probabilities_dataframe(X[["B", "A"]])
+
+    np.testing.assert_array_almost_equal(probs_orig, probs_reordered)
+
+
+def test_when_classifier_fcm_fit_without_dataframe_then_estimate_probabilities_dataframe_raises():
+    """estimate_probabilities_dataframe should raise ValueError if fit_dataframe was not called."""
+    mdl = ClassifierFCM(classifier_model=create_logistic_regression_classifier())
+
+    X0 = np.random.normal(0, 1, 100)
+    Y = (X0 > 0).astype(str)
+    mdl.fit(X0.reshape(-1, 1), Y)
+
+    with pytest.raises(ValueError, match="fit_dataframe"):
+        mdl.estimate_probabilities_dataframe(pd.DataFrame({"A": X0}))
+
+
+def test_when_estimate_probabilities_dataframe_has_missing_column_then_raises():
+    """estimate_probabilities_dataframe should raise ValueError when a required column is absent."""
+    mdl = ClassifierFCM(classifier_model=create_logistic_regression_classifier())
+
+    X0 = np.random.normal(0, 1, 100)
+    Y = (X0 > 0).astype(str)
+    X = pd.DataFrame({"A": X0, "B": np.random.normal(0, 1, 100)})
+    mdl.fit_dataframe(X, Y)
+
+    with pytest.raises(ValueError, match="missing columns"):
+        mdl.estimate_probabilities_dataframe(pd.DataFrame({"A": X0}))
