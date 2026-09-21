@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from typing import List, Optional
 
 import numpy as np
+import pandas as pd
 
 from dowhy.gcm.ml import ClassificationModel, PredictionModel
 from dowhy.gcm.ml.regression import InvertibleFunction, SklearnRegressionModel
@@ -37,6 +38,18 @@ class ConditionalStochasticModel(ABC):
     def fit(self, X: np.ndarray, Y: np.ndarray) -> None:
         """Fits the model according to the data."""
         raise NotImplementedError
+
+    def fit_dataframe(self, X: pd.DataFrame, Y: pd.Series) -> None:
+        """Fits the model using a pandas DataFrame and Series, preserving column names and dtypes.
+
+        By default this converts X and Y to NumPy arrays and delegates to :meth:`fit`. Override in
+        subclasses (or in the underlying :class:`~dowhy.gcm.ml.PredictionModel`) to retain the
+        original pandas schema for models such as AutoGluon wrappers that depend on feature types.
+
+        :param X: Feature DataFrame whose columns are the ordered predecessor nodes.
+        :param Y: Target Series.
+        """
+        self.fit(X.to_numpy(), Y.to_numpy())
 
     @abstractmethod
     def draw_samples(self, parent_samples: np.ndarray) -> np.ndarray:
@@ -110,6 +123,21 @@ class PostNonlinearModel(InvertibleFunctionalCausalModel):
 
         self._prediction_model.fit(X=X, Y=self._invertible_function.evaluate_inverse(Y))
         self._noise_model.fit(X=self.estimate_noise(Y, X))
+
+    def fit_dataframe(self, X: pd.DataFrame, Y: pd.Series) -> None:
+        """Fits the post non-linear model, passing X as a DataFrame to the underlying prediction model.
+
+        The invertible transformation g^-1 is applied to Y before fitting, which requires a NumPy
+        array. X is forwarded as a DataFrame so that any pandas-aware :class:`~dowhy.gcm.ml.PredictionModel`
+        (e.g. an AutoGluon wrapper) can retain column names and dtypes.
+
+        :param X: Feature DataFrame whose columns are the ordered predecessor nodes.
+        :param Y: Target Series.
+        """
+        X_np, Y_np = shape_into_2d(X.to_numpy(), Y.to_numpy())
+        transformed_Y = pd.Series(self._invertible_function.evaluate_inverse(Y_np).squeeze())
+        self._prediction_model.fit_dataframe(X, transformed_Y)
+        self._noise_model.fit(X=self.estimate_noise(Y_np, X_np))
 
     def estimate_noise(self, target_samples: np.ndarray, parent_samples: np.ndarray) -> np.ndarray:
         """Reconstruct the noise given samples from (X, Y). This is done by:
@@ -234,6 +262,16 @@ class DiscreteAdditiveNoiseModel(AdditiveNoiseModel):
         self._prediction_model.fit(X=X, Y=Y)
         self._noise_model.fit(Y - self._rounded_prediction(X))
 
+    def fit_dataframe(self, X: pd.DataFrame, Y: pd.Series) -> None:
+        Y_np = Y.to_numpy()
+        if not is_discrete(Y_np):
+            raise ValueError("Cannot fit a discrete ANM to non-discrete target values!")
+
+        X_np = shape_into_2d(X.to_numpy())
+        Y_np = shape_into_2d(Y_np).astype(np.int64)
+        self._prediction_model.fit_dataframe(X, pd.Series(Y_np.squeeze(), name=Y.name).astype(np.int64))
+        self._noise_model.fit(Y_np - self._rounded_prediction(X_np))
+
     def evaluate(self, parent_samples: np.ndarray, noise_samples: np.ndarray) -> np.ndarray:
         if not is_discrete(noise_samples):
             raise ValueError("Noise values have to be discrete!")
@@ -337,6 +375,21 @@ class ClassifierFCM(FunctionalCausalModel, ProbabilityEstimatorModel):
             raise ValueError("The target data needs to be categorical in the form of strings!")
 
         self._classifier_model.fit(X=X, Y=Y)
+
+    def fit_dataframe(self, X: pd.DataFrame, Y: pd.Series) -> None:
+        """Fits the underlying classification model, forwarding X as a DataFrame.
+
+        Validates that Y is categorical then calls
+        :meth:`~dowhy.gcm.ml.PredictionModel.fit_dataframe` on the underlying classifier so that
+        pandas-aware wrappers (e.g. AutoGluon) can retain the original column names and dtypes.
+
+        :param X: Feature DataFrame whose columns are the ordered predecessor nodes.
+        :param Y: Target Series of categorical (string) labels.
+        """
+        if not is_categorical(shape_into_2d(Y.to_numpy())):
+            raise ValueError("The target data needs to be categorical in the form of strings!")
+
+        self._classifier_model.fit_dataframe(X, Y)
 
     def clone(self):
         return ClassifierFCM(classifier_model=self._classifier_model.clone())
