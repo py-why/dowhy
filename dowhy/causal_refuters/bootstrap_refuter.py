@@ -110,7 +110,7 @@ def _refute_once(
     if chosen_variables is not None:
         for variable in chosen_variables:
 
-            if ("float" or "int") in new_data[variable].dtype.name:
+            if "float" in new_data[variable].dtype.name or "int" in new_data[variable].dtype.name:
                 scaling_factor = new_data[variable].std()
                 new_data[variable] += np.random.normal(loc=0.0, scale=noise * scaling_factor, size=sample_size)
 
@@ -121,13 +121,14 @@ def _refute_once(
                 )
 
             elif "category" in new_data[variable].dtype.name:
+                probs = np.random.uniform(0, 1, sample_size)
                 categories = new_data[variable].unique()
                 # Find the set difference for each row
                 changed_data = new_data[variable].apply(lambda row: list(set(categories) - set([row])))
                 # Choose one out of the remaining
                 changed_data = changed_data.apply(lambda row: random.choice(row))
-                new_data[variable] = np.where(probs < probability_of_change, changed_data)
-                new_data[variable].astype("category")
+                new_data[variable] = np.where(probs < probability_of_change, changed_data, new_data[variable])
+                new_data[variable] = new_data[variable].astype("category")
 
     new_estimator = estimate.estimator.get_new_estimator_object(target_estimand)
     new_estimator.fit(
