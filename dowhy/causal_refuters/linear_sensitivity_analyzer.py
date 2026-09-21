@@ -265,11 +265,11 @@ class LinearSensitivityAnalyzer:
             r2ywj_tw = self.r2ywj_tw[i]
 
             # r2tu_w is the partial r^2 from regressing u on t after conditioning on w
-            self.r2tu_w = self.frac_strength_treatment * (r2twj_w / (1 - r2twj_w))
+            self.r2tu_w = np.atleast_1d(self.frac_strength_treatment * (r2twj_w / (1 - r2twj_w)))
             if any(val >= 1 for val in self.r2tu_w):
                 raise ValueError("r2tu_w can not be >= 1. Try a lower frac_strength_treatment value")
 
-            r2uwj_wt = (
+            r2uwj_wt = np.atleast_1d(
                 self.frac_strength_treatment
                 * (r2twj_w**2)
                 / ((1 - self.frac_strength_treatment * r2twj_w) * (1 - r2twj_w))
@@ -277,8 +277,9 @@ class LinearSensitivityAnalyzer:
             if any(val >= 1 for val in r2uwj_wt):
                 raise ValueError("r2uwj_wt can not be >= 1. Try a lower frac_strength_treatment value")
 
-            self.r2yu_tw = ((np.sqrt(self.frac_strength_outcome) + np.sqrt(r2uwj_wt)) / np.sqrt(1 - r2uwj_wt)) ** 2 * (
-                r2ywj_tw / (1 - r2ywj_tw)
+            self.r2yu_tw = np.atleast_1d(
+                ((np.sqrt(self.frac_strength_outcome) + np.sqrt(r2uwj_wt)) / np.sqrt(1 - r2uwj_wt)) ** 2
+                * (r2ywj_tw / (1 - r2ywj_tw))
             )
             if any(val > 1 for val in self.r2yu_tw):
                 for i in range(len(self.r2yu_tw)):
@@ -290,7 +291,10 @@ class LinearSensitivityAnalyzer:
 
             # Compute bias adjusted terms
 
-        self.benchmarking_results = self.compute_bias_adjusted(self.r2tu_w, self.r2yu_tw)
+        if self.r2tu_w is not None and self.r2yu_tw is not None:
+            self.benchmarking_results = self.compute_bias_adjusted(self.r2tu_w, self.r2yu_tw)
+        else:
+            self.benchmarking_results = {}
 
         if plot == True:
             self.plot()
