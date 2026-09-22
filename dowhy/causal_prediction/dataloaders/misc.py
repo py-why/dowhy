@@ -51,7 +51,8 @@ def split_dataset(dataset, n, seed=0):
     dataset, with n datapoints in the first dataset and the rest in the last,
     using the given random seed
     """
-    assert n <= len(dataset)
+    if n > len(dataset):
+        raise ValueError(f"n={n} cannot exceed dataset length={len(dataset)}")
     keys = list(range(len(dataset)))
     np.random.RandomState(seed).shuffle(keys)
     keys_1 = keys[:n]
