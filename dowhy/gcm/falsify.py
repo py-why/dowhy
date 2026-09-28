@@ -985,9 +985,7 @@ class _PermuteNodes:
 def _to_frozenset(x: Union[Set, List, str]):
     """Converts a set, list or string into a hashable frozenset"""
     if not (isinstance(x, Set) or isinstance(x, List) or isinstance(x, str)):
-        raise TypeError(
-            f"{x} must be list, set or str. Got {type(x).__name__} instead!"
-        )
+        raise TypeError(f"{x} must be list, set or str. Got {type(x).__name__} instead!")
 
     if isinstance(x, str):
         return frozenset({x})

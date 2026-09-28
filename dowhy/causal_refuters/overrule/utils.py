@@ -36,8 +36,7 @@ def sampleUnif(x, n: int = 10000, seed: Optional[int] = None):
 
     if refSamples.shape[1] != x.shape[1]:
         raise ValueError(
-            f"Generated reference samples shape mismatch: expected {x.shape[1]} columns, "
-            f"got {refSamples.shape[1]}"
+            f"Generated reference samples shape mismatch: expected {x.shape[1]} columns, " f"got {refSamples.shape[1]}"
         )
     return refSamples
 
