@@ -170,6 +170,11 @@ class PropensityScoreEstimator(CausalEstimator):
             match = np.where(classes == treatment_value)[0]
             if len(match) == 1:
                 col_idx = int(match[0])
+            else:
+                raise ValueError(
+                    f"treatment_value {treatment_value!r} was not found in propensity_score_model.classes_: "
+                    f"{list(classes)!r}"
+                )
         data[self.propensity_score_column] = proba[:, col_idx]
 
     def construct_symbolic_estimator(self, estimand):
