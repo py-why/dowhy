@@ -5,6 +5,7 @@ import pandas as pd
 import sympy as sp
 import sympy.stats as spstats
 from statsmodels.sandbox.regression.gmm import IV2SLS
+from statsmodels.tools import add_constant
 
 from dowhy.causal_estimator import CausalEstimate, CausalEstimator, RealizedEstimand
 from dowhy.causal_identifier import IdentifiedEstimand
@@ -168,12 +169,15 @@ class InstrumentalVariableEstimator(CausalEstimator):
             # More than 1 instrument. Use 2sls.
             est_treatment = data[self._target_estimand.treatment_variable].astype(np.float32)
             est_outcome = data[self._target_estimand.outcome_variable[0]].astype(np.float32)
-            ivmodel = IV2SLS(est_outcome, est_treatment, self._estimating_instruments)
+            # An intercept is required: without it the 2SLS fit is forced through
+            # the origin, which biases the estimate whenever the instruments or
+            # the treatment are not mean-zero (e.g. instruments coded as {0, 1}).
+            ivmodel = IV2SLS(est_outcome, add_constant(est_treatment), add_constant(self._estimating_instruments))
             reg_results = ivmodel.fit()
             self.logger.debug(reg_results.summary())
-            iv_est = sum(
-                reg_results.params
-            )  # the effect is the same for any treatment value (assume treatment goes from 0 to 1)
+            # Sum the treatment coefficients only, so that the intercept is excluded
+            # (the effect is the same for any treatment value, assuming treatment goes from 0 to 1)
+            iv_est = sum(reg_results.params[t] for t in self._target_estimand.treatment_variable)
         estimate = CausalEstimate(
             data=data,
             treatment_name=self._target_estimand.treatment_variable,
