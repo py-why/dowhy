@@ -128,3 +128,4 @@ Other topics
     model_evaluation
     customizing_model_assignment
     estimating_confidence_intervals
+    random_scm_generator
