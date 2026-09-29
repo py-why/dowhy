@@ -111,7 +111,7 @@ class PluginReisz:
         W = X[:, 1:]  # assume 1-D treatment
         t = X[:, 0]
         preds = self.propmodel.predict_proba(W)
-        weights = [1 / preds[i, t[i].astype(int)] for i in range(preds.shape[0])]
+        weights = 1.0 / preds[np.arange(len(t)), t.astype(int)]
         weights = np.where(t == 0, -1, 1) * weights
         return weights
 
