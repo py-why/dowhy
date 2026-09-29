@@ -95,43 +95,25 @@ The next section provides more details about the evaluation method.
 Generate samples from a random SCM
 -----------------------------------
 
-For benchmarking and testing, it is often useful to generate synthetic data from a random causal model with
-realistic properties. The ``dowhy.gcm.data_generator`` module provides a configurable random SCM generator
-that creates arbitrary-size DAGs with a mix of linear and nonlinear causal mechanisms, additive and
-non-additive noise, and optional output transforms (clipping, discretisation).
-
-A quick way to generate samples without manually constructing a graph:
+For benchmarking and testing, it is often useful to generate synthetic data from a *random* causal model with
+realistic properties and known ground truth instead of a fitted one. The ``dowhy.gcm.data_generator`` module
+provides a configurable random SCM generator for this purpose:
 
 >>> from dowhy.gcm.data_generator import generate_samples_from_random_scm
 >>>
+>>> gcm.util.general.set_random_seed(0)
 >>> samples = generate_samples_from_random_scm(num_roots=3, num_children=5, num_samples=1000)
 >>> samples.head()
- X0        X1        X2        X3        X4        X5        X6        X7
-0.0 -1.743020 -0.002892  0.703364 -0.373855 -0.173426  1.349900 -0.180954
-0.0 -0.707959 -0.063673  0.570420 -1.515796 -0.025515  0.399103 -0.203826
-0.0 -0.054094 -0.092459  0.554522 -1.041175 -0.037628  0.464503  0.088043
-1.0  0.609341 -1.125348  0.000000 -0.499892  0.568477 -0.421944 -0.950801
-0.0  0.420774 -0.203749  0.481462 -0.904529 -0.094425  1.263864 -0.294394
+         X0        X1        X2        X3        X5        X4        X6        X7
+0 -0.735651  0.000000 -0.101367  0.133837 -0.072770  0.037052  1.141605  0.000000
+1 -0.616410  1.574406 -0.580365 -0.350869  0.324154 -0.492177  0.607491  0.664010
+2  0.065244  0.990212  0.195449  0.918361 -0.541700  0.416879  0.310798  0.177610
+3 -0.002475  0.041586 -2.168400  0.775112 -0.138023  0.788844  0.243090  0.139116
+4 -1.319146  1.508412  1.050766  0.677219  0.052386  0.317607  0.000000  0.934975
 
-To get the SCM object itself (e.g. for inspection or intervention experiments):
+The generated SCM is a regular :class:`~dowhy.gcm.causal_models.StructuralCausalModel`, so instead of the shortcut
+above we can also create it with :func:`~dowhy.gcm.data_generator.generate_random_scm` and draw from it with
+``gcm.draw_samples`` as shown earlier on this page.
 
->>> from dowhy.gcm.data_generator import generate_random_scm, DataGeneratorConfig
->>> from dowhy.utils.plotting import plot
->>> import dowhy.gcm as gcm
->>>
->>> scm = generate_random_scm(num_roots=3, num_children=5)
->>> samples = gcm.draw_samples(scm, 2000)
->>> plot(scm.graph)
-
-.. image:: random_dag.png
-    :alt: Randomly Generated SCM
-
-The behaviour is controlled through :class:`~dowhy.gcm.data_generator.DataGeneratorConfig`:
-
->>> config = DataGeneratorConfig(
-...     edge_density=0.5,              # denser graph (more parents per node)
-...     prob_linear_mechanism=0.0,     # all nonlinear mechanisms
-...     prob_non_additive_noise=0.5,   # half of nodes have non-additive noise
-...     noise_std_range=(0.01, 0.05),  # low noise for cleaner relationships
-... )
->>> samples = generate_samples_from_random_scm(5, 10, 2000, config=config)
+See :doc:`random_scm_generator` for the full description of what the generator produces, how to configure it and how
+to use the generated SCMs as ground truth for interventions and counterfactuals.
