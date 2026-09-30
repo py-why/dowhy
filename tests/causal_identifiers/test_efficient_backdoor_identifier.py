@@ -1,9 +1,11 @@
 import copy
 
+import networkx as nx
 import pytest
 
 from dowhy.causal_identifier import AutoIdentifier, BackdoorAdjustment, EstimandType
 from dowhy.causal_identifier.auto_identifier import EFFICIENT_METHODS
+from dowhy.causal_identifier.efficient_backdoor import EfficientBackdoor
 from dowhy.graph import build_graph_from_str
 from tests.causal_identifiers.example_graphs_efficient import TEST_EFFICIENT_BD_SOLUTIONS
 
@@ -108,3 +110,50 @@ def test_fail_multivar_outcome_efficient_backdoor_algorithms():
             outcome_nodes=["Y", "F"],
             conditional_node_names=example["conditional_node_names"],
         )
+
+
+def _make_eb(edges, all_nodes, treatment="X", outcome="Y"):
+    """Helper: build an EfficientBackdoor from a list of edges."""
+    G = nx.DiGraph()
+    G.add_nodes_from(all_nodes)
+    G.add_edges_from(edges)
+    return EfficientBackdoor(G, [treatment], [outcome], all_nodes)
+
+
+def test_ancestors_all_chain():
+    """ancestors_all on a chain X->Z->Y, W->X includes W."""
+    eb = _make_eb([("X", "Z"), ("Z", "Y"), ("W", "X")], ["W", "X", "Z", "Y"])
+    assert eb.ancestors_all(["X"]) == {"X", "W"}
+    assert eb.ancestors_all(["Y"]) == {"W", "X", "Z", "Y"}
+
+
+def test_ancestors_all_includes_seed_nodes():
+    """ancestors_all always includes the query nodes themselves."""
+    eb = _make_eb([("X", "Y")], ["X", "Y"])
+    result = eb.ancestors_all(["X", "Y"])
+    assert "X" in result and "Y" in result
+
+
+def test_ancestors_all_multi_source_matches_union_of_singles():
+    """Multi-source call matches manual union of per-node results on a larger graph."""
+    edges = [("A", "X"), ("B", "X"), ("C", "M"), ("M", "Y"), ("X", "M")]
+    nodes = ["A", "B", "C", "M", "X", "Y"]
+    eb = _make_eb(edges, nodes)
+    multi = eb.ancestors_all(["X", "Y"])
+    manual = nx.ancestors(eb.graph, "X") | nx.ancestors(eb.graph, "Y") | {"X", "Y"}
+    assert multi == manual
+
+
+def test_forbidden_chain_dag():
+    """forbidden() on X->Z->Y contains X, Z, and Y (Z's descendants include Y)."""
+    eb = _make_eb([("X", "Z"), ("Z", "Y")], ["X", "Z", "Y"])
+    result = eb.forbidden()
+    # Causal vertices = {Z, Y} (nodes on X->Z->Y path, minus X)
+    # forbidden = descendants({Z, Y}) ∪ {Z, Y} ∪ {X} = {X, Z, Y}
+    assert result == {"X", "Z", "Y"}
+
+
+def test_forbidden_always_contains_treatment():
+    """forbidden() always contains the treatment node."""
+    eb = _make_eb([("X", "Y")], ["X", "Y"])
+    assert "X" in eb.forbidden()
