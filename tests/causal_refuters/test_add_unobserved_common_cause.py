@@ -630,6 +630,53 @@ class TestAddUnobservedCommonCauseRefuter(object):
         assert refute is not None
 
 
+def _make_linear_sensitivity_model():
+    """Helper: build a small linear model and estimate for LinearSensitivityAnalyzer tests."""
+    import pandas as pd
+
+    np.random.seed(42)
+    n = 200
+    w = np.random.normal(size=n)
+    v = (np.random.uniform(size=n) < 1 / (1 + np.exp(-w))).astype(int)
+    y = 3 * v + w + np.random.normal(size=n)
+    df = pd.DataFrame({"v0": v, "W0": w, "y": y})
+    model = CausalModel(data=df, treatment="v0", outcome="y", common_causes=["W0"])
+    identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+    estimate = model.estimate_effect(identified_estimand, method_name="backdoor.linear_regression")
+    return model, identified_estimand, estimate
+
+
+def test_linear_sensitivity_numpy_array_frac_strength_does_not_raise():
+    """Passing np.ndarray as effect_fraction_on_treatment should work (previously AttributeError)."""
+    model, identified_estimand, estimate = _make_linear_sensitivity_model()
+    refute = model.refute_estimate(
+        identified_estimand,
+        estimate,
+        method_name="add_unobserved_common_cause",
+        simulation_method="linear-partial-R2",
+        benchmark_common_causes=["W0"],
+        effect_fraction_on_treatment=np.array([1.0, 2.0]),
+        plot_estimate=False,
+    )
+    assert refute is not None
+    assert len(refute.benchmarking_results["r2tu_w"]) == 2
+
+
+def test_linear_sensitivity_benchmark_with_none_frac_raises_value_error():
+    """benchmark_common_causes without frac_strength should raise ValueError (previously AttributeError)."""
+    model, identified_estimand, estimate = _make_linear_sensitivity_model()
+    with pytest.raises(ValueError, match="frac_strength_treatment and frac_strength_outcome must be provided"):
+        model.refute_estimate(
+            identified_estimand,
+            estimate,
+            method_name="add_unobserved_common_cause",
+            simulation_method="linear-partial-R2",
+            benchmark_common_causes=["W0"],
+            effect_fraction_on_treatment=None,
+            plot_estimate=False,
+        )
+
+
 def _make_unobserved_refuter_model():
     import pandas as pd
 
