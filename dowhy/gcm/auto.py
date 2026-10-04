@@ -181,6 +181,25 @@ class AutoAssignmentSummary:
         return "\n".join(summary_strings)
 
 
+def _validate_graph_nodes_in_data(causal_model: ProbabilisticCausalModel, based_on: pd.DataFrame) -> None:
+    missing_nodes = set(causal_model.graph.nodes) - set(based_on.columns)
+    if not missing_nodes:
+        return
+    int_nodes = [n for n in missing_nodes if isinstance(n, (int, np.integer))]
+    extra_advice = ""
+    if int_nodes:
+        extra_advice = (
+            " The graph uses integer node names %s (the default for nx.DiGraph()), but the DataFrame "
+            "uses string column names. Rename the graph nodes to match the DataFrame, for example: "
+            "nx.relabel_nodes(graph, {n: str(n) for n in graph.nodes})." % sorted(int_nodes)
+        )
+    raise ValueError(
+        "The following graph nodes are not present as columns in the provided DataFrame: %s. "
+        "All node names in the causal graph must exactly match column names in the DataFrame.%s"
+        % (sorted(str(n) for n in missing_nodes), extra_advice)
+    )
+
+
 def assign_causal_mechanisms(
     causal_model: ProbabilisticCausalModel,
     based_on: pd.DataFrame,
@@ -289,6 +308,8 @@ def assign_causal_mechanisms(
             "True and only for missing data in numerical features. Note that not all GCM features "
             "support missing data yet!"
         )
+
+    _validate_graph_nodes_in_data(causal_model, based_on)
 
     auto_assignment_summary = AutoAssignmentSummary()
 
