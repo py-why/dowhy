@@ -357,8 +357,8 @@ def intrinsic_causal_influence_sample(
                                 expects two inputs; the outcome of the model for some samples if certain features are permuted and the
                                 outcome of the model for the same samples when no features were permuted. By default,
                                 the difference between means of these samples are estimated.
-    :param num_noise_feature_samples: If no noise_feature_samples are given, noise samples are drawn from the graph.
-                                      This parameter indicates how many.
+    :param num_noise_feature_samples: Number of paired samples drawn from the graph for approximate model training.
+                                      If noise_feature_samples is None, these noise samples also form the background.
     :param max_batch_size: Maximum batch size for estimating multiple predictions at once. This has a significant influence on the
                           overall memory usage. If set to -1, all samples are used in one batch.
     :param auto_assign_quality: Auto assign quality for the 'approx' prediction_model option.
@@ -389,11 +389,12 @@ def intrinsic_causal_influence_sample(
     node_names = noise_feature_samples.columns
     noise_feature_samples, target_samples = shape_into_2d(noise_feature_samples.to_numpy(), target_samples)
 
+    # Train on paired draws from the SCM; the supplied background only controls attribution.
     prediction_method = _get_icc_noise_function(
         causal_model,
         target_node,
         prediction_model,
-        noise_feature_samples,
+        tmp_noise_feature_samples[node_names].to_numpy(),
         node_names,
         target_samples,
         auto_assign_quality,
