@@ -217,6 +217,10 @@ class MeanDeviationScorer(AnomalyScorer):
     def fit(self, X: np.ndarray) -> None:
         self._mean = np.mean(X)
         self._std = np.std(X)
+        # The standard deviation can be 0 for constant data. Fall back to a small constant to
+        # avoid dividing by zero, which would silently produce nan/inf (mirrors MedianDeviationScorer).
+        if self._std == 0:
+            self._std = EPS
 
     def score(self, X: np.ndarray) -> np.ndarray:
         if self._mean is None or self._std is None:
