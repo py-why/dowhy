@@ -69,10 +69,10 @@ class LinearSensitivityAnalyzer:
         for i in range(len(benchmark_common_causes)):
             self.benchmark_common_causes.append(self.common_causes_map[benchmark_common_causes[i]])
 
-        if type(frac_strength_treatment) in [int, list, float]:
-            self.frac_strength_treatment = np.array(frac_strength_treatment)
-        if type(frac_strength_outcome) in [int, list, float]:
-            self.frac_strength_outcome = np.array(frac_strength_outcome)
+        self.frac_strength_treatment = (
+            np.array(frac_strength_treatment) if frac_strength_treatment is not None else None
+        )
+        self.frac_strength_outcome = np.array(frac_strength_outcome) if frac_strength_outcome is not None else None
 
         # estimate: estimate of regression
         self.estimate = None
@@ -229,6 +229,13 @@ class LinearSensitivityAnalyzer:
 
         :returns: instance of LinearSensitivityAnalyzer class
         """
+
+        if self.benchmark_common_causes and (
+            self.frac_strength_treatment is None or self.frac_strength_outcome is None
+        ):
+            raise ValueError(
+                "frac_strength_treatment and frac_strength_outcome must be provided when benchmark_common_causes is set."
+            )
 
         self.standard_error = np.array(self.estimator_model.bse[1 : (len(self.treatment_name) + 1)])[0]
         self.degree_of_freedom = int(self.estimator_model.df_resid)
