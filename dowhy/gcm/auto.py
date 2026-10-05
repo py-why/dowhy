@@ -304,55 +304,40 @@ def assign_causal_mechanisms(
 
         model_performances = assign_causal_mechanism_node(causal_model, node, based_on, quality)
 
+        mechanism = causal_model.causal_mechanism(node)
+
         if is_root_node(causal_model.graph, node):
             auto_assignment_summary.add_node_log_message(
                 node,
                 "Node %s is a root node. Therefore, assigning '%s' to the node representing the marginal distribution."
-                % (node, causal_model.causal_mechanism(node)),
+                % (node, mechanism),
             )
         else:
             data_type = "continuous"
-            if isinstance(causal_model.causal_mechanism(node), ClassifierFCM):
+            if isinstance(mechanism, ClassifierFCM):
                 data_type = "categorical"
-            elif isinstance(causal_model.causal_mechanism(node), DiscreteAdditiveNoiseModel):
+            elif isinstance(mechanism, DiscreteAdditiveNoiseModel):
                 data_type = "discrete"
 
             auto_assignment_summary.add_node_log_message(
                 node,
-                "Node %s is a non-root node with %s data. Assigning '%s' to the node."
-                % (
-                    node,
-                    data_type,
-                    causal_model.causal_mechanism(node),
-                ),
+                "Node %s is a non-root node with %s data. Assigning '%s' to the node." % (node, data_type, mechanism),
             )
 
-        if isinstance(causal_model.causal_mechanism(node), DiscreteAdditiveNoiseModel):
+        if isinstance(mechanism, (DiscreteAdditiveNoiseModel, AdditiveNoiseModel, ClassifierFCM)):
+            parents_str = ",".join(str(p) for p in get_ordered_predecessors(causal_model.graph, node))
+            if isinstance(mechanism, DiscreteAdditiveNoiseModel):
+                relationship = "discrete causal relationship"
+                formula_suffix = ") + N."
+            elif isinstance(mechanism, AdditiveNoiseModel):
+                relationship = "causal relationship"
+                formula_suffix = ") + N."
+            else:
+                relationship = "causal relationship"
+                formula_suffix = ",N)."
             auto_assignment_summary.add_node_log_message(
                 node,
-                "This represents the discrete causal relationship as "
-                + str(node)
-                + " := f("
-                + ",".join([str(parent) for parent in get_ordered_predecessors(causal_model.graph, node)])
-                + ") + N.",
-            )
-        elif isinstance(causal_model.causal_mechanism(node), AdditiveNoiseModel):
-            auto_assignment_summary.add_node_log_message(
-                node,
-                "This represents the causal relationship as "
-                + str(node)
-                + " := f("
-                + ",".join([str(parent) for parent in get_ordered_predecessors(causal_model.graph, node)])
-                + ") + N.",
-            )
-        elif isinstance(causal_model.causal_mechanism(node), ClassifierFCM):
-            auto_assignment_summary.add_node_log_message(
-                node,
-                "This represents the causal relationship as "
-                + str(node)
-                + " := f("
-                + ",".join([str(parent) for parent in get_ordered_predecessors(causal_model.graph, node)])
-                + ",N).",
+                f"This represents the {relationship} as {node} := f({parents_str}{formula_suffix}",
             )
 
         for model, performance, metric_name in model_performances:
