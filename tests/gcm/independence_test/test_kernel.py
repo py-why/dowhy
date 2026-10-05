@@ -1,10 +1,20 @@
 import random
+import sys
+import unittest.mock
 
 import numpy as np
 import pytest
 from flaky import flaky
 
 from dowhy.gcm.independence_test import approx_kernel_based, kernel_based
+
+
+def test_when_causallearn_not_installed_then_kernel_based_raises_informative_error():
+    x = np.random.normal(0, 1, 100)
+    y = np.random.normal(0, 1, 100)
+    with unittest.mock.patch.dict(sys.modules, {"causallearn": None, "causallearn.utils.KCI.KCI": None}):
+        with pytest.raises(ImportError, match="causallearn"):
+            kernel_based(x, y)
 
 
 @flaky(max_runs=5)
