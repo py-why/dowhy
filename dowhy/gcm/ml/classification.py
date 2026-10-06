@@ -3,16 +3,6 @@ from typing import List
 
 import numpy as np
 import sklearn
-from packaging import version
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn.tree import DecisionTreeClassifier
-
-from dowhy.gcm.ml.prediction_model import PredictionModel
-
-if version.parse(sklearn.__version__) < version.parse("1.0"):
-    from sklearn.experimental import enable_hist_gradient_boosting  # noqa
-
 from sklearn.ensemble import (
     AdaBoostClassifier,
     ExtraTreesClassifier,
@@ -23,8 +13,12 @@ from sklearn.gaussian_process import GaussianProcessClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import PolynomialFeatures
 from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
 
+from dowhy.gcm.ml.prediction_model import PredictionModel
 from dowhy.gcm.ml.regression import SklearnRegressionModel, SklearnRegressionModelWeighted
 from dowhy.gcm.util.general import auto_apply_encoders, shape_into_2d
 

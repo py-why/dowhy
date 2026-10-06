@@ -118,7 +118,7 @@ class CausalAccessor(object):
                     variable_types[key] = self.convert_to_custom_type(all_variables[key].name)
 
         elif len(self._obj.columns) < len(variable_types):
-            raise Exception("Number of variables in the DataFrame is lesser than the variable_types dict")
+            raise ValueError("Number of variables in the DataFrame is lesser than the variable_types dict")
 
         if not self._sampler:
             self._method = method
@@ -160,7 +160,7 @@ class CausalAccessor(object):
         elif "category" in input_type:
             return "d"
         else:
-            raise Exception("{} format is not supported".format(input_type))
+            raise TypeError("{} format is not supported".format(input_type))
 
     def parse_x(self, x):
         if type(x) == str:
@@ -169,4 +169,4 @@ class CausalAccessor(object):
             return {xi: None for xi in x}, True
         if type(x) == dict:
             return x, False
-        raise Exception("x format not recognized: {}".format(type(x)))
+        raise TypeError("x format not recognized: {}".format(type(x)))

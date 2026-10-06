@@ -855,15 +855,15 @@ def _compute_p_value(
 
     # Test if we have data for X and Y
     for node in [X, Y]:
-        if not node in data.columns:
-            warnings.warn(f"WARN: Couldn't find data for node {node}. Skip this test.")
+        if node not in data.columns:
+            warnings.warn(f"Couldn't find data for node {node}. Skip this test.", stacklevel=2)
             return
 
     if Z:
         # Test if we have data for Z
         for node in Z:
-            if not node in data.columns:
-                warnings.warn(f"WARN: Couldn't find data for node {node}. Skip this test.")
+            if node not in data.columns:
+                warnings.warn(f"Couldn't find data for node {node}. Skip this test.", stacklevel=2)
                 return
         p_value = conditional_independence_test(data[X].values, data[Y].values, data[Z].values)
     else:
@@ -984,9 +984,8 @@ class _PermuteNodes:
 
 def _to_frozenset(x: Union[Set, List, str]):
     """Converts a set, list or string into a hashable frozenset"""
-    assert (
-        isinstance(x, Set) or isinstance(x, List) or isinstance(x, str)
-    ), f"{x} must be list, set or str. Got {type(x)} instead!"
+    if not (isinstance(x, Set) or isinstance(x, List) or isinstance(x, str)):
+        raise TypeError(f"{x} must be list, set or str. Got {type(x)} instead!")
 
     if isinstance(x, str):
         return frozenset({x})

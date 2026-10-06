@@ -238,7 +238,8 @@ def linear_dataset(
                     )
                     describe_synthetic_data(synthetic_data).head()
     """
-    assert not (treatment_is_binary and treatment_is_category)
+    if treatment_is_binary and treatment_is_category:
+        raise ValueError("treatment_is_binary and treatment_is_category cannot both be True")
     W, X, Z, FD, c1, c2, ce, cz, cfd1, cfd2 = [None] * 10
     W_with_dummy, X_with_categorical = (None, None)
     beta = np.array(beta, dtype=np.float64, ndmin=1)
@@ -806,7 +807,9 @@ def dataset_from_random_graph(
     :param prob_type_of_data : 3-element tuple containing the probability of data being discrete, binary and continuous respectively.
     :returns ret_dict : dictionary with information like dataframe, outcome, treatment, graph string and continuous, discrete and binary columns
     """
-    assert sum(list(prob_type_of_data)) == 1.0
+    total = sum(list(prob_type_of_data))
+    if not np.isclose(total, 1.0):
+        raise ValueError(f"prob_type_of_data must sum to 1.0, but got {prob_type_of_data} which sums to {total}")
     if random_seed is None:
         random_seed = np.random.randint(0, 1e6)
     np.random.seed(random_seed)
@@ -865,7 +868,8 @@ def partially_linear_dataset(
     training_sample_size=10,
     random_state=0,
 ):
-    assert not (treatment_is_binary and treatment_is_category)
+    if treatment_is_binary and treatment_is_category:
+        raise ValueError("treatment_is_binary and treatment_is_category cannot both be True")
     num_outcomes = 1
     beta = np.array(beta, dtype=np.float64, ndmin=1)
     if num_treatments is None:

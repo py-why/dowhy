@@ -13,9 +13,10 @@ def get_class_object(method_name, *args, **kwargs):
         class_name = string.capwords(method_name, "_").replace("_", "")
         do_sampler_module = import_module("." + module_name, package=PACKAGE_NAME)
         do_sampler_class = getattr(do_sampler_module, class_name)
-        assert issubclass(do_sampler_class, DoSampler)
+        if not issubclass(do_sampler_class, DoSampler):
+            raise TypeError("Do sampler class must inherit from DoSampler")
 
-    except (AttributeError, AssertionError, ImportError) as e:
+    except (AttributeError, ImportError) as e:
         if isinstance(e, ImportError) and e.name != PACKAGE_NAME + "." + module_name:
             raise e
         raise ImportError("{} is not an existing do sampler.".format(method_name))

@@ -21,7 +21,9 @@ def plot(
 ) -> None:
     """Deprecated, please use dowhy.utils.plotting.plot() instead."""
     warnings.warn(
-        "The plot method is deprecated. Use the plot function from dowhy.utils.plotting instead!", DeprecationWarning
+        "The plot method is deprecated. Use the plot function from dowhy.utils.plotting instead!",
+        DeprecationWarning,
+        stacklevel=2,
     )
     plotting.plot(
         causal_graph=causal_graph,
@@ -41,6 +43,7 @@ def plot_adjacency_matrix(
     warnings.warn(
         "The plot method is deprecated. Use the plot_adjacency_matrix function from dowhy.utils.plotting instead!",
         DeprecationWarning,
+        stacklevel=2,
     )
     plotting.plot_adjacency_matrix(
         adjacency_matrix=adjacency_matrix, is_directed=is_directed, filename=filename, display_plot=display_plot
@@ -63,6 +66,7 @@ def bar_plot(
     warnings.warn(
         "The plot method is deprecated. Use the bar_plot function from dowhy.utils.plotting instead!",
         DeprecationWarning,
+        stacklevel=2,
     )
     plotting.bar_plot(
         values=values,

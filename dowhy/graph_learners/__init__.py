@@ -15,9 +15,10 @@ def get_discovery_class_object(method_name, *args, **kwargs):
 
         discovery_module = import_module("." + module_name, package="dowhy.graph_learners")
         discovery_class = getattr(discovery_module, class_name)
-        assert issubclass(discovery_class, GraphLearner)
+        if not issubclass(discovery_class, GraphLearner):
+            raise TypeError("Causal discovery class must inherit from GraphLearner")
 
-    except (AttributeError, AssertionError, ImportError):
+    except (AttributeError, ImportError):
         raise ImportError("{} is not an existing causal discovery method.".format(method_name))
     return discovery_class
 

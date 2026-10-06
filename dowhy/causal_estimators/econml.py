@@ -10,6 +10,19 @@ from dowhy.causal_estimator import CausalEstimate, CausalEstimator
 from dowhy.causal_identifier import IdentifiedEstimand
 from dowhy.utils.api import parse_state
 
+_ECONML_X_NONE_ERROR_SENTINEL = "does not support X=None"
+_ECONML_X_NONE_HELP_MESSAGE = "\n".join(
+    [
+        "This error typically occurs when the EconML estimator requires effect modifiers (X) but none were provided.",
+        "Please specify `effect_modifiers` when constructing the CausalModel:",
+        "",
+        "    model = CausalModel(",
+        "        data=..., treatment=..., outcome=...,",
+        "        effect_modifiers=['col1', 'col2']  # variables for heterogeneous effects",
+        "    )",
+    ]
+)
+
 
 class _EconmlEstimator(Protocol):
     def fit(self, *args, **kwargs): ...
@@ -187,14 +200,22 @@ class Econml(CausalEstimator):
         estimator_data_args = {
             arg: named_data_args[arg] for arg in named_data_args.keys() if arg in estimator_named_args
         }
-        self.estimator.fit(**estimator_data_args, **kwargs)
+        try:
+            self.estimator.fit(**estimator_data_args, **kwargs)
+        except ValueError as exc:
+            error_message = exc.args[0] if exc.args and isinstance(exc.args[0], str) else str(exc)
+            if X is None and _ECONML_X_NONE_ERROR_SENTINEL in error_message:
+                raise ValueError(
+                    f"{_ECONML_X_NONE_HELP_MESSAGE}\n\nOriginal error from EconML: {error_message}"
+                ) from exc
+            raise
 
         return self
 
     def _get_econml_class_object(self, module_method_name, *args, **kwargs):
         # from https://www.bnmetrics.com/blog/factory-pattern-in-python3-simple-version
         try:
-            (module_name, _, class_name) = module_method_name.rpartition(".")
+            module_name, _, class_name = module_method_name.rpartition(".")
             estimator_module = import_module(module_name)
             estimator_class = getattr(estimator_module, class_name)
 
@@ -293,7 +314,12 @@ class Econml(CausalEstimator):
 
     def apply_multitreatment(self, df: pd.DataFrame, fun: Callable, *args, **kwargs):
         ests = []
-        assert not isinstance(self._treatment_value, str)
+        if isinstance(self._treatment_value, str):
+            raise TypeError(
+                "apply_multitreatment requires treatment_value to be iterable (e.g. a list), "
+                f"but got a string: {self._treatment_value!r}. "
+                "Wrap it in a list: treatment_value=[value]"
+            )
 
         if df is None:
             filtered_df = None

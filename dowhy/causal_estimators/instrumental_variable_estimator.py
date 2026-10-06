@@ -143,14 +143,19 @@ class InstrumentalVariableEstimator(CausalEstimator):
         if len(self.estimating_instrument_names) == 1 and len(self._target_estimand.treatment_variable) == 1:
             instrument = self._estimating_instruments.iloc[:, 0]
             self.logger.debug("Instrument Variable values: {0}".format(instrument))
-            num_unique_values = len(np.unique(instrument))
+            unique_values = np.unique(instrument)
+            num_unique_values = len(unique_values)
             instrument_is_binary = num_unique_values <= 2
             if instrument_is_binary:
-                # Obtain estimate by Wald Estimator
-                y1_z = np.mean(data[self._target_estimand.outcome_variable[0]][instrument == 1])
-                y0_z = np.mean(data[self._target_estimand.outcome_variable[0]][instrument == 0])
-                x1_z = np.mean(data[self._target_estimand.treatment_variable[0]][instrument == 1])
-                x0_z = np.mean(data[self._target_estimand.treatment_variable[0]][instrument == 0])
+                # Wald estimator: split on the two observed instrument levels
+                # (lower = control, higher = treatment) rather than assuming the
+                # values are {0, 1}. Fixes silent NaN when the instrument is
+                # coded as e.g. {1, 2} or {-1, 1}.
+                control_level, treatment_level = unique_values[0], unique_values[1]
+                y1_z = np.mean(data[self._target_estimand.outcome_variable[0]][instrument == treatment_level])
+                y0_z = np.mean(data[self._target_estimand.outcome_variable[0]][instrument == control_level])
+                x1_z = np.mean(data[self._target_estimand.treatment_variable[0]][instrument == treatment_level])
+                x0_z = np.mean(data[self._target_estimand.treatment_variable[0]][instrument == control_level])
                 num = y1_z - y0_z
                 deno = x1_z - x0_z
                 iv_est = num / deno
