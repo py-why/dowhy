@@ -167,6 +167,29 @@ def find_c_components(adjacency_matrix, node_set, idx2node):
     return c_components
 
 
+# Dagitty node flags and their DOT replacements (None means the flag is dropped). They are only matched as whole
+# attributes inside a node's ``[...]`` attribute list, so node names such as "exposure" or "latent_u" are left intact.
+_DAGITTY_ATTRIBUTE_MAP = {
+    "exposure": None,
+    "outcome": None,
+    "adjusted": None,
+    "latent": 'observed="no"',
+}
+# Splits a DOT attribute list on commas that are not inside double quotes (e.g. pos="0.1,0.2").
+_DOT_ATTRIBUTE_SEPARATOR = re.compile(r',(?=(?:[^"]*"[^"]*")*[^"]*$)')
+
+
+def _convert_dagitty_attributes(match):
+    attributes = []
+    for attribute in _DOT_ATTRIBUTE_SEPARATOR.split(match.group(1)):
+        attribute = attribute.strip()
+        if attribute in _DAGITTY_ATTRIBUTE_MAP:
+            attribute = _DAGITTY_ATTRIBUTE_MAP[attribute]
+        if attribute:
+            attributes.append(attribute)
+    return "[" + ",".join(attributes) + "]"
+
+
 def daggity_to_dot(daggity_string):
     """
     Converts the input daggity_string to valid DOT graph format.
@@ -178,11 +201,7 @@ def daggity_to_dot(daggity_string):
     graph = re.sub(r"^dag ", "digraph ", graph)
     graph = re.sub("{;", "{", graph)
     graph = re.sub("};", "}", graph)
-    graph = re.sub("outcome,*,", "", graph)
-    graph = re.sub("adjusted,*", "", graph)
-    graph = re.sub("exposure,*", "", graph)
-    graph = re.sub("latent,*", 'observed="no",', graph)
-    graph = re.sub(",]", "]", graph)
+    graph = re.sub(r"\[([^\]]*)\]", _convert_dagitty_attributes, graph)
     return graph
 
 

@@ -316,6 +316,49 @@ class TestDaggityToDot:
         result = daggity_to_dot(daggity)
         assert "X -> Y" in result
 
+    def test_node_names_containing_keywords_are_preserved(self):
+        # Node names that merely contain a dagitty keyword must not be rewritten.
+        daggity = (
+            "dag {\n"
+            'sun_exposure [exposure,pos="0.3,0.5"]\n'
+            'health_outcome [outcome,pos="0.7,0.5"]\n'
+            'unadjusted_x [adjusted,pos="0.1,0.1"]\n'
+            'latent_u [latent,pos="0.5,0.8"]\n'
+            "sun_exposure -> health_outcome\n"
+            "unadjusted_x -> health_outcome\n"
+            "latent_u -> sun_exposure\n"
+            "latent_u -> health_outcome\n"
+            "}"
+        )
+        result = daggity_to_dot(daggity)
+        assert result == (
+            "digraph { "
+            'sun_exposure [pos="0.3,0.5"]; '
+            'health_outcome [pos="0.7,0.5"]; '
+            'unadjusted_x [pos="0.1,0.1"]; '
+            'latent_u [observed="no",pos="0.5,0.8"]; '
+            "sun_exposure -> health_outcome; "
+            "unadjusted_x -> health_outcome; "
+            "latent_u -> sun_exposure; "
+            "latent_u -> health_outcome; "
+            "}"
+        )
+
+    def test_node_named_after_keyword_is_preserved(self):
+        daggity = 'dag {\nexposure [exposure,pos="0,0"]\noutcome [outcome,pos="1,1"]\nexposure -> outcome\n}'
+        result = daggity_to_dot(daggity)
+        assert result == 'digraph { exposure [pos="0,0"]; outcome [pos="1,1"]; exposure -> outcome; }'
+
+    def test_keyword_as_only_attribute_is_removed(self):
+        daggity = "dag {\nX [exposure]\nY [outcome]\nU [latent]\nX -> Y\n}"
+        result = daggity_to_dot(daggity)
+        assert result == 'digraph { X []; Y []; U [observed="no"]; X -> Y; }'
+
+    def test_keyword_after_other_attributes_is_removed(self):
+        daggity = 'dag {\nX [pos="0,0", exposure]\nX -> Y\n}'
+        result = daggity_to_dot(daggity)
+        assert result == 'digraph { X [pos="0,0"]; X -> Y; }'
+
 
 # ---------------------------------------------------------------------------
 # str_to_dot
