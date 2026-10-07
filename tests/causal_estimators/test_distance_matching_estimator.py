@@ -260,3 +260,33 @@ class TestDistanceMatchingEstimator:
             target_units="ate",
         )
         assert np.isfinite(estimate.value), "Estimate should be finite"
+
+
+class TestDistanceMatchingEstimatorDefaultTargetUnits:
+    """Regression test: DistanceMatchingEstimator.estimate_effect() without target_units
+    must default to 'ate' rather than raising ValueError."""
+
+    def test_estimate_effect_default_target_units_does_not_raise(self, binary_treatment_dataset):
+        """Calling estimate_effect(data) without target_units must not raise."""
+        data = binary_treatment_dataset
+        model = CausalModel(data=data, treatment="v0", outcome="y", graph=GML_SINGLE_CAUSE)
+        estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        estimand.set_identifier_method("backdoor")
+
+        estimator = DistanceMatchingEstimator(identified_estimand=estimand)
+        estimator.fit(data)
+        # target_units is omitted — previously raised ValueError("Target units string value not supported")
+        result = estimator.estimate_effect(data)
+        assert np.isfinite(result.value), "ATE should be a finite number"
+
+    def test_invalid_target_units_raises_informative_error(self, binary_treatment_dataset):
+        """An invalid target_units value should raise ValueError with a helpful message."""
+        data = binary_treatment_dataset
+        model = CausalModel(data=data, treatment="v0", outcome="y", graph=GML_SINGLE_CAUSE)
+        estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        estimand.set_identifier_method("backdoor")
+
+        estimator = DistanceMatchingEstimator(identified_estimand=estimand)
+        estimator.fit(data)
+        with pytest.raises(ValueError, match="'ate'"):
+            estimator.estimate_effect(data, target_units="invalid_value")
