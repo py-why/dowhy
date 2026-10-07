@@ -132,7 +132,7 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
         data: pd.DataFrame,
         treatment_value: Any = 1,
         control_value: Any = 0,
-        target_units=None,
+        target_units: str = "ate",
         **_,
     ):
         self._target_units = target_units
