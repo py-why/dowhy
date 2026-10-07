@@ -1,6 +1,5 @@
 import logging
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import scipy
@@ -562,6 +561,11 @@ class PartialLinearSensitivityAnalyzer:
         :param legend_position:tuple denoting the position of the legend (default = (1.6, 0.6))
         """
         critical_value = 0
+
+        try:
+            import matplotlib.pyplot as plt
+        except ImportError:
+            raise ImportError("matplotlib is required for plotting. Install it with: pip install 'dowhy[plotting]'")
 
         fig, ax = plt.subplots(1, 1, figsize=plot_size)
         ax.set_title("Sensitivity contour plot of %s" % plot_type)
