@@ -34,7 +34,8 @@ def sampleUnif(x, n: int = 10000, seed: Optional[int] = None):
     xMin, xMax = np.nanmin(x, axis=0), np.nanmax(x, axis=0)
     refSamples = rng.uniform(low=xMin.tolist(), high=xMax.tolist(), size=(n, xMin.shape[0]))
 
-    assert refSamples.shape[1] == x.shape[1]
+    if refSamples.shape[1] != x.shape[1]:
+        raise ValueError(f"Generated reference samples have {refSamples.shape[1]} features, expected {x.shape[1]}.")
     return refSamples
 
 
@@ -65,7 +66,8 @@ def sample_reference(
     data = x if isinstance(x, pd.DataFrame) else pd.DataFrame(x)
 
     if ref_range is not None:
-        assert isinstance(ref_range, dict)
+        if not isinstance(ref_range, dict):
+            raise TypeError(f"ref_range must be a dict, got {type(ref_range)} instead.")
     else:
         ref_range = {}
 
