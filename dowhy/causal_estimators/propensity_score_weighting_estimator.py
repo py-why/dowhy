@@ -243,12 +243,20 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
             * (1 - data[self._target_estimand.treatment_variable[0]])
             * data[self._target_estimand.outcome_variable[0]]
         )
-        sum_dy_weights = np.sum(data[self._target_estimand.treatment_variable[0]] * data[weighting_scheme_name])
-        sum_dbary_weights = np.sum(
-            (1 - data[self._target_estimand.treatment_variable[0]]) * data[weighting_scheme_name]
-        )
-        # Subtracting the weighted means
-        est = data["d_y"].sum() / sum_dy_weights - data["dbar_y"].sum() / sum_dbary_weights
+
+        # For normalized/stabilized weights (Hajek estimator), normalize by sum of unit weights
+        # For vanilla IPS weights (Horvitz-Thompson estimator), normalize by N (number of units)
+        if weighting_scheme_name in ["ips_normalized_weight", "tips_normalized_weight", "cips_normalized_weight",
+                                      "ips_stabilized_weight", "tips_stabilized_weight", "cips_stabilized_weight"]:
+            # Hajek estimator: normalize by sum of unit weights for each arm
+            sum_dy_weights = np.sum(data[self._target_estimand.treatment_variable[0]] * data[weighting_scheme_name])
+            sum_dbary_weights = np.sum(
+                (1 - data[self._target_estimand.treatment_variable[0]]) * data[weighting_scheme_name]
+            )
+            est = data["d_y"].sum() / sum_dy_weights - data["dbar_y"].sum() / sum_dbary_weights
+        else:
+            # Horvitz-Thompson estimator: normalize by number of units
+            est = data["d_y"].mean() - data["dbar_y"].mean()
 
         # TODO - how can we add additional information into the returned estimate?
         estimate = CausalEstimate(
