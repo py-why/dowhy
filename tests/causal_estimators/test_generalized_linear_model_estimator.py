@@ -5,7 +5,7 @@ from pytest import mark
 import dowhy.datasets
 from dowhy.causal_estimators.generalized_linear_model_estimator import GeneralizedLinearModelEstimator
 
-from .base import SimpleEstimator, GraphObject, example_graph
+from .base import GraphObject, SimpleEstimator, example_graph
 
 
 @mark.usefixtures("fixed_seed")

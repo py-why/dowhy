@@ -7,7 +7,7 @@ from dowhy import EstimandType, identify_effect_auto
 from dowhy.causal_estimators.linear_regression_estimator import LinearRegressionEstimator
 from dowhy.graph import build_graph_from_str
 
-from .base import SimpleEstimator, GraphObject, example_graph
+from .base import GraphObject, SimpleEstimator, example_graph
 
 
 @mark.usefixtures("fixed_seed")
