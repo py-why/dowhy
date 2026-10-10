@@ -167,7 +167,8 @@ def identify_effect_auto(
 
     If estimand_type is non-parametric ATE, then  uses backdoor, instrumental variable and frontdoor identification methods,  to check if an identified estimand exists, based on the causal graph.
 
-    :param optimize_backdoor: if True, uses an optimised algorithm to compute the backdoor sets
+    :param optimize_backdoor: if True, uses an optimised algorithm to compute the backdoor sets,
+        falling back to the standard search if it finds no valid observed adjustment set
     :param costs: non-negative costs associated with variables in the graph. Only used
     for estimand_type='non-parametric-ate' and backdoor_adjustment='efficient-mincost-adjustment'. If
     no costs are provided by the user, and backdoor_adjustment='efficient-mincost-adjustment', costs
@@ -255,6 +256,29 @@ def identify_ate_effect(
 
             path = Backdoor(graph, action_nodes, outcome_nodes)
             backdoor_sets = path.get_backdoor_vars()
+            # The optimized path search is a heuristic; validate its candidates
+            # before promoting them to causal estimands.
+            eligible_variables = (
+                set(observed_nodes) - set(action_nodes) - set(outcome_nodes) - get_descendants(graph, action_nodes)
+            )
+            backdoor_graph = do_surgery(graph, action_nodes, remove_outgoing_edges=True)
+            backdoor_sets = [
+                candidate
+                for candidate in backdoor_sets
+                if set(candidate.get_adjustment_variables()).issubset(eligible_variables)
+                and check_valid_backdoor_set(
+                    graph,
+                    action_nodes,
+                    outcome_nodes,
+                    candidate.get_adjustment_variables(),
+                    new_graph=backdoor_graph,
+                )["is_dseparated"]
+            ]
+            if not backdoor_sets:
+                logger.info("Optimized backdoor search found no valid observed set; using standard search.")
+                backdoor_sets = identify_backdoor(
+                    graph, action_nodes, outcome_nodes, observed_nodes, backdoor_adjustment
+                )
     elif backdoor_adjustment in EFFICIENT_METHODS:
         backdoor_sets = identify_efficient_backdoor(
             graph,
