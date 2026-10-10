@@ -52,7 +52,7 @@ def split_dataset(dataset, n, seed=0):
     using the given random seed
     """
     if n > len(dataset):
-        raise ValueError(f"n={n} cannot exceed dataset length={len(dataset)}")
+        raise ValueError(f"Cannot split dataset into {n} samples when only {len(dataset)} samples available.")
     keys = list(range(len(dataset)))
     np.random.RandomState(seed).shuffle(keys)
     keys_1 = keys[:n]

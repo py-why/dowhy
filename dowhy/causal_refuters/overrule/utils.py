@@ -35,9 +35,7 @@ def sampleUnif(x, n: int = 10000, seed: Optional[int] = None):
     refSamples = rng.uniform(low=xMin.tolist(), high=xMax.tolist(), size=(n, xMin.shape[0]))
 
     if refSamples.shape[1] != x.shape[1]:
-        raise ValueError(
-            f"Generated reference samples shape mismatch: expected {x.shape[1]} columns, " f"got {refSamples.shape[1]}"
-        )
+        raise ValueError(f"Generated reference samples have {refSamples.shape[1]} features, expected {x.shape[1]}.")
     return refSamples
 
 
@@ -69,10 +67,7 @@ def sample_reference(
 
     if ref_range is not None:
         if not isinstance(ref_range, dict):
-            raise TypeError(
-                f"ref_range must be a dict, got {type(ref_range).__name__} instead. "
-                f"Expected format: {{'col_name': {{'is_binary': True/False, 'min': min_val, 'max': max_val}}}}"
-            )
+            raise TypeError(f"ref_range must be a dict, got {type(ref_range)} instead.")
     else:
         ref_range = {}
 

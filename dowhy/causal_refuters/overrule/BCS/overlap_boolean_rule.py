@@ -127,15 +127,9 @@ class OverlapBooleanRule:
         # This will throw an error if, for example, all samples are considered to
         # be in the overlap region
         if not (nO > 0 and (nU > 0 or nN > 0)):
-            raise ValueError(
-                "Received positive samples, but no negative samples for learning Boolean Rules. "
-                f"nO={nO}, nN={nN}, nU={nU}. Need either background (nU>0) or non-overlap (nN>0) samples."
-            )
-        if nU > 0 and nN > 0:
-            raise ValueError(
-                f"Cannot have both background and non-overlap samples. Got nU={nU} (background) "
-                f"and nN={nN} (non-overlap). Use only one sample type."
-            )
+            raise ValueError("Received positive samples, but no negative samples for learning Boolean Rules")
+        if not (nU == 0 or nN == 0):
+            raise ValueError("Expected samples to be either background or non-overlap, but received both.")
 
         # Initialize with empty and singleton conjunctions, i.e. X plus all-ones feature
         # Feature indicator and conjunction matrices
@@ -349,11 +343,8 @@ class OverlapBooleanRule:
 
         U = np.where(o < 0)[0]
         nU = len(U)
-        if nU <= 0:
-            raise ValueError(
-                f"Expected reference samples (o < 0) in get_objective_value, but got nU={nU}. "
-                f"Ensure input array 'o' contains negative values."
-            )
+        if nU == 0:
+            raise ValueError("Expected at least one overlap sample for rule learning, but received none.")
 
         A = self.compute_conjunctions(X)
         lambdas = self.lambda0 + self.lambda1 * self.z.sum().values
