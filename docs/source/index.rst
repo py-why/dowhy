@@ -11,6 +11,7 @@ DoWhy documentation
     Examples <example_notebooks/nb_index>
     cite
     Contributing <contributing>
+    changelog
     dowhy
     code_repo
 
