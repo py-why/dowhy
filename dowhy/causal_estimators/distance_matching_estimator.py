@@ -103,6 +103,23 @@ class DistanceMatchingEstimator(CausalEstimator):
         self.matched_indices_att = None
         self.matched_indices_atc = None
 
+    def _build_nearest_neighbors(self) -> NearestNeighbors:
+        """Build a NearestNeighbors instance with the configured distance metric and params.
+
+        ``p`` is a first-class constructor argument of NearestNeighbors (Minkowski power);
+        all other metric-specific parameters (e.g. ``V``, ``VI``, ``w`` for Mahalanobis /
+        Wminkowski) must be passed through ``metric_params``.
+        """
+        p = self.distance_metric_params.get("p", 2)
+        extra_metric_params = {k: v for k, v in self.distance_metric_params.items() if k != "p"} or None
+        return NearestNeighbors(
+            n_neighbors=self.num_matches_per_unit,
+            metric=self.distance_metric,
+            algorithm="ball_tree",
+            p=p,
+            metric_params=extra_metric_params,
+        )
+
     def fit(self, data: pd.DataFrame, effect_modifier_names: Optional[List[str]] = None, exact_match_cols=None):
         """
         Fits the estimator with data for effect estimation
@@ -218,12 +235,9 @@ class DistanceMatchingEstimator(CausalEstimator):
         if fit_att:
             # estimate ATT on treated by summing over difference between matched neighbors
             if self.exact_match_cols is None:
-                control_neighbors = NearestNeighbors(
-                    n_neighbors=self.num_matches_per_unit,
-                    metric=self.distance_metric,
-                    algorithm="ball_tree",
-                    metric_params=self.distance_metric_params,
-                ).fit(control[self._observed_common_causes.columns].values)
+                control_neighbors = self._build_nearest_neighbors().fit(
+                    control[self._observed_common_causes.columns].values
+                )
                 distances, indices = control_neighbors.kneighbors(treated[self._observed_common_causes.columns].values)
                 self.logger.debug("distances:")
                 self.logger.debug(distances)
@@ -258,12 +272,9 @@ class DistanceMatchingEstimator(CausalEstimator):
                     group_control = group.loc[group[self._target_estimand.treatment_variable[0]] == 0]
                     if group_treated.shape[0] == 0 or group_control.shape[0] == 0:
                         continue
-                    control_neighbors = NearestNeighbors(
-                        n_neighbors=self.num_matches_per_unit,
-                        metric=self.distance_metric,
-                        algorithm="ball_tree",
-                        metric_params=self.distance_metric_params,
-                    ).fit(group_control[self._observed_common_causes.columns].values)
+                    control_neighbors = self._build_nearest_neighbors().fit(
+                        group_control[self._observed_common_causes.columns].values
+                    )
                     distances, indices = control_neighbors.kneighbors(
                         group_treated[self._observed_common_causes.columns].values
                     )
@@ -294,12 +305,9 @@ class DistanceMatchingEstimator(CausalEstimator):
             # Now computing ATC using the full treated/control DataFrames (not group-level subsets).
             treated = treated_all
             control = control_all
-            treated_neighbors = NearestNeighbors(
-                n_neighbors=self.num_matches_per_unit,
-                metric=self.distance_metric,
-                algorithm="ball_tree",
-                metric_params=self.distance_metric_params,
-            ).fit(treated[self._observed_common_causes.columns].values)
+            treated_neighbors = self._build_nearest_neighbors().fit(
+                treated[self._observed_common_causes.columns].values
+            )
             distances, indices = treated_neighbors.kneighbors(control[self._observed_common_causes.columns].values)
 
             atc = 0
