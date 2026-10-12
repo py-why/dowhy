@@ -4,7 +4,12 @@ from flaky import flaky
 
 from dowhy.causal_estimator import CausalEstimate
 from dowhy.causal_identifier.identified_estimand import IdentifiedEstimand
-from dowhy.causal_refuter import CausalRefuter, choose_variables, perform_normal_distribution_test
+from dowhy.causal_refuter import (
+    CausalRefuter,
+    choose_variables,
+    perform_bootstrap_test,
+    perform_normal_distribution_test,
+)
 
 
 class MockRefuter(CausalRefuter):
@@ -35,6 +40,29 @@ def test_normal_distribution_test_zero_std_returns_one():
     p_value = perform_normal_distribution_test(estimate, simulations_identical)
     assert not np.isnan(p_value), "p-value must not be NaN when std of simulations is 0"
     assert p_value == 1.0, f"Expected p_value=1.0 for zero-variance simulations, got {p_value}"
+
+
+def test_bootstrap_test_array_valued_estimate():
+    """Regression test for issue #1212: perform_bootstrap_test must not raise
+    'ValueError: object too deep for desired array' when estimate.value is an
+    array (e.g. EconML estimators with discrete_outcome=True return per-unit CATE)."""
+    # Simulate an array-valued estimate (per-unit CATE), centred near 0
+    array_estimate = CausalEstimate(None, None, None, np.zeros(50), None, None, None, None)
+    simulations = list(np.random.normal(0, 1, 1000))
+    # Must not raise; p-value should be a valid float
+    p_value = perform_bootstrap_test(array_estimate, simulations)
+    assert isinstance(p_value, float), f"Expected float p-value, got {type(p_value)}"
+    assert 0.0 <= p_value <= 1.0, f"p-value out of range: {p_value}"
+
+
+def test_normal_distribution_test_array_valued_estimate():
+    """Regression test for issue #1212: perform_normal_distribution_test must not raise
+    when estimate.value is an array (ambiguous truth value)."""
+    array_estimate = CausalEstimate(None, None, None, np.zeros(50), None, None, None, None)
+    simulations = list(np.random.normal(0, 1, 1000))
+    p_value = perform_normal_distribution_test(array_estimate, simulations)
+    assert isinstance(p_value, float), f"Expected float p-value, got {type(p_value)}"
+    assert 0.0 <= p_value <= 1.0, f"p-value out of range: {p_value}"
 
 
 # ---------------------------------------------------------------------------
