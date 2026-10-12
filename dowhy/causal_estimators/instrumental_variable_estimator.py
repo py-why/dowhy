@@ -5,6 +5,7 @@ import pandas as pd
 import sympy as sp
 import sympy.stats as spstats
 from statsmodels.sandbox.regression.gmm import IV2SLS
+import statsmodels.api as sm
 
 from dowhy.causal_estimator import CausalEstimate, CausalEstimator, RealizedEstimand
 from dowhy.causal_identifier import IdentifiedEstimand
@@ -168,12 +169,16 @@ class InstrumentalVariableEstimator(CausalEstimator):
             # More than 1 instrument. Use 2sls.
             est_treatment = data[self._target_estimand.treatment_variable].astype(np.float32)
             est_outcome = data[self._target_estimand.outcome_variable[0]].astype(np.float32)
-            ivmodel = IV2SLS(est_outcome, est_treatment, self._estimating_instruments)
+            # Add constant to both treatment and instruments for proper identification
+            # (Fixes bias when variables are not mean-zero)
+            est_treatment_with_const = sm.add_constant(est_treatment)
+            est_instruments_with_const = sm.add_constant(self._estimating_instruments)
+            ivmodel = IV2SLS(est_outcome, est_treatment_with_const, est_instruments_with_const)
             reg_results = ivmodel.fit()
             self.logger.debug(reg_results.summary())
-            iv_est = sum(
-                reg_results.params
-            )  # the effect is the same for any treatment value (assume treatment goes from 0 to 1)
+            # Extract treatment coefficient by name (first non-const column)
+            treatment_col_name = est_treatment.columns[0] if hasattr(est_treatment, 'columns') else 0
+            iv_est = reg_results.params[treatment_col_name]
         estimate = CausalEstimate(
             data=data,
             treatment_name=self._target_estimand.treatment_variable,

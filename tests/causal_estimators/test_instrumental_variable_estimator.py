@@ -1,8 +1,11 @@
 import itertools
 
+import numpy as np
+import pandas as pd
 import pytest
 from pytest import mark
 
+from dowhy import CausalModel
 from dowhy.causal_estimators.instrumental_variable_estimator import InstrumentalVariableEstimator
 
 from .base import SimpleEstimator
@@ -78,3 +81,42 @@ class TestInstrumentalVariableEstimator(object):
         cfg["num_instruments"] = 0
         with pytest.raises(ValueError):
             estimator_tester.average_treatment_effect_test(**cfg)
+
+    def test_iv_with_nonzero_mean_instruments(self):
+        """
+        Regression test for issue #1821: IV estimator with 2+ instruments
+        should fit 2SLS with an intercept to handle non-mean-zero instruments.
+        This test uses binary instruments coded as {0, 1}, which have non-zero mean.
+        The true treatment effect should be recoverable with proper constant term.
+        """
+        rng = np.random.default_rng(42)
+        n = 5000
+        # Binary instruments with non-zero mean (coded as 0/1)
+        z1 = rng.binomial(1, 0.5, n).astype(float)
+        z2 = rng.binomial(1, 0.5, n).astype(float)
+        # Confounding (unobserved)
+        u = rng.normal(size=n)
+        # Treatment with non-zero mean
+        x = 3.0 + z1 + z2 + u + rng.normal(size=n)
+        # Outcome: true effect is 2.0
+        y = 10.0 + 2.0 * x + 2 * u + rng.normal(size=n)
+
+        df = pd.DataFrame(dict(Z1=z1, Z2=z2, X=x, Y=y))
+        # DAG: Z1, Z2 -> X -> Y, U -> X, U -> Y
+        g = "digraph{Z1->X;Z2->X;U->X;U->Y;X->Y}"
+
+        model = CausalModel(df, "X", "Y", graph=g)
+        identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+
+        # Estimate with both instruments
+        estimate = model.estimate_effect(
+            identified_estimand, method_name="iv.instrumental_variable"
+        )
+
+        # The estimate should be close to the true effect of 2.0
+        # With the bug (no intercept), this would be ~4.2
+        # With the fix (intercept included), this should be ~2.0
+        assert (
+            abs(estimate.value - 2.0) < 0.5
+        ), f"IV estimate {estimate.value} is too far from true effect 2.0"
+
