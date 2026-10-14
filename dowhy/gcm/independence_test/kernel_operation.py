@@ -85,17 +85,19 @@ def approximate_delta_kernel_features(X: np.ndarray, num_random_components: int)
     :param num_random_components: Number of components D for the approximated kernel map.
     :return: A NxD approximated RBF kernel map, where N is the number of samples in X and D the number of components.
     """
-    # Copy to avoid mutating the caller's array in place, since shape_into_2d returns the same object for 2D inputs.
-    X = shape_into_2d(X).copy()
+    X = shape_into_2d(X)
 
     def delta_function(x, y) -> float:
         # x and y are (possibly multidimensional) samples; the delta kernel is 1 only if all entries match.
         return float(np.array_equal(x, y))
 
-    for i, unique_element in enumerate(np.unique(X)):
-        X[X == unique_element] = i
+    # Encode each unique value as a distinct integer using np.unique(return_inverse=True).
+    # This is O(n log n) and avoids the O(n * k) sequential-replacement loop, which could also
+    # produce incorrect collisions when str(i) happens to match another category name.
+    _, encoded = np.unique(X.ravel(), return_inverse=True)
+    X = encoded.reshape(X.shape)
 
-    result = Nystroem(kernel=delta_function, n_components=num_random_components).fit_transform(X.astype(int))
+    result = Nystroem(kernel=delta_function, n_components=num_random_components).fit_transform(X)
     result[result != 0] = 1
 
     return result

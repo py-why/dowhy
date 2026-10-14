@@ -176,8 +176,18 @@ def estimate_kl_divergence_categorical(X: np.ndarray, Y: np.ndarray) -> float:
 
     all_uniques = np.unique(np.vstack([X, Y]))
 
-    p = np.array([(np.sum(X == i) + EPS) / (X.shape[0] + EPS) for i in all_uniques])
-    q = np.array([(np.sum(Y == i) + EPS) / (Y.shape[0] + EPS) for i in all_uniques])
+    # Vectorised count using np.unique(return_counts=True): O(n log n) instead of O(n * k) loop.
+    x_vals, x_cnts = np.unique(X.ravel(), return_counts=True)
+    y_vals, y_cnts = np.unique(Y.ravel(), return_counts=True)
+
+    x_cnt_vec = np.zeros(len(all_uniques))
+    x_cnt_vec[np.searchsorted(all_uniques, x_vals)] = x_cnts
+
+    y_cnt_vec = np.zeros(len(all_uniques))
+    y_cnt_vec[np.searchsorted(all_uniques, y_vals)] = y_cnts
+
+    p = (x_cnt_vec + EPS) / (X.shape[0] + EPS)
+    q = (y_cnt_vec + EPS) / (Y.shape[0] + EPS)
 
     return float(np.sum(p * np.log(p / q)))
 
