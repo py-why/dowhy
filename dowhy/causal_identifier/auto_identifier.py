@@ -272,10 +272,11 @@ def identify_ate_effect(
                     outcome_nodes,
                     candidate.get_adjustment_variables(),
                     new_graph=backdoor_graph,
+                    dseparation_algo="default",
                 )["is_dseparated"]
             ]
             if not backdoor_sets:
-                logger.info("Optimized backdoor search found no valid observed set; using standard search.")
+                logger.debug("Optimized backdoor search found no valid observed set; using standard search.")
                 backdoor_sets = identify_backdoor(
                     graph, action_nodes, outcome_nodes, observed_nodes, backdoor_adjustment
                 )
