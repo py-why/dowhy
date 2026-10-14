@@ -10,6 +10,15 @@ from dowhy.gcm.ml import create_linear_regressor, create_linear_regressor_with_g
 from dowhy.gcm.shapley import ShapleyApproximationMethods, ShapleyConfig
 
 
+@pytest.fixture(autouse=True)
+def preserve_numpy_random_state():
+    state = np.random.get_state()
+    try:
+        yield
+    finally:
+        np.random.set_state(state)
+
+
 @pytest.mark.parametrize("prediction_mode", ["exact", "linear", "approx"])
 @pytest.mark.parametrize("background_variant", ["supplied", "permuted", "reordered", "shorter", "generated"])
 def test_sample_influence_preserves_training_pairs_with_custom_background(

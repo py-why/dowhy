@@ -357,7 +357,8 @@ def intrinsic_causal_influence_sample(
                                 expects two inputs; the outcome of the model for some samples if certain features are permuted and the
                                 outcome of the model for the same samples when no features were permuted. By default,
                                 the difference between means of these samples are estimated.
-    :param num_noise_feature_samples: Number of paired samples drawn from the graph for approximate model training.
+    :param num_noise_feature_samples: Number of paired samples drawn from the graph to train the selected or supplied
+                                      prediction model. Training is skipped for prediction_model="exact".
                                       If noise_feature_samples is None, these noise samples also form the background.
     :param max_batch_size: Maximum batch size for estimating multiple predictions at once. This has a significant influence on the
                           overall memory usage. If set to -1, all samples are used in one batch.
