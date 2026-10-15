@@ -1,0 +1,1188 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-B139P18WHM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-B139P18WHM');
+    </script>
+    
+    <title>Generating random SCMs for benchmarking &#8212; DoWhy  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=949a1ff5" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/jquery.js?v=5d32c60e"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=0c6e27e1"></script>
+    <script src="../../_static/design-tabs.js?v=36754332"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user_guide/modeling_gcm/random_scm_generator';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Performing Causal Tasks" href="../causal_tasks/index.html" />
+    <link rel="prev" title="Estimating Confidence Intervals" href="estimating_confidence_intervals.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="main" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/dowhy-logo-small.png" class="logo__image only-light" alt="DoWhy  documentation - Home"/>
+    <img src="../../_static/dowhy-logo-small.png" class="logo__image only-dark pst-js-only" alt="DoWhy  documentation - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../example_notebooks/nb_index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../contributing.html">
+    Contributing
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../dowhy.html">
+    dowhy package
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../code_repo.html">
+    Release notes
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item"><div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        main
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.9.1/index.html">v0.9.1</a></dd>
+            <dd><a href="/dowhy/v0.9/index.html">v0.9</a></dd>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.14/index.html">v0.14</a></dd>
+            <dd><a href="/dowhy/v0.13/index.html">v0.13</a></dd>
+            <dd><a href="/dowhy/v0.12/index.html">v0.12</a></dd>
+            <dd><a href="/dowhy/v0.11.1/index.html">v0.11.1</a></dd>
+            <dd><a href="/dowhy/v0.11/index.html">v0.11</a></dd>
+            <dd><a href="/dowhy/v0.10.1/index.html">v0.10.1</a></dd>
+            <dd><a href="/dowhy/v0.10/index.html">v0.10</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../getting_started/index.html">
+    Getting Started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../example_notebooks/nb_index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../cite.html">
+    Citing this package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../contributing.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../dowhy.html">
+    dowhy package
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../code_repo.html">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        main
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+        <dl>
+            <dt>Releases</dt>
+            <dd><a href="/dowhy/v0.9.1/index.html">v0.9.1</a></dd>
+            <dd><a href="/dowhy/v0.9/index.html">v0.9</a></dd>
+            <dd><a href="/dowhy/v0.8/index.html">v0.8</a></dd>
+            <dd><a href="/dowhy/v0.7.1/index.html">v0.7.1</a></dd>
+            <dd><a href="/dowhy/v0.7/index.html">v0.7</a></dd>
+            <dd><a href="/dowhy/v0.6/index.html">v0.6</a></dd>
+            <dd><a href="/dowhy/v0.5.1/index.html">v0.5.1</a></dd>
+            <dd><a href="/dowhy/v0.5/index.html">v0.5</a></dd>
+            <dd><a href="/dowhy/v0.4/index.html">v0.4</a></dd>
+            <dd><a href="/dowhy/v0.2/index.html">v0.2</a></dd>
+            <dd><a href="/dowhy/v0.14/index.html">v0.14</a></dd>
+            <dd><a href="/dowhy/v0.13/index.html">v0.13</a></dd>
+            <dd><a href="/dowhy/v0.12/index.html">v0.12</a></dd>
+            <dd><a href="/dowhy/v0.11.1/index.html">v0.11.1</a></dd>
+            <dd><a href="/dowhy/v0.11/index.html">v0.11</a></dd>
+            <dd><a href="/dowhy/v0.10.1/index.html">v0.10.1</a></dd>
+            <dd><a href="/dowhy/v0.10/index.html">v0.10</a></dd>
+            <dd><a href="/dowhy/v0.1.1-alpha/index.html">v0.1.1-alpha</a></dd>
+        </dl>        
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="">main</a></dd>
+        </dl>        
+    </div>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../foreword.html">Foreword</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction to DoWhy</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../modeling_causal_relations/index.html">Modeling Causal Relations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modeling_causal_relations/specifying_causal_graph.html">Specifying a causal graph using domain knowledge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modeling_causal_relations/learning_causal_structure.html">Learning causal structure from data</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../modeling_causal_relations/refuting_causal_graph/index.html">Refuting a Causal Graph</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modeling_causal_relations/refuting_causal_graph/independence_tests.html">Performing independence tests</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modeling_causal_relations/refuting_causal_graph/refute_causal_structure.html">Graph refutations</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Modeling Graphical Causal Models (GCMs)</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="graphical_causal_model_types.html">Types of graphical causal models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="draw_samples.html">Generate samples from a GCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_evaluation.html">Evaluate a GCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="customizing_model_assignment.html">Customizing Causal Mechanism Assignment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="estimating_confidence_intervals.html">Estimating Confidence Intervals</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Generating random SCMs for benchmarking</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../causal_tasks/index.html">Performing Causal Tasks</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../causal_tasks/estimating_causal_effects/index.html">Estimating Causal Effects</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../causal_tasks/estimating_causal_effects/identifying_causal_effect/index.html">Identifying causal effect</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../causal_tasks/estimating_causal_effects/identifying_causal_effect/backdoor.html">Backdoor criterion</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../causal_tasks/estimating_causal_effects/identifying_causal_effect/frontdoor.html">Frontdoor criterion</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../causal_tasks/estimating_causal_effects/identifying_causal_effect/instrumental_variable.html">Natural experiments and instrumental variables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../causal_tasks/estimating_causal_effects/identifying_causal_effect/id_algorithm.html">ID algorithm for discovering new identification strategies</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../causal_tasks/estimating_causal_effects/effect_estimation_with_backdoor/index.html">Estimating average causal effect using backdoor</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../causal_tasks/estimating_causal_effects/effect_estimation_with_backdoor/regression_based_methods.html">Regression-based methods</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../causal_tasks/estimating_causal_effects/effect_estimation_with_backdoor/distance_matching.html">Distance-based matching</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../causal_tasks/estimating_causal_effects/effect_estimation_with_backdoor/propensity_based_methods.html">Propensity-based methods</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../causal_tasks/estimating_causal_effects/effect_estimation_with_backdoor/do_sampler.html">Do-sampler</a></li>
+</ul>
+</details></li>
+<li class="toctree-l3"><a class="reference internal" href="../causal_tasks/estimating_causal_effects/effect_estimation_with_natural_experiments/index.html">Estimating average causal effect with natural experiments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../causal_tasks/estimating_causal_effects/conditional_effect_estimation/index.html">Estimating conditional average causal effect</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../causal_tasks/estimating_causal_effects/effect_estimation_with_gcm.html">Estimating average causal effect using GCM</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../causal_tasks/quantify_causal_influence/index.html">Quantify Causal Influence</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../causal_tasks/quantify_causal_influence/mediation_analysis.html">Mediation Analysis: Estimating natural direct and indirect effects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../causal_tasks/quantify_causal_influence/quantify_arrow_strength.html">Direct Effect: Quantifying Arrow Strength</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../causal_tasks/quantify_causal_influence/icc.html">Quantifying Intrinsic Causal Influence</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../causal_tasks/root_causing_and_explaining/index.html">Root-Cause Analysis and Explanation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../causal_tasks/root_causing_and_explaining/anomaly_attribution.html">Anomaly Attribution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../causal_tasks/root_causing_and_explaining/distribution_change.html">Attributing Distributional Changes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../causal_tasks/root_causing_and_explaining/feature_relevance.html">Feature Relevance</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../causal_tasks/what_if/index.html">Asking and Answering What-If Questions</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../causal_tasks/what_if/interventions.html">Simulating the Impact of Interventions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../causal_tasks/what_if/counterfactuals.html">Computing Counterfactuals</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="../causal_tasks/causal_prediction/index.html">Predicting outcome for out-of-distribution inputs</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../refuting_causal_estimates/index.html">Refuting causal estimates</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/index.html">Refuting Effect Estimates</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/graph_refutation.html">Graph Refutation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/placebo_treatment.html">Placebo Treatment Refuter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/dummy_outcome.html">Dummy Outcome Refuter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/random_common_cause.html">Random Common Cause Refuter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/data_subsample.html">Data Subsample Refuter</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/sensitivity_analysis/index.html">Sensitivity Analysis</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l4"><a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/sensitivity_analysis/simulation_based.html">Simulation-based sensitivity analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/sensitivity_analysis/linear_partialr2.html">Partial-R2 based sensitivity analysis for linear estimators</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../refuting_causal_estimates/refuting_effect_estimates/sensitivity_analysis/nonlinear_reisz.html">Reisz estimator-based sensitivity analysis for non-linear estimators</a></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cite.html">Citing this package</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">User Guide</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Modeling Graphical Causal Models (GCMs)</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Generating random SCMs for benchmarking</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="generating-random-scms-for-benchmarking">
+<h1>Generating random SCMs for benchmarking<a class="headerlink" href="#generating-random-scms-for-benchmarking" title="Link to this heading">#</a></h1>
+<p>When developing or evaluating causal methods, we often need data where the ground truth is known: the causal graph,
+the mechanisms and the noise. Real data rarely comes with this information, and hand-written toy models tend to be
+too simple to be representative. The <code class="docutils literal notranslate"><span class="pre">dowhy.gcm.data_generator</span></code> module fills this gap. It generates random
+structural causal models (SCMs) of arbitrary size whose mechanisms cover a wide range of realistic behaviour, and it
+returns them as regular <a class="reference internal" href="../../dowhy.gcm.html#dowhy.gcm.causal_models.StructuralCausalModel" title="dowhy.gcm.causal_models.StructuralCausalModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">StructuralCausalModel</span></code></a> objects, so everything described in the
+previous sections (drawing samples, interventions, counterfactuals, fitting, evaluation) works on them out of the box.</p>
+<p>Typical uses are benchmarking causal discovery or effect estimation algorithms across many random ground truths,
+stress-testing a pipeline against non-Gaussian, heteroscedastic or discretised data, and generating synthetic
+datasets for tutorials and unit tests.</p>
+<section id="generating-a-random-scm-and-drawing-data-from-it">
+<h2>Generating a random SCM and drawing data from it<a class="headerlink" href="#generating-a-random-scm-and-drawing-data-from-it" title="Link to this heading">#</a></h2>
+<p>To generate a random SCM, we only need to say how many root nodes (variables without parents) and how many non-root
+nodes the graph should have:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">dowhy</span><span class="w"> </span><span class="kn">import</span> <span class="n">gcm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">dowhy.gcm.data_generator</span><span class="w"> </span><span class="kn">import</span> <span class="n">generate_random_scm</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gcm</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">scm</span> <span class="o">=</span> <span class="n">generate_random_scm</span><span class="p">(</span><span class="n">num_roots</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">num_children</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The result is a regular, already fitted <a class="reference internal" href="../../dowhy.gcm.html#dowhy.gcm.causal_models.StructuralCausalModel" title="dowhy.gcm.causal_models.StructuralCausalModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">StructuralCausalModel</span></code></a>. Synthetic data is
+therefore drawn exactly as from any other GCM, with <code class="xref py py-func docutils literal notranslate"><span class="pre">draw_samples()</span></code>:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">samples</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">draw_samples</span><span class="p">(</span><span class="n">scm</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">samples</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="go">         X0        X1        X2        X3        X5        X4        X6        X7</span>
+<span class="go">0 -0.735651  0.000000 -0.101367  0.133837 -0.072770  0.037052  1.141605  0.000000</span>
+<span class="go">1 -0.616410  1.574406 -0.580365 -0.350869  0.324154 -0.492177  0.607491  0.664010</span>
+<span class="go">2  0.065244  0.990212  0.195449  0.918361 -0.541700  0.416879  0.310798  0.177610</span>
+<span class="go">3 -0.002475  0.041586 -2.168400  0.775112 -0.138023  0.788844  0.243090  0.139116</span>
+<span class="go">4 -1.319146  1.508412  1.050766  0.677219  0.052386  0.317607  0.000000  0.934975</span>
+</pre></div>
+</div>
+<p>Nodes are named <code class="docutils literal notranslate"><span class="pre">X0,</span> <span class="pre">X1,</span> <span class="pre">...</span></code>; the first <code class="docutils literal notranslate"><span class="pre">num_roots</span></code> of them are roots. The columns are returned in topological
+order. Note the exact zeros in <code class="docutils literal notranslate"><span class="pre">X1</span></code>, <code class="docutils literal notranslate"><span class="pre">X6</span></code> and <code class="docutils literal notranslate"><span class="pre">X7</span></code>: these nodes were censored, one of the output transforms the
+generator applies at random (more on this below). The generator draws everything from the global random state, so
+calling <a class="reference internal" href="../../dowhy.gcm.util.html#dowhy.gcm.util.general.set_random_seed" title="dowhy.gcm.util.general.set_random_seed"><code class="xref py py-func docutils literal notranslate"><span class="pre">set_random_seed()</span></code></a> first makes the graph, the mechanisms and the samples
+reproducible.</p>
+<p>If only the data is of interest, <code class="xref py py-func docutils literal notranslate"><span class="pre">generate_samples_from_random_scm()</span></code> performs both
+steps in one call:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">dowhy.gcm.data_generator</span><span class="w"> </span><span class="kn">import</span> <span class="n">generate_samples_from_random_scm</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">samples</span> <span class="o">=</span> <span class="n">generate_samples_from_random_scm</span><span class="p">(</span><span class="n">num_roots</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">num_children</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="working-with-the-generated-scm">
+<h2>Working with the generated SCM<a class="headerlink" href="#working-with-the-generated-scm" title="Link to this heading">#</a></h2>
+<p>Having the model itself lets us compare an algorithm’s output with the true graph, inspect the mechanisms or run
+interventions. Let’s look at the graph of the SCM generated above:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">networkx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nx</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">dowhy.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plot</span><span class="p">(</span><span class="n">scm</span><span class="o">.</span><span class="n">graph</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="Randomly Generated SCM" src="../../_images/random_dag.png" />
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">scm</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
+<span class="go">[(&#39;X0&#39;, &#39;X5&#39;), (&#39;X1&#39;, &#39;X6&#39;), (&#39;X2&#39;, &#39;X3&#39;), (&#39;X2&#39;, &#39;X4&#39;), (&#39;X2&#39;, &#39;X5&#39;), (&#39;X3&#39;, &#39;X4&#39;), (&#39;X3&#39;, &#39;X6&#39;), (&#39;X3&#39;, &#39;X7&#39;), (&#39;X6&#39;, &#39;X7&#39;)]</span>
+</pre></div>
+</div>
+<p>Each node carries a causal mechanism that we can inspect like in any other GCM:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nx</span><span class="o">.</span><span class="n">topological_sort</span><span class="p">(</span><span class="n">scm</span><span class="o">.</span><span class="n">graph</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">scm</span><span class="o">.</span><span class="n">causal_mechanism</span><span class="p">(</span><span class="n">node</span><span class="p">))</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="go">X0 _GaussianMixtureDistribution</span>
+<span class="go">X1 _TransformedStochasticModel</span>
+<span class="go">X2 ScipyDistribution</span>
+<span class="go">X3 _NonAdditiveNoiseFCM</span>
+<span class="go">X5 AdditiveNoiseModel</span>
+<span class="go">X4 AdditiveNoiseModel</span>
+<span class="go">X6 _TransformedConditionalModel</span>
+<span class="go">X7 _TransformedConditionalModel</span>
+</pre></div>
+</div>
+<p>Every function of the <code class="docutils literal notranslate"><span class="pre">gcm</span></code> package that accepts a fitted model works as usual. For instance, drawing a larger
+sample to look at the marginal distributions:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">draw_samples</span><span class="p">(</span><span class="n">scm</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">2000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span><span class="o">.</span><span class="n">loc</span><span class="p">[[</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;std&quot;</span><span class="p">,</span> <span class="s2">&quot;min&quot;</span><span class="p">,</span> <span class="s2">&quot;max&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">         X0     X1     X2     X3     X5     X4     X6     X7</span>
+<span class="go">mean  0.017  0.849  0.023  0.372 -0.043  0.178  0.510  0.542</span>
+<span class="go">std   0.985  0.858  0.997  0.574  0.704  0.649  0.540  0.436</span>
+<span class="go">min  -3.211  0.000 -2.839 -1.083 -2.047 -1.900  0.000  0.000</span>
+<span class="go">max   3.732  2.548  2.760  1.470  2.028  2.964  2.768  1.894</span>
+</pre></div>
+</div>
+<p>All values stay on a comparable scale: root nodes are standardised to unit variance and every mechanism output is
+calibrated to a target range, so values neither explode nor collapse as they propagate through deep graphs.</p>
+<p>Because we hold the complete ground-truth SCM and not just a data set, we can also query it for <em>interventional</em>
+distributions, something observational data alone can never provide. Fixing <code class="docutils literal notranslate"><span class="pre">X3</span></code> to -1 changes its descendants
+<code class="docutils literal notranslate"><span class="pre">X4</span></code>, <code class="docutils literal notranslate"><span class="pre">X6</span></code> and <code class="docutils literal notranslate"><span class="pre">X7</span></code> (compare the graph above), while <code class="docutils literal notranslate"><span class="pre">X0</span></code>, <code class="docutils literal notranslate"><span class="pre">X1</span></code>, <code class="docutils literal notranslate"><span class="pre">X2</span></code> and <code class="docutils literal notranslate"><span class="pre">X5</span></code> keep their observational
+distribution:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gcm</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">observational</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">draw_samples</span><span class="p">(</span><span class="n">scm</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">2000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gcm</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">intervened</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">interventional_samples</span><span class="p">(</span><span class="n">scm</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;X3&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">},</span> <span class="n">num_samples_to_draw</span><span class="o">=</span><span class="mi">2000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;observational&quot;</span><span class="p">:</span> <span class="n">observational</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="s2">&quot;do(X3 := -1)&quot;</span><span class="p">:</span> <span class="n">intervened</span><span class="o">.</span><span class="n">mean</span><span class="p">()})</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+<span class="go">                  X0     X1     X2    X3    X5     X4     X6     X7</span>
+<span class="go">observational -0.028  0.884  0.032  0.36 -0.07  0.155  0.487  0.558</span>
+<span class="go">do(X3 := -1)  -0.028  0.884  0.032 -1.00 -0.07 -1.079  0.832  0.880</span>
+</pre></div>
+</div>
+<p>This is the true interventional distribution of the data-generating process, which makes generated SCMs a convenient
+ground truth for evaluating effect estimation methods.</p>
+</section>
+<section id="what-the-generator-produces">
+<h2>What the generator produces<a class="headerlink" href="#what-the-generator-produces" title="Link to this heading">#</a></h2>
+<p>The generator randomises every ingredient of an SCM. With the default configuration:</p>
+<ul class="simple">
+<li><p><strong>Graph</strong>: Nodes are added in topological order and each new node picks its parents among the preceding nodes. The
+number of parents is controlled by <code class="docutils literal notranslate"><span class="pre">edge_density</span></code> (0 gives a tree, 1 the densest possible DAG). The graph is
+always weakly connected, and no root is left without children.</p></li>
+<li><p><strong>Root distributions</strong>: Gaussian, uniform, Laplace, log-normal, exponential, beta, Student-t and chi-squared
+distributions, all standardised to zero mean and unit variance, plus multi-modal Gaussian mixtures.</p></li>
+<li><p><strong>Mechanisms of non-root nodes</strong>: Recall that a non-root node follows <span class="math notranslate nohighlight">\(X_i = f_i(PA_{X_i}, N_i)\)</span> with
+parents <span class="math notranslate nohighlight">\(PA_{X_i}\)</span> and independent noise <span class="math notranslate nohighlight">\(N_i\)</span>. The generator draws <span class="math notranslate nohighlight">\(f_i\)</span> at random. For most
+nodes it is an <em>additive noise model</em> <span class="math notranslate nohighlight">\(X_i = f_i(PA_{X_i}) + N_i\)</span>, where <span class="math notranslate nohighlight">\(f_i\)</span> is either a linear
+function or a randomly initialised multilayer perceptron (MLP) with <code class="docutils literal notranslate"><span class="pre">tanh</span></code> activations, whose spectral-normalised
+weights produce smooth but clearly nonlinear, non-monotonic relations. Variants of the additive model make the
+noise level depend on the parents (heteroscedastic noise, <span class="math notranslate nohighlight">\(X_i = f_i(PA_{X_i}) + g_i(PA_{X_i}) \cdot N_i\)</span>) or
+operate in log space (<span class="math notranslate nohighlight">\(X_i = \exp(f_i(\log PA_{X_i}) + N_i)\)</span>, i.e. positive, right-skewed, multiplicative
+relations).</p></li>
+<li><p><strong>Arbitrary functional causal models</strong>: For a share of the nodes (20% by default, <code class="docutils literal notranslate"><span class="pre">prob_non_additive_noise</span></code>),
+the generator does not assume any particular noise structure. Instead, the noise is fed into a random MLP together
+with the parents, <span class="math notranslate nohighlight">\(X_i = \mathrm{MLP}_i(PA_{X_i}, N_i)\)</span>, which mimics an arbitrary FCM of the general form
+<span class="math notranslate nohighlight">\(f_i(PA_{X_i}, N_i)\)</span>: the noise interacts with the parents in a nonlinear way and cannot be separated from
+them. Such nodes are not invertible, which is exactly the situation many real-world variables are in.</p></li>
+<li><p><strong>Noise distributions</strong>: Gaussian, Laplace, uniform, Student-t or Gaussian mixtures, each with an exactly controlled
+standard deviation. Inputs of every mechanism are standardised and outputs calibrated, so a mechanism behaves the
+same regardless of the scale of its parents.</p></li>
+<li><p><strong>Output transforms</strong>: a node’s values can be censored (a controlled fraction becomes exactly zero, like a detection
+limit or zero-inflated counts) or discretised into a few equal-frequency categories (for a censored node, the zeros
+form a category of their own). The thresholds are fixed when
+the SCM is built, so a transformed mechanism is still a deterministic function of its parents and noise.</p></li>
+</ul>
+<p>Every edge in the generated graph corresponds to a detectable dependence: linear coefficients are bounded away from
+zero and mechanism outputs are calibrated, so there are no “phantom” edges whose parent has no measurable influence.</p>
+</section>
+<section id="configuring-the-generator">
+<h2>Configuring the generator<a class="headerlink" href="#configuring-the-generator" title="Link to this heading">#</a></h2>
+<p>All of the above is controlled through <code class="xref py py-class docutils literal notranslate"><span class="pre">DataGeneratorConfig</span></code>. Its fields are
+probabilities for the different mechanism, noise and transform types, ranges for the random parameters, and weight
+dictionaries for the distribution families. Invalid combinations (for instance probabilities that sum to more than
+one) raise a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> at construction time. The complete list of options and their defaults:</p>
+<p><strong>Graph structure</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 20.0%" />
+<col style="width: 50.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Option</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Controls</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">edge_density</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.2</span></code></p></td>
+<td><p>How many parents a non-root node gets: 0 gives exactly one parent (a tree), 1 connects every node to all of
+its predecessors (the densest DAG).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">edge_density_mode</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;preceding&quot;</span></code></p></td>
+<td><p>How <code class="docutils literal notranslate"><span class="pre">edge_density</span></code> is turned into a parent count. <code class="docutils literal notranslate"><span class="pre">&quot;preceding&quot;</span></code>: a fraction of the node’s preceding nodes,
+so later nodes get more parents. <code class="docutils literal notranslate"><span class="pre">&quot;total&quot;</span></code>: the same expected in-degree <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">+</span> <span class="pre">edge_density</span> <span class="pre">*</span> <span class="pre">(N</span> <span class="pre">-</span> <span class="pre">2)</span></code> for
+every node.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Causal mechanisms of non-root nodes</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 20.0%" />
+<col style="width: 50.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Option</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Controls</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">prob_linear_mechanism</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.2</span></code></p></td>
+<td><p>Share of non-root nodes with a linear function <span class="math notranslate nohighlight">\(f_i\)</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">prob_non_additive_noise</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.2</span></code></p></td>
+<td><p>Share of non-root nodes modelled by a random MLP over parents <em>and</em> noise, <span class="math notranslate nohighlight">\(X_i = \mathrm{MLP}_i(PA_{X_i},
+N_i)\)</span>. The remaining <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">-</span> <span class="pre">prob_linear_mechanism</span> <span class="pre">-</span> <span class="pre">prob_non_additive_noise</span></code> share uses an MLP with additive
+noise. The two probabilities must not sum to more than 1.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">prob_heteroscedastic_noise</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.2</span></code></p></td>
+<td><p>Share of the additive (linear or MLP) nodes whose noise level depends on the parents,
+<span class="math notranslate nohighlight">\(X_i = f_i(PA_{X_i}) + (|g_i(PA_{X_i})| + 0.1) \cdot N_i\)</span> with a second random MLP <span class="math notranslate nohighlight">\(g_i\)</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">prob_log_space_mechanism</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.1</span></code></p></td>
+<td><p>Share of the additive nodes that operate in log space, <span class="math notranslate nohighlight">\(X_i = \exp(f_i(\log PA_{X_i}) + N_i)\)</span>:
+positive, right-skewed, multiplicative relations. Together with <code class="docutils literal notranslate"><span class="pre">prob_heteroscedastic_noise</span></code> at most 1.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">linear_coefficient_range</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">(0.25,</span> <span class="pre">1.0)</span></code></p></td>
+<td><p>Absolute value of the coefficients of linear mechanisms (signs are random). They act on standardised parents,
+and a minimum above 0 keeps every edge detectable.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">nn_hidden_units_range</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">(4,</span> <span class="pre">64)</span></code></p></td>
+<td><p>Number of hidden units per MLP layer. Wider layers give more expressive nonlinearities.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">nn_hidden_layers_range</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">(2,</span> <span class="pre">4)</span></code></p></td>
+<td><p>Number of hidden layers. More layers compose more nonlinearities.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">nn_weight_scale</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">5.0</span></code></p></td>
+<td><p>Scale of the spectral-normalised hidden weights. Higher values push <code class="docutils literal notranslate"><span class="pre">tanh</span></code> further into saturation, i.e.
+stronger nonlinearity.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">nn_output_value_range</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">(-1.0,</span> <span class="pre">1.0)</span></code></p></td>
+<td><p>Target range of every mechanism output (linear and MLP): the 1st and 99th percentiles of the output during
+calibration are mapped onto it, which keeps values bounded in deep graphs.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Noise distributions</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 20.0%" />
+<col style="width: 50.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Option</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Controls</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">prob_unimodal_noise</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.5</span></code></p></td>
+<td><p>Share of noise terms with a unimodal distribution; the rest are Gaussian mixtures (multi-modal noise).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">unimodal_noise_weights</span></code></p></td>
+<td><p>gaussian 0.35, laplace 0.25, uniform 0.2, student_t 0.2</p></td>
+<td><p>Relative weights of the unimodal noise families <code class="docutils literal notranslate"><span class="pre">gaussian</span></code>, <code class="docutils literal notranslate"><span class="pre">uniform</span></code>, <code class="docutils literal notranslate"><span class="pre">laplace</span></code>, <code class="docutils literal notranslate"><span class="pre">student_t</span></code> and
+<code class="docutils literal notranslate"><span class="pre">cauchy</span></code> (heavy tails clipped at 50 standard deviations; not in the default mix).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">noise_std_range</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">(0.01,</span> <span class="pre">0.5)</span></code></p></td>
+<td><p>Range the standard deviation of each noise term is drawn from, for all families and mixtures. Low values give
+nearly deterministic relations, high values noisy ones.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">noise_std_log_uniform</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>Draw the standard deviation log-uniformly (equal weight per order of magnitude) instead of uniformly.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">noise_mixture_components_range</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">(2,</span> <span class="pre">6)</span></code></p></td>
+<td><p>Number of Gaussian components in mixture noise and mixture root distributions.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">noise_mixture_mean_range</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">3.0</span></code></p></td>
+<td><p>Component means are drawn from <code class="docutils literal notranslate"><span class="pre">U(-r,</span> <span class="pre">r)</span></code> before the mixture is standardised.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">noise_mixture_component_std</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.4</span></code></p></td>
+<td><p>Standard deviation of each component before standardisation. Only the ratio to <code class="docutils literal notranslate"><span class="pre">noise_mixture_mean_range</span></code>
+matters: small ratios give clearly separated modes, large ratios a single blurred bump.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Root-node distributions</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 20.0%" />
+<col style="width: 50.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Option</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Controls</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">prob_unimodal_root</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.4</span></code></p></td>
+<td><p>Share of root nodes with a unimodal distribution; the rest are Gaussian mixtures.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">root_distribution_weights</span></code></p></td>
+<td><p>gaussian 0.25, uniform 0.15, laplace 0.1, lognormal 0.15, exponential 0.1, beta 0.1, student_t 0.05, chi2 0.1</p></td>
+<td><p>Relative weights of the unimodal root families. Every family is standardised to zero mean and unit variance,
+so they differ in skew and tails but not in scale.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Output transforms (per node)</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 20.0%" />
+<col style="width: 50.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Option</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Controls</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">prob_clipped_positive</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.15</span></code></p></td>
+<td><p>Share of nodes censored from below: values under a per-node threshold become exactly 0, the rest is shifted so
+that all values are non-negative (detection limits, zero-inflated data).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">prob_clipped_negative</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.05</span></code></p></td>
+<td><p>Mirror image, all values non-positive. Together with <code class="docutils literal notranslate"><span class="pre">prob_clipped_positive</span></code> at most 1.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">clip_zero_fraction_range</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">(0.1,</span> <span class="pre">0.4)</span></code></p></td>
+<td><p>Fraction of a censored node’s values that are exactly 0; the threshold is the matching quantile, fixed when the
+SCM is built.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">prob_discretised</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.05</span></code></p></td>
+<td><p>Share of nodes whose values are mapped to equal-frequency categories <code class="docutils literal notranslate"><span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">...,</span> <span class="pre">bins</span> <span class="pre">-</span> <span class="pre">1</span></code> with bin edges
+fixed when the SCM is built. For a censored node, the exact zeros form their own category and the remaining
+categories split the non-zero values equally.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">discrete_num_bins_range</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">(2,</span> <span class="pre">8)</span></code></p></td>
+<td><p>Number of categories for discretised nodes.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Internal</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 20.0%" />
+<col style="width: 50.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Option</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Controls</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">num_calibration_samples</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1000</span></code></p></td>
+<td><p>Number of samples drawn while building the SCM to calibrate each mechanism (input standardisation, output
+range, censoring thresholds, bin edges). More samples give more stable calibration at the cost of speed.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Here are a few common recipes.</p>
+<p>A dense graph with only nonlinear mechanisms, heteroscedastic noise on a third of the nodes and low noise overall:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">dowhy.gcm.data_generator</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataGeneratorConfig</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">config</span> <span class="o">=</span> <span class="n">DataGeneratorConfig</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">edge_density</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>                         <span class="c1"># denser graph (more parents per node)</span>
+<span class="gp">... </span>    <span class="n">edge_density_mode</span><span class="o">=</span><span class="s2">&quot;total&quot;</span><span class="p">,</span>                <span class="c1"># in-degree independent of a node&#39;s position</span>
+<span class="gp">... </span>    <span class="n">prob_linear_mechanism</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>                <span class="c1"># all nonlinear mechanisms</span>
+<span class="gp">... </span>    <span class="n">prob_non_additive_noise</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>              <span class="c1"># half of the nodes have non-additive noise</span>
+<span class="gp">... </span>    <span class="n">prob_heteroscedastic_noise</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>           <span class="c1"># 30% of additive nodes: noise scale depends on the parents</span>
+<span class="gp">... </span>    <span class="n">prob_log_space_mechanism</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>             <span class="c1"># no multiplicative (log-space) mechanisms</span>
+<span class="gp">... </span>    <span class="n">noise_std_range</span><span class="o">=</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">),</span>             <span class="c1"># low noise for cleaner relationships</span>
+<span class="gp">... </span>    <span class="n">unimodal_noise_weights</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;gaussian&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s2">&quot;laplace&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">},</span>
+<span class="gp">... </span>    <span class="n">root_distribution_weights</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;gaussian&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s2">&quot;lognormal&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">},</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">samples</span> <span class="o">=</span> <span class="n">generate_samples_from_random_scm</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">2000</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>A very common setting in the causal inference literature is to assume additive noise models (ANMs) for all nodes,
+<span class="math notranslate nohighlight">\(X_i = f_i(PA_{X_i}) + N_i\)</span>, with arbitrary nonlinear <span class="math notranslate nohighlight">\(f_i\)</span>. This keeps every mechanism invertible (the
+noise can be recovered as the residual), which many algorithms for counterfactuals, root cause analysis or
+independence-based causal discovery rely on. The following configuration generates such SCMs with a mix of linear and
+MLP functions and diverse but homoscedastic noise, while keeping the rest of the defaults:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">additive_noise</span> <span class="o">=</span> <span class="n">DataGeneratorConfig</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">prob_non_additive_noise</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>              <span class="c1"># no X_i = MLP(PA_i, N_i) nodes</span>
+<span class="gp">... </span>    <span class="n">prob_heteroscedastic_noise</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>           <span class="c1"># noise level does not depend on the parents</span>
+<span class="gp">... </span>    <span class="n">prob_log_space_mechanism</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>             <span class="c1"># no multiplicative (log-space) mechanisms</span>
+<span class="gp">... </span>    <span class="n">prob_clipped_positive</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>                <span class="c1"># no censoring ...</span>
+<span class="gp">... </span>    <span class="n">prob_clipped_negative</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">prob_discretised</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>                     <span class="c1"># ... and no discretisation, so every node stays a plain ANM</span>
+<span class="gp">... </span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The classic linear-Gaussian benchmark setting:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">linear_gaussian</span> <span class="o">=</span> <span class="n">DataGeneratorConfig</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">prob_linear_mechanism</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">prob_non_additive_noise</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">prob_heteroscedastic_noise</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">prob_log_space_mechanism</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">prob_unimodal_noise</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">unimodal_noise_weights</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;gaussian&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+<span class="gp">... </span>    <span class="n">prob_unimodal_root</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">root_distribution_weights</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;gaussian&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+<span class="gp">... </span>    <span class="n">prob_clipped_positive</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">prob_clipped_negative</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">prob_discretised</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">)</span>
+</pre></div>
+</div>
+<p>A hard setting with heavy tails, skewed roots and many discrete or censored variables:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">messy</span> <span class="o">=</span> <span class="n">DataGeneratorConfig</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">unimodal_noise_weights</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;student_t&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s2">&quot;laplace&quot;</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span> <span class="s2">&quot;cauchy&quot;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">},</span>
+<span class="gp">... </span>    <span class="n">root_distribution_weights</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;lognormal&quot;</span><span class="p">:</span> <span class="mf">0.4</span><span class="p">,</span> <span class="s2">&quot;chi2&quot;</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span> <span class="s2">&quot;exponential&quot;</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">},</span>
+<span class="gp">... </span>    <span class="n">prob_clipped_positive</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">prob_discretised</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">discrete_num_bins_range</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="n">noise_std_log_uniform</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>               <span class="c1"># equal weight to every order of magnitude of the noise level</span>
+<span class="gp">... </span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Only the additive mechanisms (plain, heteroscedastic and log-space) are invertible. Nodes with non-additive noise
+or with an output transform are not, which matters for counterfactuals (see below). To generate an SCM in which
+every node is invertible, set <code class="docutils literal notranslate"><span class="pre">prob_non_additive_noise</span></code>, <code class="docutils literal notranslate"><span class="pre">prob_clipped_positive</span></code>, <code class="docutils literal notranslate"><span class="pre">prob_clipped_negative</span></code>
+and <code class="docutils literal notranslate"><span class="pre">prob_discretised</span></code> to zero.</p>
+</div>
+</section>
+<section id="random-mechanisms-for-your-own-graph">
+<h2>Random mechanisms for your own graph<a class="headerlink" href="#random-mechanisms-for-your-own-graph" title="Link to this heading">#</a></h2>
+<p>If the graph structure is given, for instance because we want to test a method on a specific topology, we can let the
+generator fill in only the mechanisms via <code class="xref py py-func docutils literal notranslate"><span class="pre">assign_random_fcms()</span></code>:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">dowhy.gcm.data_generator</span><span class="w"> </span><span class="kn">import</span> <span class="n">assign_random_fcms</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gcm</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">causal_model</span> <span class="o">=</span> <span class="n">assign_random_fcms</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">([(</span><span class="s2">&quot;age&quot;</span><span class="p">,</span> <span class="s2">&quot;income&quot;</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;age&quot;</span><span class="p">,</span> <span class="s2">&quot;health&quot;</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;income&quot;</span><span class="p">,</span> <span class="s2">&quot;health&quot;</span><span class="p">)]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gcm</span><span class="o">.</span><span class="n">draw_samples</span><span class="p">(</span><span class="n">causal_model</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="go">      age  income  health</span>
+<span class="go">0  1.5299  0.9813 -0.3781</span>
+<span class="go">1  0.7664  0.3952 -0.1625</span>
+<span class="go">2  1.4792  0.2625 -0.9570</span>
+</pre></div>
+</div>
+<p>The optional second argument is again a <code class="xref py py-class docutils literal notranslate"><span class="pre">DataGeneratorConfig</span></code>.</p>
+</section>
+<section id="using-the-scm-as-ground-truth">
+<h2>Using the SCM as ground truth<a class="headerlink" href="#using-the-scm-as-ground-truth" title="Link to this heading">#</a></h2>
+<p>Because the returned object is an ordinary SCM, interventional queries (as shown above) and counterfactual queries
+give us the true answers that a method under test should recover.</p>
+<p>Counterfactuals require an invertible model. With a configuration that produces only invertible mechanisms, we can
+wrap the generated graph in an <a class="reference internal" href="../../dowhy.gcm.html#dowhy.gcm.causal_models.InvertibleStructuralCausalModel" title="dowhy.gcm.causal_models.InvertibleStructuralCausalModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">InvertibleStructuralCausalModel</span></code></a> (the mechanisms are
+stored on the graph, so no refitting is needed):</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">invertible_config</span> <span class="o">=</span> <span class="n">DataGeneratorConfig</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">prob_non_additive_noise</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">prob_clipped_positive</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">prob_clipped_negative</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">prob_discretised</span><span class="o">=</span><span class="mf">0.0</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gcm</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">invertible_scm</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">InvertibleStructuralCausalModel</span><span class="p">(</span><span class="n">generate_random_scm</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">invertible_config</span><span class="p">)</span><span class="o">.</span><span class="n">graph</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">invertible_scm</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
+<span class="go">[(&#39;X0&#39;, &#39;X4&#39;), (&#39;X1&#39;, &#39;X2&#39;), (&#39;X2&#39;, &#39;X3&#39;), (&#39;X2&#39;, &#39;X4&#39;)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">observed</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">draw_samples</span><span class="p">(</span><span class="n">invertible_scm</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">observed</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="go">       X0      X1      X2      X3      X4</span>
+<span class="go">0  1.0254 -0.0790  0.1726  0.8990 -0.5367</span>
+<span class="go">1 -0.9072  1.4345  0.9833 -0.9028  0.4520</span>
+<span class="go">2 -0.1642  0.0030  0.2693  0.7357 -0.0199</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gcm</span><span class="o">.</span><span class="n">counterfactual_samples</span><span class="p">(</span><span class="n">invertible_scm</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;X0&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">},</span> <span class="n">observed_data</span><span class="o">=</span><span class="n">observed</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="go">       X0      X1      X2      X3      X4</span>
+<span class="go">0  2.0254 -0.0790  0.1726  0.8990 -0.8432</span>
+<span class="go">1  0.0928  1.4345  0.9833 -0.9028 -0.0680</span>
+<span class="go">2  0.8358  0.0030  0.2693  0.7357 -0.6332</span>
+</pre></div>
+</div>
+<p>Only <code class="docutils literal notranslate"><span class="pre">X0</span></code> and its child <code class="docutils literal notranslate"><span class="pre">X4</span></code> change; the noise of every node is kept exactly as it was in the observed rows.</p>
+<p>A typical benchmarking loop generates a random SCM, draws data from it, fits a fresh model on the data using the true
+graph (or a graph estimated by a discovery algorithm) and compares the results of a causal query with the ground
+truth. For instance, comparing the arrow strengths of the true and the fitted model:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gcm</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">set_random_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ground_truth</span> <span class="o">=</span> <span class="n">generate_random_scm</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">invertible_config</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">draw_samples</span><span class="p">(</span><span class="n">ground_truth</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">2000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fitted</span> <span class="o">=</span> <span class="n">gcm</span><span class="o">.</span><span class="n">StructuralCausalModel</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">(</span><span class="n">ground_truth</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">edges</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gcm</span><span class="o">.</span><span class="n">auto</span><span class="o">.</span><span class="n">assign_causal_mechanisms</span><span class="p">(</span><span class="n">fitted</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gcm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">fitted</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">{</span><span class="n">edge</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">strength</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="k">for</span> <span class="n">edge</span><span class="p">,</span> <span class="n">strength</span> <span class="ow">in</span> <span class="n">gcm</span><span class="o">.</span><span class="n">arrow_strength</span><span class="p">(</span><span class="n">ground_truth</span><span class="p">,</span> <span class="s2">&quot;X4&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+<span class="go">{(&#39;X0&#39;, &#39;X4&#39;): 0.106, (&#39;X2&#39;, &#39;X4&#39;): 0.139}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">{</span><span class="n">edge</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">strength</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="k">for</span> <span class="n">edge</span><span class="p">,</span> <span class="n">strength</span> <span class="ow">in</span> <span class="n">gcm</span><span class="o">.</span><span class="n">arrow_strength</span><span class="p">(</span><span class="n">fitted</span><span class="p">,</span> <span class="s2">&quot;X4&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+<span class="go">{(&#39;X0&#39;, &#39;X4&#39;): 0.144, (&#39;X2&#39;, &#39;X4&#39;): 0.147}</span>
+</pre></div>
+</div>
+<p>Repeating this over many seeds and configurations gives a robust picture of how a method behaves across graph
+densities, mechanism types and noise levels.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Generated SCMs can be cloned with <code class="docutils literal notranslate"><span class="pre">scm.clone()</span></code> and refitted with <code class="xref py py-func docutils literal notranslate"><span class="pre">fit()</span></code>; the clone keeps all
+random weights and thresholds, so <code class="docutils literal notranslate"><span class="pre">draw_samples</span></code> on the clone reproduces the original model under the same seed.</p>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="estimating_confidence_intervals.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Estimating Confidence Intervals</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../causal_tasks/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Performing Causal Tasks</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generating-a-random-scm-and-drawing-data-from-it">Generating a random SCM and drawing data from it</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#working-with-the-generated-scm">Working with the generated SCM</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-the-generator-produces">What the generator produces</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#configuring-the-generator">Configuring the generator</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#random-mechanisms-for-your-own-graph">Random mechanisms for your own graph</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-the-scm-as-ground-truth">Using the SCM as ground truth</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/user_guide/modeling_gcm/random_scm_generator.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2022, PyWhy contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
