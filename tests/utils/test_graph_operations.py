@@ -359,6 +359,19 @@ class TestDaggityToDot:
         result = daggity_to_dot(daggity)
         assert result == 'digraph { X [pos="0,0"]; X -> Y; }'
 
+    def test_brackets_inside_quoted_strings_are_not_attribute_lists(self):
+        daggity = 'dag {\n"region [A, B]" [exposure]\n"risk [outcome]"\nU [label="a]b",latent]\n"region [A, B]" -> "risk [outcome]"\n}'
+        result = daggity_to_dot(daggity)
+        assert result == (
+            'digraph { "region [A, B]" []; "risk [outcome]"; U [label="a]b",observed="no"]; '
+            '"region [A, B]" -> "risk [outcome]"; }'
+        )
+
+    def test_escaped_quotes_in_attribute_values(self):
+        daggity = 'dag {\nX [exposure,label="a\\"b",pos="0,0"]\nU [latent,label="c\\"d"]\n}'
+        result = daggity_to_dot(daggity)
+        assert result == r'digraph { X [label="a\"b",pos="0,0"]; U [observed="no",label="c\"d"]; }'
+
 
 # ---------------------------------------------------------------------------
 # str_to_dot

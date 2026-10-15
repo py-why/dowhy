@@ -175,13 +175,20 @@ _DAGITTY_ATTRIBUTE_MAP = {
     "adjusted": None,
     "latent": 'observed="no"',
 }
-# Splits a DOT attribute list on commas that are not inside double quotes (e.g. pos="0.1,0.2").
-_DOT_ATTRIBUTE_SEPARATOR = re.compile(r',(?=(?:[^"]*"[^"]*")*[^"]*$)')
+# A double-quoted DOT string, allowing escaped characters such as \".
+_DOT_QUOTED = r'"(?:[^"\\]|\\.)*"'
+# Matches either a quoted string (left untouched, so brackets inside quoted node names are not attribute lists) or an
+# attribute list ``[...]`` whose quoted values may contain "]" or ",".
+_DOT_QUOTED_OR_ATTRIBUTES = re.compile(_DOT_QUOTED + r'|\[((?:[^\]"\\]|\\.|' + _DOT_QUOTED + r")*)\]")
+# One attribute of an attribute list: everything up to the next comma that is not inside a quoted value.
+_DOT_ATTRIBUTE = re.compile(r'(?:[^,"\\]|\\.|' + _DOT_QUOTED + r")+")
 
 
 def _convert_dagitty_attributes(match):
+    if match.group(1) is None:
+        return match.group(0)
     attributes = []
-    for attribute in _DOT_ATTRIBUTE_SEPARATOR.split(match.group(1)):
+    for attribute in _DOT_ATTRIBUTE.findall(match.group(1)):
         attribute = attribute.strip()
         if attribute in _DAGITTY_ATTRIBUTE_MAP:
             attribute = _DAGITTY_ATTRIBUTE_MAP[attribute]
@@ -201,7 +208,7 @@ def daggity_to_dot(daggity_string):
     graph = re.sub(r"^dag ", "digraph ", graph)
     graph = re.sub("{;", "{", graph)
     graph = re.sub("};", "}", graph)
-    graph = re.sub(r"\[([^\]]*)\]", _convert_dagitty_attributes, graph)
+    graph = _DOT_QUOTED_OR_ATTRIBUTES.sub(_convert_dagitty_attributes, graph)
     return graph
 
 
