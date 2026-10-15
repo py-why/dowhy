@@ -728,9 +728,7 @@ def find_valid_adjustment_sets(
     for size_candidate_set in set_sizes:
         for candidate_set in itertools.combinations(filt_eligible_variables, size_candidate_set):
             if num_iterations >= max_iterations:
-                logger.warning(
-                    f"Max number of iterations {max_iterations} reached. Could not find a valid backdoor set."
-                )
+                logger.warning(f"Max number of iterations {max_iterations} reached. Stopping backdoor search.")
                 return backdoor_sets, found_valid_adjustment_set
 
             check = check_valid_backdoor_set(
