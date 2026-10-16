@@ -246,8 +246,14 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
 
         # For normalized/stabilized weights (Hajek estimator), normalize by sum of unit weights
         # For vanilla IPS weights (Horvitz-Thompson estimator), normalize by N (number of units)
-        if weighting_scheme_name in ["ips_normalized_weight", "tips_normalized_weight", "cips_normalized_weight",
-                                      "ips_stabilized_weight", "tips_stabilized_weight", "cips_stabilized_weight"]:
+        if weighting_scheme_name in [
+            "ips_normalized_weight",
+            "tips_normalized_weight",
+            "cips_normalized_weight",
+            "ips_stabilized_weight",
+            "tips_stabilized_weight",
+            "cips_stabilized_weight",
+        ]:
             # Hajek estimator: normalize by sum of unit weights for each arm
             sum_dy_weights = np.sum(data[self._target_estimand.treatment_variable[0]] * data[weighting_scheme_name])
             sum_dbary_weights = np.sum(
