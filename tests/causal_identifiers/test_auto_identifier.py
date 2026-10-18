@@ -36,3 +36,43 @@ def test_auto_identifier_and_id_identifier_conform_to_causal_identifier_protocol
     RuntimeCheckableCausalIdentifier = runtime_checkable(CausalIdentifier)
     assert isinstance(AutoIdentifier(estimand_type=EstimandType.NONPARAMETRIC_ATE), RuntimeCheckableCausalIdentifier)
     assert isinstance(IDIdentifier(), RuntimeCheckableCausalIdentifier)
+
+
+def test_find_valid_adjustment_sets_respects_max_iterations(monkeypatch):
+    import networkx as nx
+
+    from dowhy.causal_identifier.auto_identifier import (
+        BackdoorAdjustment,
+        find_valid_adjustment_sets,
+    )
+
+    graph = nx.DiGraph()
+    graph.add_nodes_from(["T", "Y", "A", "B", "C", "D", "E"])
+
+    num_checks = 0
+
+    def always_invalid(*args, **kwargs):
+        nonlocal num_checks
+        num_checks += 1
+        return {"is_dseparated": False}
+
+    monkeypatch.setattr(
+        "dowhy.causal_identifier.auto_identifier.check_valid_backdoor_set",
+        always_invalid,
+    )
+
+    find_valid_adjustment_sets(
+        graph=graph,
+        action_nodes=["T"],
+        outcome_nodes=["Y"],
+        observed_nodes=["T", "Y"],
+        backdoor_paths=None,
+        bdoor_graph=graph,
+        dseparation_algo="default",
+        backdoor_sets=[],
+        filt_eligible_variables=["A", "B", "C", "D", "E"],
+        backdoor_adjustment=BackdoorAdjustment.BACKDOOR_MIN,
+        max_iterations=3,
+    )
+
+    assert num_checks == 3

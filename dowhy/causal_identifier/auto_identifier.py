@@ -727,6 +727,10 @@ def find_valid_adjustment_sets(
     )
     for size_candidate_set in set_sizes:
         for candidate_set in itertools.combinations(filt_eligible_variables, size_candidate_set):
+            if num_iterations >= max_iterations:
+                logger.warning(f"Max number of iterations {max_iterations} reached. Stopping backdoor search.")
+                return backdoor_sets, found_valid_adjustment_set
+
             check = check_valid_backdoor_set(
                 graph,
                 action_nodes,
@@ -743,9 +747,6 @@ def find_valid_adjustment_sets(
                 backdoor_sets.append(AdjustmentSet(AdjustmentSet.BACKDOOR, candidate_set))
                 found_valid_adjustment_set = True
             num_iterations += 1
-            if backdoor_adjustment == BackdoorAdjustment.BACKDOOR_EXHAUSTIVE and num_iterations > max_iterations:
-                logger.warning(f"Max number of iterations {max_iterations} reached.")
-                break
         # If the backdoor method is `maximal-adjustment` or `minimal-adjustment`, return the first found adjustment set.
         if (
             backdoor_adjustment
@@ -763,9 +764,6 @@ def find_valid_adjustment_sets(
             backdoor_adjustment in {BackdoorAdjustment.BACKDOOR_DEFAULT, BackdoorAdjustment.BACKDOOR_MAX}
             and is_all_observed
         ):
-            break
-        if num_iterations > max_iterations:
-            logger.warning(f"Max number of iterations {max_iterations} reached. Could not find a valid backdoor set.")
             break
     return backdoor_sets, found_valid_adjustment_set
 
