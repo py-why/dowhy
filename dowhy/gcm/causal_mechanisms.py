@@ -302,7 +302,8 @@ class ClassifierFCM(FunctionalCausalModel, ProbabilityEstimatorModel):
         classes, n = 0.7 and an input x with p(y = 0| x) = 0.6 and p(y = 1| x) = 0.4, then we get y = 1 as a return
         value. This is because p(y = 0| x) < n <= 1.0, i.e. n falls into the bucket that is spanned by p(y = 1| x).
 
-        :param parent_samples: Samples from the inputs X.
+        :param parent_samples: Input samples with columns in the same order as the X passed to :meth:`fit`. Columns
+                               are interpreted by position, as in :meth:`estimate_probabilities`.
         :param noise_samples: Samples from the noise on [0, 1].
         :return: Class labels Y based on the inputs and noise.
         """
@@ -317,7 +318,23 @@ class ClassifierFCM(FunctionalCausalModel, ProbabilityEstimatorModel):
     def estimate_probabilities(self, parent_samples: np.ndarray) -> np.ndarray:
         """Returns the class probabilities for the given parent_samples.
 
-        :param parent_samples: Samples from inputs X.
+        Columns are interpreted by position and must follow the order of the X passed to :meth:`fit`.
+        Reordering the columns can change the probabilities without raising an error.
+
+        When the causal model was fitted with :func:`dowhy.gcm.fit`, use the order returned by
+        :func:`dowhy.graph.get_ordered_predecessors` to select the parent columns before converting to NumPy.
+        For an already fitted causal model and new data, for example:
+
+        .. code-block:: python
+
+            from dowhy.graph import get_ordered_predecessors
+
+            parents = get_ordered_predecessors(causal_model.graph, target_node)
+            parent_samples = new_data[parents].to_numpy()
+            mechanism = causal_model.causal_mechanism(target_node)
+            probabilities = mechanism.estimate_probabilities(parent_samples)
+
+        :param parent_samples: Input samples with columns in the same order as the X passed to :meth:`fit`.
         :return: A nxd numpy matrix with class probabilities for each sample, where n is the number of samples and d
                  the number of classes. Here, array entry A[i][j] corresponds to the i-th sample indicating the
                  probability of the j-th class.
@@ -327,7 +344,8 @@ class ClassifierFCM(FunctionalCausalModel, ProbabilityEstimatorModel):
     def fit(self, X: np.ndarray, Y: np.ndarray) -> None:
         """Fits the underlying classification model.
 
-        :param X: Input samples.
+        :param X: Input samples. Their column order defines the order required by later calls to :meth:`evaluate`
+                  and :meth:`estimate_probabilities`.
         :param Y: Target labels.
         :return: None
         """
