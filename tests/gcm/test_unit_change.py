@@ -357,3 +357,23 @@ def test_given_two_mechanisms_when_evaluate_unit_change_then_returns_correct_att
     )
 
     np.testing.assert_array_almost_equal(actual_contributions, expected_contributions, decimal=1)
+
+
+def test_given_input_column_named_f_when_evaluate_unit_change_with_mechanism_then_raises_value_error():
+    num_rows = 10
+    f_vals = np.random.normal(size=num_rows)
+    B_vals = np.random.normal(size=num_rows)
+    C_vals = 2 * f_vals + 3 * B_vals
+
+    background_df = pd.DataFrame(data={"f": f_vals, "B": B_vals})
+    foreground_df = pd.DataFrame(data={"f": f_vals, "B": B_vals})
+
+    mechanism = SklearnLinearRegressionModel(
+        LinearRegression(fit_intercept=False).fit(np.column_stack((f_vals, B_vals)), C_vals)
+    )
+
+    with pytest.raises(ValueError, match="reserved"):
+        unit_change_linear(mechanism, background_df, mechanism, foreground_df, ["f", "B"])
+
+    with pytest.raises(ValueError, match="reserved"):
+        unit_change_nonlinear(mechanism, background_df, mechanism, foreground_df, ["f", "B"])
