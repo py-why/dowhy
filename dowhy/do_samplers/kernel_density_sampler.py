@@ -1,5 +1,4 @@
 import numpy as np
-from scipy.interpolate import interp1d
 from statsmodels.nonparametric.kernel_density import EstimatorSettings, KDEMultivariateConditional
 
 from dowhy.do_sampler import DoSampler
@@ -110,10 +109,11 @@ class KernelSampler(object):
         points = np.vstack(
             [[self.outcome_lower_support - 3.0 * y_bw], points, [self.outcome_upper_support + 3.0 * y_bw]]
         )
-        inv_cdf = interp1d(cdf_vals.flatten(), points.flatten(), fill_value=0.0, axis=0)
+        cdf_flat = cdf_vals.flatten()
+        points_flat = points.flatten()
         r = np.random.rand()
         try:
-            return inv_cdf(r)
+            return np.interp(r, cdf_flat, points_flat, left=0.0, right=0.0)
         except ValueError:
             return self.sample_point(x_z)
 
