@@ -53,11 +53,11 @@ def fit(causal_model: ProbabilisticCausalModel, data: pd.DataFrame, return_evalu
     for node in progress_bar:
         if node not in data:
             raise RuntimeError(
-                "Could not find data for node %s in the given training data! There should be a column "
-                "containing samples for node %s." % (node, node)
+                f"Could not find data for node {node} in the given training data! There should be a column "
+                f"containing samples for node {node}."
             )
 
-        progress_bar.set_description("Fitting causal mechanism of node %s" % node)
+        progress_bar.set_description(f"Fitting causal mechanism of node {node}")
 
         fit_causal_model_of_target(causal_model, node, data)
 
