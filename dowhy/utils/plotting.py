@@ -3,11 +3,9 @@ import os
 import tempfile
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 import pandas as pd
-from matplotlib import image
 
 _logger = logging.getLogger(__name__)
 
@@ -150,6 +148,11 @@ def bar_plot(
             if node not in uncertainties:
                 uncertainties[node] = [values[node], values[node]]
 
+    try:
+        import matplotlib.pyplot as plt
+    except ImportError:
+        raise ImportError("matplotlib is required for plotting. Install it with: pip install 'dowhy[plotting]'")
+
     figure, ax = plt.subplots(figsize=figure_size)
     ci_plus = np.array([uncertainties[node][1] - values[node] for node in values.keys()])
     ci_minus = np.array([values[node] - uncertainties[node][0] for node in values.keys()])
@@ -185,6 +188,12 @@ def _calc_arrow_width(strength: float, max_strength: float):
 
 
 def _plot_as_pyplot_figure(pygraphviz_graph: Any, figure_size: Optional[Tuple[int, int]] = None) -> None:
+    try:
+        import matplotlib.pyplot as plt
+        from matplotlib import image
+    except ImportError:
+        raise ImportError("matplotlib is required for plotting. Install it with: pip install 'dowhy[plotting]'")
+
     with tempfile.TemporaryDirectory() as tmp_dir_name:
         pygraphviz_graph.draw(tmp_dir_name + os.sep + "Graph.png")
         img = image.imread(tmp_dir_name + os.sep + "Graph.png")
