@@ -500,8 +500,7 @@ def test_given_categorical_data_when_print_auto_summary_then_returns_expected_fo
     assert len(summary_result._nodes["X4"]["model_performances"]) == 0
     assert len(summary_result._nodes["Y"]["model_performances"]) > 0
 
-    assert (
-        """The following types of causal mechanisms are considered for the automatic selection:
+    assert """The following types of causal mechanisms are considered for the automatic selection:
 
 If root node:
 An empirical distribution, i.e., the distribution is represented by randomly sampling from the provided data. This provides a flexible and non-parametric way to model the marginal distribution and is valid for all types of data modalities.
@@ -535,9 +534,7 @@ Node X3 is a root node. Therefore, assigning 'Empirical Distribution' to the nod
 Node X4 is a root node. Therefore, assigning 'Empirical Distribution' to the node representing the marginal distribution.
 
 --- Node: Y
-Node Y is a non-root node with categorical data. Assigning 'Classifier FCM based on """
-        in summary_string
-    )
+Node Y is a non-root node with categorical data. Assigning 'Classifier FCM based on """ in summary_string
     assert "This represents the causal relationship as Y := f(X0,X1,X2,X3,X4,N)." in summary_string
     assert "For the model selection, the following models were evaluated on the log loss metric:" in summary_string
     assert (
@@ -682,3 +679,24 @@ def test_given_non_linear_multiclass_mixed_features_when_auto_assign_causal_mode
     assert isinstance(
         causal_model.causal_mechanism("Y").classifier_model.sklearn_model, DecisionTreeClassifier
     ) or isinstance(causal_model.causal_mechanism("Y").classifier_model.sklearn_model, HistGradientBoostingClassifier)
+
+
+def test_given_graph_node_not_in_dataframe_when_assign_causal_mechanisms_then_raises_clear_error():
+    # Regression test for https://github.com/py-why/dowhy/issues/1742
+    causal_model = StructuralCausalModel(nx.DiGraph([("X", "Y")]))
+    # DataFrame missing the "Y" column
+    data = pd.DataFrame({"X": np.random.normal(0, 1, 100)})
+    with pytest.raises(ValueError, match="Y"):
+        assign_causal_mechanisms(causal_model, data)
+
+
+def test_given_integer_node_names_when_assign_causal_mechanisms_then_raises_helpful_error():
+    # Regression test for https://github.com/py-why/dowhy/issues/1742
+    # nx.DiGraph() uses integer node names by default which causes a cryptic KeyError
+    G = nx.DiGraph()
+    G.add_edge(0, 1)
+    causal_model = StructuralCausalModel(G)
+    # DataFrame uses string column names
+    data = pd.DataFrame({"0": np.random.normal(0, 1, 100), "1": np.random.normal(0, 1, 100)})
+    with pytest.raises(ValueError, match="nx.relabel_nodes"):
+        assign_causal_mechanisms(causal_model, data)
