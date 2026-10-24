@@ -447,3 +447,51 @@ class TestEconMLEstimator:
         )
 
         assert np.array_equal(est1.cate_estimates, est2.cate_estimates)
+
+    def test_num_quantiles_parameter(self):
+        """num_quantiles_to_discretize_cont_cols reaches the DoWhy wrapper.
+
+        Regression test for https://github.com/py-why/dowhy/issues/767
+
+        The parameter controls how DoWhy discretizes numeric effect modifiers,
+        so it must be passed to the DoWhy estimator wrapper and not forwarded
+        to the underlying third-party estimator, which does not necessarily
+        accept it.
+        """
+        data = datasets.linear_dataset(
+            10,
+            num_common_causes=4,
+            num_samples=500,
+            num_instruments=2,
+            num_effect_modifiers=2,
+            num_treatments=1,
+            treatment_is_binary=False,
+        )
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            effect_modifiers=data["effect_modifier_names"],
+            graph=data["gml_graph"],
+        )
+        identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        estimate = model.estimate_effect(
+            identified_estimand,
+            method_name="backdoor.econml.dml.dml.LinearDML",
+            control_value=0,
+            treatment_value=1,
+            target_units="ate",
+            num_quantiles_to_discretize_cont_cols=6,
+            method_params={
+                "init_params": {
+                    "model_y": GradientBoostingRegressor(),
+                    "model_t": GradientBoostingRegressor(),
+                    "featurizer": PolynomialFeatures(degree=1, include_bias=True),
+                },
+                "fit_params": {},
+            },
+        )
+        assert estimate.value is not None
+        # The value must be recorded on the DoWhy wrapper, and must not have
+        # been forwarded to the third-party estimator's constructor.
+        assert estimate.estimator.num_quantiles_to_discretize_cont_cols == 6
