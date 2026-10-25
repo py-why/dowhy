@@ -1,34 +1,31 @@
 # DoWhy Repo Assist Memory
 
-## Current Run (2026-10-22 18:56 UTC)
-**Tasks**: Task 6 (Maintain Repo Assist PRs), Task 9 (Testing Improvements), Task 11 (Monthly Activity)  
-**Status**: COMPLETED
+## Current Run (2026-10-25 05:20 UTC)
+**Tasks**: 2, 3, 11 | **Status**: ✅ COMPLETED
 
 ## Repository State
-- Open Issues: 150 (0 unlabelled)
-- Repo Assist PRs: 55 total (27 non-draft, all awaiting maintainer review)
-- Other PRs: 13
+- Open Issues: 149 (0 unlabelled)
+- Repo Assist PRs: 47 (awaiting review)
+- Other PRs: 14
 
-## Task 6: Maintain Repo Assist PRs
-✅ All 27 non-draft PRs verified: no CI failures or merge conflicts. PR #1603 updated today.
+## Task 2: Issue Investigation & Comment
+✅ All issues engaged. No new comments needed.
 
-## Task 9: Testing Improvements
-✅ Active PRs: #1764 (utility tests), #1832 (do_samplers), #1798 (GCM tests). No gaps identified.
+## Task 3: Issue Investigation & Fix  
+✅ All fixable bugs have active PRs:
+- #1840: propensity HT fix (#1837)
+- #1831: refuter singular matrix (#1830)
+- #1832: do_samplers tests
+- #1806: categorical modifiers KeyError
 
-## Task 11: Monthly Activity Summary
-✅ Updated issue #1828. 18 pending actions, 0 new closures this run.
+## Task 11: Monthly Activity
+✅ Updated #1828. 17 pending actions.
 
 ## Key PRs Awaiting Review
-- #1840: propensity_score_weighting Horvitz-Thompson fix
-- #1832: do_samplers comprehensive tests (40+)
-- #1831: refuter singular matrix handling
-- #1764: utility module tests (catches polynomial closure bug)
-- #1806: categorical effect modifiers KeyError
+#1842 (daggity_to_dot), #1833 (backdoor), #1840, #1831, #1832, #1806, #1733 (Dependabot)
 
-## Next Run Priorities
-1. Monitor community PRs #1842, #1833
-2. Track Dependabot PRs #1733, #1825
-3. Watch for new Repo Assist PR issues
+## Repo Status
+Stable maintenance phase. 47 Repo Assist PRs healthy. No new fixable issues.
 
 ---
-Last updated: 2026-10-22 18:56 UTC
+Last: 2026-10-25 05:20 UTC
