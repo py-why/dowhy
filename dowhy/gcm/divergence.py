@@ -1,3 +1,4 @@
+from collections import Counter
 from functools import partial
 from typing import Callable, Union
 
@@ -166,6 +167,7 @@ def estimate_kl_divergence_continuous_clf(
 
 
 def estimate_kl_divergence_categorical(X: np.ndarray, Y: np.ndarray) -> float:
+    """Estimates KL divergence between categorical samples, treating each row as one joint observation."""
     X, Y = shape_into_2d(X, Y)
 
     if X.shape[1] != Y.shape[1]:
@@ -174,10 +176,14 @@ def estimate_kl_divergence_categorical(X: np.ndarray, Y: np.ndarray) -> float:
             "dimension %d." % (X.shape[1], Y.shape[1])
         )
 
-    all_uniques = np.unique(np.vstack([X, Y]))
+    # Count joint observations rather than pooling categories across columns. Tuples also support object arrays,
+    # which are commonly used for categorical data but are not supported by np.unique with axis=0.
+    x_counts = Counter(map(tuple, X))
+    y_counts = Counter(map(tuple, Y))
+    all_uniques = x_counts.keys() | y_counts.keys()
 
-    p = np.array([(np.sum(X == i) + EPS) / (X.shape[0] + EPS) for i in all_uniques])
-    q = np.array([(np.sum(Y == i) + EPS) / (Y.shape[0] + EPS) for i in all_uniques])
+    p = np.array([(x_counts[i] + EPS) / (X.shape[0] + EPS) for i in all_uniques])
+    q = np.array([(y_counts[i] + EPS) / (Y.shape[0] + EPS) for i in all_uniques])
 
     return float(np.sum(p * np.log(p / q)))
 
