@@ -1,5 +1,5 @@
 import sys
-from unittest.mock import patch
+from unittest.mock import patch, sentinel
 
 import numpy as np
 import pandas as pd
@@ -7,7 +7,9 @@ import pytest
 import statsmodels.api as sm
 from pytest import mark
 from scipy.special import expit
+from sklearn.base import clone
 from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.model_selection import ParameterGrid
 
 import dowhy.datasets
 from dowhy import CausalModel
@@ -47,6 +49,44 @@ def _sensitivity_dataset():
         + rng.normal(scale=stddev_outcome_noise, size=num_samples)
     )
     return {"df": data, "treatment_name": ["v0"], "outcome_name": "y", "ate": beta}
+
+
+@pytest.mark.econml
+def test_non_plugin_alpha_estimator_uses_default_grid():
+    from dowhy.causal_refuters.reisz import GridSearchCVList, ReiszRepresenter, get_alpha_estimator, reisz_scoring
+
+    X = np.array([[0, -1], [1, -0.5], [0, 0.5], [1, 1]])
+    cv = [(np.array([0, 1]), np.array([2, 3]))]
+    # Exercise real search construction without fitting the full forest grid.
+    with patch.object(GridSearchCVList, "fit", autospec=True) as search_fit:
+        search_fit.return_value.best_estimator_ = sentinel.best_estimator
+        result = get_alpha_estimator(cv=cv, X=X, max_degree=2, estimator_param_list=None, plugin_reisz=False)
+
+    search_fit.assert_called_once()
+    search, fitted_X = search_fit.call_args.args
+    assert fitted_X is X
+    assert search.cv is cv
+    assert search.scoring is reisz_scoring
+    assert result is sentinel.best_estimator
+    assert len(search.estimator_list) == len(search.param_grid_list) == 1
+    estimator = search.estimator_list[0]
+    assert isinstance(estimator, ReiszRepresenter)
+
+    grid = search.param_grid_list[0]
+    assert {name: values for name, values in grid.items() if name != "reisz_functions"} == {
+        "min_samples_leaf": [10, 50],
+        "min_var_fraction_leaf": [0.01, 0.1],
+        "l2_regularizer": [1e-5, 1e-3],
+        "max_depth": [5, None],
+    }
+    assert [len(basis) for basis in grid["reisz_functions"]] == [3, 2]
+    polynomial_input = np.array([[-2], [0], [2]])
+    for basis in grid["reisz_functions"]:
+        for degree, function in enumerate(basis):
+            np.testing.assert_array_equal(function(polynomial_input), polynomial_input**degree)
+
+    for parameters in ParameterGrid(grid):
+        clone(estimator).set_params(**parameters)
 
 
 @mark.usefixtures("fixed_seed")
