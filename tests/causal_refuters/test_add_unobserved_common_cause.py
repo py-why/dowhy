@@ -2,16 +2,30 @@ import sys
 from unittest.mock import patch
 
 import numpy as np
+import pandas as pd
 import pytest
 import statsmodels.api as sm
 from pytest import mark
+from scipy.special import expit
 from sklearn.ensemble import GradientBoostingRegressor
 
 import dowhy.datasets
 from dowhy import CausalModel
 from dowhy.causal_refuters.evalue_sensitivity_analyzer import EValueSensitivityAnalyzer
+from dowhy.utils.regression import create_polynomial_function
 
 from .base import SimpleRefuter
+
+
+def _sensitivity_dataset():
+    rng = np.random.default_rng(100)
+    data = pd.DataFrame(rng.normal(size=(500, 7)), columns=[f"W{i}" for i in range(7)])
+    other_causes = data.drop(columns="W3").sum(axis=1)
+    # Keep overlap while making W3 a meaningful benchmark for treatment and outcome.
+    propensity = 0.2 + 0.6 * expit(2 * data["W3"] + 0.2 * other_causes)
+    data["v0"] = rng.binomial(1, propensity)
+    data["y"] = 10 * data["v0"] + 3 * data["W3"] + other_causes + rng.normal(scale=5, size=len(data))
+    return {"df": data, "treatment_name": ["v0"], "outcome_name": "y", "ate": 10}
 
 
 @mark.usefixtures("fixed_seed")
@@ -314,14 +328,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
         self, mock_fig, estimator_method, effect_fraction_on_treatment, benchmark_common_causes, simulation_method
     ):
         np.random.seed(100)
-        data = dowhy.datasets.linear_dataset(
-            beta=10,
-            num_common_causes=7,
-            num_samples=500,
-            num_treatments=1,
-            stddev_treatment_noise=5,
-            stddev_outcome_noise=5,
-        )
+        data = _sensitivity_dataset()
         data["df"] = data["df"].drop("W4", axis=1)
         graph_str = 'graph[directed 1node[ id "y" label "y"]node[ id "W0" label "W0"] node[ id "W1" label "W1"] node[ id "W2" label "W2"] node[ id "W3" label "W3"]  node[ id "W5" label "W5"] node[ id "W6" label "W6"]node[ id "v0" label "v0"]edge[source "v0" target "y"]edge[ source "W0" target "v0"] edge[ source "W1" target "v0"] edge[ source "W2" target "v0"] edge[ source "W3" target "v0"] edge[ source "W5" target "v0"] edge[ source "W6" target "v0"]edge[ source "W0" target "y"] edge[ source "W1" target "y"] edge[ source "W2" target "y"] edge[ source "W3" target "y"] edge[ source "W5" target "y"] edge[ source "W6" target "y"]]'
         model = CausalModel(
@@ -355,6 +362,18 @@ class TestAddUnobservedCommonCauseRefuter(object):
             simulation_method=simulation_method,
             benchmark_common_causes=benchmark_common_causes,
             effect_fraction_on_treatment=effect_fraction_on_treatment,
+            g_s_estimator_list=[GradientBoostingRegressor(random_state=42)],
+            g_s_estimator_param_list=[{}],
+            alpha_s_estimator_param_list=[
+                {
+                    "reisz_functions": [create_polynomial_function(2), create_polynomial_function(1)],
+                    "min_samples_leaf": [10, 50],
+                    "min_var_fraction_leaf": [0.01, 0.1],
+                    "l2_regularizer": [1e-5, 1e-3],
+                    "max_depth": [5, None],
+                    "random_state": [42],
+                }
+            ],
         )
 
         assert refute.r2yu_tw >= 0 and refute.r2yu_tw <= 1
@@ -404,14 +423,7 @@ class TestAddUnobservedCommonCauseRefuter(object):
         self, mock_fig, estimator_method, effect_fraction_on_outcome, benchmark_common_causes, simulation_method
     ):
         np.random.seed(100)
-        data = dowhy.datasets.linear_dataset(
-            beta=10,
-            num_common_causes=7,
-            num_samples=500,
-            num_treatments=1,
-            stddev_treatment_noise=5,
-            stddev_outcome_noise=5,
-        )
+        data = _sensitivity_dataset()
         data["df"] = data["df"].drop("W4", axis=1)
         graph_str = 'graph[directed 1node[ id "y" label "y"]node[ id "W0" label "W0"] node[ id "W1" label "W1"] node[ id "W2" label "W2"] node[ id "W3" label "W3"]  node[ id "W5" label "W5"] node[ id "W6" label "W6"]node[ id "v0" label "v0"]edge[source "v0" target "y"]edge[ source "W0" target "v0"] edge[ source "W1" target "v0"] edge[ source "W2" target "v0"] edge[ source "W3" target "v0"] edge[ source "W5" target "v0"] edge[ source "W6" target "v0"]edge[ source "W0" target "y"] edge[ source "W1" target "y"] edge[ source "W2" target "y"] edge[ source "W3" target "y"] edge[ source "W5" target "y"] edge[ source "W6" target "y"]]'
         model = CausalModel(
@@ -445,6 +457,8 @@ class TestAddUnobservedCommonCauseRefuter(object):
             simulation_method=simulation_method,
             benchmark_common_causes=benchmark_common_causes,
             effect_fraction_on_outcome=effect_fraction_on_outcome,
+            g_s_estimator_list=[GradientBoostingRegressor(random_state=42)],
+            g_s_estimator_param_list=[{}],
         )
 
         assert refute.r2yu_tw >= 0 and refute.r2yu_tw <= 1
