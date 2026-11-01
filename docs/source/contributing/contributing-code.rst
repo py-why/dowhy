@@ -88,6 +88,12 @@ Pull request checklist
 
      poetry run poe -h
 
+   For Monte Carlo attribution tests, check Shapley efficiency against the actual
+   full and empty coalition values used by the estimator. A separately sampled
+   reference can have different empirical tail probabilities, even at the same
+   sample size. Keep qualitative root-cause assertions as separate checks, and
+   use known mechanisms when testing attribution rather than model selection.
+
    The full test suite of DoWhy takes quite long. To speed up development cycles,
    you can restrict the tests executed as in the following example.
 
