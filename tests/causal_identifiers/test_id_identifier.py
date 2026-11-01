@@ -13,6 +13,7 @@ class TestIDIdentifier(object):
             treatment_name="T",
             outcome_name="Y",
             graph="digraph{T->Y;}",
+            observed_node_names=["T", "Y"],
         )
         identified_estimand = identify_effect_id(causal_graph, action_nodes=["T"], outcome_nodes=["Y"])
         identified_str = identified_estimand.__str__()

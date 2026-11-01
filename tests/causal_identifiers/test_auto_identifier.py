@@ -12,6 +12,7 @@ class TestAutoIdentification(object):
             treatment_name="T",
             outcome_name="Y",
             graph="digraph{T->Y;}",
+            observed_node_names=["T", "Y"],
         )
         identifier = AutoIdentifier(estimand_type=EstimandType.NONPARAMETRIC_ATE)
         estimand = identifier.identify_effect(
