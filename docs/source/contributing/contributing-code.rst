@@ -72,17 +72,14 @@ Pull request checklist
 #. Add tests for your new code and execute the unittests to make sure
    you did not introduce any breaking changes or bugs.
 
+   Keep tests focused, reproducible, and reasonably fast. When tests involve
+   randomness, control its sources and account for sampling variability in
+   the assertions. Check reliability across repeated runs and measure execution
+   time when changing the amount of data or computation a test requires.
+
    .. code:: shell
 
      poetry run poe test
-
-   For randomized estimators, set explicit ``random_state`` values on both the
-   estimator and its nuisance models, including models fitted separately by
-   refuters. A global data-generation seed alone does not isolate their
-   randomness. For benchmark-confounder tests, use a controlled fixture with
-   meaningful treatment and outcome signal and treatment overlap: seeding
-   alone cannot make finite-sample variance differences positive. Verify
-   repeated runs and runtime before increasing sample counts.
 
    Note that you can also execute those tasks together
 

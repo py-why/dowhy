@@ -18,14 +18,35 @@ from .base import SimpleRefuter
 
 
 def _sensitivity_dataset():
-    rng = np.random.default_rng(100)
-    data = pd.DataFrame(rng.normal(size=(500, 7)), columns=[f"W{i}" for i in range(7)])
-    other_causes = data.drop(columns="W3").sum(axis=1)
+    beta = 10
+    num_common_causes = 7
+    num_samples = 500
+    stddev_outcome_noise = 5
+    random_seed = 100
+    benchmark_common_cause = "W3"
+    benchmark_treatment_coefficient = 2
+    other_treatment_coefficient = 0.2
+    benchmark_outcome_coefficient = 3
+    min_treatment_probability = 0.2
+    treatment_probability_range = 0.6
+
+    rng = np.random.default_rng(random_seed)
+    data = pd.DataFrame(
+        rng.normal(size=(num_samples, num_common_causes)), columns=[f"W{i}" for i in range(num_common_causes)]
+    )
+    other_causes = data.drop(columns=benchmark_common_cause).sum(axis=1)
     # Keep overlap while making W3 a meaningful benchmark for treatment and outcome.
-    propensity = 0.2 + 0.6 * expit(2 * data["W3"] + 0.2 * other_causes)
+    propensity = min_treatment_probability + treatment_probability_range * expit(
+        benchmark_treatment_coefficient * data[benchmark_common_cause] + other_treatment_coefficient * other_causes
+    )
     data["v0"] = rng.binomial(1, propensity)
-    data["y"] = 10 * data["v0"] + 3 * data["W3"] + other_causes + rng.normal(scale=5, size=len(data))
-    return {"df": data, "treatment_name": ["v0"], "outcome_name": "y", "ate": 10}
+    data["y"] = (
+        beta * data["v0"]
+        + benchmark_outcome_coefficient * data[benchmark_common_cause]
+        + other_causes
+        + rng.normal(scale=stddev_outcome_noise, size=num_samples)
+    )
+    return {"df": data, "treatment_name": ["v0"], "outcome_name": "y", "ate": beta}
 
 
 @mark.usefixtures("fixed_seed")
