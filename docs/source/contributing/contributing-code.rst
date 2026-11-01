@@ -76,6 +76,11 @@ Pull request checklist
 
      poetry run poe test
 
+   For randomized estimators, set explicit ``random_state`` values on both the
+   estimator and its nuisance models. A global data-generation seed alone does
+   not isolate their randomness. Verify repeated runs and runtime before
+   increasing sample counts to address statistical test failures.
+
    Note that you can also execute those tasks together
 
    .. code:: shell
