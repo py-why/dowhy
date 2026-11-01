@@ -16,26 +16,23 @@ from dowhy.gcm import (
     auto,
     fit,
 )
+from dowhy.gcm._noise import noise_samples_of_ancestors
 from dowhy.gcm.anomaly import _relative_frequency, attribute_anomaly_scores
 from dowhy.gcm.density_estimators import GaussianMixtureDensityEstimator
 from dowhy.gcm.ml import PredictionModel, create_linear_regressor
-from dowhy.gcm.shapley import _evaluate_set_function
 
 
 def _attribute_anomalies_with_expected_total(causal_model, anomaly_data, num_samples, attribute_mean_deviation):
-    coalition_values = {}
+    sampled_target = None
 
-    def record_coalition_values(set_func, evaluation_subsets, parallel_context, show_progressbar=True):
-        values = _evaluate_set_function(set_func, evaluation_subsets, parallel_context, show_progressbar)
-        for subset, value in values.items():
-            if not np.any(subset):
-                coalition_values["empty"] = value
-            elif np.all(subset):
-                coalition_values["full"] = value
-        return values
+    def record_samples(model, target_node, num_distribution_samples):
+        nonlocal sampled_target
+        node_samples, noise_samples = noise_samples_of_ancestors(model, target_node, num_distribution_samples)
+        sampled_target = node_samples[target_node].to_numpy()
+        return node_samples, noise_samples
 
-    # Efficiency holds for the realized coalitions, not a separately sampled reference distribution.
-    with patch("dowhy.gcm.shapley._evaluate_set_function", side_effect=record_coalition_values):
+    # Share the sampled reference, but compute the expected score independently of the coalition evaluator.
+    with patch("dowhy.gcm.anomaly.noise_samples_of_ancestors", side_effect=record_samples):
         scores = attribute_anomalies(
             causal_model,
             "X3",
@@ -45,7 +42,18 @@ def _attribute_anomalies_with_expected_total(causal_model, anomaly_data, num_sam
             attribute_mean_deviation=attribute_mean_deviation,
         )
 
-    return scores, coalition_values["full"] - coalition_values["empty"]
+    assert sampled_target is not None
+    scorer = MedianCDFQuantileScorer()
+    scorer.fit(sampled_target)
+    reference_scores = scorer.score(sampled_target)
+    anomaly_scores = scorer.score(anomaly_data["X3"].to_numpy())
+    if attribute_mean_deviation:
+        expected_total = anomaly_scores - np.mean(reference_scores)
+    else:
+        expected_total = np.array(
+            [-np.log((np.sum(reference_scores >= score) + 0.5) / (num_samples + 0.5)) for score in anomaly_scores]
+        )
+    return scores, expected_total
 
 
 @flaky(max_runs=3)
