@@ -166,8 +166,29 @@ def estimate_kl_divergence_continuous_clf(
     return kl_divergence
 
 
+# Private sentinel for missing values. A unique object cannot collide with a legitimate category such as "nan".
+_MISSING_CATEGORY = object()
+
+
+def _is_missing(value) -> bool:
+    # Missing scalars such as NaN (float, complex, Decimal) and NaT are not equal to themselves, so each occurrence would
+    # otherwise become its own category. Only a real boolean result counts: comparisons returning arrays or pd.NA are
+    # kept as regular values instead of raising an ambiguous truth value error.
+    is_unequal = value != value
+    return isinstance(is_unequal, (bool, np.bool_)) and bool(is_unequal)
+
+
+def _joint_category(row) -> tuple:
+    # Map every missing value to one shared category. Other values, including None, "nan" and inf, are kept as is.
+    return tuple(_MISSING_CATEGORY if _is_missing(v) else v for v in row)
+
+
 def estimate_kl_divergence_categorical(X: np.ndarray, Y: np.ndarray) -> float:
-    """Estimates KL divergence between categorical samples, treating each row as one joint observation."""
+    """Estimates KL divergence between categorical samples, treating each row as one joint observation.
+
+    Missing values that are not equal to themselves, such as NaN and NaT, are treated as one shared missing category
+    within a column.
+    """
     X, Y = shape_into_2d(X, Y)
 
     if X.shape[1] != Y.shape[1]:
@@ -178,9 +199,10 @@ def estimate_kl_divergence_categorical(X: np.ndarray, Y: np.ndarray) -> float:
 
     # Count joint observations rather than pooling categories across columns. Tuples also support object arrays,
     # which are commonly used for categorical data but are not supported by np.unique with axis=0.
-    x_counts = Counter(map(tuple, X))
-    y_counts = Counter(map(tuple, Y))
-    all_uniques = x_counts.keys() | y_counts.keys()
+    x_counts = Counter(map(_joint_category, X))
+    y_counts = Counter(map(_joint_category, Y))
+    # Keep first-seen order instead of set order, so the summation does not depend on hash randomization.
+    all_uniques = list(x_counts) + [i for i in y_counts if i not in x_counts]
 
     p = np.array([(x_counts[i] + EPS) / (X.shape[0] + EPS) for i in all_uniques])
     q = np.array([(y_counts[i] + EPS) / (Y.shape[0] + EPS) for i in all_uniques])
