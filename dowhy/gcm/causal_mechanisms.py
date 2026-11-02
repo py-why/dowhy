@@ -323,12 +323,14 @@ class ClassifierFCM(FunctionalCausalModel, ProbabilityEstimatorModel):
 
         When the causal model was fitted with :func:`dowhy.gcm.fit`, use the order returned by
         :func:`dowhy.graph.get_ordered_predecessors` to select the parent columns before converting to NumPy.
-        For an already fitted causal model and new data, for example:
+        For example, suppose ``causal_model`` is a fitted causal model whose categorical node ``Y`` uses a
+        ``ClassifierFCM``, and ``new_data`` is a pandas DataFrame containing the parent columns of ``Y``:
 
         .. code-block:: python
 
             from dowhy.graph import get_ordered_predecessors
 
+            target_node = "Y"
             parents = get_ordered_predecessors(causal_model.graph, target_node)
             parent_samples = new_data[parents].to_numpy()
             mechanism = causal_model.causal_mechanism(target_node)
@@ -344,7 +346,7 @@ class ClassifierFCM(FunctionalCausalModel, ProbabilityEstimatorModel):
     def fit(self, X: np.ndarray, Y: np.ndarray) -> None:
         """Fits the underlying classification model.
 
-        :param X: Input samples. Their column order defines the order required by later calls to :meth:`evaluate`
+        :param X: Input samples. Its column order defines the order required by later calls to :meth:`evaluate`
                   and :meth:`estimate_probabilities`.
         :param Y: Target labels.
         :return: None
