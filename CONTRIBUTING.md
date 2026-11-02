@@ -1,6 +1,6 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-60-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-61-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ## Contributors ✨
@@ -89,6 +89,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Anai-Guo"><img src="https://avatars.githubusercontent.com/u/275560793?v=4?s=100" width="100px;" alt="Tai An"/><br /><sub><b>Tai An</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=Anai-Guo" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/will-marella"><img src="https://avatars.githubusercontent.com/u/162729147?v=4?s=100" width="100px;" alt="Will Marella"/><br /><sub><b>Will Marella</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=will-marella" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/lucaluo925"><img src="https://avatars.githubusercontent.com/u/240237312?v=4?s=100" width="100px;" alt="lucaluo925"/><br /><sub><b>lucaluo925</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=lucaluo925" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/JoeyTan21"><img src="https://avatars.githubusercontent.com/u/105514503?v=4?s=100" width="100px;" alt="Joey Tan"/><br /><sub><b>Joey Tan</b></sub></a><br /><a href="https://github.com/py-why/dowhy/commits?author=JoeyTan21" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
