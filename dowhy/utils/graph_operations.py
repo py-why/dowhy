@@ -167,6 +167,36 @@ def find_c_components(adjacency_matrix, node_set, idx2node):
     return c_components
 
 
+# Dagitty node flags and their DOT replacements (None means the flag is dropped). They are only matched as whole
+# attributes inside a node's ``[...]`` attribute list, so node names such as "exposure" or "latent_u" are left intact.
+_DAGITTY_ATTRIBUTE_MAP = {
+    "exposure": None,
+    "outcome": None,
+    "adjusted": None,
+    "latent": 'observed="no"',
+}
+# A double-quoted DOT string, allowing escaped characters such as \".
+_DOT_QUOTED = r'"(?:[^"\\]|\\.)*"'
+# Matches either a quoted string (left untouched, so brackets inside quoted node names are not attribute lists) or an
+# attribute list ``[...]`` whose quoted values may contain "]" or ",".
+_DOT_QUOTED_OR_ATTRIBUTES = re.compile(_DOT_QUOTED + r'|\[((?:[^\]"\\]|\\.|' + _DOT_QUOTED + r")*)\]")
+# One attribute of an attribute list: everything up to the next comma that is not inside a quoted value.
+_DOT_ATTRIBUTE = re.compile(r'(?:[^,"\\]|\\.|' + _DOT_QUOTED + r")+")
+
+
+def _convert_dagitty_attributes(match):
+    if match.group(1) is None:
+        return match.group(0)
+    attributes = []
+    for attribute in _DOT_ATTRIBUTE.findall(match.group(1)):
+        attribute = attribute.strip()
+        if attribute in _DAGITTY_ATTRIBUTE_MAP:
+            attribute = _DAGITTY_ATTRIBUTE_MAP[attribute]
+        if attribute:
+            attributes.append(attribute)
+    return "[" + ",".join(attributes) + "]"
+
+
 def daggity_to_dot(daggity_string):
     """
     Converts the input daggity_string to valid DOT graph format.
@@ -178,11 +208,7 @@ def daggity_to_dot(daggity_string):
     graph = re.sub(r"^dag ", "digraph ", graph)
     graph = re.sub("{;", "{", graph)
     graph = re.sub("};", "}", graph)
-    graph = re.sub("outcome,*,", "", graph)
-    graph = re.sub("adjusted,*", "", graph)
-    graph = re.sub("exposure,*", "", graph)
-    graph = re.sub("latent,*", 'observed="no",', graph)
-    graph = re.sub(",]", "]", graph)
+    graph = _DOT_QUOTED_OR_ATTRIBUTES.sub(_convert_dagitty_attributes, graph)
     return graph
 
 
