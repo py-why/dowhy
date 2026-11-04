@@ -301,6 +301,8 @@ def test_prediction_notebook_loaders_with_lightning(tmp_path, num_eval_domains, 
     assert len(results) == 1
     assert 0 <= results[0]["test_acc"] <= 1
     assert results[0]["test_loss"] > 0
+
+
 # ── _split_by_attribute (new helper from PR #1371) ────────────────────────────
 
 
