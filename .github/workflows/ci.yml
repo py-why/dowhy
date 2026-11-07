@@ -60,6 +60,9 @@ jobs:
           venv-v2-${{ runner.os }}-${{ runner.arch }}-py${{ steps.setup-python.outputs.python-version }}-poetry${{ matrix.poetry-version }}-
 
     - name: Select and verify Poetry Python
+      env:
+        # Poetry 2.1 passes only a discovery hint; virtualenv also needs the required interpreter.
+        VIRTUALENV_PYTHON: ${{ steps.setup-python.outputs.python-path }}
       run: |
         poetry env use "${{ steps.setup-python.outputs.python-path }}"
         poetry run python -c "import sys; print(sys.executable, sys.version); assert sys.version.split()[0] == '${{ steps.setup-python.outputs.python-version }}', sys.version"
