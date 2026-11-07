@@ -658,6 +658,36 @@ class TestCausalModel(object):
                 graph=nx.Graph([("X", "Y"), ("Y", "Z")]),
             )
 
+    def test_learn_graph_initializes_the_graph(self):
+        """CausalModel.learn_graph() must pass identify_vars on to init_graph()."""
+        import sys
+        import types
+
+        from dowhy.graph_learner import GraphLearner
+
+        class STUB(GraphLearner):
+            def __init__(self, data, library_class=None, *args, **kwargs):
+                self._data = data
+
+            def learn_graph(self):
+                learned = nx.DiGraph([("W0", "v0"), ("W0", "y"), ("v0", "y")])
+                return nx.nx_pydot.to_pydot(learned).to_string()
+
+        module = types.ModuleType("dowhy.graph_learners.stub")
+        module.STUB = STUB
+        sys.modules["dowhy.graph_learners.stub"] = module
+        try:
+            data = pd.DataFrame({"W0": [0.0, 1.0, 2.0], "v0": [0, 1, 0], "y": [1.0, 3.0, 2.0]})
+            model = CausalModel(data=data, treatment="v0", outcome="y", common_causes=["W0"])
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", DeprecationWarning)
+                graph = model.learn_graph("stub")
+        finally:
+            del sys.modules["dowhy.graph_learners.stub"]
+
+        assert graph is model._graph
+        assert set(graph.get_all_nodes(include_unobserved=True)) == {"W0", "v0", "y"}
+
     def test_warn_when_treatment_not_in_data(self):
         """CausalModel should emit a UserWarning when treatment variable is missing from the DataFrame."""
         data = pd.DataFrame({"X": [0, 1], "Y": [1, 2]})
