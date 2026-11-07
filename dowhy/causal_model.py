@@ -227,7 +227,7 @@ class CausalModel:
         graph = model.learn_graph()
 
         # Initialize causal graph object
-        self.init_graph(graph=graph)
+        self.init_graph(graph=graph, identify_vars=False)
 
         return self._graph
 
@@ -281,6 +281,7 @@ class CausalModel:
         effect_modifiers=None,
         fit_estimator=True,
         method_params=None,
+        num_quantiles_to_discretize_cont_cols=None,
     ):
         """Estimate the identified causal effect.
 
@@ -312,6 +313,7 @@ class CausalModel:
         :param fit_estimator: Boolean flag on whether to fit the estimator.
             Setting it to False is useful to estimate the effect on new data using a previously fitted estimator.
         :param method_params: Dictionary containing any method-specific parameters. These are passed directly to the estimating method. See the docs for each estimation method for allowed method-specific params.
+        :param num_quantiles_to_discretize_cont_cols: The number of quantiles into which a numeric effect modifier is split, to enable estimation of conditional treatment effect over it. This is a DoWhy-level parameter and is forwarded to the DoWhy estimator wrapper, not to the underlying third-party estimator. Defaults to the estimator's own default when not specified.
         :returns: An instance of the CausalEstimate class, containing the causal effect estimate
             and other method-dependent information
 
@@ -361,6 +363,16 @@ class CausalModel:
                 extra_args = {}
             if method_params is None:
                 method_params = {}
+
+            # num_quantiles_to_discretize_cont_cols is a DoWhy-level parameter:
+            # it controls how DoWhy discretizes numeric effect modifiers. It is
+            # accepted by every DoWhy estimator wrapper (including the EconML
+            # one), so it is forwarded to the wrapper constructor rather than
+            # injected into init_params, which is passed straight through to the
+            # third-party estimator and would raise a TypeError.
+            if num_quantiles_to_discretize_cont_cols is not None:
+                extra_args = dict(extra_args)
+                extra_args["num_quantiles_to_discretize_cont_cols"] = num_quantiles_to_discretize_cont_cols
 
             identified_estimand.set_identifier_method(identifier_name)
 
@@ -450,7 +462,8 @@ class CausalModel:
                 self.causal_estimator.fit(self._data)
             else:
                 # Estimator had been computed in a previous call
-                assert self.causal_estimator is not None
+                if self.causal_estimator is None:
+                    raise RuntimeError("Causal estimator is required but was not initialized")
             try:
                 estimate = self.causal_estimator.do(x)
             except NotImplementedError:
@@ -621,7 +634,8 @@ def _warn_if_unobserved_graph_variables(
         warnings.warn(
             f"{num_unobserved_graph_variables} variables are assumed "
             "unobserved because they are not in the dataset. "
-            "Configure the logging level to `logging.WARNING` or higher for additional details."
+            "Configure the logging level to `logging.WARNING` or higher for additional details.",
+            stacklevel=3,
         )
         logger.warning(
             "The graph defines %d variables. %d were found in the dataset "

@@ -3,13 +3,6 @@ from typing import Any
 
 import numpy as np
 import sklearn
-from packaging import version
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import PolynomialFeatures
-
-if version.parse(sklearn.__version__) < version.parse("1.0"):
-    from sklearn.experimental import enable_hist_gradient_boosting  # noqa
-
 from sklearn.ensemble import (
     AdaBoostRegressor,
     ExtraTreesRegressor,
@@ -19,6 +12,8 @@ from sklearn.ensemble import (
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.linear_model import ElasticNetCV, LassoCV, LassoLarsIC, LinearRegression, RidgeCV
 from sklearn.neighbors import KNeighborsRegressor
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import PolynomialFeatures
 from sklearn.svm import SVR
 
 from dowhy.gcm.ml.prediction_model import PredictionModel
