@@ -60,20 +60,21 @@ def test_given_bad_fit_when_estimate_nrmse_then_returns_high_value():
 
 def test_given_good_fit_but_noisy_data_when_estimate_nrmse_then_returns_expected_result():
     X = np.random.normal(0, 1, 2000)
-    Y = 2 * X + np.random.normal(0, 2, 2000)
+    noise = np.random.normal(0, 2, 2000)
+    Y = 2 * X + noise
 
     mdl = AdditiveNoiseModel(
         create_linear_regressor_with_given_parameters(np.array([2]), intercept=0),
         noise_model=ScipyDistribution(stats.norm, loc=0, scale=2),
     )
 
-    # The MSE should be 4 due to the variance of the noise. The RMSE is accordingly 2 / std(Y).
-    assert nmse(Y, _estimate_conditional_expectations(mdl, X, False, 1), squared=True) == approx(
-        4 / np.var(Y), abs=0.05
-    )
-    assert nmse(Y, _estimate_conditional_expectations(mdl, X, False, 1), squared=False) == approx(
-        2 / np.std(Y), abs=0.05
-    )
+    expected_mse = np.mean(noise**2)
+    predictions = _estimate_conditional_expectations(mdl, X, False, 1)
+    np.testing.assert_allclose(predictions, 2 * X)
+
+    # Finite-sample noise error need not equal the population variance of 4.
+    assert nmse(Y, predictions, squared=True) == approx(expected_mse / np.var(Y), rel=0, abs=1e-10)
+    assert nmse(Y, predictions, squared=False) == approx(np.sqrt(expected_mse) / np.std(Y), rel=0, abs=1e-10)
 
 
 def test_given_good_fit_with_deterministic_data_when_estimate_crps_then_returns_zero():

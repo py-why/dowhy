@@ -105,6 +105,10 @@ Pull request checklist
 
      poetry run pytest -v tests/causal_refuters
 
+   For statistical metric tests, compute expected values from the observed sample
+   rather than assuming its moments equal population moments. This permits tight
+   numerical assertions without increasing data sizes or test runtime.
+
 #. Once your code is finished and it passes all checks successfully,
    commit your changes. Make sure to add an informative commit message and to sign off your
    commits:
