@@ -1,7 +1,9 @@
 import random
 
 import numpy as np
+import pandas as pd
 from pytest import mark
+from scipy.special import expit
 
 import dowhy.datasets
 from dowhy import CausalModel
@@ -167,3 +169,50 @@ class TestPlaceboRefuter(object):
             f"Placebo new_effect ({result.new_effect:.3f}) is unexpectedly close to the original "
             f"estimate ({estimate.value:.3f}); the placebo is likely not severing the causal link."
         )
+
+
+def test_placebo_refuter_does_not_reuse_stale_propensity_scores():
+    """Regression test for #1728.
+
+    After estimating with a propensity-score method, ``model._data`` gains a
+    ``propensity_score`` column.  The placebo refuter must *not* pass that stale
+    column into the placebo estimator's fit, because the estimator skips fitting
+    when the column is already present — causing the placebo effect to equal the
+    real treatment's propensity-weighted contrast instead of collapsing to zero.
+    """
+    rng = np.random.default_rng(20260801)
+    n = 5_000
+
+    x = rng.normal(size=n)
+    t = rng.binomial(1, expit(1.5 * x))
+    p_y = 0.20 + 0.10 * t + 0.05 * x
+    y = rng.binomial(1, np.clip(p_y, 0, 1))
+
+    df = pd.DataFrame({"x": x, "t": t, "y": y})
+
+    model = CausalModel(data=df, treatment="t", outcome="y", common_causes=["x"])
+    estimand = model.identify_effect(proceed_when_unidentifiable=True)
+    estimate = model.estimate_effect(
+        estimand,
+        method_name="backdoor.propensity_score_weighting",
+        method_params={"init_params": {"min_ps_score": 0.01, "max_ps_score": 0.99}},
+    )
+
+    # The ``propensity_score`` column is now in the data after estimation.
+    assert "propensity_score" in model._data.columns
+
+    result = model.refute_estimate(
+        estimand,
+        estimate,
+        method_name="placebo_treatment_refuter",
+        num_simulations=50,
+        random_seed=42,
+        n_jobs=1,
+    )
+
+    # A correct placebo effect should be near zero (|new_effect| < |original estimate|/2).
+    # With stale propensity scores the placebo effect would be ~-0.08, far from zero.
+    assert abs(result.new_effect) < abs(estimate.value) / 2, (
+        f"Placebo new_effect ({result.new_effect:.4f}) is too large; "
+        f"the refuter may be reusing stale propensity scores from the original estimation."
+    )

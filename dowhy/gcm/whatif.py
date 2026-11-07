@@ -196,6 +196,7 @@ def average_causal_effect(
     interventions_reference: Dict[Any, Callable[[np.ndarray], Union[float, np.ndarray]]],
     observed_data: Optional[pd.DataFrame] = None,
     num_samples_to_draw: Optional[int] = None,
+    positive_class: Optional[Any] = None,
 ) -> float:
     """Estimates the average causal effect (ACE) on the target of two different sets of interventions.
     The interventions can be specified through the parameters `interventions_alternative` and `interventions_reference`.
@@ -213,6 +214,13 @@ def average_causal_effect(
     Note: The target node can be a continuous real-valued variable or a categorical variable with at most two classes
     (i.e. binary).
 
+    **Important for binary categorical targets**: When the target node is a binary classifier, the ACE is
+    E[Y == positive_class | do(alt)] - E[Y == positive_class | do(ref)].  The sign of the result therefore
+    depends on which class is treated as "positive" (mapped to 1).  If ``positive_class`` is not provided the
+    class with the higher internal index in the fitted model is used as the positive class (which for string
+    labels is typically determined by alphabetical / lexicographic ordering of the training classes). To
+    obtain reproducible, semantically meaningful results always pass ``positive_class`` explicitly.
+
     :param causal_model: The probabilistic causal model we perform this intervention on .
     :param target_node: Target node for which the ACE is estimated.
     :param interventions_alternative: Dictionary defining the interventions for the alternative values.
@@ -223,6 +231,12 @@ def average_causal_effect(
                           models.
     :param num_samples_to_draw: Number of samples drawn from the causal model for estimating ACE if no observed data is
                                 given.
+    :param positive_class: For binary categorical target nodes only. The class label that should be treated as the
+                           positive class (mapped to 1) when computing the ACE.  For example, if the classes are
+                           ``"Healthy"`` and ``"Caries"`` and the ACE of interest is
+                           P(Caries | do(alt)) - P(Caries | do(ref)), pass ``positive_class="Caries"``.
+                           When ``None`` (the default) the class with the higher internal index in the fitted
+                           model is used, which may differ from the user's intended positive class.
     :return: The estimated average causal effect (ACE).
     """
     # For estimating the effect, we only need to consider the nodes that have a directed path to the target node, i.e.
@@ -260,10 +274,27 @@ def average_causal_effect(
             )
 
         class_names = target_causal_model.get_class_names(np.array([0, 1]))
-        samples_from_target_alt[samples_from_target_alt == class_names[0]] = 0
-        samples_from_target_alt[samples_from_target_alt == class_names[1]] = 1
-        samples_from_target_ref[samples_from_target_ref == class_names[0]] = 0
-        samples_from_target_ref[samples_from_target_ref == class_names[1]] = 1
+
+        if positive_class is not None:
+            if positive_class not in class_names:
+                raise ValueError(
+                    f"positive_class '{positive_class}' is not one of the known classes {class_names}. "
+                    f"Please set positive_class to one of: {class_names}"
+                )
+            # Map the user-specified positive class to 1 and the other to 0.
+            negative_class = class_names[0] if positive_class == class_names[1] else class_names[1]
+            samples_from_target_alt[samples_from_target_alt == negative_class] = 0
+            samples_from_target_alt[samples_from_target_alt == positive_class] = 1
+            samples_from_target_ref[samples_from_target_ref == negative_class] = 0
+            samples_from_target_ref[samples_from_target_ref == positive_class] = 1
+        else:
+            # Default (backward-compatible): use the model's internal class ordering.
+            # class_names[1] is treated as the positive class; its index is determined by the fitted
+            # classifier (typically alphabetical / lexicographic for string labels).
+            samples_from_target_alt[samples_from_target_alt == class_names[0]] = 0
+            samples_from_target_alt[samples_from_target_alt == class_names[1]] = 1
+            samples_from_target_ref[samples_from_target_ref == class_names[0]] = 0
+            samples_from_target_ref[samples_from_target_ref == class_names[1]] = 1
 
     return np.mean(samples_from_target_alt) - np.mean(samples_from_target_ref)
 
