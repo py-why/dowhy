@@ -77,18 +77,25 @@ def _refute_once(
         new_data = data.sample(frac=subset_fraction, random_state=random_state)
 
     new_estimator = estimate.estimator.get_new_estimator_object(target_estimand)
-    new_estimator.fit(
-        new_data,
-        effect_modifier_names=estimate.estimator._effect_modifier_names,
-        **new_estimator._fit_params if hasattr(new_estimator, "_fit_params") else {},
-    )
-    new_effect = new_estimator.estimate_effect(
-        new_data,
-        control_value=estimate.control_value,
-        treatment_value=estimate.treatment_value,
-        target_units=estimate.estimator._target_units,
-    )
-    return new_effect.value
+    try:
+        new_estimator.fit(
+            new_data,
+            effect_modifier_names=estimate.estimator._effect_modifier_names,
+            **new_estimator._fit_params if hasattr(new_estimator, "_fit_params") else {},
+        )
+        new_effect = new_estimator.estimate_effect(
+            new_data,
+            control_value=estimate.control_value,
+            treatment_value=estimate.treatment_value,
+            target_units=estimate.estimator._target_units,
+        )
+        return new_effect.value
+    except np.linalg.LinAlgError as e:
+        logger.warning(
+            f"Refutation simulation skipped due to singular matrix in estimator: {e}. "
+            "This can occur with non-linear estimators when subset selection creates degenerate residuals."
+        )
+        return None
 
 
 def refute_data_subset(
@@ -142,6 +149,16 @@ def refute_data_subset(
             desc="Refuting Estimates: ",
         )
     )
+
+    # Filter out None values (skipped simulations due to singular matrix errors)
+    sample_estimates = [est for est in sample_estimates if est is not None]
+    if not sample_estimates:
+        raise ValueError(
+            "All refutation simulations were skipped due to singular matrix errors in the estimator. "
+            "This typically occurs with non-linear EconML estimators when subset selection creates degenerate residuals. "
+            "Consider using a linear estimator (e.g., 'backdoor.linear_regression') or adjusting the subset_fraction parameter."
+        )
+
     sample_estimates = np.array(sample_estimates)
 
     refute = CausalRefutation(estimate.value, np.mean(sample_estimates), refutation_type="Refute: Use a subset of data")
