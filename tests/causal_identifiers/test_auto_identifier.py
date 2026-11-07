@@ -1,9 +1,30 @@
+from dowhy.causal_graph import CausalGraph
 from dowhy.causal_identifier import AutoIdentifier
+from dowhy.causal_identifier.auto_identifier import construct_frontdoor_estimand, construct_mediation_estimand
 from dowhy.causal_identifier.identify_effect import EstimandType
 from dowhy.graph import build_graph_from_str
 
 
 class TestAutoIdentification(object):
+    def test_auto_identify_accepts_causal_graph(self):
+        """Regression test for issue #1360: AutoIdentifier.identify_effect should accept a
+        CausalGraph wrapper, not just a plain nx.DiGraph."""
+        causal_graph = CausalGraph(
+            treatment_name="T",
+            outcome_name="Y",
+            graph="digraph{T->Y;}",
+            observed_node_names=["T", "Y"],
+        )
+        identifier = AutoIdentifier(estimand_type=EstimandType.NONPARAMETRIC_ATE)
+        estimand = identifier.identify_effect(
+            causal_graph,
+            action_nodes=["T"],
+            outcome_nodes=["Y"],
+            observed_nodes=["T", "Y"],
+        )
+        assert estimand is not None
+        assert not estimand.no_directed_path
+
     def test_auto_identify_identifies_no_directed_path(self):
         # Test added for issue #1250
         graph = build_graph_from_str("digraph{T->Y;A->Y;A->B;}")
@@ -15,3 +36,119 @@ class TestAutoIdentification(object):
         assert identifier.identify_effect(
             graph, action_nodes=["B", "T"], outcome_nodes=["Y"], observed_nodes=["T", "Y", "A", "B"]
         ).no_directed_path
+
+
+class TestConstructEstimands:
+    """Tests for estimand helper functions (regression for issue #214)."""
+
+    def test_construct_frontdoor_estimand_multi_char_outcome_not_char_joined(self):
+        """Outcome name must appear as a whole word in assumptions, not character-by-character."""
+        estimand = construct_frontdoor_estimand(
+            treatment_name=["treatment"],
+            outcome_name=["behavior"],
+            frontdoor_variables_names=["mediator"],
+        )
+        assumptions = estimand["assumptions"]
+        # "Full-mediation" assumption should contain the full word "behavior"
+        assert "behavior" in assumptions["Full-mediation"]
+        # It should NOT contain character-joined form "b,e,h,a,v,i,o,r"
+        assert "b,e,h,a,v,i,o,r" not in assumptions["Full-mediation"]
+        # "Second-stage-unconfoundedness" should contain "behavior" as a word
+        assert "behavior" in assumptions["Second-stage-unconfoundedness"]
+
+    def test_construct_frontdoor_estimand_single_char_outcome_unchanged(self):
+        """Single-character outcome names should still work correctly."""
+        estimand = construct_frontdoor_estimand(
+            treatment_name=["T"],
+            outcome_name=["Y"],
+            frontdoor_variables_names=["M"],
+        )
+        assumptions = estimand["assumptions"]
+        assert "Y" in assumptions["Full-mediation"]
+        assert "Y" in assumptions["Second-stage-unconfoundedness"]
+
+    def test_construct_mediation_estimand_nie_multi_char_outcome_not_char_joined(self):
+        """NIE mediation assumption must use full outcome name, not character-joined."""
+        estimand = construct_mediation_estimand(
+            estimand_type=EstimandType.NONPARAMETRIC_NIE,
+            action_nodes=["treatment"],
+            outcome_nodes=["behavior"],
+            mediator_nodes=["mediator"],
+        )
+        assumptions = estimand["assumptions"]
+        assert "behavior" in assumptions["Mediation"]
+        assert "b,e,h,a,v,i,o,r" not in assumptions["Mediation"]
+        assert "behavior" in assumptions["Second-stage-unconfoundedness"]
+
+    def test_construct_mediation_estimand_nde_multi_char_outcome_not_char_joined(self):
+        """NDE mediation assumption must use full outcome name, not character-joined."""
+        estimand = construct_mediation_estimand(
+            estimand_type=EstimandType.NONPARAMETRIC_NDE,
+            action_nodes=["treatment"],
+            outcome_nodes=["behavior"],
+            mediator_nodes=["mediator"],
+        )
+        assumptions = estimand["assumptions"]
+        assert "behavior" in assumptions["Mediation"]
+        assert "b,e,h,a,v,i,o,r" not in assumptions["Mediation"]
+        assert "behavior" in assumptions["Second-stage-unconfoundedness"]
+        assert "b,e,h,a,v,i,o,r" not in assumptions["Second-stage-unconfoundedness"]
+
+
+def test_causal_identifier_protocol_importable_from_top_level():
+    """Regression test for issue #831: CausalIdentifier must be importable from dowhy.causal_identifier."""
+    from dowhy.causal_identifier import CausalIdentifier  # noqa: F401
+
+    assert CausalIdentifier is not None
+
+
+def test_auto_identifier_and_id_identifier_conform_to_causal_identifier_protocol():
+    """AutoIdentifier and IDIdentifier both implement the CausalIdentifier Protocol."""
+    from typing import runtime_checkable
+
+    from dowhy.causal_identifier import AutoIdentifier, CausalIdentifier, IDIdentifier
+
+    # Make it runtime-checkable to allow isinstance checks
+    RuntimeCheckableCausalIdentifier = runtime_checkable(CausalIdentifier)
+    assert isinstance(AutoIdentifier(estimand_type=EstimandType.NONPARAMETRIC_ATE), RuntimeCheckableCausalIdentifier)
+    assert isinstance(IDIdentifier(), RuntimeCheckableCausalIdentifier)
+
+
+def test_find_valid_adjustment_sets_respects_max_iterations(monkeypatch):
+    import networkx as nx
+
+    from dowhy.causal_identifier.auto_identifier import (
+        BackdoorAdjustment,
+        find_valid_adjustment_sets,
+    )
+
+    graph = nx.DiGraph()
+    graph.add_nodes_from(["T", "Y", "A", "B", "C", "D", "E"])
+
+    num_checks = 0
+
+    def always_invalid(*args, **kwargs):
+        nonlocal num_checks
+        num_checks += 1
+        return {"is_dseparated": False}
+
+    monkeypatch.setattr(
+        "dowhy.causal_identifier.auto_identifier.check_valid_backdoor_set",
+        always_invalid,
+    )
+
+    find_valid_adjustment_sets(
+        graph=graph,
+        action_nodes=["T"],
+        outcome_nodes=["Y"],
+        observed_nodes=["T", "Y"],
+        backdoor_paths=None,
+        bdoor_graph=graph,
+        dseparation_algo="default",
+        backdoor_sets=[],
+        filt_eligible_variables=["A", "B", "C", "D", "E"],
+        backdoor_adjustment=BackdoorAdjustment.BACKDOOR_MIN,
+        max_iterations=3,
+    )
+
+    assert num_checks == 3
