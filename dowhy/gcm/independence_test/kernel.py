@@ -367,7 +367,13 @@ def _estimate_rit_statistic(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
 
 
 def _estimate_column_wise_covariances(X: np.ndarray, Y: np.ndarray) -> np.ndarray:
-    return np.cov(X, Y, rowvar=False)[: X.shape[1], -Y.shape[1] :]
+    # Compute only the (dx, dy) cross-covariance block directly instead of building
+    # the full (dx+dy, dx+dy) matrix via np.cov.  Identical result, lower memory and
+    # compute cost – O(n*dx*dy) instead of O(n*(dx+dy)^2).
+    n = X.shape[0]
+    X_c = X - X.mean(axis=0)
+    Y_c = Y - Y.mean(axis=0)
+    return X_c.T @ Y_c / (n - 1)
 
 
 def _convert_to_numeric(*args) -> List[np.ndarray]:
@@ -385,4 +391,8 @@ def _convert_to_numeric(*args) -> List[np.ndarray]:
 
 def _remove_constant_columns(X: np.ndarray) -> np.ndarray:
     X = shape_into_2d(X)
-    return X[:, [np.unique(X[:, i]).shape[0] > 1 for i in range(X.shape[1])]]
+    if X.shape[0] == 0:
+        return X
+    # Vectorised O(n*p) check: a column is non-constant iff at least one row differs
+    # from the first row.  Avoids the O(n*p*log n) per-column np.unique loop.
+    return X[:, ~np.all(X == X[0], axis=0)]
