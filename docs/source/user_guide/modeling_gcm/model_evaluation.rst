@@ -114,7 +114,7 @@ In this scenario, an empirical distribution is assigned to the root node X, whil
 nodes Y and Z (see :doc:`graphical_causal_model_types` for more details about the causal mechanism types). In both of these cases, a linear regression model demonstrated the best performance in terms
 of minimizing the mean squared error. A list of evaluated models and their performance is also available. Since we used
 the default parameter for the auto assignment, only a small model zoo is evaluated. However, we can also adjust the
-assigment quality to extend it to more models.
+assignment quality to extend it to more models.
 
 After assigning causal mechanisms to each node, the subsequent step involves fitting these mechanisms to the data:
 
