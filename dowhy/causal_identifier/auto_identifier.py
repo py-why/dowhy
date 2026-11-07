@@ -167,7 +167,8 @@ def identify_effect_auto(
 
     If estimand_type is non-parametric ATE, then  uses backdoor, instrumental variable and frontdoor identification methods,  to check if an identified estimand exists, based on the causal graph.
 
-    :param optimize_backdoor: if True, uses an optimised algorithm to compute the backdoor sets
+    :param optimize_backdoor: if True, uses an optimised algorithm to compute the backdoor sets,
+        falling back to the standard search if it finds no valid observed adjustment set
     :param costs: non-negative costs associated with variables in the graph. Only used
     for estimand_type='non-parametric-ate' and backdoor_adjustment='efficient-mincost-adjustment'. If
     no costs are provided by the user, and backdoor_adjustment='efficient-mincost-adjustment', costs
@@ -179,6 +180,12 @@ def identify_effect_auto(
     only minimal adjustment sets are supported.
     :returns:  target estimand, an instance of the IdentifiedEstimand class
     """
+
+    # Accept a CausalGraph/CausalModel wrapper by extracting the underlying nx.DiGraph.
+    # CausalModel stores its causal graph in ._graph, and CausalGraph stores the actual
+    # nx.DiGraph in ._graph. Both wrapper attributes are named _graph.
+    if hasattr(graph, "_graph") and isinstance(graph._graph, nx.DiGraph):
+        graph = graph._graph
 
     observed_nodes = parse_state(observed_nodes)
     action_nodes = parse_state(action_nodes)
@@ -255,6 +262,30 @@ def identify_ate_effect(
 
             path = Backdoor(graph, action_nodes, outcome_nodes)
             backdoor_sets = path.get_backdoor_vars()
+            # The optimized path search is a heuristic; validate its candidates
+            # before promoting them to causal estimands.
+            eligible_variables = (
+                set(observed_nodes) - set(action_nodes) - set(outcome_nodes) - get_descendants(graph, action_nodes)
+            )
+            backdoor_graph = do_surgery(graph, action_nodes, remove_outgoing_edges=True)
+            backdoor_sets = [
+                candidate
+                for candidate in backdoor_sets
+                if set(candidate.get_adjustment_variables()).issubset(eligible_variables)
+                and check_valid_backdoor_set(
+                    graph,
+                    action_nodes,
+                    outcome_nodes,
+                    candidate.get_adjustment_variables(),
+                    new_graph=backdoor_graph,
+                    dseparation_algo="default",
+                )["is_dseparated"]
+            ]
+            if not backdoor_sets:
+                logger.debug("Optimized backdoor search found no valid observed set; using standard search.")
+                backdoor_sets = identify_backdoor(
+                    graph, action_nodes, outcome_nodes, observed_nodes, backdoor_adjustment
+                )
     elif backdoor_adjustment in EFFICIENT_METHODS:
         backdoor_sets = identify_efficient_backdoor(
             graph,
@@ -727,6 +758,10 @@ def find_valid_adjustment_sets(
     )
     for size_candidate_set in set_sizes:
         for candidate_set in itertools.combinations(filt_eligible_variables, size_candidate_set):
+            if num_iterations >= max_iterations:
+                logger.warning(f"Max number of iterations {max_iterations} reached. Stopping backdoor search.")
+                return backdoor_sets, found_valid_adjustment_set
+
             check = check_valid_backdoor_set(
                 graph,
                 action_nodes,
@@ -743,9 +778,6 @@ def find_valid_adjustment_sets(
                 backdoor_sets.append(AdjustmentSet(AdjustmentSet.BACKDOOR, candidate_set))
                 found_valid_adjustment_set = True
             num_iterations += 1
-            if backdoor_adjustment == BackdoorAdjustment.BACKDOOR_EXHAUSTIVE and num_iterations > max_iterations:
-                logger.warning(f"Max number of iterations {max_iterations} reached.")
-                break
         # If the backdoor method is `maximal-adjustment` or `minimal-adjustment`, return the first found adjustment set.
         if (
             backdoor_adjustment
@@ -763,9 +795,6 @@ def find_valid_adjustment_sets(
             backdoor_adjustment in {BackdoorAdjustment.BACKDOOR_DEFAULT, BackdoorAdjustment.BACKDOOR_MAX}
             and is_all_observed
         ):
-            break
-        if num_iterations > max_iterations:
-            logger.warning(f"Max number of iterations {max_iterations} reached. Could not find a valid backdoor set.")
             break
     return backdoor_sets, found_valid_adjustment_set
 
@@ -1076,8 +1105,8 @@ def construct_frontdoor_estimand(
 ):
     # TODO: support multivariate treatments better.
     expr = None
-    outcome_name = outcome_name[0]
-    sym_outcome = spstats.Normal(outcome_name, 0, 1)
+    outcome_name_str = outcome_name[0]
+    sym_outcome = spstats.Normal(outcome_name_str, 0, 1)
     sym_treatment_symbols = [spstats.Normal(t, 0, 1) for t in treatment_name]
     sym_treatment = sp.Array(sym_treatment_symbols)
     sym_frontdoor_symbols = [sp.Symbol(inst) for inst in frontdoor_variables_names]
@@ -1098,7 +1127,7 @@ def construct_frontdoor_estimand(
             "If U\N{RIGHTWARDS ARROW}{{{2}}} and U\N{RIGHTWARDS ARROW}{1}" " then P({1}|{2}, {0}, U) = P({1}|{2}, {0})"
         ).format(
             ",".join(treatment_name),
-            outcome_name,
+            outcome_name_str,
             ",".join(frontdoor_variables_names),
         ),
     }
@@ -1116,8 +1145,8 @@ def construct_mediation_estimand(
         EstimandType.NONPARAMETRIC_NDE,
         EstimandType.NONPARAMETRIC_NIE,
     ):
-        outcome_nodes = outcome_nodes[0]
-        sym_outcome = spstats.Normal(outcome_nodes, 0, 1)
+        outcome_nodes_str = outcome_nodes[0]
+        sym_outcome = spstats.Normal(outcome_nodes_str, 0, 1)
         sym_treatment_symbols = [spstats.Normal(t, 0, 1) for t in action_nodes]
         sym_treatment = sp.Array(sym_treatment_symbols)
         sym_mediators_symbols = [sp.Symbol(inst) for inst in mediator_nodes]
@@ -1125,7 +1154,7 @@ def construct_mediation_estimand(
         sym_outcome_derivative = sp.Derivative(sym_outcome, sym_mediators)
         sym_treatment_derivative = sp.Derivative(sym_mediators, sym_treatment)
         # For direct effect
-        num_expr_str = outcome_nodes
+        num_expr_str = outcome_nodes_str
         if len(mediator_nodes) > 0:
             num_expr_str += "|" + ",".join(mediator_nodes)
         sym_mu = sp.Symbol("mu")
@@ -1150,7 +1179,7 @@ def construct_mediation_estimand(
             "Second-stage-unconfoundedness": (
                 "If U\N{RIGHTWARDS ARROW}{{{2}}} and U\N{RIGHTWARDS ARROW}{1}"
                 " then P({1}|{2}, {0}, U) = P({1}|{2}, {0})"
-            ).format(",".join(action_nodes), outcome_nodes, ",".join(mediator_nodes)),
+            ).format(",".join(action_nodes), outcome_nodes_str, ",".join(mediator_nodes)),
         }
     else:
         raise ValueError(

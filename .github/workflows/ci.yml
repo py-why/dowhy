@@ -57,6 +57,14 @@ jobs:
         restore-keys: |
           venv-${{ runner.os }}-py${{ matrix.python-version }}-
 
+    - name: Free disk space for dependency installation
+      if: steps.cache-venv.outputs.cache-hit != 'true'
+      run: |
+        df -h /
+        # These preinstalled SDKs are unused by the Python test suite.
+        sudo rm -rf /usr/local/lib/android /usr/share/dotnet
+        df -h /
+
     # At the moment needed to support scipy in Python 3.12+
     # Only required when building from source (i.e., no cached venv)
     - name: Install LLVM and Clang
