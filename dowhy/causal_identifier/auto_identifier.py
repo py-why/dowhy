@@ -868,7 +868,8 @@ def identify_frontdoor(
 ):
     """Find a valid frontdoor variable set if it exists.
 
-    Candidate sets are checked in increasing size, so the returned set is one of the smallest valid sets.
+    Candidate sets are checked in increasing size, so the returned set is one of the smallest valid sets. If that
+    search stops after MAX_FRONTDOOR_ITERATIONS candidate sets, a larger valid set is returned when one is known.
     """
     frontdoor_paths = None
     cond1_graph = do_surgery(graph, action_nodes, remove_incoming_edges=True)
@@ -877,6 +878,29 @@ def identify_frontdoor(
     elif dseparation_algo != "default":
         raise ValueError(f"d-separation algorithm {dseparation_algo} is not supported")
 
+    def satisfies_cond1(candidate_set):
+        # Cond 1: All directed paths intercepted by candidate_set
+        return check_valid_frontdoor_set(
+            graph,
+            action_nodes,
+            outcome_nodes,
+            candidate_set,
+            frontdoor_paths=frontdoor_paths,
+            new_graph=cond1_graph,
+            dseparation_algo=dseparation_algo,
+        )
+
+    def satisfies_cond3(candidate_set):
+        # Cond 3: treatment blocks all confounding between candidate_set and outcome
+        return check_valid_backdoor_set(
+            graph,
+            candidate_set,
+            outcome_nodes,
+            action_nodes,
+            new_graph=do_surgery(graph, candidate_set, remove_outgoing_edges=True),
+            dseparation_algo=dseparation_algo,
+        )["is_dseparated"]
+
     eligible_variables = (
         get_descendants(graph, action_nodes)
         - set(action_nodes)
@@ -884,33 +908,50 @@ def identify_frontdoor(
         - set(get_descendants(graph, outcome_nodes))
     )
     eligible_variables = eligible_variables.intersection(set(observed_nodes))
+    # Candidates keep the graph's node order so that the returned set does not depend on set iteration order.
+    candidates = [var for var in graph.nodes if var in eligible_variables]
+    outcome_ancestors = get_ancestors(cond1_graph, outcome_nodes)
+
+    # If any subset of the candidates satisfies Cond 1, then so do the candidates that are ancestors of the outcome
+    # (van der Zander, Liskiewicz and Textor, 2019, Lemma 1). Checking that one set first ends the search when no
+    # subset can intercept the causal paths, e.g. when the treatment also has a direct edge to the outcome.
+    if not satisfies_cond1([var for var in candidates if var in outcome_ancestors]):
+        return []
 
     # Cond 2 (no unblocked backdoor path from the treatment to the candidate set) holds for a set exactly when it
     # holds for each of its members, so a variable that fails it on its own can never be part of a frontdoor set.
-    # Candidates keep the graph's node order so that the returned set does not depend on set iteration order.
+    graph_without_action_outgoing = do_surgery(graph, action_nodes, remove_outgoing_edges=True)
     candidates = [
         var
-        for var in graph.nodes
-        if var in eligible_variables
-        and check_valid_backdoor_set(graph, action_nodes, [var], set(), dseparation_algo=dseparation_algo)[
-            "is_dseparated"
-        ]
+        for var in candidates
+        if check_dseparation(graph, action_nodes, [var], set(), new_graph=graph_without_action_outgoing)
     ]
 
-    # If any subset of the candidates satisfies Cond 1, then so do the candidates that are ancestors of the outcome
-    # (van der Zander, Liskiewicz and Textor, 2019, Lemma 1). Checking that one set first skips the subset search
-    # when no subset can intercept the causal paths, e.g. when the treatment also has a direct edge to the outcome.
-    outcome_ancestors = get_ancestors(cond1_graph, outcome_nodes)
-    if not check_valid_frontdoor_set(
-        graph,
-        action_nodes,
-        outcome_nodes,
-        set(candidates) & outcome_ancestors,
-        frontdoor_paths=frontdoor_paths,
-        new_graph=cond1_graph,
-        dseparation_algo=dseparation_algo,
-    ):
+    # Cond 3 is closed under union: removing the outgoing edges of more variables only removes paths. So the
+    # variables that belong to some set satisfying Cond 3 form a largest such set. A candidate with an unblocked
+    # backdoor path to the outcome while the other candidates' outgoing edges are removed is not in it, so dropping
+    # those candidates until none are left finds that set.
+    while candidates:
+        graph_without_candidate_outgoing = do_surgery(graph, candidates, remove_outgoing_edges=True)
+        kept = [
+            var
+            for var in candidates
+            if check_dseparation(graph, [var], outcome_nodes, action_nodes, new_graph=graph_without_candidate_outgoing)
+        ]
+        if len(kept) == len(candidates):
+            break
+        candidates = kept
+
+    # With a single action node, a frontdoor set exists exactly when the remaining candidates that are ancestors of
+    # the outcome form one, and every smallest frontdoor set is a subset of them. With several action nodes this set
+    # is used when it is valid, and otherwise all remaining candidates are searched.
+    known_valid_set = [var for var in candidates if var in outcome_ancestors]
+    if known_valid_set and satisfies_cond1(known_valid_set) and satisfies_cond3(known_valid_set):
+        candidates = known_valid_set
+    elif len(action_nodes) == 1:
         return []
+    else:
+        known_valid_set = []
 
     num_iterations = 0
     for size_candidate_set in range(1, len(candidates) + 1):
@@ -919,37 +960,15 @@ def identify_frontdoor(
                 logger.warning(
                     f"Max number of iterations {MAX_FRONTDOOR_ITERATIONS} reached. Stopping frontdoor search."
                 )
-                return []
+                return known_valid_set
             num_iterations += 1
             candidate_set = list(candidate_set)
-            # Cond 1: All directed paths intercepted by candidate_var
-            cond1 = check_valid_frontdoor_set(
-                graph,
-                action_nodes,
-                outcome_nodes,
-                candidate_set,
-                frontdoor_paths=frontdoor_paths,
-                new_graph=cond1_graph,
-                dseparation_algo=dseparation_algo,
-            )
+            cond1 = satisfies_cond1(candidate_set)
             logger.debug("Candidate frontdoor set: {0}, Cond1: is_dseparated: {1}".format(candidate_set, cond1))
-            if not cond1:
-                continue
             # Cond 2 holds for every candidate set after the filtering above.
-            # Cond 3: treatment blocks all confounding between candidate_var and outcome
-            bdoor_graph2 = do_surgery(graph, candidate_set, remove_outgoing_edges=True)
-            cond3 = check_valid_backdoor_set(
-                graph,
-                candidate_set,
-                outcome_nodes,
-                action_nodes,
-                backdoor_paths=None,
-                new_graph=bdoor_graph2,
-                dseparation_algo=dseparation_algo,
-            )["is_dseparated"]
-            if cond3:
+            if cond1 and satisfies_cond3(candidate_set):
                 return candidate_set
-    return []
+    return known_valid_set
 
 
 def identify_generalized_adjustment_set(

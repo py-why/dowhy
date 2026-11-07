@@ -88,11 +88,10 @@ class TestFrontdoorIdentification(object):
         assert frontdoor_set == []
         assert num_checks == 1
 
-    def test_identify_frontdoor_respects_max_iterations(self, monkeypatch):
+    def test_identify_frontdoor_does_not_search_subsets_when_cond3_rules_them_out(self, monkeypatch):
         # Every set that intercepts the causal paths contains B, and B<-C->Y is not blocked by X, so no frontdoor set
-        # exists. Without a limit this graph needs every subset of the candidates to be checked.
+        # exists. This used to be found by checking every subset of the candidates.
         graph = build_graph_from_str("digraph {X->P0->P1->P2->P3->A->B->D->Y; X->D; C->B; C->Y}")
-        monkeypatch.setattr(auto_identifier, "MAX_FRONTDOOR_ITERATIONS", 10)
 
         num_checks = 0
         check_valid_frontdoor_set = auto_identifier.check_valid_frontdoor_set
@@ -109,5 +108,17 @@ class TestFrontdoorIdentification(object):
         )
 
         assert frontdoor_set == []
-        # One check for the early Cond 1 test, then at most 10 candidate sets.
-        assert num_checks <= 11
+        assert num_checks <= 2
+
+    def test_identify_frontdoor_returns_valid_set_when_search_stops(self, monkeypatch):
+        # The only frontdoor set is {M0, ..., M5}. When the search for a smallest set stops early, that set is still
+        # returned instead of reporting that no frontdoor set exists.
+        mediators = [f"M{i}" for i in range(6)]
+        graph = build_graph_from_str("digraph {U->X; U->Y; " + " ".join(f"X->{m}; {m}->Y;" for m in mediators) + "}")
+        monkeypatch.setattr(auto_identifier, "MAX_FRONTDOOR_ITERATIONS", 10)
+
+        frontdoor_set = identify_frontdoor(
+            graph, action_nodes=["X"], outcome_nodes=["Y"], observed_nodes=["X", *mediators, "Y"]
+        )
+
+        assert sorted(frontdoor_set) == mediators
