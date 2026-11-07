@@ -12,6 +12,7 @@ import numpy as np
 from dowhy.utils.graph_operations import (
     add_edge,
     adjacency_matrix_to_adjacency_list,
+    convert_to_undirected_graph,
     daggity_to_dot,
     del_edge,
     find_ancestor,
@@ -286,6 +287,18 @@ class TestIsConnected:
         g.add_node(1)
         # No edges between them
         assert not is_connected(g)
+
+
+class TestConvertToUndirectedGraph:
+    def test_edges_are_preserved(self):
+        g = nx.DiGraph()
+        g.add_edges_from([(0, 1), (1, 2)])
+
+        undirected = convert_to_undirected_graph(g)
+
+        assert not undirected.is_directed()
+        assert undirected.has_edge(0, 1)
+        assert undirected.has_edge(1, 2)
 
 
 # ---------------------------------------------------------------------------
