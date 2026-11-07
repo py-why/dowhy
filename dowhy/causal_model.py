@@ -314,9 +314,7 @@ class CausalModel:
         :param fit_estimator: Boolean flag on whether to fit the estimator.
             Setting it to False is useful to estimate the effect on new data using a previously fitted estimator.
         :param method_params: Dictionary containing any method-specific parameters. These are passed directly to the estimating method. See the docs for each estimation method for allowed method-specific params.
-        :param num_quantiles_to_discretize_cont_cols: The number of quantiles into which a numeric
-            effect modifier is discretized for conditional treatment effect estimation. This is a
-            shorthand for passing ``num_quantiles_to_discretize_cont_cols`` inside ``method_params``.
+        :param num_quantiles_to_discretize_cont_cols: The number of quantiles into which a numeric effect modifier is split, to enable estimation of conditional treatment effect over it. This is a DoWhy-level parameter and is forwarded to the DoWhy estimator wrapper, not to the underlying third-party estimator. Defaults to the estimator's own default when not specified.
         :param sample_size_fraction: The fraction of data used per bootstrap sample when computing
             confidence intervals via bootstrap. This is a shorthand for passing
             ``sample_size_fraction`` inside ``method_params``.
@@ -327,8 +325,6 @@ class CausalModel:
         # Merge shorthand estimator params into method_params so they reach the estimator constructor.
         # Values already present in method_params take priority over the shorthand params.
         _extra = {}
-        if num_quantiles_to_discretize_cont_cols is not None:
-            _extra["num_quantiles_to_discretize_cont_cols"] = num_quantiles_to_discretize_cont_cols
         if sample_size_fraction is not None:
             _extra["sample_size_fraction"] = sample_size_fraction
         if _extra:
@@ -381,6 +377,19 @@ class CausalModel:
                 extra_args = {}
             if method_params is None:
                 method_params = {}
+
+            # num_quantiles_to_discretize_cont_cols is a DoWhy-level parameter:
+            # it controls how DoWhy discretizes numeric effect modifiers. It is
+            # accepted by every DoWhy estimator wrapper (including the EconML
+            # one), so it is forwarded to the wrapper constructor rather than
+            # injected into init_params, which is passed straight through to the
+            # third-party estimator and would raise a TypeError.
+            if "num_quantiles_to_discretize_cont_cols" in method_params:
+                extra_args = dict(extra_args)
+                extra_args.pop("num_quantiles_to_discretize_cont_cols", None)
+            elif num_quantiles_to_discretize_cont_cols is not None:
+                extra_args = dict(extra_args)
+                extra_args["num_quantiles_to_discretize_cont_cols"] = num_quantiles_to_discretize_cont_cols
 
             identified_estimand.set_identifier_method(identifier_name)
 
