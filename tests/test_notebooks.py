@@ -17,8 +17,6 @@ advanced_notebooks = {
     "lalonde_pandas_api.ipynb",
     # will be removed
     "dowhy_optimize_backdoor_example.ipynb",
-    # applied notebook, not necessary to test each time
-    "dowhy_ranking_methods.ipynb",
     # needs xgboost too
     "DoWhy-The Causal Story Behind Hotel Booking Cancellations.ipynb",
     # Slow Notebooks
@@ -42,6 +40,7 @@ py310_dependent_notebooks = {
 ignore_notebooks = [
     "dowhy_causal_discovery_example.ipynb",  # This is being tested as part of documentation generation
     "gcm_chest_xray_causal_inference.ipynb",  # Requires network download; flaky in CI due to HTTP 429
+    "dowhy_ranking_methods.ipynb",  # Consistently times out in CI (runs 10 experiments with 5 econml estimators)
 ]
 
 # Adding the dowhy root folder to the python path so that jupyter notebooks
@@ -72,7 +71,12 @@ def _notebook_run(filepath):
             fout.name,
             filepath,
         ]
-        subprocess.check_call(args)
+        result = subprocess.run(args, capture_output=True, text=True)
+        if result.returncode != 0:
+            stderr = result.stderr.strip()
+            stdout = result.stdout.strip()
+            detail = stderr or stdout or "(no output captured from nbconvert)"
+            raise RuntimeError(f"Notebook execution failed (exit code {result.returncode}):\n{detail}")
 
         fout.seek(0)
         nb = nbformat.read(fout, nbformat.current_nbformat)
