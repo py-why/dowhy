@@ -32,6 +32,7 @@ jobs:
     - uses: actions/checkout@v7.0.1
 
     - name: Set up Python ${{ matrix.python-version }}
+      id: setup-python
       uses: actions/setup-python@v7
       with:
         python-version: ${{ matrix.python-version }}
@@ -49,11 +50,13 @@ jobs:
 
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
+        "${{ steps.setup-python.outputs.python-path }}" -c "import sys; print(sys.executable, sys.version); assert sys.version_info[:2] == tuple(map(int, '${{ matrix.python-version }}'.split('.'))), sys.version"
+        "${{ steps.setup-python.outputs.python-path }}" -m pip install --upgrade pip
         echo "HEAD_REPO='$HEAD_REPO'"
         echo "HEAD_BRANCH='$HEAD_BRANCH'"
         echo "GITHUB_CONTEXT='$GITHUB_CONTEXT'"
-        pip install git+https://github.com/${HEAD_REPO}@${HEAD_BRANCH:-main}
+        "${{ steps.setup-python.outputs.python-path }}" -m pip install git+https://github.com/${HEAD_REPO}@${HEAD_BRANCH:-main}
+        "${{ steps.setup-python.outputs.python-path }}" -I -c "import dowhy; print(dowhy.__file__)"
       env:
         GITHUB_CONTEXT: ${{ toJson(github) }}
         HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name || github.repository }}

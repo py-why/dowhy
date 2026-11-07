@@ -19,6 +19,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Python 3.9
+        id: setup-python
         uses: actions/setup-python@v7
         with:
           python-version: '3.9'
@@ -29,10 +30,13 @@ jobs:
           sudo apt-get install -y gcc g++ pkg-config libgraphviz-dev graphviz-dev graphviz nodejs npm pandoc
 
       - name: Install Poetry
-        run: python3 -m pip install poetry
+        run: '"${{ steps.setup-python.outputs.python-path }}" -m pip install poetry'
 
       - name: Install Python Dependencies
-        run: poetry install -E plotting -E pydot -E pygraphviz -E econml --with docs
+        run: |
+          poetry env use "${{ steps.setup-python.outputs.python-path }}"
+          poetry run python -c "import sys; print(sys.executable, sys.version); assert sys.version.split()[0] == '${{ steps.setup-python.outputs.python-version }}', sys.version"
+          poetry install -E plotting -E pydot -E pygraphviz -E econml --with docs
       
       - run: git config --global --add safe.directory /__w/dowhy/dowhy
 

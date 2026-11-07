@@ -18,6 +18,7 @@ jobs:
       - uses: actions/checkout@v7.0.1
 
       - name: Set up Python ${{ matrix.python-version }}
+        id: setup-python
         uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
@@ -40,7 +41,9 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
+          poetry env use "${{ steps.setup-python.outputs.python-path }}"
+          poetry run python -c "import sys; print(sys.executable, sys.version); assert sys.version.split()[0] == '${{ steps.setup-python.outputs.python-version }}', sys.version"
+          "${{ steps.setup-python.outputs.python-path }}" -m pip install --upgrade pip
           echo "installing poetry dependencies"
           poetry install -E plotting -E pydot -E pygraphviz -E econml --with docs
 
