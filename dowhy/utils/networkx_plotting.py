@@ -1,7 +1,6 @@
 from copy import deepcopy
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 import pandas as pd
@@ -26,6 +25,11 @@ def plot_causal_graph_networkx(
         colors = {}
     else:
         colors = deepcopy(colors)
+
+    try:
+        import matplotlib.pyplot as plt
+    except ImportError:
+        raise ImportError("matplotlib is required for plotting. Install it with: pip install 'dowhy[plotting]'")
 
     max_strength = 0.0
     for source, target, strength in causal_graph.edges(data="CAUSAL_STRENGTH", default=None):
@@ -104,6 +108,8 @@ def _draw_graph_with_custom_layout(
     edge_widths: Dict[Tuple[Any, Any], float],
     figure_size: Optional[List[int]] = None,
 ):
+    import matplotlib.pyplot as plt
+
     # This layout tries to mimic the graphviz layout in a simpler form. The depth grows horizontally here instead of
     # vertically.
     if isinstance(graph, nx.DiGraph):

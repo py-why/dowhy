@@ -1,6 +1,5 @@
 import logging
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
@@ -421,6 +420,11 @@ class LinearSensitivityAnalyzer:
             critical_value = 0  # default value of estimate
         else:
             critical_value = 2  # default t-value (usual approx for 95% CI)
+
+        try:
+            import matplotlib.pyplot as plt
+        except ImportError:
+            raise ImportError("matplotlib is required for plotting. Install it with: pip install 'dowhy[plotting]'")
 
         fig, ax = plt.subplots(1, 1, figsize=plot_size)
         ax.set_title("Sensitivity contour plot of %s" % plot_type)
