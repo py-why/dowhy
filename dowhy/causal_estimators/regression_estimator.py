@@ -69,6 +69,7 @@ class RegressionEstimator(CausalEstimator):
         )
 
         self.model = None
+        self._data = None  # set by fit(); used by predict() and interventional_outcomes()
 
     def fit(
         self,
@@ -78,9 +79,7 @@ class RegressionEstimator(CausalEstimator):
         """
         Fits the estimator with data for effect estimation
         :param data: data frame containing the data
-        :param treatment: name of the treatment variable
-        :param outcome: name of the outcome variable
-        :param effect_modifiers: Variables on which to compute separate
+        :param effect_modifier_names: Variables on which to compute separate
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
@@ -230,8 +229,10 @@ class RegressionEstimator(CausalEstimator):
 
     def predict(self, data_df):
         if not self.model:
-            # The model is always built on the entire data
-            _, self.model = self._build_model()
+            if self._data is None:
+                raise ValueError("Estimator has not been fitted. Call fit() before predict().")
+            # Lazily build the model from stored training data.
+            _, self.model = self._build_model(self._data)
 
         new_features = self._build_features(data_df=data_df)
         interventional_outcomes = self.predict_fn(data_df, self.model, new_features)

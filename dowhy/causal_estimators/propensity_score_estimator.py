@@ -89,7 +89,7 @@ class PropensityScoreEstimator(CausalEstimator):
         """
         Fits the estimator with data for effect estimation
         :param data: data frame containing the data
-        :param effect_modifiers: Variables on which to compute separate
+        :param effect_modifier_names: Variables on which to compute separate
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
