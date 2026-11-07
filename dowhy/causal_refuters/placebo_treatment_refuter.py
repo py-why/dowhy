@@ -183,6 +183,12 @@ def _refute_once(
     # Sanity check the data
     logger.debug(new_data[0:10])
     new_estimator = estimate.estimator.get_new_estimator_object(target_estimand)
+    # Drop any cached propensity scores that were computed for the original treatment.
+    # Propensity-score estimators skip refitting when this column already exists in the
+    # dataframe, so a stale column would cause the placebo to be scored with the original
+    # treatment's propensity scores — producing a systematically non-null placebo effect.
+    if hasattr(new_estimator, "propensity_score_column"):
+        new_data = new_data.drop(columns=[new_estimator.propensity_score_column], errors="ignore")
     new_estimator.fit(
         new_data,
         effect_modifier_names=estimate.estimator._effect_modifier_names,

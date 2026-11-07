@@ -119,9 +119,13 @@ def identify_effect_id(
 
     :returns: target estimand, an instance of the IDExpression class.
     """
+    # Accept a CausalGraph/CausalModel wrapper by extracting the underlying nx.DiGraph.
+    if hasattr(graph, "_graph") and isinstance(graph._graph, nx.DiGraph):
+        graph = graph._graph
+
     node_names = OrderedSet(graph.nodes)
 
-    adjacency_matrix = np.asmatrix(get_adjacency_matrix(graph))
+    adjacency_matrix = np.array(get_adjacency_matrix(graph))
 
     try:
         tsort_node_names = OrderedSet(list(nx.topological_sort(graph)))  # topological sorting of graph nodes
@@ -138,7 +142,7 @@ def identify_effect_id(
 
 
 def __adjacency_matrix_identify_effect(
-    adjacency_matrix: np.matrix,
+    adjacency_matrix: np.ndarray,
     treatment_name: OrderedSet,
     outcome_name: OrderedSet,
     tsort_node_names: OrderedSet,

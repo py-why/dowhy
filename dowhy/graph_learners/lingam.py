@@ -1,5 +1,7 @@
+import numpy as np
+
 from dowhy.graph_learners import GraphLearner
-from dowhy.utils.graph_operations import *
+from dowhy.utils.graph_operations import adjacency_matrix_to_graph, str_to_dot
 
 from . import get_library_class_object
 
