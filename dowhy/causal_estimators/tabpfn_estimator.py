@@ -6,8 +6,15 @@ from typing import Any, List, Optional, Union
 
 import numpy as np
 import pandas as pd
-import torch
 from sklearn.utils import resample
+
+try:
+    import torch
+
+    _TORCH_AVAILABLE = True
+except ImportError:
+    _TORCH_AVAILABLE = False
+    torch = None  # type: ignore[assignment]
 
 from dowhy.causal_estimator import CausalEstimate, CausalEstimator
 from dowhy.causal_estimators.regression_estimator import RegressionEstimator
@@ -154,7 +161,7 @@ class TabPFNModelWrapper:
         self._advise_pretraining_limits(self.train_X, self.train_y, logger)
         return self
 
-    def fit_single(self, device: torch.device):
+    def fit_single(self, device: Any):
         """Fit a single TabPFN model on the provided device using prepared train_X/train_y."""
         if self.resolved_model_type == "Classifier":
             from tabpfn import TabPFNClassifier as _Model
@@ -384,9 +391,7 @@ class TabpfnEstimator(RegressionEstimator):
         """
         Fits the estimator with data for effect estimation
         :param data: data frame containing the data
-        :param treatment: name of the treatment variable
-        :param outcome: name of the outcome variable
-        :param effect_modifiers: Variables on which to compute separate
+        :param effect_modifier_names: Variables on which to compute separate
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
