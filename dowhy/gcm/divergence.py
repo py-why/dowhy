@@ -183,6 +183,158 @@ def _joint_category(row) -> tuple:
     return tuple(_MISSING_CATEGORY if _is_missing(v) else v for v in row)
 
 
+def _joint_categories_equal(left: tuple, right: tuple) -> bool:
+    for left_value, right_value in zip(left, right):
+        if left_value is right_value:
+            continue
+        if isinstance(left_value, (np.datetime64, np.timedelta64)) and type(left_value) is type(right_value):
+            ticks = _temporal_sort_keys([left_value, right_value])
+            if ticks is not None:
+                if ticks[0] != ticks[1]:
+                    return False
+                continue
+        try:
+            is_equal = left_value == right_value
+        except TypeError:
+            # Some unrelated scalars, such as Decimal and timedelta64, cannot be compared.
+            return False
+        if not isinstance(is_equal, (bool, np.bool_)) or not is_equal:
+            return False
+    return True
+
+
+_ATTOSECONDS_PER_UNIT = {
+    "W": 7 * 86400 * 10**18,
+    "D": 86400 * 10**18,
+    "h": 3600 * 10**18,
+    "m": 60 * 10**18,
+    "s": 10**18,
+    "ms": 10**15,
+    "us": 10**12,
+    "ns": 10**9,
+    "ps": 10**6,
+    "fs": 10**3,
+    "as": 1,
+}
+
+
+def _calendar_month_to_days(months: int) -> int:
+    # First day of a proleptic Gregorian month, relative to 1970-01-01. Python integers retain the full NumPy range.
+    year, month = 1970 + months // 12, months % 12 + 1
+    year -= month <= 2
+    era, year_of_era = divmod(year, 400)
+    march_month = month + (-3 if month > 2 else 9)
+    return (
+        era * 146097 + year_of_era * 365 + year_of_era // 4 - year_of_era // 100 + (153 * march_month + 2) // 5 - 719468
+    )
+
+
+def _temporal_sort_keys(values: list):
+    metadata = [np.datetime_data(value.dtype) for value in values]
+    # Generic durations acquire the other operand's unit during comparison, so retain the equality fallback.
+    if any(unit == "generic" for unit, _ in metadata):
+        return None
+    keys = []
+    for value, (unit, step) in zip(values, metadata):
+        count = np.asarray(value).view(np.int64).item() * step
+        if unit in ("Y", "M"):
+            months = count * 12 if unit == "Y" else count
+            if isinstance(value, np.timedelta64):
+                keys.append(("calendar", months))
+                continue
+            count, unit = _calendar_month_to_days(months), "D"
+        # Arbitrary-precision ticks avoid both overflowing unit casts and NumPy temporal hashing.
+        keys.append(("fixed", count * _ATTOSECONDS_PER_UNIT[unit]))
+    return keys
+
+
+def _joint_sort_keys(rows: list):
+    keys = [[(value is not _MISSING_CATEGORY, value) for value in row] for row in rows]
+    for column_index, column in enumerate(zip(*rows)):
+        value_types = {type(value) for value in column if value is not _MISSING_CATEGORY}
+        # Mixed types can have non-transitive equality, such as integers and durations in different units.
+        if len(value_types) > 1:
+            return None
+        if value_types & {np.datetime64, np.timedelta64}:
+            values = [value for value in column if value is not _MISSING_CATEGORY]
+            ticks = _temporal_sort_keys(values)
+            if ticks is None:
+                return None
+            tick_iterator = iter(ticks)
+            for index, value in enumerate(column):
+                if value is not _MISSING_CATEGORY:
+                    keys[index][column_index] = (True, next(tick_iterator))
+    return keys
+
+
+def _sorted_joint_counts(x_rows: list, y_rows: list):
+    rows = x_rows + y_rows
+    keys = _joint_sort_keys(rows)
+    if keys is None:
+        return None
+    group_ids = [0] * len(rows)
+    representative = None
+    group = 0
+    try:
+        for index in sorted(range(len(rows)), key=keys.__getitem__):
+            if representative is None:
+                representative = index
+            elif not _joint_categories_equal(rows[index], rows[representative]):
+                # A partial ordering (for example, disjoint sets) cannot safely group equal categories.
+                if not keys[representative] < keys[index]:
+                    return None
+                group += 1
+                representative = index
+            group_ids[index] = group
+    except (TypeError, ValueError):
+        # Mixed or non-boolean comparisons may prevent sorting. Use the equality fallback instead.
+        return None
+
+    # Count in input order so KL accumulation keeps first-seen order, including categories unique to Y.
+    split = len(x_rows)
+    return Counter(group_ids[:split]), Counter(group_ids[split:])
+
+
+def _contains_temporal(values: np.ndarray) -> bool:
+    return values.dtype.kind in "mM" or (
+        values.dtype.kind == "O" and any(isinstance(value, (np.datetime64, np.timedelta64)) for value in values.flat)
+    )
+
+
+def _joint_counts(X: np.ndarray, Y: np.ndarray):
+    # Equal temporal scalars can have different hashes across units. Hashing them also leaks memory in NumPy 2.2.6.
+    # Check before hashing any row, including temporal cells in object arrays.
+    if not (_contains_temporal(X) or _contains_temporal(Y)):
+        try:
+            # Stream ordinary hashable rows, retaining only the distinct categories.
+            return Counter(map(_joint_category, X)), Counter(map(_joint_category, Y))
+        except TypeError:
+            # Orderable, unhashable objects were supported by the original np.unique implementation.
+            pass
+
+    x_rows = list(map(_joint_category, X))
+    y_rows = list(map(_joint_category, Y))
+    sorted_counts = _sorted_joint_counts(x_rows, y_rows)
+    if sorted_counts is not None:
+        return sorted_counts
+
+    # Compare original scalar values without casting to a common temporal unit, which can overflow or lose precision.
+    # Share category indices across both samples and retain first-seen order, as on the hashable path.
+    categories = []
+    counts = []
+    for rows in (x_rows, y_rows):
+        row_counts = Counter()
+        for row in rows:
+            index = next(
+                (i for i, category in enumerate(categories) if _joint_categories_equal(row, category)), len(categories)
+            )
+            if index == len(categories):
+                categories.append(row)
+            row_counts[index] += 1
+        counts.append(row_counts)
+    return counts
+
+
 def estimate_kl_divergence_categorical(X: np.ndarray, Y: np.ndarray) -> float:
     """Estimates KL divergence between categorical samples, treating each row as one joint observation.
 
@@ -199,8 +351,7 @@ def estimate_kl_divergence_categorical(X: np.ndarray, Y: np.ndarray) -> float:
 
     # Count joint observations rather than pooling categories across columns. Tuples also support object arrays,
     # which are commonly used for categorical data but are not supported by np.unique with axis=0.
-    x_counts = Counter(map(_joint_category, X))
-    y_counts = Counter(map(_joint_category, Y))
+    x_counts, y_counts = _joint_counts(X, Y)
     # Keep first-seen order instead of set order, so the summation does not depend on hash randomization.
     all_uniques = list(x_counts) + [i for i in y_counts if i not in x_counts]
 

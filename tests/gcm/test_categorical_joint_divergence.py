@@ -1,9 +1,43 @@
 from decimal import Decimal
+from itertools import permutations
 
 import numpy as np
 import pytest
 
 from dowhy.gcm.divergence import auto_estimate_kl_divergence, estimate_kl_divergence_categorical
+
+
+@pytest.mark.parametrize("joint", [False, True])
+@pytest.mark.parametrize("kind", ["dates", "durations"])
+def test_categorical_kl_handles_mixed_temporal_units_outside_common_range(joint, kind):
+    if kind == "dates":
+        values = [
+            np.datetime64("1500-01-01", "D"),
+            np.datetime64("2500-01-01", "D"),
+            np.datetime64("2000-01-01", "ns"),
+        ]
+    else:
+        values = [np.timedelta64(-200000, "D"), np.timedelta64(200000, "D"), np.timedelta64(0, "ns")]
+    for order in permutations(values):
+        x = np.array([["tag", value] for value in order] if joint else order, dtype=object)
+        assert estimate_kl_divergence_categorical(x, x.copy()) == pytest.approx(0)
+        assert estimate_kl_divergence_categorical(x, x[::-1]) == pytest.approx(0)
+
+
+@pytest.mark.parametrize("kind", ["datetime64", "timedelta64"])
+@pytest.mark.parametrize("count", [-1, 1])
+def test_categorical_kl_keeps_large_stepped_temporal_values_distinct(kind, count):
+    value = np.array(count, dtype=f"{kind}[1000000D]")[()]
+    x = np.array([value], dtype=object)
+    equivalent = np.array([np.array(count * 1000000, dtype=f"{kind}[D]")[()]], dtype=object)
+    # This timestamp fits in nanoseconds but differs from the million-day value, despite overflowing comparisons
+    # treating them as equal on older NumPy versions.
+    wrapped = np.array([np.array(count * -5833720368547758080, dtype=f"{kind}[ns]")[()]], dtype=object)
+    eps = np.finfo(float).eps
+    expected = np.log((1 + eps) / eps) / (1 + eps)
+
+    assert estimate_kl_divergence_categorical(x, equivalent) == pytest.approx(0)
+    assert estimate_kl_divergence_categorical(x, wrapped) == pytest.approx(expected)
 
 
 @pytest.mark.parametrize("estimator", [estimate_kl_divergence_categorical, auto_estimate_kl_divergence])
@@ -140,3 +174,140 @@ def test_categorical_kl_keeps_values_with_non_boolean_self_comparison():
     assert estimate_kl_divergence_categorical(non_boolean, non_boolean.copy()) == pytest.approx(0)
     assert estimate_kl_divergence_categorical(non_boolean, missing) == pytest.approx(expected)
     assert estimate_kl_divergence_categorical(infinite, missing) == pytest.approx(expected)
+
+
+@pytest.mark.parametrize(
+    "dtype, values, unit",
+    [
+        ("datetime64[D]", ["1500-01-01", "2500-01-01"], "s"),
+        ("datetime64[Y]", ["1900", "2000"], "M"),
+        ("datetime64[ps]", [1, 2], "as"),
+        ("timedelta64[D]", [-1, 2], "s"),
+        ("timedelta64[Y]", [-1, 2], "M"),
+        ("timedelta64[ps]", [1, 2], "as"),
+        ("timedelta64[2s]", [-1, 2], "ms"),
+    ],
+)
+def test_categorical_kl_matches_equivalent_temporal_units(dtype, values, unit):
+    x = np.array(values, dtype=dtype)
+    y = x.astype(dtype.split("[")[0] + "[" + unit + "]")
+    original_x, original_y = x.copy(), y.copy()
+
+    assert estimate_kl_divergence_categorical(x, y) == pytest.approx(0)
+    assert estimate_kl_divergence_categorical(x, y[::-1]) == pytest.approx(0)
+    # Preserve distinct values even beyond the nanosecond date range or below nanosecond resolution.
+    assert estimate_kl_divergence_categorical(x[:1], y[1:]) > 30
+    np.testing.assert_array_equal(x, original_x)
+    np.testing.assert_array_equal(y, original_y)
+
+
+@pytest.mark.parametrize("kind", ["datetime64", "timedelta64"])
+def test_categorical_kl_matches_temporal_units_in_mixed_joint_rows(kind):
+    first = getattr(np, kind)(1, "D")
+    second = getattr(np, kind)(2, "D")
+    first_seconds = first.astype(kind + "[s]")
+    second_seconds = second.astype(kind + "[s]")
+    x = np.array([["a", first], ["a", first_seconds], ["b", second]], dtype=object)
+    y = np.array([["a", first_seconds], ["b", second_seconds], ["b", second]], dtype=object)
+
+    assert estimate_kl_divergence_categorical(x, y) == pytest.approx(np.log(2) / 3)
+    assert estimate_kl_divergence_categorical(x, x[::-1].copy()) == pytest.approx(0)
+
+
+def test_categorical_kl_supports_orderable_unhashable_categories():
+    from dataclasses import dataclass
+
+    @dataclass(order=True)
+    class Category:
+        value: int
+
+    x = np.array([Category(1), Category(1), Category(2)], dtype=object)
+    y = np.array([Category(1), Category(2), Category(2)], dtype=object)
+    assert estimate_kl_divergence_categorical(x, y) == pytest.approx(np.log(2) / 3)
+    assert estimate_kl_divergence_categorical(x, x[::-1].copy()) == pytest.approx(0)
+
+    # Unhashable cells can occur in joint observations alongside ordinary and missing categories.
+    x = np.array([["a", Category(1), Decimal("NaN")]] * 2 + [["b", Category(2), None]], dtype=object)
+    y = np.array([["a", Category(1), float("nan")]] + [["b", Category(2), None]] * 2, dtype=object)
+    assert estimate_kl_divergence_categorical(x, y) == pytest.approx(np.log(2) / 3)
+    assert estimate_kl_divergence_categorical(x, y[:, ::-1]) > 30
+
+
+def test_categorical_kl_keeps_non_boolean_comparisons_in_temporal_fallback():
+    class NonBooleanComparison:
+        def __eq__(self, other):
+            return np.array([True, False])
+
+        def __ne__(self, other):
+            return np.array([False, True])
+
+        __hash__ = object.__hash__
+
+    first, second = NonBooleanComparison(), NonBooleanComparison()
+    x = np.array([np.datetime64("2020-01-01"), first, second, np.nan, None, "nan", True, 1], dtype=object)
+    y = x[::-1].copy()
+    assert estimate_kl_divergence_categorical(x, y) == pytest.approx(0)
+
+
+@pytest.mark.parametrize("reverse", [False, True])
+@pytest.mark.parametrize("joint", [False, True])
+def test_categorical_kl_supports_mixed_decimal_and_timedelta_categories(reverse, joint):
+    x = np.array([np.timedelta64(1, "D"), np.timedelta64(1, "D"), Decimal("0.1")], dtype=object)
+    y = np.array([np.timedelta64(1, "D"), Decimal("0.1"), Decimal("0.1")], dtype=object)
+    if reverse:
+        x, y = x[::-1].copy(), y[::-1].copy()
+    if joint:
+        x = np.column_stack([np.full(len(x), "same", dtype=object), x])
+        y = np.column_stack([np.full(len(y), "same", dtype=object), y])
+
+    assert estimate_kl_divergence_categorical(x, x.copy()) == pytest.approx(0)
+    assert estimate_kl_divergence_categorical(x, y) == pytest.approx(np.log(2) / 3)
+
+
+@pytest.mark.parametrize("kind", ["datetime64", "timedelta64"])
+@pytest.mark.parametrize("joint", [False, True])
+def test_categorical_kl_groups_ordered_temporal_categories_without_scanning_every_pair(monkeypatch, kind, joint):
+    import dowhy.gcm.divergence as divergence
+
+    size = 256
+    x = np.arange(size).astype(kind + "[D]")
+    x[0] = "NaT"
+    y = x.astype(kind + "[s]")[::-1].copy()
+    if joint:
+        # Construct object rows without converting NumPy temporal scalars to Python dates or timedeltas.
+        x = np.array([["same", value] for value in x], dtype=object)
+        y = np.array([["same", value] for value in y], dtype=object)
+
+    comparisons = 0
+    original_equal = divergence._joint_categories_equal
+
+    def count_comparisons(left, right):
+        nonlocal comparisons
+        comparisons += 1
+        return original_equal(left, right)
+
+    monkeypatch.setattr(divergence, "_joint_categories_equal", count_comparisons)
+    assert estimate_kl_divergence_categorical(x, y) == pytest.approx(0)
+    # Bound category-search work deterministically, independently of machine speed.
+    assert comparisons < 20 * size
+
+
+def test_categorical_kl_preserves_first_seen_equality_for_mixed_durations_and_integers():
+    # NumPy can compare an integer equal to durations in different units, even when those durations are unequal.
+    # Keep the original first-seen representative for these genuinely mixed categories.
+    x = np.array([np.timedelta64(1, "s"), 2, 1, np.timedelta64(1, "D"), np.timedelta64(1, "s")], dtype=object)
+    y = np.array([2, np.timedelta64(1, "D"), 1, 2, np.timedelta64(1, "s")], dtype=object)
+    eps = np.finfo(float).eps
+    p = (np.array([3, 1, 1]) + eps) / (5 + eps)
+    q = (np.array([2, 2, 1]) + eps) / (5 + eps)
+
+    assert estimate_kl_divergence_categorical(x, y) == pytest.approx(np.sum(p * np.log(p / q)))
+
+
+def test_categorical_kl_falls_back_for_partially_ordered_unhashable_categories():
+    # Disjoint sets have neither less-than nor greater-than ordering, so sorting cannot group their duplicates.
+    x = np.array([{1}, {2}, {1}], dtype=object)
+    y = np.array([{1}, {2}, {2}], dtype=object)
+
+    assert estimate_kl_divergence_categorical(x, y) == pytest.approx(np.log(2) / 3)
+    assert estimate_kl_divergence_categorical(x, x[::-1].copy()) == pytest.approx(0)
