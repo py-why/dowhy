@@ -93,6 +93,11 @@ Pull request checklist
 
      poetry run poe -h
 
+   On GitHub-hosted CI runners, fresh dependency installs first remove the unused
+   Android and .NET SDKs to make room for the development dependencies, including
+   PyTorch and its CUDA libraries. The workflow logs available disk space before
+   and after cleanup. Cached virtual environments skip this cleanup.
+
    The full test suite of DoWhy takes quite long. To speed up development cycles,
    you can restrict the tests executed as in the following example.
 
