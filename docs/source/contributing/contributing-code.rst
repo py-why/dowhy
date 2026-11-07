@@ -72,6 +72,11 @@ Pull request checklist
 #. Add tests for your new code and execute the unittests to make sure
    you did not introduce any breaking changes or bugs.
 
+   Keep tests focused, reproducible, and reasonably fast. When tests involve
+   randomness, control its sources and account for sampling variability in
+   the assertions. Check reliability across repeated runs and measure execution
+   time when changing the amount of data or computation a test requires.
+
    .. code:: shell
 
      poetry run poe test
@@ -87,6 +92,11 @@ Pull request checklist
    .. code:: shell
 
      poetry run poe -h
+
+   On GitHub-hosted CI runners, fresh dependency installs first remove the unused
+   Android and .NET SDKs to make room for the development dependencies, including
+   PyTorch and its CUDA libraries. The workflow logs available disk space before
+   and after cleanup. Cached virtual environments skip this cleanup.
 
    The full test suite of DoWhy takes quite long. To speed up development cycles,
    you can restrict the tests executed as in the following example.
