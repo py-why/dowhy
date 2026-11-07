@@ -841,7 +841,7 @@ def _get_baseline_model_interpretation_string(
             + str(best_baseline_performance)
             + ". Accordingly, the current mechanism could be improved using a "
             + best_baseline_model
-            + " instead. If you are using an auto assigment, consider a "
+            + " instead. If you are using an auto assignment, consider a "
             "better assignment quality level such as AssignmentQuality.BETTER."
         )
     else:
@@ -856,6 +856,6 @@ def _get_baseline_model_interpretation_string(
             + str(best_baseline_performance)
             + ". Seeing this, consider changing the mechanism to a "
             + best_baseline_model
-            + " or, if you are using an auto assigment, consider a better assignment quality "
+            + " or, if you are using an auto assignment, consider a better assignment quality "
             "level such as AssignmentQuality.BETTER."
         )
