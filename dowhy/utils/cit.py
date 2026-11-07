@@ -30,9 +30,12 @@ def compute_ci(r=None, nx=None, ny=None, confidence=0.95):
     :returns : array containing confidence interval
     """
 
-    assert r is not None and nx is not None
-    assert isinstance(confidence, float)
-    assert 0 < confidence < 1
+    if r is None or nx is None:
+        raise ValueError("Both 'r' (correlation coefficient) and 'nx' (sample size) must be provided.")
+    if not isinstance(confidence, float):
+        raise TypeError(f"'confidence' must be a float, got {type(confidence).__name__}.")
+    if not (0 < confidence < 1):
+        raise ValueError(f"'confidence' must be strictly between 0 and 1, got {confidence}.")
 
     z = np.arctanh(r)  # Fisher Transform  from r to z
     se = 1 / np.sqrt(nx - 3)  # Standard error = 1/sqrt(N-3) where N is sample size
@@ -65,13 +68,19 @@ def partial_corr(data=None, x=None, y=None, z=None, method="pearson"):
         p-val: p-value
     """
 
-    assert data.shape[0] > 2  # Check for atleast 3 samples
-    assert x != z  # x and z should be distinct
-    assert y != z  # y and z should be distinct
-    assert x != y  # x and y should be distinct
+    if data.shape[0] <= 2:
+        raise ValueError("'data' must contain more than 2 samples for partial correlation.")
+    if x == z:
+        raise ValueError(f"'x' and 'z' must be distinct variables, both are '{x}'.")
+    if y == z:
+        raise ValueError(f"'y' and 'z' must be distinct variables, both are '{y}'.")
+    if x == y:
+        raise ValueError(f"'x' and 'y' must be distinct variables, both are '{x}'.")
     if isinstance(z, list):
-        assert x not in z  # x and z should be distinct
-        assert y not in z  # y and z should be distinct
+        if x in z:
+            raise ValueError(f"'x' ({x!r}) must not appear in 'z'.")
+        if y in z:
+            raise ValueError(f"'y' ({y!r}) must not appear in 'z'.")
 
     combined_variables = [x, y]  # Combine all variables - x, y and z
     for var in z:
@@ -79,7 +88,8 @@ def partial_corr(data=None, x=None, y=None, z=None, method="pearson"):
     data = data[combined_variables].dropna()  # Drop missing values
     n = data.shape[0]  # Number of samples after dropping missing values
     k = data.shape[1] - 2  # Number of covariates
-    assert n > 2
+    if n <= 2:
+        raise ValueError(f"After dropping missing values, only {n} sample(s) remain; at least 3 are required.")
 
     if method == "spearman":
         V = data.rank(na_option="keep").cov()  # Change data to rank for spearman correlation
@@ -139,14 +149,16 @@ def conditional_MI(data=None, x=None, y=None, z=None):
     :param x,y,z : column names from dataset
     :returns : conditional mutual information between X and Y given Z
     """
-    X = data[list(x)].astype(int)
-    Y = data[list(y)].astype(int)
-    t = list(z)
-    Z = data[t].astype(int)
-    Z = Z.values.tolist()
-    Z = list(data[t].itertuples(index=False, name=None))
-    Hxz = entropy(map(lambda x: "%s/%s" % x, zip(X, Z)))  # Finding Joint entropy of X and Z
-    Hyz = entropy(map(lambda x: "%s/%s" % x, zip(Y, Z)))  # Finding Joint entropy of Y and Z
+    x_cols = [x] if isinstance(x, str) else list(x)
+    y_cols = [y] if isinstance(y, str) else list(y)
+    z_cols = [z] if isinstance(z, str) else list(z)
+    X = list(data[x_cols].astype(int).itertuples(index=False, name=None))
+    Y = list(data[y_cols].astype(int).itertuples(index=False, name=None))
+    Z = list(data[z_cols].itertuples(index=False, name=None))
+    Hxz = entropy(str(xv) + "/" + str(zv) for xv, zv in zip(X, Z))  # Finding Joint entropy of X and Z
+    Hyz = entropy(str(yv) + "/" + str(zv) for yv, zv in zip(Y, Z))  # Finding Joint entropy of Y and Z
     Hz = entropy(Z)  # Finding Entropy of Z
-    Hxyz = entropy(map(lambda x: "%s/%s/%s" % x, zip(X, Y, Z)))  # Finding Joint Entropy of X, Y and Z
+    Hxyz = entropy(
+        str(xv) + "/" + str(yv) + "/" + str(zv) for xv, yv, zv in zip(X, Y, Z)
+    )  # Finding Joint Entropy of X, Y and Z
     return Hxz + Hyz - Hxyz - Hz

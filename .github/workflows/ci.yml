@@ -33,10 +33,10 @@ jobs:
         test-group: [1, 2, 3, 4, 5, 6]
 
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@v7.0.1
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v6
+      uses: actions/setup-python@v7
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -56,6 +56,14 @@ jobs:
         key: venv-${{ runner.os }}-py${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
         restore-keys: |
           venv-${{ runner.os }}-py${{ matrix.python-version }}-
+
+    - name: Free disk space for dependency installation
+      if: steps.cache-venv.outputs.cache-hit != 'true'
+      run: |
+        df -h /
+        # These preinstalled SDKs are unused by the Python test suite.
+        sudo rm -rf /usr/local/lib/android /usr/share/dotnet
+        df -h /
 
     # At the moment needed to support scipy in Python 3.12+
     # Only required when building from source (i.e., no cached venv)

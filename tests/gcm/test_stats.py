@@ -83,6 +83,11 @@ def test_given_invalid_inputs_when_merge_p_values_quantile_then_raises_error():
     with pytest.raises(ValueError):
         assert merge_p_values_quantile(np.array([0.1, 0.5, 1]), quantile=-0.5)
 
+    # A quantile in the open interval (1, 2) must be rejected by the input validation with the informative message,
+    # rather than slipping through to np.quantile (which would raise a generic "Quantiles must be in the range [0, 1]").
+    with pytest.raises(ValueError, match=r"needs to be on \(0, 1\]"):
+        merge_p_values_quantile(np.array([0.1, 0.5, 1]), quantile=1.5)
+
 
 def test_when_merge_p_values_average_without_randomization_then_returns_expected_results():
     assert merge_p_values_average([0]) == 0

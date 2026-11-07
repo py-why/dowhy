@@ -658,6 +658,36 @@ class TestCausalModel(object):
                 graph=nx.Graph([("X", "Y"), ("Y", "Z")]),
             )
 
+    def test_learn_graph_initializes_the_graph(self):
+        """CausalModel.learn_graph() must pass identify_vars on to init_graph()."""
+        import sys
+        import types
+
+        from dowhy.graph_learner import GraphLearner
+
+        class STUB(GraphLearner):
+            def __init__(self, data, library_class=None, *args, **kwargs):
+                self._data = data
+
+            def learn_graph(self):
+                learned = nx.DiGraph([("W0", "v0"), ("W0", "y"), ("v0", "y")])
+                return nx.nx_pydot.to_pydot(learned).to_string()
+
+        module = types.ModuleType("dowhy.graph_learners.stub")
+        module.STUB = STUB
+        sys.modules["dowhy.graph_learners.stub"] = module
+        try:
+            data = pd.DataFrame({"W0": [0.0, 1.0, 2.0], "v0": [0, 1, 0], "y": [1.0, 3.0, 2.0]})
+            model = CausalModel(data=data, treatment="v0", outcome="y", common_causes=["W0"])
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", DeprecationWarning)
+                graph = model.learn_graph("stub")
+        finally:
+            del sys.modules["dowhy.graph_learners.stub"]
+
+        assert graph is model._graph
+        assert set(graph.get_all_nodes(include_unobserved=True)) == {"W0", "v0", "y"}
+
     def test_warn_when_treatment_not_in_data(self):
         """CausalModel should emit a UserWarning when treatment variable is missing from the DataFrame."""
         data = pd.DataFrame({"X": [0, 1], "Y": [1, 2]})
@@ -896,6 +926,54 @@ class TestCausalModel(object):
         do_control = float(do_control)
         # The implied ATE should be close to beta=10.
         assert do_treated - do_control == pytest.approx(10, abs=5)
+
+    def test_repr_matches_str_for_key_result_objects(self):
+        """repr() should return the same text as str() for CausalEstimate, IdentifiedEstimand, and CausalRefutation."""
+        np.random.seed(42)
+        data = dowhy.datasets.linear_dataset(
+            beta=10,
+            num_common_causes=1,
+            num_samples=200,
+            num_treatments=1,
+            treatment_is_binary=True,
+        )
+        model = CausalModel(
+            data=data["df"],
+            treatment=data["treatment_name"],
+            outcome=data["outcome_name"],
+            graph=data["gml_graph"],
+        )
+        identified_estimand = model.identify_effect(proceed_when_unidentifiable=True)
+        estimate = model.estimate_effect(
+            identified_estimand,
+            method_name="backdoor.linear_regression",
+        )
+
+        # IdentifiedEstimand
+        assert repr(identified_estimand) == str(identified_estimand)
+        assert "Estimand type" in repr(identified_estimand)
+
+        # CausalEstimate
+        assert repr(estimate) == str(estimate)
+        assert "Mean value" in repr(estimate)
+
+        # RealizedEstimand
+        from dowhy.causal_estimator import RealizedEstimand
+
+        realized_estimand = RealizedEstimand(identified_estimand, estimator_name="Test")
+        realized_estimand.update_estimand_expression(0)
+        realized_estimand.update_assumptions({})
+        assert repr(realized_estimand) == str(realized_estimand)
+        assert "Realized estimand" in repr(realized_estimand)
+        # CausalRefutation
+        refutation = model.refute_estimate(
+            identified_estimand,
+            estimate,
+            method_name="placebo_treatment_refuter",
+            num_simulations=5,
+        )
+        assert repr(refutation) == str(refutation)
+        assert "Estimated effect" in repr(refutation)
 
 
 if __name__ == "__main__":

@@ -17,8 +17,22 @@ def test_given_gaussian_data_when_estimating_entropy_using_discretization_then_i
     X = np.random.normal(0, 1, 10000)
     Y = np.random.normal(0, 3, 10000)
 
-    assert estimate_entropy_using_discretization(X) == approx(1.25, abs=0.2)
-    assert estimate_entropy_using_discretization(Y) == approx(2.45, abs=0.2)
+    # With bin_width=1, the discretization has bins of unit width covering the data range. The estimate is close to the
+    # theoretical differential entropy of the Gaussian (0.5 * ln(2 * pi * e * sigma^2)), i.e. ~1.42 and ~2.52.
+    assert estimate_entropy_using_discretization(X) == approx(1.42, abs=0.2)
+    assert estimate_entropy_using_discretization(Y) == approx(2.52, abs=0.2)
+
+
+def test_given_data_with_range_smaller_than_two_bin_widths_when_estimating_entropy_then_it_is_positive():
+    # Regression test: when the data range is smaller than 2 * bin_width the number of bins used to be collapsed to 1
+    # (an empty histogram), so the estimated entropy was silently 0 regardless of the actual distribution.
+    X = np.random.uniform(0, 1.9, 1000)
+
+    assert estimate_entropy_using_discretization(X, bin_width=1) > 0
+
+
+def test_given_constant_data_when_estimating_entropy_using_discretization_then_it_is_zero():
+    assert estimate_entropy_using_discretization(np.ones(100)) == approx(0.0)
 
 
 def test_given_gaussian_data_when_estimating_entropy_using_kmeans_then_it_should_return_correct_entropy_values():

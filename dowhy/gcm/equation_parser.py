@@ -7,7 +7,13 @@ import networkx as nx
 import numpy as np
 import scipy.stats
 
-from dowhy.gcm import AdditiveNoiseModel, EmpiricalDistribution, ScipyDistribution, StructuralCausalModel
+from dowhy.gcm import (
+    AdditiveNoiseModel,
+    BayesianGaussianMixtureDistribution,
+    EmpiricalDistribution,
+    ScipyDistribution,
+    StructuralCausalModel,
+)
 from dowhy.gcm.causal_mechanisms import StochasticModel
 from dowhy.gcm.causal_models import PARENTS_DURING_FIT
 from dowhy.gcm.ml.prediction_model import PredictionModel
@@ -16,7 +22,7 @@ from dowhy.graph import get_ordered_predecessors
 
 _STOCHASTIC_MODEL_TYPES = {
     "empirical": EmpiricalDistribution,
-    "bayesiangaussianmixture": EmpiricalDistribution,
+    "bayesiangaussianmixture": BayesianGaussianMixtureDistribution,
     "parametric": ScipyDistribution,
 }
 _NOISE_MODEL_PATTERN = r"^\s*([\w]+)\(([^)]*)\)\s*$"
@@ -123,6 +129,11 @@ def _parse_args(args: str) -> dict:
     for str_arg in str_args_list:
         if str_arg:
             arg_value_pairs = str_arg.split("=")
+            if len(arg_value_pairs) != 2:
+                raise ValueError(
+                    f"Unable to parse the argument '{str_arg.strip()}'. Arguments must be given as keyword "
+                    f"arguments, e.g. 'norm(loc=0, scale=1)' or 't(df=3)'."
+                )
             kwargs[arg_value_pairs[0].strip()] = ast.literal_eval(arg_value_pairs[1].strip())
     return kwargs
 
@@ -151,7 +162,7 @@ def _extract_noise_model_components(noise_eq: str) -> Tuple[str, dict]:
         parsed_args = _parse_args(args)
         return noise_model_name, parsed_args
     else:
-        raise Exception("Unable to recognise the format or function specified")
+        raise ValueError("Unable to recognise the format or function specified")
 
 
 def _extract_equation_components(equation: str) -> Tuple[str, str]:
@@ -170,6 +181,14 @@ def _get_sorted_parent_nodes(parent_node_candidates: list) -> list:
         candidate_node_name = candidate_node_name.strip()
         if candidate_node_name not in _allowed_callables:
             parent_nodes.append(candidate_node_name)
+        elif candidate_node_name:
+            # The candidate name collides with a numpy/scipy/builtin callable (e.g. 'mean', 'norm', 'beta') and is
+            # therefore treated as a function call rather than a parent node. Warn so this is not silently dropped,
+            # which would otherwise orphan the child node and cause a confusing error later during fitting.
+            logger.warning(
+                f"'{candidate_node_name}' collides with an allowed function name and will not be treated as a parent "
+                f"node. If it is meant to be a parent, rename it to avoid the collision."
+            )
     parent_nodes.sort()
     return parent_nodes
 
@@ -185,7 +204,7 @@ def _add_undefined_nodes_info(causal_nodes_info: dict, present_nodes: list) -> N
 
 def _check_node_redundancy(causal_nodes_info: dict, node_name: str) -> None:
     if node_name in causal_nodes_info:
-        raise Exception(f"The node {node_name} is specified twice which is not allowed.")
+        raise ValueError(f"The node {node_name} is specified twice which is not allowed.")
 
 
 def _sanitize_input_expression(expression: str, banned_characters: list) -> None:

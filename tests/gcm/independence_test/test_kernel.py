@@ -336,6 +336,23 @@ def test_given_data_with_boolean_and_object_type_when_kernel_based_then_does_not
     )
 
 
+def test_given_constant_column_or_single_row_when_apply_rbf_kernel_with_adaptive_precision_then_does_not_return_nan():
+    from dowhy.gcm.independence_test.kernel_operation import apply_rbf_kernel_with_adaptive_precision
+
+    # A constant column has all-zero pairwise distances; its per-column RBF kernel is exp(0) = 1 everywhere, so it must
+    # not poison the result with NaN (which would happen if the median over an empty set of positive distances is used).
+    constant_and_varying = np.array([[5.0, 0.0], [5.0, 1.0], [5.0, 2.0], [5.0, 10.0]])
+    result = apply_rbf_kernel_with_adaptive_precision(constant_and_varying)
+    assert not np.isnan(result).any()
+    # The constant column contributes an all-ones factor, so the result equals the kernel of the varying column alone.
+    varying_only = apply_rbf_kernel_with_adaptive_precision(constant_and_varying[:, [1]])
+    assert np.allclose(result, varying_only)
+
+    # A fully constant column and a single-row input both yield an all-ones kernel without NaNs.
+    assert np.allclose(apply_rbf_kernel_with_adaptive_precision(np.array([[7.0], [7.0], [7.0]])), 1.0)
+    assert np.allclose(apply_rbf_kernel_with_adaptive_precision(np.array([[1.0, 2.0, 3.0]])), 1.0)
+
+
 def _generate_categorical_data(num_samples=1000):
     x = np.random.normal(0, 1, num_samples)
     z = []

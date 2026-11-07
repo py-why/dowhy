@@ -206,6 +206,24 @@ def test_when_estimate_counterfactual_with_observed_and_noise_data_then_raise_er
         )
 
 
+def test_given_categorical_node_when_estimate_counterfactual_from_observed_data_then_raises_informative_error():
+    # The noise of a categorical (ClassifierFCM) node cannot be recovered from data (the mechanism is not invertible),
+    # so counterfactuals from observed_data must fail with a clear message rather than a leaked AttributeError.
+    import networkx as nx
+
+    from dowhy.gcm import InvertibleStructuralCausalModel, auto, fit
+
+    np.random.seed(0)
+    data = pd.DataFrame({"X": np.random.normal(0, 1, 500)})
+    data["Y"] = np.where(data["X"] < 0, "lo", "hi")
+    causal_model = InvertibleStructuralCausalModel(nx.DiGraph([("X", "Y")]))
+    auto.assign_causal_mechanisms(causal_model, data)
+    fit(causal_model, data)
+
+    with pytest.raises(ValueError, match="not invertible"):
+        counterfactual_samples(causal_model, {"X": lambda x: 2.0}, observed_data=data)
+
+
 @flaky(max_runs=3)
 def test_given_continuous_target_when_estimate_average_causal_effect_then_return_expected_result():
     T = np.random.choice(2, 1000, replace=True)
@@ -248,6 +266,70 @@ def test_given_binary_target_when_estimate_average_causal_effect_then_return_exp
         interventions_reference={"T": lambda x: 0},
         num_samples_to_draw=1000,
     ) == approx(0.5, abs=0.1)
+
+
+@flaky(max_runs=3)
+def test_given_binary_categorical_target_with_positive_class_when_estimate_ace_then_sign_is_correct():
+    """Regression test for issue #1651: ACE sign should not depend on alphabetical class ordering."""
+    np.random.seed(42)
+    # Treatment increases probability of class "Disease" (alphabetically after "Control")
+    T = np.random.choice(2, 2000, replace=True)
+    # With T=1 the threshold is lower so "Disease" (True) is more likely
+    Y = (np.random.normal(0, 1, 2000) + T > 0.5).astype(str)
+    # Rename so that the "positive" class sorts alphabetically first ("Disease" < "Healthy")
+    Y = np.where(Y == "True", "Disease", "Healthy")
+    data = pd.DataFrame(dict(T=T, Y=Y))
+
+    causal_model = ProbabilisticCausalModel(nx.DiGraph([("T", "Y")]))
+    auto.assign_causal_mechanisms(causal_model, data, auto.AssignmentQuality.GOOD)
+    fit(causal_model, data)
+
+    # Without positive_class the sign may be wrong because sklearn sorts "Disease" < "Healthy"
+    # so class_names[0]="Disease" -> 0, class_names[1]="Healthy" -> 1, and the default ACE
+    # reports E[Healthy | T=1] - E[Healthy | T=0] which is negative.
+    ace_without_positive_class = average_causal_effect(
+        causal_model,
+        "Y",
+        interventions_alternative={"T": lambda x: 1},
+        interventions_reference={"T": lambda x: 0},
+        num_samples_to_draw=2000,
+    )
+
+    # With positive_class="Disease" the ACE should be positive (T increases P(Disease)).
+    ace_with_positive_class = average_causal_effect(
+        causal_model,
+        "Y",
+        interventions_alternative={"T": lambda x: 1},
+        interventions_reference={"T": lambda x: 0},
+        num_samples_to_draw=2000,
+        positive_class="Disease",
+    )
+
+    # The two results should have opposite signs, confirming the positive_class parameter works.
+    assert ace_with_positive_class > 0, "ACE should be positive when positive_class='Disease'"
+    assert ace_without_positive_class < 0, "Default ACE uses model's alphabetical class order"
+    assert ace_with_positive_class == approx(-ace_without_positive_class, abs=0.05)
+
+
+def test_given_invalid_positive_class_when_estimate_ace_then_raise_value_error():
+    np.random.seed(0)
+    T = np.random.choice(2, 500, replace=True)
+    Y = (np.random.normal(0, 1, 500) + T > 0).astype(str)
+    data = pd.DataFrame(dict(T=T, Y=Y))
+
+    causal_model = ProbabilisticCausalModel(nx.DiGraph([("T", "Y")]))
+    auto.assign_causal_mechanisms(causal_model, data, auto.AssignmentQuality.GOOD)
+    fit(causal_model, data)
+
+    with pytest.raises(ValueError, match="positive_class"):
+        average_causal_effect(
+            causal_model,
+            "Y",
+            interventions_alternative={"T": lambda x: 1},
+            interventions_reference={"T": lambda x: 0},
+            num_samples_to_draw=500,
+            positive_class="invalid_class",
+        )
 
 
 @flaky(max_runs=3)

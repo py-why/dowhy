@@ -162,15 +162,18 @@ def is_categorical(X: np.ndarray) -> bool:
     X = shape_into_2d(X)
 
     nan_mask = pd.isna(X).any(axis=1)
+    non_nan_X = X[~nan_mask]
 
     status = True
-    for column in range(X.shape[1]):
-        X = X[~nan_mask]
-
-        if X.shape[0] == 0:
+    for column in range(non_nan_X.shape[1]):
+        if non_nan_X.shape[0] == 0:
             return False
 
-        status &= isinstance(X[0, column], str) or isinstance(X[0, column], bool) or isinstance(X[0, column], np.bool_)
+        status &= (
+            isinstance(non_nan_X[0, column], str)
+            or isinstance(non_nan_X[0, column], bool)
+            or isinstance(non_nan_X[0, column], np.bool_)
+        )
 
         if not status:
             break

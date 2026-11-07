@@ -15,4 +15,5 @@ def test_given_simple_counter_as_estimation_func_when_confidence_interval_then_r
     median, interval = confidence_intervals(simple_counter, num_bootstrap_resamples=20)
 
     assert median["X"] == pytest.approx(10.5)
-    assert np.allclose(interval["X"], [1.95, 19.05])
+    # Default confidence_level=0.95 -> two-sided 2.5th/97.5th percentiles of the results 1..20.
+    assert np.allclose(interval["X"], [1.475, 19.525])

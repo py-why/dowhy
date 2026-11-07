@@ -7,7 +7,6 @@ from itertools import combinations
 
 import dowhy.causal_estimators as causal_estimators
 import dowhy.causal_refuters as causal_refuters
-import dowhy.graph_learners as graph_learners
 from dowhy.causal_estimator import CausalEstimate, estimate_effect
 from dowhy.causal_graph import CausalGraph
 from dowhy.causal_identifier import AutoIdentifier, BackdoorAdjustment, IDIdentifier
@@ -41,7 +40,8 @@ class CausalModel:
         and outcome.
 
         At least one of graph, common_causes or instruments must be provided. If
-        none of these variables are provided, then learn_graph() can be used later.
+        none of these variables are provided, then learn_graph() (deprecated) can be used later,
+        or use causal-learn/dodiscover for discovery and pass the result as graph=.
 
         :param data: a pandas dataframe containing treatment, outcome and other variables.
         :param treatment: name of the treatment variable
@@ -104,7 +104,10 @@ class CausalModel:
                 )
             else:
                 self.logger.warning(
-                    "Relevant variables to build causal graph not provided. You may want to use the learn_graph() function to construct the causal graph."
+                    "Relevant variables to build causal graph not provided. "
+                    "Consider using causal-learn (https://github.com/py-why/causal-learn) "
+                    "or dodiscover (https://github.com/py-why/dodiscover) for causal discovery, "
+                    "then pass the resulting graph to CausalModel via the graph= parameter."
                 )
                 self._graph = CausalGraph(
                     self._treatment,
@@ -191,13 +194,30 @@ class CausalModel:
 
     def learn_graph(self, method_name="cdt.causality.graph.LiNGAM", *args, **kwargs):
         """
-        Learn causal graph from the data. This function takes the method name as input and initializes the
-        causal graph object using the learnt graph.
+        Learn causal graph from the data.
 
-        :param self: instance of the CausalModel class (or its subclass)
+        .. deprecated::
+            ``CausalModel.learn_graph()`` and the ``dowhy.graph_learners`` module are deprecated
+            and will be removed in a future major release. Please use the `causal-learn
+            <https://github.com/py-why/causal-learn>`_ or `dodiscover
+            <https://github.com/py-why/dodiscover>`_ libraries directly for causal discovery,
+            then pass the resulting graph to ``CausalModel`` via the ``graph`` parameter.
+
         :param method_name: Exact method name of the object to be imported from the concerned library.
         :returns: an instance of the CausalGraph class initialized with the learned graph.
         """
+        warnings.warn(
+            "CausalModel.learn_graph() and the dowhy.graph_learners module are deprecated and will "
+            "be removed in a future major release. "
+            "Please use causal-learn (https://github.com/py-why/causal-learn) or dodiscover "
+            "(https://github.com/py-why/dodiscover) for causal discovery, then pass the resulting "
+            "graph to CausalModel via the graph= parameter. "
+            "See https://github.com/py-why/dowhy/issues/1039 for context.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        import dowhy.graph_learners as graph_learners
+
         # Import causal discovery class
         str_arr = method_name.split(".", maxsplit=1)
         library_name = str_arr[0]
@@ -207,7 +227,7 @@ class CausalModel:
         graph = model.learn_graph()
 
         # Initialize causal graph object
-        self.init_graph(graph=graph)
+        self.init_graph(graph=graph, identify_vars=False)
 
         return self._graph
 
@@ -261,6 +281,7 @@ class CausalModel:
         effect_modifiers=None,
         fit_estimator=True,
         method_params=None,
+        num_quantiles_to_discretize_cont_cols=None,
     ):
         """Estimate the identified causal effect.
 
@@ -292,6 +313,7 @@ class CausalModel:
         :param fit_estimator: Boolean flag on whether to fit the estimator.
             Setting it to False is useful to estimate the effect on new data using a previously fitted estimator.
         :param method_params: Dictionary containing any method-specific parameters. These are passed directly to the estimating method. See the docs for each estimation method for allowed method-specific params.
+        :param num_quantiles_to_discretize_cont_cols: The number of quantiles into which a numeric effect modifier is split, to enable estimation of conditional treatment effect over it. This is a DoWhy-level parameter and is forwarded to the DoWhy estimator wrapper, not to the underlying third-party estimator. Defaults to the estimator's own default when not specified.
         :returns: An instance of the CausalEstimate class, containing the causal effect estimate
             and other method-dependent information
 
@@ -341,6 +363,16 @@ class CausalModel:
                 extra_args = {}
             if method_params is None:
                 method_params = {}
+
+            # num_quantiles_to_discretize_cont_cols is a DoWhy-level parameter:
+            # it controls how DoWhy discretizes numeric effect modifiers. It is
+            # accepted by every DoWhy estimator wrapper (including the EconML
+            # one), so it is forwarded to the wrapper constructor rather than
+            # injected into init_params, which is passed straight through to the
+            # third-party estimator and would raise a TypeError.
+            if num_quantiles_to_discretize_cont_cols is not None:
+                extra_args = dict(extra_args)
+                extra_args["num_quantiles_to_discretize_cont_cols"] = num_quantiles_to_discretize_cont_cols
 
             identified_estimand.set_identifier_method(identifier_name)
 
@@ -430,7 +462,8 @@ class CausalModel:
                 self.causal_estimator.fit(self._data)
             else:
                 # Estimator had been computed in a previous call
-                assert self.causal_estimator is not None
+                if self.causal_estimator is None:
+                    raise RuntimeError("Causal estimator is required but was not initialized")
             try:
                 estimate = self.causal_estimator.do(x)
             except NotImplementedError:
@@ -601,7 +634,8 @@ def _warn_if_unobserved_graph_variables(
         warnings.warn(
             f"{num_unobserved_graph_variables} variables are assumed "
             "unobserved because they are not in the dataset. "
-            "Configure the logging level to `logging.WARNING` or higher for additional details."
+            "Configure the logging level to `logging.WARNING` or higher for additional details.",
+            stacklevel=3,
         )
         logger.warning(
             "The graph defines %d variables. %d were found in the dataset "
