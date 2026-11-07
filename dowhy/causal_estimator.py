@@ -399,7 +399,7 @@ class CausalEstimator:
         return est
 
     def construct_symbolic_estimator(self, estimand):
-        raise NotImplementedError(("Symbolic estimator string is ").format(self.__class__))
+        raise NotImplementedError("Symbolic estimator string is not implemented for {0}.".format(self.__class__))
 
     def _generate_bootstrap_estimates(self, data: pd.DataFrame, num_bootstrap_simulations, sample_size_fraction):
         """Helper function to generate causal estimates over bootstrapped samples.

@@ -5,6 +5,7 @@ import pandas as pd
 import sympy as sp
 import sympy.stats as spstats
 from statsmodels.sandbox.regression.gmm import IV2SLS
+from statsmodels.tools import add_constant
 
 from dowhy.causal_estimator import CausalEstimate, CausalEstimator, RealizedEstimand
 from dowhy.causal_identifier import IdentifiedEstimand
@@ -94,9 +95,7 @@ class InstrumentalVariableEstimator(CausalEstimator):
         """
         Fits the estimator with data for effect estimation
         :param data: data frame containing the data
-        :param treatment: name of the treatment variable
-        :param outcome: name of the outcome variable
-        :param effect_modifiers: Variables on which to compute separate
+        :param effect_modifier_names: Variables on which to compute separate
                     effects, or return a heterogeneous effect function. Not all
                     methods support this currently.
         """
@@ -143,14 +142,19 @@ class InstrumentalVariableEstimator(CausalEstimator):
         if len(self.estimating_instrument_names) == 1 and len(self._target_estimand.treatment_variable) == 1:
             instrument = self._estimating_instruments.iloc[:, 0]
             self.logger.debug("Instrument Variable values: {0}".format(instrument))
-            num_unique_values = len(np.unique(instrument))
+            unique_values = np.unique(instrument)
+            num_unique_values = len(unique_values)
             instrument_is_binary = num_unique_values <= 2
             if instrument_is_binary:
-                # Obtain estimate by Wald Estimator
-                y1_z = np.mean(data[self._target_estimand.outcome_variable[0]][instrument == 1])
-                y0_z = np.mean(data[self._target_estimand.outcome_variable[0]][instrument == 0])
-                x1_z = np.mean(data[self._target_estimand.treatment_variable[0]][instrument == 1])
-                x0_z = np.mean(data[self._target_estimand.treatment_variable[0]][instrument == 0])
+                # Wald estimator: split on the two observed instrument levels
+                # (lower = control, higher = treatment) rather than assuming the
+                # values are {0, 1}. Fixes silent NaN when the instrument is
+                # coded as e.g. {1, 2} or {-1, 1}.
+                control_level, treatment_level = unique_values[0], unique_values[1]
+                y1_z = np.mean(data[self._target_estimand.outcome_variable[0]][instrument == treatment_level])
+                y0_z = np.mean(data[self._target_estimand.outcome_variable[0]][instrument == control_level])
+                x1_z = np.mean(data[self._target_estimand.treatment_variable[0]][instrument == treatment_level])
+                x0_z = np.mean(data[self._target_estimand.treatment_variable[0]][instrument == control_level])
                 num = y1_z - y0_z
                 deno = x1_z - x0_z
                 iv_est = num / deno
@@ -163,12 +167,15 @@ class InstrumentalVariableEstimator(CausalEstimator):
             # More than 1 instrument. Use 2sls.
             est_treatment = data[self._target_estimand.treatment_variable].astype(np.float32)
             est_outcome = data[self._target_estimand.outcome_variable[0]].astype(np.float32)
-            ivmodel = IV2SLS(est_outcome, est_treatment, self._estimating_instruments)
+            # An intercept is required: without it the 2SLS fit is forced through
+            # the origin, which biases the estimate whenever the instruments or
+            # the treatment are not mean-zero (e.g. instruments coded as {0, 1}).
+            ivmodel = IV2SLS(est_outcome, add_constant(est_treatment), add_constant(self._estimating_instruments))
             reg_results = ivmodel.fit()
             self.logger.debug(reg_results.summary())
-            iv_est = sum(
-                reg_results.params
-            )  # the effect is the same for any treatment value (assume treatment goes from 0 to 1)
+            # Sum the treatment coefficients only, so that the intercept is excluded
+            # (the effect is the same for any treatment value, assuming treatment goes from 0 to 1)
+            iv_est = sum(reg_results.params[t] for t in self._target_estimand.treatment_variable)
         estimate = CausalEstimate(
             data=data,
             treatment_name=self._target_estimand.treatment_variable,
