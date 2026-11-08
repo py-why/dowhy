@@ -70,6 +70,7 @@ jobs:
         env:
           VIRTUALENV_PYTHON: ${{ steps.setup-python.outputs.python-path }}
         run: |
+          echo "VIRTUALENV_PYTHON=$VIRTUALENV_PYTHON" >> "$GITHUB_ENV"
           poetry env use "${{ steps.setup-python.outputs.python-path }}"
           poetry run python -c "import sys; print(sys.executable, sys.version); assert sys.version.split()[0] == '${{ steps.setup-python.outputs.python-version }}', sys.version"
           "${{ steps.setup-python.outputs.python-path }}" -m pip install --upgrade pip

@@ -54,16 +54,18 @@ jobs:
       uses: actions/cache@v6
       with:
         path: .venv
-        # Discard environments cached before the interpreter was explicitly selected.
-        key: venv-v2-${{ runner.os }}-${{ runner.arch }}-py${{ steps.setup-python.outputs.python-version }}-poetry${{ matrix.poetry-version }}-${{ hashFiles('poetry.lock', 'pyproject.toml') }}
+        # Discard environments containing native dependencies built with a different Python.
+        key: venv-v3-${{ runner.os }}-${{ runner.arch }}-py${{ steps.setup-python.outputs.python-version }}-poetry${{ matrix.poetry-version }}-${{ hashFiles('poetry.lock', 'pyproject.toml') }}
         restore-keys: |
-          venv-v2-${{ runner.os }}-${{ runner.arch }}-py${{ steps.setup-python.outputs.python-version }}-poetry${{ matrix.poetry-version }}-
+          venv-v3-${{ runner.os }}-${{ runner.arch }}-py${{ steps.setup-python.outputs.python-version }}-poetry${{ matrix.poetry-version }}-
 
     - name: Select and verify Poetry Python
       env:
         # Poetry 2.1 passes only a discovery hint; virtualenv also needs the required interpreter.
         VIRTUALENV_PYTHON: ${{ steps.setup-python.outputs.python-path }}
       run: |
+        # Later dependency and wheel builds create their own isolated environments.
+        echo "VIRTUALENV_PYTHON=$VIRTUALENV_PYTHON" >> "$GITHUB_ENV"
         poetry env use "${{ steps.setup-python.outputs.python-path }}"
         poetry run python -c "import sys; print(sys.executable, sys.version); assert sys.version.split()[0] == '${{ steps.setup-python.outputs.python-version }}', sys.version"
 
@@ -95,9 +97,10 @@ jobs:
         # Validate the lock and refresh the editable project even on an exact cache hit.
         poetry sync -E plotting -E pygraphviz -E econml
 
-    - name: Verify checkout import
+    - name: Verify checkout and native imports
       run: |
         poetry run python -I -c "import importlib.util; from pathlib import Path; actual = Path(importlib.util.find_spec('dowhy').origin).resolve(); expected = Path('dowhy/__init__.py').resolve(); print(actual); assert actual == expected, (actual, expected)"
+        poetry run python -I -c "import pygraphviz; graph = pygraphviz.AGraph(string='digraph { a -> b; }'); assert graph.has_edge('a', 'b'); print(pygraphviz.__version__, pygraphviz.__file__)"
 
     - name: Lint
       run: poetry run poe lint
