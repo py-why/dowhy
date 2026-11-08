@@ -1,0 +1,26 @@
+name: Resolve PR1868 lock
+on:
+  push:
+    branches: [agents/resolve-pr1868-lock]
+permissions:
+  contents: read
+jobs:
+  lock:
+    runs-on: ubuntu-latest
+    env:
+      POETRY_VIRTUALENVS_CREATE: "false"
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - uses: abatilo/actions-poetry@v4.0.0
+        with:
+          poetry-version: "2.1.3"
+      - run: poetry lock --no-interaction
+      - run: poetry check --lock
+      - uses: actions/upload-artifact@v4
+        with:
+          name: python313-compatible-lock
+          path: poetry.lock
+          if-no-files-found: error
