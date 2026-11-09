@@ -37,7 +37,7 @@ class CausalAccessor(object):
         x,
         method="weighting",
         num_cores=1,
-        variable_types={},
+        variable_types=None,
         outcome=None,
         params=None,
         graph: nx.DiGraph = None,
@@ -104,7 +104,7 @@ class CausalAccessor(object):
                 mediator_nodes=None,
             )
 
-        if not bool(variable_types):  # check if the variables dictionary is empty
+        if not bool(variable_types):  # check if the variables dictionary is empty or None
             variable_types = dict(self._obj.dtypes)  # Convert the series containing data types to a dictionary
             for key in variable_types.keys():
                 variable_types[key] = self.convert_to_custom_type(
