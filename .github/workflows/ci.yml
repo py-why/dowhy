@@ -25,10 +25,11 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # Ubuntu 26.04 does not provide the Python 3.9 builds in our supported matrix.
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
-        python-version: [3.9, "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.12", "3.13"]
         poetry-version: [2.1.3]
         test-group: [1, 2, 3, 4, 5, 6]
 
@@ -36,6 +37,7 @@ jobs:
     - uses: actions/checkout@v7.0.1
 
     - name: Set up Python ${{ matrix.python-version }}
+      id: setup-python
       uses: actions/setup-python@v7
       with:
         python-version: ${{ matrix.python-version }}
@@ -53,9 +55,28 @@ jobs:
       uses: actions/cache@v6
       with:
         path: .venv
-        key: venv-${{ runner.os }}-py${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
+        # Discard environments containing native dependencies built with a different Python.
+        key: venv-v3-${{ runner.os }}-${{ runner.arch }}-py${{ steps.setup-python.outputs.python-version }}-poetry${{ matrix.poetry-version }}-${{ hashFiles('poetry.lock', 'pyproject.toml') }}
         restore-keys: |
-          venv-${{ runner.os }}-py${{ matrix.python-version }}-
+          venv-v3-${{ runner.os }}-${{ runner.arch }}-py${{ steps.setup-python.outputs.python-version }}-poetry${{ matrix.poetry-version }}-
+
+    - name: Select and verify Poetry Python
+      env:
+        # Poetry 2.1 passes only a discovery hint; virtualenv also needs the required interpreter.
+        VIRTUALENV_PYTHON: ${{ steps.setup-python.outputs.python-path }}
+      run: |
+        # Later dependency and wheel builds create their own isolated environments.
+        echo "VIRTUALENV_PYTHON=$VIRTUALENV_PYTHON" >> "$GITHUB_ENV"
+        poetry env use "${{ steps.setup-python.outputs.python-path }}"
+        poetry run python -c "import sys; print(sys.executable, sys.version); assert sys.version.split()[0] == '${{ steps.setup-python.outputs.python-version }}', sys.version"
+
+    - name: Free disk space for dependency installation
+      if: steps.cache-venv.outputs.cache-hit != 'true'
+      run: |
+        df -h /
+        # These preinstalled SDKs are unused by the Python test suite.
+        sudo rm -rf /usr/local/lib/android /usr/share/dotnet
+        df -h /
 
     # At the moment needed to support scipy in Python 3.12+
     # Only required when building from source (i.e., no cached venv)
@@ -71,11 +92,16 @@ jobs:
         sudo apt install graphviz libgraphviz-dev graphviz-dev pkg-config
 
     - name: Install dependencies
-      if: steps.cache-venv.outputs.cache-hit != 'true'
       run: |
-        python -m pip install --upgrade pip
+        "${{ steps.setup-python.outputs.python-path }}" -m pip install --upgrade pip
         echo "installing poetry dependencies"
-        poetry install -E plotting -E pygraphviz -E econml
+        # Validate the lock and refresh the editable project even on an exact cache hit.
+        poetry sync -E plotting -E pygraphviz -E econml
+
+    - name: Verify checkout and native imports
+      run: |
+        poetry run python -I -c "import importlib.util; from pathlib import Path; actual = Path(importlib.util.find_spec('dowhy').origin).resolve(); expected = Path('dowhy/__init__.py').resolve(); print(actual); assert actual == expected, (actual, expected)"
+        poetry run python -I -c "import pygraphviz; graph = pygraphviz.AGraph(string='digraph { a -> b; }'); assert graph.has_edge('a', 'b'); print(pygraphviz.__version__, pygraphviz.__file__)"
 
     - name: Lint
       run: poetry run poe lint
