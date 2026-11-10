@@ -305,7 +305,7 @@ class CausalModel:
         :param method_name: name of the estimation method to be used.
         :param control_value: Value of the treatment in the control group, for effect estimation.  If treatment is multi-variate, this can be a list.
         :param treatment_value: Value of the treatment in the treated group, for effect estimation. If treatment is multi-variate, this can be a list.
-        :param test_significance: Binary flag on whether to additionally do a statistical signficance test for the estimate.
+        :param test_significance: Binary flag on whether to additionally do a statistical significance test for the estimate.
         :param evaluate_effect_strength: (Experimental) Binary flag on whether to estimate the relative strength of the treatment's effect. This measure can be used to compare different treatments for the same outcome (by running this method with different treatments sequentially).
         :param confidence_intervals: (Experimental) Binary flag indicating whether confidence intervals should be computed.
         :param target_units: (Experimental) The units for which the treatment effect should be estimated. This can be of three types. (1) a string for common specifications of target units (namely, "ate", "att" and "atc"), (2) a lambda function that can be used as an index for the data (pandas DataFrame), or (3) a new DataFrame that contains values of the effect_modifiers and effect will be estimated only for this new data.
