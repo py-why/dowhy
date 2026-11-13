@@ -19,6 +19,21 @@ class TestIDIdentifier(object):
         identified_str = identified_estimand.__str__()
         assert identified_str == "Predictor: P(Y|T)"
 
+    @pytest.mark.parametrize("weight", [-2, 0, 0.5, 2, float("nan")])
+    @pytest.mark.parametrize(
+        "graph_str",
+        ["digraph{T->Y;}", "digraph{T->M;M->Y;}", "digraph{C->T;C->Y;T->Y;}"],
+    )
+    def test_id_identifier_ignores_edge_weights(self, graph_str, weight):
+        graph = build_graph_from_str(graph_str)
+        expected = str(identify_effect_id(graph, action_nodes=["T"], outcome_nodes=["Y"]))
+        for source, target in graph.edges:
+            graph[source][target]["weight"] = weight
+
+        actual = identify_effect_id(graph, action_nodes=["T"], outcome_nodes=["Y"])
+
+        assert str(actual) == expected
+
     def test_1(self):
         identified_estimand = identify_effect_id(
             build_graph_from_str("digraph{T->Y;}"), action_nodes=["T"], outcome_nodes=["Y"]

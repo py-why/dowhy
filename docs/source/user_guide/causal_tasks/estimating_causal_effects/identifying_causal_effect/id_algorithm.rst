@@ -17,4 +17,7 @@ Alternatively, you can use the functional API.
 >>> # Note that the return type for id_identify_effect is IDExpression and not IdentifiedEstimand  
 >>> print(identified_estimand)
 
+Identification uses the graph's edge structure, ignoring edge weights. A present edge
+is treated as a causal link even if its ``weight`` attribute is zero.
+
 To see the ID algorithm in action, check out the example notebook, :doc:`../../../../example_notebooks/identifying_effects_using_id_algorithm`.
