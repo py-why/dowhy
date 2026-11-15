@@ -4,7 +4,9 @@ Installation
 Installing with pip
 -------------------
 
-DoWhy requires Python 3.9 through 3.13. To install, you can use pip or conda.
+DoWhy requires Python 3.11 through 3.13. To install, you can use pip or conda.
+Python 3.9 and 3.10 are no longer supported, allowing dependencies to receive
+security updates that require newer Python versions.
 
 
 **Latest Release**
