@@ -3,8 +3,9 @@ import re
 import numpy as np
 import pandas as pd
 import pytest
+from sklearn.dummy import DummyClassifier
 from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
-from sklearn.linear_model import LogisticRegressionCV
+from sklearn.linear_model import LinearRegression, LogisticRegressionCV
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import PolynomialFeatures
 
@@ -235,19 +236,22 @@ class TestEconMLEstimator:
             },
         )
 
-    def test_multivalue_treatment(self):
-        n_points = 100000
+    @pytest.mark.parametrize("seed", [0, 42, 101])
+    @pytest.mark.parametrize("treatment_values", [[1, 2], [2, 1]])
+    def test_multivalue_treatment(self, seed, treatment_values):
+        rng = np.random.default_rng(seed)
+        n_points = 10000
         impact = {0: 0.0, 1: 2.0, 2: 1.0}
         df = pd.DataFrame(
             {
-                "X": np.random.normal(size=n_points),
-                "W": np.random.normal(size=n_points),
-                "T": np.random.choice(np.array(list(impact.keys())), size=n_points),
+                "X": rng.normal(size=n_points),
+                "W": rng.normal(size=n_points),
+                "T": rng.choice(np.array(list(impact.keys())), size=n_points),
             }
         )
         df["Y"] = df["W"] + df["T"].apply(lambda x: impact[x])
 
-        train_data, test_data = train_test_split(df, train_size=0.9)
+        train_data, test_data = train_test_split(df, train_size=0.9, random_state=seed, stratify=df["T"])
 
         causal_model = CausalModel(
             data=train_data,
@@ -262,17 +266,25 @@ class TestEconMLEstimator:
             identified_estimand,
             method_name="backdoor.econml.dml.dml.LinearDML",
             control_value=0,
-            treatment_value=[1, 2],
+            treatment_value=treatment_values,
             target_units="ate",  # condition used for CATE
             confidence_intervals=False,
             method_params={
-                "init_params": {"discrete_treatment": True},
+                "init_params": {
+                    "discrete_treatment": True,
+                    # The outcome nuisance is linear and treatment is randomized independently of X and W.
+                    "model_y": LinearRegression(),
+                    "model_t": DummyClassifier(strategy="prior"),
+                    "random_state": seed,
+                },
                 "fit_params": {},
             },
         )
 
-        est_test = est_2.estimator.effect_tt(test_data, [1, 2])
+        est_test = est_2.estimator.effect_tt(test_data, treatment_values)
 
+        pd.testing.assert_index_equal(est_test.index, test_data.index)
+        assert set(test_data["T"]) == set(impact)
         est_error = (est_test - test_data["T"].apply(lambda x: impact[x]).values).abs().max()
         assert est_error < 0.03
 
