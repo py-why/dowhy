@@ -189,18 +189,26 @@ def _refute_once(
     # treatment's propensity scores — producing a systematically non-null placebo effect.
     if hasattr(new_estimator, "propensity_score_column"):
         new_data = new_data.drop(columns=[new_estimator.propensity_score_column], errors="ignore")
-    new_estimator.fit(
-        new_data,
-        effect_modifier_names=estimate.estimator._effect_modifier_names,
-        **new_estimator._fit_params if hasattr(new_estimator, "_fit_params") else {},
-    )
-    new_effect = new_estimator.estimate_effect(
-        new_data,
-        control_value=estimate.control_value,
-        treatment_value=estimate.treatment_value,
-        target_units=estimate.estimator._target_units,
-    )
-    return new_effect.value
+    try:
+        new_estimator.fit(
+            new_data,
+            effect_modifier_names=estimate.estimator._effect_modifier_names,
+            **new_estimator._fit_params if hasattr(new_estimator, "_fit_params") else {},
+        )
+        new_effect = new_estimator.estimate_effect(
+            new_data,
+            control_value=estimate.control_value,
+            treatment_value=estimate.treatment_value,
+            target_units=estimate.estimator._target_units,
+        )
+        return new_effect.value
+    except np.linalg.LinAlgError as e:
+        logger.warning(
+            f"Refutation simulation skipped due to singular matrix in estimator: {e}. "
+            "This can occur when using non-linear estimators (e.g., EconML with boosting) "
+            "with placebo treatment, as random noise can cause degenerate residuals."
+        )
+        return None
 
 
 def refute_placebo_treatment(
@@ -279,6 +287,16 @@ def refute_placebo_treatment(
             desc="Refuting Estimates: ",
         )
     )
+
+    # Filter out None values (skipped simulations due to singular matrix errors)
+    sample_estimates = [est for est in sample_estimates if est is not None]
+    if not sample_estimates:
+        raise ValueError(
+            "All refutation simulations were skipped due to singular matrix errors in the estimator. "
+            "This typically occurs with non-linear EconML estimators when placebo treatment creates degenerate residuals. "
+            "Consider using a linear estimator (e.g., 'backdoor.linear_regression') or "
+            "adjusting the placebo_type parameter."
+        )
 
     sample_estimates = np.array(sample_estimates)
 

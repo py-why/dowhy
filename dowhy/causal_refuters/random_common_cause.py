@@ -68,18 +68,25 @@ def _refute_once(
         new_data = data.assign(w_random=random_state.normal(size=data.shape[0]))
 
     new_estimator = estimate.estimator.get_new_estimator_object(target_estimand)
-    new_estimator.fit(
-        new_data,
-        effect_modifier_names=estimate.estimator._effect_modifier_names,
-        **new_estimator._fit_params if hasattr(new_estimator, "_fit_params") else {},
-    )
-    new_effect = new_estimator.estimate_effect(
-        new_data,
-        control_value=estimate.control_value,
-        treatment_value=estimate.treatment_value,
-        target_units=estimate.estimator._target_units,
-    )
-    return new_effect.value
+    try:
+        new_estimator.fit(
+            new_data,
+            effect_modifier_names=estimate.estimator._effect_modifier_names,
+            **new_estimator._fit_params if hasattr(new_estimator, "_fit_params") else {},
+        )
+        new_effect = new_estimator.estimate_effect(
+            new_data,
+            control_value=estimate.control_value,
+            treatment_value=estimate.treatment_value,
+            target_units=estimate.estimator._target_units,
+        )
+        return new_effect.value
+    except np.linalg.LinAlgError as e:
+        logger.warning(
+            f"Refutation simulation skipped due to singular matrix in estimator: {e}. "
+            "This can occur with non-linear estimators when confounders create degenerate residuals."
+        )
+        return None
 
 
 def refute_random_common_cause(
@@ -125,6 +132,16 @@ def refute_random_common_cause(
             desc="Refuting Estimates: ",
         )
     )
+
+    # Filter out None values (skipped simulations due to singular matrix errors)
+    sample_estimates = [est for est in sample_estimates if est is not None]
+    if not sample_estimates:
+        raise ValueError(
+            "All refutation simulations were skipped due to singular matrix errors in the estimator. "
+            "This typically occurs with non-linear EconML estimators when confounders create degenerate residuals. "
+            "Consider using a linear estimator (e.g., 'backdoor.linear_regression')."
+        )
+
     sample_estimates = np.array(sample_estimates)
 
     refute = CausalRefutation(
