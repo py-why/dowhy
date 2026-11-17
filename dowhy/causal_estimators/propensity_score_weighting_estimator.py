@@ -261,8 +261,14 @@ class PropensityScoreWeightingEstimator(PropensityScoreEstimator):
             )
             est = data["d_y"].sum() / sum_dy_weights - data["dbar_y"].sum() / sum_dbary_weights
         else:
-            # Horvitz-Thompson estimator: normalize by number of units
-            est = data["d_y"].mean() - data["dbar_y"].mean()
+            # Horvitz-Thompson estimator: normalize by the number of target units
+            if weighting_scheme_name == "tips_weight":
+                num_target_units = num_treatment_units
+            elif weighting_scheme_name == "cips_weight":
+                num_target_units = num_control_units
+            else:
+                num_target_units = num_units
+            est = (data["d_y"].sum() - data["dbar_y"].sum()) / num_target_units
 
         # TODO - how can we add additional information into the returned estimate?
         estimate = CausalEstimate(
