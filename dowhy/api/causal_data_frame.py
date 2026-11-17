@@ -60,11 +60,7 @@ class CausalAccessor(object):
 
         Inference requires a set of control variables. These can be provided explicitly using `common_causes`, which
         contains a list of variable names to control for. These can be provided implicitly by specifying a causal graph
-        with `dot_graph`, from which they will be chosen using the default identification method.
-
-        When the set of control variables can't be identified with the provided assumptions, a prompt will raise to the
-        user asking whether to proceed. To automatically over-ride the prompt, you can set the flag
-        `proceed_when_unidentifiable` to `True`.
+        with `graph`, from which they will be chosen using the default identification method.
 
         Some methods build components during inference which are expensive. To retain those components for later
         inference (e.g. successive calls to `do` with different values of `x`), you can set the `stateful` flag to `True`.
@@ -80,11 +76,9 @@ class CausalAccessor(object):
             state, control variables, and the outcome.
         :param outcome: str: The outcome variable.
         :param params: dict: extra parameters to set as attributes on the sampler object
-        :param dot_graph: str: A string specifying the causal graph.
+        :param graph: nx.DiGraph: A networkx DiGraph specifying the causal graph.
         :param common_causes: list: A list of strings containing the variable names to control for.
         :param estimand_type: str: 'nonparametric-ate' is the only one currently supported. Others may be added later, to allow for specific, parametric estimands.
-        :param proceed_when_unidentifiable: bool: A flag to over-ride user prompts to proceed when effects aren't
-            identifiable with the assumptions provided.
         :param stateful: bool: Whether to retain state. By default, the do operation is stateless.
 
         :return: pandas.DataFrame: A DataFrame containing the sampled outcome
