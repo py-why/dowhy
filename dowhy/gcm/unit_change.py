@@ -12,6 +12,10 @@ from dowhy.gcm.ml.prediction_model import PredictionModel
 from dowhy.gcm.ml.regression import SklearnRegressionModel
 from dowhy.gcm.shapley import ShapleyConfig, estimate_shapley_values
 
+# Name of the column added to attribution DataFrames to represent the causal mechanism's contribution.
+# Input column names must not use this name.
+_MECHANISM_COLUMN_NAME = "f"
+
 
 class LinearPredictionModel:
     @property
@@ -106,6 +110,7 @@ def unit_change_nonlinear(
     :return: A pandas dataframe with attributions to each cause for the change in each output row of provided dataframes.
     """
     _check_if_input_columns_exist(background_df, foreground_df, input_column_names)
+    _check_no_reserved_column_name(input_column_names)
 
     def payoff(player_indicator: List[int]) -> np.ndarray:
         """The last cell in the binary vector represents the player 'mechanism'."""
@@ -117,7 +122,7 @@ def unit_change_nonlinear(
         return mechanism.predict(np.column_stack(input_arrays)).flatten()
 
     contributions = estimate_shapley_values(payoff, len(input_column_names) + 1, shapley_config)
-    root_causes = input_column_names + ["f"]
+    root_causes = input_column_names + [_MECHANISM_COLUMN_NAME]
     return pd.DataFrame(contributions, columns=root_causes)
 
 
@@ -139,6 +144,7 @@ def unit_change_linear(
     :return: A pandas dataframe with attributions to each cause for the change in each output row of provided dataframes.
     """
     _check_if_input_columns_exist(background_df, foreground_df, input_column_names)
+    _check_no_reserved_column_name(input_column_names)
 
     coeffs_total = background_mechanism.coefficients + foreground_mechanism.coefficients  # p x 1
     coeffs_diff = foreground_mechanism.coefficients - background_mechanism.coefficients  # p x 1
@@ -153,7 +159,7 @@ def unit_change_linear(
     # background and foreground mechanisms have different intercepts (e.g. fit with the default fit_intercept=True).
     contribution_mechanism = contribution_mechanism + (foreground_mechanism.intercept - background_mechanism.intercept)
     contribution_df = pd.DataFrame(contribution_input, columns=input_column_names)
-    contribution_df["f"] = contribution_mechanism  # TODO: Handle the case where 'f' is an input column name
+    contribution_df[_MECHANISM_COLUMN_NAME] = contribution_mechanism
     return contribution_df
 
 
@@ -218,3 +224,12 @@ def _check_if_input_columns_exist(
         set(foreground_df.columns).intersection(input_column_names)
     ) == len(input_column_names):
         raise ValueError("Input column names not found in either the background or the foreground data.")
+
+
+def _check_no_reserved_column_name(input_column_names: List[str]) -> None:
+    if _MECHANISM_COLUMN_NAME in input_column_names:
+        raise ValueError(
+            f"The column name '{_MECHANISM_COLUMN_NAME}' is reserved for the mechanism attribution and cannot be "
+            f"used as an input column name in unit_change functions. Please rename column "
+            f"'{_MECHANISM_COLUMN_NAME}' in your data."
+        )

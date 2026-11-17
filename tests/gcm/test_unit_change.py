@@ -357,3 +357,36 @@ def test_given_two_mechanisms_when_evaluate_unit_change_then_returns_correct_att
     )
 
     np.testing.assert_array_almost_equal(actual_contributions, expected_contributions, decimal=1)
+
+
+def test_given_reserved_column_name_f_when_calling_unit_change_linear_then_raises_value_error():
+    bg_df = pd.DataFrame({"f": [1.0, 2.0], "x": [3.0, 4.0]})
+    fg_df = pd.DataFrame({"f": [1.1, 2.1], "x": [3.1, 4.1]})
+    mechanism = SklearnLinearRegressionModel(
+        LinearRegression().fit(bg_df[["f", "x"]].to_numpy(), np.array([1.0, 2.0]))
+    )
+    with pytest.raises(ValueError, match="reserved"):
+        unit_change_linear(mechanism, bg_df, mechanism, fg_df, ["f", "x"])
+
+
+def test_given_reserved_column_name_f_when_calling_unit_change_nonlinear_then_raises_value_error():
+    bg_df = pd.DataFrame({"f": [1.0, 2.0], "x": [3.0, 4.0]})
+    fg_df = pd.DataFrame({"f": [1.1, 2.1], "x": [3.1, 4.1]})
+    mechanism = SklearnRegressionModel(RFR(n_jobs=1).fit(bg_df[["f", "x"]].to_numpy(), np.array([1.0, 2.0])))
+    with pytest.raises(ValueError, match="reserved"):
+        unit_change_nonlinear(mechanism, bg_df, mechanism, fg_df, ["f", "x"])
+
+
+def test_given_non_reserved_column_names_when_calling_unit_change_linear_then_returns_f_column_in_output():
+    num_rows = 20
+    rng = np.random.default_rng(42)
+    A = rng.normal(size=num_rows)
+    B = rng.normal(size=num_rows)
+    C = 2 * A + 3 * B
+    bg_df = pd.DataFrame({"A": A, "B": B})
+    fg_df = pd.DataFrame({"A": A + 0.1, "B": B + 0.2})
+    m = SklearnLinearRegressionModel(LinearRegression().fit(bg_df.to_numpy(), C))
+    result = unit_change_linear(m, bg_df, m, fg_df, ["A", "B"])
+    assert "f" in result.columns, "Mechanism column 'f' should be present in the output"
+    assert "A" in result.columns
+    assert "B" in result.columns
