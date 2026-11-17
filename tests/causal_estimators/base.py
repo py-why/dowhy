@@ -396,7 +396,9 @@ class SimpleEstimatorWithModelParams(object):
             pass  # Expected, for many Estimators
 
 
-class TestGraphObject(object):
+class GraphObject(object):
+    """Fixture object representing a causal graph for testing."""
+
     def __init__(
         self,
         graph_str,
@@ -412,4 +414,4 @@ class TestGraphObject(object):
 
 @pytest.fixture(params=TEST_GRAPHS.keys())
 def example_graph(request):
-    return TestGraphObject(**TEST_GRAPHS[request.param])
+    return GraphObject(**TEST_GRAPHS[request.param])

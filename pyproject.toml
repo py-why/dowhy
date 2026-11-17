@@ -21,8 +21,6 @@ repository = "https://github.com/py-why/dowhy"
 classifiers = [
     'Development Status :: 4 - Beta',
     'License :: OSI Approved :: MIT License',
-    'Programming Language :: Python :: 3.9',
-    'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
     'Programming Language :: Python :: 3.12',
     'Programming Language :: Python :: 3.13',
@@ -60,24 +58,20 @@ format = "{base}"
 [tool.poetry-dynamic-versioning.substitution]
 files = ["dowhy/__init__.py"]
 
-#
-# Dependency compatibility notes:
-# * numba (imported by econml) requires python <3.11
-#
 [tool.poetry.dependencies]
-python = ">=3.9,<3.14"
+python = ">=3.11,<3.14"
 cython = ">=3.0"
 scipy = [
-    { version = ">=1.10.0", python = ">=3.9,<3.13" },
+    { version = ">=1.10.0", python = ">=3.11,<3.13" },
     { version = ">=1.15", python = ">=3.13" },
 ]
 statsmodels = ">=0.14"
-numpy = ">2.0"
-pandas = ">1.0"
-networkx = [
-    { version = ">=3.3", python = ">=3.10" },
-    { version = ">=2.8.5", python = "<3.10" }
+numpy = [
+    { version = ">2.0", python = "<3.13" },
+    { version = ">=2.1", python = ">=3.13" },
 ]
+pandas = ">1.0"
+networkx = ">=3.3"
 sympy = ">=1.10.1"
 scikit-learn = ">1.0"
 pydot = { version = "^1.4.2", optional = true }
@@ -86,7 +80,10 @@ pygraphviz = { version = ">=1.9", optional = true }
 econml = ">=0.16"
 tqdm = ">=4.64.0"
 causal-learn = ">=0.1.4.4"
-numba = ">=0.59"
+numba = [
+    { version = ">=0.59", python = "<3.13" },
+    { version = ">=0.61", python = ">=3.13" },
+]
 
 #Plotting Extra
 matplotlib = { version = ">=3.5.3", optional = true }
@@ -117,10 +114,7 @@ torch = [
     { version = ">=2.0", python = ">=3.13" }
 ]
 torchvision = ">=0.13.1"
-pytorch-lightning = [
-    { version = "<2.0", python = ">=3.9,<3.11" },
-    { version = ">=2.0", python = ">=3.11" }
-]
+pytorch-lightning = ">=2.0"
 
 [tool.poetry.group.docs]
 optional = true
@@ -190,7 +184,7 @@ ignore_fail = "return_non_zero"
 
 [tool.black]
 line-length = 120
-target-version = ['py39', 'py310', 'py311', 'py312', 'py313']
+target-version = ['py311', 'py312', 'py313']
 include = '\.pyi?$'
 extend-exclude = '''
 (
@@ -207,4 +201,4 @@ disable = ["W0511"]
 profile = 'black'
 multi_line_output = 3
 line_length = 120
-py_version = 38
+py_version = 311
