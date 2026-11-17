@@ -167,9 +167,7 @@ class DoublyRobustEstimator(CausalEstimator):
         self._treatment_value = treatment_value
         self._control_value = control_value
         self._target_units = "ate"  # TODO: add support for other target units
-        effect_estimate = self._do(treatment_value, treatment_value, data) - self._do(
-            control_value, treatment_value, data
-        )
+        effect_estimate = self._do(treatment_value, data) - self._do(control_value, data)
 
         estimate = CausalEstimate(
             data=data,
@@ -187,23 +185,22 @@ class DoublyRobustEstimator(CausalEstimator):
     def _do(
         self,
         treatment,
-        received_treatment_value,
         data_df: pd.DataFrame,
     ):
         """
         Evaluate doubly robust model for a given treatment value.
-        :param treatment: the value assigned to the treatment variable
-        :param received_treatment_value: value associated with receiving the treatment
+        :param treatment: the value assigned to the treatment variable (0 or 1)
         :param data_df: data frame containing the data
         """
         # Vector representation of E[Y | X_i, T_i=t]
         regression_est_outcomes = self.regression_model.interventional_outcomes(data_df, treatment)
         # Vector representation of Y
         true_outcomes = np.array(data_df[self._target_estimand.outcome_variable[0]])
-        # Vector representation of Pr[T_i=t | X_i]
-        propensity_scores = np.array(
-            self.propensity_score_model.predict_proba(data_df)[:, int(treatment == received_treatment_value)]
-        )
+        # Vector representation of Pr[T_i=t | X_i].
+        # PropensityScoreEstimator enforces binary {0, 1} treatment, so classes_ is always [0, 1]
+        # and predict_proba[:, int(treatment)] gives Pr(T=treatment|X) correctly regardless of
+        # whether treatment_value=0 or treatment_value=1.
+        propensity_scores = np.array(self.propensity_score_model.predict_proba(data_df)[:, int(treatment)])
         propensity_scores = np.maximum(self.min_ps_score, propensity_scores)
         propensity_scores = np.minimum(self.max_ps_score, propensity_scores)
         if propensity_scores.min() <= 0:  # Can only be reached if the caller sets min_ps_score <= 0
