@@ -125,7 +125,7 @@ def identify_effect_id(
 
     node_names = OrderedSet(graph.nodes)
 
-    adjacency_matrix = np.array(get_adjacency_matrix(graph))
+    adjacency_matrix = np.array(get_adjacency_matrix(graph, weight=None))
 
     try:
         tsort_node_names = OrderedSet(list(nx.topological_sort(graph)))  # topological sorting of graph nodes
