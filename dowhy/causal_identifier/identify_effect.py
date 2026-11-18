@@ -38,8 +38,8 @@ def identify_effect(
     """Identify the causal effect to be estimated based on a causal graph
 
     :param graph: Causal graph to be analyzed
-    :param treatment: name of the treatment
-    :param outcome: name of the outcome
+    :param action_nodes: name of the treatment
+    :param outcome_nodes: name of the outcome
     :returns: a probability expression (estimand) for the causal effect if identified, else NULL
     """
     return identify_effect_auto(

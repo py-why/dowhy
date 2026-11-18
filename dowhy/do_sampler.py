@@ -51,10 +51,8 @@ class DoSampler:
         how this works to implement one yourself.
 
         :param data: pandas.DataFrame containing the data
-        :param identified_estimand: dowhy.causal_identifier.IdentifiedEstimand: and estimand using a backdoor method
-        for effect identification.
-        :param treatments: list or str:  names of the treatment variables
-        :param outcomes: list or str: names of the outcome variables
+        :param action_nodes: list or str:  names of the treatment variables
+        :param outcome_nodes: list or str: names of the outcome variables
         :param variable_types: dict: A dictionary containing the variable's names and types. 'c' for continuous, 'o'
         for ordered, 'd' for discrete, and 'u' for unordered discrete.
         :param keep_original_treatment: bool: Whether to use `make_treatment_effective`, or to keep the original

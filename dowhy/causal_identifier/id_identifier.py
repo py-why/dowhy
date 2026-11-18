@@ -114,8 +114,8 @@ def identify_effect_id(
     Link - https://ftp.cs.ucla.edu/pub/stat_ser/shpitser-thesis.pdf
     The pseudo code has been provided on Pg 40.
 
-    :param treatment_names: OrderedSet comprising names of treatment variables.
-    :param outcome_names:OrderedSet comprising names of outcome variables.
+    :param action_nodes: OrderedSet comprising names of treatment variables.
+    :param outcome_nodes: OrderedSet comprising names of outcome variables.
 
     :returns: target estimand, an instance of the IDExpression class.
     """
