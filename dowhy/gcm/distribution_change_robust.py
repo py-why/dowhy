@@ -643,9 +643,6 @@ def distribution_change_robust(
     :param target_functional: Target functional of interest, of which the change is attributed. For now, supported
                               functionals are "mean" and "variance".
     :param sample_weight: Sample weight variable, if using (optional).
-    :param target_functional: Target functional of interest, of which the change is attributed. For now, supported
-                              functionals are "mean" and "variance".
-    :param sample_weight: Sample weight variable, if using (optional).
 
     :param xfit: Whether to use cross-fitting (True) or sample splitting (False) to estimate the nuisance parameters.
     :param xfit_folds: Number of folds for cross-fitting if xfit = True.
@@ -664,7 +661,6 @@ def distribution_change_robust(
     Note: Only the classes SklearnRegressionModelWeighted and SklearnClassificationModelWeighted
           support sample weights for now.
 
-    :param variance: boolean, if True, compute Shapley value attribution for the change in variance (rather than the change in mean).
     :param all_indep: boolean, True if all explanatory variables are independent (used to simplify estimating equation).
     :param crop: float, all predicted probabilities from the classifier will be cropped below at this lower bound,
             and above at 1-crop.

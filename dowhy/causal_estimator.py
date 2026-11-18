@@ -207,7 +207,7 @@ class CausalEstimator:
     def _set_effect_modifiers(self, data: pd.DataFrame, effect_modifier_names: Optional[List[str]] = None):
         """Sets the effect modifiers for the estimator
         Modifies need_conditional_estimates accordingly to effect modifiers value
-        :param effect_modifiers: Variables on which to compute separate
+        :param effect_modifier_names: Variables on which to compute separate
             effects, or return a heterogeneous effect function. Not all
             methods support this currently.
         """
@@ -878,9 +878,6 @@ def estimate_effect(
 
     :param treatment: Name of the treatment
     :param outcome: Name of the outcome
-    :param identified_estimand: a probability expression
-        that represents the effect to be estimated. Output of
-        CausalModel.identify_effect method
     :param estimator: Instance of a CausalEstimator to use
     :param control_value: Value of the treatment in the control group, for effect estimation.  If treatment is multi-variate, this can be a list.
     :param treatment_value: Value of the treatment in the treated group, for effect estimation. If treatment is multi-variate, this can be a list.

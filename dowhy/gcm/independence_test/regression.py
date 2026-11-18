@@ -48,8 +48,6 @@ def regression_based(
                                           replaced with an empty array. If Z is given, half of the number is used to
                                           generate features for Z. Note that the actual number of components is 1/10 of the
                                           number of samples, but at most max_num_components_all_inputs.
-    :param num_target_components_factor: The factor indicates how many components are used for the target variable. This is,
-                                         num_target_components_factor * dimension of the target many components.
     :param k_folds: Number of folds for training and test set. This equals the number of estimated p-values, which get adjusted by the
                     p_value_adjust_func.
     :param p_value_adjust_func: A callable that expects a numpy array of multiple p-values and returns one p-value. This

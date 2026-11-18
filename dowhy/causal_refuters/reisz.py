@@ -25,7 +25,7 @@ def get_alpha_estimator(
     :param cv: training and testing data indices obtained afteer Kfolding the dataset
     :param X: treatment+confounders
     :param max_degree: degree of the polynomial function used to approximate alpha_s
-    :param param_grid_dict: python dictionary with parameters to tune the ReiszRepresenter estimator
+    :param estimator_param_list: list of parameter dictionaries to tune the ReiszRepresenter estimator
 
     :returns: estimator for alpha_s
 

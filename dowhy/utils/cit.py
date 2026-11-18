@@ -22,7 +22,7 @@ def compute_ci(r=None, nx=None, ny=None, confidence=0.95):
 
     The confidence interval is then converted back to r space
 
-    :param stat : correlation coefficient
+    :param r : correlation coefficient
     :param nx : length of vector x
     :param ny :length of vector y
     :param confidence : Confidence level (0.95 = 95%)
