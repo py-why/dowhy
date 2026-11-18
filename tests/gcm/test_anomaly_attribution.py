@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import networkx as nx
 import numpy as np
 import pandas as pd
@@ -6,6 +8,7 @@ from pytest import approx
 
 from dowhy.gcm import (
     AdditiveNoiseModel,
+    EmpiricalDistribution,
     InverseDensityScorer,
     InvertibleStructuralCausalModel,
     MedianCDFQuantileScorer,
@@ -13,9 +16,44 @@ from dowhy.gcm import (
     auto,
     fit,
 )
+from dowhy.gcm._noise import noise_samples_of_ancestors
 from dowhy.gcm.anomaly import _relative_frequency, attribute_anomaly_scores
 from dowhy.gcm.density_estimators import GaussianMixtureDensityEstimator
-from dowhy.gcm.ml import PredictionModel
+from dowhy.gcm.ml import PredictionModel, create_linear_regressor
+
+
+def _attribute_anomalies_with_expected_total(causal_model, anomaly_data, num_samples, attribute_mean_deviation):
+    sampled_target = None
+
+    def record_samples(model, target_node, num_distribution_samples):
+        nonlocal sampled_target
+        node_samples, noise_samples = noise_samples_of_ancestors(model, target_node, num_distribution_samples)
+        sampled_target = node_samples[target_node].to_numpy()
+        return node_samples, noise_samples
+
+    # Share the sampled reference, but compute the expected score independently of the coalition evaluator.
+    with patch("dowhy.gcm.anomaly.noise_samples_of_ancestors", side_effect=record_samples):
+        scores = attribute_anomalies(
+            causal_model,
+            "X3",
+            anomaly_data,
+            anomaly_scorer=MedianCDFQuantileScorer(),
+            num_distribution_samples=num_samples,
+            attribute_mean_deviation=attribute_mean_deviation,
+        )
+
+    assert sampled_target is not None
+    scorer = MedianCDFQuantileScorer()
+    scorer.fit(sampled_target)
+    reference_scores = scorer.score(sampled_target)
+    anomaly_scores = scorer.score(anomaly_data["X3"].to_numpy())
+    if attribute_mean_deviation:
+        expected_total = anomaly_scores - np.mean(reference_scores)
+    else:
+        expected_total = np.array(
+            [-np.log((np.sum(reference_scores >= score) + 0.5) / (num_samples + 0.5)) for score in anomaly_scores]
+        )
+    return scores, expected_total
 
 
 @flaky(max_runs=3)
@@ -130,7 +168,9 @@ def test_given_simple_causal_chain_with_linear_relationships_when_attribute_anom
     training_data = pd.DataFrame({"X0": X0, "X1": X1, "X2": X2, "X3": X3})
 
     causal_model = InvertibleStructuralCausalModel(nx.DiGraph([("X0", "X1"), ("X1", "X2"), ("X2", "X3")]))
-    auto.assign_causal_mechanisms(causal_model, training_data, auto.AssignmentQuality.GOOD)
+    causal_model.set_causal_mechanism("X0", EmpiricalDistribution())
+    for node in ["X1", "X2", "X3"]:
+        causal_model.set_causal_mechanism(node, AdditiveNoiseModel(create_linear_regressor()))
 
     fit(causal_model, training_data)
 
@@ -147,22 +187,9 @@ def test_given_simple_causal_chain_with_linear_relationships_when_attribute_anom
         }
     )
 
-    scores = attribute_anomalies(
-        causal_model,
-        "X3",
-        anomaly_data,
-        anomaly_scorer=MedianCDFQuantileScorer(),
-        num_distribution_samples=num_training_samples,
-        attribute_mean_deviation=False,
+    scores, expected_total = _attribute_anomalies_with_expected_total(
+        causal_model, anomaly_data, num_training_samples, attribute_mean_deviation=False
     )
-
-    def total_anomaly_score(training_data, anomaly_sample):
-        distribution_samples = training_data["X3"].to_numpy()
-        anomaly_scorer = MedianCDFQuantileScorer()
-        anomaly_scorer.fit(distribution_samples)
-        return -np.log(
-            _relative_frequency(anomaly_scorer.score(distribution_samples) >= anomaly_scorer.score(anomaly_sample))
-        )
 
     assert scores["X0"][0] < 0.5  # Not anomalous.
     assert scores["X0"][1] > 8  # Anomalous, but the only root cause.
@@ -174,16 +201,7 @@ def test_given_simple_causal_chain_with_linear_relationships_when_attribute_anom
     assert np.all(scores["X3"][:2] < 0.5)  # Not anomalous given upstream nodes.
     assert scores["X3"][2] > 4  # Anomalous together with X0.
 
-    # The sum of the scores should add up to the anomaly score of the target (here, X3).
-    assert scores["X0"][0] + scores["X1"][0] + scores["X2"][0] + scores["X3"][0] == approx(
-        total_anomaly_score(training_data, anomaly_data["X3"].to_numpy()[0]), abs=0.001
-    )
-    assert scores["X0"][1] + scores["X1"][1] + scores["X2"][1] + scores["X3"][1] == approx(
-        total_anomaly_score(training_data, anomaly_data["X3"].to_numpy()[1]), abs=0.001
-    )
-    assert scores["X0"][2] + scores["X1"][2] + scores["X2"][2] + scores["X3"][2] == approx(
-        total_anomaly_score(training_data, anomaly_data["X3"].to_numpy()[2]), abs=0.001
-    )
+    np.testing.assert_allclose(np.sum(list(scores.values()), axis=0), expected_total, rtol=0, atol=1e-10)
 
 
 @flaky(max_runs=3)
@@ -196,7 +214,9 @@ def test_given_simple_causal_chain_with_linear_relationships_when_attribute_anom
     training_data = pd.DataFrame({"X0": X0, "X1": X1, "X2": X2, "X3": X3})
 
     causal_model = InvertibleStructuralCausalModel(nx.DiGraph([("X0", "X1"), ("X1", "X2"), ("X2", "X3")]))
-    auto.assign_causal_mechanisms(causal_model, training_data, auto.AssignmentQuality.GOOD)
+    causal_model.set_causal_mechanism("X0", EmpiricalDistribution())
+    for node in ["X1", "X2", "X3"]:
+        causal_model.set_causal_mechanism(node, AdditiveNoiseModel(create_linear_regressor()))
 
     fit(causal_model, training_data)
 
@@ -213,20 +233,9 @@ def test_given_simple_causal_chain_with_linear_relationships_when_attribute_anom
         }
     )
 
-    scores = attribute_anomalies(
-        causal_model,
-        "X3",
-        anomaly_data,
-        anomaly_scorer=MedianCDFQuantileScorer(),
-        num_distribution_samples=num_training_samples,
-        attribute_mean_deviation=True,
+    scores, expected_total = _attribute_anomalies_with_expected_total(
+        causal_model, anomaly_data, num_training_samples, attribute_mean_deviation=True
     )
-
-    def total_anomaly_score(training_data, anomaly_sample):
-        distribution_samples = training_data["X3"].to_numpy()
-        anomaly_scorer = MedianCDFQuantileScorer()
-        anomaly_scorer.fit(distribution_samples)
-        return anomaly_scorer.score(anomaly_sample) - np.mean(anomaly_scorer.score(distribution_samples))
 
     assert scores["X0"][0] == approx(0, abs=0.1)  # Not anomalous.
     assert scores["X0"][1] > 0.4  # Anomalous, but the only root cause.
@@ -238,16 +247,7 @@ def test_given_simple_causal_chain_with_linear_relationships_when_attribute_anom
     assert scores["X3"][:2] == approx(np.array([0, 0]), abs=0.1)  # Not anomalous given upstream nodes.
     assert scores["X3"][2] > 0.2  # Anomalous together with X0.
 
-    # The sum of the scores should add up to the anomaly score of the target (here, X3).
-    assert scores["X0"][0] + scores["X1"][0] + scores["X2"][0] + scores["X3"][0] == approx(
-        total_anomaly_score(training_data, anomaly_data["X3"].to_numpy()[0]), abs=0.001
-    )
-    assert scores["X0"][1] + scores["X1"][1] + scores["X2"][1] + scores["X3"][1] == approx(
-        total_anomaly_score(training_data, anomaly_data["X3"].to_numpy()[1]), abs=0.001
-    )
-    assert scores["X0"][2] + scores["X1"][2] + scores["X2"][2] + scores["X3"][2] == approx(
-        total_anomaly_score(training_data, anomaly_data["X3"].to_numpy()[2]), abs=0.001
-    )
+    np.testing.assert_allclose(np.sum(list(scores.values()), axis=0), expected_total, rtol=0, atol=1e-10)
 
 
 @flaky(max_runs=3)
@@ -290,22 +290,9 @@ def test_given_non_trivial_graph_with_nonlinear_relationships_when_attribute_ano
         }
     )
 
-    scores = attribute_anomalies(
-        causal_model,
-        "X3",
-        anomaly_data,
-        anomaly_scorer=MedianCDFQuantileScorer(),
-        num_distribution_samples=num_training_samples,
-        attribute_mean_deviation=False,
+    scores, expected_total = _attribute_anomalies_with_expected_total(
+        causal_model, anomaly_data, num_training_samples, attribute_mean_deviation=False
     )
-
-    def total_anomaly_score(training_data, anomaly_sample):
-        distribution_samples = training_data["X3"].to_numpy()
-        anomaly_scorer = MedianCDFQuantileScorer()
-        anomaly_scorer.fit(distribution_samples)
-        return -np.log(
-            _relative_frequency(anomaly_scorer.score(distribution_samples) >= anomaly_scorer.score(anomaly_sample))
-        )
 
     # 1. X0 is the root cause (+ 10 to the noise)
     # 2. X0 and X1 are the root causes (+ 10 to both noise)
@@ -326,16 +313,7 @@ def test_given_non_trivial_graph_with_nonlinear_relationships_when_attribute_ano
     assert scores["X3"][1] < 1  # Not anomalous given upstream nodes.
     assert scores["X3"][2] > 1  # Anomalous, but together with X1.
 
-    # The sum of the scores should add up to the anomaly score of the target (here, X3).
-    assert scores["X0"][0] + scores["X1"][0] + scores["X2"][0] + scores["X3"][0] == approx(
-        total_anomaly_score(training_data, anomaly_data["X3"].to_numpy()[0]), abs=0.4
-    )
-    assert scores["X0"][1] + scores["X1"][1] + scores["X2"][1] + scores["X3"][1] == approx(
-        total_anomaly_score(training_data, anomaly_data["X3"].to_numpy()[1]), abs=0.4
-    )
-    assert scores["X0"][2] + scores["X1"][2] + scores["X2"][2] + scores["X3"][2] == approx(
-        total_anomaly_score(training_data, anomaly_data["X3"].to_numpy()[2]), abs=0.6
-    )
+    np.testing.assert_allclose(np.sum(list(scores.values()), axis=0), expected_total, rtol=0, atol=1e-10)
 
 
 def test_relative_frequency():
