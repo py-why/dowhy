@@ -484,10 +484,10 @@ def create_dot_graph(treatments, outcome, common_causes, instruments, effect_mod
     dot_graph += " ".join([v + "-> " + outcome + ";" for v in common_causes])
     dot_graph += " ".join([v + "-> " + outcome + ";" for v in effect_modifiers])
     dot_graph += " ".join([v + "-> " + outcome + ";" for v in frontdoor_variables])
-    dot_graph = dot_graph + "}"
     # Adding edges between common causes and the frontdoor mediator
     for v1 in common_causes:
         dot_graph += " ".join([v1 + "-> " + v2 + ";" for v2 in frontdoor_variables])
+    dot_graph = dot_graph + "}"
     return dot_graph
 
 

@@ -1,6 +1,7 @@
 import numpy as np
 
 from dowhy.datasets import linear_dataset, sales_dataset
+from dowhy.graph import build_graph_from_str
 
 
 def test_when_generating_sales_dataset_then_returns_reasonable_samples():
@@ -42,3 +43,20 @@ def test_linear_dataset_with_categorical_treatment():
     df = data["df"]
     treatment_col = data["treatment_name"][0]
     assert set(df[treatment_col].unique()).issubset({0, 1, 2})
+
+
+def test_linear_dataset_dot_graph_includes_common_cause_to_frontdoor_edges():
+    """The dot graph must contain the same edges as the gml graph, including W -> FD edges."""
+    data = linear_dataset(
+        beta=10,
+        num_common_causes=2,
+        num_samples=100,
+        num_frontdoor_variables=1,
+    )
+    dot_graph = build_graph_from_str(data["dot_graph"])
+    gml_graph = build_graph_from_str(data["gml_graph"])
+
+    assert data["dot_graph"].rstrip().endswith("}")
+    assert dot_graph.has_edge("W0", "FD0")
+    assert dot_graph.has_edge("W1", "FD0")
+    assert set(dot_graph.edges()) == set(gml_graph.edges())
