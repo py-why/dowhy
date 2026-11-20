@@ -113,7 +113,10 @@ def apply_one_hot_encoding(X: np.ndarray, one_hot_encoder_map: Dict[int, OneHotE
         else:
             one_hot_features.append(X[:, column].reshape(-1, 1))
 
-    return np.hstack(one_hot_features).astype(float)
+    stacked_features = np.hstack(one_hot_features)
+    # Release the per-column arrays before allocating the float result.
+    del one_hot_features
+    return stacked_features.astype(float)
 
 
 def fit_catboost_encoders(X: np.ndarray, Y: np.ndarray) -> Dict[int, CatBoostEncoder]:
