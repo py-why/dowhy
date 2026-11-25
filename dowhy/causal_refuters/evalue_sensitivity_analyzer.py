@@ -1,7 +1,6 @@
 import copy
 import logging
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
@@ -150,6 +149,11 @@ class EValueSensitivityAnalyzer:
 
         if self.stats is None:
             raise ValueError("Must call ``check_sensitivity'' before calling ``plot''")
+
+        try:
+            import matplotlib.pyplot as plt
+        except ImportError:
+            raise ImportError("matplotlib is required for plotting. Install it with: pip install 'dowhy[plotting]'")
 
         fig, ax = plt.subplots(1, 1, figsize=plot_size)
 
