@@ -502,7 +502,7 @@ class CausalEstimator:
 
     def _estimate_confidence_intervals(self, confidence_level=None, method=None, **kwargs):
         """
-        This method is to be overriden by the child classes, so that they
+        This method is to be overridden by the child classes, so that they
         can run a confidence interval estimation method suited to the specific
         causal estimator.
         """
@@ -579,7 +579,7 @@ class CausalEstimator:
 
     def _estimate_std_error(self, method=None, **kwargs):
         """
-        This method is to be overriden by the child classes, so that they
+        This method is to be overridden by the child classes, so that they
         can run a standard error estimation method suited to the specific
         causal estimator.
         """
@@ -680,7 +680,7 @@ class CausalEstimator:
 
     def _test_significance(self, estimate_value, method=None, **kwargs):
         """
-        This method is to be overriden by the child classes, so that they
+        This method is to be overridden by the child classes, so that they
         can run a significance test suited to the specific
         causal estimator.
         """

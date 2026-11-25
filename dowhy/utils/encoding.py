@@ -72,7 +72,7 @@ class Encoders:
     """Categorical data One-Hot encoding helper object.
 
     Initializes a factory object which manages a set of sklearn.preprocessing.OneHotEncoder instances,
-    although the `encode()` method can be overriden to replace these with your preferred encoder.
+    although the `encode()` method can be overridden to replace these with your preferred encoder.
 
     Each Encoder instance is given a name to retrieve it in future, and is used to encode
     a different set of variables.
