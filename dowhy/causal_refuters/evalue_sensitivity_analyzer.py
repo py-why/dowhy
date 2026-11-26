@@ -330,7 +330,7 @@ class EValueSensitivityAnalyzer:
         """
         Computes E-value from OLS coefficient.
 
-        :param est: coefficient from OLS
+        :param est: OLS effect estimate for the treatment_value vs control_value contrast
         :param se: standard error of point estimate
         :param sd: residual standard deviation
         :param no_effect_baseline: no_effect_baseline standardized difference to which to shift the observed estimate. (Default = 0)
@@ -338,11 +338,11 @@ class EValueSensitivityAnalyzer:
         if se < 0:
             raise ValueError("Standard error cannot be negative")
 
-        delta = abs(self.estimate.estimator._treatment_value - self.estimate.estimator._control_value)
-        est = self._to_smd(est, sd, delta=delta)
-        se = self._to_smd(
-            se, sd, delta=1
-        )  # already multiplied by delta in LinearRegressionEstimator._estimate_std_error()
+        # Both are already multiplied by the contrast (treatment_value - control_value):
+        # the estimate in RegressionEstimator.estimate_effect() and the standard error in
+        # LinearRegressionEstimator._estimate_std_error().
+        est = self._to_smd(est, sd, delta=1)
+        se = self._to_smd(se, sd, delta=1)
         return self._evalue_MD(est=est, se=se, no_effect_baseline=no_effect_baseline)
 
     def _evalue_MD(self, est, se=None, no_effect_baseline=0):
