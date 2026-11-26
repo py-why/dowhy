@@ -641,6 +641,31 @@ class TestAddUnobservedCommonCauseRefuter(object):
         assert refute.stats["evalue_lower_ci"] < refute.stats["evalue_estimate"]
         assert mock_fig.call_count > 0
 
+    def test_evalue_linear_regression_treatment_contrast(self):
+        # estimate.value is already the effect of moving from control_value to treatment_value,
+        # so the standardized difference is estimate.value / sd(outcome) (R EValue: est * delta / sd)
+        data = dowhy.datasets.linear_dataset(
+            beta=1, num_common_causes=3, num_samples=1000, treatment_is_binary=False, stddev_outcome_noise=5
+        )
+        model = CausalModel(
+            data=data["df"], treatment=data["treatment_name"], outcome=data["outcome_name"], graph=data["gml_graph"]
+        )
+        identified_estimand = model.identify_effect()
+        estimate = model.estimate_effect(
+            identified_estimand, method_name="backdoor.linear_regression", control_value=0, treatment_value=2
+        )
+        refute = model.refute_estimate(
+            identified_estimand,
+            estimate,
+            method_name="add_unobserved_common_cause",
+            simulation_method="e-value",
+            plot_estimate=False,
+        )
+
+        sd_outcome = np.std(data["df"][data["outcome_name"]])
+        expected_rr = np.exp(0.91 * estimate.value / sd_outcome)
+        assert refute.stats["converted_estimate"] == pytest.approx(expected_rr)
+
     @pytest.mark.parametrize(
         "estimator_method",
         [
