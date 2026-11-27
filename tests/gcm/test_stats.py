@@ -498,6 +498,67 @@ def test_given_linear_dependent_data_when_estimate_ftest_pvalue_then_returns_sma
     assert estimate_ftest_pvalue(X_training, np.array([]), Y_training, X_test, np.array([]), Y_test) < 0.05
 
 
+def test_given_exact_small_scale_linear_relation_when_estimate_ftest_pvalue_then_returns_zero():
+    rng = np.random.default_rng(123)
+    X = rng.normal(size=2000)
+    Y = 0.001 * X
+
+    assert estimate_ftest_pvalue(X[:1000], np.array([]), Y[:1000], X[1000:], np.array([]), Y[1000:]) < 1e-10
+
+
+def test_given_exact_multivariate_relation_when_estimate_ftest_pvalue_then_returns_zero():
+    rng = np.random.default_rng(456)
+    X1 = rng.normal(size=2000)
+    X2 = rng.normal(size=2000)
+    Y = X1 + 0.001 * X2
+
+    assert (
+        estimate_ftest_pvalue(
+            np.column_stack([X1[:1000], X2[:1000]]),
+            X1[:1000],
+            Y[:1000],
+            np.column_stack([X1[1000:], X2[1000:]]),
+            X1[1000:],
+            Y[1000:],
+        )
+        < 1e-10
+    )
+
+
+def test_given_both_models_are_perfect_when_estimate_ftest_pvalue_then_returns_one():
+    rng = np.random.default_rng(789)
+    X1 = rng.normal(size=2000)
+    X2 = rng.normal(size=2000)
+    Y = X1
+
+    assert estimate_ftest_pvalue(
+        np.column_stack([X1[:1000], X2[:1000]]),
+        X1[:1000],
+        Y[:1000],
+        np.column_stack([X1[1000:], X2[1000:]]),
+        X1[1000:],
+        Y[1000:],
+    ) == pytest.approx(1)
+
+
+def test_given_invalid_dof_and_perfect_larger_model_when_estimate_ftest_pvalue_then_returns_nan():
+    rng = np.random.default_rng(901)
+    X1 = rng.normal(size=6)
+    X2 = rng.normal(size=6)
+    Y = X1 + X2
+
+    p_value = estimate_ftest_pvalue(
+        np.column_stack([X1[:4], X2[:4]]),
+        X1[:4],
+        Y[:4],
+        np.column_stack([X1[4:], X2[4:]]),
+        X1[4:],
+        Y[4:],
+    )
+
+    assert np.isnan(p_value)
+
+
 @flaky(max_runs=3)
 def test_given_linear_independent_data_when_estimate_ftest_pvalue_then_returns_pvalue_greater_05():
     X_training = np.random.normal(0, 1, 1000)

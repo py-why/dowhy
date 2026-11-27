@@ -281,8 +281,6 @@ def estimate_ftest_pvalue(
     dof_diff_1 = X_test_a.shape[1] - X_test_b.shape[1]  # p1 - p2
     dof_diff_2 = X_test_a.shape[0] - X_test_a.shape[1] - 1  # n - p2 (parameters include intercept)
 
-    f_statistic = (ssr_b - ssr_a) / dof_diff_1 * dof_diff_2
-
     if ssr_a < EPS:
         ssr_a = 0
     if ssr_b < EPS:
@@ -290,7 +288,9 @@ def estimate_ftest_pvalue(
 
     if ssr_a == 0 and ssr_b == 0:
         f_statistic = 0
-    elif ssr_a != 0:
-        f_statistic /= ssr_a
+    elif ssr_a == 0:
+        f_statistic = np.inf
+    else:
+        f_statistic = (ssr_b - ssr_a) / dof_diff_1 * dof_diff_2 / ssr_a
 
     return stats.f.sf(f_statistic, dof_diff_1, dof_diff_2)
